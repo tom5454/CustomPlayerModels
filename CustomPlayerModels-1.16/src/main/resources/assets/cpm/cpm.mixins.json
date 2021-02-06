@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.tom.cpm.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "cpm.mixins.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "PlayerRendererMixin",
+    "RenderTypeBuffersMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

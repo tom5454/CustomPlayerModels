@@ -1,35 +1,46 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "promos": {
-    "1.12.2-latest": "0.0.5a",
-    "1.12.2-recommended": "0.0.5a",
-    "1.16.4-latest": "0.0.5a",
-    "1.16.4-recommended": "0.0.5a",
-    "1.16.5-latest": "0.0.5a",
-    "1.16.5-recommended": "0.0.5a",
-    "1.8.9-latest": "0.0.5a",
-    "1.8.9-recommended": "0.0.5a",
-    "1.7.10-latest": "0.0.5a",
-    "1.7.10-recommended": "0.0.5a",
-    "1.17-latest": "0.0.5a",
-    "1.17-recommended": "0.0.5a"
+    "1.12.2-latest": "0.0.6a",
+    "1.12.2-recommended": "0.0.6a",
+    "1.16.4-latest": "0.0.6a",
+    "1.16.4-recommended": "0.0.6a",
+    "1.16.5-latest": "0.0.6a",
+    "1.16.5-recommended": "0.0.6a",
+    "1.8.9-latest": "0.0.6a",
+    "1.8.9-recommended": "0.0.6a",
+    "1.7.10-latest": "0.0.6a",
+    "1.7.10-recommended": "0.0.6a",
+    "1.17-latest": "0.0.6a",
+    "1.17-recommended": "0.0.6a",
+    "1.15.2-latest": "0.0.6a",
+    "1.15.2-recommended": "0.0.6a"
   },
   "1.12.2": {
-    "0.0.5a": "First release"
+    "0.0.5a": "First release",
+    "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor"
   },
   "1.16.4": {
-    "0.0.5a": "First release"
+    "0.0.5a": "First release",
+    "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor"
   },
   "1.16.5": {
-    "0.0.5a": "First release"
+    "0.0.5a": "First release",
+    "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor"
   },
   "1.8.9": {
-    "0.0.5a": "First release"
+    "0.0.5a": "First release",
+    "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor"
   },
   "1.7.10": {
-    "0.0.5a": "First release"
+    "0.0.5a": "First release",
+    "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor"
   },
   "1.17": {
-    "0.0.5a": "First release"
+    "0.0.5a": "First release",
+    "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor"
+  },
+  "1.15.2": {
+    "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor"
   }
 }

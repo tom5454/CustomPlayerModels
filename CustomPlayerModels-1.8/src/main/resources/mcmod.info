@@ -1,0 +1,10 @@
+[
+{
+  "modid" : "customplayermodels",
+  "name" : "Custom Player Models",
+  "description": "",
+  "version": "${version}",
+  "url" : "",
+  "authorList": ["tom5454"]
+}
+]
