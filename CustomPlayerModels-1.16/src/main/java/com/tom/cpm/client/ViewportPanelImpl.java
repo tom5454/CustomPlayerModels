@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.Texture;
 import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -122,7 +121,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		try {
 			ClientProxy.mc.getPlayerRenderManager().bindModel(p, mc.getRenderTypeBuffers().getBufferSource(), editor.definition, null);
 			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true);
-			cbi.setReturnValue(DefaultPlayerSkin.getDefaultSkin(mc.getSession().getProfile().getId()));
+			cbi.setReturnValue(MinecraftObject.getDefaultSkin(mc.getSession().getProfile().getId()));
 			ClientProxy.mc.getPlayerRenderManager().bindSkin(p, cbi);
 			if(editor.renderPaint) {
 				if(mc.getTextureManager().getTexture(PAINT) == null)

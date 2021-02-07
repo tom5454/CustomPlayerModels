@@ -1,4 +1,4 @@
-# Custom Player Models  
+# Customizable Player Models  
 Create a custom avatar using the editor.
 Download it on CurseForge:  
 For Forge: [https://www.curseforge.com/minecraft/mc-mods/custom-player-models](https://www.curseforge.com/minecraft/mc-mods/custom-player-models)  

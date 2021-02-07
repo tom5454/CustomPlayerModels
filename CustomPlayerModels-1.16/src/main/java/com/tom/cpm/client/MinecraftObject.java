@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
@@ -176,5 +177,9 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public ServerStatus getServerSideStatus() {
 		return mc.player != null ? ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
+	}
+
+	public static ResourceLocation getDefaultSkin(UUID playerUUID) {
+		return DefaultPlayerSkin.getSkinType(playerUUID).equals("slim") ? TEXTURE_ALEX : TEXTURE_STEVE;
 	}
 }
