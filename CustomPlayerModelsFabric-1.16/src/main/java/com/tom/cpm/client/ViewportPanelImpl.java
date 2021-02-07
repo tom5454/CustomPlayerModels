@@ -62,12 +62,10 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		}
 	};
 	private MinecraftClient mc;
-	private FakePlayer playerObj;
 	private MatrixStack matrixstack;
 	public ViewportPanelImpl(ViewportPanel panel) {
 		super(panel);
 		mc = MinecraftClient.getInstance();
-		playerObj = new FakePlayer();
 	}
 
 	private void renderSetup() {
@@ -131,7 +129,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		try {
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(p, mc.getBufferBuilders().getEntityVertexConsumers(), editor.definition, null);
 			CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true);
-			cbi.setReturnValue(DefaultSkinHelper.getTexture(playerObj.getUuid()));
+			cbi.setReturnValue(DefaultSkinHelper.getTexture(mc.getSession().getProfile().getId()));
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(p, cbi);
 			if(editor.renderPaint) {
 				if(mc.getTextureManager().getTexture(PAINT) == null)
@@ -142,7 +140,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			int light = 15 << 4 | 15 << 20;
 			RenderLayer rt = editor.renderPaint ? CustomRenderTypes.getEntityTranslucentCullNoLight(PAINT) : RenderLayer.getEntityTranslucentCull(cbi.getReturnValue());
 			VertexConsumer buffer = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rt);
-			p.setAngles(playerObj, 0, 0, 0, 0, 0);
+			PlayerModelSetup.setAngles(p, 0, 0, 0, 0, mc.options.mainArm, false);
 			if(!editor.applyAnim && editor.playerTpose) {
 				p.rightArm.roll = (float) Math.toRadians(90);
 				p.leftArm.roll = (float) Math.toRadians(-90);
@@ -161,12 +159,12 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 				case SNEAKING:
 					p.sneaking = true;
-					p.setAngles(playerObj, 0, 0, 0, 0, 0);
+					PlayerModelSetup.setAngles(p, 0, 0, 0, 0, mc.options.mainArm, false);
 					break;
 
 				case RIDING:
 					p.riding = true;
-					p.setAngles(playerObj, 0, 0, 0, 0, 0);
+					PlayerModelSetup.setAngles(p, 0, 0, 0, 0, mc.options.mainArm, false);
 					break;
 				case CUSTOM:
 				case DYING:
@@ -178,14 +176,14 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case RUNNING:
-					p.setAngles(playerObj, ls, 1f, 0, 0, 0);
+					PlayerModelSetup.setAngles(p, ls, 1f, 0, 0, mc.options.mainArm, false);
 					break;
 
 				case SWIMMING:
 					break;
 
 				case WALKING:
-					p.setAngles(playerObj, ls, lsa, 0, 0, 0);
+					PlayerModelSetup.setAngles(p, ls, lsa, 0, 0, mc.options.mainArm, false);
 					break;
 
 				default:

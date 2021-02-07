@@ -58,12 +58,10 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		}
 	};
 	private Minecraft mc;
-	private FakePlayer playerObj;
 	private MatrixStack matrixstack;
 	public ViewportPanelImpl(ViewportPanel panel) {
 		super(panel);
 		mc = Minecraft.getInstance();
-		playerObj = new FakePlayer();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -96,10 +94,6 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 	}
 
 	private void renderBase() {
-		//mc.getTextureManager().bindTexture(new ResourceLocation("cpm", "textures/gui/area.png"));
-		//RenderSystem.disableCull();
-		//Tessellator tes = Tessellator.getInstance();
-		//BufferBuilder t = tes.getBuffer();
 		RenderType rt = CustomRenderTypes.getTexCutout(new ResourceLocation("cpm", "textures/gui/area.png"));
 		IVertexBuilder t = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
 		Matrix4f m = matrixstack.getLast().getMatrix();
@@ -107,7 +101,6 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		t.pos(m, 4,  0, -3).tex(0, 1).endVertex();
 		t.pos(m, -3, 0, -3).tex(0, 0).endVertex();
 		t.pos(m, -3, 0,  4).tex(1, 0).endVertex();
-		//RenderSystem.enableCull();
 		mc.getRenderTypeBuffers().getBufferSource().finish(rt);
 
 		mc.getTextureManager().bindTexture(new ResourceLocation("cpm", "textures/gui/base.png"));
@@ -129,7 +122,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		try {
 			ClientProxy.mc.getPlayerRenderManager().bindModel(p, mc.getRenderTypeBuffers().getBufferSource(), editor.definition, null);
 			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true);
-			cbi.setReturnValue(DefaultPlayerSkin.getDefaultSkin(playerObj.getUniqueID()));
+			cbi.setReturnValue(DefaultPlayerSkin.getDefaultSkin(mc.getSession().getProfile().getId()));
 			ClientProxy.mc.getPlayerRenderManager().bindSkin(p, cbi);
 			if(editor.renderPaint) {
 				if(mc.getTextureManager().getTexture(PAINT) == null)
@@ -140,7 +133,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			int light = LightTexture.packLight(15, 15);
 			RenderType rt = editor.renderPaint ? CustomRenderTypes.getEntityTranslucentCullNoLight(PAINT) : RenderType.getEntityTranslucent(cbi.getReturnValue());
 			IVertexBuilder buffer = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
-			p.setRotationAngles(playerObj, 0, 0, 0, 0, 0);
+			PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand, false);
 
 			if(!editor.applyAnim && editor.playerTpose) {
 				p.bipedRightArm.rotateAngleZ = (float) Math.toRadians(90);
@@ -160,12 +153,12 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 				case SNEAKING:
 					p.isSneak = true;
-					p.setRotationAngles(playerObj, 0, 0, 0, 0, 0);
+					PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand, false);
 					break;
 
 				case RIDING:
 					p.isSitting = true;
-					p.setRotationAngles(playerObj, 0, 0, 0, 0, 0);
+					PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand, false);
 					break;
 				case CUSTOM:
 				case DYING:
@@ -177,14 +170,14 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case RUNNING:
-					p.setRotationAngles(playerObj, ls, 1f, 0, 0, 0);
+					PlayerModelSetup.setRotationAngles(p, ls, 1, 0, 0, mc.gameSettings.mainHand, false);
 					break;
 
 				case SWIMMING:
 					break;
 
 				case WALKING:
-					p.setRotationAngles(playerObj, ls, lsa, 0, 0, 0);
+					PlayerModelSetup.setRotationAngles(p, ls, lsa, 0, 0, mc.gameSettings.mainHand, false);
 					break;
 
 				default:
@@ -205,7 +198,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			FloatBuffer buffer = BufferUtils.createFloatBuffer(3);
 			GL11.glReadPixels((int) mc.mouseHelper.getMouseX(), mc.getMainWindow().getFramebufferHeight() - (int) mc.mouseHelper.getMouseY(), 1, 1, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
 			colorUnderMouse = (((int)(buffer.get(0) * 255)) << 16) | (((int)(buffer.get(1) * 255)) << 8) | ((int)(buffer.get(2) * 255));
-			//GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
 	}
 
