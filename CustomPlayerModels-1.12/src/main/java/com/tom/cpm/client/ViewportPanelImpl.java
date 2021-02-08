@@ -10,7 +10,6 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.model.ModelBiped.ArmPose;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -40,11 +39,9 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		}
 	};
 	private Minecraft mc;
-	private EntityOtherPlayerMP playerObj;
 	public ViewportPanelImpl(ViewportPanel panel) {
 		super(panel);
 		mc = Minecraft.getMinecraft();
-		playerObj = new FakePlayer();
 	}
 
 	private void renderSetup() {
@@ -130,7 +127,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			rp.bindTexture(PAINT);
 		} else {
 			if(editor.skinProvider != null)editor.skinProvider.bind();
-			else rp.bindTexture(DefaultPlayerSkin.getDefaultSkin(playerObj.getUniqueID()));
+			else rp.bindTexture(DefaultPlayerSkin.getDefaultSkin(mc.getSession().getProfile().getId()));
 		}
 		float scale = 1;//0.0625F
 		GlStateManager.translate(0.5f, 1.5f, 0.5f);
@@ -141,6 +138,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		try {
 			ClientProxy.mc.getPlayerRenderManager().bindModel(p, editor.definition, null);
 			setupModel(p);
+			PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand);
 			if(!editor.applyAnim && editor.playerTpose) {
 				p.bipedRightArm.rotateAngleZ = (float) Math.toRadians(90);
 				p.bipedLeftArm.rotateAngleZ = (float) Math.toRadians(-90);
@@ -159,12 +157,12 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 				case SNEAKING:
 					p.isSneak = true;
-					p.setRotationAngles(0, 0, 0, 0, 0, 0.0625F, playerObj);
+					PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand);
 					break;
 
 				case RIDING:
 					p.isRiding = true;
-					p.setRotationAngles(0, 0, 0, 0, 0, 0.0625F, playerObj);
+					PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand);
 					break;
 				case CUSTOM:
 				case DYING:
@@ -176,14 +174,14 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case RUNNING:
-					p.setRotationAngles(ls, 1f, 0, 0, 0, 0.0625F, playerObj);
+					PlayerModelSetup.setRotationAngles(p, ls, 1f, 0, 0, mc.gameSettings.mainHand);
 					break;
 
 				case SWIMMING:
 					break;
 
 				case WALKING:
-					p.setRotationAngles(ls, lsa, 0, 0, 0, 0.0625F, playerObj);
+					PlayerModelSetup.setRotationAngles(p, ls, lsa, 0, 0, mc.gameSettings.mainHand);
 					break;
 
 				default:
@@ -192,7 +190,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			});
 
 			GlStateManager.disableCull();
-			p.render(playerObj, 0, 0, 0, 0, 0, 0.0625F);//Mouse.getX() / 1920f, Mouse.getY() / 1080f
+			PlayerModelSetup.render(p);
 			GlStateManager.enableCull();
 		} finally {
 			ClientProxy.mc.getPlayerRenderManager().unbindModel(p);
