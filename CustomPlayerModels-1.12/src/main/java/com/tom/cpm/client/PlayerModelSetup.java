@@ -8,7 +8,7 @@ import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.math.MathHelper;
 
 public class PlayerModelSetup {
-	private static final float scale = 0.0625F;
+	public static final float scale = 0.0625F;
 
 	@SuppressWarnings("incomplete-switch")
 	public static void setRotationAngles(ModelPlayer player, float limbSwing, float limbSwingAmount, float netHeadYaw, float headPitch, EnumHandSide enumhandside)

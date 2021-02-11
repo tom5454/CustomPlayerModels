@@ -1,17 +1,18 @@
 package com.tom.cpm.shared.io;
 
-import java.awt.image.BufferedImage;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.tom.cpm.shared.util.Image;
+
 public class SkinDataOutputStream extends OutputStream {
-	private BufferedImage img, template;
+	private Image img, template;
 	private int block;
 	private int channel;
 	private int x, y;
 
-	public SkinDataOutputStream(BufferedImage img, BufferedImage template, int channel) {
+	public SkinDataOutputStream(Image img, Image template, int channel) {
 		this.img = img;
 		this.template = template;
 		this.channel = channel;

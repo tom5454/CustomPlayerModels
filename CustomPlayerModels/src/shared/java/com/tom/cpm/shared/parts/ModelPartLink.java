@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.parts;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -29,14 +28,11 @@ public abstract class ModelPartLink implements IModelPart {
 			ChecksumInputStream cis = new ChecksumInputStream(in);
 			try {
 				return load(new IOHelper(cis), loader).resolve();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new IOException(e);
 			} finally {
-				int ch1 = in.read();
-				int ch2 = in.read();
-				if ((ch1 | ch2) < 0)
-					throw new EOFException();
-				if(cis.getSum() != (short)((ch1 << 8) + (ch2 << 0))) {
-					throw new IOException("Sum error");
-				}
+				cis.checkSum();
 			}
 		}
 	}

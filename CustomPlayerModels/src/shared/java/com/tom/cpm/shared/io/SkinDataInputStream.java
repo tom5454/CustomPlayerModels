@@ -1,15 +1,16 @@
 package com.tom.cpm.shared.io;
 
-import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
+import com.tom.cpm.shared.util.Image;
+
 public class SkinDataInputStream extends InputStream {
-	private BufferedImage img, template;
+	private Image img, template;
 	private int block;
 	private int channel;
 	private int x, y;
 
-	public SkinDataInputStream(BufferedImage img, BufferedImage template, int channel) {
+	public SkinDataInputStream(Image img, Image template, int channel) {
 		this.img = img;
 		this.template = template;
 		this.channel = channel;

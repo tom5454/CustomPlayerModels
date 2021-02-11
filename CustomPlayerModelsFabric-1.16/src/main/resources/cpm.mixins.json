@@ -8,7 +8,8 @@
     "PlayerRendererMixin",
     "ScreenMixin",
     "BufferBuilderStorageMixin",
-    "MinecraftClientMixin"
+    "MinecraftClientMixin",
+    "SkullBlockEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

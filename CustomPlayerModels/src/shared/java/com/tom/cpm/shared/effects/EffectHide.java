@@ -39,4 +39,8 @@ public class EffectHide implements IRenderEffect {
 		return RenderEffects.HIDE;
 	}
 
+	@Override
+	public String toString() {
+		return "Hide [" + id + "]";
+	}
 }

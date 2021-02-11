@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.editor;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -16,12 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -49,6 +47,7 @@ import com.tom.cpm.shared.math.Vec3f;
 import com.tom.cpm.shared.math.Vec3i;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.util.Image;
 import com.tom.cpm.shared.util.Pair;
 
 public class Editor {
@@ -88,6 +87,7 @@ public class Editor {
 	public Updater<Boolean> setAnimPlayEn = updaterReg.create();
 	public Updater<EditorAnim> setSelAnim = updaterReg.create();
 	public Updater<Boolean> setHiddenEffect = updaterReg.create();
+	public Updater<Boolean> setSkinEdited = updaterReg.create();
 
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
@@ -114,7 +114,7 @@ public class Editor {
 	public EditorAnim selectedAnim;
 	public List<EditorAnim> animations = new ArrayList<>();
 	public int skinType;
-	public BufferedImage vanillaSkin;
+	public Image vanillaSkin;
 	public boolean dirty;
 	public ModelDefinition definition;
 	public SkinProvider skinProvider = new SkinProvider();
@@ -422,6 +422,7 @@ public class Editor {
 	public void setPixel(int x, int y, int color) {
 		int old = skinProvider.getImage().getRGB(x, y);
 		if(old == color)return;
+		if(!skinProvider.isEdited())setSkinEdited.accept(true);
 		addUndo(() -> skinProvider.setRGB(x, y, old));
 		runOp(() -> skinProvider.setRGB(x, y, color));
 		markDirty();
@@ -500,7 +501,7 @@ public class Editor {
 						if(selectedAnim.add) {
 							setAnimPos.accept(new Vec3f());
 							setAnimRot.accept(new Vec3f());
-						} else if(selectedElement.type == ElementType.PLAYER_PART){
+						} else if(selectedElement.type == ElementType.ROOT_PART){
 							PlayerPartValues val = PlayerPartValues.getFor((PlayerModelParts) selectedElement.typeData, skinType);
 							setAnimPos.accept(val.getPos());
 							setAnimRot.accept(new Vec3f());
@@ -530,6 +531,7 @@ public class Editor {
 			setAnimPlayEn.accept(selectedAnim.getFrames().size() > 1);
 		}
 		setSelAnim.accept(selectedAnim);
+		setSkinEdited.accept(skinProvider.isEdited());
 		updateTree.accept(null);
 	}
 
@@ -543,7 +545,7 @@ public class Editor {
 		undoQueue.clear();
 		redoQueue.clear();
 		skinType = MinecraftClientAccess.get().getSkinType();
-		BufferedImage skin = MinecraftClientAccess.get().getVanillaSkin(skinType);
+		Image skin = MinecraftClientAccess.get().getVanillaSkin(skinType);
 		skinProvider.setImage(skin);
 		skinProvider.size = new Vec2i(skin.getWidth(), skin.getHeight());
 		dirty = false;
@@ -557,14 +559,21 @@ public class Editor {
 		Player profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.loadSkin(() -> {
 			skinType = profile.getSkinType();
-			BufferedImage img = profile.getSkin();
-			if(img == null)img = MinecraftClientAccess.get().getVanillaSkin(skinType);
-			this.vanillaSkin = img;
-			if(!skinProvider.isEdited())
-				skinProvider.setImage(Exporter.copyImage(img));
+			CompletableFuture<Image> img = profile.getSkin();
+			this.vanillaSkin = MinecraftClientAccess.get().getVanillaSkin(skinType);
+			img.thenAccept(s -> {
+				if(s != null) {
+					this.vanillaSkin = s;
+					if(!skinProvider.isEdited())
+						skinProvider.setImage(new Image(this.vanillaSkin));
+				} else {
+					skinProvider.setImage(new Image(this.vanillaSkin));
+				}
+			});
 		});
 		for(PlayerModelParts type : PlayerModelParts.values()) {
-			elements.add(new ModelElement(this, ElementType.PLAYER_PART, type, gui.getGui()));
+			if(type != PlayerModelParts.CUSTOM_PART)
+				elements.add(new ModelElement(this, ElementType.ROOT_PART, type, gui.getGui()));
 		}
 	}
 
@@ -611,7 +620,7 @@ public class Editor {
 		}
 		if(skinProvider.texture != null && skinProvider.isEdited()) {
 			try(OutputStream os = project.setAsStream("skin.png")) {
-				ImageIO.write(skinProvider.texture.getImage(), "PNG", os);
+				skinProvider.texture.getImage().storeTo(os);
 			}
 		}
 		project.clearFolder("animations");
@@ -682,7 +691,7 @@ public class Editor {
 		}
 		byte[] ze = project.getEntry("skin.png");
 		if(ze != null) {
-			skinProvider.setImage(ImageIO.read(new ByteArrayInputStream(ze)));
+			skinProvider.setImage(Image.loadFrom(new ByteArrayInputStream(ze)));
 			skinProvider.markDirty();
 		}
 		int fileVersion = ((Number) data.getOrDefault("version", 0)).intValue();
@@ -698,6 +707,7 @@ public class Editor {
 						loadChildren((List<Map<String, Object>>) map.get("children"), elem, fileVersion);
 					}
 					elem.pos = new Vec3f((Map<String, Object>) map.get("pos"), new Vec3f(0, 0, 0));
+					elem.rotation = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f(0, 0, 0));
 				}
 			}
 		}
@@ -783,8 +793,9 @@ public class Editor {
 	public void reloadSkin() {
 		if(skinFile != null) {
 			try {
-				skinProvider.setImage(ImageIO.read(skinFile));
+				skinProvider.setImage(Image.loadFrom(skinFile));
 				skinProvider.setEdited(true);
+				setSkinEdited.accept(true);
 			} catch (IOException e) {
 				e.printStackTrace();
 				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
@@ -794,7 +805,7 @@ public class Editor {
 
 	public void saveSkin(File f) {
 		try {
-			ImageIO.write(skinProvider.getImage(), "PNG", f);
+			skinProvider.getImage().storeTo(f);
 			skinFile = f;
 		} catch (IOException e) {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.img_save_failed", e.getLocalizedMessage())));

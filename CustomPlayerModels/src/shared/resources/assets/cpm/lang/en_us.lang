@@ -108,6 +108,7 @@ label.cpm.exportSkin=Export Skin
 label.cpm.force_link_file=Force Link File
 label.cpm.no_file=No File
 label.cpm.vanilla_skin=Vanilla Skin
+label.cpm.export_output=Export As:
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body
@@ -128,6 +129,7 @@ label.cpm.pose.sleeping=Sleeping
 label.cpm.pose.riding=Riding
 label.cpm.pose.flying=Flying
 label.cpm.pose.dying=Dying
+label.cpm.pose.skull_render=Player Head
 
 error.cpm.crash=Custom Player Models editor has crashed, please create a bug report on GitHub with your minecraft log attached. Error: %s
 error.cpm.too_many_animations=Too many custom animations\for current Skin Layer settings.

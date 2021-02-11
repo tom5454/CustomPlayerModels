@@ -1,34 +1,35 @@
 package com.tom.cpm.shared.model;
 
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.math.Vec3f;
-import com.tom.cpm.shared.parts.ModelPartPlayer;
+import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 
-public class PlayerModelElement extends RenderedCube {
-	private PlayerModelParts part;
-	private ModelPartPlayer player;
+public class RootModelElement extends RenderedCube {
+	private ModelPart part;
+	private ModelDefinition def;
 	public Vec3f posN, rotN;
 	public boolean forcePos;
 
-	public PlayerModelElement(PlayerModelParts part, ModelPartPlayer player) {
+	public RootModelElement(ModelPart part, ModelDefinition def) {
 		this.part = part;
-		this.player = player;
+		this.def = def;
 		this.posN = new Vec3f();
 		this.rotN = new Vec3f();
 		this.pos = new Vec3f();
 		this.rotation = new Vec3f();
 	}
 
-	protected PlayerModelElement(PlayerModelParts part) {
+	protected RootModelElement(ModelPart part) {
 		this.part = part;
 	}
 
-	public PlayerModelParts getPart() {
+	public ModelPart getPart() {
 		return part;
 	}
 
 	@Override
 	public boolean doDisplay() {
-		return player.doRenderPart(part) && super.doDisplay();
+		return def.doRenderPart(part) && super.doDisplay();
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class PlayerModelElement extends RenderedCube {
 
 	@Override
 	public int getId() {
-		return part.ordinal();
+		return part.getId(this);
 	}
 
 	@Override

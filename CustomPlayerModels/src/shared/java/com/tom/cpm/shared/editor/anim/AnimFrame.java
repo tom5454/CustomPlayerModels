@@ -36,7 +36,7 @@ public class AnimFrame {
 		public Data(ModelElement comp) {
 			this.comp = comp;
 			if(!anim.add) {
-				if(comp.type == ElementType.PLAYER_PART) {
+				if(comp.type == ElementType.ROOT_PART) {
 					PlayerPartValues val = PlayerPartValues.getFor((PlayerModelParts) comp.typeData, anim.editor.skinType);
 					pos = val.getPos();
 					rot = new Vec3f();

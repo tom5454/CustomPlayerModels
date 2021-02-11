@@ -15,6 +15,10 @@ public class DrawToolsPanel extends Panel {
 	public DrawToolsPanel(EditorGui e, int x, int y, int w, int h) {
 		super(e.getGui());
 		this.editor = e.getEditor();
+		if(w < 70) {
+			x -= (70 - w);
+			w = 70;
+		}
 		setBounds(new Box(x, y, w, h));
 		setBackgroundColor(gui.getColors().panel_background);
 

@@ -5,35 +5,38 @@ import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
-import javax.imageio.ImageIO;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCustomizeSkin;
 import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
+import com.mojang.authlib.GameProfile;
+
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
+import com.tom.cpm.shared.util.Image;
 
 public class ClientProxy extends CommonProxy {
 	public static MinecraftObject mc;
@@ -44,7 +47,7 @@ public class ClientProxy extends CommonProxy {
 	public void init() {
 		super.init();
 		try(InputStream is = ClientProxy.class.getResourceAsStream("/assets/cpm/textures/template/free_space_template.png")) {
-			loader = new ModelDefinitionLoader(ImageIO.read(is), PlayerProfile::create);
+			loader = new ModelDefinitionLoader(Image.loadFrom(is), PlayerProfile::create);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load template", e);
 		}
@@ -59,25 +62,27 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		tryBindModel(event.getEntityPlayer(), null);
+		tryBindModel(null, event.getEntityPlayer(), null, null);
 	}
 
-	private void tryBindModel(EntityPlayer player, Predicate<Object> unbindRule) {
-		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(player.getGameProfile());
-		ModelDefinition def = profile.getModelDefinition();
+	private boolean tryBindModel(GameProfile gprofile, EntityPlayer player, Predicate<Object> unbindRule, ModelBase toBind) {
+		if(gprofile == null)gprofile = player.getGameProfile();
+		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
+		if(toBind == null)toBind = profile.getModel();
+		ModelDefinition def = profile.getAndResolveDefinition();
 		if(def != null) {
-			if(def.getResolveState() == 0)def.startResolve();
-			else if(def.getResolveState() == 2) {
-				if(def.doRender()) {
-					this.profile = profile;
-					profile.updateFromPlayer(player);
-					mc.getPlayerRenderManager().bindModel(profile.getModel(), def, unbindRule);
-					mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
-					return;
-				}
-			}
+			this.profile = profile;
+			if(player != null)
+				profile.updateFromPlayer(player);
+			else
+				profile.setRenderPose(VanillaPose.SKULL_RENDER);
+			mc.getPlayerRenderManager().bindModel(toBind, null, def, unbindRule);
+			if(unbindRule == null || player == null)
+				mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
+			return true;
 		}
-		mc.getPlayerRenderManager().unbindModel(profile.getModel());
+		mc.getPlayerRenderManager().unbindModel(toBind);
+		return false;
 	}
 
 	@SubscribeEvent
@@ -110,8 +115,13 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@SubscribeEvent
-	public void renderHand(RenderSpecificHandEvent evt) {
-		tryBindModel(Minecraft.getMinecraft().player, PlayerRenderManager::unbindHand);
+	public void renderHand(RenderHandEvent evt) {
+		tryBindModel(null, Minecraft.getMinecraft().player, PlayerRenderManager::unbindHand, null);
+		this.profile = null;
+	}
+
+	public void renderSkull(ModelBase skullModel, GameProfile profile) {
+		tryBindModel(profile, null, PlayerRenderManager::unbindSkull, skullModel);
 		this.profile = null;
 	}
 

@@ -1,12 +1,13 @@
 package com.tom.cpm.shared.editor.util;
 
-import java.awt.image.BufferedImage;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.tom.cpm.shared.util.Image;
+
 public class GetFreeSkinSlots {
-	public static Set<PlayerSkinLayer> getFreeLayers(BufferedImage img, BufferedImage template, int skinType) {
+	public static Set<PlayerSkinLayer> getFreeLayers(Image img, Image template, int skinType) {
 		Set<PlayerSkinLayer> used = new HashSet<>(EnumSet.allOf(PlayerSkinLayer.class));
 		int shift = 8 * (2 - skinType);
 		for(int x = 0;x<template.getWidth();x++) {
@@ -24,7 +25,7 @@ public class GetFreeSkinSlots {
 		return used;
 	}
 
-	public static void clearLayerArea(BufferedImage img, BufferedImage template, int skinType, PlayerSkinLayer layer) {
+	public static void clearLayerArea(Image img, Image template, int skinType, PlayerSkinLayer layer) {
 		int shift = 8 * (2 - skinType);
 		for(int x = 0;x<template.getWidth();x++) {
 			for(int y = 0;y<template.getHeight();y++) {

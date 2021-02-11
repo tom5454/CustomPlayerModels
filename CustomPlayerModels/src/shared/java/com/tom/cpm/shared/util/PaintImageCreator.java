@@ -1,13 +1,11 @@
 package com.tom.cpm.shared.util;
 
-import java.awt.image.BufferedImage;
-
 import com.tom.cpm.shared.math.Vec2i;
 
 public class PaintImageCreator {
 
-	public static BufferedImage createImage() {
-		BufferedImage img = new BufferedImage(1024, 1024, BufferedImage.TYPE_INT_ARGB);
+	public static Image createImage() {
+		Image img = new Image(1024, 1024);
 		for(int x = 0;x<1024;x++) {
 			for(int y = 0;y<1024;y++) {
 				img.setRGB(x, y, 0xff000000 | 0x800000 | (x << 10) | y);

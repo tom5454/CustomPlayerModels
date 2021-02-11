@@ -136,9 +136,14 @@ public class PosPanel extends Panel {
 			addElement(lblT);
 			addElement(colorBtn);
 
-			Label lblS = new Label(gui, gui.i18nFormat("label.cpm.skin"));
+			String skinLbl = gui.i18nFormat("label.cpm.skin");
+			Label lblS = new Label(gui, skinLbl);
 			lblS.setBounds(new Box(5, ys + 50, 40, 18));
 			addElement(lblS);
+			editor.setSkinEdited.add(b -> {
+				if(b)lblS.setText(skinLbl + "*");
+				else lblS.setText(skinLbl);
+			});
 
 			SkinTextureDisplay skinDisp = new SkinTextureDisplay(gui, editor);
 			skinDisp.setBounds(new Box(5, ys + 60, 135, 135));

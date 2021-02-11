@@ -1,8 +1,6 @@
 package com.tom.cpm.shared.definition;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -10,6 +8,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -34,6 +33,7 @@ import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartEnd;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartType;
+import com.tom.cpm.shared.util.Image;
 
 public class ModelDefinitionLoader {
 	public static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(0, 2, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
@@ -44,9 +44,11 @@ public class ModelDefinitionLoader {
 		public Player load(Object key) throws Exception {
 			Player player = playerFactory.apply(key);
 			player.loadSkin(() -> {
-				BufferedImage skin = player.getSkin();
-				if(skin != null && player.getModelDefinition() == null)
-					player.setModelDefinition(loadModel(skin, player));
+				CompletableFuture<Image> skinF = player.getSkin();
+				skinF.thenAccept(skin -> {
+					if(skin != null && player.getModelDefinition() == null)
+						player.setModelDefinition(loadModel(skin, player));
+				});
 			});
 			return player;
 		}
@@ -56,10 +58,10 @@ public class ModelDefinitionLoader {
 		LOADERS.put("int", new InternalResourceLoader());
 		LOADERS.put("git", new GistResourceLoader());
 	}
-	private BufferedImage template;
+	private Image template;
 	public static final int HEADER = 0x53;
 
-	public ModelDefinitionLoader(BufferedImage template, Function<Object, Player> playerFactory) {
+	public ModelDefinitionLoader(Image template, Function<Object, Player> playerFactory) {
 		this.template = template;
 		this.playerFactory = playerFactory;
 	}
@@ -68,6 +70,7 @@ public class ModelDefinitionLoader {
 		try {
 			return cache.get(player);
 		} catch (ExecutionException | UncheckedExecutionException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -80,7 +83,7 @@ public class ModelDefinitionLoader {
 		}
 	}
 
-	public ModelDefinition loadModel(BufferedImage skin, Player player) {
+	public ModelDefinition loadModel(Image skin, Player player) {
 		try(SkinDataInputStream in = new SkinDataInputStream(skin, template, player.getSkinType())) {
 			return loadModel(in, player);
 		} catch (Exception e) {
@@ -106,11 +109,7 @@ public class ModelDefinitionLoader {
 				}
 			}
 			if(part instanceof ModelPartEnd) {
-				int ch1 = in.read();
-				int ch2 = in.read();
-				if ((ch1 | ch2) < 0)
-					throw new EOFException();
-				if(cis.getSum() != (short)((ch1 << 8) + (ch2 << 0)))throw new IOException("Sum error");
+				cis.checkSum();
 				break;
 			}
 			parts.add(part);
@@ -125,7 +124,7 @@ public class ModelDefinitionLoader {
 		return LOADERS.get(link.loader).loadResource(link.path);
 	}
 
-	public BufferedImage getTemplate() {
+	public Image getTemplate() {
 		return template;
 	}
 

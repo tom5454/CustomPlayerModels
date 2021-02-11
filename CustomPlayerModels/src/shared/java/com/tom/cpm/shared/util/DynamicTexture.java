@@ -1,15 +1,13 @@
 package com.tom.cpm.shared.util;
 
-import java.awt.image.BufferedImage;
-
 import com.tom.cpm.shared.MinecraftClientAccess;
 
 public class DynamicTexture {
-	private BufferedImage image;
+	private Image image;
 	private boolean needReload;
 	private ITexture texture;
 
-	public DynamicTexture(BufferedImage image) {
+	public DynamicTexture(Image image) {
 		this.image = image;
 		needReload = true;
 	}
@@ -27,7 +25,7 @@ public class DynamicTexture {
 		needReload = true;
 	}
 
-	public void setImage(BufferedImage image) {
+	public void setImage(Image image) {
 		this.image = image;
 		this.needReload = true;
 	}
@@ -42,11 +40,11 @@ public class DynamicTexture {
 
 	public static interface ITexture {
 		void bind();
-		void load(BufferedImage image);
+		void load(Image image);
 		void free();
 	}
 
-	public BufferedImage getImage() {
+	public Image getImage() {
 		return image;
 	}
 }

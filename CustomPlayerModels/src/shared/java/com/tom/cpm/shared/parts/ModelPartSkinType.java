@@ -33,4 +33,9 @@ public class ModelPartSkinType implements IModelPart, IResolvedModelPart {
 	public int getSkinType() {
 		return type;
 	}
+
+	@Override
+	public String toString() {
+		return "Skin Type: " + (type == 1 ? "default" : type == 0 ? "slim" : "Unknown (" + type + ")");
+	}
 }

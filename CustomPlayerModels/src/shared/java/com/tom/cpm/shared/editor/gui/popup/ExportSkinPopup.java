@@ -1,10 +1,7 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Exporter;
@@ -17,6 +14,7 @@ import com.tom.cpm.shared.gui.elements.MessagePopup;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
 import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.util.Image;
 
 public class ExportSkinPopup extends PopupPanel {
 	private SkinProvider vanillaSkin;
@@ -44,7 +42,7 @@ public class ExportSkinPopup extends PopupPanel {
 			fc.setFilter((f, n) -> n.endsWith(".png") && !f.isDirectory());
 			fc.setAccept(f -> {
 				try {
-					BufferedImage img = ImageIO.read(f);
+					Image img = Image.loadFrom(f);
 					editor.vanillaSkin = img;
 					vanillaSkin.setImage(img);
 				} catch (IOException ex) {
@@ -62,8 +60,10 @@ public class ExportSkinPopup extends PopupPanel {
 		addElement(forceLinkFile);
 		forceLinkFile.setAction(() -> forceLinkFile.setSelected(!forceLinkFile.isSelected()));
 
+		addElement(new Label(gui, gui.i18nFormat("label.cpm.export_output")).setBounds(new Box(5, 95, 0, 0)));
+
 		Label exportName = new Label(gui, gui.i18nFormat("label.cpm.no_file"));
-		exportName.setBounds(new Box(5, 85, 0, 0));
+		exportName.setBounds(new Box(5, 115, 0, 0));
 		addElement(exportName);
 
 		File[] exportFile = new File[] {null};
@@ -90,7 +90,7 @@ public class ExportSkinPopup extends PopupPanel {
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
 			e.openPopup(fc);
 		});
-		setOut.setBounds(new Box(150, 80, 30, 20));
+		setOut.setBounds(new Box(150, 110, 30, 20));
 		addElement(setOut);
 
 		ok.setEnabled(false);

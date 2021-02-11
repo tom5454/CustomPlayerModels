@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 
 import com.tom.cpm.shared.editor.Editor;
@@ -11,6 +10,7 @@ import com.tom.cpm.shared.gui.elements.PopupPanel;
 import com.tom.cpm.shared.gui.elements.Spinner;
 import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.math.Vec2i;
+import com.tom.cpm.shared.util.Image;
 
 public class NewSkinPopup extends PopupPanel {
 
@@ -59,7 +59,7 @@ public class NewSkinPopup extends PopupPanel {
 
 		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			close();
-			BufferedImage oldImg = editor.skinProvider.getImage();
+			Image oldImg = editor.skinProvider.getImage();
 			File oldSkin = editor.skinFile;
 			boolean edited = editor.skinProvider.isEdited();
 			Vec2i oldSize = editor.skinProvider.size;
@@ -70,7 +70,7 @@ public class NewSkinPopup extends PopupPanel {
 				editor.skinProvider.setEdited(edited);
 				editor.skinProvider.size = oldSize;
 			});
-			BufferedImage newImage = new BufferedImage((int) spinnerW.getValue(), (int) spinnerH.getValue(), BufferedImage.TYPE_INT_ARGB);
+			Image newImage = new Image((int) spinnerW.getValue(), (int) spinnerH.getValue());
 			Vec2i size = new Vec2i((int) spinnerTW.getValue(), (int) spinnerTH.getValue());
 			if(size.x == 0)size.x = (int) spinnerW.getValue();
 			if(size.y == 0)size.y = (int) spinnerH.getValue();

@@ -1,11 +1,8 @@
 package com.tom.cpm.client;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import org.lwjgl.opengl.GL11;
 
@@ -21,6 +18,7 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.gui.IKeybind;
 import com.tom.cpm.shared.util.DynamicTexture.ITexture;
+import com.tom.cpm.shared.util.Image;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -44,11 +42,11 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public BufferedImage getVanillaSkin(int skinType) {
+	public Image getVanillaSkin(int skinType) {
 		try {
 			IResource r = mc.getResourceManager().getResource(skinType == 1 ? TEXTURE_STEVE : TEXTURE_ALEX);
 			try (InputStream is = r.getInputStream()) {
-				return ImageIO.read(is);
+				return Image.loadFrom(is);
 			}
 		} catch (IOException e) {
 		}
@@ -73,9 +71,9 @@ public class MinecraftObject implements MinecraftClientAccess {
 		}
 
 		@Override
-		public void load(BufferedImage image) {
+		public void load(Image image) {
 			this.deleteGlTexture();
-			TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), image, false, false);
+			TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), image.toBufferedImage(), false, false);
 		}
 
 		@Override

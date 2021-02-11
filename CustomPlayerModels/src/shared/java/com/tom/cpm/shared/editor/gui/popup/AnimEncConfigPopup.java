@@ -3,8 +3,6 @@ package com.tom.cpm.shared.editor.gui.popup;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.imageio.ImageIO;
-
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Editor.AnimationEncodingData;
 import com.tom.cpm.shared.editor.util.GetFreeSkinSlots;
@@ -15,8 +13,17 @@ import com.tom.cpm.shared.gui.elements.Checkbox;
 import com.tom.cpm.shared.gui.elements.Label;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
 import com.tom.cpm.shared.math.Box;
+import com.tom.cpm.shared.util.Image;
 
 public class AnimEncConfigPopup extends PopupPanel {
+	private static Image template;
+	static {
+		try(InputStream is = AnimEncConfigPopup.class.getResourceAsStream("/assets/cpm/textures/template/layers_template.png")) {
+			template = Image.loadFrom(is);
+		} catch (IOException e) {
+			template = null;
+		}
+	}
 
 	public AnimEncConfigPopup(IGui gui, Editor editor, Runnable onOk) {
 		super(gui);
@@ -25,10 +32,7 @@ public class AnimEncConfigPopup extends PopupPanel {
 		AnimationEncodingData dt = editor.animEnc != null ? new AnimationEncodingData(editor.animEnc) : new AnimationEncodingData();
 
 		if(editor.animEnc == null) {
-			try(InputStream is = AnimEncConfigPopup.class.getResourceAsStream("/assets/cpm/textures/template/layers_template.png")) {
-				dt.freeLayers = GetFreeSkinSlots.getFreeLayers(editor.vanillaSkin, ImageIO.read(is), editor.skinType);
-			} catch (IOException e) {
-			}
+			dt.freeLayers = GetFreeSkinSlots.getFreeLayers(editor.vanillaSkin, template, editor.skinType);
 		}
 
 		Label lbl = new Label(gui, gui.i18nFormat("label.cpm.skin_layers_to_use"));
@@ -63,11 +67,7 @@ public class AnimEncConfigPopup extends PopupPanel {
 			chkbxEn.setSelected(dt.defaultLayerValue.computeIfAbsent(layer, k -> !enc));
 
 			Button clearLayer = new Button(gui, gui.i18nFormat("button.cpm.clearLayer"), () -> {
-				try(InputStream is = AnimEncConfigPopup.class.getResourceAsStream("/assets/cpm/textures/template/layers_template.png")) {
-					GetFreeSkinSlots.clearLayerArea(editor.vanillaSkin, ImageIO.read(is), editor.skinType, layer);
-					editor.skinProvider.markDirty();
-				} catch (IOException e) {
-				}
+				GetFreeSkinSlots.clearLayerArea(editor.vanillaSkin, template, editor.skinType, layer);
 			});
 			clearLayer.setBounds(new Box(210, 10 + y * 25, 80, 20));
 			addElement(clearLayer);

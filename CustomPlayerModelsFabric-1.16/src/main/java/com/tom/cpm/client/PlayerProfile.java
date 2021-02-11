@@ -1,12 +1,6 @@
 package com.tom.cpm.client;
 
-import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URL;
 import java.util.UUID;
-
-import javax.imageio.ImageIO;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -24,12 +18,10 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.util.LegacySkinConverter;
 
 public class PlayerProfile extends Player {
 	private final GameProfile profile;
 	private String skinType;
-	private String url;
 	private VanillaPose pose;
 	private int encodedGesture;
 
@@ -43,23 +35,6 @@ public class PlayerProfile extends Player {
 
 	public PlayerProfile(MinecraftClient mc) {
 		this(mc.getSession().getProfile());
-	}
-
-	@Override
-	public BufferedImage getSkin() {
-		if(MinecraftObjectHolder.DEBUGGING) {
-			try (FileInputStream fin = new FileInputStream("skin_test.png")){
-				return ImageIO.read(fin);
-			} catch (IOException e) {
-			}
-		}
-		if(url == null)return null;
-		try {
-			return new LegacySkinConverter().convertSkin(ImageIO.read(new URL(url)));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
 	}
 
 	@Override
@@ -152,5 +127,10 @@ public class PlayerProfile extends Player {
 	@Override
 	public int getEncodedGestureId() {
 		return encodedGesture;
+	}
+
+	public void setRenderPose(VanillaPose pose) {
+		this.pose = pose;
+		this.encodedGesture = 0;
 	}
 }

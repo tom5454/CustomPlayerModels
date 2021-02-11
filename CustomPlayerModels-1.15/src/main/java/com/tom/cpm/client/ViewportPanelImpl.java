@@ -189,6 +189,12 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					p.setRotationAngles(playerObj, ls, lsa, 0, 0, 0);
 					break;
 
+				case SKULL_RENDER:
+					p.setVisible(false);
+					p.bipedHead.showModel = true;
+					matrixstack.translate(0.0D, 1.501F, 0.0D);
+					break;
+
 				default:
 					break;
 				}

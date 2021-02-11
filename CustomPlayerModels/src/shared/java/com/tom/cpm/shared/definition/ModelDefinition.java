@@ -14,9 +14,11 @@ import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.model.PlayerModelElement;
+import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.IResolvedModelPart;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
@@ -38,7 +40,7 @@ public class ModelDefinition {
 	private SkinProvider skinOverride;
 	private List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
-	private Map<PlayerModelParts, PlayerModelElement> renderingCubes;
+	private Map<ModelPart, RootModelElement> rootRenderingCubes;
 	private int resolveState;
 	private boolean editor;
 	private AnimationRegistry animations = new AnimationRegistry();
@@ -54,9 +56,9 @@ public class ModelDefinition {
 		this.loader = null;
 		this.editor = true;
 		resolveState = 2;
-		renderingCubes = new MapViewOfList<>(
-				new ListView<>(editor.elements, e -> (PlayerModelElement) e.rc),
-				PlayerModelElement::getPart,
+		rootRenderingCubes = new MapViewOfList<>(
+				new ListView<>(editor.elements, e -> (RootModelElement) e.rc),
+				RootModelElement::getPart,
 				Function.identity()
 				);
 		skinOverride = editor.skinProvider;
@@ -130,9 +132,9 @@ public class ModelDefinition {
 		}
 		if(player == null)player = new ModelPartPlayer();
 		cubes = new ArrayList<>();
-		Map<Integer, PlayerModelElement> playerModelParts = new HashMap<>();
+		Map<Integer, RootModelElement> playerModelParts = new HashMap<>();
 		for(int i = 0;i<PlayerModelParts.VALUES.length;i++) {
-			PlayerModelElement elem = new PlayerModelElement(PlayerModelParts.VALUES[i], player);
+			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i], this);
 			playerModelParts.put(i, elem);
 		}
 		for (IResolvedModelPart part : resolved) {
@@ -150,8 +152,8 @@ public class ModelDefinition {
 			}
 			cubes.addAll(cs);
 		}
-		renderingCubes = new HashMap<>();
-		playerModelParts.forEach((i, e) -> renderingCubes.put(PlayerModelParts.VALUES[i], e));
+		rootRenderingCubes = new HashMap<>();
+		playerModelParts.forEach((i, e) -> rootRenderingCubes.put(PlayerModelParts.VALUES[i], e));
 		cubeMap = new HashMap<>();
 		cubes.addAll(playerModelParts.values());
 		cubes.forEach(c -> cubeMap.put(c.getId(), c));
@@ -175,8 +177,8 @@ public class ModelDefinition {
 		return resolveState;
 	}
 
-	public PlayerModelElement getModelElementFor(PlayerModelParts part) {
-		return renderingCubes.get(part);
+	public RootModelElement getModelElementFor(ModelPart part) {
+		return rootRenderingCubes.get(part);
 	}
 
 	public boolean isEditor() {
@@ -210,9 +212,9 @@ public class ModelDefinition {
 		switch (resolveState) {
 		case 0:
 		case 1:
-			bb.append("\n\tParts:\n");
+			bb.append("\n\tParts:");
 			for (IModelPart iModelPart : parts) {
-				bb.append("\t\t");
+				bb.append("\n\t\t");
 				bb.append(iModelPart.toString().replace("\n", "\n\t\t"));
 			}
 			break;
@@ -232,5 +234,16 @@ public class ModelDefinition {
 			break;
 		}
 		return bb.toString();
+	}
+
+	public boolean doRenderPart(ModelPart part) {
+		if(part instanceof PlayerModelParts)return player.doRenderPart((PlayerModelParts) part);
+		return true;
+	}
+
+	public RootModelElement addRoot(int id, RootModelType type) {
+		RootModelElement elem = new RootModelElement(type, this);
+		rootRenderingCubes.put(type, elem);
+		return elem;
 	}
 }

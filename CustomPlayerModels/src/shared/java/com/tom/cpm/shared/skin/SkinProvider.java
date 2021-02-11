@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.skin;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -9,6 +8,7 @@ import javax.imageio.ImageIO;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.util.DynamicTexture;
+import com.tom.cpm.shared.util.Image;
 
 public class SkinProvider {
 	public DynamicTexture texture;
@@ -23,7 +23,7 @@ public class SkinProvider {
 		this();
 		size = in.read2s();
 		try {
-			texture = new DynamicTexture(ImageIO.read(in.readNextBlock().getDin()));
+			texture = new DynamicTexture(Image.loadFrom(in.readNextBlock().getDin()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -32,7 +32,7 @@ public class SkinProvider {
 	public void write(IOHelper dout) throws IOException {
 		dout.write2s(size);
 		try (OutputStream baos = dout.writeNextBlock().getDout()) {
-			ImageIO.write(texture.getImage(), "PNG", baos);
+			ImageIO.write(texture.getImage().toBufferedImage(), "PNG", baos);
 		}
 	}
 
@@ -49,7 +49,7 @@ public class SkinProvider {
 		return size;
 	}
 
-	public BufferedImage getImage() {
+	public Image getImage() {
 		return texture == null ? null : texture.getImage();
 	}
 
@@ -58,7 +58,7 @@ public class SkinProvider {
 		markDirty();
 	}
 
-	public void setImage(BufferedImage image) {
+	public void setImage(Image image) {
 		if(texture == null)texture = new DynamicTexture(image);
 		else texture.setImage(image);
 	}

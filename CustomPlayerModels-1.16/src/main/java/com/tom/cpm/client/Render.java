@@ -150,7 +150,6 @@ public class Render {
 				}
 			}
 		}
-
 	}
 
 	public static Box createTextured(Vec3f pos, Vec3f size, Vec3f sc, float delta, int texU, int texV, int texSize, int sheetSizeX, int sheetSizeY) {

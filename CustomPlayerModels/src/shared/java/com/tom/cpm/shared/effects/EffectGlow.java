@@ -39,4 +39,8 @@ public class EffectGlow implements IRenderEffect {
 		return RenderEffects.GLOW;
 	}
 
+	@Override
+	public String toString() {
+		return "Glow [" + id + "]";
+	}
 }

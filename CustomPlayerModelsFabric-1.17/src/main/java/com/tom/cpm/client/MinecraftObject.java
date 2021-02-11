@@ -1,13 +1,10 @@
 package com.tom.cpm.client;
 
-import java.awt.image.BufferedImage;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
-
-import javax.imageio.ImageIO;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.entity.PlayerModelPart;
@@ -22,6 +19,7 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.gui.IKeybind;
 import com.tom.cpm.shared.util.DynamicTexture.ITexture;
+import com.tom.cpm.shared.util.Image;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private static final Identifier STEVE_SKIN = new Identifier("textures/entity/steve.png");
@@ -52,9 +50,9 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public BufferedImage getVanillaSkin(int skinType) {
+	public Image getVanillaSkin(int skinType) {
 		try(Resource r = mc.getResourceManager().getResource(skinType == 1 ? STEVE_SKIN : ALEX_SKIN)) {
-			return ImageIO.read(r.getInputStream());
+			return Image.loadFrom(r.getInputStream());
 		} catch (IOException e) {
 		}
 		return null;
@@ -89,7 +87,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 		}
 
 		@Override
-		public void load(BufferedImage texture) {
+		public void load(Image texture) {
 			NativeImage ni = createFromBufferedImage(texture);
 			setImage(ni);
 			TextureUtil.allocate(this.getGlId(), ni.getWidth(), ni.getHeight());
@@ -106,7 +104,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 		}
 	}
 
-	public static NativeImage createFromBufferedImage(BufferedImage texture) {
+	public static NativeImage createFromBufferedImage(Image texture) {
 		NativeImage ni = new NativeImage(texture.getWidth(), texture.getHeight(), false);
 		for(int y = 0;y<texture.getHeight();y++) {
 			for(int x = 0;x<texture.getWidth();x++) {

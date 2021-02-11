@@ -3,26 +3,36 @@ package com.tom.cpm.shared.util;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.awt.image.ImageObserver;
+import java.io.File;
+import java.io.IOException;
+
+import com.tom.cpm.shared.MinecraftObjectHolder;
 
 public class LegacySkinConverter {
 	private int[] imageData;
 	private int imageWidth;
 	private int imageHeight;
 
-	public BufferedImage convertSkin(BufferedImage image) {
+	public Image convertSkin(Image image) {
 		if (image == null) {
 			return null;
 		} else {
+			if(MinecraftObjectHolder.DEBUGGING) {
+				try {
+					image.storeTo(new File("cpm_dump/" + System.nanoTime() + "_dl.png"));
+				} catch (IOException e) {
+				}
+			}
 			this.imageWidth = 64;
 			this.imageHeight = 64;
-			BufferedImage bufferedimage = new BufferedImage(this.imageWidth, this.imageHeight, 2);
-			Graphics graphics = bufferedimage.getGraphics();
-			graphics.drawImage(image, 0, 0, (ImageObserver)null);
+			Image img;
 			boolean flag = image.getHeight() == 32;
+			if(flag) {
+				BufferedImage bufferedimage = new BufferedImage(this.imageWidth, this.imageHeight, 2);
+				Graphics graphics = bufferedimage.getGraphics();
+				graphics.drawImage(image.toBufferedImage(), 0, 0, (ImageObserver)null);
 
-			if (flag) {
 				graphics.setColor(new Color(0, 0, 0, 0));
 				graphics.fillRect(0, 32, 64, 32);
 				graphics.drawImage(bufferedimage, 24, 48, 20, 52, 4, 16, 8, 20, (ImageObserver)null);
@@ -37,10 +47,15 @@ public class LegacySkinConverter {
 				graphics.drawImage(bufferedimage, 40, 52, 36, 64, 44, 20, 48, 32, (ImageObserver)null);
 				graphics.drawImage(bufferedimage, 44, 52, 40, 64, 40, 20, 44, 32, (ImageObserver)null);
 				graphics.drawImage(bufferedimage, 48, 52, 44, 64, 52, 20, 56, 32, (ImageObserver)null);
+				graphics.dispose();
+
+				img = new Image(bufferedimage);
+			} else {
+				img = new Image(64, 64);
+				img.draw(image);
 			}
 
-			graphics.dispose();
-			this.imageData = ((DataBufferInt)bufferedimage.getRaster().getDataBuffer()).getData();
+			this.imageData = img.getData();
 			this.setAreaOpaque(0, 0, 32, 16);
 
 			if (flag) {
@@ -49,7 +64,14 @@ public class LegacySkinConverter {
 
 			this.setAreaOpaque(0, 16, 64, 32);
 			this.setAreaOpaque(16, 48, 48, 64);
-			return bufferedimage;
+
+			if(MinecraftObjectHolder.DEBUGGING) {
+				try {
+					img.storeTo(new File("cpm_dump/" + System.nanoTime() + "_lc.png"));
+				} catch (IOException e) {
+				}
+			}
+			return img;
 		}
 	}
 

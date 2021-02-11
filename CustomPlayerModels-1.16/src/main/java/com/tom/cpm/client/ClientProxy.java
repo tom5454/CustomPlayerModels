@@ -5,12 +5,11 @@ import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
-import javax.imageio.ImageIO;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.CustomizeSkinScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -24,13 +23,17 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import com.mojang.authlib.GameProfile;
+
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
+import com.tom.cpm.shared.util.Image;
 
 public class ClientProxy extends CommonProxy {
 	public static ClientProxy INSTANCE = null;
@@ -43,7 +46,7 @@ public class ClientProxy extends CommonProxy {
 		super.init();
 		INSTANCE = this;
 		try(InputStream is = ClientProxy.class.getResourceAsStream("/assets/cpm/textures/template/free_space_template.png")) {
-			loader = new ModelDefinitionLoader(ImageIO.read(is), PlayerProfile::create);
+			loader = new ModelDefinitionLoader(Image.loadFrom(is), PlayerProfile::create);
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load template", e);
 		}
@@ -58,26 +61,27 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		tryBindModel(event.getPlayer(), event.getBuffers(), null);
+		tryBindModel(null, event.getPlayer(), event.getBuffers(), null, null);
 	}
 
-	private void tryBindModel(PlayerEntity player, IRenderTypeBuffer buffer, Predicate<Object> unbindRule) {
-		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(player.getGameProfile());
-		ModelDefinition def = profile.getModelDefinition();
+	private boolean tryBindModel(GameProfile gprofile, PlayerEntity player, IRenderTypeBuffer buffer, Predicate<Object> unbindRule, Model toBind) {
+		if(gprofile == null)gprofile = player.getGameProfile();
+		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
+		if(toBind == null)toBind = profile.getModel();
+		ModelDefinition def = profile.getAndResolveDefinition();
 		if(def != null) {
-			if(def.getResolveState() == 0)def.startResolve();
-			else if(def.getResolveState() == 2) {
-				if(def.doRender()) {
-					this.profile = profile;
-					profile.updateFromPlayer(player);
-					mc.getPlayerRenderManager().bindModel(profile.getModel(), buffer, def, unbindRule);
-					if(unbindRule == null)
-						mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
-					return;
-				}
-			}
+			this.profile = profile;
+			if(player != null)
+				profile.updateFromPlayer(player);
+			else
+				profile.setRenderPose(VanillaPose.SKULL_RENDER);
+			mc.getPlayerRenderManager().bindModel(toBind, buffer, def, unbindRule);
+			if(unbindRule == null || player == null)
+				mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
+			return true;
 		}
-		mc.getPlayerRenderManager().unbindModel(profile.getModel());
+		mc.getPlayerRenderManager().unbindModel(toBind);
+		return false;
 	}
 
 	@SubscribeEvent
@@ -96,7 +100,12 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public void renderHand(IRenderTypeBuffer buffer) {
-		tryBindModel(Minecraft.getInstance().player, buffer, PlayerRenderManager::unbindHand);
+		tryBindModel(null, Minecraft.getInstance().player, buffer, PlayerRenderManager::unbindHand, null);
+		this.profile = null;
+	}
+
+	public void renderSkull(Model skullModel, GameProfile profile, IRenderTypeBuffer buffer) {
+		tryBindModel(profile, null, buffer, PlayerRenderManager::unbindSkull, skullModel);
 		this.profile = null;
 	}
 

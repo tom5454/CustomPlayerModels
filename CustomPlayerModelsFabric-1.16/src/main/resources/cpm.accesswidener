@@ -14,3 +14,9 @@ accessible field net/minecraft/client/render/entity/EntityRenderDispatcher model
 accessible field net/minecraft/client/gui/widget/AbstractButtonWidget height I
 
 accessible field net/minecraft/client/options/GameOptions enabledPlayerModelParts Ljava/util/Set;
+
+accessible field net/minecraft/client/render/entity/model/SkullOverlayEntityModel skullOverlay Lnet/minecraft/client/model/ModelPart;
+mutable field net/minecraft/client/render/entity/model/SkullOverlayEntityModel skullOverlay Lnet/minecraft/client/model/ModelPart;
+
+accessible field net/minecraft/client/render/entity/model/SkullEntityModel skull Lnet/minecraft/client/model/ModelPart;
+mutable field net/minecraft/client/render/entity/model/SkullEntityModel skull Lnet/minecraft/client/model/ModelPart;

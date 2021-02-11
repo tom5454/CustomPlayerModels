@@ -1,8 +1,5 @@
 package com.tom.cpm.client;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -12,7 +9,9 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.entity.model.HumanoidHeadModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
 
@@ -21,32 +20,55 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.Render.Box;
-import com.tom.cpm.shared.IPlayerRenderManager;
-import com.tom.cpm.shared.animation.AnimationEngine;
-import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.Cube;
-import com.tom.cpm.shared.model.PlayerModelElement;
+import com.tom.cpm.shared.model.ModelRenderManager;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.skin.SkinProvider;
 
-public class PlayerRenderManager implements IPlayerRenderManager {
-	private final ModelDefinitionLoader loader;
-	private Map<PlayerModel<AbstractClientPlayerEntity>, RedirectHolder> holders = new HashMap<>();
-	private AnimationEngine animEngine = new AnimationEngine();
+public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer, Model> {
 
 	public PlayerRenderManager(ModelDefinitionLoader loader) {
-		this.loader = loader;
-	}
+		super(loader);
+		setFactory(new RedirectHolderFactory<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer>() {
 
-	public void bindModel(PlayerModel<AbstractClientPlayerEntity> model, IRenderTypeBuffer bufferIn, ModelDefinition def, Predicate<Object> unbindRule) {
-		holders.computeIfAbsent(model, RedirectHolder::new).swapIn(def, unbindRule, bufferIn);
-	}
+			@SuppressWarnings("unchecked")
+			@Override
+			public <M> RedirectHolder<M, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> create(
+					M model) {
+				if(model instanceof PlayerModel) {
+					return (RedirectHolder<M, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer>)
+							new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<AbstractClientPlayerEntity>) model);
+				} else if(model instanceof HumanoidHeadModel) {
+					return (RedirectHolder<M, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer>)
+							new RedirectHolderSkull(PlayerRenderManager.this, (HumanoidHeadModel) model);
+				}
+				return null;
+			}
+		});
+		setRedirectFactory(new RedirectRendererFactory<Model, CallbackInfoReturnable<ResourceLocation>, ModelRenderer>() {
 
-	public void unbindModel(PlayerModel<AbstractClientPlayerEntity> model) {
-		RedirectHolder h = holders.get(model);
-		if(h != null)h.swapOut();
+			@Override
+			public RedirectRenderer<ModelRenderer> create(Model model,
+					RedirectHolder<Model, ?, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> access,
+					Supplier<ModelRenderer> modelPart, ModelPart part) {
+				return new RedirectModelRenderer(model, (RDH) access, modelPart, part);
+			}
+		});
+		setVis(m -> m.showModel, (m, v) -> m.showModel = v);
+		setModelPosGetters(m -> m.rotationPointX, m -> m.rotationPointY, m -> m.rotationPointZ);
+		setModelRotGetters(m -> m.rotateAngleX, m -> m.rotateAngleY, m -> m.rotateAngleZ);
+		setModelSetters((m, x, y, z) -> {
+			m.rotationPointX = x;
+			m.rotationPointY = y;
+			m.rotationPointZ = z;
+		}, (m, x, y, z) -> {
+			m.rotateAngleX = x;
+			m.rotateAngleY = y;
+			m.rotateAngleZ = z;
+		});
 	}
 
 	@Override
@@ -56,59 +78,17 @@ public class PlayerRenderManager implements IPlayerRenderManager {
 		}
 	}
 
-	@Override
-	public ModelDefinitionLoader getLoader() {
-		return loader;
-	}
-
-	public void bindSkin(PlayerModel<AbstractClientPlayerEntity> model, CallbackInfoReturnable<ResourceLocation> cbi) {
-		holders.computeIfAbsent(model, RedirectHolder::new).bindTexture(cbi);
-	}
-
-	public boolean isBound(PlayerModel<AbstractClientPlayerEntity> model) {
-		return holders.computeIfAbsent(model, RedirectHolder::new).swappedIn;
-	}
-
-	private static class RedirectHolder {
-		private final PlayerModel<AbstractClientPlayerEntity> model;
-		private final RedirectModelRenderer bipedHead;
-		private final RedirectModelRenderer bipedBody;
-		private final RedirectModelRenderer bipedRightArm;
-		private final RedirectModelRenderer bipedLeftArm;
-		private final RedirectModelRenderer bipedRightLeg;
-		private final RedirectModelRenderer bipedLeftLeg;
-
-		private final RedirectModelRenderer bipedHeadwear;
-		private final RedirectModelRenderer bipedLeftArmwear;
-		private final RedirectModelRenderer bipedRightArmwear;
-		private final RedirectModelRenderer bipedLeftLegwear;
-		private final RedirectModelRenderer bipedRightLegwear;
-		private final RedirectModelRenderer bipedBodyWear;
-
-		private ModelDefinition def;
-		private Predicate<Object> unbindRule;
-		private boolean swappedIn;
-		private int sheetX, sheetY;
-		private IRenderTypeBuffer buffer;
+	private static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> {
 		private ResourceLocation boundSkin;
+		private RenderType glowType, defaultType;
 
-		public RedirectHolder(PlayerModel<AbstractClientPlayerEntity> model) {
-			this.model = model;
-			bipedHead         = new RedirectModelRenderer(this, () -> model.bipedHead        , PlayerModelParts.HEAD);
-			bipedBody         = new RedirectModelRenderer(this, () -> model.bipedBody        , PlayerModelParts.BODY);
-			bipedRightArm     = new RedirectModelRenderer(this, () -> model.bipedRightArm    , PlayerModelParts.RIGHT_ARM);
-			bipedLeftArm      = new RedirectModelRenderer(this, () -> model.bipedLeftArm     , PlayerModelParts.LEFT_ARM);
-			bipedRightLeg     = new RedirectModelRenderer(this, () -> model.bipedRightLeg    , PlayerModelParts.RIGHT_LEG);
-			bipedLeftLeg      = new RedirectModelRenderer(this, () -> model.bipedLeftLeg     , PlayerModelParts.LEFT_LEG);
-
-			bipedHeadwear     = new RedirectModelRenderer(this, () -> model.bipedHeadwear    , null);
-			bipedLeftArmwear  = new RedirectModelRenderer(this, () -> model.bipedLeftArmwear , null);
-			bipedRightArmwear = new RedirectModelRenderer(this, () -> model.bipedRightArmwear, null);
-			bipedLeftLegwear  = new RedirectModelRenderer(this, () -> model.bipedLeftLegwear , null);
-			bipedRightLegwear = new RedirectModelRenderer(this, () -> model.bipedRightLegwear, null);
-			bipedBodyWear     = new RedirectModelRenderer(this, () -> model.bipedBodyWear    , null);
+		public RDH(
+				ModelRenderManager<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer, Model> mngr,
+				Model model) {
+			super(mngr, model);
 		}
 
+		@Override
 		public void bindTexture(CallbackInfoReturnable<ResourceLocation> cbi) {
 			if(def == null)return;
 			SkinProvider skin = def.getSkinOverride();
@@ -122,144 +102,144 @@ public class PlayerRenderManager implements IPlayerRenderManager {
 				sheetY = 64;
 			}
 			boundSkin = cbi.getReturnValue();
-		}
-
-		public void swapIn(ModelDefinition def, Predicate<Object> unbindRule, IRenderTypeBuffer bufferIn) {
-			this.def = def;
-			this.unbindRule = unbindRule;
-			this.buffer = bufferIn;
-			if(swappedIn)return;
-			model.bipedHead         = bipedHead        .swapIn();
-			model.bipedBody         = bipedBody        .swapIn();
-			model.bipedRightArm     = bipedRightArm    .swapIn();
-			model.bipedLeftArm      = bipedLeftArm     .swapIn();
-			model.bipedRightLeg     = bipedRightLeg    .swapIn();
-			model.bipedLeftLeg      = bipedLeftLeg     .swapIn();
-
-			model.bipedHeadwear     = bipedHeadwear    .swapIn();
-			model.bipedLeftArmwear  = bipedLeftArmwear .swapIn();
-			model.bipedRightArmwear = bipedRightArmwear.swapIn();
-			model.bipedLeftLegwear  = bipedLeftLegwear .swapIn();
-			model.bipedRightLegwear = bipedRightLegwear.swapIn();
-			model.bipedBodyWear     = bipedBodyWear    .swapIn();
-			this.swappedIn = true;
-		}
-
-		public void swapOut() {
-			this.def = null;
-			this.unbindRule = null;
-			this.buffer = null;
-			this.boundSkin = null;
-			if(!swappedIn)return;
-			model.bipedHead         = bipedHead        .swapOut();
-			model.bipedBody         = bipedBody        .swapOut();
-			model.bipedRightArm     = bipedRightArm    .swapOut();
-			model.bipedLeftArm      = bipedLeftArm     .swapOut();
-			model.bipedRightLeg     = bipedRightLeg    .swapOut();
-			model.bipedLeftLeg      = bipedLeftLeg     .swapOut();
-
-			model.bipedHeadwear     = bipedHeadwear    .swapOut();
-			model.bipedLeftArmwear  = bipedLeftArmwear .swapOut();
-			model.bipedRightArmwear = bipedRightArmwear.swapOut();
-			model.bipedLeftLegwear  = bipedLeftLegwear .swapOut();
-			model.bipedRightLegwear = bipedRightLegwear.swapOut();
-			model.bipedBodyWear     = bipedBodyWear    .swapOut();
-			swappedIn = false;
-		}
-	}
-
-	private static class RedirectModelRenderer extends ModelRenderer {
-		private final RedirectHolder holder;
-		private final PlayerModelParts part;
-		private final Supplier<ModelRenderer> parentProvider;
-		private ModelRenderer parent;
-		private PlayerModelElement elem;
-		private CubeModelRenderer dispRender;
-		private int sel;
-
-		public RedirectModelRenderer(RedirectHolder holder, Supplier<ModelRenderer> parent, PlayerModelParts part) {
-			super(holder.model);
-			this.holder = holder;
-			holder.model.modelRenderers.remove(this);
-			this.parentProvider = parent;
-			this.part = part;
-			this.dispRender = new CubeModelRenderer();
+			defaultType = RenderType.getEntityTranslucent(boundSkin);
+			glowType = RenderType.getEyes(boundSkin);
 		}
 
 		@Override
-		public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-			if(holder.def != null) {
-				if(part == null) {
-					if(holder.unbindRule != null && holder.unbindRule.test(this))
-						holder.swapOut();
-					return;
-				}
-				elem = holder.def.getModelElementFor(part);
-				sel = elem.getSelected();
-				float px = this.rotationPointX;
-				float py = this.rotationPointY;
-				float pz = this.rotationPointZ;
-				float rx = this.rotateAngleX;
-				float ry = this.rotateAngleY;
-				float rz = this.rotateAngleZ;
-				boolean skipTransform = false;
-				if(holder.bipedLeftArm == this && holder.model.leftArmPose.ordinal() > 2) {
-					skipTransform = true;
-				}
-				if(holder.bipedRightArm == this && holder.model.rightArmPose.ordinal() > 2) {
-					skipTransform = true;
-				}
-				if(!skipTransform) {
-					if(elem.forcePos) {
-						this.rotationPointX = elem.pos.x;
-						this.rotationPointY = elem.pos.y;
-						this.rotationPointZ = elem.pos.z;
-						this.rotateAngleX = elem.rotation.x;
-						this.rotateAngleY = elem.rotation.y;
-						this.rotateAngleZ = elem.rotation.z;
-					} else {
-						this.rotationPointX += elem.pos.x;
-						this.rotationPointY += elem.pos.y;
-						this.rotationPointZ += elem.pos.z;
-						this.rotateAngleX += elem.rotation.x;
-						this.rotateAngleY += elem.rotation.y;
-						this.rotateAngleZ += elem.rotation.z;
-					}
-				}
-				if(elem.doDisplay()) {
-					copyModel(this, parent);
-					parent.addChild(dispRender);
-					parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-					parent.rotationPointX = px;
-					parent.rotationPointY = py;
-					parent.rotationPointZ = pz;
-					parent.rotateAngleX = rx;
-					parent.rotateAngleY = ry;
-					parent.rotateAngleZ = rz;
-					parent.childModels.remove(dispRender);
-				} else {
-					if(holder.def.isEditor()) {
-						//parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, 0.5f);
-					}
-					matrixStackIn.push();
-					translateRotate(matrixStackIn);
-					if(sel > 0)drawVanillaOutline(matrixStackIn, bufferIn);
-					render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-					matrixStackIn.pop();
-				}
-				elem = null;
-			} else {
-				copyModel(this, parent);
-				parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		public void swapOut0() {
+			this.boundSkin = null;
+			defaultType = null;
+			glowType = null;
+		}
+
+		@Override
+		public void swapIn0() {}
+	}
+
+	private static class RedirectHolderPlayer extends RDH {
+		private RedirectRenderer<ModelRenderer> bipedLeftArm;
+		private RedirectRenderer<ModelRenderer> bipedRightArm;
+		private RedirectRenderer<ModelRenderer> bipedLeftArmwear;
+		private RedirectRenderer<ModelRenderer> bipedRightArmwear;
+
+		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerModel<AbstractClientPlayerEntity> model) {
+			super(mngr, model);
+			register(new Field<>(() -> model.bipedHead        , v -> model.bipedHead         = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.bipedBody        , v -> model.bipedBody         = v, PlayerModelParts.BODY));
+			bipedRightArm = register(new Field<>(() -> model.bipedRightArm    , v -> model.bipedRightArm     = v, PlayerModelParts.RIGHT_ARM));
+			bipedLeftArm = register(new Field<>(() -> model.bipedLeftArm     , v -> model.bipedLeftArm      = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.bipedRightLeg    , v -> model.bipedRightLeg     = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.bipedLeftLeg     , v -> model.bipedLeftLeg      = v, PlayerModelParts.LEFT_LEG));
+
+			register(new Field<>(() -> model.bipedHeadwear    , v -> model.bipedHeadwear     = v, null));
+			bipedLeftArmwear = register(new Field<>(() -> model.bipedLeftArmwear , v -> model.bipedLeftArmwear  = v, null));
+			bipedRightArmwear = register(new Field<>(() -> model.bipedRightArmwear, v -> model.bipedRightArmwear = v, null));
+			register(new Field<>(() -> model.bipedLeftLegwear , v -> model.bipedLeftLegwear  = v, null));
+			register(new Field<>(() -> model.bipedRightLegwear, v -> model.bipedRightLegwear = v, null));
+			register(new Field<>(() -> model.bipedBodyWear    , v -> model.bipedBodyWear     = v, null));
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public boolean skipTransform(RedirectRenderer<ModelRenderer> part) {
+			PlayerModel<AbstractClientPlayerEntity> model = (PlayerModel<AbstractClientPlayerEntity>) this.model;
+			boolean skipTransform = false;
+			if(bipedLeftArm == part && model.leftArmPose.ordinal() > 2) {
+				skipTransform = true;
 			}
-			if(holder.unbindRule != null && holder.unbindRule.test(this))
-				holder.swapOut();
+			if(bipedRightArm == part && model.rightArmPose.ordinal() > 2) {
+				skipTransform = true;
+			}
+			return skipTransform;
+		}
+	}
+
+	private static class RedirectHolderSkull extends RDH {
+		private RedirectRenderer<ModelRenderer> hat;
+
+		public RedirectHolderSkull(PlayerRenderManager mngr, HumanoidHeadModel model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.field_217105_a, v -> model.field_217105_a = v, PlayerModelParts.HEAD));
+			hat = register(new Field<>(() -> model.head        , v -> model.head         = v, null));
+		}
+
+	}
+
+	private static class RedirectModelRenderer extends ModelRenderer implements RedirectRenderer<ModelRenderer> {
+		private final RDH holder;
+		private final ModelPart part;
+		private final Supplier<ModelRenderer> parentProvider;
+		private ModelRenderer parent;
+		private RootModelElement elem;
+		private CubeModelRenderer dispRender;
+		private int sel;
+
+		@SuppressWarnings("unchecked")
+		public RedirectModelRenderer(Model model, RDH holder, Supplier<ModelRenderer> parent, ModelPart part) {
+			super(model);
+			this.part = part;
+			this.holder = holder;
+			this.parentProvider = parent;
+			if(model instanceof PlayerModel)
+				((PlayerModel<AbstractClientPlayerEntity>)model).modelRenderers.remove(this);
+			this.dispRender = new CubeModelRenderer();
+		}
+
+		private MatrixStack matrixStackIn;
+		private IVertexBuilder bufferIn;
+		private int packedLightIn, packedOverlayIn;
+		private float red, green, blue, alpha;
+
+		@Override
+		public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+			this.matrixStackIn   = matrixStackIn  ;
+			this.bufferIn        = bufferIn       ;
+			this.packedLightIn   = packedLightIn  ;
+			this.packedOverlayIn = packedOverlayIn;
+			this.red             = red            ;
+			this.green           = green          ;
+			this.blue            = blue           ;
+			this.alpha           = alpha          ;
+			render();
+			this.matrixStackIn = null;
+			this.bufferIn = null;
+		}
+
+		@Override
+		public void renderParent() {
+			parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		}
+
+		@Override
+		public void renderWithParent(RootModelElement elem, int sel) {
+			this.elem = elem;
+			this.sel = sel;
+			parent.addChild(dispRender);
+			parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+			parent.childModels.remove(dispRender);
+			this.elem = null;
+		}
+
+		@Override
+		public void doRender(RootModelElement elem, int sel) {
+			this.elem = elem;
+			this.sel = sel;
+			matrixStackIn.push();
+			translateRotate(matrixStackIn);
+			if(sel > 0)drawVanillaOutline(matrixStackIn, bufferIn);
+			render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+			matrixStackIn.pop();
+			this.elem = null;
 		}
 
 		private class CubeModelRenderer extends ModelRenderer {
+			@SuppressWarnings("unchecked")
 			public CubeModelRenderer() {
 				super(holder.model);
-				holder.model.modelRenderers.remove(this);
+				if(holder.model instanceof PlayerModel)
+					((PlayerModel<AbstractClientPlayerEntity>)holder.model).modelRenderers.remove(this);
 			}
 
 			@Override
@@ -273,9 +253,9 @@ public class PlayerRenderManager implements IPlayerRenderManager {
 			float f = 0.001f;
 			float g = f * 2;
 			float scale = 1 / 16.0F;
-			if(sel == 2)Render.drawOrigin(matrixStackIn, holder.buffer.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
+			if(sel == 2)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
 			for(ModelBox b : parent.cubeList) {
-				WorldRenderer.drawBoundingBox(matrixStackIn, holder.buffer.getBuffer(CustomRenderTypes.getLinesNoDepth()),
+				WorldRenderer.drawBoundingBox(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
 						b.posX1 * scale - f, b.posY1 * scale - f, b.posZ1 * scale - f,
 						b.posX2 * scale + g, b.posY2 * scale + g, b.posZ2 * scale + g,
 						1, 1, sel == 2 ? 1 : 0, 1);
@@ -301,7 +281,9 @@ public class PlayerRenderManager implements IPlayerRenderManager {
 		private void render(RenderedCube elem, MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
 			if(elem.children == null)return;
 			for(RenderedCube cube : elem.children) {
-				if(!cube.display)continue;
+				if(!cube.display) {
+					continue;
+				}
 				matrixStackIn.push();
 				translateRotate(cube, matrixStackIn);
 				float r = red;
@@ -322,15 +304,11 @@ public class PlayerRenderManager implements IPlayerRenderManager {
 					b = 1;
 				}
 				IVertexBuilder buffer = bufferIn;
-				boolean newBuffer = false;
 				if(cube.glow && sel == 0) {
-					buffer = holder.buffer.getBuffer(RenderType.getEyes(holder.boundSkin));
-					newBuffer = true;
+					buffer = holder.addDt.getBuffer(holder.glowType);
 				}
-				((Box)cube.renderObject).draw(matrixStackIn, buffer, holder.buffer, packedLightIn, packedOverlayIn, r, g, b, alpha);
-				if(newBuffer) {
-					holder.buffer.getBuffer(RenderType.getEntityTranslucent(holder.boundSkin));
-				}
+				((Box)cube.renderObject).draw(matrixStackIn, buffer, holder.addDt, packedLightIn, packedOverlayIn, r, g, b, alpha);
+				holder.addDt.getBuffer(holder.defaultType);
 				drawSelect(cube, matrixStackIn, bufferIn, sel);
 				render(cube, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 				matrixStackIn.pop();
@@ -342,10 +320,10 @@ public class PlayerRenderManager implements IPlayerRenderManager {
 				float f = 0.001f;
 				float g = f * 2;
 				float scale = 1 / 16f;
-				if(sel == 2)Render.drawOrigin(matrixStackIn, holder.buffer.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
+				if(sel == 2)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
 				Cube c = cube.getCube();
 				Render.drawBoundingBox(
-						matrixStackIn, holder.buffer.getBuffer(CustomRenderTypes.getLinesNoDepth()),
+						matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
 						c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
 						c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
 						sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0, 1
@@ -370,44 +348,47 @@ public class PlayerRenderManager implements IPlayerRenderManager {
 			}
 		}
 
-		private ModelRenderer swapIn() {
-			if(parent != null) {
-				//new Exception("Double swapping?").printStackTrace();
-				return this;
-			}
+		@Override
+		public ModelRenderer swapIn() {
+			if(parent != null)return this;
 			parent = parentProvider.get();
-			copyModel(parent, this);
+			holder.copyModel(parent, this);
 			return this;
 		}
 
-		private ModelRenderer swapOut() {
-			if(parent == null) {
-				//new Exception("Double swapping?").printStackTrace();
-				return parentProvider.get();
-			}
+		@Override
+		public ModelRenderer swapOut() {
+			if(parent == null)return parentProvider.get();
 			ModelRenderer p = parent;
 			parent = null;
 			return p;
 		}
 
-		private static void copyModel(ModelRenderer s, ModelRenderer d) {
-			d.rotationPointX = s.rotationPointX;
-			d.rotationPointY = s.rotationPointY;
-			d.rotationPointZ = s.rotationPointZ;
-			d.rotateAngleX   = s.rotateAngleX  ;
-			d.rotateAngleY   = s.rotateAngleY  ;
-			d.rotateAngleZ   = s.rotateAngleZ  ;
-			d.showModel      = s.showModel     ;
+		@Override
+		public RedirectHolder<?, ?, ?, ModelRenderer> getHolder() {
+			return holder;
+		}
+
+		@Override
+		public ModelRenderer getParent() {
+			return parent;
+		}
+
+		@Override
+		public ModelPart getPart() {
+			return part;
 		}
 	}
 
 	public static boolean unbindHand(Object v) {
 		RedirectModelRenderer rd = (RedirectModelRenderer) v;
-		return rd.parent == rd.holder.bipedLeftArmwear.parent || rd.parent == rd.holder.bipedRightArmwear.parent;
+		RedirectHolderPlayer rdhp = (RedirectHolderPlayer) rd.holder;
+		return rd == rdhp.bipedLeftArmwear || rd == rdhp.bipedRightArmwear;
 	}
 
-	@Override
-	public AnimationEngine getAnimationEngine() {
-		return animEngine;
+	public static boolean unbindSkull(Object v) {
+		RedirectModelRenderer rd = (RedirectModelRenderer) v;
+		RedirectHolderSkull rdhs = (RedirectHolderSkull) rd.holder;
+		return rd == rdhs.hat;
 	}
 }

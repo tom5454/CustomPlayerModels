@@ -16,4 +16,9 @@ public class CustomPose implements IPose {
 	public String getName() {
 		return name;
 	}
+
+	@Override
+	public String toString() {
+		return "Custom Pose: " + name;
+	}
 }

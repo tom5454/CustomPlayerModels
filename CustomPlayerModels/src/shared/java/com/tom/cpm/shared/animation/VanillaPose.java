@@ -14,6 +14,7 @@ public enum VanillaPose implements IPose {
 	RIDING,
 	FLYING,
 	DYING,
+	SKULL_RENDER,
 
 	;
 	private final String i18nKey;

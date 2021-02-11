@@ -13,6 +13,7 @@ public enum ModelPartType {
 	UUID_LOCK(ModelPartUUIDLockout::new),
 	ANIMATION_DATA(ModelPartAnimation::new),
 	SKIN_TYPE(ModelPartSkinType::new),
+	MODEL_ROOT(ModelPartRoot::new),
 	;
 	public static final ModelPartType[] VALUES = values();
 	private final IModelPart.Factory factory;

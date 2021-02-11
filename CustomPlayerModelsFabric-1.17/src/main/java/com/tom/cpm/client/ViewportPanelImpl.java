@@ -188,6 +188,12 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					PlayerModelSetup.setAngles(p, ls, lsa, 0, 0, mc.options.mainArm, false);
 					break;
 
+				case SKULL_RENDER:
+					p.setVisible(false);
+					p.head.visible = true;
+					matrixstack.translate(0.0D, 1.501F, 0.0D);
+					break;
+
 				default:
 					break;
 				}

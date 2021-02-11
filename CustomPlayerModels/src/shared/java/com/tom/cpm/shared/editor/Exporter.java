@@ -1,7 +1,5 @@
 package com.tom.cpm.shared.editor;
 
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
@@ -10,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
-
-import javax.imageio.ImageIO;
 
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -29,8 +25,8 @@ import com.tom.cpm.shared.io.ChecksumOutputStream;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.SkinDataOutputStream;
 import com.tom.cpm.shared.model.Cube;
-import com.tom.cpm.shared.model.PlayerModelElement;
 import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartAnimation;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
@@ -41,6 +37,7 @@ import com.tom.cpm.shared.parts.ModelPartPlayerPos;
 import com.tom.cpm.shared.parts.ModelPartRenderEffect;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
+import com.tom.cpm.shared.util.Image;
 
 public class Exporter {
 
@@ -54,10 +51,10 @@ public class Exporter {
 			List<IModelPart> otherParts = new ArrayList<>();
 			for(PlayerModelParts p : PlayerModelParts.VALUES) {
 				for (ModelElement el : e.elements) {
-					if(el.type == ElementType.PLAYER_PART && el.typeData == p) {
+					if(el.type == ElementType.ROOT_PART && el.typeData == p) {
 						if(Math.abs(el.pos.x) >= 0.1f || Math.abs(el.pos.y) >= 0.1f || Math.abs(el.pos.z) >= 0.1f ||
 								Math.abs(el.rotation.x) >= 0.1f || Math.abs(el.rotation.y) >= 0.1f || Math.abs(el.rotation.z) >= 0.1f) {
-							otherParts.add(new ModelPartPlayerPos(p, el.pos, el.rotation));
+							otherParts.add(new ModelPartPlayerPos(p.getId(el.rc), el.pos, el.rotation));
 						}
 					}
 				}
@@ -91,7 +88,7 @@ public class Exporter {
 				writeOut(e, gui, def, f);
 				return;
 			}
-			BufferedImage image = copyImage(e.vanillaSkin);
+			Image image = new Image(e.vanillaSkin);
 			try(SkinDataOutputStream out = new SkinDataOutputStream(image, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType)) {
 				out.write(ModelDefinitionLoader.HEADER);
 				ChecksumOutputStream cos = new ChecksumOutputStream(out);
@@ -106,7 +103,7 @@ public class Exporter {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			ImageIO.write(image, "PNG", f);
+			image.storeTo(f);
 		} catch (ExportException ex) {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
@@ -126,7 +123,7 @@ public class Exporter {
 		System.out.println(b64);
 		gui.openPopup(new ExportOverflowPopup(gui.getGui(), b64, link -> {
 			try {
-				BufferedImage img = copyImage(e.vanillaSkin);
+				Image img = new Image(e.vanillaSkin);
 				ModelPartDefinitionLink defLink = new ModelPartDefinitionLink(link);
 				try(SkinDataOutputStream out = new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType)) {
 					out.write(ModelDefinitionLoader.HEADER);
@@ -137,7 +134,7 @@ public class Exporter {
 						dout.writeObjectBlock(ModelPartEnd.END);
 					}
 				}
-				ImageIO.write(img, "PNG", f);
+				img.storeTo(f);
 			} catch (ExportException ex) {
 				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", ex.getMessage())));
 			} catch (Exception ex) {
@@ -153,8 +150,8 @@ public class Exporter {
 				me.id = (byte) id[0]++;
 				flatList.add(me);
 				break;
-			case PLAYER_PART:
-				me.id = (byte) ((PlayerModelElement)me.rc).getPart().ordinal();
+			case ROOT_PART:
+				me.id = (byte) ((RootModelElement)me.rc).getPart().getId(me.rc);
 				break;
 			default:
 				break;
@@ -169,14 +166,6 @@ public class Exporter {
 			c.accept(me);
 			walkElements(me.children, c);
 		}
-	}
-
-	public static BufferedImage copyImage(BufferedImage source){
-		BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
-		Graphics g = b.getGraphics();
-		g.drawImage(source, 0, 0, null);
-		g.dispose();
-		return b;
 	}
 
 	public static boolean check(Editor editor, EditorGui editorGui, Runnable next) {

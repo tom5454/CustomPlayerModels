@@ -35,7 +35,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 		@Override
 		public void loadTexture(IResourceManager resourceManager) throws IOException {
-			TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), PaintImageCreator.createImage(), false, false);
+			TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), PaintImageCreator.createImage().toBufferedImage(), false, false);
 		}
 	};
 	private Minecraft mc;
@@ -138,7 +138,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		ModelPlayer p = rp.getMainModel();
 		editor.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, editor.definition, null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, editor.definition, null);
 			setupModel(p);
 			if(!editor.applyAnim && editor.playerTpose) {
 				p.bipedRightArm.rotateAngleZ = (float) Math.toRadians(90);
@@ -183,6 +183,12 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 				case WALKING:
 					p.setRotationAngles(ls, lsa, 0, 0, 0, 0.0625F, playerObj);
+					break;
+
+				case SKULL_RENDER:
+					p.setInvisible(false);
+					p.bipedHead.showModel = true;
+					GlStateManager.translate(0.0D, 1.501F, 0.0D);
 					break;
 
 				default:

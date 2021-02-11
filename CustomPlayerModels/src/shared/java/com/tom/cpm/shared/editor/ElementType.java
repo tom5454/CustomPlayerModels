@@ -2,9 +2,9 @@ package com.tom.cpm.shared.editor;
 
 import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.math.Vec3f;
-import com.tom.cpm.shared.model.PlayerModelElement;
-import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.util.ListView;
 
 public enum ElementType {
@@ -51,15 +51,15 @@ public enum ElementType {
 		}
 
 	}),
-	PLAYER_PART(new ElementBuilder(){
+	ROOT_PART(new ElementBuilder(){
 
 		@Override
 		public void buildElement(IGui gui, Editor editor, ModelElement elem, Object typeData) {
-			PlayerModelParts type = (PlayerModelParts) typeData;
-			elem.name = gui.i18nFormat("label.cpm.elem." + type.name().toLowerCase());
+			ModelPart type = (ModelPart) typeData;
+			elem.name = gui.i18nFormat("label.cpm.elem." + type.getName());
 			elem.pos = new Vec3f();
 			elem.rotation = new Vec3f();
-			elem.rc = new PlayerModelElement(type) {
+			elem.rc = new RootModelElement(type) {
 				@Override
 				public boolean doDisplay() {
 					return elem.show;
@@ -78,14 +78,14 @@ public enum ElementType {
 			elem.rc.pos = elem.pos;
 			elem.rc.rotation = elem.rotation;
 			elem.rc.children = new ListView<>(elem.children, m -> m.rc);
-			elem.storeID = type.ordinal();
+			elem.storeID = type.getId(elem.rc);
 		}
 
 		@Override
 		public void preRenderUpdate(ModelElement elem) {
 			elem.rc.pos = new Vec3f(elem.pos);
 			elem.rc.rotation = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
-			((PlayerModelElement)elem.rc).forcePos = false;
+			((RootModelElement)elem.rc).forcePos = false;
 		}
 	}),
 	//TEMPLATE

@@ -1,23 +1,13 @@
 package com.tom.cpm.client;
 
-import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
-
-import javax.imageio.ImageIO;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelPlayer;
-import net.minecraft.client.renderer.ThreadDownloadImageData;
-import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.util.ResourceLocation;
-
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
@@ -39,29 +29,6 @@ public class PlayerProfile extends Player {
 
 	private PlayerProfile(GameProfile profile) {
 		this.profile = profile;
-	}
-
-	@Override
-	public BufferedImage getSkin() {
-		if(MinecraftObjectHolder.DEBUGGING) {
-			try (FileInputStream fin = new FileInputStream("skin_test.png")){
-				return ImageIO.read(fin);
-			} catch (IOException e) {
-			}
-		}
-		Minecraft minecraft = Minecraft.getMinecraft();
-		Map<Type, MinecraftProfileTexture> map = minecraft.getSkinManager().loadSkinFromCache(profile);
-
-		if (map.containsKey(Type.SKIN)) {
-			ITextureObject skin = minecraft.getTextureManager().getTexture(minecraft.getSkinManager().loadSkin(map.get(Type.SKIN), Type.SKIN));
-			if (skin instanceof ThreadDownloadImageData) {
-				ThreadDownloadImageData imagedata = (ThreadDownloadImageData) skin;
-				return ObfuscationReflectionHelper.getPrivateValue(ThreadDownloadImageData.class, imagedata, "field_110560_d");//, "bufferedImage"
-			} else {
-				return null;
-			}
-		}
-		return null;
 	}
 
 	@Override
@@ -106,6 +73,7 @@ public class PlayerProfile extends Player {
 					if (skinType == null) {
 						skinType = "default";
 					}
+					url = profileTexture.getUrl();
 					if(onLoaded != null)onLoaded.run();
 
 					break;
@@ -150,5 +118,10 @@ public class PlayerProfile extends Player {
 	@Override
 	public int getEncodedGestureId() {
 		return encodedGesture;
+	}
+
+	public void setRenderPose(VanillaPose pose) {
+		this.pose = pose;
+		encodedGesture = 0;
 	}
 }

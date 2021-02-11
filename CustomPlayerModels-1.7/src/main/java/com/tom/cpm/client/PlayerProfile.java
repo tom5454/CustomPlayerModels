@@ -5,8 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.imageio.ImageIO;
+import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
@@ -25,6 +24,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.util.Image;
 
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 
@@ -40,12 +40,16 @@ public class PlayerProfile extends Player {
 		this.profile = profile;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public BufferedImage getSkin() {
+	public CompletableFuture<Image> getSkin() {
+		return CompletableFuture.completedFuture(getSkin0());
+	}
+
+	@SuppressWarnings("unchecked")
+	private Image getSkin0() {
 		if(MinecraftObjectHolder.DEBUGGING) {
 			try (FileInputStream fin = new FileInputStream("skin_test.png")){
-				return ImageIO.read(fin);
+				return Image.loadFrom(fin);
 			} catch (IOException e) {
 			}
 		}
@@ -56,7 +60,7 @@ public class PlayerProfile extends Player {
 			ITextureObject skin = minecraft.getTextureManager().getTexture(minecraft.func_152342_ad().func_152792_a(map.get(Type.SKIN), Type.SKIN));
 			if (skin instanceof ThreadDownloadImageData) {
 				ThreadDownloadImageData imagedata = (ThreadDownloadImageData) skin;
-				return ObfuscationReflectionHelper.getPrivateValue(ThreadDownloadImageData.class, imagedata, "field_110560_d", "bufferedImage");
+				return new Image((BufferedImage) ObfuscationReflectionHelper.getPrivateValue(ThreadDownloadImageData.class, imagedata, "field_110560_d", "bufferedImage"));
 			} else {
 				return null;
 			}
@@ -135,5 +139,9 @@ public class PlayerProfile extends Player {
 	@Override
 	public int getEncodedGestureId() {
 		return -1;
+	}
+
+	public void setRenderPose(VanillaPose pose) {
+		this.pose = pose;
 	}
 }

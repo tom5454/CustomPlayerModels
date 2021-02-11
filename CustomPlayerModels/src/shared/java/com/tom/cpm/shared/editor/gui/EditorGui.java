@@ -109,15 +109,16 @@ public class EditorGui extends Frame {
 		editor.cursorPos = viewT::getHoveredTexPos;
 
 		Panel p = new Panel(gui);
-		p.setBounds(new Box(width - 150, height / 2, 150, height / 2));
+		int treeW = Math.min(150, height / 2);
+		p.setBounds(new Box(width - treeW, height / 2, treeW, height / 2));
 		ModelElementsTree tree = new ModelElementsTree(gui, editor);
-		tree.setBounds(new Box(0, 0, 150, height / 2 - 25));
+		tree.setBounds(new Box(0, 0, treeW, height / 2 - 25));
 		p.addElement(tree);
 		p.setBackgroundColor(gui.getColors().panel_background);
 		editor.updateTree.add(tree::updateTree);
 		textureEditor.addElement(p);
 
-		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - 150, height / 2));
+		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - treeW, height / 2));
 
 		ButtonIcon visBtn = new ButtonIcon(gui, "editor", 42, 16, editor::switchVis);
 		visBtn.setBounds(new Box(5, height / 2 - 44, 18, 18));
