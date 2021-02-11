@@ -205,8 +205,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					if(elem.doDisplay()) {
 						holder.copyModel(tp, parent);
 						renderWithParent(elem, sel);
-						mngr.posSet.set(tp, px, py, pz);
-						mngr.rotSet.set(tp, rx, ry, rz);
+						mngr.posSet.set(parent, px, py, pz);
+						mngr.rotSet.set(parent, rx, ry, rz);
 					} else {
 						doRender(elem, sel);
 					}
