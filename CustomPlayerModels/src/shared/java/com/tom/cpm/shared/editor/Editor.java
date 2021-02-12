@@ -332,8 +332,11 @@ public class Editor {
 		if(selectedElement != null) {
 			ModelElement elem = new ModelElement(this);
 			ModelElement sel = selectedElement;
-			addUndo(() -> sel.children.remove(elem));
-			runOp(() -> selectedElement.children.add(elem));
+			addUndo(() -> {
+				sel.children.remove(elem);
+				selectedElement = null;
+			});
+			runOp(() -> sel.children.add(elem));
 			elem.parent = selectedElement;
 			selectedElement = elem;
 			markDirty();
@@ -546,7 +549,8 @@ public class Editor {
 		redoQueue.clear();
 		skinType = MinecraftClientAccess.get().getSkinType();
 		Image skin = MinecraftClientAccess.get().getVanillaSkin(skinType);
-		skinProvider.setImage(skin);
+		this.vanillaSkin = skin;
+		skinProvider.setImage(new Image(skin));
 		skinProvider.size = new Vec2i(skin.getWidth(), skin.getHeight());
 		dirty = false;
 		file = null;
@@ -562,12 +566,13 @@ public class Editor {
 			CompletableFuture<Image> img = profile.getSkin();
 			this.vanillaSkin = MinecraftClientAccess.get().getVanillaSkin(skinType);
 			img.thenAccept(s -> {
-				if(s != null) {
-					this.vanillaSkin = s;
-					if(!skinProvider.isEdited())
+				if(!skinProvider.isEdited()) {
+					if(s != null) {
+						this.vanillaSkin = s;
 						skinProvider.setImage(new Image(this.vanillaSkin));
-				} else {
-					skinProvider.setImage(new Image(this.vanillaSkin));
+					} else {
+						skinProvider.setImage(new Image(this.vanillaSkin));
+					}
 				}
 			});
 		});
@@ -947,9 +952,13 @@ public class Editor {
 		anim.add = add;
 		anim.loop = loop;
 		anim.gestureName = gesture;
-		addUndo(() -> animations.remove(anim));
+		addUndo(() -> {
+			animations.remove(anim);
+			selectedAnim = null;
+		});
 		runOp(() -> animations.add(anim));
 		selectedAnim = anim;
+		markDirty();
 		updateGui();
 	}
 

@@ -82,7 +82,12 @@ public class TextureDisplayPanel extends GuiElement {
 				int px = (int) ((x - offX - bounds.x) / zoom);
 				int py = (int) ((y - offY - bounds.y) / zoom);
 				if(px >= 0 && py >= 0 && px < editor.skinProvider.getImage().getWidth() && py < editor.skinProvider.getImage().getHeight()) {
-					editor.drawPixel(px, py);
+					if(gui.isCtrlDown()) {
+						editor.penColor = editor.skinProvider.getImage().getRGB(px, py);
+						editor.setPenColor.accept(editor.penColor);
+						dragging = false;
+					} else
+						editor.drawPixel(px, py);
 				}
 			}
 			return true;

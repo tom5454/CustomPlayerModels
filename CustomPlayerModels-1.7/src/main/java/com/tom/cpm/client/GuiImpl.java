@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -129,7 +130,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) {
 		try {
-			KeyboardEvent evt = new KeyboardEvent(keyCode, 0, typedChar);
+			KeyboardEvent evt = new KeyboardEvent(keyCode, 0, typedChar, Keyboard.getKeyName(keyCode));
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
 				if(mc.thePlayer != null && mc.gameSettings.keyBindChat.getKeyCode() == keyCode && mc.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN) {
@@ -475,5 +476,10 @@ public class GuiImpl extends GuiScreen implements IGui {
 	@Override
 	public Frame getFrame() {
 		return gui;
+	}
+
+	@Override
+	public String getClipboardText() {
+		return getClipboardString();
 	}
 }

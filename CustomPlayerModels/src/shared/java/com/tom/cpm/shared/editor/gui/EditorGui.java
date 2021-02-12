@@ -327,11 +327,11 @@ public class EditorGui extends Frame {
 		super.keyPressed(event);
 		if(!event.isConsumed()) {
 			if(gui.isCtrlDown()) {
-				if(event.matches(gui.getKeyCodes().KEY_Z)) {
+				if(event.matches("z")) {
 					editor.undo();
 					event.consume();
 				}
-				if(event.matches(gui.getKeyCodes().KEY_Y)) {
+				if(event.matches("y")) {
 					editor.redo();
 					event.consume();
 				}

@@ -5,10 +5,12 @@ import com.tom.cpm.shared.gui.elements.GuiElement;
 import com.tom.cpm.shared.gui.elements.Label;
 import com.tom.cpm.shared.gui.elements.Panel;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
+import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.math.Box;
 
 public abstract class Frame extends Panel {
 	protected PopupPanels popup;
+	protected Tooltip tooltipBox;
 
 	public Frame(IGui gui) {
 		super(gui);
@@ -29,6 +31,20 @@ public abstract class Frame extends Panel {
 		elements.clear();
 		initFrame(width, height);
 		addElement(popup);
+	}
+
+	@Override
+	public void draw(int mouseX, int mouseY, float partialTicks) {
+		tooltipBox = null;
+		super.draw(mouseX, mouseY, partialTicks);
+		if(tooltipBox != null) {
+			Box b = tooltipBox.getBounds();
+			int tx = Math.min(mouseX + b.w + 5, bounds.w + b.w + 1);
+			int ty = Math.min(mouseY + b.h + 5, bounds.h + b.h + 1);
+			tooltipBox.setBounds(new Box(tx - b.w, ty - b.h, b.w, b.h));
+
+			tooltipBox.draw(Integer.MIN_VALUE, Integer.MIN_VALUE, partialTicks);
+		}
 	}
 
 	public abstract void initFrame(int width, int height);
@@ -144,5 +160,9 @@ public abstract class Frame extends Panel {
 		public void close() {
 			Frame.this.popup.remove(this);
 		}
+	}
+
+	public void setTooltip(Tooltip tooltip) {
+		this.tooltipBox = tooltip;
 	}
 }

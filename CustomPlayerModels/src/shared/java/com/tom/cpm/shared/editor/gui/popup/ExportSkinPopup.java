@@ -12,6 +12,7 @@ import com.tom.cpm.shared.gui.elements.Checkbox;
 import com.tom.cpm.shared.gui.elements.Label;
 import com.tom.cpm.shared.gui.elements.MessagePopup;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
+import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.skin.SkinProvider;
 import com.tom.cpm.shared.util.Image;
@@ -19,6 +20,11 @@ import com.tom.cpm.shared.util.Image;
 public class ExportSkinPopup extends PopupPanel {
 	private SkinProvider vanillaSkin;
 	private EditorGui editorGui;
+	private File selFile;
+	private Checkbox forceLinkFile;
+	private ExportMode mode = ExportMode.SKIN;
+	private Button ok, modeBtn, setOut, changeVanillaSkin, encSettings;
+	private Label expOutLbl, exportName, vanillaSkinLbl;
 
 	public ExportSkinPopup(IGui gui, EditorGui e) {
 		super(gui);
@@ -29,13 +35,15 @@ public class ExportSkinPopup extends PopupPanel {
 		vanillaSkin = new SkinProvider();
 		vanillaSkin.setImage(editor.vanillaSkin);
 
-		addElement(new Label(gui, gui.i18nFormat("label.cpm.vanilla_skin")).setBounds(new Box(185, 5, 0, 0)));
+		vanillaSkinLbl = new Label(gui, gui.i18nFormat("label.cpm.vanilla_skin"));
+		vanillaSkinLbl.setBounds(new Box(185, 5, 0, 0));
+		addElement(vanillaSkinLbl);
 
-		Button encSettings = new Button(gui, gui.i18nFormat("button.cpm.animEncSettings"), () -> e.openPopup(new AnimEncConfigPopup(gui, editor, vanillaSkin::markDirty)));
-		encSettings.setBounds(new Box(5, 5, 135, 20));
+		encSettings = new Button(gui, gui.i18nFormat("button.cpm.animEncSettings"), () -> e.openPopup(new AnimEncConfigPopup(gui, editor, vanillaSkin::markDirty)));
+		encSettings.setBounds(new Box(5, 30, 135, 20));
 		addElement(encSettings);
 
-		Button changeVanillaSkin = new Button(gui, gui.i18nFormat("button.cpm.change_vanilla_skin"), () -> {
+		changeVanillaSkin = new Button(gui, gui.i18nFormat("button.cpm.change_vanilla_skin"), () -> {
 			FileChooserGui fc = new FileChooserGui(editor.gui);
 			fc.setTitle(gui.i18nFormat("button.cpm.change_vanilla_skin"));
 			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
@@ -52,30 +60,22 @@ public class ExportSkinPopup extends PopupPanel {
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
 			e.openPopup(fc);
 		});
-		changeVanillaSkin.setBounds(new Box(5, 30, 135, 20));
+		changeVanillaSkin.setBounds(new Box(5, 55, 135, 20));
 		addElement(changeVanillaSkin);
 
-		Checkbox forceLinkFile = new Checkbox(gui, gui.i18nFormat("label.cpm.force_link_file"));
-		forceLinkFile.setBounds(new Box(5, 55, 135, 20));
+		forceLinkFile = new Checkbox(gui, gui.i18nFormat("label.cpm.force_link_file"));
 		addElement(forceLinkFile);
 		forceLinkFile.setAction(() -> forceLinkFile.setSelected(!forceLinkFile.isSelected()));
 
-		addElement(new Label(gui, gui.i18nFormat("label.cpm.export_output")).setBounds(new Box(5, 95, 0, 0)));
+		expOutLbl = new Label(gui, gui.i18nFormat("label.cpm.export_output"));
+		expOutLbl.setBounds(new Box(5, 105, 0, 0));
+		addElement(expOutLbl);
 
-		Label exportName = new Label(gui, gui.i18nFormat("label.cpm.no_file"));
-		exportName.setBounds(new Box(5, 115, 0, 0));
+		exportName = new Label(gui, gui.i18nFormat("label.cpm.no_file"));
+		exportName.setBounds(new Box(5, 125, 0, 0));
 		addElement(exportName);
 
-		File[] exportFile = new File[] {null};
-
-		Button ok = new Button(gui, gui.i18nFormat("button.cpm.file.export"), () -> {
-			if(exportFile[0] != null) {
-				close();
-				export(exportFile[0], forceLinkFile.isSelected());
-			}
-		});
-
-		Button setOut = new Button(gui, "...", () -> {
+		setOut = new Button(gui, "...", () -> {
 			FileChooserGui fc = new FileChooserGui(e);
 			fc.setTitle(gui.i18nFormat("label.cpm.exportSkin"));
 			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
@@ -83,37 +83,93 @@ public class ExportSkinPopup extends PopupPanel {
 			fc.setSaveDialog(true);
 			fc.setExtAdder(n -> n + ".png");
 			fc.setAccept(f -> {
-				exportFile[0] = f;
-				ok.setEnabled(true);
+				selFile = f;
+				updateOkEn();
 				exportName.setText(f.getName());
 			});
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
 			e.openPopup(fc);
 		});
-		setOut.setBounds(new Box(150, 110, 30, 20));
+		setOut.setBounds(new Box(150, 120, 30, 20));
 		addElement(setOut);
+
+		modeBtn = new Button(gui, "", () -> {
+			mode = ExportMode.VALUES[(mode.ordinal() + 1) % ExportMode.VALUES.length];
+			setExportType();
+		});
+		modeBtn.setBounds(new Box(5, 5, 135, 20));
+		addElement(modeBtn);
+
+		ok = new Button(gui, gui.i18nFormat("button.cpm.file.export"), () -> {
+			if(okEn()) {
+				close();
+				export();
+			}
+		});
 
 		ok.setEnabled(false);
 		ok.setBounds(new Box(5, 165, 80, 20));
 		addElement(ok);
 
-		setBounds(new Box(0, 0, 320, 190));
+		setExportType();
 	}
 
-	private void export(File file, boolean force) {
-		if(Exporter.check(editorGui.getEditor(), editorGui, () -> export(file, force)))
-			Exporter.exportSkin(editorGui.getEditor(), editorGui, file, force);
+	private void setExportType() {
+		boolean vis = layer != null;
+		if(vis)close();
+		modeBtn.setText(gui.i18nFormat("button.cpm.export.as_" + mode.name().toLowerCase()));
+		modeBtn.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export.as_" + mode.name().toLowerCase())));
+		updateOkEn();
+		setOut.setVisible(mode.hasFile);
+		exportName.setVisible(mode.hasFile);
+		expOutLbl.setVisible(mode.hasFile);
+		vanillaSkinLbl.setVisible(mode == ExportMode.SKIN);
+		changeVanillaSkin.setVisible(mode == ExportMode.SKIN);
+		forceLinkFile.setBounds(new Box(5, mode == ExportMode.SKIN ? 80 : 55, 135, 20));
+		setBounds(new Box(0, 0, mode.w, 190));
+		if(layer != null)editorGui.openPopup(this);
+	}
+
+	private void updateOkEn() {
+		ok.setEnabled(okEn());
+	}
+
+	private boolean okEn() {
+		return !mode.hasFile || selFile != null;
+	}
+
+	private void export() {
+		if(Exporter.check(editorGui.getEditor(), editorGui, this::export)) {
+			switch (mode) {
+			case SKIN:
+				Exporter.exportSkin(editorGui.getEditor(), editorGui, selFile, forceLinkFile.isSelected());
+				break;
+				/*case B64:
+				Exporter.exportSkin(editorGui.getEditor(), editorGui, b64 -> editorGui.openPopup(new ExportB64Popup(editorGui, gui, b64)), forceLinkFile.isSelected());
+				break;
+			case MODEL:
+				editorGui.openPopup(new MessagePopup(gui, "Info", "This feature is not implemented yet."));
+				break;
+			case TEMPLATE:
+				editorGui.openPopup(new MessagePopup(gui, "Info", "This feature is not implemented yet."));
+				break;*/
+			default:
+				break;
+			}
+		}
 	}
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
 		super.draw(mouseX, mouseY, partialTicks);
 
-		gui.drawBox(bounds.x + bounds.w - 136, bounds.y + 14, 130, 130, gui.getColors().color_picker_border);
-		gui.drawBox(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0xffffffff);
+		if(mode == ExportMode.SKIN) {
+			gui.drawBox(bounds.x + bounds.w - 136, bounds.y + 14, 130, 130, gui.getColors().color_picker_border);
+			gui.drawBox(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0xffffffff);
 
-		vanillaSkin.bind();
-		gui.drawTexture(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0, 0, 1, 1);
+			vanillaSkin.bind();
+			gui.drawTexture(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0, 0, 1, 1);
+		}
 	}
 
 	@Override
@@ -124,5 +180,20 @@ public class ExportSkinPopup extends PopupPanel {
 	@Override
 	public String getTitle() {
 		return gui.i18nFormat("label.cpm.exportSkin");
+	}
+
+	private static enum ExportMode {
+		SKIN(true, 320),
+		/*B64(false, 160),
+		TEMPLATE(false, 160),
+		MODEL(true, 185),*/
+		;
+		private ExportMode(boolean hasFile, int w) {
+			this.hasFile = hasFile;
+			this.w = w;
+		}
+		public static final ExportMode[] VALUES = values();
+		public boolean hasFile;
+		public int w;
 	}
 }

@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -143,7 +144,7 @@ public class GuiImpl extends Screen implements IGui {
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		try {
 			this.keyModif = modifiers;
-			KeyboardEvent evt = new KeyboardEvent(keyCode, scanCode, (char) -1);
+			KeyboardEvent evt = new KeyboardEvent(keyCode, scanCode, (char) -1, GLFW.glfwGetKeyName(keyCode, scanCode));
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
 				if(minecraft.player != null && minecraft.gameSettings.keyBindChat.matchesKey(keyCode, scanCode) && minecraft.gameSettings.chatVisibility != ChatVisibility.HIDDEN) {
@@ -163,7 +164,7 @@ public class GuiImpl extends Screen implements IGui {
 	public boolean charTyped(char codePoint, int modifiers) {
 		try {
 			this.keyModif = modifiers;
-			KeyboardEvent evt = new KeyboardEvent(-1, -1, codePoint);
+			KeyboardEvent evt = new KeyboardEvent(-1, -1, codePoint, null);
 			gui.keyPressed(evt);
 			return evt.isConsumed();
 		} catch (Throwable e) {
@@ -536,5 +537,10 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public Frame getFrame() {
 		return gui;
+	}
+
+	@Override
+	public String getClipboardText() {
+		return minecraft.keyboardListener.getClipboardString();
 	}
 }

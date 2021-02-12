@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBox;
+import net.minecraft.client.model.ModelHumanoidHead;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GLAllocation;
@@ -33,6 +34,9 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				if(model instanceof ModelPlayer) {
 					return (RedirectHolder<M, Void, Void, ModelRenderer>)
 							new RedirectHolderPlayer(PlayerRenderManager.this, (ModelPlayer) model);
+				} else if(model instanceof ModelHumanoidHead) {
+					return (RedirectHolder<M, Void, Void, ModelRenderer>)
+							new RedirectHolderSkull(PlayerRenderManager.this, (ModelHumanoidHead) model);
 				}
 				return null;
 			}
@@ -119,6 +123,17 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 	}
 
+	private static class RedirectHolderSkull extends RDH {
+		private RedirectRenderer<ModelRenderer> hat;
+
+		public RedirectHolderSkull(PlayerRenderManager mngr, ModelHumanoidHead model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.skeletonHead, v -> model.skeletonHead = v, PlayerModelParts.HEAD));
+			hat = register(new Field<>(() -> model.head, v -> model.head = v, null));
+		}
+	}
+
 	private abstract static class RDH extends ModelRenderManager.RedirectHolder<ModelBase, Void, Void, ModelRenderer> {
 
 		public RDH(ModelRenderManager<Void, Void, ModelRenderer, ModelBase> mngr, ModelBase model) {
@@ -136,6 +151,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				sheetX = 64;
 				sheetY = 64;
 			}
+			//new Throwable().printStackTrace();
 		}
 
 		@Override protected void bindTexture(Void cbi) {}
@@ -449,9 +465,8 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 	}
 
 	public static boolean unbindSkull(Object v) {
-		/*RedirectModelRenderer rd = (RedirectModelRenderer) v;
+		RedirectModelRenderer rd = (RedirectModelRenderer) v;
 		RedirectHolderSkull rdhs = (RedirectHolderSkull) rd.holder;
-		return rd == rdhs.hat;*/
-		return true;
+		return rd == rdhs.hat;
 	}
 }

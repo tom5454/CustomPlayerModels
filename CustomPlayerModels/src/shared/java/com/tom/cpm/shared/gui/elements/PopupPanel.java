@@ -5,7 +5,7 @@ import com.tom.cpm.shared.gui.IGui;
 
 public class PopupPanel extends Panel {
 	private Runnable onClosed;
-	private PopupLayer layer;
+	protected PopupLayer layer;
 
 	public PopupPanel(IGui gui) {
 		super(gui);

@@ -121,8 +121,9 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, VertexConsumerProvider buffer) {
+		PlayerProfile prev = this.profile;
 		tryBindModel(profile, null, buffer, PlayerRenderManager::unbindSkull, skullModel);
-		this.profile = null;
+		this.profile = prev;
 	}
 
 	public static class Button extends ButtonWidget {

@@ -1,27 +1,26 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "promos": {
-    "1.12.2-latest": "0.0.7b",
-    "1.12.2-recommended": "0.0.7b",
-    "1.16.4-latest": "0.0.7b",
-    "1.16.4-recommended": "0.0.7b",
-    "1.16.5-latest": "0.0.7b",
-    "1.16.5-recommended": "0.0.7b",
-    "1.8.9-latest": "0.0.7b",
-    "1.8.9-recommended": "0.0.7b",
-    "1.7.10-latest": "0.0.7b",
-    "1.7.10-recommended": "0.0.7b",
-    "1.17-latest": "0.0.7b",
-    "1.17-recommended": "0.0.7b",
-    "1.15.2-latest": "0.0.7b",
-    "1.15.2-recommended": "0.0.7b"
+    "1.12.2-latest": "0.0.8a",
+    "1.12.2-recommended": "0.0.8a",
+    "1.16.4-latest": "0.0.8a",
+    "1.16.4-recommended": "0.0.8a",
+    "1.16.5-latest": "0.0.8a",
+    "1.16.5-recommended": "0.0.8a",
+    "1.8.9-latest": "0.0.8a",
+    "1.8.9-recommended": "0.0.8a",
+    "1.7.10-latest": "0.0.8a",
+    "1.7.10-recommended": "0.0.8a",
+    "1.15.2-latest": "0.0.8a",
+    "1.15.2-recommended": "0.0.8a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
     "0.0.6b": "Fixed Editor crash with Quark",
     "0.0.7a": "Fixed models not loading from skins.\nPlayer heads now show proper model (1.15+).\nFixed editor not loading player part rotations.",
-    "0.0.7b": "Fixed player parts flying off"
+    "0.0.7b": "Fixed player parts flying off",
+    "0.0.8a": "Added skull rendering to 1.7.10-1.12.2\nFixed crash with export menu.\nFixed Undo and Redo keyboard shortcuts not working on some keyboards."
   },
   "1.16.4": {
     "0.0.5a": "First release",
@@ -29,7 +28,8 @@
     "0.0.6b": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
     "0.0.6c": "Fixed Editor crash with Gender Mod",
     "0.0.7a": "Fixed models not loading from skins.\nPlayer heads now show proper model (1.15+).\nFixed editor not loading player part rotations.",
-    "0.0.7b": "Fixed player parts flying off"
+    "0.0.7b": "Fixed player parts flying off",
+    "0.0.8a": "Added skull rendering to 1.7.10-1.12.2\nFixed crash with export menu.\nFixed Undo and Redo keyboard shortcuts not working on some keyboards."
   },
   "1.16.5": {
     "0.0.5a": "First release",
@@ -37,30 +37,27 @@
     "0.0.6b": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
     "0.0.6c": "Fixed Editor crash with Gender Mod",
     "0.0.7a": "Fixed models not loading from skins.\nPlayer heads now show proper model (1.15+).\nFixed editor not loading player part rotations.",
-    "0.0.7b": "Fixed player parts flying off"
+    "0.0.7b": "Fixed player parts flying off",
+    "0.0.8a": "Added skull rendering to 1.7.10-1.12.2\nFixed crash with export menu.\nFixed Undo and Redo keyboard shortcuts not working on some keyboards."
   },
   "1.8.9": {
     "0.0.5a": "First release",
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
     "0.0.7a": "Fixed models not loading from skins.\nPlayer heads now show proper model (1.15+).\nFixed editor not loading player part rotations.",
-    "0.0.7b": "Fixed player parts flying off"
+    "0.0.7b": "Fixed player parts flying off",
+    "0.0.8a": "Added skull rendering to 1.7.10-1.12.2\nFixed crash with export menu.\nFixed Undo and Redo keyboard shortcuts not working on some keyboards."
   },
   "1.7.10": {
     "0.0.5a": "First release",
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
     "0.0.7a": "Fixed models not loading from skins.\nPlayer heads now show proper model (1.15+).\nFixed editor not loading player part rotations.",
-    "0.0.7b": "Fixed player parts flying off"
-  },
-  "1.17": {
-    "0.0.5a": "First release",
-    "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
-    "0.0.6b": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
-    "0.0.7a": "Fixed models not loading from skins.\nPlayer heads now show proper model (1.15+).\nFixed editor not loading player part rotations.",
-    "0.0.7b": "Fixed player parts flying off"
+    "0.0.7b": "Fixed player parts flying off",
+    "0.0.8a": "Added skull rendering to 1.7.10-1.12.2\nFixed crash with export menu.\nFixed Undo and Redo keyboard shortcuts not working on some keyboards."
   },
   "1.15.2": {
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
     "0.0.7a": "Fixed models not loading from skins.\nPlayer heads now show proper model (1.15+).\nFixed editor not loading player part rotations.",
-    "0.0.7b": "Fixed player parts flying off"
+    "0.0.7b": "Fixed player parts flying off",
+    "0.0.8a": "Added skull rendering to 1.7.10-1.12.2\nFixed crash with export menu.\nFixed Undo and Redo keyboard shortcuts not working on some keyboards."
   }
 }

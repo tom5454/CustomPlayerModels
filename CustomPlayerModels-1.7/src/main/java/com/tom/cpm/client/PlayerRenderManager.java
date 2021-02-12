@@ -9,6 +9,7 @@ import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.model.ModelSkeletonHead;
 import net.minecraft.client.renderer.GLAllocation;
 
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -33,6 +34,9 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				if(model instanceof ModelBiped) {
 					return (RedirectHolder<M, Void, Void, ModelRenderer>)
 							new RedirectHolderPlayer(PlayerRenderManager.this, (ModelBiped) model);
+				} else if(model instanceof ModelSkeletonHead) {
+					return (RedirectHolder<M, Void, Void, ModelRenderer>)
+							new RedirectHolderSkull(PlayerRenderManager.this, (ModelSkeletonHead) model);
 				}
 				return null;
 			}
@@ -111,6 +115,15 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				skipTransform = true;
 			}
 			return skipTransform;
+		}
+	}
+
+	private static class RedirectHolderSkull extends RDH {
+
+		public RedirectHolderSkull(PlayerRenderManager mngr, ModelSkeletonHead model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.skeletonHead, v -> model.skeletonHead = v, PlayerModelParts.HEAD));
 		}
 	}
 
@@ -443,9 +456,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 	}
 
 	public static boolean unbindSkull(Object v) {
-		/*RedirectModelRenderer rd = (RedirectModelRenderer) v;
-		RedirectHolderSkull rdhs = (RedirectHolderSkull) rd.holder;
-		return rd == rdhs.hat;*/
 		return true;
 	}
 }

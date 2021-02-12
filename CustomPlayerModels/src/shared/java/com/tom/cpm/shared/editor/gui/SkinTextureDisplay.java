@@ -5,7 +5,6 @@ import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.gui.elements.GuiElement;
 import com.tom.cpm.shared.math.MathHelper;
-import com.tom.cpm.shared.math.Vec2i;
 
 public class SkinTextureDisplay extends GuiElement {
 	private Editor editor;
@@ -23,13 +22,6 @@ public class SkinTextureDisplay extends GuiElement {
 			float x = bounds.w / (float) editor.skinProvider.size.x;
 			float y = bounds.h / (float) editor.skinProvider.size.y;
 			drawBoxTextureOverlay(gui, editor, bounds.x, bounds.y, x, y);
-
-			Vec2i p = editor.cursorPos.get();
-			if(p != null) {
-				int bx = (int) (x * p.x);
-				int by = (int) (y * p.y);
-				gui.drawBox(bounds.x + bx, bounds.y + by, (int) Math.ceil(x), (int) Math.ceil(y), 0xffffffff);
-			}
 		}
 	}
 

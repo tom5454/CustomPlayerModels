@@ -5,6 +5,7 @@ import com.tom.cpm.shared.gui.IGui;
 public class Button extends GuiElement {
 	protected String name;
 	protected Runnable action;
+	protected Tooltip tooltip;
 	public Button(IGui gui, String name, Runnable action) {
 		super(gui);
 		this.name = name;
@@ -22,6 +23,7 @@ public class Button extends GuiElement {
 		} else if(bounds.isInBounds(mouseX, mouseY)) {
 			color = gui.getColors().button_text_hover;
 			bgColor = gui.getColors().button_hover;
+			if(tooltip != null)tooltip.set();
 		}
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
@@ -48,5 +50,9 @@ public class Button extends GuiElement {
 
 	public void setAction(Runnable action) {
 		this.action = action;
+	}
+
+	public void setTooltip(Tooltip tooltip) {
+		this.tooltip = tooltip;
 	}
 }

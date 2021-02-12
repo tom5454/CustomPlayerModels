@@ -44,6 +44,7 @@ public class ClientProxy extends CommonProxy {
 	public static MinecraftObject mc;
 	private ModelDefinitionLoader loader;
 	private Minecraft minecraft;
+	public static ClientProxy instance;
 
 	@Override
 	public void init() {
@@ -53,6 +54,7 @@ public class ClientProxy extends CommonProxy {
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load template", e);
 		}
+		instance = this;
 		minecraft = Minecraft.getMinecraft();
 		mc = new MinecraftObject(minecraft, loader);
 		MinecraftObjectHolder.setClientObject(mc);
@@ -124,8 +126,9 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public void renderSkull(ModelBase skullModel, GameProfile profile) {
+		PlayerProfile prev = this.profile;
 		tryBindModel(profile, null, PlayerRenderManager::unbindSkull, skullModel);
-		this.profile = null;
+		this.profile = prev;
 	}
 
 	@SubscribeEvent

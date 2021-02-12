@@ -34,6 +34,17 @@ button.cpm.clearLayer=Clear
 button.cpm.skinSettings=Skin Settings
 button.cpm.animEncSettings=Skin Layer settings
 button.cpm.change_vanilla_skin=Change Vanilla Skin
+button.cpm.export.as_skin=Export mode: Skin
+button.cpm.export.as_b64=Export mode: Base64 String
+button.cpm.export.as_template=Export mode: Template
+button.cpm.export.as_model=Export mode: Model
+button.cpm.paste=Paste
+
+tooltip.cpm.export.as_skin=Export Model as a skin file.
+tooltip.cpm.export.as_b64=Export Model as a Base64 String.\You probably want to export as skin instead of Base64.\Can be loaded with \'/cpm setskin <player> <base64_string>'\ ingame if server-side mod is loaded and you are an op.
+tooltip.cpm.export.as_template=Export Model as a template.\Templates can be imported into other projects.
+tooltip.cpm.export.as_model=Export Model as a .cpmmodel file,\to be loaded in the Skin customization menu.
+tooltip.cpm.texture_sheet=Skin texture resolution in pixels for Texture U/V.\Doesn't have to match actual image resolution.\Aspect ratio should match.
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -109,6 +120,10 @@ label.cpm.force_link_file=Force Link File
 label.cpm.no_file=No File
 label.cpm.vanilla_skin=Vanilla Skin
 label.cpm.export_output=Export As:
+label.cpm.export_success=Export Successful
+label.cpm.export_success.desc=Model successfully exported as: %s
+label.cpm.base64_model=Base64 Model
+label.cpm.base64_model.desc=Can be loaded with '/cpm setskin <player> <base64_string>' ingame.
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body
@@ -131,11 +146,12 @@ label.cpm.pose.flying=Flying
 label.cpm.pose.dying=Dying
 label.cpm.pose.skull_render=Player Head
 
-error.cpm.crash=Custom Player Models editor has crashed, please create a bug report on GitHub with your minecraft log attached. Error: %s
+error.cpm.crash=Customizable Player Models editor has crashed, please create a bug report on GitHub with your minecraft log attached. Error: %s
 error.cpm.too_many_animations=Too many custom animations\for current Skin Layer settings.
 error.cpm.custom_anims_not_supported=The current Skin Layer settings doesn't support\custom poses and gestures.\Please enable at least 2 layers for encoding\in Skin Layer settings.
 error.cpm.img_load_failed=Failed to load Image File\%s
 error.cpm.img_save_failed=Failed to save Image File\%s
+error.cpm.unknownError=Unknown Error
 
 key.cpm.category=Custom Player Models
 key.cpm.gestureMenu=Gestures Menu

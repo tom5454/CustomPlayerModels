@@ -26,6 +26,7 @@ public interface IGui {
 	KeyCodes getKeyCodes();
 	NativeGuiComponents getNative();
 	void setClipboardText(String text);
+	String getClipboardText();
 	Frame getFrame();
 
 	default void drawBox(float x, float y, float w, float h, int color) {

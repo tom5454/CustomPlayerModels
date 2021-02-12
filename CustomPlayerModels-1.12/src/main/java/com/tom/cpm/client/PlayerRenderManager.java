@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBox;
+import net.minecraft.client.model.ModelHumanoidHead;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GLAllocation;
@@ -32,6 +33,9 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				if(model instanceof ModelPlayer) {
 					return (RedirectHolder<M, Void, Void, ModelRenderer>)
 							new RedirectHolderPlayer(PlayerRenderManager.this, (ModelPlayer) model);
+				} else if(model instanceof ModelHumanoidHead) {
+					return (RedirectHolder<M, Void, Void, ModelRenderer>)
+							new RedirectHolderSkull(PlayerRenderManager.this, (ModelHumanoidHead) model);
 				}
 				return null;
 			}
@@ -118,6 +122,17 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				skipTransform = true;
 			}
 			return skipTransform;
+		}
+	}
+
+	private static class RedirectHolderSkull extends RDH {
+		private RedirectRenderer<ModelRenderer> hat;
+
+		public RedirectHolderSkull(PlayerRenderManager mngr, ModelHumanoidHead model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.skeletonHead, v -> model.skeletonHead = v, PlayerModelParts.HEAD));
+			hat = register(new Field<>(() -> model.head, v -> model.head = v, null));
 		}
 	}
 
@@ -451,9 +466,8 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 	}
 
 	public static boolean unbindSkull(Object v) {
-		/*RedirectModelRenderer rd = (RedirectModelRenderer) v;
+		RedirectModelRenderer rd = (RedirectModelRenderer) v;
 		RedirectHolderSkull rdhs = (RedirectHolderSkull) rd.holder;
-		return rd == rdhs.hat;*/
-		return true;
+		return rd == rdhs.hat;
 	}
 }

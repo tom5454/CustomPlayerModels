@@ -7,6 +7,7 @@ import com.tom.cpm.shared.gui.elements.Button;
 import com.tom.cpm.shared.gui.elements.Label;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
 import com.tom.cpm.shared.gui.elements.Spinner;
+import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.math.Box;
 
 public class SkinSettingsPopup extends PopupPanel {
@@ -56,18 +57,19 @@ public class SkinSettingsPopup extends PopupPanel {
 		addElement(newSkin);
 
 		Label lblT = new Label(gui, gui.i18nFormat("label.cpm.sheetSize"));
-		lblT.setBounds(new Box(5, 30, 40, 18));
+		lblT.setBounds(new Box(5, 40, 80, 18));
+		lblT.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.texture_sheet")));
 		addElement(lblT);
 
 		Label lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
-		lblTW.setBounds(new Box(5, 40, 40, 18));
+		lblTW.setBounds(new Box(5, 50, 40, 18));
 		Label lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
-		lblTH.setBounds(new Box(75, 40, 40, 18));
+		lblTH.setBounds(new Box(75, 50, 40, 18));
 
 		Spinner spinnerTW = new Spinner(gui);
 		Spinner spinnerTH = new Spinner(gui);
-		spinnerTW.setBounds(new Box(5, 50, 65, 18));
-		spinnerTH.setBounds(new Box(75, 50, 65, 18));
+		spinnerTW.setBounds(new Box(5, 60, 65, 18));
+		spinnerTH.setBounds(new Box(75, 60, 65, 18));
 		spinnerTW.setDp(0);
 		spinnerTH.setDp(0);
 		addElement(spinnerTW);

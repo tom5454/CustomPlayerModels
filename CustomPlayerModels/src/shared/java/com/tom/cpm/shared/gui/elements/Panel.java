@@ -13,8 +13,9 @@ public class Panel extends GuiElement {
 		super(gui);
 	}
 
-	public void addElement(GuiElement elem) {
+	public <T extends GuiElement> T addElement(T elem) {
 		elements.add(elem);
+		return elem;
 	}
 
 	@Override

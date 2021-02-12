@@ -1,13 +1,17 @@
 package com.tom.cpm.shared.editor;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -42,6 +46,24 @@ import com.tom.cpm.shared.util.Image;
 public class Exporter {
 
 	public static void exportSkin(Editor e, EditorGui gui, File f, boolean forceOut) {
+		if(e.vanillaSkin == null) {
+			gui.openPopup(new MessagePopup(gui.getGui(), "Unknown Error", "Couldn't load vanilla skin"));
+			return;
+		}
+		Image img = new Image(e.vanillaSkin);
+		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType), () -> {
+			img.storeTo(f);
+			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
+		}), forceOut);
+	}
+
+	public static void exportSkin(Editor e, EditorGui gui, Consumer<String> b64Out, boolean forceOut) {
+		byte[] buffer = new byte[200];
+		int[] size = new int[] {0};
+		exportSkin0(e, gui, new Result(() -> new BAOS(buffer, size), () -> b64Out.accept(Base64.getEncoder().encodeToString(Arrays.copyOf(buffer, size[0])))), forceOut);
+	}
+
+	private static void exportSkin0(Editor e, EditorGui gui, Result result, boolean forceOut) {
 		try {
 			List<Cube> flatList = new ArrayList<>();
 			walkElements(e.elements, new int[] {10}, flatList);
@@ -79,17 +101,12 @@ public class Exporter {
 				otherParts.add(new ModelPartAnimation(e));
 			}
 			def.setOtherParts(otherParts);
-			if(e.vanillaSkin == null) {
-				gui.openPopup(new MessagePopup(gui.getGui(), "Unknown Error", "Couldn't load vanilla skin"));
-				return;
-			}
 			if(MinecraftObjectHolder.DEBUGGING)System.out.println(def);
 			if(forceOut) {
-				writeOut(e, gui, def, f);
+				writeOut(e, gui, def, result);
 				return;
 			}
-			Image image = new Image(e.vanillaSkin);
-			try(SkinDataOutputStream out = new SkinDataOutputStream(image, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType)) {
+			try(OutputStream out = result.get()) {
 				out.write(ModelDefinitionLoader.HEADER);
 				ChecksumOutputStream cos = new ChecksumOutputStream(out);
 				try(IOHelper dout = new IOHelper(cos)) {
@@ -98,12 +115,12 @@ public class Exporter {
 					dout.writeObjectBlock(ModelPartEnd.END);
 				}
 			} catch (EOFException unusedException) {
-				writeOut(e, gui, def, f);
+				writeOut(e, gui, def, result);
 				return;
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				throw new ExportException("error.cpm.unknownError", e1);
 			}
-			image.storeTo(f);
+			result.close();
 		} catch (ExportException ex) {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
@@ -111,7 +128,7 @@ public class Exporter {
 		}
 	}
 
-	private static void writeOut(Editor e, EditorGui gui, ModelPartDefinition def, File f) throws Exception {
+	private static void writeOut(Editor e, EditorGui gui, ModelPartDefinition def, Result result) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		{
 			baos.write(ModelDefinitionLoader.HEADER);
@@ -121,11 +138,10 @@ public class Exporter {
 		}
 		String b64 = Base64.getEncoder().encodeToString(baos.toByteArray());
 		System.out.println(b64);
-		gui.openPopup(new ExportOverflowPopup(gui.getGui(), b64, link -> {
+		gui.openPopup(new ExportOverflowPopup(gui, gui.getGui(), b64, link -> {
 			try {
-				Image img = new Image(e.vanillaSkin);
 				ModelPartDefinitionLink defLink = new ModelPartDefinitionLink(link);
-				try(SkinDataOutputStream out = new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType)) {
+				try(OutputStream out = result.get()) {
 					out.write(ModelDefinitionLoader.HEADER);
 					ChecksumOutputStream cos = new ChecksumOutputStream(out);
 					try(IOHelper dout = new IOHelper(cos)) {
@@ -134,7 +150,7 @@ public class Exporter {
 						dout.writeObjectBlock(ModelPartEnd.END);
 					}
 				}
-				img.storeTo(f);
+				result.close();
 			} catch (ExportException ex) {
 				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", ex.getMessage())));
 			} catch (Exception ex) {
@@ -185,6 +201,44 @@ public class Exporter {
 
 		public ExportException(String message) {
 			super(message);
+		}
+	}
+
+	private static class Result implements Supplier<OutputStream>, Closeable {
+		private Supplier<OutputStream> out;
+		private Closeable finish;
+
+		public Result(Supplier<OutputStream> out, Closeable finish) {
+			this.out = out;
+			this.finish = finish;
+		}
+
+		@Override
+		public OutputStream get() {
+			return out.get();
+		}
+
+		@Override
+		public void close() throws IOException {
+			finish.close();
+		}
+	}
+
+	private static class BAOS extends OutputStream {
+		private byte[] buffer;
+		private int[] size;
+		public BAOS(byte[] buffer, int[] size) {
+			this.buffer = buffer;
+			this.size = size;
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			if(buffer.length > size[0]) {
+				buffer[size[0]++] = (byte) b;
+			} else {
+				throw new EOFException();
+			}
 		}
 
 	}

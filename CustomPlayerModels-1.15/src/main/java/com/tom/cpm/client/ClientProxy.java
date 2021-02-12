@@ -105,8 +105,9 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, IRenderTypeBuffer buffer) {
+		PlayerProfile prev = this.profile;
 		tryBindModel(profile, null, buffer, PlayerRenderManager::unbindSkull, skullModel);
-		this.profile = null;
+		this.profile = prev;
 	}
 
 	@SubscribeEvent
