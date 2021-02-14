@@ -78,11 +78,11 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(matrixStack, -1000);
+		renderBackground(matrixStack, 0);
 		try {
 			this.matrixStack = matrixStack;
 			matrixStack.push();
-			matrixStack.translate(0, 0, 500);
+			matrixStack.translate(0, 0, 1000);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			current = new Ctx();
 			gui.draw(mouseX, mouseY, partialTicks);

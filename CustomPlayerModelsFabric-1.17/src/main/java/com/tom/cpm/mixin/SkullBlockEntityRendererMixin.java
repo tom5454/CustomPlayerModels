@@ -39,7 +39,7 @@ public abstract class SkullBlockEntityRendererMixin {
 					+ "getRenderLayer(Lnet/minecraft/block/SkullBlock$SkullType;Lcom/mojang/authlib/GameProfile;)"
 					+ "Lnet/minecraft/client/render/RenderLayer;"
 			),
-			method = "render(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformation$Mode;"
+			method = "render(Lnet/minecraft/block/entity/SkullBlockEntity;F"
 					+ "Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V",
 					locals = LocalCapture.CAPTURE_FAILHARD)
 	public void onRender(SkullBlockEntity skullBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider buffer, int i, int arg5, CallbackInfo ci, float g, BlockState blockState, boolean bl, Direction direction, float h, SkullBlock.SkullType skullType, SkullBlockEntityModel model) {
