@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.CustomizeSkinScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
@@ -12,6 +14,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -26,6 +29,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.client.optifine.OptifineDetector;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
@@ -36,6 +41,7 @@ import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.util.Image;
 
 public class ClientProxy extends CommonProxy {
+	public static boolean optifineLoaded;
 	public static ClientProxy INSTANCE = null;
 	public static MinecraftObject mc;
 	private ModelDefinitionLoader loader;
@@ -50,6 +56,8 @@ public class ClientProxy extends CommonProxy {
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load template", e);
 		}
+		optifineLoaded = OptifineDetector.detectOptiFine();
+		if(optifineLoaded)System.out.println("Optifine detected, enabling optifine compatibility");
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft, loader);
 		MinecraftObjectHolder.setClientObject(mc);
@@ -82,6 +90,18 @@ public class ClientProxy extends CommonProxy {
 		}
 		mc.getPlayerRenderManager().unbindModel(toBind);
 		return false;
+	}
+
+	public void getSkin(PlayerEntity player, CallbackInfoReturnable<ResourceLocation> cbi) {
+		GameProfile gprofile = player.getGameProfile();
+		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
+		ModelDefinition def = profile.getAndResolveDefinition();
+		if(def != null) {
+			if(def.getSkinOverride().texture != null) {
+				def.getSkinOverride().texture.bind();
+				cbi.setReturnValue(DynTexture.getBoundLoc());
+			}
+		}
 	}
 
 	@SubscribeEvent

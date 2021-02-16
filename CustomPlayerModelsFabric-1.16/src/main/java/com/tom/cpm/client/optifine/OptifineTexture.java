@@ -1,0 +1,21 @@
+package com.tom.cpm.client.optifine;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.util.Identifier;
+
+import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.client.optifine.proxy.AbstractTextureOF;
+import com.tom.cpm.shared.skin.SkinProvider;
+
+public class OptifineTexture {
+
+	public static void applyOptifineTexture(Identifier loc, SkinProvider skin) {
+		if(CustomPlayerModelsClient.optifineLoaded) {
+			AbstractTexture tex = MinecraftClient.getInstance().getTextureManager().getTexture(loc);
+			DynTexture dt = (DynTexture) skin.texture.getNative();
+			((AbstractTextureOF)dt).cpm$copyMultiTex(((AbstractTextureOF) tex).cpm$multiTex());
+		}
+	}
+}

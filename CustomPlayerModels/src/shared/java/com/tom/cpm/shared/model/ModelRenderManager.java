@@ -98,12 +98,14 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public List<Field<P>> modelFields;
 		public List<RedirectRenderer<P>> redirectRenderers;
 		public boolean skinBound;
+		public Map<RedirectRenderer<P>, RedirectRenderer<P>> copyMap;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
 			this.model = model;
 			this.mngr = mngr;
 			modelFields = new ArrayList<>();
 			redirectRenderers = new ArrayList<>();
+			copyMap = new HashMap<>();
 		}
 
 		public final void swapIn(ModelDefinition def, Predicate<Object> unbindRule, D addDt) {
@@ -166,6 +168,11 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		void renderWithParent(RootModelElement elem, int sel);
 		void doRender(RootModelElement elem, int sel);
 
+		default RedirectRenderer<P> setCopyFrom(RedirectRenderer<P> from) {
+			getHolder().copyMap.put(this, from);
+			return this;
+		}
+
 		@SuppressWarnings("unchecked")
 		default void render() {
 			RedirectHolder<?, ?, ?, P> holder = getHolder();
@@ -180,6 +187,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						holder.bindSkin();
 					}
 					if(part == null) {
+						RedirectRenderer<P> copyFrom = holder.copyMap.get(this);
+						if(copyFrom != null) {
+							holder.copyModel((P) copyFrom, tp);
+						}
 						if(holder.unbindRule != null && holder.unbindRule.test(this))
 							holder.swapOut();
 						return;

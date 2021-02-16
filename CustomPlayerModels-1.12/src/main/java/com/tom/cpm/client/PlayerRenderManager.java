@@ -89,6 +89,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 	}
 
 	private static class RedirectHolderPlayer extends RDH {
+		private RedirectRenderer<ModelRenderer> bipedHead;
 		private RedirectRenderer<ModelRenderer> bipedLeftArm;
 		private RedirectRenderer<ModelRenderer> bipedRightArm;
 		private RedirectRenderer<ModelRenderer> bipedLeftArmwear;
@@ -96,14 +97,14 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, ModelPlayer model) {
 			super(mngr, model);
-			register(new Field<>(() -> model.bipedHead        , v -> model.bipedHead         = v, PlayerModelParts.HEAD));
+			bipedHead = register(new Field<>(() -> model.bipedHead        , v -> model.bipedHead         = v, PlayerModelParts.HEAD));
 			register(new Field<>(() -> model.bipedBody        , v -> model.bipedBody         = v, PlayerModelParts.BODY));
 			bipedRightArm = register(new Field<>(() -> model.bipedRightArm    , v -> model.bipedRightArm     = v, PlayerModelParts.RIGHT_ARM));
 			bipedLeftArm = register(new Field<>(() -> model.bipedLeftArm     , v -> model.bipedLeftArm      = v, PlayerModelParts.LEFT_ARM));
 			register(new Field<>(() -> model.bipedRightLeg    , v -> model.bipedRightLeg     = v, PlayerModelParts.RIGHT_LEG));
 			register(new Field<>(() -> model.bipedLeftLeg     , v -> model.bipedLeftLeg      = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.bipedHeadwear    , v -> model.bipedHeadwear     = v, null));
+			register(new Field<>(() -> model.bipedHeadwear    , v -> model.bipedHeadwear     = v, null)).setCopyFrom(bipedHead);
 			bipedLeftArmwear = register(new Field<>(() -> model.bipedLeftArmwear , v -> model.bipedLeftArmwear  = v, null));
 			bipedRightArmwear = register(new Field<>(() -> model.bipedRightArmwear, v -> model.bipedRightArmwear = v, null));
 			register(new Field<>(() -> model.bipedLeftLegwear , v -> model.bipedLeftLegwear  = v, null));

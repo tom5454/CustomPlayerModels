@@ -24,6 +24,7 @@ import net.minecraft.text.TranslatableText;
 
 import com.mojang.authlib.GameProfile;
 
+import com.tom.cpm.client.optifine.OptifineDetector;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
@@ -38,6 +39,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	private ModelDefinitionLoader loader;
 
 	public static CustomPlayerModelsClient INSTANCE;
+	public static boolean optifineLoaded;
 
 	@Override
 	public void onInitializeClient() {
@@ -48,6 +50,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 			throw new RuntimeException("Failed to load template", e);
 		}
 		mc = new MinecraftObject(MinecraftClient.getInstance(), loader);
+		optifineLoaded = OptifineDetector.detectOptiFine();
 		MinecraftObjectHolder.setClientObject(mc);
 		ClientTickEvents.START_CLIENT_TICK.register(cl -> {
 			if(!cl.isPaused())

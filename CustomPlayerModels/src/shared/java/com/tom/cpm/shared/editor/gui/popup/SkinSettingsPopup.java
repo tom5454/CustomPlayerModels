@@ -4,11 +4,13 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.gui.elements.Button;
+import com.tom.cpm.shared.gui.elements.ConfirmPopup;
 import com.tom.cpm.shared.gui.elements.Label;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
 import com.tom.cpm.shared.gui.elements.Spinner;
 import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.math.Box;
+import com.tom.cpm.shared.util.Image;
 
 public class SkinSettingsPopup extends PopupPanel {
 
@@ -56,20 +58,42 @@ public class SkinSettingsPopup extends PopupPanel {
 		newSkin.setBounds(new Box(145, 5, 60, 20));
 		addElement(newSkin);
 
+		Button delSkin = new Button(gui, gui.i18nFormat("button.cpm.delSkin"), () -> {
+			boolean edited = editor.skinProvider.isEdited();
+			if(edited) {
+				e.openPopup(new ConfirmPopup(e, gui.i18nFormat("label.cpm.delSkin"), () -> {
+					Image img = editor.skinProvider.getImage();
+					editor.addUndo(() -> {
+						editor.skinProvider.setImage(img);
+						editor.skinProvider.setEdited(true);
+					});
+					Image vskin = new Image(editor.vanillaSkin);
+					editor.runOp(() -> {
+						editor.skinProvider.setImage(vskin);
+						editor.skinProvider.setEdited(false);
+						editor.markDirty();
+						editor.updateGui();
+					});
+				}, null));
+			}
+		});
+		delSkin.setBounds(new Box(5, 30, 60, 20));
+		addElement(delSkin);
+
 		Label lblT = new Label(gui, gui.i18nFormat("label.cpm.sheetSize"));
-		lblT.setBounds(new Box(5, 40, 80, 18));
+		lblT.setBounds(new Box(5, 80, 80, 18));
 		lblT.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.texture_sheet")));
 		addElement(lblT);
 
 		Label lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
-		lblTW.setBounds(new Box(5, 50, 40, 18));
+		lblTW.setBounds(new Box(5, 90, 40, 18));
 		Label lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
-		lblTH.setBounds(new Box(75, 50, 40, 18));
+		lblTH.setBounds(new Box(75, 90, 40, 18));
 
 		Spinner spinnerTW = new Spinner(gui);
 		Spinner spinnerTH = new Spinner(gui);
-		spinnerTW.setBounds(new Box(5, 60, 65, 18));
-		spinnerTH.setBounds(new Box(75, 60, 65, 18));
+		spinnerTW.setBounds(new Box(5, 100, 65, 18));
+		spinnerTH.setBounds(new Box(75, 100, 65, 18));
 		spinnerTW.setDp(0);
 		spinnerTH.setDp(0);
 		addElement(spinnerTW);
@@ -83,7 +107,7 @@ public class SkinSettingsPopup extends PopupPanel {
 		spinnerTW.setValue(editor.skinProvider.size.x);
 		spinnerTH.setValue(editor.skinProvider.size.y);
 
-		setBounds(new Box(0, 0, 210, 100));
+		setBounds(new Box(0, 0, 210, 140));
 	}
 
 	@Override

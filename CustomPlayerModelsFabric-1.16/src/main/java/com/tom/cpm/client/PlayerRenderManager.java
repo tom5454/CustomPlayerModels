@@ -18,6 +18,8 @@ import net.minecraft.util.Identifier;
 
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.Render.Box;
+import com.tom.cpm.client.optifine.OptifineTexture;
+import com.tom.cpm.client.optifine.RedirectRendererOF;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager;
@@ -53,7 +55,9 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			public RedirectRenderer<net.minecraft.client.model.ModelPart> create(Model model,
 					RedirectHolder<Model, ?, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart> access,
 					Supplier<net.minecraft.client.model.ModelPart> modelPart, ModelPart part) {
-				return new RedirectModelRenderer(model, (RDH) access, modelPart, part);
+				return CustomPlayerModelsClient.optifineLoaded ?
+						new RedirectRendererOF(model, (RDH) access, modelPart, part) :
+							new RedirectModelRendererVanilla(model, (RDH) access, modelPart, part);
 			}
 		});
 		setVis(m -> m.visible, (m, v) -> m.visible = v);
@@ -77,9 +81,9 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 	}
 
-	private static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart> {
-		private Identifier boundSkin;
-		private RenderLayer glowType, defaultType;
+	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart> {
+		public Identifier boundSkin;
+		public RenderLayer glowType, defaultType;
 
 		public RDH(
 				ModelRenderManager<VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart, Model> mngr,
@@ -93,6 +97,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			SkinProvider skin = def.getSkinOverride();
 			if(skin != null && skin.texture != null) {
 				skin.bind();
+				OptifineTexture.applyOptifineTexture(cbi.getReturnValue(), skin);
 				cbi.setReturnValue(DynTexture.getBoundLoc());
 				sheetX = skin.getSize().x;
 				sheetY = skin.getSize().y;
@@ -117,6 +122,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 	}
 
 	private static class RedirectHolderPlayer extends RDH {
+		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedHead;
 		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedLeftArm;
 		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedRightArm;
 		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedLeftArmwear;
@@ -124,16 +130,16 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerEntityModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
-			register(new Field<>(() -> model.head        , v -> model.head         = v, PlayerModelParts.HEAD));
+			bipedHead = register(new Field<>(() -> model.head        , v -> model.head         = v, PlayerModelParts.HEAD));
 			register(new Field<>(() -> model.torso       , v -> model.torso        = v, PlayerModelParts.BODY));
-			register(new Field<>(() -> model.rightArm    , v -> model.rightArm     = v, PlayerModelParts.RIGHT_ARM));
-			register(new Field<>(() -> model.leftArm     , v -> model.leftArm      = v, PlayerModelParts.LEFT_ARM));
+			bipedRightArm = register(new Field<>(() -> model.rightArm    , v -> model.rightArm     = v, PlayerModelParts.RIGHT_ARM));
+			bipedLeftArm = register(new Field<>(() -> model.leftArm     , v -> model.leftArm      = v, PlayerModelParts.LEFT_ARM));
 			register(new Field<>(() -> model.rightLeg    , v -> model.rightLeg     = v, PlayerModelParts.RIGHT_LEG));
 			register(new Field<>(() -> model.leftLeg     , v -> model.leftLeg      = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.helmet      , v -> model.helmet       = v, null));
-			register(new Field<>(() -> model.leftSleeve  , v -> model.leftSleeve   = v, null));
-			register(new Field<>(() -> model.rightSleeve , v -> model.rightSleeve  = v, null));
+			register(new Field<>(() -> model.helmet      , v -> model.helmet       = v, null)).setCopyFrom(bipedHead);
+			bipedLeftArmwear = register(new Field<>(() -> model.leftSleeve  , v -> model.leftSleeve   = v, null));
+			bipedRightArmwear = register(new Field<>(() -> model.rightSleeve , v -> model.rightSleeve  = v, null));
 			register(new Field<>(() -> model.leftPantLeg , v -> model.leftPantLeg  = v, null));
 			register(new Field<>(() -> model.rightPantLeg, v -> model.rightPantLeg = v, null));
 			register(new Field<>(() -> model.jacket      , v -> model.jacket       = v, null));
@@ -166,22 +172,27 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 	}
 
-	private static class RedirectModelRenderer extends net.minecraft.client.model.ModelPart implements RedirectRenderer<net.minecraft.client.model.ModelPart> {
-		private final RDH holder;
-		private final ModelPart part;
-		private final Supplier<net.minecraft.client.model.ModelPart> parentProvider;
-		private net.minecraft.client.model.ModelPart parent;
-		private RootModelElement elem;
-		private CubeModelRenderer dispRender;
-		private int sel;
+	public static abstract class RedirectModelRendererBase extends net.minecraft.client.model.ModelPart implements RedirectRenderer<net.minecraft.client.model.ModelPart> {
+		public final RDH holder;
+		public final ModelPart part;
+		public final Supplier<net.minecraft.client.model.ModelPart> parentProvider;
+		public net.minecraft.client.model.ModelPart parent;
+		public RootModelElement elem;
+		public int sel;
 
-		public RedirectModelRenderer(Model model, RDH holder, Supplier<net.minecraft.client.model.ModelPart> parent, ModelPart part) {
-			super(holder.model);
+		public RedirectModelRendererBase(Model model, RDH holder, Supplier<net.minecraft.client.model.ModelPart> parent, ModelPart part) {
+			super(0, 0, 0, 0);
 			this.holder = holder;
-			if(model instanceof PlayerEntityModel)
-				((PlayerEntityModel<AbstractClientPlayerEntity>)model).parts.remove(this);
 			this.parentProvider = parent;
 			this.part = part;
+		}
+	}
+
+	private static class RedirectModelRendererVanilla extends RedirectModelRendererBase {
+		private CubeModelRenderer dispRender;
+
+		public RedirectModelRendererVanilla(Model model, RDH holder, Supplier<net.minecraft.client.model.ModelPart> parent, ModelPart part) {
+			super(model, holder, parent, part);
 			this.dispRender = new CubeModelRenderer();
 		}
 
@@ -207,14 +218,12 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 		private class CubeModelRenderer extends net.minecraft.client.model.ModelPart {
 			public CubeModelRenderer() {
-				super(holder.model);
-				if(holder.model instanceof PlayerEntityModel)
-					((PlayerEntityModel<AbstractClientPlayerEntity>)holder.model).parts.remove(this);
+				super(0, 0, 0, 0);
 			}
 
 			@Override
 			public void render(MatrixStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-				RedirectModelRenderer.this.render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+				RedirectModelRendererVanilla.this.render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 				if(sel > 0)drawVanillaOutline(matrixStackIn, bufferIn);
 			}
 		}
@@ -378,13 +387,13 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 	}
 
 	public static boolean unbindHand(Object v) {
-		RedirectModelRenderer rd = (RedirectModelRenderer) v;
+		RedirectModelRendererBase rd = (RedirectModelRendererBase) v;
 		RedirectHolderPlayer rdhp = (RedirectHolderPlayer) rd.holder;
 		return rd == rdhp.bipedLeftArmwear || rd == rdhp.bipedRightArmwear;
 	}
 
 	public static boolean unbindSkull(Object v) {
-		RedirectModelRenderer rd = (RedirectModelRenderer) v;
+		RedirectModelRendererBase rd = (RedirectModelRendererBase) v;
 		RedirectHolderSkull rdhs = (RedirectHolderSkull) rd.holder;
 		return rd == rdhs.hat;
 	}

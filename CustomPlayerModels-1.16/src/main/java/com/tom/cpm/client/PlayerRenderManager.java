@@ -20,6 +20,8 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.Render.Box;
+import com.tom.cpm.client.optifine.OptifineTexture;
+import com.tom.cpm.client.optifine.RedirectRendererOF;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager;
@@ -54,7 +56,9 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 			public RedirectRenderer<ModelRenderer> create(Model model,
 					RedirectHolder<Model, ?, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> access,
 					Supplier<ModelRenderer> modelPart, ModelPart part) {
-				return new RedirectModelRenderer(model, (RDH) access, modelPart, part);
+				return ClientProxy.optifineLoaded ?
+						new RedirectRendererOF(model, (RDH) access, modelPart, part) :
+							new RedirectModelRendererVanilla(model, (RDH) access, modelPart, part);
 			}
 		});
 		setVis(m -> m.showModel, (m, v) -> m.showModel = v);
@@ -78,9 +82,9 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		}
 	}
 
-	private static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> {
-		private ResourceLocation boundSkin;
-		private RenderType glowType, defaultType;
+	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> {
+		public ResourceLocation boundSkin;
+		public RenderType glowType, defaultType;
 
 		public RDH(
 				ModelRenderManager<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer, Model> mngr,
@@ -94,6 +98,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 			SkinProvider skin = def.getSkinOverride();
 			if(skin != null && skin.texture != null) {
 				skin.bind();
+				OptifineTexture.applyOptifineTexture(cbi.getReturnValue(), skin);
 				cbi.setReturnValue(DynTexture.getBoundLoc());
 				sheetX = skin.getSize().x;
 				sheetY = skin.getSize().y;
@@ -118,6 +123,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 	}
 
 	private static class RedirectHolderPlayer extends RDH {
+		private RedirectRenderer<ModelRenderer> bipedHead;
 		private RedirectRenderer<ModelRenderer> bipedLeftArm;
 		private RedirectRenderer<ModelRenderer> bipedRightArm;
 		private RedirectRenderer<ModelRenderer> bipedLeftArmwear;
@@ -125,14 +131,14 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
-			register(new Field<>(() -> model.bipedHead        , v -> model.bipedHead         = v, PlayerModelParts.HEAD));
+			bipedHead = register(new Field<>(() -> model.bipedHead        , v -> model.bipedHead         = v, PlayerModelParts.HEAD));
 			register(new Field<>(() -> model.bipedBody        , v -> model.bipedBody         = v, PlayerModelParts.BODY));
 			bipedRightArm = register(new Field<>(() -> model.bipedRightArm    , v -> model.bipedRightArm     = v, PlayerModelParts.RIGHT_ARM));
 			bipedLeftArm = register(new Field<>(() -> model.bipedLeftArm     , v -> model.bipedLeftArm      = v, PlayerModelParts.LEFT_ARM));
 			register(new Field<>(() -> model.bipedRightLeg    , v -> model.bipedRightLeg     = v, PlayerModelParts.RIGHT_LEG));
 			register(new Field<>(() -> model.bipedLeftLeg     , v -> model.bipedLeftLeg      = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.bipedHeadwear    , v -> model.bipedHeadwear     = v, null));
+			register(new Field<>(() -> model.bipedHeadwear    , v -> model.bipedHeadwear     = v, null)).setCopyFrom(bipedHead);
 			bipedLeftArmwear = register(new Field<>(() -> model.bipedLeftArmwear , v -> model.bipedLeftArmwear  = v, null));
 			bipedRightArmwear = register(new Field<>(() -> model.bipedRightArmwear, v -> model.bipedRightArmwear = v, null));
 			register(new Field<>(() -> model.bipedLeftLegwear , v -> model.bipedLeftLegwear  = v, null));
@@ -167,23 +173,27 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 
 	}
 
-	private static class RedirectModelRenderer extends ModelRenderer implements RedirectRenderer<ModelRenderer> {
-		private final RDH holder;
-		private final ModelPart part;
-		private final Supplier<ModelRenderer> parentProvider;
-		private ModelRenderer parent;
-		private RootModelElement elem;
-		private CubeModelRenderer dispRender;
-		private int sel;
+	public static abstract class RedirectModelRendererBase extends ModelRenderer implements RedirectRenderer<ModelRenderer> {
+		protected final RDH holder;
+		protected final ModelPart part;
+		protected final Supplier<ModelRenderer> parentProvider;
+		protected ModelRenderer parent;
+		protected RootModelElement elem;
+		protected int sel;
 
-		@SuppressWarnings("unchecked")
-		public RedirectModelRenderer(Model model, RDH holder, Supplier<ModelRenderer> parent, ModelPart part) {
-			super(model);
+		public RedirectModelRendererBase(Model model, RDH holder, Supplier<ModelRenderer> parent, ModelPart part) {
+			super(0, 0, 0, 0);
 			this.part = part;
 			this.holder = holder;
 			this.parentProvider = parent;
-			if(model instanceof PlayerModel)
-				((PlayerModel<AbstractClientPlayerEntity>)model).modelRenderers.remove(this);
+		}
+	}
+
+	private static class RedirectModelRendererVanilla extends RedirectModelRendererBase {
+		private CubeModelRenderer dispRender;
+
+		public RedirectModelRendererVanilla(Model model, RDH holder, Supplier<ModelRenderer> parent, ModelPart part) {
+			super(model, holder, parent, part);
 			this.dispRender = new CubeModelRenderer();
 		}
 
@@ -235,16 +245,14 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		}
 
 		private class CubeModelRenderer extends ModelRenderer {
-			@SuppressWarnings("unchecked")
+
 			public CubeModelRenderer() {
-				super(holder.model);
-				if(holder.model instanceof PlayerModel)
-					((PlayerModel<AbstractClientPlayerEntity>)holder.model).modelRenderers.remove(this);
+				super(0, 0, 0, 0);
 			}
 
 			@Override
 			public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-				RedirectModelRenderer.this.render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+				RedirectModelRendererVanilla.this.render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 				if(sel > 0)drawVanillaOutline(matrixStackIn, bufferIn);
 			}
 		}
@@ -381,13 +389,13 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 	}
 
 	public static boolean unbindHand(Object v) {
-		RedirectModelRenderer rd = (RedirectModelRenderer) v;
+		RedirectModelRendererBase rd = (RedirectModelRendererBase) v;
 		RedirectHolderPlayer rdhp = (RedirectHolderPlayer) rd.holder;
 		return rd == rdhp.bipedLeftArmwear || rd == rdhp.bipedRightArmwear;
 	}
 
 	public static boolean unbindSkull(Object v) {
-		RedirectModelRenderer rd = (RedirectModelRenderer) v;
+		RedirectModelRendererBase rd = (RedirectModelRendererBase) v;
 		RedirectHolderSkull rdhs = (RedirectHolderSkull) rd.holder;
 		return rd == rdhs.hat;
 	}

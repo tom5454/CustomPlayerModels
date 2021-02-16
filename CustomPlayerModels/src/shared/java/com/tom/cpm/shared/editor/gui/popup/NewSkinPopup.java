@@ -8,6 +8,7 @@ import com.tom.cpm.shared.gui.elements.Button;
 import com.tom.cpm.shared.gui.elements.Label;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
 import com.tom.cpm.shared.gui.elements.Spinner;
+import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.util.Image;
@@ -36,7 +37,8 @@ public class NewSkinPopup extends PopupPanel {
 		spinnerH.setValue(64);
 
 		Label lblT = new Label(gui, gui.i18nFormat("label.cpm.sheetSize"));
-		lblT.setBounds(new Box(5, 50, 40, 18));
+		lblT.setBounds(new Box(5, 50, 120, 18));
+		lblT.setTooltip(new Tooltip(editor.gui, gui.i18nFormat("tooltip.cpm.texture_sheet")));
 		addElement(lblT);
 
 		lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));

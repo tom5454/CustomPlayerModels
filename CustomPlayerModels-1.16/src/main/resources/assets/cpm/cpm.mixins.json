@@ -9,7 +9,8 @@
   "client": [
     "PlayerRendererMixin",
     "RenderTypeBuffersMixin",
-    "SkullTileEntityRendererMixin"
+    "SkullTileEntityRendererMixin",
+    "AbstractClientPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

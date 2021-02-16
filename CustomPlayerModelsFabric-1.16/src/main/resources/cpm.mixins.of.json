@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.tom.cpm.mixin.of",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "ModelPartOFMixin",
+    "WorldRendererOFMixin",
+    "VertexConsumerProviderImmediateOFMixin",
+    "VertexConsumerOFMixin",
+    "PlayerItemModelOFMixin",
+    "AbstractTextureOFMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -39,6 +39,7 @@ button.cpm.export.as_b64=Export mode: Base64 String
 button.cpm.export.as_template=Export mode: Template
 button.cpm.export.as_model=Export mode: Model
 button.cpm.paste=Paste
+button.cpm.delSkin=Delete Skin
 
 tooltip.cpm.export.as_skin=Export Model as a skin file.
 tooltip.cpm.export.as_b64=Export Model as a Base64 String.\You probably want to export as skin instead of Base64.\Can be loaded with \'/cpm setskin <player> <base64_string>'\ ingame if server-side mod is loaded and you are an op.
@@ -124,6 +125,7 @@ label.cpm.export_success=Export Successful
 label.cpm.export_success.desc=Model successfully exported as: %s
 label.cpm.base64_model=Base64 Model
 label.cpm.base64_model.desc=Can be loaded with '/cpm setskin <player> <base64_string>' ingame.
+label.cpm.delSkin=Delete Custom Skin?
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body

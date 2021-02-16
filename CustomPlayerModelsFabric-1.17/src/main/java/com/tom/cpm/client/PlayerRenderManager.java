@@ -117,6 +117,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 	}
 
 	private static class RedirectHolderPlayer extends RDH {
+		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedHead;
 		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedLeftArm;
 		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedRightArm;
 		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedLeftArmwear;
@@ -124,16 +125,16 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerEntityModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
-			register(new Field<>(() -> model.head        , v -> model.head         = v, PlayerModelParts.HEAD));
+			bipedHead = register(new Field<>(() -> model.head        , v -> model.head         = v, PlayerModelParts.HEAD));
 			register(new Field<>(() -> model.body       , v -> model.body        = v, PlayerModelParts.BODY));
-			register(new Field<>(() -> model.rightArm    , v -> model.rightArm     = v, PlayerModelParts.RIGHT_ARM));
-			register(new Field<>(() -> model.leftArm     , v -> model.leftArm      = v, PlayerModelParts.LEFT_ARM));
+			bipedRightArm = register(new Field<>(() -> model.rightArm    , v -> model.rightArm     = v, PlayerModelParts.RIGHT_ARM));
+			bipedLeftArm = register(new Field<>(() -> model.leftArm     , v -> model.leftArm      = v, PlayerModelParts.LEFT_ARM));
 			register(new Field<>(() -> model.rightLeg    , v -> model.rightLeg     = v, PlayerModelParts.RIGHT_LEG));
 			register(new Field<>(() -> model.leftLeg     , v -> model.leftLeg      = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.hat      , v -> model.hat       = v, null));
-			register(new Field<>(() -> model.leftSleeve  , v -> model.leftSleeve   = v, null));
-			register(new Field<>(() -> model.rightSleeve , v -> model.rightSleeve  = v, null));
+			register(new Field<>(() -> model.hat      , v -> model.hat       = v, null)).setCopyFrom(bipedHead);
+			bipedLeftArmwear = register(new Field<>(() -> model.leftSleeve  , v -> model.leftSleeve   = v, null));
+			bipedRightArmwear = register(new Field<>(() -> model.rightSleeve , v -> model.rightSleeve  = v, null));
 			register(new Field<>(() -> model.leftPants , v -> model.leftPants  = v, null));
 			register(new Field<>(() -> model.rightPants, v -> model.rightPants = v, null));
 			register(new Field<>(() -> model.jacket      , v -> model.jacket       = v, null));

@@ -35,5 +35,10 @@
   },
   "suggests": {
     "flamingo": "*"
+  },
+  "custom": {
+    "mm:early_risers": [
+      "com.tom.cpm.LaunchMixinWithOptifineRunnable"
+    ]
   }
 }
