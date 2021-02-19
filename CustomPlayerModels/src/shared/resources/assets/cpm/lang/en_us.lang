@@ -40,12 +40,15 @@ button.cpm.export.as_template=Export mode: Template
 button.cpm.export.as_model=Export mode: Model
 button.cpm.paste=Paste
 button.cpm.delSkin=Delete Skin
+button.cpm.edit.convert_model_custom=Convert vanilla parts
+button.cpm.edit.add_skin_layer2=Add 2nd Layer
 
 tooltip.cpm.export.as_skin=Export Model as a skin file.
 tooltip.cpm.export.as_b64=Export Model as a Base64 String.\You probably want to export as skin instead of Base64.\Can be loaded with \'/cpm setskin <player> <base64_string>'\ ingame if server-side mod is loaded and you are an op.
 tooltip.cpm.export.as_template=Export Model as a template.\Templates can be imported into other projects.
 tooltip.cpm.export.as_model=Export Model as a .cpmmodel file,\to be loaded in the Skin customization menu.
 tooltip.cpm.texture_sheet=Skin texture resolution in pixels for Texture U/V.\Doesn't have to match actual image resolution.\Aspect ratio should match.
+tooltip.cpm.edit.convert_model_custom=Converts Vanilla skin parts to custom\required if you want to have a bigger skin sheet.
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -126,6 +129,7 @@ label.cpm.export_success.desc=Model successfully exported as: %s
 label.cpm.base64_model=Base64 Model
 label.cpm.base64_model.desc=Can be loaded with '/cpm setskin <player> <base64_string>' ingame.
 label.cpm.delSkin=Delete Custom Skin?
+label.cpm.tex_size_too_big=Texture size too big!\Max size: %1$dx%1$d
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body

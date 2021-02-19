@@ -36,6 +36,7 @@ import com.tom.cpm.shared.parts.ModelPartAnimation;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
 import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
 import com.tom.cpm.shared.parts.ModelPartEnd;
+import com.tom.cpm.shared.parts.ModelPartListIcon;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
 import com.tom.cpm.shared.parts.ModelPartPlayerPos;
 import com.tom.cpm.shared.parts.ModelPartRenderEffect;
@@ -99,6 +100,9 @@ public class Exporter {
 			});
 			if(!e.animations.isEmpty()) {
 				otherParts.add(new ModelPartAnimation(e));
+			}
+			if(e.listIconProvider != null) {
+				otherParts.add(new ModelPartListIcon(e));
 			}
 			def.setOtherParts(otherParts);
 			if(MinecraftObjectHolder.DEBUGGING)System.out.println(def);

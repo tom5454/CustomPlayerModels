@@ -20,4 +20,7 @@ public class UIColors {
 
 	public int popup_border         = 0xffaaaaaa;
 	public int popup_background     = 0xff333333;
+
+	public int move_background      = 0xff000000;
+	public int select_background    = 0xff6666ff;
 }

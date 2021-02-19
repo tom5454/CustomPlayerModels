@@ -33,10 +33,6 @@ public class PlayerProfile extends Player {
 		this.profile = profile;
 	}
 
-	public PlayerProfile(MinecraftClient mc) {
-		this(mc.getSession().getProfile());
-	}
-
 	@Override
 	public int getSkinType() {
 		return skinType == null ? 1 : skinType.equals("default") ? 1 : 0;

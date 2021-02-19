@@ -8,7 +8,7 @@ public class Tooltip extends Panel {
 	public Tooltip(Frame frm) {
 		super(frm.getGui());
 		this.frm = frm;
-		setBackgroundColor(gui.getColors().panel_background);
+		setBackgroundColor(gui.getColors().popup_border);
 	}
 
 	public Tooltip(Frame frm, String text) {
@@ -29,5 +29,19 @@ public class Tooltip extends Panel {
 
 	public void set() {
 		frm.setTooltip(this);
+	}
+
+	@Override
+	public void draw(int mouseX, int mouseY, float partialTicks) {
+		gui.pushMatrix();
+		gui.setPosOffset(getBounds());
+		Box bounds = getBounds();
+		gui.drawBox(0, 0, bounds.w, bounds.h, backgroundColor);
+		gui.drawBox(1, 1, bounds.w - 2, bounds.h - 2, gui.getColors().panel_background);
+		for (GuiElement guiElement : elements) {
+			if(guiElement.isVisible())
+				guiElement.draw(mouseX - bounds.x, mouseY - bounds.y, partialTicks);
+		}
+		gui.popMatrix();
 	}
 }

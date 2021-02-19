@@ -36,7 +36,8 @@ public class CPMTransformerService implements IClassTransformer {
 				MethodNode m = null;
 
 				for(MethodNode method : input.methods) {
-					if(method.desc.equals("(FFFLnet/minecraft/util/EnumFacing;FILcom/mojang/authlib/GameProfile;IF)V")) {
+					if(method.desc.equals("(FFFLnet/minecraft/util/EnumFacing;FILcom/mojang/authlib/GameProfile;IF)V") ||
+							method.desc.equals("(FFFLfa;FILcom/mojang/authlib/GameProfile;IF)V")) {
 						m = method;
 						System.out.println("CPM Skull Hook: found method");
 						break;

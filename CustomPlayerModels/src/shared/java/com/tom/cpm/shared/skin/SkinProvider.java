@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import javax.imageio.ImageIO;
 
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.io.IOHelper.ImageBlock;
 import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.util.DynamicTexture;
 import com.tom.cpm.shared.util.Image;
@@ -19,14 +20,13 @@ public class SkinProvider {
 		size = new Vec2i(64, 64);
 	}
 
-	public SkinProvider(IOHelper in) throws IOException {
-		this();
+	public SkinProvider(IOHelper in, int sizeLimit) throws IOException {
 		size = in.read2s();
-		try {
-			texture = new DynamicTexture(Image.loadFrom(in.readNextBlock().getDin()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		ImageBlock block = in.readImage();
+		if(block.getWidth() > sizeLimit || block.getHeight() > sizeLimit)
+			throw new IOException("Texture size too large");
+		block.doReadImage();
+		texture = new DynamicTexture(block.getImage());
 	}
 
 	public void write(IOHelper dout) throws IOException {

@@ -165,4 +165,8 @@ public abstract class Frame extends Panel {
 	public void setTooltip(Tooltip tooltip) {
 		this.tooltipBox = tooltip;
 	}
+
+	public void logMessage(String msg) {
+
+	}
 }

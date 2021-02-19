@@ -11,12 +11,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.function.Function;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 import com.tom.cpm.shared.math.MathHelper;
 import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.math.Vec3f;
+import com.tom.cpm.shared.util.Image;
 
 public class IOHelper implements DataInput, DataOutput, Closeable {
 	private static final int DIV = Short.MAX_VALUE / Vec3f.MAX_POS;
@@ -356,6 +362,20 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		}
 	}
 
+	public void reset() throws IOException {
+		din.reset();
+	}
+
+	public ImageBlock readImage() throws IOException {
+		return new ImageBlock(this);
+	}
+
+	public void writeImage(Image img) throws IOException {
+		try(IOHelper h = writeNextBlock()) {
+			img.storeTo(h.getDout());
+		}
+	}
+
 	@FunctionalInterface
 	public static interface ObjectReader<T, R> {
 		R read(T type, IOHelper block) throws IOException;
@@ -368,5 +388,47 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 	public static interface ObjectBlock<T extends Enum<T>> {
 		void write(IOHelper h) throws IOException;
 		T getType();
+	}
+
+	public static class ImageBlock {
+		private IOHelper buf;
+		private Image image;
+		private int w, h;
+
+		public ImageBlock(IOHelper io) throws IOException {
+			buf = io.readNextBlock();
+			try(ImageInputStream in = ImageIO.createImageInputStream(buf.getDin())){
+				final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
+				if (readers.hasNext()) {
+					ImageReader reader = readers.next();
+					try {
+						reader.setInput(in);
+						w = reader.getWidth(0);
+						h = reader.getHeight(0);
+					} finally {
+						reader.dispose();
+					}
+				}
+			}
+			buf.reset();
+		}
+
+		public int getWidth() {
+			return w;
+		}
+
+		public int getHeight() {
+			return h;
+		}
+
+		public void doReadImage() throws IOException {
+			image = Image.loadFrom(buf.getDin());
+			w = image.getWidth();
+			h = image.getHeight();
+		}
+
+		public Image getImage() {
+			return image;
+		}
 	}
 }

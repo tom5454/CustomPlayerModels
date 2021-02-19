@@ -3,8 +3,8 @@
   "id": "cpm",
   "version": "${version}",
 
-  "name": "Custom Player Models",
-  "description": "Custom Player Models for Minecraft",
+  "name": "Customizable Player Models",
+  "description": "Customize your minecraft avatar!",
   "authors": [
     "tom5454"
   ],
@@ -28,7 +28,7 @@
   "mixins": [
   	"cpm.mixins.json"
   ],
-	"accessWidener" : "cpm.accesswidener",
+  "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.7.4",
     "fabric": "*"

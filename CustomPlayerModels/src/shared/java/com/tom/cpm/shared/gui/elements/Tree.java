@@ -1,29 +1,27 @@
-package com.tom.cpm.shared.editor.gui;
+package com.tom.cpm.shared.gui.elements;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.ElementType;
-import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.GuiElement;
-import com.tom.cpm.shared.gui.elements.PopupMenu;
+import com.tom.cpm.shared.gui.Frame;
 import com.tom.cpm.shared.math.Vec2i;
 
-public class ModelElementsTree extends GuiElement {
-	private Editor editor;
+public class Tree<T> extends GuiElement {
 	private TreeElement root;
 	private Map<Integer, TreeElement> map = new HashMap<>();
 	private TreeElement moveElem;
+	private TreeModel<T> model;
+	private Frame frame;
 
-	public ModelElementsTree(IGui gui, Editor editor) {
-		super(gui);
-		this.editor = editor;
+	public Tree(Frame gui, TreeModel<T> model) {
+		super(gui.getGui());
+		this.frame = gui;
 		this.root = new TreeElement();
 		this.root.display = "Root";
+		this.model = model;
 	}
 
 	@Override
@@ -34,32 +32,33 @@ public class ModelElementsTree extends GuiElement {
 			TreeElement elem = map.get(yp);
 			if(elem != null) {
 				if(evt.btn == 1) {
-					if(elem.modelElement != null && (elem.modelElement.type == ElementType.NORMAL || moveElem != null)) {
+					if(elem.value != null && (model.canMove(elem.value) || (moveElem != null && model.canMoveTo(moveElem.value, elem.value)))) {
 						PopupMenu popup = new PopupMenu(gui);
 						popup.addButton(moveElem != null ? gui.i18nFormat("button.cpm.tree.put") : gui.i18nFormat("button.cpm.tree.move"), () -> {
 							if(moveElem != null) {
-								if(moveElem.modelElement != elem.modelElement)
-									editor.moveElement(moveElem.modelElement, elem.modelElement);
+								if(moveElem.value != elem.value)
+									model.moveElement(moveElem.value, elem.value);
 								moveElem = null;
 							} else moveElem = elem;
 						});
 						Vec2i p = evt.getPos();
-						popup.display(editor.gui, p.x, p.y);
+						popup.display(frame, p.x, p.y);
 					}
 				} else {
 					if(evt.x < 5 + elem.depth * 5 && elem != root && !elem.children.isEmpty()) {
 						elem.showChildren = !elem.showChildren;
 					} else {
-						editor.selectedElement = elem.modelElement;
+						model.onClick(elem.value);
 					}
 				}
 			} else {
-				editor.selectedElement = null;
+				model.onClick(null);
 			}
-			editor.updateGui();
+			model.treeUpdated();
 			evt.consume();
 		}
 	}
+
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
@@ -69,18 +68,20 @@ public class ModelElementsTree extends GuiElement {
 
 	private void drawTree(int mouseX, int mouseY, int x, int[] y, TreeElement e) {
 		int yp = y[0]++;
-		int textColor = 0xffffffff;
-		if(moveElem != null && e.modelElement == moveElem.modelElement) {
-			gui.drawBox(x * 5 - 1, yp * 10 - 1, bounds.w - 1, 12, 0xff000000);
+		int textColor = gui.getColors().button_text_color;
+		if(moveElem != null && e.value == moveElem.value) {
+			gui.drawBox(x * 5 - 1, yp * 10 - 1, bounds.w - 1, 12, gui.getColors().select_background);
 		}
-		if(e.modelElement == editor.selectedElement) {
-			gui.drawBox(x * 5, yp * 10, bounds.w, 10, 0xff6666ff);
+		int bg = e.value == null ? 0 : model.bgColor(e.value);
+		if(bg != 0) {
+			gui.drawBox(x * 5, yp * 10, bounds.w, 10, bg);
 		}
-		if(e.modelElement != null && !e.modelElement.show) {
-			textColor = 0xffaaaaaa;
+		int txtc = e.value == null ? 0 : model.textColor(e.value);
+		if(txtc != 0) {
+			textColor = txtc;
 		}
 		if(mouseX > bounds.x && mouseY > yp * 10 && mouseY < (yp+1) * 10) {
-			textColor = 0xffffff00;
+			textColor = gui.getColors().button_text_hover;
 		}
 		map.put(yp, e);
 		gui.drawText(x * 5 + 3, yp * 10, e.display, textColor);
@@ -99,22 +100,20 @@ public class ModelElementsTree extends GuiElement {
 		List<TreeElement> old = new ArrayList<>(root.children);
 		root.children.clear();
 		root.showChildren = true;
-		editor.elements.forEach(e -> {
-			if(e.parent == null) {
-				TreeElement t = new TreeElement();
-				t.display = e.name;
-				t.modelElement = e;
-				TreeElement oldTree = find(old, e);
-				if(oldTree != null)t.showChildren = oldTree.showChildren;
-				root.children.add(t);
-				walkChildren(t, oldTree != null ? oldTree.children : null);
-			}
+		model.getElements(null, e -> {
+			TreeElement t = new TreeElement();
+			t.display = model.getName(e);
+			t.value = e;
+			TreeElement oldTree = find(old, e);
+			if(oldTree != null)t.showChildren = oldTree.showChildren;
+			root.children.add(t);
+			walkChildren(t, oldTree != null ? oldTree.children : null);
 		});
 	}
 
-	private TreeElement find(List<TreeElement> list, ModelElement elem) {
+	private TreeElement find(List<TreeElement> list, T elem) {
 		for (TreeElement e : list) {
-			if(e.modelElement == elem)return e;
+			if(e.value == elem)return e;
 			else {
 				TreeElement d = find(e.children, elem);
 				if(d != null)return d;
@@ -124,23 +123,35 @@ public class ModelElementsTree extends GuiElement {
 	}
 
 	private void walkChildren(TreeElement p, List<TreeElement> old) {
-		for (ModelElement e : p.modelElement.children) {
+		model.getElements(p.value, e -> {
 			TreeElement t = new TreeElement();
-			t.display = e.name;
-			t.modelElement = e;
+			t.display = model.getName(e);
+			t.value = e;
 			p.children.add(t);
 			TreeElement oldTree = null;
 			if(old != null)oldTree = find(old, e);
 			if(oldTree != null)t.showChildren = oldTree.showChildren;
 			walkChildren(t, oldTree != null ? oldTree.children : null);
-		}
+		});
 	}
 
 	private class TreeElement {
 		private String display;
-		private ModelElement modelElement;
+		private T value;
 		private List<TreeElement> children = new ArrayList<>();
 		private boolean showChildren;
 		private int depth;
+	}
+
+	public static abstract class TreeModel<T> {
+		protected abstract int textColor(T val);
+		protected abstract void getElements(T parent, Consumer<T> c);
+		protected abstract int bgColor(T val);
+		protected abstract void treeUpdated();
+		protected abstract void moveElement(T elem, T to);
+		protected abstract boolean canMove(T elem);
+		protected abstract boolean canMoveTo(T elem, T to);
+		protected abstract void onClick(T elem);
+		protected abstract String getName(T elem);
 	}
 }

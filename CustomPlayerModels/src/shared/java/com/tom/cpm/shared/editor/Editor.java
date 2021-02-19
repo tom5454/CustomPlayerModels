@@ -38,6 +38,7 @@ import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
 import com.tom.cpm.shared.editor.util.ValueOp;
 import com.tom.cpm.shared.gui.Frame;
+import com.tom.cpm.shared.gui.UIColors;
 import com.tom.cpm.shared.gui.UpdaterRegistry;
 import com.tom.cpm.shared.gui.UpdaterRegistry.Updater;
 import com.tom.cpm.shared.gui.elements.MessagePopup;
@@ -118,6 +119,7 @@ public class Editor {
 	public boolean dirty;
 	public ModelDefinition definition;
 	public SkinProvider skinProvider = new SkinProvider();
+	public SkinProvider listIconProvider;
 	public File file, skinFile;
 	public ProjectFile project = new ProjectFile();
 
@@ -376,7 +378,11 @@ public class Editor {
 	}
 
 	public void switchHide() {
-		updateValueOp(selectedElement, selectedElement.hidden, !selectedElement.hidden, (a, b) -> a.hidden = b, setHiddenEffect);
+		if(selectedElement != null && selectedElement.type == ElementType.ROOT_PART) {
+			switchVis();
+			setHiddenEffect.accept(!selectedElement.show);
+		} else
+			updateValueOp(selectedElement, selectedElement.hidden, !selectedElement.hidden, (a, b) -> a.hidden = b, setHiddenEffect);
 	}
 
 	public void setTexSize(int x, int y) {
@@ -469,7 +475,8 @@ public class Editor {
 		setHiddenEffect.accept(null);
 		if(selectedElement != null) {
 			setVis.accept(selectedElement.show);
-			if(selectedElement.type == ElementType.NORMAL) {
+			switch(selectedElement.type) {
+			case NORMAL:
 				setOffset.accept(selectedElement.offset);
 				setRot.accept(selectedElement.rotation);
 				setPosition.accept(selectedElement.pos);
@@ -486,9 +493,16 @@ public class Editor {
 				setGlow.accept(selectedElement.glow);
 				setReColor.accept(selectedElement.recolor);
 				setHiddenEffect.accept(selectedElement.hidden);
-			} else {
+				break;
+
+			case ROOT_PART:
 				setPosition.accept(selectedElement.pos);
 				setRot.accept(selectedElement.rotation);
+				setHiddenEffect.accept(!selectedElement.show);
+				break;
+
+			default:
+				break;
 			}
 		}
 		setNameDisplay.accept((file == null ? gui.getGui().i18nFormat("label.cpm.new_project") : file.getName()) + (dirty ? "*" : ""));
@@ -545,6 +559,8 @@ public class Editor {
 		skinProvider.free();
 		skinProvider.texture = null;
 		skinProvider.setEdited(false);
+		if(listIconProvider != null)listIconProvider.free();
+		listIconProvider = null;
 		undoQueue.clear();
 		redoQueue.clear();
 		skinType = MinecraftClientAccess.get().getSkinType();
@@ -798,7 +814,10 @@ public class Editor {
 	public void reloadSkin() {
 		if(skinFile != null) {
 			try {
-				skinProvider.setImage(Image.loadFrom(skinFile));
+				Image img = Image.loadFrom(skinFile);
+				if(img.getWidth() > 512 || img.getHeight() > 512)
+					throw new IOException(gui.getGui().i18nFormat("label.cpm.tex_size_too_big", 512));
+				skinProvider.setImage(img);
 				skinProvider.setEdited(true);
 				setSkinEdited.accept(true);
 			} catch (IOException e) {
@@ -841,7 +860,7 @@ public class Editor {
 		private List<Runnable> rs;
 
 		public OpList(Runnable... r) {
-			rs = Arrays.asList(r);
+			rs = new ArrayList<>(Arrays.asList(r));
 		}
 
 		@Override
@@ -1037,5 +1056,68 @@ public class Editor {
 			freeLayers = new HashSet<>(cpy.freeLayers);
 			defaultLayerValue = new EnumMap<>(cpy.defaultLayerValue);
 		}
+	}
+
+	public UIColors colors() {
+		return gui.getGui().getColors();
+	}
+
+	public void addSkinLayer() {
+		OpList l = new OpList();
+		OpList u = new OpList(() -> selectedElement = null);
+		for(PlayerModelParts p : PlayerModelParts.VALUES) {
+			for (ModelElement el : elements) {
+				if(el.type == ElementType.ROOT_PART && el.typeData == p) {
+					ModelElement elem = new ModelElement(this);
+					l.rs.add(() -> el.children.add(elem));
+					u.rs.add(() -> el.children.remove(elem));
+					elem.parent = el;
+					PlayerPartValues val = PlayerPartValues.getFor(p, skinType);
+					elem.size = val.getSize();
+					elem.offset = val.getOffset();
+					elem.texture = true;
+					elem.u = val.u2;
+					elem.v = val.v2;
+					elem.name = gui.getGui().i18nFormat("label.cpm.layer_" + val.layer.getLowerName());
+					elem.mcScale = 0.25F;
+					break;
+				}
+			}
+		}
+		runOp(l);
+		addUndo(u);
+		markDirty();
+		updateGui();
+	}
+
+	public void convertModel() {
+		OpList l = new OpList();
+		OpList u = new OpList(() -> selectedElement = null);
+		for(PlayerModelParts p : PlayerModelParts.VALUES) {
+			for (ModelElement el : elements) {
+				if(el.type == ElementType.ROOT_PART && el.typeData == p) {
+					if(el.show) {
+						ModelElement elem = new ModelElement(this);
+						l.rs.add(() -> el.children.add(elem));
+						u.rs.add(() -> el.children.remove(elem));
+						elem.parent = el;
+						PlayerPartValues val = PlayerPartValues.getFor(p, skinType);
+						elem.size = val.getSize();
+						elem.offset = val.getOffset();
+						elem.texture = true;
+						elem.u = val.u;
+						elem.v = val.v;
+						elem.name = el.name;
+						l.rs.add(() -> el.show = false);
+						u.rs.add(() -> el.show = true);
+					}
+					break;
+				}
+			}
+		}
+		runOp(l);
+		addUndo(u);
+		markDirty();
+		updateGui();
 	}
 }

@@ -38,6 +38,7 @@ public class ModelDefinition {
 	private List<IResolvedModelPart> resolved;
 	private ModelPartPlayer player;
 	private SkinProvider skinOverride;
+	private SkinProvider listIconOverride;
 	private List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
 	private Map<ModelPart, RootModelElement> rootRenderingCubes;
@@ -245,5 +246,13 @@ public class ModelDefinition {
 		RootModelElement elem = new RootModelElement(type, this);
 		rootRenderingCubes.put(type, elem);
 		return elem;
+	}
+
+	public void setListIconOverride(SkinProvider listIconOverride) {
+		this.listIconOverride = listIconOverride;
+	}
+
+	public SkinProvider getListIconOverride() {
+		return listIconOverride;
 	}
 }

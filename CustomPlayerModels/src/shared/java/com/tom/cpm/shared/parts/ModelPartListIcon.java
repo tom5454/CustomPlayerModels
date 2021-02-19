@@ -2,20 +2,21 @@ package com.tom.cpm.shared.parts;
 
 import java.io.IOException;
 
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.skin.SkinProvider;
 
-public class ModelPartSkin implements IModelPart, IResolvedModelPart {
+public class ModelPartListIcon implements IModelPart, IResolvedModelPart {
 	private SkinProvider image;
 
-	public ModelPartSkin(IOHelper in, ModelDefinitionLoader loader) throws IOException {
-		image = new SkinProvider(in, 512);
+	public ModelPartListIcon(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+		image = new SkinProvider(in, 32);
 	}
 
-	public ModelPartSkin(Editor editor) {
-		this.image = editor.skinProvider;
+	public ModelPartListIcon(Editor editor) {
+		this.image = editor.listIconProvider;
 	}
 
 	@Override
@@ -24,8 +25,8 @@ public class ModelPartSkin implements IModelPart, IResolvedModelPart {
 	}
 
 	@Override
-	public SkinProvider getSkin() {
-		return image;
+	public void apply(ModelDefinition def) {
+		def.setListIconOverride(image);
 	}
 
 	@Override
@@ -35,6 +36,6 @@ public class ModelPartSkin implements IModelPart, IResolvedModelPart {
 
 	@Override
 	public ModelPartType getType() {
-		return ModelPartType.SKIN;
+		return ModelPartType.LIST_ICON;
 	}
 }

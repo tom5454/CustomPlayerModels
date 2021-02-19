@@ -333,7 +333,7 @@ public class GuiImpl extends Screen implements IGui {
 		public TxtField() {
 			this.field = new TextFieldWidget(textRenderer, 0, 0, 0, 0, null);
 			this.field.setMaxLength(1024*1024);
-			this.field.setHasBorder(false);
+			this.field.setDrawsBackground(false);
 			this.field.setVisible(true);
 			this.field.setEditableColor(16777215);
 			this.field.setChangedListener(this);

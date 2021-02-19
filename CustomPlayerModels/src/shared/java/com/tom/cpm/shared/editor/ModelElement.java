@@ -2,15 +2,17 @@ package com.tom.cpm.shared.editor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.tom.cpm.shared.editor.anim.IElem;
+import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.math.Vec3f;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.RenderedCube;
 
-public class ModelElement extends Cube implements IElem {
-
+public class ModelElement extends Cube implements IElem, TreeElement {
+	public Editor editor;
 	public String name;
 	public ModelElement parent;
 	public List<ModelElement> children = new ArrayList<>();
@@ -32,6 +34,7 @@ public class ModelElement extends Cube implements IElem {
 	public ModelElement(Editor editor, ElementType type, Object typeData, IGui gui) {
 		this.type = type;
 		this.typeData = typeData;
+		this.editor = editor;
 		type.buildElement(gui, editor, this, typeData);
 	}
 
@@ -63,4 +66,43 @@ public class ModelElement extends Cube implements IElem {
 		return show;
 	}
 
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void getTreeElements(Consumer<TreeElement> c) {
+		children.forEach(c);
+	}
+
+	@Override
+	public void onClick() {
+		editor.selectedElement = this;
+	}
+
+	@Override
+	public int textColor() {
+		return !show ? editor.colors().button_text_disabled : 0;
+	}
+
+	@Override
+	public int bgColor() {
+		return editor.selectedElement == this ? editor.colors().select_background : 0;
+	}
+
+	@Override
+	public void accept(TreeElement elem) {
+		editor.moveElement((ModelElement) elem, this);
+	}
+
+	@Override
+	public boolean canAccept(TreeElement elem) {
+		return elem instanceof ModelElement;
+	}
+
+	@Override
+	public boolean canMove() {
+		return type == ElementType.NORMAL;
+	}
 }

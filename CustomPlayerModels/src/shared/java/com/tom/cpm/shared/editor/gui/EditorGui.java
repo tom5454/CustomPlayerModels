@@ -6,6 +6,8 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
 import com.tom.cpm.shared.editor.gui.popup.FileChooserGui;
+import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.gui.Frame;
 import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.gui.elements.Button;
@@ -17,6 +19,8 @@ import com.tom.cpm.shared.gui.elements.MessagePopup;
 import com.tom.cpm.shared.gui.elements.Panel;
 import com.tom.cpm.shared.gui.elements.PopupMenu;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
+import com.tom.cpm.shared.gui.elements.Tooltip;
+import com.tom.cpm.shared.gui.elements.Tree;
 import com.tom.cpm.shared.gui.util.HorizontalLayout;
 import com.tom.cpm.shared.gui.util.TabbedPanelManager;
 import com.tom.cpm.shared.math.Box;
@@ -111,7 +115,7 @@ public class EditorGui extends Frame {
 		Panel p = new Panel(gui);
 		int treeW = Math.min(150, height / 2);
 		p.setBounds(new Box(width - treeW, height / 2, treeW, height / 2));
-		ModelElementsTree tree = new ModelElementsTree(gui, editor);
+		Tree<TreeElement> tree = new Tree<>(this, new ModelTree(editor));
 		tree.setBounds(new Box(0, 0, treeW, height / 2 - 25));
 		p.addElement(tree);
 		p.setBackgroundColor(gui.getColors().panel_background);
@@ -210,6 +214,13 @@ public class EditorGui extends Frame {
 
 		Button redo = pp.addButton(gui.i18nFormat("button.cpm.edit.redo"), editor::redo);
 		editor.setRedoEn.add(redo::setEnabled);
+
+		pp.add(new Label(gui, "=========").setBounds(new Box(5, 5, 0, 0)));
+
+		Button convertToCustom = pp.addButton(gui.i18nFormat("button.cpm.edit.convert_model_custom"), editor::convertModel);
+		convertToCustom.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.edit.convert_model_custom")));
+
+		Button addSkinLayers = pp.addButton(gui.i18nFormat("button.cpm.edit.add_skin_layer2"), editor::addSkinLayer);
 	}
 
 	private void initEffectMenu() {

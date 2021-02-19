@@ -8,7 +8,7 @@ import com.tom.cpm.shared.math.Box;
 
 public class Panel extends GuiElement {
 	protected List<GuiElement> elements = new ArrayList<>();
-	private int backgroundColor;
+	protected int backgroundColor;
 	public Panel(IGui gui) {
 		super(gui);
 	}
@@ -35,6 +35,7 @@ public class Panel extends GuiElement {
 	@Override
 	public void mouseClick(MouseEvent event) {
 		if(!elements.isEmpty()) {
+			List<GuiElement> elements = new ArrayList<>(this.elements);
 			for (int i = elements.size()-1; i >= 0; i--) {
 				GuiElement guiElement = elements.get(i);
 				if(guiElement.isVisible()) {
@@ -47,10 +48,13 @@ public class Panel extends GuiElement {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		for (int i = elements.size()-1; i >= 0; i--) {
-			GuiElement guiElement = elements.get(i);
-			if(guiElement.isVisible()) {
-				guiElement.keyPressed(event);
+		if(!elements.isEmpty()) {
+			List<GuiElement> elements = new ArrayList<>(this.elements);
+			for (int i = elements.size()-1; i >= 0; i--) {
+				GuiElement guiElement = elements.get(i);
+				if(guiElement.isVisible()) {
+					guiElement.keyPressed(event);
+				}
 			}
 		}
 	}
@@ -61,10 +65,13 @@ public class Panel extends GuiElement {
 
 	@Override
 	public void mouseDrag(MouseEvent event) {
-		for (int i = elements.size()-1; i >= 0; i--) {
-			GuiElement guiElement = elements.get(i);
-			if(guiElement.isVisible()) {
-				guiElement.mouseDrag(event.offset(getBounds()));
+		if(!elements.isEmpty()) {
+			List<GuiElement> elements = new ArrayList<>(this.elements);
+			for (int i = elements.size()-1; i >= 0; i--) {
+				GuiElement guiElement = elements.get(i);
+				if(guiElement.isVisible()) {
+					guiElement.mouseDrag(event.offset(getBounds()));
+				}
 			}
 		}
 		if(event.isInBounds(getBounds()) && backgroundColor > 0)event.consume();
@@ -72,10 +79,13 @@ public class Panel extends GuiElement {
 
 	@Override
 	public void mouseRelease(MouseEvent event) {
-		for (int i = elements.size()-1; i >= 0; i--) {
-			GuiElement guiElement = elements.get(i);
-			if(guiElement.isVisible()) {
-				guiElement.mouseRelease(event.offset(getBounds()));
+		if(!elements.isEmpty()) {
+			List<GuiElement> elements = new ArrayList<>(this.elements);
+			for (int i = elements.size()-1; i >= 0; i--) {
+				GuiElement guiElement = elements.get(i);
+				if(guiElement.isVisible()) {
+					guiElement.mouseRelease(event.offset(getBounds()));
+				}
 			}
 		}
 		if(event.isInBounds(getBounds()) && backgroundColor > 0)event.consume();
@@ -83,10 +93,13 @@ public class Panel extends GuiElement {
 
 	@Override
 	public void mouseWheel(MouseEvent event) {
-		for (int i = elements.size()-1; i >= 0; i--) {
-			GuiElement guiElement = elements.get(i);
-			if(guiElement.isVisible()) {
-				guiElement.mouseWheel(event.offset(getBounds()));
+		if(!elements.isEmpty()) {
+			List<GuiElement> elements = new ArrayList<>(this.elements);
+			for (int i = elements.size()-1; i >= 0; i--) {
+				GuiElement guiElement = elements.get(i);
+				if(guiElement.isVisible()) {
+					guiElement.mouseWheel(event.offset(getBounds()));
+				}
 			}
 		}
 		if(event.isInBounds(getBounds()) && backgroundColor > 0)event.consume();
