@@ -24,11 +24,12 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.config.ResourceLoader;
+import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
 import com.tom.cpm.shared.io.ChecksumInputStream;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.SkinDataInputStream;
 import com.tom.cpm.shared.loaders.GistResourceLoader;
-import com.tom.cpm.shared.loaders.InternalResourceLoader;
+import com.tom.cpm.shared.loaders.GithubRepoResourceLoader;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartEnd;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
@@ -55,8 +56,8 @@ public class ModelDefinitionLoader {
 	});
 	private static final Map<String, ResourceLoader> LOADERS = new HashMap<>();
 	static {
-		LOADERS.put("int", new InternalResourceLoader());
 		LOADERS.put("git", new GistResourceLoader());
+		LOADERS.put("gh", new GithubRepoResourceLoader());
 	}
 	private Image template;
 	public static final int HEADER = 0x53;
@@ -120,8 +121,8 @@ public class ModelDefinitionLoader {
 		return def;
 	}
 
-	public InputStream load(Link link) throws IOException {
-		return LOADERS.get(link.loader).loadResource(link.path);
+	public InputStream load(Link link, ResourceEncoding enc) throws IOException {
+		return LOADERS.get(link.loader).loadResource(link.path, enc);
 	}
 
 	public Image getTemplate() {

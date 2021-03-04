@@ -65,7 +65,8 @@ public class PlayerProfile extends Player {
 	@Override
 	public void loadSkin(Runnable onLoaded) {
 		MinecraftClient mc = MinecraftClient.getInstance();
-		mc.getSkinProvider().loadSkin(profile, new PlayerSkinProvider.SkinTextureAvailableCallback() {
+		mc.getSkinProvider().loadSkin(new GameProfile(profile.getId(), profile.getName()),
+				new PlayerSkinProvider.SkinTextureAvailableCallback() {
 
 			@Override
 			public void onSkinTextureAvailable(Type typeIn, Identifier identifier, MinecraftProfileTexture profileTexture) {

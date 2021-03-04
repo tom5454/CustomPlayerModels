@@ -1,53 +1,80 @@
 package com.tom.cpm.shared.animation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
 import com.tom.cpm.shared.config.Player;
 
 public class AnimationHandler {
 	private final Player player;
 
-	private Animation currentAnimation;
-	private long currentStart;
+	private List<PlayingAnim> currentAnimations = new ArrayList<>();
+	private List<Animation> nextAnims = new ArrayList<>();
 
 	private Gesture currentGesture;
-	private long gestureStart;
-
-	private Animation nextAnimation;
 
 	public AnimationHandler(Player player) {
 		this.player = player;
 	}
 
 	public void animate(long currentTime) {
-		if (nextAnimation != null) {
-			currentAnimation = nextAnimation;
-			currentStart = currentTime;
-			nextAnimation = null;
+		boolean needsSort = false;
+		currentAnimations.removeIf(a -> !nextAnims.contains(a.currentAnimation));
+		for (Animation animation : nextAnims) {
+			boolean found = false;
+			for (int i = 0; i < currentAnimations.size(); i++) {
+				if(currentAnimations.get(i).currentAnimation == animation) {
+					found = true;
+					break;
+				}
+			}
+			if(!found) {
+				currentAnimations.add(new PlayingAnim(animation, currentTime,
+						currentGesture != null ? (currentGesture.animation.contains(animation) ? currentGesture.isLoop : true) : true));
+				needsSort = true;
+			}
 		}
+		if(needsSort)
+			currentAnimations.sort((a, b) -> Integer.compare(a.currentAnimation.priority, b.currentAnimation.priority));
 
 		player.getModelDefinition().resetAnimationPos();
 
-		if (currentAnimation != null) {
-			long currentStep = (currentTime - currentStart);
-			currentAnimation.animate(currentStep, player.getModelDefinition());
+		for (PlayingAnim a : currentAnimations) {
+			if(!a.finished) {
+				long currentStep = (currentTime - a.currentStart);
+				a.currentAnimation.animate(currentStep, player.getModelDefinition());
+
+				if(!a.loop && currentStep > a.currentAnimation.duration) {
+					a.finished = true;
+				}
+			}
 		}
 
-		if(currentGesture != null) {
-			long currentStep = (currentTime - gestureStart);
-			currentGesture.animation.animate(currentStep, player.getModelDefinition());
-
-			if(currentStep > currentGesture.animation.duration && !currentGesture.isLoop)
-				currentGesture = null;
-		}
+		nextAnims.clear();
 	}
 
-	public void setNextAnimation(Animation next) {
-		if(currentAnimation != next)
-			nextAnimation = next;
+	public void addAnimations(List<Animation> next) {
+		nextAnims.addAll(next);
 	}
 
 	public void setGesture(Gesture next) {
-		if(currentGesture != next)
-			currentGesture = next;
+		currentGesture = next;
+		if(next != null) {
+			nextAnims.addAll(next.animation);
+		}
+	}
+
+	private static class PlayingAnim {
+		private Animation currentAnimation;
+		private long currentStart;
+		private boolean loop, finished;
+
+		public PlayingAnim(Animation currentAnimation, long currentStart, boolean loop) {
+			this.currentAnimation = currentAnimation;
+			this.currentStart = currentStart;
+			this.loop = loop;
+			this.finished = false;
+		}
 	}
 }

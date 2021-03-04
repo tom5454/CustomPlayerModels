@@ -91,6 +91,14 @@ public class Image {
 		}
 	}
 
+	public void draw(Image i, int xs, int ys) {
+		for(int x = 0;x + xs < w && x < i.w;x++) {
+			for(int y = 0;y + ys < h && y < i.h;y++) {
+				data[(y + ys) * w + x + xs] = i.data[y * i.w + x];
+			}
+		}
+	}
+
 	public static CompletableFuture<Image> download(String url) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
@@ -99,5 +107,13 @@ public class Image {
 				throw new RuntimeException(e);
 			}
 		});
+	}
+
+	public void fill(int color) {
+		for(int y = 0;y<h;y++) {
+			for(int x = 0;x<w;x++) {
+				data[y * w + x] = color;
+			}
+		}
 	}
 }

@@ -41,6 +41,23 @@ public class Cube {
 		return c;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static Cube loadDefinitionCube(Map<String, Object> map) {
+		Cube c = new Cube();
+		c.offset = new Vec3f((Map<String, Object>) map.get("offset"), new Vec3f());
+		c.pos = new Vec3f((Map<String, Object>) map.get("pos"), new Vec3f());
+		c.rotation = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f());
+		c.size = new Vec3f((Map<String, Object>) map.get("size"), new Vec3f(1, 1, 1));
+		c.scale = new Vec3f((Map<String, Object>) map.get("scale"), new Vec3f(1, 1, 1));
+		c.u = ((Number)map.get("u")).intValue();
+		c.v = ((Number)map.get("v")).intValue();
+		c.rgb = Integer.parseUnsignedInt((String) map.get("color"), 16);
+		c.texSize = ((Number)map.get("textureSize")).intValue();
+		c.mcScale = ((Number)map.get("mcScale")).floatValue();
+		c.parentId = ((Number)map.get("parent")).intValue();
+		return c;
+	}
+
 	public static void saveDefinitionCube(IOHelper dout, Cube cube) throws IOException {
 		dout.writeVec3ub(cube.size);
 		dout.writeVec6b(cube.pos);
@@ -56,6 +73,20 @@ public class Cube {
 			dout.write(cube.u);
 			dout.write(cube.v);
 		}
+	}
+
+	public static void saveDefinitionCube(Map<String, Object> map, Cube cube) throws IOException {
+		map.put("offset", cube.offset.toMap());
+		map.put("pos", cube.pos.toMap());
+		map.put("rotation", cube.rotation.toMap());
+		map.put("size", cube.size.toMap());
+		map.put("scale", cube.scale.toMap());
+		map.put("u", cube.u);
+		map.put("v", cube.v);
+		map.put("color", Integer.toHexString(cube.rgb));
+		map.put("mcScale", cube.mcScale);
+		map.put("textureSize", cube.texSize);
+		map.put("parent", cube.parentId);
 	}
 
 	public static Cube loadTemplateCube(IOHelper din, int[] colors) throws IOException {

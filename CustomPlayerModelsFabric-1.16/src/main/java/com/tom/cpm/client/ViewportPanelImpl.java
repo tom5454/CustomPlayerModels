@@ -33,6 +33,7 @@ import net.minecraft.util.math.Quaternion;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.gui.ViewportPanel.ViewportPanelNative;
@@ -140,6 +141,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			int light = 15 << 4 | 15 << 20;
 			RenderLayer rt = editor.renderPaint ? CustomRenderTypes.getEntityTranslucentCullNoLight(PAINT) : RenderLayer.getEntityTranslucentCull(cbi.getReturnValue());
 			VertexConsumer buffer = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rt);
+			((RDH)CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolder(p)).defaultType = rt;
 			PlayerModelSetup.setAngles(p, 0, 0, 0, 0, mc.options.mainArm, false);
 			if(!editor.applyAnim && editor.playerTpose) {
 				p.rightArm.roll = (float) Math.toRadians(90);

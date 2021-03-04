@@ -26,6 +26,7 @@ import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -108,7 +109,8 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void initGui(Screen screen, List<Element> children, List<AbstractButtonWidget> buttons) {
-		if(screen instanceof TitleScreen || screen instanceof SkinOptionsScreen) {
+		if((screen instanceof TitleScreen && ModConfig.getConfig().getSetBoolean("titleScreenButton", true)) ||
+				screen instanceof SkinOptionsScreen) {
 			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen)));
 			buttons.add(btn);
 			children.add(btn);

@@ -1,6 +1,6 @@
 package com.tom.cpm.shared.animation;
 
-import java.util.function.Function;
+import com.tom.cpm.shared.gui.IGui;
 
 public class CustomPose implements IPose {
 	private String name;
@@ -9,7 +9,7 @@ public class CustomPose implements IPose {
 	}
 
 	@Override
-	public String getName(Function<String, String> i18n) {
+	public String getName(IGui gui, String display) {
 		return name;
 	}
 

@@ -22,6 +22,12 @@ public class Link {
 		this.path = path;
 	}
 
+	public Link(String fullPath) {
+		String[] sp = fullPath.split(":", 2);
+		this.loader = sp[0];
+		this.path = sp[1];
+	}
+
 	public void write(IOHelper dout) throws IOException {
 		byte[] path = (loader + ":" + this.path).getBytes();
 		dout.write(path.length);

@@ -7,6 +7,7 @@ import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.gui.elements.GuiElement;
 import com.tom.cpm.shared.math.MathHelper;
 import com.tom.cpm.shared.math.Vec2i;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class TextureDisplayPanel extends GuiElement {
 	private int lastMx, lastMy;
@@ -23,24 +24,25 @@ public class TextureDisplayPanel extends GuiElement {
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
-		if(editor.skinProvider.texture != null) {
+		TextureProvider provider = editor.getTextureProvider();
+		if(provider != null && provider.texture != null) {
 			gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_fill);
-			editor.skinProvider.bind();
+			provider.bind();
 			if(zoom == 0) {
-				zoom = bounds.h / (float) editor.skinProvider.getImage().getWidth();
+				zoom = bounds.h / (float) provider.getImage().getWidth();
 			}
-			int rw = (int) (zoom * editor.skinProvider.getImage().getWidth());
-			int rh = (int) (zoom * editor.skinProvider.getImage().getHeight());
+			int rw = (int) (zoom * provider.getImage().getWidth());
+			int rh = (int) (zoom * provider.getImage().getHeight());
 			gui.drawBox(bounds.x + offX, bounds.y + offY, rw, rh, 0xffffffff);
 			gui.drawTexture(bounds.x + offX, bounds.y + offY, rw, rh, 0, 0, 1, 1);
 			int imgX = (int) ((mouseX - offX - bounds.x) / zoom);
 			int imgY = (int) ((mouseY - offY - bounds.y) / zoom);
 			SkinTextureDisplay.drawBoxTextureOverlay(gui, editor, bounds.x + offX, bounds.y + offY, zoom, zoom);
-			Vec2i p1 = imgX >= 0 && imgY >= 0 && imgX < editor.skinProvider.getImage().getWidth() && imgY < editor.skinProvider.getImage().getHeight() ? new Vec2i(imgX, imgY) : null;
+			Vec2i p1 = imgX >= 0 && imgY >= 0 && imgX < provider.getImage().getWidth() && imgY < provider.getImage().getHeight() ? new Vec2i(imgX, imgY) : null;
 			Vec2i p2 = editor.cursorPos.get();
 			Vec2i p = p2 != null ? p2 : p1;
-			if(p != null && p.x >= 0 && p.y >= 0 && p.x < editor.skinProvider.getImage().getWidth() && p.y < editor.skinProvider.getImage().getHeight()) {
-				int imgC = editor.skinProvider.getImage().getRGB(p.x, p.y);
+			if(p != null && p.x >= 0 && p.y >= 0 && p.x < provider.getImage().getWidth() && p.y < provider.getImage().getHeight()) {
+				int imgC = provider.getImage().getRGB(p.x, p.y);
 				int outlineColor = ((0xffffff - (imgC & 0xffffff)) & 0xffffff);
 				int a = (imgC >> 24) & 0xff;
 				if(a < 64)outlineColor = 0x000000;
@@ -55,18 +57,19 @@ public class TextureDisplayPanel extends GuiElement {
 	@Override
 	public boolean mouseWheel(int x, int y, int dir) {
 		if(bounds.isInBounds(x, y)) {
+			TextureProvider provider = editor.getTextureProvider();
 			float zv = (dir * (zoom / 8f));
-			float iw = editor.skinProvider.getImage().getWidth() * zoom;
-			float ih = editor.skinProvider.getImage().getHeight() * zoom;
+			float iw = provider.getImage().getWidth() * zoom;
+			float ih = provider.getImage().getHeight() * zoom;
 			zoom += zv;
-			float niw = editor.skinProvider.getImage().getWidth() * zoom;
-			float nih = editor.skinProvider.getImage().getHeight() * zoom;
+			float niw = provider.getImage().getWidth() * zoom;
+			float nih = provider.getImage().getHeight() * zoom;
 			//offX -= (bounds.w / 2 - x - offX - bounds.x) * zv / 2;
 			//offY -= (bounds.h / 2 - y - offY - bounds.y) * zv / 2;
 			offX -= ((niw - iw) / 2) * MathHelper.clamp(Math.abs(1-(offX / (bounds.w / 2))), 0, 1);
 			offY -= ((nih - ih) / 2) * MathHelper.clamp(Math.abs(1-(offY / (bounds.h / 2))), 0, 1);
-			offX = MathHelper.clamp(offX, (int) (-editor.skinProvider.getImage().getWidth() * zoom + 10), bounds.w - 10);
-			offY = MathHelper.clamp(offY, (int) (-editor.skinProvider.getImage().getWidth() * zoom + 10), bounds.h - 10);
+			offX = MathHelper.clamp(offX, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.w - 10);
+			offY = MathHelper.clamp(offY, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.h - 10);
 			return true;
 		}
 		return false;
@@ -78,12 +81,13 @@ public class TextureDisplayPanel extends GuiElement {
 			lastMx = x;
 			lastMy = y;
 			dragging = true;
+			TextureProvider provider = editor.getTextureProvider();
 			if(btn == 0) {
 				int px = (int) ((x - offX - bounds.x) / zoom);
 				int py = (int) ((y - offY - bounds.y) / zoom);
-				if(px >= 0 && py >= 0 && px < editor.skinProvider.getImage().getWidth() && py < editor.skinProvider.getImage().getHeight()) {
+				if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
 					if(gui.isCtrlDown()) {
-						editor.penColor = editor.skinProvider.getImage().getRGB(px, py);
+						editor.penColor = provider.getImage().getRGB(px, py);
 						editor.setPenColor.accept(editor.penColor);
 						dragging = false;
 					} else
@@ -101,16 +105,17 @@ public class TextureDisplayPanel extends GuiElement {
 			if(dragging) {
 				int dx = x - lastMx;
 				int dy = y - lastMy;
+				TextureProvider provider = editor.getTextureProvider();
 
 				if(btn == 2) {
 					offX += dx;
 					offY += dy;
-					offX = MathHelper.clamp(offX, (int) (-editor.skinProvider.getImage().getWidth() * zoom + 10), bounds.w - 10);
-					offY = MathHelper.clamp(offY, (int) (-editor.skinProvider.getImage().getWidth() * zoom + 10), bounds.h - 10);
+					offX = MathHelper.clamp(offX, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.w - 10);
+					offY = MathHelper.clamp(offY, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.h - 10);
 				} else if(btn == 0) {
 					int px = (int) ((x - offX - bounds.x) / zoom);
 					int py = (int) ((y - offY - bounds.y) / zoom);
-					if(px >= 0 && py >= 0 && px < editor.skinProvider.getImage().getWidth() && py < editor.skinProvider.getImage().getHeight()) {
+					if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
 						editor.drawPixel(px, py);
 					}
 				}

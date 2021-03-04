@@ -6,13 +6,13 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class ModelPartListIcon implements IModelPart, IResolvedModelPart {
-	private SkinProvider image;
+	private TextureProvider image;
 
 	public ModelPartListIcon(IOHelper in, ModelDefinitionLoader loader) throws IOException {
-		image = new SkinProvider(in, 32);
+		image = new TextureProvider(in, 32);
 	}
 
 	public ModelPartListIcon(Editor editor) {

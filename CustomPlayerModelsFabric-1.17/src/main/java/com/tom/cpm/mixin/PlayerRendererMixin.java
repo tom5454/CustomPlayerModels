@@ -22,7 +22,7 @@ import net.minecraft.util.Identifier;
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.shared.config.Player;
 
-@Mixin(PlayerEntityRenderer.class)
+@Mixin(value = PlayerEntityRenderer.class, priority = 1100)
 public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
 
 	public PlayerRendererMixin(Context ctx, PlayerEntityModel<AbstractClientPlayerEntity> model, float shadowRadius) {
@@ -78,7 +78,8 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 			method = "renderArm("
 					+ "Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;"
 					+ "ILnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/model/ModelPart;"
-					+ "Lnet/minecraft/client/model/ModelPart;)V"
+					+ "Lnet/minecraft/client/model/ModelPart;)V",
+					require = 0
 			)
 	public RenderLayer getArmLayer(Identifier loc, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity playerIn, ModelPart arm, ModelPart sleeve) {
 		return CustomPlayerModelsClient.mc.getPlayerRenderManager().isBound(getModel()) ? RenderLayer.getEntityTranslucent(getTexture(playerIn)) : RenderLayer.getEntitySolid(getTexture(playerIn));

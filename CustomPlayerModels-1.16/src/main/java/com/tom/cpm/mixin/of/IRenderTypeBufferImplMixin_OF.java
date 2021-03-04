@@ -11,7 +11,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.tom.cpm.client.optifine.proxy.IRenderTypeBufferOF;
 
 @Mixin(IRenderTypeBuffer.Impl.class)
-public abstract class IRenderTypeBufferImplOFMixin implements IRenderTypeBufferOF {
+public abstract class IRenderTypeBufferImplMixin_OF implements IRenderTypeBufferOF {
 
 	@Shadow public abstract IVertexBuilder getBuffer(ResourceLocation textureLocation, IVertexBuilder def);
 

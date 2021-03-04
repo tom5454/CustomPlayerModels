@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.Editor.AnimationEncodingData;
+import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.util.GetFreeSkinSlots;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.gui.IGui;

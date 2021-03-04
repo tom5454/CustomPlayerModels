@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.editor.anim;
 
+import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.math.Vec3f;
 
 public interface IElem {
@@ -8,17 +9,17 @@ public interface IElem {
 	Vec3f getColor();
 	boolean isVisible();
 
-	default float part(int i) {
+	default float part(InterpolatorChannel i) {
 		switch (i) {
-		case 0: return getPosition().x;
-		case 1: return getPosition().y;
-		case 2: return getPosition().z;
-		case 3: return getRotation().x;
-		case 4: return getRotation().y;
-		case 5: return getRotation().z;
-		case 6: return getColor().x;
-		case 7: return getColor().y;
-		case 8: return getColor().z;
+		case POS_X: return getPosition().x;
+		case POS_Y: return getPosition().y;
+		case POS_Z: return getPosition().z;
+		case ROT_X: return (float) Math.toRadians(getRotation().x);
+		case ROT_Y: return (float) Math.toRadians(getRotation().y);
+		case ROT_Z: return (float) Math.toRadians(getRotation().z);
+		case COLOR_R: return getColor().x;
+		case COLOR_G: return getColor().y;
+		case COLOR_B: return getColor().z;
 		default:
 			break;
 		}

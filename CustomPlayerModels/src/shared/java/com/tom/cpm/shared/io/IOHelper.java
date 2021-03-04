@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.function.Function;
@@ -28,6 +29,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 	private static final int DIV = Short.MAX_VALUE / Vec3f.MAX_POS;
 	private DataInputStream din;
 	private DataOutputStream dout;
+	private ByteArrayOutputStream baos;
 
 	public IOHelper(DataInputStream din) {
 		this.din = din;
@@ -43,6 +45,19 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 
 	public IOHelper(OutputStream dout) {
 		this.dout = new DataOutputStream(dout);
+		if(dout instanceof ByteArrayOutputStream)baos = (ByteArrayOutputStream) dout;
+	}
+
+	public IOHelper(byte[] data) {
+		this(new ByteArrayInputStream(data));
+	}
+
+	public IOHelper() {
+		this(new ByteArrayOutputStream());
+	}
+
+	public IOHelper(String b64) {
+		this(Base64.getDecoder().decode(b64));
 	}
 
 	public int read() throws IOException {
@@ -374,6 +389,17 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		try(IOHelper h = writeNextBlock()) {
 			img.storeTo(h.getDout());
 		}
+	}
+
+	public void writeBlock(IOHelper to) throws IOException {
+		if(baos == null)throw new IOException("Not a byte array backed io handler");
+		to.writeVarInt(baos.size());
+		baos.writeTo(to.dout);
+	}
+
+	public String toB64() throws IOException {
+		if(baos == null)throw new IOException("Not a byte array backed io handler");
+		return Base64.getEncoder().encodeToString(baos.toByteArray());
 	}
 
 	@FunctionalInterface

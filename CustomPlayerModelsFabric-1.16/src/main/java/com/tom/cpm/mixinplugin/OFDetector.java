@@ -1,10 +1,11 @@
-package com.tom.cpm.client.optifine;
+package com.tom.cpm.mixinplugin;
 
 import net.fabricmc.loader.api.FabricLoader;
 
-public class OptifineDetector {
+public class OFDetector {
+
 	//Taken from Immersive Portals
-	public static boolean detectOptiFine() {
+	public static boolean doApply() {
 		boolean isOptiFabricPresent = FabricLoader.getInstance().isModLoaded("optifabric");
 
 		if (!isOptiFabricPresent) {

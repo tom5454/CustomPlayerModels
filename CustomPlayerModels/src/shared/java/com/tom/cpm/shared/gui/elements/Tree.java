@@ -7,12 +7,10 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.math.Vec2i;
 
 public class Tree<T> extends GuiElement {
 	private TreeElement root;
 	private Map<Integer, TreeElement> map = new HashMap<>();
-	private TreeElement moveElem;
 	private TreeModel<T> model;
 	private Frame frame;
 
@@ -31,28 +29,13 @@ public class Tree<T> extends GuiElement {
 			int yp = (evt.y - bounds.y) / 10;
 			TreeElement elem = map.get(yp);
 			if(elem != null) {
-				if(evt.btn == 1) {
-					if(elem.value != null && (model.canMove(elem.value) || (moveElem != null && model.canMoveTo(moveElem.value, elem.value)))) {
-						PopupMenu popup = new PopupMenu(gui);
-						popup.addButton(moveElem != null ? gui.i18nFormat("button.cpm.tree.put") : gui.i18nFormat("button.cpm.tree.move"), () -> {
-							if(moveElem != null) {
-								if(moveElem.value != elem.value)
-									model.moveElement(moveElem.value, elem.value);
-								moveElem = null;
-							} else moveElem = elem;
-						});
-						Vec2i p = evt.getPos();
-						popup.display(frame, p.x, p.y);
-					}
+				if(evt.btn == 0 && evt.x < 5 + elem.depth * 5 && elem != root && !elem.children.isEmpty()) {
+					elem.showChildren = !elem.showChildren;
 				} else {
-					if(evt.x < 5 + elem.depth * 5 && elem != root && !elem.children.isEmpty()) {
-						elem.showChildren = !elem.showChildren;
-					} else {
-						model.onClick(elem.value);
-					}
+					model.onClick(evt, elem.value);
 				}
 			} else {
-				model.onClick(null);
+				model.onClick(evt, null);
 			}
 			model.treeUpdated();
 			evt.consume();
@@ -69,9 +52,6 @@ public class Tree<T> extends GuiElement {
 	private void drawTree(int mouseX, int mouseY, int x, int[] y, TreeElement e) {
 		int yp = y[0]++;
 		int textColor = gui.getColors().button_text_color;
-		if(moveElem != null && e.value == moveElem.value) {
-			gui.drawBox(x * 5 - 1, yp * 10 - 1, bounds.w - 1, 12, gui.getColors().select_background);
-		}
 		int bg = e.value == null ? 0 : model.bgColor(e.value);
 		if(bg != 0) {
 			gui.drawBox(x * 5, yp * 10, bounds.w, 10, bg);
@@ -82,6 +62,8 @@ public class Tree<T> extends GuiElement {
 		}
 		if(mouseX > bounds.x && mouseY > yp * 10 && mouseY < (yp+1) * 10) {
 			textColor = gui.getColors().button_text_hover;
+			Tooltip tt = model.getTooltip(e.value);
+			if(tt != null)tt.set();
 		}
 		map.put(yp, e);
 		gui.drawText(x * 5 + 3, yp * 10, e.display, textColor);
@@ -107,6 +89,7 @@ public class Tree<T> extends GuiElement {
 			TreeElement oldTree = find(old, e);
 			if(oldTree != null)t.showChildren = oldTree.showChildren;
 			root.children.add(t);
+			model.refresh(e);
 			walkChildren(t, oldTree != null ? oldTree.children : null);
 		});
 	}
@@ -148,10 +131,9 @@ public class Tree<T> extends GuiElement {
 		protected abstract void getElements(T parent, Consumer<T> c);
 		protected abstract int bgColor(T val);
 		protected abstract void treeUpdated();
-		protected abstract void moveElement(T elem, T to);
-		protected abstract boolean canMove(T elem);
-		protected abstract boolean canMoveTo(T elem, T to);
-		protected abstract void onClick(T elem);
+		protected abstract void onClick(MouseEvent evt, T elem);
 		protected abstract String getName(T elem);
+		protected abstract Tooltip getTooltip(T elem);
+		protected abstract void refresh(T elem);
 	}
 }

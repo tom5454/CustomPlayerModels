@@ -3,12 +3,13 @@ package com.tom.cpm.shared.editor.anim;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
 
-import com.tom.cpm.externals.org.apache.commons.math3.PolynomialSplineFunction;
-import com.tom.cpm.externals.org.apache.commons.math3.SplineInterpolator;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
+import com.tom.cpm.shared.animation.InterpolatorChannel;
+import com.tom.cpm.shared.animation.PolynomialSplineInterpolator;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.gui.AnimPanel.IAnim;
@@ -18,49 +19,40 @@ public class EditorAnim implements IAnim {
 	private List<ModelElement> components;
 	private final List<AnimFrame> frames = new ArrayList<>();
 	public int duration = 1000;
-	private PolynomialSplineFunction[][] psfs;
+	private DoubleUnaryOperator[][] psfs;
 	private AnimFrame currentFrame;
 	public final Editor editor;
 	public final String filename;
+	public final AnimationType type;
 	public IPose pose;
-	public String gestureName;
+	public String displayName;
 	public boolean add = true;
 	public boolean loop;
+	public int priority;
 
-	public EditorAnim(Editor e, String filename, boolean initNew) {
+	public EditorAnim(Editor e, String filename, AnimationType type, boolean initNew) {
 		this.editor = e;
 		this.filename = filename;
+		this.type = type;
 		if(initNew)addFrame();
 	}
 
 	private void calculateSplines() {
 		components = frames.stream().flatMap(AnimFrame::getAllElements).distinct().collect(Collectors.toList());
 
-		psfs = new PolynomialSplineFunction[components.size()][9];
-
-		SplineInterpolator si = new SplineInterpolator();
-
-		double[] xArr = new double[frames.size() + 5];
-		for (int i = 0; i < frames.size() + 5; i++)
-			xArr[i] = i - 2;
+		psfs = new DoubleUnaryOperator[components.size()][InterpolatorChannel.VALUES.length];
 
 		for (int component = 0; component < components.size(); component++) {
-			double[][] yArr = new double[9][frames.size() + 5];
-			for (int i = 0; i < 9; i++) {
-				for (int j = 0; j < frames.size() + 5; j++) {
-					IElem data = frames.get((j + frames.size() - 2) % frames.size()).getData(components.get(component));
-					if (data == null)
-						data = components.get(component);
-					yArr[i][j] = data.part(i);
-				}
-
-				psfs[component][i] = si.interpolate(xArr, yArr[i]);
+			for (InterpolatorChannel channel : InterpolatorChannel.VALUES) {
+				PolynomialSplineInterpolator i = new PolynomialSplineInterpolator();
+				i.init(frames, components.get(component), channel);
+				psfs[component][channel.channelID()] = i;
 			}
 		}
 	}
 
-	public float getValue(ModelElement component, int attribute, double time) {
-		return (float) psfs[components.indexOf(component)][attribute].value(time);
+	public float getValue(ModelElement component, InterpolatorChannel attribute, double time) {
+		return (float) psfs[components.indexOf(component)][attribute.channelID()].applyAsDouble(time);
 	}
 
 	public void apply() {
@@ -75,42 +67,52 @@ public class EditorAnim implements IAnim {
 		for (int i = 0; i < components.size(); i++) {
 			ModelElement component = components.get(i);
 			component.rc.setRotation(add,
-					(float) Math.toRadians(getValue(component, 3, step)),
-					(float) Math.toRadians(getValue(component, 4, step)),
-					(float) Math.toRadians(getValue(component, 5, step))
+					getValue(component, InterpolatorChannel.ROT_X, step),
+					getValue(component, InterpolatorChannel.ROT_Y, step),
+					getValue(component, InterpolatorChannel.ROT_Z, step)
 					);
-			component.rc.setPosition(add, getValue(component, 0, step), getValue(component, 1, step), getValue(component, 2, step));
-			component.rc.setColor(getValue(component, 6, step), getValue(component, 7, step), getValue(component, 8, step));
+			component.rc.setPosition(add,
+					getValue(component, InterpolatorChannel.POS_X, step),
+					getValue(component, InterpolatorChannel.POS_Y, step),
+					getValue(component, InterpolatorChannel.POS_Z, step));
+			component.rc.setColor(
+					getValue(component, InterpolatorChannel.COLOR_R, step),
+					getValue(component, InterpolatorChannel.COLOR_G, step),
+					getValue(component, InterpolatorChannel.COLOR_B, step));
 			component.rc.setVisible(frames.get((int) step).getVisible(component));
 		}
 	}
 
 	public void setPosition(Vec3f v) {
-		if(currentFrame != null) {
-			currentFrame.setPos(editor.selectedElement, v);
+		if(currentFrame != null && editor.getSelectedElement() != null) {
+			currentFrame.setPos(editor.getSelectedElement(), v);
 		}
 		components = null;
+		psfs = null;
 	}
 
 	public void setRotation(Vec3f v) {
-		if(currentFrame != null) {
-			currentFrame.setRot(editor.selectedElement, v);
+		if(currentFrame != null && editor.getSelectedElement() != null) {
+			currentFrame.setRot(editor.getSelectedElement(), v);
 		}
 		components = null;
+		psfs = null;
 	}
 
 	public void switchVisible() {
-		if(currentFrame != null) {
-			currentFrame.switchVis(editor.selectedElement);
+		if(currentFrame != null && editor.getSelectedElement() != null) {
+			currentFrame.switchVis(editor.getSelectedElement());
 		}
 		components = null;
+		psfs = null;
 	}
 
 	public void setColor(int rgb) {
-		if(currentFrame != null) {
-			currentFrame.setColor(editor.selectedElement, rgb);
+		if(currentFrame != null && editor.getSelectedElement() != null) {
+			currentFrame.setColor(editor.getSelectedElement(), rgb);
 		}
 		components = null;
+		psfs = null;
 	}
 
 	public void addFrame() {
@@ -118,6 +120,8 @@ public class EditorAnim implements IAnim {
 		editor.addUndo(() -> frames.remove(frm));
 		editor.runOp(() -> frames.add(frm));
 		currentFrame = frm;
+		components = null;
+		psfs = null;
 	}
 
 	public void deleteFrame() {
@@ -126,6 +130,8 @@ public class EditorAnim implements IAnim {
 			editor.addUndo(() -> frames.add(frm));
 			editor.runOp(() -> frames.remove(frm));
 		}
+		components = null;
+		psfs = null;
 	}
 
 	public void loadFrame(Map<String, Object> data) {
@@ -149,8 +155,8 @@ public class EditorAnim implements IAnim {
 
 	@Override
 	public String toString() {
-		if(pose != null)return editor.gui.getGui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui.getGui()::i18nFormat));
-		return editor.gui.getGui().i18nFormat("label.cpm.anim_gesture", gestureName);
+		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), displayName));
+		return editor.gui().i18nFormat("label.cpm.anim_gesture", displayName);
 	}
 
 	public AnimFrame getSelectedFrame() {
@@ -174,6 +180,6 @@ public class EditorAnim implements IAnim {
 	}
 
 	public boolean isCustom () {
-		return gestureName != null || pose instanceof CustomPose;
+		return type == AnimationType.GESTURE || pose instanceof CustomPose;
 	}
 }

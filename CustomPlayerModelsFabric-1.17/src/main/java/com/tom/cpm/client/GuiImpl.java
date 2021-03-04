@@ -230,7 +230,15 @@ public class GuiImpl extends Screen implements IGui {
 	}
 
 	private void logError(String e) {
-
+		if(gui != null) {
+			try {
+				gui.logMessage(e);
+			} catch (Throwable ex) {
+				ex.printStackTrace();
+				ex.addSuppressed(new RuntimeException(e));
+				displayError(ex.toString());
+			}
+		}
 	}
 
 	private void displayError(String e) {
@@ -288,15 +296,17 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void setPosOffset(Box box) {
+		current.box = new Box(current.box.x + box.x, current.box.y + box.y, box.w, box.h);
+	}
+
+	@Override
+	public void setupCut() {
 		int dw = client.getWindow().getWidth();
 		int dh = client.getWindow().getHeight();
 		float multiplierX = dw / (float)width;
 		float multiplierY = dh / (float)height;
-		int x = current.box.x + box.x;
-		int y = current.box.y + box.y;
-		GL11.glScissor((int) (x * multiplierX), dh - (int) ((y + box.h) * multiplierY),
-				(int) (box.w * multiplierX), (int) (box.h * multiplierY));
-		current.box = new Box(x, y, box.w, box.h);
+		GL11.glScissor((int) (current.box.x * multiplierX), dh - (int) ((current.box.y + current.box.h) * multiplierY),
+				(int) (current.box.w * multiplierX), (int) (current.box.h * multiplierY));
 	}
 
 	@Override
@@ -331,7 +341,7 @@ public class GuiImpl extends Screen implements IGui {
 		private Box bounds = new Box(0, 0, 0, 0);
 		private boolean settingText, updateField;
 		public TxtField() {
-			this.field = new TextFieldWidget(textRenderer, 0, 0, 0, 0, null);
+			this.field = new TextFieldWidget(textRenderer, 0, 0, 0, 0, new TranslatableText("narrator.cpm.field"));
 			this.field.setMaxLength(1024*1024);
 			this.field.setDrawsBackground(false);
 			this.field.setVisible(true);

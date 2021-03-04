@@ -25,8 +25,9 @@ import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer, Model> {
 
@@ -78,9 +79,9 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		}
 	}
 
-	private static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> {
-		private ResourceLocation boundSkin;
-		private RenderType glowType, defaultType;
+	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> {
+		public ResourceLocation boundSkin;
+		public RenderType glowType, defaultType;
 
 		public RDH(
 				ModelRenderManager<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer, Model> mngr,
@@ -91,7 +92,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		@Override
 		public void bindTexture(CallbackInfoReturnable<ResourceLocation> cbi) {
 			if(def == null)return;
-			SkinProvider skin = def.getSkinOverride();
+			TextureProvider skin = def.getSkinOverride();
 			if(skin != null && skin.texture != null) {
 				skin.bind();
 				cbi.setReturnValue(DynTexture.getBoundLoc());
@@ -175,7 +176,6 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		private ModelRenderer parent;
 		private RootModelElement elem;
 		private CubeModelRenderer dispRender;
-		private int sel;
 
 		@SuppressWarnings("unchecked")
 		public RedirectModelRenderer(Model model, RDH holder, Supplier<ModelRenderer> parent, ModelPart part) {
@@ -214,9 +214,8 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		}
 
 		@Override
-		public void renderWithParent(RootModelElement elem, int sel) {
+		public void renderWithParent(RootModelElement elem) {
 			this.elem = elem;
-			this.sel = sel;
 			parent.addChild(dispRender);
 			parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 			parent.childModels.remove(dispRender);
@@ -224,12 +223,11 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		}
 
 		@Override
-		public void doRender(RootModelElement elem, int sel) {
+		public void doRender(RootModelElement elem) {
 			this.elem = elem;
-			this.sel = sel;
 			matrixStackIn.push();
 			translateRotate(matrixStackIn);
-			if(sel > 0)drawVanillaOutline(matrixStackIn, bufferIn);
+			drawVanillaOutline(matrixStackIn, bufferIn);
 			render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 			matrixStackIn.pop();
 			this.elem = null;
@@ -246,20 +244,26 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 			@Override
 			public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
 				RedirectModelRenderer.this.render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-				if(sel > 0)drawVanillaOutline(matrixStackIn, bufferIn);
+				drawVanillaOutline(matrixStackIn, bufferIn);
 			}
 		}
 
 		private void drawVanillaOutline(MatrixStack matrixStackIn, IVertexBuilder bufferIn) {
-			float f = 0.001f;
-			float g = f * 2;
-			float scale = 1 / 16.0F;
-			if(sel == 2)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
-			for(ModelBox b : parent.cubeList) {
-				WorldRenderer.drawBoundingBox(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
-						b.posX1 * scale - f, b.posY1 * scale - f, b.posZ1 * scale - f,
-						b.posX2 * scale + g, b.posY2 * scale + g, b.posZ2 * scale + g,
-						1, 1, sel == 2 ? 1 : 0, 1);
+			if(holder.def.isEditor()) {
+				ElementSelectMode sel = elem.getSelected();
+				if(sel.isRenderOutline()) {
+					float f = 0.001f;
+					float g = f * 2;
+					float scale = 1 / 16.0F;
+					boolean s = sel == ElementSelectMode.SELECTED;
+					if(s)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
+					for(ModelBox b : parent.cubeList) {
+						WorldRenderer.drawBoundingBox(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
+								b.posX1 * scale - f, b.posY1 * scale - f, b.posZ1 * scale - f,
+								b.posX2 * scale + g, b.posY2 * scale + g, b.posZ2 * scale + g,
+								1, 1, s ? 1 : 0, 1);
+					}
+				}
 			}
 		}
 
@@ -298,37 +302,45 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 				if(cube.useDynamic || cube.renderObject == null) {
 					cube.renderObject = createBox(cube);
 				}
-				int sel = cube.getSelected();
-				if(sel == 3) {
-					r = 1;
-					g = 1;
-					b = 1;
-				}
 				IVertexBuilder buffer = bufferIn;
-				if(cube.glow && sel == 0) {
+				if(holder.def.isEditor()) {
+					ElementSelectMode sel = cube.getSelected();
+					if(!sel.applyColor()) {
+						r = 1;
+						g = 1;
+						b = 1;
+					}
+					if(cube.glow && sel == ElementSelectMode.NULL) {
+						buffer = holder.addDt.getBuffer(holder.glowType);
+					}
+				} else if(cube.glow) {
 					buffer = holder.addDt.getBuffer(holder.glowType);
 				}
 				((Box)cube.renderObject).draw(matrixStackIn, buffer, holder.addDt, packedLightIn, packedOverlayIn, r, g, b, alpha);
 				holder.addDt.getBuffer(holder.defaultType);
-				drawSelect(cube, matrixStackIn, bufferIn, sel);
+				drawSelect(cube, matrixStackIn, bufferIn);
 				render(cube, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 				matrixStackIn.pop();
 			}
 		}
 
-		private void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, IVertexBuilder bufferIn, int sel) {
-			if(sel > 0) {
-				float f = 0.001f;
-				float g = f * 2;
-				float scale = 1 / 16f;
-				if(sel == 2)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
-				Cube c = cube.getCube();
-				Render.drawBoundingBox(
-						matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
-						c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
-						c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
-						sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0, 1
-						);
+		private void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, IVertexBuilder bufferIn) {
+			if(holder.def.isEditor()) {
+				ElementSelectMode sel = cube.getSelected();
+				if(sel.isRenderOutline()) {
+					float f = 0.001f;
+					float g = f * 2;
+					float scale = 1 / 16f;
+					boolean s = sel == ElementSelectMode.SELECTED;
+					if(s)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
+					Cube c = cube.getCube();
+					Render.drawBoundingBox(
+							matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
+							c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
+							c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
+							s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
+							);
+				}
 			}
 		}
 

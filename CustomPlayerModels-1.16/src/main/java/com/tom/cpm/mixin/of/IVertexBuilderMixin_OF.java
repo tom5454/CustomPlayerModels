@@ -11,7 +11,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.tom.cpm.client.optifine.proxy.IVertexBuilderOF;
 
 @Mixin(IVertexBuilder.class)
-public interface IVertexBuilderOFMixin extends IVertexBuilderOF {
+public interface IVertexBuilderMixin_OF extends IVertexBuilderOF {
 
 	@Shadow default IRenderTypeBuffer.Impl getRenderTypeBuffer() { return null; }
 

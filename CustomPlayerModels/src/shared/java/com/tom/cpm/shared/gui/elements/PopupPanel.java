@@ -7,7 +7,7 @@ public class PopupPanel extends Panel {
 	private Runnable onClosed;
 	protected PopupLayer layer;
 
-	public PopupPanel(IGui gui) {
+	protected PopupPanel(IGui gui) {
 		super(gui);
 	}
 

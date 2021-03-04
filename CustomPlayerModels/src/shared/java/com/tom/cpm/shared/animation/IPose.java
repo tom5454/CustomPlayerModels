@@ -1,7 +1,7 @@
 package com.tom.cpm.shared.animation;
 
-import java.util.function.Function;
+import com.tom.cpm.shared.gui.IGui;
 
 public interface IPose {
-	String getName(Function<String, String> i18n);
+	String getName(IGui gui, String display);
 }

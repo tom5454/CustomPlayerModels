@@ -12,22 +12,22 @@ import com.tom.cpm.shared.gui.elements.TextField;
 import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.math.Box;
 
-public class ExportOverflowPopup extends PopupPanel {
-	public ExportOverflowPopup(Frame frm, IGui gui, String b64, Consumer<Link> ok) {
+public class CreateGistPopup extends PopupPanel {
+	public CreateGistPopup(Frame frm, IGui gui, String reason, String text, Consumer<Link> ok) {
 		super(gui);
 
 		setBounds(new Box(0, 0, 260, 120));
 
-		Label lbl1 = new Label(gui, gui.i18nFormat("label.cpm.skinOverflow"));
+		Label lbl1 = new Label(gui, gui.i18nFormat("label.cpm." + reason));
 		lbl1.setBounds(new Box(5, 0, 0, 0));
 		addElement(lbl1);
 
-		Label lbl2 = new Label(gui, gui.i18nFormat("label.cpm.skinOverflow.desc"));
+		Label lbl2 = new Label(gui, gui.i18nFormat("label.cpm.createGist"));
 		lbl2.setBounds(new Box(5, 10, 0, 0));
 		addElement(lbl2);
 
 		TextField txtf = new TextField(gui);
-		txtf.setText(b64);
+		txtf.setText(text);
 		txtf.setBounds(new Box(5, 20, 205, 20));
 		addElement(txtf);
 
@@ -52,7 +52,7 @@ public class ExportOverflowPopup extends PopupPanel {
 		okBtn.setBounds(new Box(110, 90, 40, 20));
 		addElement(okBtn);
 
-		Button cpyBtn = new Button(gui, gui.i18nFormat("button.cpm.copy"), () -> gui.setClipboardText(b64));
+		Button cpyBtn = new Button(gui, gui.i18nFormat("button.cpm.copy"), () -> gui.setClipboardText(text));
 		cpyBtn.setBounds(new Box(215, 20, 40, 20));
 		addElement(cpyBtn);
 

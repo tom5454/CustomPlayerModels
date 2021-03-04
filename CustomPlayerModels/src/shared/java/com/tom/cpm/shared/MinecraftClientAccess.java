@@ -3,13 +3,12 @@ package com.tom.cpm.shared;
 import java.util.List;
 
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.config.ResourceLoader;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.gui.IKeybind;
 import com.tom.cpm.shared.util.DynamicTexture.ITexture;
 import com.tom.cpm.shared.util.Image;
 
-public interface MinecraftClientAccess extends ResourceLoader {
+public interface MinecraftClientAccess {
 	IPlayerRenderManager getPlayerRenderManager();
 	ModelDefinitionLoader getDefinitionLoader();
 	ITexture createTexture();

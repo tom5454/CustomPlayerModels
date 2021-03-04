@@ -1,6 +1,10 @@
 package com.tom.cpm.shared;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class MinecraftObjectHolder {
+	public static final Gson gson = new GsonBuilder().setPrettyPrinting().enableComplexMapKeySerialization().create();
 	protected static MinecraftClientAccess clientObject;
 	protected static MinecraftCommonAccess commonObject;
 	protected static MinecraftServerAccess serverAccess;

@@ -24,11 +24,13 @@ public class ViewportPanel extends GuiElement {
 	public void draw(int mouseX, int mouseY, float partialTicks) {
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);
+		gui.setupCut();
 		gui.drawBox(0, 0, bounds.w, bounds.h, 0xff333333);
 
 		nat.render(partialTicks, mouseX, mouseY);
 
 		gui.popMatrix();
+		gui.setupCut();
 	}
 
 	@Override

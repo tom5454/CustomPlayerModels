@@ -15,7 +15,7 @@ public class PaintImageCreator {
 	}
 
 	public static Vec2i getImageCoords(int rgb, int w, int h) {
-		if((rgb & 0x800000) == 0)return null;
+		if((rgb & 0xC00000) == 0)return null;
 		int x = (rgb >> 10) & 0x3ff;
 		int y = rgb & 0x3ff;
 		return new Vec2i((int) Math.floor(x / 1024f * w), (int) Math.floor(y / 1024f * h));

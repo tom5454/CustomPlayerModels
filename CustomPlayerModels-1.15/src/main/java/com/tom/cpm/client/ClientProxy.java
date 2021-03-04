@@ -28,6 +28,7 @@ import com.mojang.authlib.GameProfile;
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -93,8 +94,9 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@SubscribeEvent
-	public void openGui(GuiScreenEvent.InitGuiEvent.Post evt) {
-		if(evt.getGui() instanceof MainMenuScreen || evt.getGui() instanceof CustomizeSkinScreen) {
+	public void initGui(GuiScreenEvent.InitGuiEvent.Post evt) {
+		if((evt.getGui() instanceof MainMenuScreen && ModConfig.getConfig().getSetBoolean("titleScreenButton", true)) ||
+				evt.getGui() instanceof CustomizeSkinScreen) {
 			evt.addWidget(new Button(0, 0, () -> Minecraft.getInstance().displayGuiScreen(new GuiImpl(EditorGui::new, evt.getGui()))));
 		}
 	}

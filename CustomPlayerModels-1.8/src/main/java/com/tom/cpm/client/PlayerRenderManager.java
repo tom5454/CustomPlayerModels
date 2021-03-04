@@ -17,8 +17,9 @@ import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRenderer, ModelBase> {
 	private static final float scale = 0.0625F;
@@ -142,7 +143,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 		@Override
 		protected void bindSkin() {
-			SkinProvider skin = def.getSkinOverride();
+			TextureProvider skin = def.getSkinOverride();
 			if(skin != null) {
 				if(!def.isEditor())skin.bind();
 				sheetX = skin.getSize().x;
@@ -151,7 +152,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				sheetX = 64;
 				sheetY = 64;
 			}
-			//new Throwable().printStackTrace();
 		}
 
 		@Override protected void bindTexture(Void cbi) {}
@@ -166,7 +166,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		private ModelRenderer parent;
 		private RootModelElement elem;
 		private CubeModelRenderer dispRender;
-		private int sel;
 
 		public RedirectModelRenderer(RDH holder, Supplier<ModelRenderer> parent, ModelPart part) {
 			super(holder.model);
@@ -191,7 +190,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			@Override
 			public void render(float scale) {
 				RedirectModelRenderer.this.render(elem, scale);
-				if(sel > 0)drawVanillaOutline(scale);
+				drawVanillaOutline(scale);
 			}
 		}
 
@@ -215,20 +214,25 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 
 		private void drawVanillaOutline(float scale) {
-			GlStateManager.disableDepth();
-			GlStateManager.disableTexture2D();
+			if(holder.def.isEditor()) {
+				ElementSelectMode sel = elem.getSelected();
+				if(sel.isRenderOutline()) {
+					GlStateManager.disableDepth();
+					GlStateManager.disableTexture2D();
 
-			GlStateManager.enableCull();
-			if(sel == 2)Render.drawOrigin(1);
-			GlStateManager.disableCull();
+					GlStateManager.enableCull();
+					if(sel == ElementSelectMode.SELECTED)Render.drawOrigin(1);
+					GlStateManager.disableCull();
 
-			float f = 0.001f;
-			float g = f * 2;
-			for(ModelBox b : parent.cubeList) {
-				Render.drawCubeOutline(b.posX1 * scale - f, b.posY1 * scale - f, b.posZ1 * scale - f, (b.posX2 - b.posX1)  * scale + g, (b.posY2 - b.posY1) * scale + g, (b.posZ2 - b.posZ1) * scale + g, 1, 1, sel == 2 ? 1 : 0);
+					float f = 0.001f;
+					float g = f * 2;
+					for(ModelBox b : parent.cubeList) {
+						Render.drawCubeOutline(b.posX1 * scale - f, b.posY1 * scale - f, b.posZ1 * scale - f, (b.posX2 - b.posX1)  * scale + g, (b.posY2 - b.posY1) * scale + g, (b.posZ2 - b.posZ1) * scale + g, 1, 1, sel == ElementSelectMode.SELECTED ? 1 : 0);
+					}
+					GlStateManager.enableTexture2D();
+					GlStateManager.enableDepth();
+				}
 			}
-			GlStateManager.enableTexture2D();
-			GlStateManager.enableDepth();
 		}
 
 		private void render(RenderedCube elem, float scale) {
@@ -318,19 +322,20 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 
 		private void drawSelect(RenderedCube cube, float scale) {
-			int sel = cube.getSelected();
+			ElementSelectMode sel = cube.getSelected();
 
-			if(sel > 0) {
+			if(sel.isRenderOutline()) {
 				float f = 0.001f;
 				float g = f * 2;
 				Cube c = cube.getCube();
 				GlStateManager.disableDepth();
 				GlStateManager.disableTexture2D();
-				if(sel == 2)Render.drawOrigin(1);
+				boolean s = sel == ElementSelectMode.SELECTED;
+				if(s)Render.drawOrigin(1);
 				Render.drawCubeOutline(
 						c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
 						c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
-						sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0);
+						s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0);
 				GlStateManager.enableTexture2D();
 				GlStateManager.enableDepth();
 			}
@@ -411,9 +416,8 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 
 		@Override
-		public void renderWithParent(RootModelElement elem, int sel) {
+		public void renderWithParent(RootModelElement elem) {
 			this.elem = elem;
-			this.sel = sel;
 			parent.addChild(dispRender);
 			parent.render(scale);
 			parent.childModels.remove(dispRender);
@@ -421,13 +425,13 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 
 		@Override
-		public void doRender(RootModelElement elem, int sel) {
+		public void doRender(RootModelElement elem) {
 			if(holder.def.isEditor()) {
 				//GlStateManager.color(1, 1, 1, 0.5f);
 				//parent.render(scale);
 				//GlStateManager.color(1, 1, 1, 1);
 			}
-			if(sel > 0)drawSelectionOutline(scale);
+			if(holder.def.isEditor())drawSelectionOutline(scale);
 			GlStateManager.translate(this.offsetX, this.offsetY, this.offsetZ);
 			if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
 				if (this.rotationPointX == 0.0F && this.rotationPointY == 0.0F && this.rotationPointZ == 0.0F) {

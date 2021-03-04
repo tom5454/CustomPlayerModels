@@ -19,11 +19,18 @@ public abstract class Player {
 
 	private ModelDefinition definition;
 	private AnimationHandler animHandler = new AnimationHandler(this);
+	private CompletableFuture<Image> skinFuture;
 	public VanillaPose prevPose;
 	public IPose currentPose;
 	public String url;
 
 	public CompletableFuture<Image> getSkin() {
+		if(skinFuture != null)return skinFuture;
+		skinFuture = getSkin0();
+		return skinFuture;
+	}
+
+	private CompletableFuture<Image> getSkin0() {
 		if(MinecraftObjectHolder.DEBUGGING && new File("skin_test.png").exists()) {
 			return CompletableFuture.supplyAsync(() -> {
 				try {

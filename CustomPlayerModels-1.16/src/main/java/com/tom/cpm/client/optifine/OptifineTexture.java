@@ -7,11 +7,11 @@ import net.minecraft.util.ResourceLocation;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.proxy.TextureOF;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class OptifineTexture {
 
-	public static void applyOptifineTexture(ResourceLocation loc, SkinProvider skin) {
+	public static void applyOptifineTexture(ResourceLocation loc, TextureProvider skin) {
 		if(ClientProxy.optifineLoaded) {
 			Texture tex = Minecraft.getInstance().getTextureManager().getTexture(loc);
 			DynTexture dt = (DynTexture) skin.texture.getNative();

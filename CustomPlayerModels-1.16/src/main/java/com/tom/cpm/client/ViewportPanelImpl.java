@@ -28,6 +28,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.gui.ViewportPanel.ViewportPanelNative;
@@ -132,6 +133,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			int light = LightTexture.packLight(15, 15);
 			RenderType rt = editor.renderPaint ? CustomRenderTypes.getEntityTranslucentCullNoLight(PAINT) : RenderType.getEntityTranslucent(cbi.getReturnValue());
 			IVertexBuilder buffer = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
+			((RDH)ClientProxy.mc.getPlayerRenderManager().getHolder(p)).defaultType = rt;
 			PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand, false);
 
 			if(!editor.applyAnim && editor.playerTpose) {
@@ -192,6 +194,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 			p.render(matrixstack, buffer, light, overlay, 1, 1, 1, 1);
 			mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
+			mc.getRenderTypeBuffers().getBufferSource().finish(CustomRenderTypes.ENTITY_COLOR);
 			mc.getRenderTypeBuffers().getBufferSource().finish();
 		} finally {
 			ClientProxy.mc.getPlayerRenderManager().unbindModel(p);

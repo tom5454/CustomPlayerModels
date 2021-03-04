@@ -18,6 +18,11 @@ public class ModelPartRoot implements IModelPart, IResolvedModelPart {
 		type = din.readEnum(RootModelType.VALUES);
 	}
 
+	public ModelPartRoot(int id, RootModelType type) {
+		this.id = id;
+		this.type = type;
+	}
+
 	@Override
 	public IResolvedModelPart resolve() throws IOException {
 		return this;

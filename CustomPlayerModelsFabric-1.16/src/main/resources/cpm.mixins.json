@@ -2,6 +2,7 @@
   "required": true,
   "package": "com.tom.cpm.mixin",
   "compatibilityLevel": "JAVA_8",
+  "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "mixins": [
   ],
   "client": [

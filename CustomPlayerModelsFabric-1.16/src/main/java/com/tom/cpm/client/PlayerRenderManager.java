@@ -25,8 +25,9 @@ import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart, Model> {
 
@@ -94,7 +95,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		@Override
 		public void bindTexture(CallbackInfoReturnable<Identifier> cbi) {
 			if(def == null)return;
-			SkinProvider skin = def.getSkinOverride();
+			TextureProvider skin = def.getSkinOverride();
 			if(skin != null && skin.texture != null) {
 				skin.bind();
 				OptifineTexture.applyOptifineTexture(cbi.getReturnValue(), skin);
@@ -178,7 +179,6 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		public final Supplier<net.minecraft.client.model.ModelPart> parentProvider;
 		public net.minecraft.client.model.ModelPart parent;
 		public RootModelElement elem;
-		public int sel;
 
 		public RedirectModelRendererBase(Model model, RDH holder, Supplier<net.minecraft.client.model.ModelPart> parent, ModelPart part) {
 			super(0, 0, 0, 0);
@@ -224,20 +224,25 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			@Override
 			public void render(MatrixStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
 				RedirectModelRendererVanilla.this.render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-				if(sel > 0)drawVanillaOutline(matrixStackIn, bufferIn);
+				drawVanillaOutline(matrixStackIn, bufferIn);
 			}
 		}
 
 		private void drawVanillaOutline(MatrixStack matrixStackIn, VertexConsumer bufferIn) {
-			float f = 0.001f;
-			float g = f * 2;
-			float scale = 1 / 16.0F;
-			for(Cuboid b : parent.cuboids) {
-				WorldRenderer.drawBox(
-						matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
-						b.minX * scale - f, b.minY * scale - f, b.minZ * scale - f,
-						b.maxX * scale + g, b.maxY * scale + g, b.maxZ * scale + g,
-						1, 1, sel == 2 ? 1 : 0, 1);
+			if(holder.def.isEditor()) {
+				ElementSelectMode sel = elem.getSelected();
+				if(sel.isRenderOutline()) {
+					float f = 0.001f;
+					float g = f * 2;
+					float scale = 1 / 16.0F;
+					for(Cuboid b : parent.cuboids) {
+						WorldRenderer.drawBox(
+								matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
+								b.minX * scale - f, b.minY * scale - f, b.minZ * scale - f,
+								b.maxX * scale + g, b.maxY * scale + g, b.maxZ * scale + g,
+								1, 1, sel == ElementSelectMode.SELECTED ? 1 : 0, 1);
+					}
+				}
 			}
 		}
 
@@ -275,7 +280,17 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 					cube.renderObject = createBox(cube);
 				}
 				VertexConsumer buffer = bufferIn;
-				if(cube.glow && sel == 0) {
+				if(holder.def.isEditor()) {
+					ElementSelectMode sel = cube.getSelected();
+					if(!sel.applyColor()) {
+						r = 1;
+						g = 1;
+						b = 1;
+					}
+					if(cube.glow && sel == ElementSelectMode.NULL) {
+						buffer = holder.addDt.getBuffer(holder.glowType);
+					}
+				} else if(cube.glow) {
 					buffer = holder.addDt.getBuffer(holder.glowType);
 				}
 				((Box)cube.renderObject).draw(matrixStackIn, buffer, holder.addDt, packedLightIn, packedOverlayIn, r, g, b, alpha);
@@ -287,19 +302,22 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 
 		private void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, VertexConsumer bufferIn) {
-			int sel = cube.getSelected();
-
-			if(sel > 0) {
-				float f = 0.001f;
-				float g = f * 2;
-				float scale = 1 / 16f;
-				Cube c = cube.getCube();
-				Render.drawBoundingBox(
-						matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
-						c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
-						c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
-						sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0, 1
-						);
+			if(holder.def.isEditor()) {
+				ElementSelectMode sel = cube.getSelected();
+				if(sel.isRenderOutline()) {
+					float f = 0.001f;
+					float g = f * 2;
+					float scale = 1 / 16f;
+					boolean s = sel == ElementSelectMode.SELECTED;
+					if(s)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
+					Cube c = cube.getCube();
+					Render.drawBoundingBox(
+							matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
+							c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
+							c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
+							s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
+							);
+				}
 			}
 		}
 
@@ -324,7 +342,6 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		@Override
 		public net.minecraft.client.model.ModelPart swapIn() {
 			if(parent != null) {
-				//new Exception("Double swapping?").printStackTrace();
 				return this;
 			}
 			parent = parentProvider.get();
@@ -335,7 +352,6 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		@Override
 		public net.minecraft.client.model.ModelPart swapOut() {
 			if(parent == null) {
-				//new Exception("Double swapping?").printStackTrace();
 				return parentProvider.get();
 			}
 			net.minecraft.client.model.ModelPart p = parent;
@@ -364,9 +380,8 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 
 		@Override
-		public void renderWithParent(RootModelElement elem, int sel) {
+		public void renderWithParent(RootModelElement elem) {
 			this.elem = elem;
-			this.sel = sel;
 			parent.addChild(dispRender);
 			parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 			parent.children.remove(dispRender);
@@ -374,12 +389,11 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 
 		@Override
-		public void doRender(RootModelElement elem, int sel) {
+		public void doRender(RootModelElement elem) {
 			this.elem = elem;
-			this.sel = sel;
 			matrixStackIn.push();
 			rotate(matrixStackIn);
-			if(sel > 0)drawVanillaOutline(matrixStackIn, bufferIn);
+			drawVanillaOutline(matrixStackIn, bufferIn);
 			render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 			matrixStackIn.pop();
 			this.elem = null;

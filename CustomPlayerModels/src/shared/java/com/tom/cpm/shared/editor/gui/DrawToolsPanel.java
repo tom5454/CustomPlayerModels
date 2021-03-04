@@ -6,6 +6,7 @@ import com.tom.cpm.shared.editor.gui.popup.SkinSettingsPopup;
 import com.tom.cpm.shared.gui.elements.Button;
 import com.tom.cpm.shared.gui.elements.ButtonIcon;
 import com.tom.cpm.shared.gui.elements.Panel;
+import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.math.Box;
 
 public class DrawToolsPanel extends Panel {
@@ -22,13 +23,17 @@ public class DrawToolsPanel extends Panel {
 		setBounds(new Box(x, y, w, h));
 		setBackgroundColor(gui.getColors().panel_background);
 
-		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.skinSettings"), () -> e.openPopup(new SkinSettingsPopup(gui, e)));
+		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.skinSettings"), () -> SkinSettingsPopup.showPopup(e));
 		openSkinBtn.setBounds(new Box(5, 30, w - 10, 20));
 		addElement(openSkinBtn);
 
 		Button refreshSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.reloadSkin"), editor::reloadSkin);
 		refreshSkinBtn.setBounds(new Box(5, 5, w - 10, 20));
 		addElement(refreshSkinBtn);
+		editor.setReload.add(f -> {
+			refreshSkinBtn.setEnabled(f != null);
+			refreshSkinBtn.setTooltip(new Tooltip(e, f != null ? gui.i18nFormat("tooltip.cpm.reloadSkin.file", f) : gui.i18nFormat("tooltip.cpm.reloadSkin.no_file")));
+		});
 
 		colorBtn = new ColorButton(gui, e, c -> {
 			editor.penColor = c;

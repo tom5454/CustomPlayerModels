@@ -1,11 +1,13 @@
 package com.tom.cpm.shared.animation;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AnimationRegistry {
-	public static final Animation NULL = new Animation(new IModelComponent[0], new float[0][][], new boolean[0][], 1, true);
-	private Map<IPose, Animation> animations = new HashMap<>();
+	private Map<IPose, List<Animation>> animations = new HashMap<>();
 	private Map<Integer, IPose> encodedToPose = new HashMap<>();
 	private Map<Integer, Gesture> encodedToGesture = new HashMap<>();
 	private Map<IPose, Integer> poseToEncoded = new HashMap<>();
@@ -15,8 +17,8 @@ public class AnimationRegistry {
 	private int blankGesture;
 	private int poseResetId;
 
-	public Animation getPoseAnimation(IPose id) {
-		return animations.getOrDefault(id, NULL);
+	public List<Animation> getPoseAnimations(IPose id) {
+		return animations.getOrDefault(id, Collections.emptyList());
 	}
 
 	public IPose getPose(int gesture, IPose pose) {
@@ -28,11 +30,11 @@ public class AnimationRegistry {
 	}
 
 	public static class Gesture {
-		public Animation animation;
+		public List<Animation> animation;
 		public boolean isLoop;
 		public String name;
 
-		public Gesture(Animation animation, String name, boolean isLoop) {
+		public Gesture(List<Animation> animation, String name, boolean isLoop) {
 			this.animation = animation;
 			this.name = name;
 			this.isLoop = isLoop;
@@ -40,7 +42,7 @@ public class AnimationRegistry {
 	}
 
 	public void register(IPose pose, Animation anim) {
-		animations.put(pose, anim);
+		animations.computeIfAbsent(pose, k -> new ArrayList<>()).add(anim);
 	}
 
 	public void register(int gid, IPose pose) {

@@ -28,7 +28,7 @@ public class PlayerProfile extends Player {
 	}
 
 	public PlayerProfile(GameProfile profile) {
-		this.profile = profile;
+		this.profile = new GameProfile(profile.getId(), profile.getName());
 	}
 
 	public PlayerProfile() {

@@ -82,6 +82,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		return holders.computeIfAbsent(model, this::create).swappedIn;
 	}
 
+	public RedirectHolder<MB, D, S, P> getHolder(MB model) {
+		return holders.computeIfAbsent(model, this::create);
+	}
+
 	@FunctionalInterface
 	public static interface RedirectHolderFactory<D, S, P> {
 		<M> RedirectHolder<M, D, S, P> create(M model);
@@ -165,8 +169,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		P getParent();
 		ModelPart getPart();
 		void renderParent();
-		void renderWithParent(RootModelElement elem, int sel);
-		void doRender(RootModelElement elem, int sel);
+		void renderWithParent(RootModelElement elem);
+		void doRender(RootModelElement elem);
 
 		default RedirectRenderer<P> setCopyFrom(RedirectRenderer<P> from) {
 			getHolder().copyMap.put(this, from);
@@ -196,7 +200,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						return;
 					}
 					RootModelElement elem = holder.def.getModelElementFor(part);
-					int sel = elem.getSelected();
 					float px = mngr.px.apply(tp);
 					float py = mngr.py.apply(tp);
 					float pz = mngr.pz.apply(tp);
@@ -215,11 +218,11 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					}
 					if(elem.doDisplay()) {
 						holder.copyModel(tp, parent);
-						renderWithParent(elem, sel);
+						renderWithParent(elem);
 						mngr.posSet.set(parent, px, py, pz);
 						mngr.rotSet.set(parent, rx, ry, rz);
 					} else {
-						doRender(elem, sel);
+						doRender(elem);
 					}
 				} else {
 					holder.copyModel(tp, parent);

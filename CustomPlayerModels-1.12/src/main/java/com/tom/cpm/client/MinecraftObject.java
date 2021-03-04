@@ -1,8 +1,6 @@
 package com.tom.cpm.client;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +17,6 @@ import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.gui.IKeybind;
@@ -39,21 +36,6 @@ public class MinecraftObject implements MinecraftClientAccess {
 		this.mc = mc;
 		prm = new PlayerRenderManager(loader);
 		this.loader = loader;
-	}
-
-	@Override
-	public InputStream loadResource(String path) throws IOException {
-		IResource r = mc.getResourceManager().getResource(new ResourceLocation(CustomPlayerModels.ID, path));
-		return new FilterInputStream(r.getInputStream()) {
-			@Override
-			public void close() throws IOException {
-				try {
-					super.close();
-				} finally {
-					r.close();
-				}
-			}
-		};
 	}
 
 	@Override

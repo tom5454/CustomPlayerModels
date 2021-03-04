@@ -3,9 +3,12 @@ package com.tom.cpm.shared.editor.gui;
 import java.io.File;
 
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
 import com.tom.cpm.shared.editor.gui.popup.FileChooserGui;
+import com.tom.cpm.shared.editor.template.EditorTemplate;
+import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.gui.Frame;
@@ -14,16 +17,19 @@ import com.tom.cpm.shared.gui.elements.Button;
 import com.tom.cpm.shared.gui.elements.ButtonIcon;
 import com.tom.cpm.shared.gui.elements.Checkbox;
 import com.tom.cpm.shared.gui.elements.ConfirmPopup;
+import com.tom.cpm.shared.gui.elements.InputPopup;
 import com.tom.cpm.shared.gui.elements.Label;
 import com.tom.cpm.shared.gui.elements.MessagePopup;
 import com.tom.cpm.shared.gui.elements.Panel;
 import com.tom.cpm.shared.gui.elements.PopupMenu;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
+import com.tom.cpm.shared.gui.elements.ProcessPopup;
+import com.tom.cpm.shared.gui.elements.ScrollPanel;
 import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.gui.elements.Tree;
 import com.tom.cpm.shared.gui.util.HorizontalLayout;
 import com.tom.cpm.shared.gui.util.TabbedPanelManager;
 import com.tom.cpm.shared.math.Box;
+import com.tom.cpm.shared.util.Image;
 
 public class EditorGui extends Frame {
 	private TabbedPanelManager tabs;
@@ -38,7 +44,7 @@ public class EditorGui extends Frame {
 
 		gui.setCloseListener(c -> {
 			checkUnsaved(() -> {
-				editor.skinProvider.free();
+				editor.free();
 				c.run();
 			});
 		});
@@ -69,6 +75,8 @@ public class EditorGui extends Frame {
 		initEffectMenu();
 		initDisplayMenu();
 
+		this.topPanel.addX(2);
+
 		initModelPanel(width, height);
 		initTexturePanel(width, height);
 		initAnimPanel(width, height);
@@ -88,13 +96,16 @@ public class EditorGui extends Frame {
 	private void initModelPanel(int width, int height) {
 		Panel mainPanel = new Panel(gui);
 		mainPanel.setBounds(new Box(0, 0, width, height - 20));
-		mainPanel.addElement(new PosPanel(gui, this, height - 20));
+		ScrollPanel sp = new ScrollPanel(gui);
+		sp.setDisplay(new PosPanel(gui, this));
+		sp.setBounds(new Box(0, 0, 170, height - 20));
+		mainPanel.addElement(sp);
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.model"), mainPanel));
 
 		mainPanel.addElement(new TreePanel(gui, this, width, height - 20));
 
 		ViewportPanel view = new ViewportPanel(gui, editor);
-		view.setBounds(new Box(145, 0, width - 145 - 150, height - 20));
+		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
 	}
 
@@ -119,7 +130,7 @@ public class EditorGui extends Frame {
 		tree.setBounds(new Box(0, 0, treeW, height / 2 - 25));
 		p.addElement(tree);
 		p.setBackgroundColor(gui.getColors().panel_background);
-		editor.updateTree.add(tree::updateTree);
+		editor.updateGui.add(tree::updateTree);
 		textureEditor.addElement(p);
 
 		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - treeW, height / 2));
@@ -141,13 +152,35 @@ public class EditorGui extends Frame {
 	private void initAnimPanel(int width, int height) {
 		Panel mainPanel = new Panel(gui);
 		mainPanel.setBounds(new Box(0, 0, width, height - 20));
-		mainPanel.addElement(new AnimPanel(gui, this, height - 20));
+
+		Panel buttonsPanel = new Panel(gui);
+		buttonsPanel.setBounds(new Box(0, 0, 170, 20));
+		buttonsPanel.setBackgroundColor(gui.getColors().menu_bar_background);
+
+		HorizontalLayout buttons = new HorizontalLayout(buttonsPanel);
+		TabbedPanelManager animPanelTabs = new TabbedPanelManager(gui);
+
+		ScrollPanel spSetup = new ScrollPanel(gui);
+		spSetup.setBounds(new Box(0, 0, 170, height - 40));
+		spSetup.setDisplay(new AnimPanel(gui, this));
+
+		ScrollPanel spTest = new ScrollPanel(gui);
+		spTest.setBounds(new Box(0, 0, 170, height - 40));
+		spTest.setDisplay(new AnimTestPanel(gui, this));
+
+		buttons.add(animPanelTabs.createTab(gui.i18nFormat("tab.cpm.animation.setup"), spSetup));
+		buttons.add(animPanelTabs.createTab(gui.i18nFormat("tab.cpm.animation.test"), spTest));
+
+		animPanelTabs.setBounds(new Box(0, 20, 170, height - 40));
+		mainPanel.addElement(animPanelTabs);
+		mainPanel.addElement(buttonsPanel);
+
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.animation"), mainPanel));
 
 		mainPanel.addElement(new TreePanel(gui, this, width, height - 20));
 
 		ViewportPanelAnim view = new ViewportPanelAnim(gui, editor);
-		view.setBounds(new Box(145, 0, width - 145 - 150, height - 20));
+		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
 	}
 
@@ -155,10 +188,25 @@ public class EditorGui extends Frame {
 		PopupMenu pp = new PopupMenu(gui);
 		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.file"), () -> pp.display(this, 0, 20)));
 
-		pp.addButton(gui.i18nFormat("button.cpm.file.new"), () -> checkUnsaved(() -> {
+		PopupMenu newMenu = new PopupMenu(gui);
+
+		newMenu.addButton(gui.i18nFormat("button.cpm.new.model"), () -> checkUnsaved(() -> {
 			this.editor.loadDefaultPlayerModel();
 			this.editor.updateGui();
 		}));
+
+		Button newTempl = newMenu.addButton(gui.i18nFormat("button.cpm.new.template"), () -> checkUnsaved(() -> {
+			this.editor.loadDefaultPlayerModel();
+			editor.templateSettings = new TemplateSettings(editor);
+			editor.setupTemplateModel();
+			editor.skinProvider.setImage(new Image(64, 64));
+			editor.skinProvider.texture.markDirty();
+			this.editor.updateGui();
+		}));
+		newTempl.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.new.template")));
+
+		int x = topPanel.getX();
+		pp.addButton(gui.i18nFormat("button.cpm.file.new"), () -> newMenu.display(this, x, 20));
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.load"), () -> checkUnsaved(() -> {
 			FileChooserGui fc = new FileChooserGui(this);
@@ -220,7 +268,42 @@ public class EditorGui extends Frame {
 		Button convertToCustom = pp.addButton(gui.i18nFormat("button.cpm.edit.convert_model_custom"), editor::convertModel);
 		convertToCustom.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.edit.convert_model_custom")));
 
-		Button addSkinLayers = pp.addButton(gui.i18nFormat("button.cpm.edit.add_skin_layer2"), editor::addSkinLayer);
+		pp.addButton(gui.i18nFormat("button.cpm.edit.add_skin_layer2"), editor::addSkinLayer);
+
+		pp.addButton(gui.i18nFormat("button.cpm.edit.add_template"), new InputPopup(this, gui.i18nFormat("label.cpm.template_link_input"), gui.i18nFormat("label.cpm.template_link_input.desc"), link -> {
+			new ProcessPopup<>(this, gui.i18nFormat("label.cpm.loading_template"), gui.i18nFormat("label.cpm.loading_template.desc"), () -> {
+				return EditorTemplate.create(editor, link);
+			}, t -> {
+				editor.templates.add(t);
+				editor.restitchTexture();
+				editor.markDirty();
+				editor.updateGui();
+			}, e -> {
+				if(e == null)return;
+				e.printStackTrace();
+				openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.template_load_error", e.getMessage())));
+			}).start();
+		}, null));
+
+		pp.addButton(gui.i18nFormat("button.cpm.edit.convert2template"), () -> {
+			if (editor.templateSettings == null) {
+				if (editor.dirty) {
+					openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.must_save")));
+				} else {
+					if(editor.file == null)
+						setupTemplate();
+					else
+						openPopup(new ConfirmPopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warn_c2t"), this::setupTemplate, null));
+				}
+			}
+		});
+	}
+
+	private void setupTemplate() {
+		editor.templateSettings = new TemplateSettings(editor);
+		editor.setupTemplateModel();
+		editor.markDirty();
+		editor.updateGui();
 	}
 
 	private void initEffectMenu() {
@@ -246,7 +329,7 @@ public class EditorGui extends Frame {
 		});
 		pp.add(boxReColor);
 
-		ColorButton colorBtn = new ColorButton(gui, this, editor::setColor);
+		ColorButton colorBtn = new ColorButton(gui, editor.frame, editor::setColor);
 		editor.setPartColor.add(c -> {
 			colorBtn.setEnabled(c != null);
 			if(c != null)colorBtn.setColor(c);
@@ -305,23 +388,15 @@ public class EditorGui extends Frame {
 	}
 
 	public void loadSkin(File file) {
-		editor.skinFile = file;
-		editor.reloadSkin();
+		EditorTexture tex = editor.getTextureProvider();
+		if(tex != null) {
+			tex.file = file;
+			editor.reloadSkin();
+		}
 	}
 
 	private void showError(String msg, String error) {
-		PopupPanel pp = new PopupPanel(gui);
-		pp.setBounds(new Box(0, 0, 100, 30));
-
-		Label lbl = new Label(gui, gui.i18nFormat("label.cpm.error." + msg));
-		lbl.setBounds(new Box(5, 5, 0, 0));
-		pp.addElement(lbl);
-
-		Label lbl2 = new Label(gui, error);
-		lbl2.setBounds(new Box(5, 15, 0, 0));
-		pp.addElement(lbl2);
-
-		openPopup(pp);
+		openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error." + msg), error));
 	}
 
 	public Editor getEditor() {
@@ -346,6 +421,9 @@ public class EditorGui extends Frame {
 					editor.redo();
 					event.consume();
 				}
+			}
+			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
+				editor.restitchTexture();
 			}
 		}
 	}

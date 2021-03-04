@@ -16,7 +16,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.tom.cpm.client.ClientProxy;
 
 @Mixin(PlayerItemModel.class)
-public class PlayerItemModelOFMixin {
+public class PlayerItemModelMixin_OF {
 
 	@Redirect(at = @At(
 			value = "INVOKE",

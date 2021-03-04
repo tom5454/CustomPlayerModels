@@ -20,7 +20,7 @@ public class TreePanel extends Panel {
 		Tree<TreeElement> tree = new Tree<>(e, new ModelTree(editor));
 		tree.setBounds(new Box(0, 0, 150, height - 20));
 		addElement(tree);
-		editor.updateTree.add(tree::updateTree);
+		editor.updateGui.add(tree::updateTree);
 
 		ButtonIcon newBtn = new ButtonIcon(gui, "editor", 0, 16, editor::addNew);
 		newBtn.setBounds(new Box(5, height - 24, 18, 18));

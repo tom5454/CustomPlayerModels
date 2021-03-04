@@ -1,10 +1,13 @@
 package com.tom.cpm.shared.editor;
 
+import com.tom.cpm.shared.editor.template.TemplateArgHandler.ArgElem;
 import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.math.Vec3f;
 import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.util.CombinedListView;
+import com.tom.cpm.shared.util.FlatListView;
 import com.tom.cpm.shared.util.ListView;
 
 public enum ElementType {
@@ -26,14 +29,19 @@ public enum ElementType {
 				}
 
 				@Override
-				public int getSelected() {
-					if(editor.renderPaint && !elem.texture)return 3;
-					if(editor.selectedElement == elem)return 2;
-					if(elem.parent != null) {
-						int ps = elem.parent.rc.getSelected();
-						if(ps == 2 || ps == 1)return 1;
+				public ElementSelectMode getSelected() {
+					if(editor.renderPaint) {
+						return ElementSelectMode.PAINT_MODE;
 					}
-					return 0;
+					if(editor.selectedElement == elem)return ElementSelectMode.SELECTED;
+					if(editor.selectedElement instanceof ArgElem && ((ArgElem) editor.selectedElement).elem == elem)
+						return ElementSelectMode.SEL_ONLY;
+					if(elem.parent != null) {
+						ElementSelectMode ps = elem.parent.rc.getSelected();
+						if(ps == ElementSelectMode.SEL_CHILDREN || ps == ElementSelectMode.SELECTED)
+							return ElementSelectMode.SEL_CHILDREN;
+					}
+					return ElementSelectMode.NULL;
 				}
 			};
 			elem.rc.children = new ListView<>(elem.children, m -> m.rc);
@@ -66,18 +74,19 @@ public enum ElementType {
 				}
 
 				@Override
-				public int getSelected() {
-					if(editor.selectedElement == elem)return 2;
+				public ElementSelectMode getSelected() {
+					if(editor.selectedElement == elem)return ElementSelectMode.SELECTED;
 					if(elem.parent != null) {
-						int ps = elem.parent.rc.getSelected();
-						if(ps == 2 || ps == 1)return 1;
+						ElementSelectMode ps = elem.parent.rc.getSelected();
+						if(ps == ElementSelectMode.SEL_CHILDREN || ps == ElementSelectMode.SELECTED)
+							return ElementSelectMode.SEL_CHILDREN;
 					}
-					return 0;
+					return ElementSelectMode.NULL;
 				}
 			};
 			elem.rc.pos = elem.pos;
 			elem.rc.rotation = elem.rotation;
-			elem.rc.children = new ListView<>(elem.children, m -> m.rc);
+			elem.rc.children = new CombinedListView<>(new ListView<>(elem.children, m -> m.rc), new FlatListView<>(editor.templates, t -> t.getForPart(type).stream()));
 			elem.storeID = type.getId(elem.rc);
 		}
 

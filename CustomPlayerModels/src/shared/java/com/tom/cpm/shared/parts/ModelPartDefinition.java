@@ -9,7 +9,8 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.RenderedCube;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ModelPartDefinition implements IModelPart, IResolvedModelPart {
 	private List<Cube> cubes;
@@ -94,7 +95,7 @@ public class ModelPartDefinition implements IModelPart, IResolvedModelPart {
 	}
 
 	@Override
-	public SkinProvider getSkin() {
+	public TextureProvider getSkin() {
 		return skinImage != null ? skinImage.getSkin() : null;
 	}
 
@@ -121,6 +122,12 @@ public class ModelPartDefinition implements IModelPart, IResolvedModelPart {
 	@Override
 	public void apply(ModelDefinition def) {
 		resolvedOtherParts.forEach(p -> p.apply(def));
+	}
+
+	@Override
+	public void stitch(TextureStitcher stitcher) {
+		resolvedTemplates.forEach(t -> t.stitch(stitcher));
+		resolvedOtherParts.forEach(p -> p.stitch(stitcher));
 	}
 
 	public void setPlayer(ModelPartPlayer player) {

@@ -38,6 +38,10 @@ public class ModelPartPlayer implements IModelPart, IResolvedModelPart {
 		return keep[part.ordinal()];
 	}
 
+	public void setDoRenderPart(PlayerModelParts part, boolean value) {
+		keep[part.ordinal()] = value;
+	}
+
 	@Override
 	public IResolvedModelPart resolve() throws IOException {
 		return this;

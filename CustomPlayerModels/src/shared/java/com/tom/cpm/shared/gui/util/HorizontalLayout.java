@@ -29,4 +29,8 @@ public class HorizontalLayout {
 	public int getX() {
 		return x;
 	}
+
+	public void addX(int i) {
+		x += i;
+	}
 }

@@ -37,10 +37,11 @@ public abstract class Frame extends Panel {
 	public void draw(int mouseX, int mouseY, float partialTicks) {
 		tooltipBox = null;
 		super.draw(mouseX, mouseY, partialTicks);
+
 		if(tooltipBox != null) {
 			Box b = tooltipBox.getBounds();
-			int tx = Math.min(mouseX + b.w + 5, bounds.w + b.w + 1);
-			int ty = Math.min(mouseY + b.h + 5, bounds.h + b.h + 1);
+			int tx = Math.min(mouseX + b.w + 5, bounds.w - 1);
+			int ty = Math.min(mouseY + b.h + 5, bounds.h - 1);
 			tooltipBox.setBounds(new Box(tx - b.w, ty - b.h, b.w, b.h));
 
 			tooltipBox.draw(Integer.MIN_VALUE, Integer.MIN_VALUE, partialTicks);
@@ -114,6 +115,7 @@ public abstract class Frame extends Panel {
 		public void draw(int mouseX, int mouseY, float partialTicks) {
 			gui.pushMatrix();
 			gui.setPosOffset(bounds);
+			gui.setupCut();
 			gui.drawBox(0, 0, bounds.w, bounds.h, gui.getColors().popup_border);
 			gui.drawBox(1, 1, bounds.w - 2, bounds.h - 2, gui.getColors().popup_background);
 			for (GuiElement guiElement : elements) {
@@ -121,6 +123,7 @@ public abstract class Frame extends Panel {
 					guiElement.draw(mouseX - bounds.x, mouseY - bounds.y, partialTicks);
 			}
 			gui.popMatrix();
+			gui.setupCut();
 		}
 
 		@Override

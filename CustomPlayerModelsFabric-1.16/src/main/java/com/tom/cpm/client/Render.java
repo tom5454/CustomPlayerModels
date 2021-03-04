@@ -295,4 +295,14 @@ public class Render {
 
 		}
 	}
+
+	public static void drawOrigin(MatrixStack matrixStackIn, VertexConsumer bufferIn, float len) {
+		Matrix4f matrix4f = matrixStackIn.peek().getModel();
+		bufferIn.vertex(matrix4f, 0, 0, 0).color(0f, 1, 0, 1).next();
+		bufferIn.vertex(matrix4f, 0, len, 0).color(0f, 1, 0, 1).next();
+		bufferIn.vertex(matrix4f, 0, 0, 0).color(1f, 0, 0, 1).next();
+		bufferIn.vertex(matrix4f, len, 0, 0).color(1f, 0, 0, 1).next();
+		bufferIn.vertex(matrix4f, 0, 0, 0).color(0f, 0, 1, 1).next();
+		bufferIn.vertex(matrix4f, 0, 0, len).color(0f, 0, 1, 1).next();
+	}
 }

@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -14,6 +17,11 @@ import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.util.PlayerPartValues;
+import com.tom.cpm.shared.math.MathHelper;
+import com.tom.cpm.shared.math.Vec2i;
+import com.tom.cpm.shared.math.Vec3f;
+import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
@@ -26,9 +34,11 @@ import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinLink;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.Image;
 import com.tom.cpm.shared.util.ListView;
 import com.tom.cpm.shared.util.MapViewOfList;
+import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ModelDefinition {
 	public static final ModelDefinition NULL_DEF = new ModelDefinition(null, Collections.emptyList(), null);
@@ -37,8 +47,8 @@ public class ModelDefinition {
 	private List<IModelPart> parts;
 	private List<IResolvedModelPart> resolved;
 	private ModelPartPlayer player;
-	private SkinProvider skinOverride;
-	private SkinProvider listIconOverride;
+	private TextureProvider skinOverride;
+	private TextureProvider listIconOverride;
 	private List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
 	private Map<ModelPart, RootModelElement> rootRenderingCubes;
@@ -62,7 +72,7 @@ public class ModelDefinition {
 				RootModelElement::getPart,
 				Function.identity()
 				);
-		skinOverride = editor.skinProvider;
+		skinOverride = editor.renderTexture;
 		this.playerObj = null;
 	}
 
@@ -116,7 +126,7 @@ public class ModelDefinition {
 			resolved.add(part.resolve());
 		}
 		for (IResolvedModelPart parts : resolved) {
-			SkinProvider img = parts.getSkin();
+			TextureProvider img = parts.getSkin();
 			if(img != null) {
 				if(skinOverride != null)throw new IOException("Multiple skin tags");
 				else {
@@ -153,6 +163,63 @@ public class ModelDefinition {
 			}
 			cubes.addAll(cs);
 		}
+		TextureStitcher stitcher = new TextureStitcher();
+		if(skinOverride != null) {
+			stitcher.setBase(skinOverride);
+		} else {
+			Image skin;
+			try {
+				skin = playerObj.getSkin().get(5, TimeUnit.SECONDS);
+			} catch (InterruptedException | ExecutionException | TimeoutException e1) {
+				throw new IOException(e1);
+			}
+			stitcher.setBase(skin);
+		}
+		Vec2i whiteBox = new Vec2i(0, 0);
+		List<RenderedCube> coloredCubes = new ArrayList<>();
+		cubes.forEach(t -> {
+			if(t.getCube().texSize == 0) {
+				coloredCubes.add(t);
+				int dx = MathHelper.ceil(t.getCube().size.x);
+				int dy = MathHelper.ceil(t.getCube().size.y);
+				int dz = MathHelper.ceil(t.getCube().size.z);
+				whiteBox.x = Math.max(whiteBox.x, 2 * (dx + dz));
+				whiteBox.y = Math.max(whiteBox.y, dy + dz);
+			}
+		});
+		if(whiteBox.x > 0 && whiteBox.y > 0) {
+			stitcher.allocSingleColor(whiteBox, 0xffffffff, uv -> coloredCubes.forEach(cube -> {
+				cube.recolor = true;
+				cube.getCube().texSize = 1;
+				cube.getCube().u = uv.x;
+				cube.getCube().v = uv.y;
+			}));
+		}
+		resolved.forEach(r -> r.stitch(stitcher));
+		skinOverride = stitcher.finish();
+		if(stitcher.hasStitches()) {
+			for (PlayerModelParts part : PlayerModelParts.VALUES) {
+				if(part == PlayerModelParts.CUSTOM_PART)continue;
+				if(player.doRenderPart(part)) {
+					player.setDoRenderPart(part, false);
+					RootModelElement p = playerModelParts.get(part.ordinal());
+					Cube cube = new Cube();
+					PlayerPartValues val = PlayerPartValues.getFor(part, playerObj.getSkinType());
+					cube.offset = val.getOffset();
+					cube.rotation = new Vec3f(0, 0, 0);
+					cube.pos = new Vec3f(0, 0, 0);
+					cube.size = val.getSize();
+					cube.scale = new Vec3f(1, 1, 1);
+					cube.u = val.u;
+					cube.v = val.v;
+					cube.texSize = 1;
+					cube.id = 0xfff0 + part.ordinal();
+					RenderedCube rc = new RenderedCube(cube);
+					rc.setParent(p);
+					p.addChild(rc);
+				}
+			}
+		}
 		rootRenderingCubes = new HashMap<>();
 		playerModelParts.forEach((i, e) -> rootRenderingCubes.put(PlayerModelParts.VALUES[i], e));
 		cubeMap = new HashMap<>();
@@ -186,7 +253,7 @@ public class ModelDefinition {
 		return editor;
 	}
 
-	public SkinProvider getSkinOverride() {
+	public TextureProvider getSkinOverride() {
 		return skinOverride;
 	}
 
@@ -248,11 +315,20 @@ public class ModelDefinition {
 		return elem;
 	}
 
-	public void setListIconOverride(SkinProvider listIconOverride) {
+	public void setListIconOverride(TextureProvider listIconOverride) {
 		this.listIconOverride = listIconOverride;
 	}
 
-	public SkinProvider getListIconOverride() {
+	public TextureProvider getListIconOverride() {
 		return listIconOverride;
+	}
+
+	public Link findDefLink() {
+		for (IModelPart iModelPart : parts) {
+			if(iModelPart instanceof ModelPartDefinitionLink) {
+				return ((ModelPartDefinitionLink)iModelPart).getLink();
+			}
+		}
+		return null;
 	}
 }

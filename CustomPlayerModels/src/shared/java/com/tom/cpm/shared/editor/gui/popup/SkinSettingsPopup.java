@@ -1,11 +1,13 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.gui.elements.Button;
 import com.tom.cpm.shared.gui.elements.ConfirmPopup;
 import com.tom.cpm.shared.gui.elements.Label;
+import com.tom.cpm.shared.gui.elements.MessagePopup;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
 import com.tom.cpm.shared.gui.elements.Spinner;
 import com.tom.cpm.shared.gui.elements.Tooltip;
@@ -13,14 +15,24 @@ import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.util.Image;
 
 public class SkinSettingsPopup extends PopupPanel {
+	private static boolean shownWarning = false;
 
-	public SkinSettingsPopup(IGui gui, EditorGui e) {
+	public static void showPopup(EditorGui e) {
+		Editor editor = e.getEditor();
+		EditorTexture tex = editor.getTextureProvider();
+		if(tex != null) {
+			e.openPopup(new SkinSettingsPopup(e.getGui(), e));
+		}
+	}
+
+	private SkinSettingsPopup(IGui gui, EditorGui e) {
 		super(gui);
 
 		Editor editor = e.getEditor();
+		EditorTexture tex = editor.getTextureProvider();
 
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.openSkin"), () -> {
-			FileChooserGui fc = new FileChooserGui(editor.gui);
+			FileChooserGui fc = new FileChooserGui(editor.frame);
 			fc.setTitle(gui.i18nFormat("label.cpm.loadSkin"));
 			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
 			fc.setFilter((f, n) -> n.endsWith(".png") && !f.isDirectory());
@@ -33,8 +45,8 @@ public class SkinSettingsPopup extends PopupPanel {
 		addElement(openSkinBtn);
 
 		Button saveSkin = new Button(gui, gui.i18nFormat("button.cpm.saveSkin"), () -> {
-			if(gui.isShiftDown() || editor.skinFile == null) {
-				FileChooserGui fc = new FileChooserGui(editor.gui);
+			if(gui.isShiftDown() || tex.file == null) {
+				FileChooserGui fc = new FileChooserGui(editor.frame);
 				fc.setTitle(gui.i18nFormat("label.cpm.saveSkin"));
 				fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
 				fc.setFilter((f, n) -> n.endsWith(".png") && !f.isDirectory());
@@ -44,7 +56,7 @@ public class SkinSettingsPopup extends PopupPanel {
 				fc.setAccept(editor::saveSkin);
 				e.openPopup(fc);
 			} else {
-				editor.saveSkin(editor.skinFile);
+				editor.saveSkin(tex.file);
 			}
 			close();
 		});
@@ -59,18 +71,18 @@ public class SkinSettingsPopup extends PopupPanel {
 		addElement(newSkin);
 
 		Button delSkin = new Button(gui, gui.i18nFormat("button.cpm.delSkin"), () -> {
-			boolean edited = editor.skinProvider.isEdited();
+			boolean edited = tex.isEdited();
 			if(edited) {
 				e.openPopup(new ConfirmPopup(e, gui.i18nFormat("label.cpm.delSkin"), () -> {
-					Image img = editor.skinProvider.getImage();
+					Image img = tex.getImage();
 					editor.addUndo(() -> {
-						editor.skinProvider.setImage(img);
-						editor.skinProvider.setEdited(true);
+						tex.setImage(img);
+						tex.setEdited(true);
 					});
 					Image vskin = new Image(editor.vanillaSkin);
 					editor.runOp(() -> {
-						editor.skinProvider.setImage(vskin);
-						editor.skinProvider.setEdited(false);
+						tex.setImage(vskin);
+						tex.setEdited(false);
 						editor.markDirty();
 						editor.updateGui();
 					});
@@ -101,11 +113,17 @@ public class SkinSettingsPopup extends PopupPanel {
 		addElement(lblTW);
 		addElement(lblTH);
 
-		Runnable r = () -> editor.setTexSize((int) spinnerTW.getValue(), (int) spinnerTH.getValue());
+		Runnable r = () -> {
+			if(editor.hasVanillaParts() && !shownWarning) {
+				shownWarning = true;
+				e.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));
+			} else
+				editor.setTexSize((int) spinnerTW.getValue(), (int) spinnerTH.getValue());
+		};
 		spinnerTW.addChangeListener(r);
 		spinnerTH.addChangeListener(r);
-		spinnerTW.setValue(editor.skinProvider.size.x);
-		spinnerTH.setValue(editor.skinProvider.size.y);
+		spinnerTW.setValue(tex.size.x);
+		spinnerTH.setValue(tex.size.y);
 
 		setBounds(new Box(0, 0, 210, 140));
 	}

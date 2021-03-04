@@ -24,7 +24,7 @@ public class MessagePopup extends PopupPanel {
 		}
 		setBounds(new Box(0, 0, wm + 20, 45 + lines.length * 10));
 
-		Button ok = new Button(gui, "Ok", this::close);
+		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), this::close);
 		ok.setBounds(new Box(wm / 2 - 10, 20 + lines.length * 10, 40, 20));
 		addElement(ok);
 	}

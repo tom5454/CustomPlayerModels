@@ -22,6 +22,7 @@ public class Panel extends GuiElement {
 	public void draw(int mouseX, int mouseY, float partialTicks) {
 		gui.pushMatrix();
 		gui.setPosOffset(getBounds());
+		gui.setupCut();
 		Box bounds = getBounds();
 		if(backgroundColor != 0)
 			gui.drawBox(0, 0, bounds.w, bounds.h, backgroundColor);
@@ -30,6 +31,7 @@ public class Panel extends GuiElement {
 				guiElement.draw(mouseX - bounds.x, mouseY - bounds.y, partialTicks);
 		}
 		gui.popMatrix();
+		gui.setupCut();
 	}
 
 	@Override

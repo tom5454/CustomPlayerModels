@@ -33,8 +33,12 @@ public class Gui {
 		}
 
 		public MouseEvent offset(Box bounds) {
+			return offset(bounds.x, bounds.y);
+		}
+
+		public MouseEvent offset(int xo, int yo) {
 			MouseEvent t = this;
-			return new MouseEvent(x - bounds.x, y - bounds.y, btn) {
+			return new MouseEvent(x - xo, y - yo, btn) {
 				@Override
 				public boolean isConsumed() {
 					return t.isConsumed();

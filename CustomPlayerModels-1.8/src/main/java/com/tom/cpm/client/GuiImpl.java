@@ -143,7 +143,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
-			displayError(e.toString());
+			logError(e.toString());
 		}
 	}
 
@@ -153,7 +153,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			gui.mouseClick(new MouseEvent(mouseX, mouseY, mouseButton));
 		} catch (Throwable e) {
 			e.printStackTrace();
-			displayError(e.toString());
+			logError(e.toString());
 		}
 	}
 
@@ -163,7 +163,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			gui.mouseDrag(new MouseEvent(mouseX, mouseY, clickedMouseButton));
 		} catch (Throwable e) {
 			e.printStackTrace();
-			displayError(e.toString());
+			logError(e.toString());
 		}
 	}
 
@@ -173,7 +173,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			gui.mouseRelease(new MouseEvent(mouseX, mouseY, state));
 		} catch (Throwable e) {
 			e.printStackTrace();
-			displayError(e.toString());
+			logError(e.toString());
 		}
 	}
 
@@ -196,7 +196,19 @@ public class GuiImpl extends GuiScreen implements IGui {
 				gui.mouseWheel(new MouseEvent(x, y, i));
 			} catch (Throwable e) {
 				e.printStackTrace();
-				displayError(e.toString());
+				logError(e.toString());
+			}
+		}
+	}
+
+	private void logError(String e) {
+		if(gui != null) {
+			try {
+				gui.logMessage(e);
+			} catch (Throwable ex) {
+				ex.printStackTrace();
+				ex.addSuppressed(new RuntimeException(e));
+				displayError(ex.toString());
 			}
 		}
 	}
@@ -263,13 +275,15 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void setPosOffset(Box box) {
+		current.box = new Box(current.box.x + box.x, current.box.y + box.y, box.w, box.h);
+	}
+
+	@Override
+	public void setupCut() {
 		float multiplierX = mc.displayWidth / (float)width;
 		float multiplierY = mc.displayHeight / (float)height;
-		int x = current.box.x + box.x;
-		int y = current.box.y + box.y;
-		GL11.glScissor((int) (x * multiplierX), mc.displayHeight - (int) ((y + box.h) * multiplierY),
-				(int) (box.w * multiplierX), (int) (box.h * multiplierY));
-		current.box = new Box(x, y, box.w, box.h);
+		GL11.glScissor((int) (current.box.x * multiplierX), mc.displayHeight - (int) ((current.box.y + current.box.h) * multiplierY),
+				(int) (current.box.w * multiplierX), (int) (current.box.h * multiplierY));
 	}
 
 	@Override

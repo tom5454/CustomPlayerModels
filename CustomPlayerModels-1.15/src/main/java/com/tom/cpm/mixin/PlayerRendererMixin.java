@@ -22,7 +22,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.shared.config.Player;
 
-@Mixin(PlayerRenderer.class)
+@Mixin(value = PlayerRenderer.class, priority = 1100)
 public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
 
 	public PlayerRendererMixin(EntityRendererManager rendererManager,
@@ -62,7 +62,8 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 			method = "renderItem("
 					+ "Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;"
 					+ "ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;"
-					+ "Lnet/minecraft/client/renderer/model/ModelRenderer;Lnet/minecraft/client/renderer/model/ModelRenderer;)V"
+					+ "Lnet/minecraft/client/renderer/model/ModelRenderer;Lnet/minecraft/client/renderer/model/ModelRenderer;)V",
+					require = 0
 			)
 	public RenderType getArmLayer(ResourceLocation loc, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, AbstractClientPlayerEntity playerIn, ModelRenderer rendererArmIn, ModelRenderer rendererArmwearIn) {
 		return ClientProxy.mc.getPlayerRenderManager().isBound(getEntityModel()) ? RenderType.getEntityTranslucent(getEntityTexture(playerIn)) : RenderType.getEntitySolid(getEntityTexture(playerIn));

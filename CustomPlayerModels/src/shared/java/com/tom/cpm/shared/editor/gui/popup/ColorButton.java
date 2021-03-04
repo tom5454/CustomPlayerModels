@@ -1,6 +1,8 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.IntConsumer;
 
 import com.tom.cpm.shared.gui.Frame;
@@ -13,12 +15,18 @@ import com.tom.cpm.shared.gui.elements.TextField;
 import com.tom.cpm.shared.math.Box;
 
 public class ColorButton extends Button {
+	private static List<Integer> colorCache = new ArrayList<>();
 	private IntConsumer actionColor;
 	private int color;
 	public ColorButton(IGui gui, Frame frame, IntConsumer action) {
 		super(gui, "", null);
 		this.action = () -> frame.openPopup(new ColorPopup(gui));
 		this.actionColor = action;
+	}
+
+	private ColorButton(IGui gui, Runnable action) {
+		super(gui, "", null);
+		this.action = action;
 	}
 
 	@Override
@@ -150,13 +158,25 @@ public class ColorButton extends Button {
 			addElement(hexField);
 
 			Button ok = new Button(gui, gui.i18nFormat("button.cpm.set"), () -> {
-				actionColor.accept(getColor());
+				int color = getColor();
+				colorCache.remove(Integer.valueOf(color));
+				if(colorCache.size() >= 6)colorCache.remove(0);
+				colorCache.add(Integer.valueOf(color));
+				actionColor.accept(color);
 				close();
 			});
-			ok.setBounds(new Box(5, 240, 100, 16));
+			ok.setBounds(new Box(5, 265, 100, 16));
 			addElement(ok);
 
-			setBounds(new Box(0, 0, 160, 270));
+			for(int i = 0;i<6;i++) {
+				int c = i < colorCache.size() ? colorCache.get(colorCache.size() - i - 1) : 0xffffffff;
+				ColorButton btn = new ColorButton(gui, () -> loadColor(c));
+				btn.setColor(c);
+				btn.setBounds(new Box(5 + i * 25, 240, 20, 16));
+				addElement(btn);
+			}
+
+			setBounds(new Box(0, 0, 160, 290));
 			updateDisplayText();
 		}
 
@@ -165,6 +185,23 @@ public class ColorButton extends Button {
 			super.draw(mouseX, mouseY, partialTicks);
 			gui.drawBox(bounds.x + bounds.w - 35, bounds.y + 5, 30, 20, gui.getColors().color_picker_border);
 			gui.drawBox(bounds.x + bounds.w - 34, bounds.y + 6, 28, 18, getColor() | 0xff000000);
+		}
+
+		private void loadColor(int color) {
+			int r = ((color & 0xff0000) >> 16);
+			int g = ((color & 0x00ff00) >> 8);
+			int b =  color & 0x0000ff;
+
+			spinnerR.setValue(r);
+			spinnerG.setValue(g);
+			spinnerB.setValue(b);
+
+			sliderR.setValue(r / 255f);
+			sliderG.setValue(g / 255f);
+			sliderB.setValue(b / 255f);
+			updateRGB();
+			updateDisplayText();
+			hexField.setText(String.format("%1$06X", color));
 		}
 
 		private int getColor() {

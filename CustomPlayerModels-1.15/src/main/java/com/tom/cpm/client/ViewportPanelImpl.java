@@ -29,6 +29,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.gui.ViewportPanel.ViewportPanelNative;
@@ -142,6 +143,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			int light = LightTexture.packLight(15, 15);
 			RenderType rt = editor.renderPaint ? CustomRenderTypes.getEntityTranslucentCullNoLight(PAINT) : RenderType.getEntityTranslucent(cbi.getReturnValue());
 			IVertexBuilder buffer = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
+			((RDH)ClientProxy.mc.getPlayerRenderManager().getHolder(p)).defaultType = rt;
 			p.setRotationAngles(playerObj, 0, 0, 0, 0, 0);
 
 			if(!editor.applyAnim && editor.playerTpose) {

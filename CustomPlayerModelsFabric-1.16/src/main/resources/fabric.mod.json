@@ -23,6 +23,9 @@
   	],
   	"client": [
       "com.tom.cpm.client.CustomPlayerModelsClient"
+    ],
+    "mm:early_risers": [
+      "com.tom.cpm.LaunchMixinWithOptifineRunnable"
     ]
   },
   "mixins": [
@@ -35,10 +38,5 @@
   },
   "suggests": {
     "flamingo": "*"
-  },
-  "custom": {
-    "mm:early_risers": [
-      "com.tom.cpm.LaunchMixinWithOptifineRunnable"
-    ]
   }
 }

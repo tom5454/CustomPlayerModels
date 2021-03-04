@@ -3,6 +3,7 @@ package com.tom.cpm.shared.parts;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.ChecksumInputStream;
@@ -23,7 +24,7 @@ public abstract class ModelPartLink implements IModelPart {
 
 	@Override
 	public IResolvedModelPart resolve() throws IOException {
-		try(InputStream in = loader.load(link)) {
+		try(InputStream in = loader.load(link, ResourceEncoding.BASE64)) {
 			if(in.read() != ModelDefinitionLoader.HEADER)throw new IOException();
 			ChecksumInputStream cis = new ChecksumInputStream(in);
 			try {
@@ -49,5 +50,9 @@ public abstract class ModelPartLink implements IModelPart {
 		StringBuilder bb = new StringBuilder("Link\n\tPath: ");
 		bb.append(link);
 		return bb.toString();
+	}
+
+	public Link getLink() {
+		return link;
 	}
 }

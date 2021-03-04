@@ -59,7 +59,11 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				int flags = block.read();
 				if(pose == VanillaPose.CUSTOM) {
 					String name = block.readUTF();
-					parsedData.put(id, new ResolvedData(new CustomPose(name), (flags & 1) != 0));
+					CustomPose p = parsedData.values().stream().map(k -> k.pose).
+							filter(k -> k instanceof CustomPose && ((CustomPose)k).getName().equals(name)).
+							map(k -> (CustomPose) k).findFirst().orElse(null);
+					if(p == null)p = new CustomPose(name);
+					parsedData.put(id, new ResolvedData(p, (flags & 1) != 0));
 				} else {
 					parsedData.put(id, new ResolvedData(pose, (flags & 1) != 0));
 				}
@@ -153,6 +157,15 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				blankId = block.read();
 				resetId = block.read();
 				break;
+
+			case ANIMATION_DATA_EXTRA:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.priority = block.readByte();
+			}
+			break;
 			default:
 				break;
 			}
@@ -161,11 +174,11 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 
 	public ModelPartAnimation(Editor e) {
 		int[] idc = new int[] {0, 1};
-		int valMask = PlayerSkinLayer.encode(e.animEnc.freeLayers);
-		int defMask = PlayerSkinLayer.encode(e.animEnc.defaultLayerValue) & (~valMask);
+		int valMask = e.animEnc == null ? 0 :  PlayerSkinLayer.encode(e.animEnc.freeLayers);
+		int defMask = e.animEnc == null ? 0 : (PlayerSkinLayer.encode(e.animEnc.defaultLayerValue) & (~valMask));
 		resetId = defMask | valMask;
 		blankId = defMask | 0;
-		List<PlayerSkinLayer> allLayers = new ArrayList<>(e.animEnc.freeLayers);
+		List<PlayerSkinLayer> allLayers = e.animEnc != null ? new ArrayList<>(e.animEnc.freeLayers) : new ArrayList<>();
 		Collections.sort(allLayers);
 		e.animations.forEach(ea -> {
 			int id = idc[0]++;
@@ -176,7 +189,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd = new ResolvedData(ea.pose, ea.add);
 				resolveEncID(rd, idc[1]++, allLayers);
 			} else {
-				rd = new ResolvedData(ea.gestureName, ea.loop, ea.add);
+				rd = new ResolvedData(ea.displayName, ea.loop, ea.add);
 				resolveEncID(rd, idc[1]++, allLayers);
 			}
 			rd.gid &= valMask;
@@ -195,6 +208,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.color = new Vec3f[cs][];
 			rd.show = new boolean[cs][];
 			rd.loop = ea.loop;
+			rd.priority = ea.priority;
 			for (int i = 0; i < cs; i++) {
 				ModelElement elem = elems.get(i);
 				rd.components[i] = elem.id;
@@ -237,7 +251,9 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 	private static <T> void fillArray(T[] array, List<AnimFrame> frames, ModelElement elem, Function<IElem, T> func) {
 		for (int i = 0; i < frames.size(); i++) {
 			AnimFrame frm = frames.get(i);
-			array[i] = func.apply(frm.getData(elem));
+			IElem dt = frm.getData(elem);
+			if(dt == null)dt = elem;
+			array[i] = func.apply(dt);
 		}
 	}
 
@@ -344,6 +360,13 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					}
 				}
 			}
+			if(dt.priority != 0) {
+				dout.writeEnum(Type.ANIMATION_DATA_EXTRA);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+					d.writeByte(dt.priority);
+				}
+			}
 		}
 		dout.writeEnum(Type.CTRL_IDS);
 		try(IOHelper d = dout.writeNextBlock()) {
@@ -401,16 +424,21 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					Arrays.fill(rd.show[i], c.isVisible());
 				}
 			}
-			rd.anim = new Animation(comp, data, rd.show, rd.duration, rd.add);
+			rd.anim = new Animation(comp, data, rd.show, rd.duration, rd.priority, rd.add);
 		});
+		Map<String, List<Animation>> gestures = new HashMap<>();
 		parsedData.values().forEach(rd -> {
 			if(rd.pose instanceof VanillaPose) {
 				def.getAnimations().register(rd.pose, rd.anim);
 			} else if(rd.name != null) {
-				Gesture g = new Gesture(rd.anim, rd.name, rd.loop);
-				def.getAnimations().register(g);
-				if(rd.gid != -1)
-					def.getAnimations().register(rd.gid, g);
+				gestures.computeIfAbsent(rd.name, k -> {
+					List<Animation> l = new ArrayList<>();
+					Gesture g = new Gesture(l, rd.name, rd.loop);
+					def.getAnimations().register(g);
+					if(rd.gid != -1)
+						def.getAnimations().register(rd.gid, g);
+					return l;
+				}).add(rd.anim);
 			} else {
 				def.getAnimations().register(rd.pose, rd.anim);
 				def.getAnimations().register((CustomPose) rd.pose);
@@ -448,6 +476,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		ANIMATION_INFO,
 		ENCODING,
 		CTRL_IDS,
+		ANIMATION_DATA_EXTRA,
 		;
 		public static final Type[] VALUES = values();
 	}
@@ -465,6 +494,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		private Animation anim;
 		private boolean loop;
 		private boolean add;
+		private int priority;
 
 		public ResolvedData(VanillaPose pose, boolean add) {
 			this.pose = pose;
@@ -497,6 +527,8 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			bb.append(duration);
 			bb.append("ms\n\tComponent count: ");
 			bb.append(components.length);
+			bb.append("\n\tPriority: ");
+			bb.append(priority);
 			bb.append("\n\tColorValues: \n\t\t[");
 			for (Vec3f[] vec3fs : color) {
 				bb.append(Arrays.toString(vec3fs));

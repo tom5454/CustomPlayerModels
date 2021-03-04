@@ -68,6 +68,14 @@ public class ConfigEntry {
 		}
 	}
 
+	public String getSetString(String name, String def) {
+		try {
+			return getSet(name, def);
+		} catch (ClassCastException e) {
+			return def;
+		}
+	}
+
 	public void setString(String name, String value) {
 		data.put(name, value);
 		changeListener.run();
@@ -81,7 +89,47 @@ public class ConfigEntry {
 		}
 	}
 
+	public int getSetInt(String name, int def) {
+		try {
+			return getSet(name, def);
+		} catch (ClassCastException e) {
+			return def;
+		}
+	}
+
 	public void setInt(String name, int value) {
+		data.put(name, value);
+		changeListener.run();
+	}
+
+	public boolean getBoolean(String name, boolean def) {
+		try {
+			return (boolean) data.getOrDefault(name, def);
+		} catch (ClassCastException e) {
+			return def;
+		}
+	}
+
+	public boolean getSetBoolean(String name, boolean def) {
+		try {
+			return getSet(name, def);
+		} catch (ClassCastException e) {
+			return def;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T getSet(String name, T def) {
+		T v = (T) data.get(name);
+		if(v == null) {
+			v = def;
+			data.put(name, def);
+			changeListener.run();
+		}
+		return v;
+	}
+
+	public void setBoolean(String name, boolean value) {
 		data.put(name, value);
 		changeListener.run();
 	}

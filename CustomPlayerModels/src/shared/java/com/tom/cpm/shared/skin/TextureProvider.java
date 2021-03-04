@@ -11,22 +11,26 @@ import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.util.DynamicTexture;
 import com.tom.cpm.shared.util.Image;
 
-public class SkinProvider {
+public class TextureProvider {
 	public DynamicTexture texture;
-	private boolean edited;
 	public Vec2i size;
 
-	public SkinProvider() {
+	public TextureProvider() {
 		size = new Vec2i(64, 64);
 	}
 
-	public SkinProvider(IOHelper in, int sizeLimit) throws IOException {
+	public TextureProvider(IOHelper in, int sizeLimit) throws IOException {
 		size = in.read2s();
 		ImageBlock block = in.readImage();
 		if(block.getWidth() > sizeLimit || block.getHeight() > sizeLimit)
 			throw new IOException("Texture size too large");
 		block.doReadImage();
 		texture = new DynamicTexture(block.getImage());
+	}
+
+	public TextureProvider(Image imgIn, Vec2i size) {
+		this.size = size;
+		texture = new DynamicTexture(imgIn);
 	}
 
 	public void write(IOHelper dout) throws IOException {
@@ -53,26 +57,8 @@ public class SkinProvider {
 		return texture == null ? null : texture.getImage();
 	}
 
-	public void setRGB(int x, int y, int rgb) {
-		texture.getImage().setRGB(x, y, rgb);
-		markDirty();
-	}
-
 	public void setImage(Image image) {
 		if(texture == null)texture = new DynamicTexture(image);
 		else texture.setImage(image);
-	}
-
-	public void markDirty() {
-		if(texture != null)texture.markDirty();
-		this.edited = true;
-	}
-
-	public boolean isEdited() {
-		return edited;
-	}
-
-	public void setEdited(boolean edited) {
-		this.edited = edited;
 	}
 }

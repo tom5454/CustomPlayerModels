@@ -1,8 +1,9 @@
-package com.tom.cpm.client.optifine;
+package com.tom.cpm.mixinplugin;
 
-public class OptifineDetector {
+public class OFDetector {
+
 	//Taken from Immersive Portals
-	public static boolean detectOptiFine() {
+	public static boolean doApply() {
 		try {
 			//do not load other optifine classes that loads vanilla classes
 			//that would load the class before mixin

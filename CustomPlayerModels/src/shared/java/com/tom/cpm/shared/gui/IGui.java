@@ -2,6 +2,7 @@ package com.tom.cpm.shared.gui;
 
 import java.util.function.Consumer;
 
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.math.Vec2i;
 
@@ -16,6 +17,7 @@ public interface IGui {
 	void close();
 	void pushMatrix();
 	void setPosOffset(Box box);
+	void setupCut();
 	void popMatrix();
 	UIColors getColors();
 	void setCloseListener(Consumer<Runnable> listener);
@@ -31,5 +33,16 @@ public interface IGui {
 
 	default void drawBox(float x, float y, float w, float h, int color) {
 		drawBox((int) x, (int) y, (int) w, (int) h, color);
+	}
+
+	default void executeLater(Runnable r) {
+		MinecraftClientAccess.get().executeLater(() -> {
+			try {
+				r.run();
+			} catch (Throwable e) {
+				e.printStackTrace();
+				getFrame().logMessage(e.getMessage());
+			}
+		});
 	}
 }

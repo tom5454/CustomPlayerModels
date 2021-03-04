@@ -1,4 +1,4 @@
-package com.tom.cpm;
+package com.tom.cpm.mixinplugin;
 
 import java.util.List;
 import java.util.Set;
@@ -6,8 +6,6 @@ import java.util.Set;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-
-import com.tom.cpm.client.optifine.OptifineDetector;
 
 public class CPMMixinPlugin implements IMixinConfigPlugin {
 
@@ -23,7 +21,14 @@ public class CPMMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return OptifineDetector.detectOptiFine();
+		if(mixinClassName.contains("_")) {
+			try {
+				return (boolean) Class.forName("com.tom.cpm.mixinplugin." + mixinClassName.split("_")[1] + "Detector").getDeclaredMethod("doApply").invoke(null);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return true;
+			}
+		} else return true;
 	}
 
 	@Override

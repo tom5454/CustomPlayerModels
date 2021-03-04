@@ -27,6 +27,7 @@ import com.mojang.authlib.GameProfile;
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -99,8 +100,9 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@SubscribeEvent
-	public void openGui(GuiScreenEvent.InitGuiEvent.Post evt) {
-		if(evt.gui instanceof GuiMainMenu || evt.gui instanceof GuiOptions) {
+	public void initGui(GuiScreenEvent.InitGuiEvent.Post evt) {
+		if((evt.gui instanceof GuiMainMenu && ModConfig.getConfig().getSetBoolean("titleScreenButton", true)) ||
+				evt.gui instanceof GuiOptions) {
 			evt.buttonList.add(new Button(0, 0));
 		}
 	}

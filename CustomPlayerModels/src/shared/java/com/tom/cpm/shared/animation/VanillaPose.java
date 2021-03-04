@@ -1,6 +1,6 @@
 package com.tom.cpm.shared.animation;
 
-import java.util.function.Function;
+import com.tom.cpm.shared.gui.IGui;
 
 public enum VanillaPose implements IPose {
 	CUSTOM,
@@ -15,6 +15,7 @@ public enum VanillaPose implements IPose {
 	FLYING,
 	DYING,
 	SKULL_RENDER,
+	GLOBAL,
 
 	;
 	private final String i18nKey;
@@ -25,7 +26,8 @@ public enum VanillaPose implements IPose {
 	}
 
 	@Override
-	public String getName(Function<String, String> i18n) {
-		return i18n.apply(i18nKey);
+	public String getName(IGui gui, String display) {
+		if(display == null)return gui.i18nFormat(i18nKey);
+		return gui.i18nFormat("label.cpm.vanilla_anim", gui.i18nFormat(i18nKey), display);
 	}
 }

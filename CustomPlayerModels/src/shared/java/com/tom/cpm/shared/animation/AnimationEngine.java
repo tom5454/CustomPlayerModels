@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.animation;
 
+import java.util.List;
+
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
@@ -38,8 +40,10 @@ public class AnimationEngine {
 			}
 			player.currentPose = def.getAnimations().getPose(gesture, player.currentPose);
 			player.prevPose = pose;
-			Animation anim = def.getAnimations().getPoseAnimation(player.currentPose);
-			player.getAnimationHandler().setNextAnimation(anim);
+			List<Animation> anim = def.getAnimations().getPoseAnimations(player.currentPose);
+			List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
+			player.getAnimationHandler().addAnimations(anim);
+			player.getAnimationHandler().addAnimations(global);
 			player.getAnimationHandler().setGesture(def.getAnimations().getGesture(gesture));
 			player.getAnimationHandler().animate(getTime());
 		} catch (Exception e) {

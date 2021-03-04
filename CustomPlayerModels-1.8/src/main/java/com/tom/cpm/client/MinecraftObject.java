@@ -18,7 +18,6 @@ import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.gui.IKeybind;
@@ -38,12 +37,6 @@ public class MinecraftObject implements MinecraftClientAccess {
 		this.mc = mc;
 		prm = new PlayerRenderManager(loader);
 		this.loader = loader;
-	}
-
-	@Override
-	public InputStream loadResource(String path) throws IOException {
-		IResource r = mc.getResourceManager().getResource(new ResourceLocation(CustomPlayerModels.ID, path));
-		return r.getInputStream();
 	}
 
 	@Override

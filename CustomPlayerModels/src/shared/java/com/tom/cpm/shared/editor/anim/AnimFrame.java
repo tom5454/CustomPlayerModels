@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.util.PlayerPartValues;
@@ -220,7 +221,7 @@ public class AnimFrame {
 		List<Map<String, Object>> c = (List<Map<String, Object>>) data.get("components");
 		for (Map<String, Object> map : c) {
 			long sid = ((Number)map.get("storeID")).longValue();
-			anim.editor.walkElements(anim.editor.elements, elem -> {
+			Editor.walkElements(anim.editor.elements, elem -> {
 				if(elem.storeID == sid) {
 					Data dt = new Data(elem);
 					components.put(elem, dt);

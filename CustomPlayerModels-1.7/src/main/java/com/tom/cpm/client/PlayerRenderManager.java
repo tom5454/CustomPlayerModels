@@ -17,8 +17,9 @@ import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRenderer, ModelBase> {
 	private static final float scale = 0.0625F;
@@ -135,7 +136,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 		@Override
 		protected void bindSkin() {
-			SkinProvider skin = def.getSkinOverride();
+			TextureProvider skin = def.getSkinOverride();
 			if(skin != null) {
 				if(!def.isEditor())skin.bind();
 				sheetX = skin.getSize().x;
@@ -158,7 +159,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		private ModelRenderer parent;
 		private RootModelElement elem;
 		private CubeModelRenderer dispRender;
-		private int sel;
 
 		public RedirectModelRenderer(RDH holder, Supplier<ModelRenderer> parent, ModelPart part) {
 			super(holder.model);
@@ -183,7 +183,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			@Override
 			public void render(float scale) {
 				RedirectModelRenderer.this.render(elem, scale);
-				if(sel > 0)drawVanillaOutline(scale);
+				if(holder.def.isEditor() && elem.getSelected().isRenderOutline())drawVanillaOutline(scale);
 			}
 		}
 
@@ -212,13 +212,14 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 			GL11.glEnable(GL11.GL_CULL_FACE);
-			if(sel == 2)Render.drawOrigin(1);
+			boolean sel = elem.getSelected() == ElementSelectMode.SELECTED;
+			if(sel)Render.drawOrigin(1);
 			GL11.glDisable(GL11.GL_CULL_FACE);
 
 			float f = 0.001f;
 			float g = f * 2;
 			for(ModelBox b : ((List<ModelBox>) parent.cubeList)) {
-				Render.drawCubeOutline(b.posX1 * scale - f, b.posY1 * scale - f, b.posZ1 * scale - f, (b.posX2 - b.posX1)  * scale + g, (b.posY2 - b.posY1) * scale + g, (b.posZ2 - b.posZ1) * scale + g, 1, 1, sel == 2 ? 1 : 0);
+				Render.drawCubeOutline(b.posX1 * scale - f, b.posY1 * scale - f, b.posZ1 * scale - f, (b.posX2 - b.posX1)  * scale + g, (b.posY2 - b.posY1) * scale + g, (b.posZ2 - b.posZ1) * scale + g, 1, 1, sel ? 1 : 0);
 			}
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 			GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -255,7 +256,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 					drawBox(cube, scale);
 					if(cube.useDynamic) {
-						drawSelect(cube, scale);
+						if(holder.def.isEditor())drawSelect(cube, scale);
 						render(cube, scale);
 					}
 
@@ -307,23 +308,23 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			}
 			((DisplayList)cube.renderObject).call();
 			if(cube.color != 0xffffff)GL11.glColor4f(1, 1, 1, 1);
-			drawSelect(cube, scale);
 		}
 
 		private void drawSelect(RenderedCube cube, float scale) {
-			int sel = cube.getSelected();
+			ElementSelectMode selM = cube.getSelected();
 
-			if(sel > 0) {
+			if(selM.isRenderOutline()) {
 				float f = 0.001f;
 				float g = f * 2;
 				Cube c = cube.getCube();
 				GL11.glDisable(GL11.GL_DEPTH_TEST);
 				GL11.glDisable(GL11.GL_TEXTURE_2D);
-				if(sel == 2)Render.drawOrigin(1);
+				boolean sel = selM == ElementSelectMode.SELECTED;
+				if(sel)Render.drawOrigin(1);
 				Render.drawCubeOutline(
 						c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
 						c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
-						sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0.5f, sel == 2 ? 1 : 0);
+						sel ? 1 : 0.5f, sel ? 1 : 0.5f, sel ? 1 : 0);
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
 				GL11.glEnable(GL11.GL_DEPTH_TEST);
 			}
@@ -350,7 +351,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		@Override
 		public ModelRenderer swapIn() {
 			if(parent != null) {
-				//new Exception("Double swapping?").printStackTrace();
 				return this;
 			}
 			parent = parentProvider.get();
@@ -361,7 +361,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		@Override
 		public ModelRenderer swapOut() {
 			if(parent == null) {
-				new Exception("Double swapping?").printStackTrace();
 				return parentProvider.get();
 			}
 			ModelRenderer p = parent;
@@ -404,9 +403,8 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 
 		@Override
-		public void renderWithParent(RootModelElement elem, int sel) {
+		public void renderWithParent(RootModelElement elem) {
 			this.elem = elem;
-			this.sel = sel;
 			parent.addChild(dispRender);
 			parent.render(scale);
 			parent.childModels.remove(dispRender);
@@ -414,13 +412,13 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 
 		@Override
-		public void doRender(RootModelElement elem, int sel) {
+		public void doRender(RootModelElement elem) {
 			if(holder.def.isEditor()) {
 				//GL11.glColor4f(1, 1, 1, 0.5f);
 				//parent.render(scale);
 				//GL11.glColor4f(1, 1, 1, 1);
 			}
-			if(sel > 0)drawSelectionOutline(scale);
+			if(holder.def.isEditor() && elem.getSelected().isRenderOutline())drawSelectionOutline(scale);
 			GL11.glTranslatef(this.offsetX, this.offsetY, this.offsetZ);
 			if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
 				if (this.rotationPointX == 0.0F && this.rotationPointY == 0.0F && this.rotationPointZ == 0.0F) {

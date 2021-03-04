@@ -2,8 +2,13 @@ package com.tom.cpm.shared.editor.gui.popup;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
+import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.definition.Link;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Exporter;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.IGui;
@@ -12,19 +17,21 @@ import com.tom.cpm.shared.gui.elements.Checkbox;
 import com.tom.cpm.shared.gui.elements.Label;
 import com.tom.cpm.shared.gui.elements.MessagePopup;
 import com.tom.cpm.shared.gui.elements.PopupPanel;
+import com.tom.cpm.shared.gui.elements.TextField;
 import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.skin.SkinProvider;
 import com.tom.cpm.shared.util.Image;
 
 public class ExportSkinPopup extends PopupPanel {
-	private SkinProvider vanillaSkin;
+	private EditorTexture vanillaSkin;
 	private EditorGui editorGui;
 	private File selFile;
 	private Checkbox forceLinkFile;
 	private ExportMode mode = ExportMode.SKIN;
-	private Button ok, modeBtn, setOut, changeVanillaSkin, encSettings;
-	private Label expOutLbl, exportName, vanillaSkinLbl;
+	private Button ok, modeBtn, setOut, changeVanillaSkin, encSettings, okDef;
+	private Label expOutLbl, exportName, vanillaSkinLbl, nameLbl, descLbl;
+	private TextField nameField, descField;
+	private Link defLink;
 
 	public ExportSkinPopup(IGui gui, EditorGui e) {
 		super(gui);
@@ -32,7 +39,7 @@ public class ExportSkinPopup extends PopupPanel {
 		this.editorGui = e;
 		Editor editor = e.getEditor();
 
-		vanillaSkin = new SkinProvider();
+		vanillaSkin = new EditorTexture();
 		vanillaSkin.setImage(editor.vanillaSkin);
 
 		vanillaSkinLbl = new Label(gui, gui.i18nFormat("label.cpm.vanilla_skin"));
@@ -44,7 +51,7 @@ public class ExportSkinPopup extends PopupPanel {
 		addElement(encSettings);
 
 		changeVanillaSkin = new Button(gui, gui.i18nFormat("button.cpm.change_vanilla_skin"), () -> {
-			FileChooserGui fc = new FileChooserGui(editor.gui);
+			FileChooserGui fc = new FileChooserGui(editor.frame);
 			fc.setTitle(gui.i18nFormat("button.cpm.change_vanilla_skin"));
 			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
 			fc.setFilter((f, n) -> n.endsWith(".png") && !f.isDirectory());
@@ -53,6 +60,8 @@ public class ExportSkinPopup extends PopupPanel {
 					Image img = Image.loadFrom(f);
 					editor.vanillaSkin = img;
 					vanillaSkin.setImage(img);
+					detectDef();
+					setExportType();
 				} catch (IOException ex) {
 					e.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.img_load_failed", ex.getLocalizedMessage())));
 				}
@@ -74,6 +83,18 @@ public class ExportSkinPopup extends PopupPanel {
 		exportName = new Label(gui, gui.i18nFormat("label.cpm.no_file"));
 		exportName.setBounds(new Box(5, 125, 0, 0));
 		addElement(exportName);
+
+		nameLbl = new Label(gui, gui.i18nFormat("label.cpm.name"));
+		addElement(nameLbl);
+
+		nameField = new TextField(gui);
+		addElement(nameField);
+
+		descLbl = new Label(gui, gui.i18nFormat("label.cpm.desc"));
+		addElement(descLbl);
+
+		descField = new TextField(gui);
+		addElement(descField);
 
 		setOut = new Button(gui, "...", () -> {
 			FileChooserGui fc = new FileChooserGui(e);
@@ -108,10 +129,27 @@ public class ExportSkinPopup extends PopupPanel {
 		});
 
 		ok.setEnabled(false);
-		ok.setBounds(new Box(5, 165, 80, 20));
 		addElement(ok);
 
+		okDef = new Button(gui, gui.i18nFormat("button.cpm.export_def"), () -> {
+			if(mode == ExportMode.SKIN && defLink != null) {
+				mode = ExportMode.GIST_UPDATE;
+				close();
+				export();
+			}
+		});
+		okDef.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export_def")));
+		addElement(okDef);
+
+		detectDef();
 		setExportType();
+	}
+
+	private void detectDef() {
+		ModelDefinition def = MinecraftClientAccess.get().getDefinitionLoader().loadModel(editorGui.getEditor().vanillaSkin, MinecraftClientAccess.get().getClientPlayer());
+		if(def != null) {
+			defLink = def.findDefLink();
+		}
 	}
 
 	private void setExportType() {
@@ -125,8 +163,27 @@ public class ExportSkinPopup extends PopupPanel {
 		expOutLbl.setVisible(mode.hasFile);
 		vanillaSkinLbl.setVisible(mode == ExportMode.SKIN);
 		changeVanillaSkin.setVisible(mode == ExportMode.SKIN);
-		forceLinkFile.setBounds(new Box(5, mode == ExportMode.SKIN ? 80 : 55, 135, 20));
-		setBounds(new Box(0, 0, mode.w, 190));
+		if(mode.forceLinkY == -1) {
+			forceLinkFile.setVisible(false);
+		} else {
+			forceLinkFile.setBounds(new Box(5, mode.forceLinkY, 135, 20));
+			forceLinkFile.setVisible(true);
+		}
+		boolean en = mode.nameDescY != -1;
+		nameLbl.setVisible(en);
+		nameField.setVisible(en);
+		descLbl.setVisible(en);
+		descField.setVisible(en);
+		if(en) {
+			nameLbl.setBounds(new Box(5, mode.nameDescY, 130, 10));
+			nameField.setBounds(new Box(5, mode.nameDescY + 10, 130, 20));
+			descLbl.setBounds(new Box(5, mode.nameDescY + 35, 130, 10));
+			descField.setBounds(new Box(5, mode.nameDescY + 45, 130, 20));
+		}
+		okDef.setVisible(mode == ExportMode.SKIN && defLink != null && editorGui.getEditor().templateSettings == null);
+		ok.setBounds(new Box(5, mode.h - 25, 80, 20));
+		okDef.setBounds(new Box(90, mode.h - 25, 80, 20));
+		setBounds(new Box(0, 0, mode.w, mode.h));
 		if(layer != null)editorGui.openPopup(this);
 	}
 
@@ -142,17 +199,37 @@ public class ExportSkinPopup extends PopupPanel {
 		if(Exporter.check(editorGui.getEditor(), editorGui, this::export)) {
 			switch (mode) {
 			case SKIN:
+				if(editorGui.getEditor().templateSettings != null) {
+					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
+					return;
+				}
 				Exporter.exportSkin(editorGui.getEditor(), editorGui, selFile, forceLinkFile.isSelected());
 				break;
 				/*case B64:
-				Exporter.exportSkin(editorGui.getEditor(), editorGui, b64 -> editorGui.openPopup(new ExportB64Popup(editorGui, gui, b64)), forceLinkFile.isSelected());
+				Exporter.exportSkin(editorGui.getEditor(), editorGui, b64 -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "base64_model", b64)), forceLinkFile.isSelected());
 				break;
 			case MODEL:
 				editorGui.openPopup(new MessagePopup(gui, "Info", "This feature is not implemented yet."));
-				break;
-			case TEMPLATE:
-				editorGui.openPopup(new MessagePopup(gui, "Info", "This feature is not implemented yet."));
 				break;*/
+			case TEMPLATE:
+				if(editorGui.getEditor().templateSettings == null) {
+					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.projectNotTemplate")));
+					return;
+				}
+				Exporter.exportTemplate(editorGui.getEditor(), editorGui, nameField.getText(), descField.getText(),
+						t -> editorGui.openPopup(new CreateGistPopup(editorGui, gui, "template_export", t,
+								l -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "template", l.toString()))
+								)));
+				break;
+
+			case GIST_UPDATE:
+				if(editorGui.getEditor().templateSettings != null) {
+					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
+					return;
+				}
+				Exporter.exportSkin(editorGui.getEditor(), editorGui, gist -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "skin_update", gist)));
+				break;
+
 			default:
 				break;
 			}
@@ -183,17 +260,31 @@ public class ExportSkinPopup extends PopupPanel {
 	}
 
 	private static enum ExportMode {
-		SKIN(true, 320),
-		/*B64(false, 160),
-		TEMPLATE(false, 160),
-		MODEL(true, 185),*/
+		SKIN(true, 320, 190, 80, -1),
+		//B64(false, 160, 150, 55, -1),
+		TEMPLATE(false, 160, 190, -1, 55),
+		//MODEL(true, 185, 260, 55, 145),
+		GIST_UPDATE,
 		;
-		private ExportMode(boolean hasFile, int w) {
-			this.hasFile = hasFile;
-			this.w = w;
+
+		private ExportMode() {
+			this(false, false, 0, 0, 0, 0);
 		}
-		public static final ExportMode[] VALUES = values();
-		public boolean hasFile;
-		public int w;
+
+		private ExportMode(boolean hasFile, int w, int h, int forceLinkY, int nameDescY) {
+			this(hasFile, true, w, h, forceLinkY, nameDescY);
+		}
+
+		private ExportMode(boolean hasFile, boolean doDisplay, int w, int h, int forceLinkY, int nameDescY) {
+			this.hasFile = hasFile;
+			this.doDisplay = doDisplay;
+			this.w = w;
+			this.h = h;
+			this.forceLinkY = forceLinkY;
+			this.nameDescY = nameDescY;
+		}
+		public static final ExportMode[] VALUES = Arrays.stream(values()).filter(v -> v.doDisplay).toArray(ExportMode[]::new);
+		public boolean hasFile, doDisplay;
+		public int w, h, forceLinkY, nameDescY;
 	}
 }

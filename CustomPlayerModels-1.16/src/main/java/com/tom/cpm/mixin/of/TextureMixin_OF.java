@@ -9,7 +9,7 @@ import net.optifine.shaders.MultiTexID;
 import com.tom.cpm.client.optifine.proxy.TextureOF;
 
 @Mixin(Texture.class)
-public class TextureOFMixin implements TextureOF {
+public class TextureMixin_OF implements TextureOF {
 
 	@Shadow public MultiTexID multiTex;
 

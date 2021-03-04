@@ -64,8 +64,8 @@ public class RenderedCube implements IModelComponent {
 		return parent;
 	}
 
-	public int getSelected() {
-		return 0;
+	public ElementSelectMode getSelected() {
+		return ElementSelectMode.NULL;
 	}
 
 	public void setCube(Cube cube) {
@@ -138,5 +138,28 @@ public class RenderedCube implements IModelComponent {
 	public int getRGB() {
 		if(cube == null)return -1;
 		return recolor || cube.texSize == 0 ? cube.rgb : -1;
+	}
+
+	public static enum ElementSelectMode {
+		NULL(false, true),
+		SELECTED(true, true),
+		SEL_CHILDREN(true, true),
+		SEL_ONLY(true, true),
+		PAINT_MODE(false, false),
+		;
+		private boolean renderOutline, applyColor;
+
+		private ElementSelectMode(boolean renderOutline, boolean applyColor) {
+			this.renderOutline = renderOutline;
+			this.applyColor = applyColor;
+		}
+
+		public boolean isRenderOutline() {
+			return renderOutline;
+		}
+
+		public boolean applyColor() {
+			return applyColor;
+		}
 	}
 }

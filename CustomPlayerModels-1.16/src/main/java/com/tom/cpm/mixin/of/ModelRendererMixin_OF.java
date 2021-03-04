@@ -13,7 +13,7 @@ import net.optifine.entity.model.anim.ModelUpdater;
 import com.tom.cpm.client.optifine.proxy.ModelRendererOF;
 
 @Mixin(ModelRenderer.class)
-public abstract class ModelRendererOFMixin implements ModelRendererOF {
+public abstract class ModelRendererMixin_OF implements ModelRendererOF {
 	@Shadow private ResourceLocation textureLocation = null;
 	@Shadow private WorldRenderer renderGlobal;
 	@Shadow private ModelUpdater modelUpdater;

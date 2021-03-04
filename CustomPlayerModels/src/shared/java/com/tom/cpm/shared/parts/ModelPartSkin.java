@@ -5,13 +5,13 @@ import java.io.IOException;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.skin.SkinProvider;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class ModelPartSkin implements IModelPart, IResolvedModelPart {
-	private SkinProvider image;
+	private TextureProvider image;
 
 	public ModelPartSkin(IOHelper in, ModelDefinitionLoader loader) throws IOException {
-		image = new SkinProvider(in, 512);
+		image = new TextureProvider(in, 512);
 	}
 
 	public ModelPartSkin(Editor editor) {
@@ -24,7 +24,7 @@ public class ModelPartSkin implements IModelPart, IResolvedModelPart {
 	}
 
 	@Override
-	public SkinProvider getSkin() {
+	public TextureProvider getSkin() {
 		return image;
 	}
 

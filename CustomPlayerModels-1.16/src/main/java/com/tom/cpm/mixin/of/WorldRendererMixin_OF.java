@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import com.tom.cpm.client.optifine.proxy.WorldRendererOF;
 
 @Mixin(WorldRenderer.class)
-public class WorldRendererOFMixin implements WorldRendererOF {
+public class WorldRendererMixin_OF implements WorldRendererOF {
 
 	@Shadow public boolean renderOverlayEyes = false;
 
