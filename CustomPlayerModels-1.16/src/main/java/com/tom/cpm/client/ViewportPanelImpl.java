@@ -120,7 +120,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		PlayerModel<AbstractClientPlayerEntity> p = rp.getEntityModel();
 		editor.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, mc.getRenderTypeBuffers().getBufferSource(), editor.definition, null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, mc.getRenderTypeBuffers().getBufferSource(), editor.definition, null, null);
 			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true);
 			cbi.setReturnValue(MinecraftObject.getDefaultSkin(mc.getSession().getProfile().getId()));
 			ClientProxy.mc.getPlayerRenderManager().bindSkin(p, cbi);

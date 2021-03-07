@@ -17,6 +17,9 @@ public class ViewportPaintPanel extends ViewportPanel {
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
+		mouseCursorPos.x = mouseX;
+		mouseCursorPos.y = mouseY;
+
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);
 		gui.setupCut();

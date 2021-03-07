@@ -131,7 +131,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerEntityModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
-			bipedHead = register(new Field<>(() -> model.head        , v -> model.head         = v, PlayerModelParts.HEAD));
+			bipedHead = register(new Field<>(() -> model.head        , v -> model.head         = v, PlayerModelParts.HEAD), p -> !((PlayerProfile)p).hasPlayerHead);
 			register(new Field<>(() -> model.torso       , v -> model.torso        = v, PlayerModelParts.BODY));
 			bipedRightArm = register(new Field<>(() -> model.rightArm    , v -> model.rightArm     = v, PlayerModelParts.RIGHT_ARM));
 			bipedLeftArm = register(new Field<>(() -> model.leftArm     , v -> model.leftArm      = v, PlayerModelParts.LEFT_ARM));

@@ -5,6 +5,7 @@ import com.tom.cpm.shared.gui.IGui;
 import com.tom.cpm.shared.gui.elements.GuiElement;
 import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.math.MathHelper;
+import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.math.Vec3f;
 
 public class ViewportPanel extends GuiElement {
@@ -14,6 +15,8 @@ public class ViewportPanel extends GuiElement {
 	protected boolean dragMode;
 	protected int paintColor;
 	protected ViewportPanelNative nat;
+	protected Vec2i mouseCursorPos = new Vec2i();
+
 	public ViewportPanel(IGui gui, Editor editor) {
 		super(gui);
 		this.editor = editor;
@@ -22,6 +25,9 @@ public class ViewportPanel extends GuiElement {
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
+		mouseCursorPos.x = mouseX;
+		mouseCursorPos.y = mouseY;
+
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);
 		gui.setupCut();
@@ -35,7 +41,7 @@ public class ViewportPanel extends GuiElement {
 
 	@Override
 	public boolean mouseClick(int x, int y, int btn) {
-		if(btn == 2 && bounds.isInBounds(x, y)) {
+		if(btn == EditorGui.getRotateMouseButton() && bounds.isInBounds(x, y)) {
 			this.mx = x;
 			this.my = y;
 			this.enableDrag = true;
@@ -52,7 +58,7 @@ public class ViewportPanel extends GuiElement {
 
 	@Override
 	public boolean mouseRelease(int x, int y, int btn) {
-		if(btn == 2 && bounds.isInBounds(x, y)) {
+		if(btn == EditorGui.getRotateMouseButton() && bounds.isInBounds(x, y)) {
 			enableDrag = false;
 			return true;
 		}
@@ -61,7 +67,7 @@ public class ViewportPanel extends GuiElement {
 
 	@Override
 	public boolean mouseDrag(int x, int y, int btn) {
-		if(btn == 2 && bounds.isInBounds(x, y) && enableDrag) {
+		if(btn == EditorGui.getRotateMouseButton() && bounds.isInBounds(x, y) && enableDrag) {
 			if(dragMode) {
 				float yaw = editor.look.getYaw();
 				double px = 0, pz = 0;
@@ -110,12 +116,27 @@ public class ViewportPanel extends GuiElement {
 	@Override
 	public boolean mouseWheel(int x, int y, int dir) {
 		if(bounds.isInBounds(x, y)) {
-			editor.camDist += (dir * (editor.camDist / 16f));
-			if(editor.camDist < 32)editor.camDist = 32;
-			if(editor.camDist > 512)editor.camDist = 512;
+			zoom(dir);
 			return true;
 		}
 		return false;
+	}
+
+	private void zoom(int dir) {
+		editor.camDist += (dir * (editor.camDist / 16f));
+		if(editor.camDist < 32)editor.camDist = 32;
+		if(editor.camDist > 512)editor.camDist = 512;
+	}
+
+	@Override
+	public void keyPressed(KeyboardEvent event) {
+		if(!event.isConsumed() && bounds.isInBounds(mouseCursorPos)) {
+			if(event.matches("+")) {
+				zoom(1);
+			} else if(event.matches("-")) {
+				zoom(-1);
+			}
+		}
 	}
 
 	public static abstract class ViewportPanelNative {

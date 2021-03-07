@@ -32,6 +32,7 @@ import com.tom.cpm.CommonProxy;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
+import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -79,7 +80,7 @@ public class ClientProxy extends CommonProxy {
 				profile.updateFromPlayer(player);
 			else
 				profile.setRenderPose(VanillaPose.SKULL_RENDER);
-			mc.getPlayerRenderManager().bindModel(toBind, null, def, unbindRule);
+			mc.getPlayerRenderManager().bindModel(toBind, null, def, unbindRule, profile);
 			if(unbindRule == null || player == null)
 				mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
 			return true;
@@ -98,7 +99,7 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void initGui(GuiScreenEvent.InitGuiEvent.Post evt) {
-		if((evt.gui instanceof GuiMainMenu && ModConfig.getConfig().getSetBoolean("titleScreenButton", true)) ||
+		if((evt.gui instanceof GuiMainMenu && ModConfig.getConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				evt.gui instanceof GuiCustomizeSkin) {
 			evt.buttonList.add(new Button(0, 0));
 		}

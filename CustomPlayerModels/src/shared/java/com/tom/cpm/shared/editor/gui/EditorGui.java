@@ -2,11 +2,14 @@ package com.tom.cpm.shared.editor.gui;
 
 import java.io.File;
 
+import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
+import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
 import com.tom.cpm.shared.editor.gui.popup.FileChooserGui;
+import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.TreeElement;
@@ -297,6 +300,8 @@ public class EditorGui extends Frame {
 				}
 			}
 		});
+
+		pp.addButton(gui.i18nFormat("button.cpm.edit.settings"), () -> openPopup(new SettingsPopup(this)));
 	}
 
 	private void setupTemplate() {
@@ -426,5 +431,9 @@ public class EditorGui extends Frame {
 				editor.restitchTexture();
 			}
 		}
+	}
+
+	public static int getRotateMouseButton() {
+		return ModConfig.getConfig().getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2);
 	}
 }

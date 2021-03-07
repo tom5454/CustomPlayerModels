@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import com.tom.cpm.shared.IPlayerRenderManager;
 import com.tom.cpm.shared.animation.AnimationEngine;
+import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.math.Vec3f;
@@ -59,8 +60,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.setVis = setVis;
 	}
 
-	public void bindModel(MB model, D addDt, ModelDefinition def, Predicate<Object> unbindRule) {
-		holders.computeIfAbsent(model, this::create).swapIn(def, unbindRule, addDt);
+	public void bindModel(MB model, D addDt, ModelDefinition def, Predicate<Object> unbindRule, Player player) {
+		holders.computeIfAbsent(model, this::create).swapIn(def, unbindRule, addDt, player);
 	}
 
 	private RedirectHolder<MB, D, S, P> create(MB model) {
@@ -103,6 +104,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public List<RedirectRenderer<P>> redirectRenderers;
 		public boolean skinBound;
 		public Map<RedirectRenderer<P>, RedirectRenderer<P>> copyMap;
+		public Map<RedirectRenderer<P>, Predicate<Player>> testMap;
+		public Player playerObj;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
 			this.model = model;
@@ -110,9 +113,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			modelFields = new ArrayList<>();
 			redirectRenderers = new ArrayList<>();
 			copyMap = new HashMap<>();
+			testMap = new HashMap<>();
 		}
 
-		public final void swapIn(ModelDefinition def, Predicate<Object> unbindRule, D addDt) {
+		public final void swapIn(ModelDefinition def, Predicate<Object> unbindRule, D addDt, Player playerObj) {
 			this.def = def;
 			this.unbindRule = unbindRule;
 			this.addDt = addDt;
@@ -122,6 +126,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				Field<P> field = modelFields.get(i);
 				field.set.accept(redirectRenderers.get(i).swapIn());
 			}
+			this.playerObj = playerObj;
 			swappedIn = true;
 		}
 
@@ -130,6 +135,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			this.unbindRule = null;
 			this.addDt = null;
 			skinBound = false;
+			this.playerObj = null;
 			if(!swappedIn)return;
 			swapOut0();
 			for (int i = 0; i < modelFields.size(); i++) {
@@ -145,9 +151,14 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected void bindSkin() {}
 
 		protected RedirectRenderer<P> register(Field<P> f) {
+			return register(f, p -> true);
+		}
+
+		protected RedirectRenderer<P> register(Field<P> f, Predicate<Player> doRender) {
 			RedirectRenderer<P> rd = mngr.redirectFactory.create(model, this, f.get, f.part);
 			modelFields.add(f);
 			redirectRenderers.add(rd);
+			testMap.put(rd, doRender);
 			return rd;
 		}
 
@@ -216,13 +227,15 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 							mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
 						}
 					}
-					if(elem.doDisplay()) {
-						holder.copyModel(tp, parent);
-						renderWithParent(elem);
-						mngr.posSet.set(parent, px, py, pz);
-						mngr.rotSet.set(parent, rx, ry, rz);
-					} else {
-						doRender(elem);
+					if(holder.playerObj == null || holder.testMap.getOrDefault(this, p -> true).test(holder.playerObj)) {
+						if(elem.doDisplay()) {
+							holder.copyModel(tp, parent);
+							renderWithParent(elem);
+							mngr.posSet.set(parent, px, py, pz);
+							mngr.rotSet.set(parent, rx, ry, rz);
+						} else {
+							doRender(elem);
+						}
 					}
 				} else {
 					holder.copyModel(tp, parent);

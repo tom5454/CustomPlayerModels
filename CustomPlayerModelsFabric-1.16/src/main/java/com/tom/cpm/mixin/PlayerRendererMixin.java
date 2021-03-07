@@ -22,7 +22,7 @@ import net.minecraft.util.Identifier;
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.shared.config.Player;
 
-@Mixin(value = PlayerEntityRenderer.class, priority = 1100)
+@Mixin(value = PlayerEntityRenderer.class, priority = 900)
 public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
 
 	public PlayerRendererMixin(EntityRenderDispatcher dispatcher, PlayerEntityModel<AbstractClientPlayerEntity> model,

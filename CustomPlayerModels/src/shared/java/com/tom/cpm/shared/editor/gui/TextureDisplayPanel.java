@@ -16,6 +16,8 @@ public class TextureDisplayPanel extends GuiElement {
 	private int offX, offY;
 	private Editor editor;
 	public Supplier<Vec2i> cursorPos;
+	private Vec2i mouseCursorPos = new Vec2i();
+
 	public TextureDisplayPanel(IGui gui, Editor editor, int zoom) {
 		super(gui);
 		this.editor = editor;
@@ -24,6 +26,9 @@ public class TextureDisplayPanel extends GuiElement {
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
+		mouseCursorPos.x = mouseX;
+		mouseCursorPos.y = mouseY;
+
 		TextureProvider provider = editor.getTextureProvider();
 		if(provider != null && provider.texture != null) {
 			gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_fill);
@@ -57,19 +62,7 @@ public class TextureDisplayPanel extends GuiElement {
 	@Override
 	public boolean mouseWheel(int x, int y, int dir) {
 		if(bounds.isInBounds(x, y)) {
-			TextureProvider provider = editor.getTextureProvider();
-			float zv = (dir * (zoom / 8f));
-			float iw = provider.getImage().getWidth() * zoom;
-			float ih = provider.getImage().getHeight() * zoom;
-			zoom += zv;
-			float niw = provider.getImage().getWidth() * zoom;
-			float nih = provider.getImage().getHeight() * zoom;
-			//offX -= (bounds.w / 2 - x - offX - bounds.x) * zv / 2;
-			//offY -= (bounds.h / 2 - y - offY - bounds.y) * zv / 2;
-			offX -= ((niw - iw) / 2) * MathHelper.clamp(Math.abs(1-(offX / (bounds.w / 2))), 0, 1);
-			offY -= ((nih - ih) / 2) * MathHelper.clamp(Math.abs(1-(offY / (bounds.h / 2))), 0, 1);
-			offX = MathHelper.clamp(offX, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.w - 10);
-			offY = MathHelper.clamp(offY, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.h - 10);
+			zoom(x, y, dir);
 			return true;
 		}
 		return false;
@@ -107,7 +100,7 @@ public class TextureDisplayPanel extends GuiElement {
 				int dy = y - lastMy;
 				TextureProvider provider = editor.getTextureProvider();
 
-				if(btn == 2) {
+				if(btn == EditorGui.getRotateMouseButton()) {
 					offX += dx;
 					offY += dy;
 					offX = MathHelper.clamp(offX, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.w - 10);
@@ -135,5 +128,32 @@ public class TextureDisplayPanel extends GuiElement {
 			return true;
 		}
 		return false;
+	}
+
+	private void zoom(int x, int y, int dir) {
+		TextureProvider provider = editor.getTextureProvider();
+		float zv = (dir * (zoom / 8f));
+		float iw = provider.getImage().getWidth() * zoom;
+		float ih = provider.getImage().getHeight() * zoom;
+		zoom += zv;
+		float niw = provider.getImage().getWidth() * zoom;
+		float nih = provider.getImage().getHeight() * zoom;
+		//offX -= (bounds.w / 2 - x - offX - bounds.x) * zv / 2;
+		//offY -= (bounds.h / 2 - y - offY - bounds.y) * zv / 2;
+		offX -= ((niw - iw) / 2) * MathHelper.clamp(Math.abs(1-(offX / (bounds.w / 2))), 0, 1);
+		offY -= ((nih - ih) / 2) * MathHelper.clamp(Math.abs(1-(offY / (bounds.h / 2))), 0, 1);
+		offX = MathHelper.clamp(offX, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.w - 10);
+		offY = MathHelper.clamp(offY, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.h - 10);
+	}
+
+	@Override
+	public void keyPressed(KeyboardEvent event) {
+		if(!event.isConsumed() && bounds.isInBounds(mouseCursorPos)) {
+			if(event.matches("+")) {
+				zoom(mouseCursorPos.x, mouseCursorPos.y, 1);
+			} else if(event.matches("-")) {
+				zoom(mouseCursorPos.x, mouseCursorPos.y, -1);
+			}
+		}
 	}
 }

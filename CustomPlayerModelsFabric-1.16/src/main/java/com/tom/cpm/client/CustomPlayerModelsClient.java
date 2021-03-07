@@ -28,6 +28,7 @@ import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
+import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -95,7 +96,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 				profile.updateFromPlayer(player);
 			else
 				profile.setRenderPose(VanillaPose.SKULL_RENDER);
-			mc.getPlayerRenderManager().bindModel(toBind, buffer, def, unbindRule);
+			mc.getPlayerRenderManager().bindModel(toBind, buffer, def, unbindRule, profile);
 			if(unbindRule == null || player == null)
 				mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
 			return true;
@@ -112,7 +113,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void initGui(Screen screen, List<Element> children, List<AbstractButtonWidget> buttons) {
-		if((screen instanceof TitleScreen && ModConfig.getConfig().getSetBoolean("titleScreenButton", true)) ||
+		if((screen instanceof TitleScreen && ModConfig.getConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				screen instanceof SkinOptionsScreen) {
 			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen)));
 			buttons.add(btn);

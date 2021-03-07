@@ -136,7 +136,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		ModelPlayer p = rp.getMainModel();
 		editor.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, editor.definition, null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, editor.definition, null, null);
 			setupModel(p);
 			PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand);
 			if(!editor.applyAnim && editor.playerTpose) {

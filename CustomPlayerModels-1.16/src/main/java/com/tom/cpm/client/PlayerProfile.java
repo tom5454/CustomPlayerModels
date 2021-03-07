@@ -2,6 +2,7 @@ package com.tom.cpm.client;
 
 import java.util.UUID;
 
+import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -9,6 +10,9 @@ import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
@@ -24,6 +28,7 @@ public class PlayerProfile extends Player {
 	private String skinType;
 	private VanillaPose pose;
 	private int encodedGesture;
+	public boolean hasPlayerHead;
 
 	public static PlayerProfile create(Object object) {
 		return new PlayerProfile((GameProfile) object);
@@ -118,6 +123,9 @@ public class PlayerProfile extends Player {
 		if(player.isWearing(PlayerModelPart.RIGHT_PANTS_LEG))encodedGesture |= 8;
 		if(player.isWearing(PlayerModelPart.LEFT_SLEEVE))encodedGesture |= 16;
 		if(player.isWearing(PlayerModelPart.RIGHT_SLEEVE))encodedGesture |= 32;
+
+		ItemStack is = player.getItemStackFromSlot(EquipmentSlotType.HEAD);
+		hasPlayerHead = is.getItem() instanceof BlockItem && ((BlockItem)is.getItem()).getBlock() instanceof AbstractSkullBlock;
 	}
 
 	public void setRenderPose(VanillaPose pose) {

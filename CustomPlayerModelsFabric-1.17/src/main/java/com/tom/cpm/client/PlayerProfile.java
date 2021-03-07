@@ -2,6 +2,7 @@ package com.tom.cpm.client;
 
 import java.util.UUID;
 
+import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -9,7 +10,10 @@ import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 import com.mojang.authlib.GameProfile;
@@ -25,6 +29,7 @@ public class PlayerProfile extends Player {
 	private String skinType;
 	private VanillaPose pose;
 	private int encodedGesture;
+	public boolean hasPlayerHead;
 
 	public static PlayerProfile create(Object object) {
 		return new PlayerProfile((GameProfile) object);
@@ -123,6 +128,9 @@ public class PlayerProfile extends Player {
 		if(player.isPartVisible(PlayerModelPart.RIGHT_PANTS_LEG))encodedGesture |= 8;
 		if(player.isPartVisible(PlayerModelPart.LEFT_SLEEVE))encodedGesture |= 16;
 		if(player.isPartVisible(PlayerModelPart.RIGHT_SLEEVE))encodedGesture |= 32;
+
+		ItemStack is = player.getEquippedStack(EquipmentSlot.HEAD);
+		hasPlayerHead = is.getItem() instanceof BlockItem && ((BlockItem)is.getItem()).getBlock() instanceof AbstractSkullBlock;
 	}
 
 	@Override

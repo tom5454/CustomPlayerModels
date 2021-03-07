@@ -2,11 +2,14 @@ package com.tom.cpm.client;
 
 import java.util.UUID;
 
+import net.minecraft.block.BlockSkull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EnumPlayerModelParts;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
@@ -22,6 +25,7 @@ public class PlayerProfile extends Player {
 	private String skinType;
 	private VanillaPose pose;
 	private int encodedGesture;
+	public boolean hasPlayerHead;
 
 	public static PlayerProfile create(Object object) {
 		return new PlayerProfile((GameProfile) object);
@@ -116,6 +120,9 @@ public class PlayerProfile extends Player {
 		if(player.isWearing(EnumPlayerModelParts.RIGHT_PANTS_LEG))encodedGesture |= 8;
 		if(player.isWearing(EnumPlayerModelParts.LEFT_SLEEVE))encodedGesture |= 16;
 		if(player.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE))encodedGesture |= 32;
+
+		ItemStack is = player.getEquipmentInSlot(1);
+		hasPlayerHead = is.getItem() instanceof ItemBlock && ((ItemBlock)is.getItem()).getBlock() instanceof BlockSkull;
 	}
 
 	@Override

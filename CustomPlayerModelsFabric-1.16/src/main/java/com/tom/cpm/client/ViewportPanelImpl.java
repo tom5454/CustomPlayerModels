@@ -128,7 +128,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		PlayerEntityModel<AbstractClientPlayerEntity> p = rp.getModel();
 		editor.preRender();
 		try {
-			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(p, mc.getBufferBuilders().getEntityVertexConsumers(), editor.definition, null);
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(p, mc.getBufferBuilders().getEntityVertexConsumers(), editor.definition, null, null);
 			CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true);
 			cbi.setReturnValue(DefaultSkinHelper.getTexture(mc.getSession().getProfile().getId()));
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(p, cbi);

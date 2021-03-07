@@ -22,7 +22,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.shared.config.Player;
 
-@Mixin(value = PlayerRenderer.class, priority = 1100)
+@Mixin(value = PlayerRenderer.class, priority = 900)
 public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
 
 	public PlayerRendererMixin(EntityRendererManager rendererManager,

@@ -6,6 +6,7 @@ public class Checkbox extends GuiElement {
 	private String name;
 	protected Runnable action;
 	private boolean selected;
+	private Tooltip tooltip;
 	public Checkbox(IGui gui, String name) {
 		super(gui);
 		this.name = name;
@@ -22,6 +23,7 @@ public class Checkbox extends GuiElement {
 			color = gui.getColors().button_text_hover;
 			bgColor = gui.getColors().button_hover;
 		}
+		if(bounds.isInBounds(mouseX, mouseY) && tooltip != null)tooltip.set();
 		gui.drawBox(bounds.x, bounds.y, bounds.h, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.h-2, bounds.h-2, bgColor);
 		gui.drawText(bounds.x + bounds.h + 3, bounds.y + bounds.h / 2 - 4, name, color);
@@ -57,5 +59,9 @@ public class Checkbox extends GuiElement {
 
 	public boolean isSelected() {
 		return selected;
+	}
+
+	public void setTooltip(Tooltip tooltip) {
+		this.tooltip = tooltip;
 	}
 }

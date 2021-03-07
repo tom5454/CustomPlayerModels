@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import net.minecraft.block.BlockSkull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.ThreadDownloadImageData;
@@ -15,6 +16,8 @@ import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
@@ -31,6 +34,7 @@ import cpw.mods.fml.common.ObfuscationReflectionHelper;
 public class PlayerProfile extends Player {
 	private final GameProfile profile;
 	private VanillaPose pose;
+	public boolean hasPlayerHead;
 
 	public static PlayerProfile create(Object object) {
 		return new PlayerProfile((GameProfile) object);
@@ -134,6 +138,9 @@ public class PlayerProfile extends Player {
 		else if(player.isSneaking())pose = VanillaPose.SNEAKING;
 		else if(player.distanceWalkedModified - player.prevDistanceWalkedModified > 0)pose = VanillaPose.WALKING;
 		else pose = VanillaPose.STANDING;
+
+		ItemStack is = player.getEquipmentInSlot(1);
+		hasPlayerHead = is.getItem() instanceof ItemBlock && ((ItemBlock)is.getItem()).field_150939_a instanceof BlockSkull;
 	}
 
 	@Override

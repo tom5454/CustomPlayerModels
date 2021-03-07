@@ -138,7 +138,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		ModelPlayer p = rp.getMainModel();
 		editor.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, editor.definition, null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, editor.definition, null, null);
 			setupModel(p);
 			if(!editor.applyAnim && editor.playerTpose) {
 				p.bipedRightArm.rotateAngleZ = (float) Math.toRadians(90);

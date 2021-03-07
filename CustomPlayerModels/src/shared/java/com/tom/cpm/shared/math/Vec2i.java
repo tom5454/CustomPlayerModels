@@ -18,4 +18,8 @@ public class Vec2i {
 		this.y = v.y;
 	}
 
+	public Vec2i() {
+		this.x = 0;
+		this.y = 0;
+	}
 }
