@@ -24,10 +24,11 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 
@@ -73,8 +74,8 @@ public class PlayerProfile extends Player {
 	}
 
 	@Override
-	public int getSkinType() {
-		return 1;
+	public SkinType getSkinType() {
+		return SkinType.DEFAULT;
 	}
 
 	@Override

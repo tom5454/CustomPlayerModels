@@ -22,10 +22,10 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
+import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.gui.ViewportPanel.ViewportPanelNative;
-import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.util.PaintImageCreator;
 
 public class ViewportPanelImpl extends ViewportPanelNative {

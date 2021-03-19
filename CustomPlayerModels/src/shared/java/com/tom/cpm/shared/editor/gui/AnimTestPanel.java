@@ -5,18 +5,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.DropDownBox;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.util.NamedElement;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.DropDownBox;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.Panel;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.util.NamedElement;
 
 public class AnimTestPanel extends Panel {
 	private Editor editor;

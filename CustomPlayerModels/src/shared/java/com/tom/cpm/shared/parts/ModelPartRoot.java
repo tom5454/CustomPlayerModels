@@ -41,11 +41,11 @@ public class ModelPartRoot implements IModelPart, IResolvedModelPart {
 
 	@Override
 	public void apply(ModelDefinition def) {
-		RootModelElement elem = def.getModelElementFor(PlayerModelParts.CUSTOM_PART);
+		RootModelElement elem = def.getModelElementFor(PlayerModelParts.CUSTOM_PART).get();
 		for(RenderedCube rc : elem.children) {
 			if(rc.getId() == id) {
 				elem.children.remove(rc);
-				RootModelElement e = def.addRoot(id, type);
+				RootModelElement e = def.addRoot(type);
 				e.children.addAll(rc.children);
 				rc.children.forEach(p -> p.setParent(e));
 				break;

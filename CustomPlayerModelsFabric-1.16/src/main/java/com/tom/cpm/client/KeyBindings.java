@@ -11,8 +11,8 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 
-import com.tom.cpm.shared.gui.Gui.KeyboardEvent;
-import com.tom.cpm.shared.gui.IKeybind;
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.gui.KeyboardEvent;
 
 public class KeyBindings implements IKeybind {
 	public static KeyBinding gestureMenuBinding, renderToggleBinding;

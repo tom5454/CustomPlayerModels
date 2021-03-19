@@ -3,16 +3,16 @@ package com.tom.cpm.shared.editor.gui.popup;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.DropDownBox;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.TextField;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.util.NamedElement;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.template.TemplateArgType;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.DropDownBox;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.gui.elements.TextField;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.util.NamedElement;
 
 public class NewTemplateArgPopup extends PopupPanel {
 

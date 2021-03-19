@@ -2,10 +2,10 @@ package com.tom.cpm.shared.parts;
 
 import java.io.IOException;
 
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.math.Vec3f;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 

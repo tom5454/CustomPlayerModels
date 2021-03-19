@@ -1,35 +1,23 @@
 package com.tom.cpm.shared.model;
 
-import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.math.Vec3f;
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 
 public class RootModelElement extends RenderedCube {
 	private ModelPart part;
-	private ModelDefinition def;
 	public Vec3f posN, rotN;
 	public boolean forcePos;
 
-	public RootModelElement(ModelPart part, ModelDefinition def) {
+	public RootModelElement(ModelPart part) {
 		this.part = part;
-		this.def = def;
 		this.posN = new Vec3f();
 		this.rotN = new Vec3f();
 		this.pos = new Vec3f();
 		this.rotation = new Vec3f();
 	}
 
-	protected RootModelElement(ModelPart part) {
-		this.part = part;
-	}
-
 	public ModelPart getPart() {
 		return part;
-	}
-
-	@Override
-	public boolean doDisplay() {
-		return def.doRenderPart(part) && super.doDisplay();
 	}
 
 	@Override
@@ -40,6 +28,7 @@ public class RootModelElement extends RenderedCube {
 		pos.x = posN.x;
 		pos.y = posN.y;
 		pos.z = posN.z;
+		display = !hidden;
 		forcePos = false;
 	}
 

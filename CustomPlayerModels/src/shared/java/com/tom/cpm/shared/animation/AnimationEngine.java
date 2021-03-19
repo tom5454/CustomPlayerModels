@@ -2,11 +2,11 @@ package com.tom.cpm.shared.animation;
 
 import java.util.List;
 
+import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
-import com.tom.cpm.shared.config.ConfigEntry;
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 

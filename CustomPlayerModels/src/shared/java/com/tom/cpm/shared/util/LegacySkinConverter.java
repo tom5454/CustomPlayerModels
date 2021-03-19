@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 
+import com.tom.cpl.util.Image;
+
 public class LegacySkinConverter {
 	private int[] imageData;
 	private int imageWidth;

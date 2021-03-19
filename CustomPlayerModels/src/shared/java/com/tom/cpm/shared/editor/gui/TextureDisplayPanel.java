@@ -2,11 +2,12 @@ package com.tom.cpm.shared.editor.gui;
 
 import java.util.function.Supplier;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.elements.GuiElement;
+import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.GuiElement;
-import com.tom.cpm.shared.math.MathHelper;
-import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.skin.TextureProvider;
 
 public class TextureDisplayPanel extends GuiElement {

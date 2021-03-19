@@ -1,12 +1,12 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
-import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.gui.elements.TextField;
-import com.tom.cpm.shared.math.Box;
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.TextField;
+import com.tom.cpl.math.Box;
 
 public class ExportStringResultPopup extends PopupPanel {
 	public ExportStringResultPopup(Frame frm, IGui gui, String resultName, String result) {

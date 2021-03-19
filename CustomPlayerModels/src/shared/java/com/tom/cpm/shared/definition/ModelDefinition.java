@@ -9,24 +9,23 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 
+import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.util.PlayerPartValues;
-import com.tom.cpm.shared.math.MathHelper;
-import com.tom.cpm.shared.math.Vec2i;
-import com.tom.cpm.shared.math.Vec3f;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
+import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
-import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.IResolvedModelPart;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
@@ -35,9 +34,6 @@ import com.tom.cpm.shared.parts.ModelPartPlayer;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinLink;
 import com.tom.cpm.shared.skin.TextureProvider;
-import com.tom.cpm.shared.util.Image;
-import com.tom.cpm.shared.util.ListView;
-import com.tom.cpm.shared.util.MapViewOfList;
 import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ModelDefinition {
@@ -51,28 +47,20 @@ public class ModelDefinition {
 	private TextureProvider listIconOverride;
 	private List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
-	private Map<ModelPart, RootModelElement> rootRenderingCubes;
+	private Map<ModelPart, PartRoot> rootRenderingCubes;
 	private int resolveState;
-	private boolean editor;
 	private AnimationRegistry animations = new AnimationRegistry();
+	private boolean stitchedTexture;
 
 	public ModelDefinition(ModelDefinitionLoader loader, List<IModelPart> parts, Player player) {
 		this.loader = loader;
 		this.parts = parts;
-		this.editor = false;
 		this.playerObj = player;
 	}
 
-	public ModelDefinition(Editor editor) {
+	protected ModelDefinition() {
 		this.loader = null;
-		this.editor = true;
 		resolveState = 2;
-		rootRenderingCubes = new MapViewOfList<>(
-				new ListView<>(editor.elements, e -> (RootModelElement) e.rc),
-				RootModelElement::getPart,
-				Function.identity()
-				);
-		skinOverride = editor.renderTexture;
 		this.playerObj = null;
 	}
 
@@ -145,7 +133,8 @@ public class ModelDefinition {
 		cubes = new ArrayList<>();
 		Map<Integer, RootModelElement> playerModelParts = new HashMap<>();
 		for(int i = 0;i<PlayerModelParts.VALUES.length;i++) {
-			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i], this);
+			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i]);
+			elem.hidden = !player.doRenderPart(PlayerModelParts.VALUES[i]);
 			playerModelParts.put(i, elem);
 		}
 		for (IResolvedModelPart part : resolved) {
@@ -197,31 +186,15 @@ public class ModelDefinition {
 		}
 		resolved.forEach(r -> r.stitch(stitcher));
 		skinOverride = stitcher.finish();
-		if(stitcher.hasStitches()) {
+		stitchedTexture = stitcher.hasStitches();
+		if(stitchedTexture) {
 			for (PlayerModelParts part : PlayerModelParts.VALUES) {
 				if(part == PlayerModelParts.CUSTOM_PART)continue;
-				if(player.doRenderPart(part)) {
-					player.setDoRenderPart(part, false);
-					RootModelElement p = playerModelParts.get(part.ordinal());
-					Cube cube = new Cube();
-					PlayerPartValues val = PlayerPartValues.getFor(part, playerObj.getSkinType());
-					cube.offset = val.getOffset();
-					cube.rotation = new Vec3f(0, 0, 0);
-					cube.pos = new Vec3f(0, 0, 0);
-					cube.size = val.getSize();
-					cube.scale = new Vec3f(1, 1, 1);
-					cube.u = val.u;
-					cube.v = val.v;
-					cube.texSize = 1;
-					cube.id = 0xfff0 + part.ordinal();
-					RenderedCube rc = new RenderedCube(cube);
-					rc.setParent(p);
-					p.addChild(rc);
-				}
+				convertPart(playerModelParts.get(part.ordinal()));
 			}
 		}
 		rootRenderingCubes = new HashMap<>();
-		playerModelParts.forEach((i, e) -> rootRenderingCubes.put(PlayerModelParts.VALUES[i], e));
+		playerModelParts.forEach((i, e) -> rootRenderingCubes.put(PlayerModelParts.VALUES[i], new PartRoot(e)));
 		cubeMap = new HashMap<>();
 		cubes.addAll(playerModelParts.values());
 		cubes.forEach(c -> cubeMap.put(c.getId(), c));
@@ -229,6 +202,27 @@ public class ModelDefinition {
 		resolveState = 2;
 		if(MinecraftObjectHolder.DEBUGGING)
 			System.out.println(this);
+	}
+
+	private void convertPart(RootModelElement p) {
+		PlayerModelParts part = (PlayerModelParts) p.getPart();
+		if(!p.hidden) {
+			p.hidden = true;
+			Cube cube = new Cube();
+			PlayerPartValues val = PlayerPartValues.getFor(part, playerObj.getSkinType());
+			cube.offset = val.getOffset();
+			cube.rotation = new Vec3f(0, 0, 0);
+			cube.pos = new Vec3f(0, 0, 0);
+			cube.size = val.getSize();
+			cube.scale = new Vec3f(1, 1, 1);
+			cube.u = val.u;
+			cube.v = val.v;
+			cube.texSize = 1;
+			cube.id = 0xfff0 + part.ordinal();
+			RenderedCube rc = new RenderedCube(cube);
+			rc.setParent(p);
+			p.addChild(rc);
+		}
 	}
 
 	public void cleanup() {
@@ -245,12 +239,12 @@ public class ModelDefinition {
 		return resolveState;
 	}
 
-	public RootModelElement getModelElementFor(ModelPart part) {
+	public PartRoot getModelElementFor(ModelPart part) {
 		return rootRenderingCubes.get(part);
 	}
 
 	public boolean isEditor() {
-		return editor;
+		return false;
 	}
 
 	public TextureProvider getSkinOverride() {
@@ -304,14 +298,14 @@ public class ModelDefinition {
 		return bb.toString();
 	}
 
-	public boolean doRenderPart(ModelPart part) {
-		if(part instanceof PlayerModelParts)return player.doRenderPart((PlayerModelParts) part);
-		return true;
-	}
-
-	public RootModelElement addRoot(int id, RootModelType type) {
-		RootModelElement elem = new RootModelElement(type, this);
-		rootRenderingCubes.put(type, elem);
+	public RootModelElement addRoot(ModelPart type) {
+		RootModelElement elem = new RootModelElement(type);
+		elem.children = new ArrayList<>();
+		rootRenderingCubes.computeIfAbsent(type, k -> new PartRoot(elem)).add(elem);
+		cubes.add(elem);
+		if(type instanceof PlayerModelParts && stitchedTexture) {
+			convertPart(elem);
+		}
 		return elem;
 	}
 
@@ -330,5 +324,9 @@ public class ModelDefinition {
 			}
 		}
 		return null;
+	}
+
+	public boolean isStitchedTexture() {
+		return stitchedTexture;
 	}
 }

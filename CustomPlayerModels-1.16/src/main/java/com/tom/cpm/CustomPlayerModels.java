@@ -13,10 +13,10 @@ import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 
+import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
 
 @Mod("cpm")
 public class CustomPlayerModels implements MinecraftCommonAccess {
@@ -34,15 +34,15 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		proxy.init();
 	}
 
-	private ModConfig cfg;
+	private ModConfigFile cfg;
 
 	public void setup(FMLCommonSetupEvent evt) {
-		cfg = new ModConfig(new File(FMLPaths.CONFIGDIR.get().toFile(), "cpm.json"));
+		cfg = new ModConfigFile(new File(FMLPaths.CONFIGDIR.get().toFile(), "cpm.json"));
 		MinecraftObjectHolder.setCommonObject(this);
 	}
 
 	@Override
-	public ModConfig getConfig() {
+	public ModConfigFile getConfig() {
 		return cfg;
 	}
 

@@ -1,14 +1,14 @@
 package com.tom.cpm.shared.editor;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.util.CombinedListView;
+import com.tom.cpl.util.FlatListView;
+import com.tom.cpl.util.ListView;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.ArgElem;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.math.Vec3f;
 import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
-import com.tom.cpm.shared.util.CombinedListView;
-import com.tom.cpm.shared.util.FlatListView;
-import com.tom.cpm.shared.util.ListView;
 
 public enum ElementType {
 	NORMAL(new ElementBuilder() {
@@ -97,8 +97,6 @@ public enum ElementType {
 			((RootModelElement)elem.rc).forcePos = false;
 		}
 	}),
-	//TEMPLATE
-
 	;
 	private final ElementBuilder elementBuilder;
 	private ElementType(ElementBuilder elementBuilder) {

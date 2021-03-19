@@ -14,7 +14,7 @@ import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vector4f;
 
-import com.tom.cpm.shared.math.Vec3f;
+import com.tom.cpl.math.Vec3f;
 
 public class Render {
 

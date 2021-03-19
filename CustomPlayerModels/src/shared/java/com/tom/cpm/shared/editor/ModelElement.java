@@ -4,21 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.MessagePopup;
+import com.tom.cpl.gui.elements.PopupMenu;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.math.Vec3i;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
 import com.tom.cpm.shared.editor.gui.SkinTextureDisplay;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.util.ValueOp;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.PopupMenu;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.math.MathHelper;
-import com.tom.cpm.shared.math.Vec3f;
-import com.tom.cpm.shared.math.Vec3i;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.RenderedCube;
 
 public class ModelElement extends Cube implements IElem, TreeElement {
+	private static boolean movePopupShown = false;
 	public Editor editor;
 	public String name;
 	public ModelElement parent;
@@ -33,7 +35,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public boolean recolor;
 	public long storeID;
 	public boolean hidden;
-	public boolean templateElement;
+	public boolean templateElement, generated;
+	public boolean duplicated;
 
 	public ModelElement(ModelElement element, ModelElement parent) {
 		this(element.editor);
@@ -101,6 +104,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public String getName() {
 		String name = this.name;
 		if(hidden)name = editor.gui().i18nFormat("label.cpm.tree.hidden", name);
+		if(duplicated)name = editor.gui().i18nFormat("label.cpm.tree.duplicated", name);
 		return name;
 	}
 
@@ -134,6 +138,10 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void setVec(Vec3f v, VecType object) {
+		if(type == ElementType.ROOT_PART && generated && object == VecType.POSITION && !movePopupShown) {
+			movePopupShown = true;
+			editor.frame.openPopup(new MessagePopup(editor.gui(), editor.gui().i18nFormat("label.cpm.info"), editor.gui().i18nFormat("label.cpm.warnMoveGenPart")));
+		}
 		editor.setVec(this, v, object);
 	}
 
@@ -149,7 +157,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
-		SkinTextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys);
+		if(show || editor.selectedElement == this)
+			SkinTextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys, editor.selectedElement == this ? 0xcc : 0x55);
 	}
 
 	@Override
@@ -201,6 +210,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setPosition.accept(this.pos);
 			editor.setRot.accept(this.rotation);
 			editor.setHiddenEffect.accept(!this.show);
+			editor.setDelEn.accept(this.duplicated);
 			break;
 
 		default:
@@ -236,6 +246,14 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 				if(parent != null) {
 					parent.children.remove(this);
 				}
+				editor.selectedElement = null;
+			});
+			editor.markDirty();
+			editor.updateGui();
+		} else if(duplicated) {
+			editor.addUndo(() -> editor.elements.add(this));
+			editor.runOp(() -> {
+				editor.elements.remove(this);
 				editor.selectedElement = null;
 			});
 			editor.markDirty();
@@ -336,6 +354,24 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 				editor.markDirty();
 				editor.updateGui();
 			});
+		} else if(type == ElementType.ROOT_PART) {
+			popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), () -> {
+				ModelElement elem = new ModelElement(editor, ElementType.ROOT_PART, typeData, editor.gui());
+				elem.duplicated = true;
+				editor.addUndo(() -> {
+					editor.elements.remove(elem);
+					editor.selectedElement = null;
+				});
+				editor.runOp(() -> editor.elements.add(elem));
+				editor.selectedElement = elem;
+				editor.markDirty();
+				editor.updateGui();
+			});
 		}
+	}
+
+	@Override
+	public int bgColor() {
+		return editor.selectedElement != this && editor.selectedAnim != null && editor.applyAnim && editor.selectedAnim.getComponentsFiltered().contains(this) ? editor.colors().anim_part_background : 0;
 	}
 }

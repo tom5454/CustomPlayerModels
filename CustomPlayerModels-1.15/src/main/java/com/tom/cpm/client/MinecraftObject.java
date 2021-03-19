@@ -16,11 +16,12 @@ import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.util.DynamicTexture.ITexture;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.gui.IKeybind;
-import com.tom.cpm.shared.util.DynamicTexture.ITexture;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -38,8 +39,20 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public Image getVanillaSkin(int skinType) {
-		try(IResource r = mc.getResourceManager().getResource(skinType == 1 ? TEXTURE_STEVE : TEXTURE_ALEX)) {
+	public Image getVanillaSkin(SkinType skinType) {
+		ResourceLocation loc;
+		switch (skinType) {
+		case SLIM:
+			loc = TEXTURE_ALEX;
+			break;
+
+		case DEFAULT:
+		case UNKNOWN:
+		default:
+			loc = TEXTURE_STEVE;
+			break;
+		}
+		try(IResource r = mc.getResourceManager().getResource(loc)) {
 			return Image.loadFrom(r.getInputStream());
 		} catch (IOException e) {
 		}
@@ -121,8 +134,8 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public int getSkinType() {
-		return DefaultPlayerSkin.getSkinType(mc.getSession().getProfile().getId()).equals("default") ? 1 : 0;
+	public SkinType getSkinType() {
+		return SkinType.get(DefaultPlayerSkin.getSkinType(mc.getSession().getProfile().getId()));
 	}
 
 	@Override

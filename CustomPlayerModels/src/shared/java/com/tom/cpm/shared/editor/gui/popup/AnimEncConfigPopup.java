@@ -3,17 +3,17 @@ package com.tom.cpm.shared.editor.gui.popup;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.util.GetFreeSkinSlots;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.Checkbox;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.util.Image;
 
 public class AnimEncConfigPopup extends PopupPanel {
 	private static Image template;

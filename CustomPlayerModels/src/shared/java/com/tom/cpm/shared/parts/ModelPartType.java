@@ -15,6 +15,7 @@ public enum ModelPartType {
 	SKIN_TYPE(ModelPartSkinType::new),
 	MODEL_ROOT(ModelPartRoot::new),
 	LIST_ICON(ModelPartListIcon::new),
+	DUP_ROOT(ModelPartDupRoot::new),
 	;
 	public static final ModelPartType[] VALUES = values();
 	private final IModelPart.Factory factory;

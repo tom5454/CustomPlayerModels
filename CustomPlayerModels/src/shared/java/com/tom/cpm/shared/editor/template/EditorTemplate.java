@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
+import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
 import com.tom.cpm.shared.definition.Link;
@@ -18,7 +19,6 @@ import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.template.args.TexEditorArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.template.Template;

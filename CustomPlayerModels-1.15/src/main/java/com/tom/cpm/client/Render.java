@@ -18,7 +18,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import com.tom.cpm.shared.math.Vec3f;
+import com.tom.cpl.math.Vec3f;
 
 public class Render {
 	public static void drawTexturedCube(MatrixStack mst, float x, float y, float z, float w, float h, float d){

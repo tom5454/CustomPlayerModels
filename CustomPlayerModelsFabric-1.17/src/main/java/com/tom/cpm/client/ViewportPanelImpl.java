@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.Tessellator;
@@ -31,11 +32,11 @@ import net.minecraft.util.math.Quaternion;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import com.tom.cpl.math.Box;
 import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.gui.ViewportPanel.ViewportPanelNative;
-import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.util.PaintImageCreator;
 
 public class ViewportPanelImpl extends ViewportPanelNative {
@@ -71,13 +72,15 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		float pitch = (float) Math.asin(editor.look.y);
 		float yaw = editor.look.getYaw();
 
-		RenderSystem.pushMatrix();
+		MatrixStack matrixStack = RenderSystem.getModelViewStack();
+		matrixStack.push();
 		Box bounds = getBounds();
-		RenderSystem.translatef(bounds.x + bounds.w / 2, bounds.y + bounds.h / 2, 500);
+		matrixStack.translate(bounds.x + bounds.w / 2, bounds.y + bounds.h / 2, 500);
 		RenderSystem.enableDepthTest();
-		RenderSystem.enableAlphaTest();
+		//RenderSystem.enableAlphaTest();
 		float scale = editor.camDist;
-		RenderSystem.scalef((-scale), scale, 0.1f);
+		matrixStack.scale((-scale), scale, 0.1f);
+		RenderSystem.applyModelViewMatrix();
 		matrixstack = new MatrixStack();
 		matrixstack.scale(1, 1, 1);
 		Quaternion quaternion = net.minecraft.util.math.Vec3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
@@ -86,17 +89,21 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		matrixstack.multiply(quaternion);
 		matrixstack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Y.getRadialQuaternion(yaw));
 		matrixstack.translate(-editor.position.x, -editor.position.y, -editor.position.z);
-		RenderSystem.color4f(1, 1, 1, 1);
+		//RenderSystem.color4f(1, 1, 1, 1);
 	}
 
 	private void renderFinish() {
 		RenderSystem.disableDepthTest();
-		RenderSystem.popMatrix();
+		MatrixStack matrixStack = RenderSystem.getModelViewStack();
+		matrixStack.pop();
+		RenderSystem.applyModelViewMatrix();
 		matrixstack = null;
 	}
 
 	private void renderBase() {
-		mc.getTextureManager().bindTexture(new Identifier("cpm", "textures/gui/area.png"));
+		RenderSystem.setShader(GameRenderer::method_34542);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, new Identifier("cpm", "textures/gui/area.png"));
 		RenderSystem.disableCull();
 		Tessellator tes = Tessellator.getInstance();
 		BufferBuilder t = tes.getBuffer();
@@ -109,7 +116,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		tes.draw();
 		RenderSystem.enableCull();
 
-		mc.getTextureManager().bindTexture(new Identifier("cpm", "textures/gui/base.png"));
+		RenderSystem.setShaderTexture(0, new Identifier("cpm", "textures/gui/base.png"));
 		Render.drawTexturedCube(matrixstack, 0, -1.001f, 0, 1, 1, 1);
 	}
 
@@ -121,7 +128,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
 
-		PlayerEntityRenderer rp = (PlayerEntityRenderer) mc.getEntityRenderDispatcher().modelRenderers.get(editor.skinType == 1 ? "default" : "slim");
+		PlayerEntityRenderer rp = (PlayerEntityRenderer) mc.getEntityRenderDispatcher().modelRenderers.get(editor.skinType.getName());
 		float scale = 1;//0.0625F
 		matrixstack.translate(0.5f, 1.5f, 0.5f);
 		matrixstack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Y.getDegreesQuaternion(90));
@@ -134,7 +141,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			cbi.setReturnValue(DefaultSkinHelper.getTexture(mc.getSession().getProfile().getId()));
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(p, cbi);
 			if(editor.renderPaint) {
-				if(mc.getTextureManager().getTexture(PAINT) == null)
+				if(mc.getTextureManager().method_34590(PAINT, null) == null)
 					mc.getTextureManager().registerTexture(PAINT, PAINT_TEX);
 			}
 			setupModel(p);
@@ -184,6 +191,9 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case SWIMMING:
+					PlayerModelSetup.setAngles(p, ls, lsa, 0, 0, mc.options.mainArm, true);
+					matrixstack.translate(0.0D, 1.0D, -0.5d);
+					matrixstack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Y.getDegreesQuaternion(90));
 					break;
 
 				case WALKING:
@@ -214,7 +224,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			FloatBuffer buffer = BufferUtils.createFloatBuffer(3);
 			GL11.glReadPixels((int) mc.mouse.getX(), mc.getWindow().getFramebufferHeight() - (int) mc.mouse.getY(), 1, 1, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
 			colorUnderMouse = (((int)(buffer.get(0) * 255)) << 16) | (((int)(buffer.get(1) * 255)) << 8) | ((int)(buffer.get(2) * 255));
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			//GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		}
 	}
 

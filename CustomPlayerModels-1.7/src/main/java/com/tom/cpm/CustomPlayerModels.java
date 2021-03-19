@@ -2,9 +2,9 @@ package com.tom.cpm;
 
 import java.io.File;
 
+import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -36,16 +36,16 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		MinecraftObjectHolder.setServerObject(null);
 	}
 
-	private ModConfig cfg;
+	private ModConfigFile cfg;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent evt) {
-		cfg = new ModConfig(new File(evt.getModConfigurationDirectory(), "cpm.json"));
+		cfg = new ModConfigFile(new File(evt.getModConfigurationDirectory(), "cpm.json"));
 		MinecraftObjectHolder.setCommonObject(this);
 	}
 
 	@Override
-	public ModConfig getConfig() {
+	public ModConfigFile getConfig() {
 		return cfg;
 	}
 }

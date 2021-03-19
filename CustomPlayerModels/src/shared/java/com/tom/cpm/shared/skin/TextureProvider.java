@@ -5,11 +5,11 @@ import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
 
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.DynamicTexture;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.IOHelper.ImageBlock;
-import com.tom.cpm.shared.math.Vec2i;
-import com.tom.cpm.shared.util.DynamicTexture;
-import com.tom.cpm.shared.util.Image;
 
 public class TextureProvider {
 	public DynamicTexture texture;

@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.Animation;
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
 import com.tom.cpm.shared.animation.CustomPose;
@@ -28,7 +29,6 @@ import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.math.Vec3f;
 
 public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 	private Map<Integer, ResolvedData> parsedData = new HashMap<>();

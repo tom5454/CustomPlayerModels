@@ -23,10 +23,10 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 
+import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.gui.ViewportPanel.ViewportPanelNative;
-import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.util.PaintImageCreator;
 
 public class ViewportPanelImpl extends ViewportPanelNative {
@@ -122,7 +122,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			GlStateManager.disableLighting();
 		} else if(editor.renderBase) renderBase();
 
-		RenderPlayer rp = mc.getRenderManager().getSkinMap().get(editor.skinType == 1 ? "default" : "slim");
+		RenderPlayer rp = mc.getRenderManager().getSkinMap().get(editor.skinType.getName());
 		if(editor.renderPaint) {
 			if(mc.getTextureManager().getTexture(PAINT) == null)
 				mc.getTextureManager().loadTexture(PAINT, PAINT_TEX);

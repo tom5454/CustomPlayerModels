@@ -12,6 +12,7 @@ public class PlayerModelSetup {
 	public static void setRotationAngles(PlayerModel<AbstractClientPlayerEntity> player, float limbSwing, float limbSwingAmount, float netHeadYaw, float headPitch, HandSide handside, boolean swim) {
 		boolean flag = false;
 		boolean flag1 = swim;
+		player.swimAnimation = swim ? 1 : 0;
 		player.bipedHead.rotateAngleY = netHeadYaw * ((float)Math.PI / 180F);
 		if (flag) {
 			player.bipedHead.rotateAngleX = (-(float)Math.PI / 4F);

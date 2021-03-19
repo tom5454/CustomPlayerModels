@@ -3,18 +3,18 @@ package com.tom.cpm.shared.editor.gui.popup;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.DropDownBox;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.TextField;
+import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.Checkbox;
-import com.tom.cpm.shared.gui.elements.DropDownBox;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.gui.elements.TextField;
-import com.tom.cpm.shared.math.Box;
 
 public class NewAnimationPopup extends PopupPanel {
 

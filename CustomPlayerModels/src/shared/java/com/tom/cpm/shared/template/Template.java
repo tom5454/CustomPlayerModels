@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.Util;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.editor.template.args.TexEditorArg;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.PlayerModelParts;
@@ -20,7 +21,6 @@ import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.template.args.TexArg;
-import com.tom.cpm.shared.util.Util;
 
 public class Template {
 	public static final int TEMPLATE_ID_OFFSET = 10000;

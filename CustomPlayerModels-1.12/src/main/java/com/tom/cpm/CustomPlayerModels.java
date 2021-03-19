@@ -10,9 +10,9 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
+import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
 
 @Mod(modid = CustomPlayerModels.ID, clientSideOnly = true, updateJSON = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json")
 public class CustomPlayerModels implements MinecraftCommonAccess {
@@ -36,16 +36,16 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		MinecraftObjectHolder.setServerObject(null);
 	}
 
-	private ModConfig cfg;
+	private ModConfigFile cfg;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent evt) {
-		cfg = new ModConfig(new File(evt.getModConfigurationDirectory(), "cpm.json"));
+		cfg = new ModConfigFile(new File(evt.getModConfigurationDirectory(), "cpm.json"));
 		MinecraftObjectHolder.setCommonObject(this);
 	}
 
 	@Override
-	public ModConfig getConfig() {
+	public ModConfigFile getConfig() {
 		return cfg;
 	}
 }

@@ -24,17 +24,17 @@ import net.minecraftforge.common.MinecraftForge;
 
 import com.mojang.authlib.GameProfile;
 
+import com.tom.cpl.util.Image;
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
 import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
-import com.tom.cpm.shared.util.Image;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;

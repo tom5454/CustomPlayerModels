@@ -8,12 +8,12 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.IPlayerRenderManager;
 import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.math.Vec3f;
 
 public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderManager {
 	private Map<MB, RedirectHolder<MB, D, S, P>> holders = new HashMap<>();
@@ -210,31 +210,43 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 							holder.swapOut();
 						return;
 					}
-					RootModelElement elem = holder.def.getModelElementFor(part);
+					boolean skipTransform = holder.unbindRule != null || holder.skipTransform(this);
 					float px = mngr.px.apply(tp);
 					float py = mngr.py.apply(tp);
 					float pz = mngr.pz.apply(tp);
 					float rx = mngr.rx.apply(tp);
 					float ry = mngr.ry.apply(tp);
 					float rz = mngr.rz.apply(tp);
-					boolean skipTransform = holder.unbindRule != null || holder.skipTransform(this);
+					PartRoot elems = holder.def.getModelElementFor(part);
+					if(holder.playerObj == null || holder.testMap.getOrDefault(this, p -> true).test(holder.playerObj)) {
+						elems.forEach(elem -> {
+							if(!skipTransform) {
+								if(elem.forcePos) {
+									mngr.posSet.set(tp, elem.pos);
+									mngr.rotSet.set(tp, elem.rotation);
+								} else {
+									mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
+									mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
+								}
+							}
+							if(elem.doDisplay()) {
+								holder.copyModel(tp, parent);
+								renderWithParent(elem);
+							} else {
+								doRender(elem);
+							}
+						});
+						mngr.posSet.set(parent, px, py, pz);
+						mngr.rotSet.set(parent, rx, ry, rz);
+					}
 					if(!skipTransform) {
+						RootModelElement elem = elems.getMainRoot();
 						if(elem.forcePos) {
 							mngr.posSet.set(tp, elem.pos);
 							mngr.rotSet.set(tp, elem.rotation);
 						} else {
 							mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
 							mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
-						}
-					}
-					if(holder.playerObj == null || holder.testMap.getOrDefault(this, p -> true).test(holder.playerObj)) {
-						if(elem.doDisplay()) {
-							holder.copyModel(tp, parent);
-							renderWithParent(elem);
-							mngr.posSet.set(parent, px, py, pz);
-							mngr.rotSet.set(parent, rx, ry, rz);
-						} else {
-							doRender(elem);
 						}
 					}
 				} else {

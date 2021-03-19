@@ -4,12 +4,13 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpl.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 
 public class GetFreeSkinSlots {
-	public static Set<PlayerSkinLayer> getFreeLayers(Image img, Image template, int skinType) {
+	public static Set<PlayerSkinLayer> getFreeLayers(Image img, Image template, SkinType skinType) {
 		Set<PlayerSkinLayer> used = new HashSet<>(EnumSet.allOf(PlayerSkinLayer.class));
-		int shift = 8 * (2 - skinType);
+		int shift = 8 * (2 - skinType.getChannel());
 		for(int x = 0;x<template.getWidth();x++) {
 			for(int y = 0;y<template.getHeight();y++) {
 				int i = img.getRGB(x, y);
@@ -25,8 +26,8 @@ public class GetFreeSkinSlots {
 		return used;
 	}
 
-	public static void clearLayerArea(Image img, Image template, int skinType, PlayerSkinLayer layer) {
-		int shift = 8 * (2 - skinType);
+	public static void clearLayerArea(Image img, Image template, SkinType skinType, PlayerSkinLayer layer) {
+		int shift = 8 * (2 - skinType.getChannel());
 		for(int x = 0;x<template.getWidth();x++) {
 			for(int y = 0;y<template.getHeight();y++) {
 				int t = template.getRGB(x, y);

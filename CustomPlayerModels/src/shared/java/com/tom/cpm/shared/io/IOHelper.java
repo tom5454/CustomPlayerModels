@@ -20,10 +20,10 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import com.tom.cpm.shared.math.MathHelper;
-import com.tom.cpm.shared.math.Vec2i;
-import com.tom.cpm.shared.math.Vec3f;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.util.Image;
 
 public class IOHelper implements DataInput, DataOutput, Closeable {
 	private static final int DIV = Short.MAX_VALUE / Vec3f.MAX_POS;

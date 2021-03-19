@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntConsumer;
 
-import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.gui.elements.Slider;
-import com.tom.cpm.shared.gui.elements.Spinner;
-import com.tom.cpm.shared.gui.elements.TextField;
-import com.tom.cpm.shared.math.Box;
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.Slider;
+import com.tom.cpl.gui.elements.Spinner;
+import com.tom.cpl.gui.elements.TextField;
+import com.tom.cpl.math.Box;
 
 public class ColorButton extends Button {
 	private static List<Integer> colorCache = new ArrayList<>();

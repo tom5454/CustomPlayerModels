@@ -28,11 +28,11 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import com.tom.cpl.math.Box;
 import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.gui.ViewportPanel.ViewportPanelNative;
-import com.tom.cpm.shared.math.Box;
 import com.tom.cpm.shared.util.PaintImageCreator;
 
 public class ViewportPanelImpl extends ViewportPanelNative {
@@ -112,7 +112,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		renderSetup();
 		if(!editor.renderPaint && editor.renderBase)renderBase();
 
-		PlayerRenderer rp = mc.getRenderManager().getSkinMap().get(editor.skinType == 1 ? "default" : "slim");
+		PlayerRenderer rp = mc.getRenderManager().getSkinMap().get(editor.skinType.getName());
 		float scale = 1;//0.0625F
 		matrixstack.translate(0.5f, 1.5f, 0.5f);
 		matrixstack.rotate(Vector3f.YP.rotationDegrees(90));
@@ -175,6 +175,9 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case SWIMMING:
+					PlayerModelSetup.setRotationAngles(p, ls, lsa, 0, 0, mc.gameSettings.mainHand, true);
+					matrixstack.translate(0.0D, 1.0D, -0.5d);
+					matrixstack.rotate(Vector3f.XP.rotationDegrees(90));
 					break;
 
 				case WALKING:

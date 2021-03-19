@@ -6,14 +6,14 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.ConfirmPopup;
-import com.tom.cpm.shared.gui.elements.GuiElement;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.gui.elements.TextField;
-import com.tom.cpm.shared.math.Box;
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.elements.GuiElement;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.TextField;
+import com.tom.cpl.math.Box;
 
 public class FileChooserGui extends PopupPanel {
 	private File currDir;

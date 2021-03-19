@@ -12,8 +12,8 @@ import net.minecraft.client.settings.KeyBinding;
 
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
-import com.tom.cpm.shared.gui.Gui.KeyboardEvent;
-import com.tom.cpm.shared.gui.IKeybind;
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.gui.KeyboardEvent;
 
 public class KeyBindings implements IKeybind {
 	public static KeyBinding gestureMenuBinding, renderToggleBinding;

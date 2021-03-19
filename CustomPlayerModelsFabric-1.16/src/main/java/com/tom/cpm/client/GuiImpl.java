@@ -28,20 +28,20 @@ import net.minecraft.util.math.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.KeyCodes;
+import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.gui.NativeGuiComponents;
+import com.tom.cpl.gui.NativeGuiComponents.NativeConstructor;
+import com.tom.cpl.gui.UIColors;
+import com.tom.cpl.gui.elements.TextField;
+import com.tom.cpl.gui.elements.TextField.ITextField;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
-import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.gui.Gui.KeyboardEvent;
-import com.tom.cpm.shared.gui.Gui.MouseEvent;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.KeyCodes;
-import com.tom.cpm.shared.gui.NativeGuiComponents;
-import com.tom.cpm.shared.gui.NativeGuiComponents.NativeConstructor;
-import com.tom.cpm.shared.gui.UIColors;
-import com.tom.cpm.shared.gui.elements.TextField;
-import com.tom.cpm.shared.gui.elements.TextField.ITextField;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.math.Vec2i;
 
 public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new GLFWKeyCodes();

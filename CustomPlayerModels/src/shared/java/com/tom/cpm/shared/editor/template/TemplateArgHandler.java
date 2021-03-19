@@ -7,16 +7,16 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.tom.cpl.gui.elements.ChooseElementPopup;
+import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.util.NamedElement;
+import com.tom.cpl.util.Util;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.gui.elements.ChooseElementPopup;
-import com.tom.cpm.shared.gui.elements.Tooltip;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.template.Template.IArg;
-import com.tom.cpm.shared.util.NamedElement;
-import com.tom.cpm.shared.util.Util;
 
 public class TemplateArgHandler implements TreeElement {
 	public String name;

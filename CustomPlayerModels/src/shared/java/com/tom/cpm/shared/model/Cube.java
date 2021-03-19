@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.math.Vec3f;
 
 public class Cube {
 	public Vec3f offset;
@@ -118,5 +118,15 @@ public class Cube {
 			parent.addChild(cube);
 		}
 		return new ArrayList<>(r.values());
+	}
+
+	public static Cube newFakeCube() {
+		Cube c = new Cube();
+		c.offset = new Vec3f();
+		c.size = new Vec3f();
+		c.pos = new Vec3f();
+		c.rotation = new Vec3f();
+		c.parentId = PlayerModelParts.CUSTOM_PART.ordinal();
+		return c;
 	}
 }

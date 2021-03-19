@@ -1,10 +1,10 @@
 package com.tom.cpm.shared.editor.gui;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.util.PaintImageCreator;
 
 public class ViewportPaintPanel extends ViewportPanel {

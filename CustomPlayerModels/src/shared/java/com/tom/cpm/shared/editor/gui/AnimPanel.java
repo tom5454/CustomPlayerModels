@@ -2,25 +2,25 @@ package com.tom.cpm.shared.editor.gui;
 
 import java.util.Collections;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ButtonIcon;
+import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.elements.DropDownBox;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.Spinner;
+import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.util.CombinedListView;
+import com.tom.cpl.util.ListView;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.NewAnimationPopup;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.ButtonIcon;
-import com.tom.cpm.shared.gui.elements.Checkbox;
-import com.tom.cpm.shared.gui.elements.ConfirmPopup;
-import com.tom.cpm.shared.gui.elements.DropDownBox;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.Panel;
-import com.tom.cpm.shared.gui.elements.Spinner;
-import com.tom.cpm.shared.gui.elements.Tooltip;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.util.CombinedListView;
-import com.tom.cpm.shared.util.ListView;
 
 public class AnimPanel extends Panel {
 	private Editor editor;

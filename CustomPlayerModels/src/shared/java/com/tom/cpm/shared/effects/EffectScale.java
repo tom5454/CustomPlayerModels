@@ -2,9 +2,9 @@ package com.tom.cpm.shared.effects;
 
 import java.io.IOException;
 
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.math.Vec3f;
 import com.tom.cpm.shared.model.RenderedCube;
 
 public class EffectScale implements IRenderEffect {

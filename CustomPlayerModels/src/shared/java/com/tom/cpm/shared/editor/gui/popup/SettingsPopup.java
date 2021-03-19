@@ -1,14 +1,14 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.gui.EditorGui;
-import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.Checkbox;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.gui.elements.Tooltip;
-import com.tom.cpm.shared.math.Box;
 
 public class SettingsPopup extends PopupPanel {
 
@@ -44,5 +44,10 @@ public class SettingsPopup extends PopupPanel {
 	@Override
 	public String getTitle() {
 		return gui.i18nFormat("button.cpm.edit.settings");
+	}
+
+	@Override
+	public void onClosed() {
+		ModConfig.getConfig().save();
 	}
 }

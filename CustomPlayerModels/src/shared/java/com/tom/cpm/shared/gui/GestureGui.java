@@ -3,20 +3,24 @@ package com.tom.cpm.shared.gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tom.cpl.config.ConfigEntry;
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
 import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.config.ConfigEntry;
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.Checkbox;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.Panel;
-import com.tom.cpm.shared.math.Box;
 
 public class GestureGui extends Frame {
 	private GestureButton hoveredBtn;

@@ -28,19 +28,19 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.mojang.authlib.GameProfile;
 
+import com.tom.cpl.util.Image;
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
 import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
-import com.tom.cpm.shared.util.Image;
 
 public class ClientProxy extends CommonProxy {
 	public static boolean optifineLoaded;

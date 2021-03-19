@@ -6,9 +6,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.editor.EditorTexture;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.math.Vec2i;
 import com.tom.cpm.shared.skin.TextureProvider;
 
 public class TextureStitcher {

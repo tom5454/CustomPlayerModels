@@ -20,6 +20,17 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.UIColors;
+import com.tom.cpl.gui.UpdaterRegistry;
+import com.tom.cpl.gui.UpdaterRegistry.Updater;
+import com.tom.cpl.gui.elements.MessagePopup;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.math.Vec3i;
+import com.tom.cpl.util.Image;
+import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
@@ -39,23 +50,13 @@ import com.tom.cpm.shared.editor.template.TemplateArgType;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
-import com.tom.cpm.shared.editor.util.PlayerPartValues;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
 import com.tom.cpm.shared.editor.util.ValueOp;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.UIColors;
-import com.tom.cpm.shared.gui.UpdaterRegistry;
-import com.tom.cpm.shared.gui.UpdaterRegistry.Updater;
-import com.tom.cpm.shared.gui.elements.MessagePopup;
 import com.tom.cpm.shared.io.ProjectFile;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.math.Vec2i;
-import com.tom.cpm.shared.math.Vec3f;
-import com.tom.cpm.shared.math.Vec3i;
 import com.tom.cpm.shared.model.PlayerModelParts;
-import com.tom.cpm.shared.util.Image;
-import com.tom.cpm.shared.util.Pair;
+import com.tom.cpm.shared.model.PlayerPartValues;
+import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.util.TextureStitcher;
 
 public class Editor {
@@ -104,6 +105,7 @@ public class Editor {
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
 	public int drawMode = 0;
+	public boolean drawAllUVs = false;
 
 	public Vec3f position = new Vec3f(0.5f, 1, 0.5f);
 	public Vec3f look = new Vec3f(0.25f, 0.5f, 0.25f);
@@ -129,7 +131,8 @@ public class Editor {
 	public List<EditorAnim> animations = new ArrayList<>();
 	public List<EditorTemplate> templates = new ArrayList<>();
 	public TemplateSettings templateSettings;
-	public int skinType;
+	public SkinType skinType;
+	public boolean customSkinType;
 	public Image vanillaSkin;
 	public boolean dirty;
 	public ModelDefinition definition;
@@ -141,7 +144,7 @@ public class Editor {
 	public ProjectFile project = new ProjectFile();
 
 	public Editor(EditorGui gui) {
-		this.definition = new ModelDefinition(this);
+		this.definition = new EditorDefinition(this);
 		this.frame = gui;
 	}
 
@@ -533,6 +536,7 @@ public class Editor {
 		skinType = MinecraftClientAccess.get().getSkinType();
 		Image skin = MinecraftClientAccess.get().getVanillaSkin(skinType);
 		this.vanillaSkin = skin;
+		customSkinType = false;
 		skinProvider.setImage(new Image(skin));
 		skinProvider.size = new Vec2i(skin.getWidth(), skin.getHeight());
 		dirty = false;
@@ -544,7 +548,7 @@ public class Editor {
 		storeIDgen = new StoreIDGen();
 		Player profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.loadSkin(() -> {
-			skinType = profile.getSkinType();
+			if(!customSkinType)skinType = profile.getSkinType();
 			CompletableFuture<Image> img = profile.getSkin();
 			this.vanillaSkin = MinecraftClientAccess.get().getVanillaSkin(skinType);
 			img.thenAccept(s -> {
@@ -610,12 +614,14 @@ public class Editor {
 			}
 			map.put("pos", elem.pos.toMap());
 			map.put("rotation", elem.rotation.toMap());
+			map.put("dup", elem.duplicated);
 		}
 		data.put("version", projectFileVersion);
 		Map<String, Object> skinSize = new HashMap<>();
 		data.put("skinSize", skinSize);
 		skinSize.put("x", skinProvider.size.x);
 		skinSize.put("y", skinProvider.size.y);
+		data.put("skinType", skinType.getName());
 		try(OutputStreamWriter os = new OutputStreamWriter(project.setAsStream("config.json"))) {
 			gson.toJson(data, os);
 		}
@@ -747,16 +753,36 @@ public class Editor {
 		this.file = file;
 		for (Map<String, Object> map : lst) {
 			String key = (String) map.get("id");
-			for (ModelElement elem : elements) {
-				if(((PlayerModelParts) elem.typeData).name().equalsIgnoreCase(key)) {
-					elem.show = (boolean) map.get("show");
-					if(map.containsKey("children")) {
-						loadChildren((List<Map<String, Object>>) map.get("children"), elem, fileVersion);
+			ModelElement elem = null;
+			if((boolean) map.getOrDefault("dup", false)) {
+				for (ModelElement e : elements) {
+					if(((PlayerModelParts) e.typeData).name().equalsIgnoreCase(key)) {
+						elem = new ModelElement(this, ElementType.ROOT_PART, e.typeData, frame.getGui());
+						elem.duplicated = true;
+						elements.add(elem);
+						break;
 					}
-					elem.pos = new Vec3f((Map<String, Object>) map.get("pos"), new Vec3f(0, 0, 0));
-					elem.rotation = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f(0, 0, 0));
+				}
+			} else {
+				for (ModelElement e : elements) {
+					if(((PlayerModelParts) e.typeData).name().equalsIgnoreCase(key)) {
+						elem = e;
+						break;
+					}
 				}
 			}
+			if(elem != null) {
+				elem.show = (boolean) map.get("show");
+				if(map.containsKey("children")) {
+					loadChildren((List<Map<String, Object>>) map.get("children"), elem, fileVersion);
+				}
+				elem.pos = new Vec3f((Map<String, Object>) map.get("pos"), new Vec3f(0, 0, 0));
+				elem.rotation = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f(0, 0, 0));
+			}
+		}
+		if(data.containsKey("skinType")) {
+			customSkinType = true;
+			skinType = SkinType.get((String) data.get("skinType"));
 		}
 		List<String> anims = project.listEntires("animations");
 		Map<String, Object> skinTexSize = (Map<String, Object>) data.get("skinSize");
@@ -1207,6 +1233,7 @@ public class Editor {
 						elem.u = val.u;
 						elem.v = val.v;
 						elem.name = el.name;
+						elem.generated = true;
 						l.rs.add(() -> el.show = false);
 						u.rs.add(() -> el.show = true);
 					}

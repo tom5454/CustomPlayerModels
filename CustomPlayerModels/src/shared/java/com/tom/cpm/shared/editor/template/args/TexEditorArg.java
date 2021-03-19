@@ -3,6 +3,11 @@ package com.tom.cpm.shared.editor.template.args;
 import java.util.List;
 import java.util.Map;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.math.Vec3i;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.ModelElement;
@@ -11,12 +16,7 @@ import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.util.ValueOp;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.ConfirmPopup;
-import com.tom.cpm.shared.math.Vec3f;
-import com.tom.cpm.shared.math.Vec3i;
 import com.tom.cpm.shared.template.args.TexArg;
-import com.tom.cpm.shared.util.Image;
 
 public class TexEditorArg implements TemplateArg<TexArg> {
 	public static final String NAME = "__tex";
@@ -94,14 +94,14 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 		editor.markDirty();
 	}
 
-	private void draw(Editor editor, IGui gui, int x, int y, float xs, float ys) {
+	private void draw(Editor editor, IGui gui, int x, int y, float xs, float ys, int alpha) {
 		if(texSize != 0 && et.getTemplateTexture() != null) {
 			int bx = (int) (xs * u * texSize);
 			int by = (int) (ys * v * texSize);
 			Image img = et.getTemplateTexture().getImage();
 			Image skin = editor.skinProvider.getImage();
 
-			gui.drawBox(x + bx, y + by, img.getWidth() * xs, img.getHeight() * ys, 0xccffffff);
+			gui.drawBox(x + bx, y + by, img.getWidth() * xs, img.getHeight() * ys, 0xffffff | (alpha << 24));
 		}
 	}
 
@@ -150,7 +150,7 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 
 			@Override
 			public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
-				draw(editor, gui, x, y, xs, ys);
+				draw(editor, gui, x, y, xs, ys, editor.selectedElement == this ? 0xcc : 0x55);
 			}
 		});
 		c.add(new TreeElement() {
@@ -204,7 +204,8 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 
 			@Override
 			public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
-				draw(editor, gui, x, y, xs, ys);
+				if(editor.selectedElement == this)
+					draw(editor, gui, x, y, xs, ys, 0xcc);
 			}
 		});
 	}

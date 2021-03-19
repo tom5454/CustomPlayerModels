@@ -2,7 +2,7 @@ package com.tom.cpm.client;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.tom.cpm.shared.gui.KeyCodes;
+import com.tom.cpl.gui.KeyCodes;
 
 public class GLFWKeyCodes extends KeyCodes {
 	public GLFWKeyCodes() {

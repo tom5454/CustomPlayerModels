@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.option.ChatVisibility;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat.DrawMode;
 import net.minecraft.client.render.VertexFormats;
@@ -29,20 +30,20 @@ import net.minecraft.util.math.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.KeyCodes;
+import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.gui.NativeGuiComponents;
+import com.tom.cpl.gui.NativeGuiComponents.NativeConstructor;
+import com.tom.cpl.gui.UIColors;
+import com.tom.cpl.gui.elements.TextField;
+import com.tom.cpl.gui.elements.TextField.ITextField;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
-import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.gui.Gui.KeyboardEvent;
-import com.tom.cpm.shared.gui.Gui.MouseEvent;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.KeyCodes;
-import com.tom.cpm.shared.gui.NativeGuiComponents;
-import com.tom.cpm.shared.gui.NativeGuiComponents.NativeConstructor;
-import com.tom.cpm.shared.gui.UIColors;
-import com.tom.cpm.shared.gui.elements.TextField;
-import com.tom.cpm.shared.gui.elements.TextField.ITextField;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.math.Vec2i;
 
 public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new GLFWKeyCodes();
@@ -257,10 +258,11 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture) {
-		client.getTextureManager().bindTexture(new Identifier("cpm", "textures/gui/" + texture + ".png"));
 		x += current.box.x;
 		y += current.box.y;
-		RenderSystem.color4f(1, 1, 1, 1);
+		RenderSystem.setShader(GameRenderer::method_34542);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.setShaderTexture(0, new Identifier("cpm", "textures/gui/" + texture + ".png"));
 		drawTexture(matrixStack, x, y, u, v, w, h);
 	}
 
@@ -268,8 +270,9 @@ public class GuiImpl extends Screen implements IGui {
 	public void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2) {
 		x += current.box.x;
 		y += current.box.y;
-		client.getTextureManager().bindTexture(DynTexture.getBoundLoc());
-		RenderSystem.color4f(1, 1, 1, 1);
+		RenderSystem.setShaderTexture(0, DynTexture.getBoundLoc());
+		RenderSystem.setShader(GameRenderer::method_34542);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		Matrix4f mat = matrixStack.peek().getModel();
 		float bo = getZOffset();
 		Tessellator tessellator = Tessellator.getInstance();
@@ -279,7 +282,6 @@ public class GuiImpl extends Screen implements IGui {
 		bufferbuilder.vertex(mat, x + width, y + height, bo).texture(u2, v2).next();
 		bufferbuilder.vertex(mat, x + width, y, bo).texture(u2, v1).next();
 		bufferbuilder.vertex(mat, x, y, bo).texture(u1, v1).next();
-		RenderSystem.enableAlphaTest();
 		tessellator.draw();
 	}
 
@@ -504,9 +506,8 @@ public class GuiImpl extends Screen implements IGui {
 		float bbr = (bottomRight & 255) / 255.0F;
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
-		RenderSystem.disableAlphaTest();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.shadeModel(7425);
+		RenderSystem.setShader(GameRenderer::method_34540);
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
 		Matrix4f mat = matrixStack.peek().getModel();
@@ -516,9 +517,7 @@ public class GuiImpl extends Screen implements IGui {
 		bufferbuilder.vertex(mat, left, bottom, this.getZOffset()).color(rbl, gbl, bbl, abl).next();
 		bufferbuilder.vertex(mat, right, bottom, this.getZOffset()).color(rbr, gbr, bbr, abr).next();
 		tessellator.draw();
-		RenderSystem.shadeModel(7424);
 		RenderSystem.disableBlend();
-		RenderSystem.enableAlphaTest();
 		RenderSystem.enableTexture();
 	}
 

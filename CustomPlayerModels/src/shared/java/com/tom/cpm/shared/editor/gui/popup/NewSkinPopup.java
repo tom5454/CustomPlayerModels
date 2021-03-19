@@ -2,19 +2,19 @@ package com.tom.cpm.shared.editor.gui.popup;
 
 import java.io.File;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.MessagePopup;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.Spinner;
+import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.Checkbox;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.MessagePopup;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.gui.elements.Spinner;
-import com.tom.cpm.shared.gui.elements.Tooltip;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.math.Vec2i;
-import com.tom.cpm.shared.util.Image;
 
 public class NewSkinPopup extends PopupPanel {
 

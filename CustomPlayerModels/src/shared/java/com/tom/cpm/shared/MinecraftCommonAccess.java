@@ -1,6 +1,6 @@
 package com.tom.cpm.shared;
 
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
+import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 
 public interface MinecraftCommonAccess {
 
@@ -8,5 +8,5 @@ public interface MinecraftCommonAccess {
 		return MinecraftObjectHolder.commonObject;
 	}
 
-	public ModConfig getConfig();
+	public ModConfigFile getConfig();
 }

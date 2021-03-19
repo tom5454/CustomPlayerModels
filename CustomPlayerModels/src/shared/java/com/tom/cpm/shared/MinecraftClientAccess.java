@@ -2,11 +2,12 @@ package com.tom.cpm.shared;
 
 import java.util.List;
 
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.util.DynamicTexture.ITexture;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.gui.IKeybind;
-import com.tom.cpm.shared.util.DynamicTexture.ITexture;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 
 public interface MinecraftClientAccess {
 	IPlayerRenderManager getPlayerRenderManager();
@@ -23,8 +24,8 @@ public interface MinecraftClientAccess {
 	}
 
 	Object getPlayerIDObject();
-	int getSkinType();
-	Image getVanillaSkin(int skinType);
+	SkinType getSkinType();
+	Image getVanillaSkin(SkinType skinType);
 	void setEncodedGesture(int value);
 	boolean isInGame();
 	List<IKeybind> getKeybinds();

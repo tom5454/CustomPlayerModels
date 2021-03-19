@@ -2,7 +2,7 @@ package com.tom.cpm.client;
 
 import org.lwjgl.input.Keyboard;
 
-import com.tom.cpm.shared.gui.KeyCodes;
+import com.tom.cpl.gui.KeyCodes;
 
 public class LWJGLKeyCodes extends KeyCodes {
 	public LWJGLKeyCodes() {

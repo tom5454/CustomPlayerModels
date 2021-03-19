@@ -1,13 +1,13 @@
 package com.tom.cpm.shared.editor.gui;
 
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ButtonIcon;
+import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.SkinSettingsPopup;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.ButtonIcon;
-import com.tom.cpm.shared.gui.elements.Panel;
-import com.tom.cpm.shared.gui.elements.Tooltip;
-import com.tom.cpm.shared.math.Box;
 
 public class DrawToolsPanel extends Panel {
 	private Editor editor;

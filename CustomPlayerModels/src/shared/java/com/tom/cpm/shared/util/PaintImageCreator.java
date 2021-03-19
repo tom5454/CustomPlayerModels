@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.util;
 
-import com.tom.cpm.shared.math.Vec2i;
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.Image;
 
 public class PaintImageCreator {
 

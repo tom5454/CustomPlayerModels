@@ -18,6 +18,8 @@ import java.util.function.Supplier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import com.tom.cpl.gui.elements.MessagePopup;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -31,7 +33,6 @@ import com.tom.cpm.shared.effects.EffectColor;
 import com.tom.cpm.shared.effects.EffectGlow;
 import com.tom.cpm.shared.effects.EffectHide;
 import com.tom.cpm.shared.effects.EffectScale;
-import com.tom.cpm.shared.gui.elements.MessagePopup;
 import com.tom.cpm.shared.io.ChecksumOutputStream;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.SkinDataOutputStream;
@@ -42,6 +43,7 @@ import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartAnimation;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
 import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
+import com.tom.cpm.shared.parts.ModelPartDupRoot;
 import com.tom.cpm.shared.parts.ModelPartEnd;
 import com.tom.cpm.shared.parts.ModelPartListIcon;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
@@ -51,7 +53,6 @@ import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartTemplate;
 import com.tom.cpm.shared.template.Template;
-import com.tom.cpm.shared.util.Image;
 
 public class Exporter {
 	public static final Gson sgson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
@@ -62,7 +63,7 @@ public class Exporter {
 			return;
 		}
 		Image img = new Image(e.vanillaSkin);
-		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType), () -> {
+		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType.getChannel()), () -> {
 			img.storeTo(f);
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
 		}), forceOut);
@@ -103,7 +104,7 @@ public class Exporter {
 		List<IModelPart> otherParts = new ArrayList<>();
 		for(PlayerModelParts p : PlayerModelParts.VALUES) {
 			for (ModelElement el : e.elements) {
-				if(el.type == ElementType.ROOT_PART && el.typeData == p) {
+				if(el.type == ElementType.ROOT_PART && el.typeData == p && !el.duplicated) {
 					if(Math.abs(el.pos.x) >= 0.1f || Math.abs(el.pos.y) >= 0.1f || Math.abs(el.pos.z) >= 0.1f ||
 							Math.abs(el.rotation.x) >= 0.1f || Math.abs(el.rotation.y) >= 0.1f || Math.abs(el.rotation.z) >= 0.1f) {
 						otherParts.add(new ModelPartPlayerPos(p.getId(el.rc), el.pos, el.rotation));
@@ -127,6 +128,12 @@ public class Exporter {
 				}
 			}
 		});
+		for (ModelElement el : e.elements) {
+			if(el.type == ElementType.ROOT_PART && el.duplicated) {
+				if(!el.show)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
+				otherParts.add(new ModelPartDupRoot(el.id, (PlayerModelParts) el.typeData));
+			}
+		}
 		if(!e.animations.isEmpty()) {
 			otherParts.add(new ModelPartAnimation(e));
 		}
@@ -266,7 +273,14 @@ public class Exporter {
 				flatList.add(me);
 				break;
 			case ROOT_PART:
-				me.id = ((RootModelElement)me.rc).getPart().getId(me.rc);
+				if(me.duplicated) {
+					Cube fake = Cube.newFakeCube();
+					me.id = id[0]++;
+					fake.id = me.id;
+					fake.pos = me.pos;
+					fake.rotation = me.rotation;
+					flatList.add(fake);
+				} else me.id = ((RootModelElement)me.rc).getPart().getId(me.rc);
 				break;
 			default:
 				break;

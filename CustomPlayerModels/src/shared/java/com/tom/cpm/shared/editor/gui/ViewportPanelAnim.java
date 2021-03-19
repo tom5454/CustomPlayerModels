@@ -1,7 +1,7 @@
 package com.tom.cpm.shared.editor.gui;
 
+import com.tom.cpl.gui.IGui;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.gui.IGui;
 
 public class ViewportPanelAnim extends ViewportPanel {
 

@@ -4,7 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpl.util.Image;
 
 public class SkinDataOutputStream extends OutputStream {
 	private Image img, template;

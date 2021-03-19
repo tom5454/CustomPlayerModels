@@ -2,17 +2,17 @@ package com.tom.cpm.shared.editor.tree;
 
 import java.util.function.Consumer;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.gui.elements.PopupMenu;
+import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.elements.Tree.TreeModel;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Effect;
-import com.tom.cpm.shared.gui.Gui.MouseEvent;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.PopupMenu;
-import com.tom.cpm.shared.gui.elements.Tooltip;
-import com.tom.cpm.shared.gui.elements.Tree.TreeModel;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.math.Vec2i;
-import com.tom.cpm.shared.math.Vec3f;
 
 public abstract interface TreeElement {
 	public class ModelTree extends TreeModel<TreeElement> {

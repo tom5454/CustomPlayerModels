@@ -13,11 +13,12 @@ import net.minecraft.client.util.DefaultSkinHelper;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.util.DynamicTexture.ITexture;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.gui.IKeybind;
-import com.tom.cpm.shared.util.DynamicTexture.ITexture;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private static final Identifier STEVE_SKIN = new Identifier("textures/entity/steve.png");
@@ -33,8 +34,20 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public Image getVanillaSkin(int skinType) {
-		try(Resource r = mc.getResourceManager().getResource(skinType == 1 ? STEVE_SKIN : ALEX_SKIN)) {
+	public Image getVanillaSkin(SkinType skinType) {
+		Identifier loc;
+		switch (skinType) {
+		case SLIM:
+			loc = ALEX_SKIN;
+			break;
+
+		case DEFAULT:
+		case UNKNOWN:
+		default:
+			loc = STEVE_SKIN;
+			break;
+		}
+		try(Resource r = mc.getResourceManager().getResource(loc)) {
 			return Image.loadFrom(r.getInputStream());
 		} catch (IOException e) {
 		}
@@ -113,8 +126,8 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public int getSkinType() {
-		return DefaultSkinHelper.getModel(mc.getSession().getProfile().getId()).equals("default") ? 1 : 0;
+	public SkinType getSkinType() {
+		return SkinType.get(DefaultSkinHelper.getModel(mc.getSession().getProfile().getId()));
 	}
 
 	@Override

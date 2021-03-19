@@ -3,9 +3,9 @@ package com.tom.cpm.shared.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.IModelComponent;
-import com.tom.cpm.shared.math.MathHelper;
-import com.tom.cpm.shared.math.Vec3f;
 
 public class RenderedCube implements IModelComponent {
 	private Cube cube;

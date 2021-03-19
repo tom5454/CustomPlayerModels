@@ -11,7 +11,7 @@ public class PlayerModelSetup {
 	public static void setAngles(PlayerEntityModel<AbstractClientPlayerEntity> player, float f, float g, float i, float j, Arm arm, boolean swim) {
 		boolean bl = false;
 		boolean bl2 = swim;
-
+		player.leaningPitch = swim ? 1 : 0;
 		player.head.yaw = i * 0.017453292F;
 		if (bl) {
 			player.head.pitch = -0.7853982F;

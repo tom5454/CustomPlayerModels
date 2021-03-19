@@ -1,6 +1,6 @@
 package com.tom.cpm.shared.animation;
 
-import com.tom.cpm.shared.gui.IGui;
+import com.tom.cpl.gui.IGui;
 
 public class CustomPose implements IPose {
 	private String name;

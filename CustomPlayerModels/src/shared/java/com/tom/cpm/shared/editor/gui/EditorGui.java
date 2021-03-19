@@ -2,8 +2,28 @@ package com.tom.cpm.shared.editor.gui;
 
 import java.io.File;
 
-import com.tom.cpm.shared.config.ConfigEntry.ModConfig;
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ButtonIcon;
+import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.elements.InputPopup;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.MessagePopup;
+import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.PopupMenu;
+import com.tom.cpl.gui.elements.ProcessPopup;
+import com.tom.cpl.gui.elements.ScrollPanel;
+import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.elements.Tree;
+import com.tom.cpl.gui.util.HorizontalLayout;
+import com.tom.cpl.gui.util.TabbedPanelManager;
+import com.tom.cpl.math.Box;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
@@ -14,25 +34,7 @@ import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
-import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.ButtonIcon;
-import com.tom.cpm.shared.gui.elements.Checkbox;
-import com.tom.cpm.shared.gui.elements.ConfirmPopup;
-import com.tom.cpm.shared.gui.elements.InputPopup;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.MessagePopup;
-import com.tom.cpm.shared.gui.elements.Panel;
-import com.tom.cpm.shared.gui.elements.PopupMenu;
-import com.tom.cpm.shared.gui.elements.ProcessPopup;
-import com.tom.cpm.shared.gui.elements.ScrollPanel;
-import com.tom.cpm.shared.gui.elements.Tooltip;
-import com.tom.cpm.shared.gui.elements.Tree;
-import com.tom.cpm.shared.gui.util.HorizontalLayout;
-import com.tom.cpm.shared.gui.util.TabbedPanelManager;
-import com.tom.cpm.shared.math.Box;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 
 public class EditorGui extends Frame {
 	private TabbedPanelManager tabs;
@@ -180,11 +182,28 @@ public class EditorGui extends Frame {
 
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.animation"), mainPanel));
 
-		mainPanel.addElement(new TreePanel(gui, this, width, height - 20));
+		mainPanel.addElement(new TreePanel(gui, this, width, height - 20) {
+
+			@Override
+			public void draw(int mouseX, int mouseY, float partialTicks) {
+				editor.applyAnim = true;
+				super.draw(mouseX, mouseY, partialTicks);
+				editor.applyAnim = false;
+			}
+		});
 
 		ViewportPanelAnim view = new ViewportPanelAnim(gui, editor);
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
+	}
+
+	private void newModel(SkinType type) {
+		checkUnsaved(() -> {
+			this.editor.loadDefaultPlayerModel();
+			this.editor.customSkinType = true;
+			this.editor.skinType = type;
+			this.editor.updateGui();
+		});
 	}
 
 	private void initFileMenu() {
@@ -192,11 +211,15 @@ public class EditorGui extends Frame {
 		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.file"), () -> pp.display(this, 0, 20)));
 
 		PopupMenu newMenu = new PopupMenu(gui);
+		PopupMenu newModelMenu = new PopupMenu(gui);
+		int x = topPanel.getX();
 
-		newMenu.addButton(gui.i18nFormat("button.cpm.new.model"), () -> checkUnsaved(() -> {
-			this.editor.loadDefaultPlayerModel();
-			this.editor.updateGui();
-		}));
+		newMenu.addButton(gui.i18nFormat("button.cpm.new.model"), () -> newModelMenu.display(this, x, 20));
+
+		for (SkinType type : SkinType.VALUES) {
+			if(type == SkinType.UNKNOWN)continue;
+			newModelMenu.addButton(gui.i18nFormat("label.cpm.skin_type." + type.getName()), () -> newModel(type));
+		}
 
 		Button newTempl = newMenu.addButton(gui.i18nFormat("button.cpm.new.template"), () -> checkUnsaved(() -> {
 			this.editor.loadDefaultPlayerModel();
@@ -208,7 +231,6 @@ public class EditorGui extends Frame {
 		}));
 		newTempl.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.new.template")));
 
-		int x = topPanel.getX();
 		pp.addButton(gui.i18nFormat("button.cpm.file.new"), () -> newMenu.display(this, x, 20));
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.load"), () -> checkUnsaved(() -> {
@@ -357,7 +379,7 @@ public class EditorGui extends Frame {
 		int x = topPanel.getX();
 		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.display"), () -> pp.display(this, x, 20)));
 
-		Checkbox chxbxBase = new Checkbox(gui, gui.i18nFormat("label.cpm.drawBase"));
+		Checkbox chxbxBase = new Checkbox(gui, gui.i18nFormat("label.cpm.display.drawBase"));
 		pp.add(chxbxBase);
 		chxbxBase.setSelected(editor.renderBase);
 		chxbxBase.setAction(() -> {
@@ -365,12 +387,20 @@ public class EditorGui extends Frame {
 			chxbxBase.setSelected(editor.renderBase);
 		});
 
-		Checkbox chxbxTpose = new Checkbox(gui, gui.i18nFormat("label.cpm.player_tpose"));
+		Checkbox chxbxTpose = new Checkbox(gui, gui.i18nFormat("label.cpm.display.player_tpose"));
 		pp.add(chxbxTpose);
 		chxbxTpose.setSelected(editor.playerTpose);
 		chxbxTpose.setAction(() -> {
 			editor.playerTpose = !chxbxTpose.isSelected();
 			chxbxTpose.setSelected(editor.playerTpose);
+		});
+
+		Checkbox chxbxAllUVs = new Checkbox(gui, gui.i18nFormat("label.cpm.display.allUVs"));
+		pp.add(chxbxAllUVs);
+		chxbxAllUVs.setSelected(editor.drawAllUVs);
+		chxbxAllUVs.setAction(() -> {
+			editor.drawAllUVs = !chxbxAllUVs.isSelected();
+			chxbxAllUVs.setSelected(editor.drawAllUVs);
 		});
 	}
 

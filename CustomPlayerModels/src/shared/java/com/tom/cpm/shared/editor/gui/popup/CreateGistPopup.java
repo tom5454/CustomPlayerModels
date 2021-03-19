@@ -2,15 +2,15 @@ package com.tom.cpm.shared.editor.gui.popup;
 
 import java.util.function.Consumer;
 
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.TextField;
+import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.definition.Link;
-import com.tom.cpm.shared.gui.Frame;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.Button;
-import com.tom.cpm.shared.gui.elements.Label;
-import com.tom.cpm.shared.gui.elements.PopupPanel;
-import com.tom.cpm.shared.gui.elements.TextField;
-import com.tom.cpm.shared.gui.elements.Tooltip;
-import com.tom.cpm.shared.math.Box;
 
 public class CreateGistPopup extends PopupPanel {
 	public CreateGistPopup(Frame frm, IGui gui, String reason, String text, Consumer<Link> ok) {

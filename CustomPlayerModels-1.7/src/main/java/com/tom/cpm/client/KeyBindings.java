@@ -10,8 +10,8 @@ import org.lwjgl.input.Keyboard;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 
-import com.tom.cpm.shared.gui.Gui.KeyboardEvent;
-import com.tom.cpm.shared.gui.IKeybind;
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.gui.KeyboardEvent;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 

@@ -2,8 +2,8 @@ package com.tom.cpm.shared.template.args;
 
 import java.io.IOException;
 
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.math.MathHelper;
 
 public class Float1Arg extends ArgBase {
 	private float value;

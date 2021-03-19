@@ -6,6 +6,7 @@ import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,6 +23,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.model.SkinType;
 
 public class PlayerProfile extends Player {
 	private final GameProfile profile;
@@ -36,11 +38,12 @@ public class PlayerProfile extends Player {
 
 	private PlayerProfile(GameProfile profile) {
 		this.profile = new GameProfile(profile.getId(), profile.getName());
+		this.skinType = DefaultPlayerSkin.getSkinType(profile.getId());
 	}
 
 	@Override
-	public int getSkinType() {
-		return skinType == null ? 1 : skinType.equals("default") ? 1 : 0;
+	public SkinType getSkinType() {
+		return SkinType.get(skinType);
 	}
 
 	@Override

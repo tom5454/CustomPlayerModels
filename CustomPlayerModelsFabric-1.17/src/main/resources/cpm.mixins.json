@@ -10,7 +10,8 @@
     "BufferBuilderStorageMixin",
     "MinecraftClientMixin",
     "SkullBlockEntityRendererMixin",
-    "BuiltinModelItemRendererMixin"
+    "BuiltinModelItemRendererMixin",
+    "MixinGameRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

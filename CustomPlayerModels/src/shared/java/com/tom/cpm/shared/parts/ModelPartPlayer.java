@@ -25,7 +25,7 @@ public class ModelPartPlayer implements IModelPart, IResolvedModelPart {
 
 	public ModelPartPlayer(Editor editor) {
 		editor.elements.forEach(e -> {
-			if(e.rc instanceof RootModelElement) {
+			if(e.rc instanceof RootModelElement && !e.duplicated) {
 				ModelPart part = ((RootModelElement)e.rc).getPart();
 				if(part != null && part instanceof PlayerModelParts) {
 					keep[((PlayerModelParts)part).ordinal()] = e.show;

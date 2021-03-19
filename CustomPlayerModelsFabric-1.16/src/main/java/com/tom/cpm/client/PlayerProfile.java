@@ -22,6 +22,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.model.SkinType;
 
 public class PlayerProfile extends Player {
 	private final GameProfile profile;
@@ -39,8 +40,8 @@ public class PlayerProfile extends Player {
 	}
 
 	@Override
-	public int getSkinType() {
-		return skinType == null ? 1 : skinType.equals("default") ? 1 : 0;
+	public SkinType getSkinType() {
+		return SkinType.get(skinType);
 	}
 
 	@Override

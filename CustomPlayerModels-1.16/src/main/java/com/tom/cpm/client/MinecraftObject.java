@@ -11,17 +11,19 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.util.DynamicTexture.ITexture;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.gui.IKeybind;
-import com.tom.cpm.shared.util.DynamicTexture.ITexture;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -39,8 +41,20 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public Image getVanillaSkin(int skinType) {
-		try(IResource r = mc.getResourceManager().getResource(skinType == 1 ? TEXTURE_STEVE : TEXTURE_ALEX)) {
+	public Image getVanillaSkin(SkinType skinType) {
+		ResourceLocation loc;
+		switch (skinType) {
+		case SLIM:
+			loc = TEXTURE_ALEX;
+			break;
+
+		case DEFAULT:
+		case UNKNOWN:
+		default:
+			loc = TEXTURE_STEVE;
+			break;
+		}
+		try(IResource r = mc.getResourceManager().getResource(loc)) {
 			return Image.loadFrom(r.getInputStream());
 		} catch (IOException e) {
 		}
@@ -119,8 +133,8 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public int getSkinType() {
-		return DefaultPlayerSkin.getSkinType(mc.getSession().getProfile().getId()).equals("default") ? 1 : 0;
+	public SkinType getSkinType() {
+		return SkinType.get(DefaultPlayerSkin.getSkinType(mc.getSession().getProfile().getId()));
 	}
 
 	@Override
@@ -162,5 +176,9 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	public static ResourceLocation getDefaultSkin(UUID playerUUID) {
 		return DefaultPlayerSkin.getSkinType(playerUUID).equals("slim") ? TEXTURE_ALEX : TEXTURE_STEVE;
+	}
+
+	public static void main(String[] args) {
+		System.out.println(DefaultPlayerSkin.getSkinType(PlayerEntity.getOfflineUUID("Dev3")));
 	}
 }

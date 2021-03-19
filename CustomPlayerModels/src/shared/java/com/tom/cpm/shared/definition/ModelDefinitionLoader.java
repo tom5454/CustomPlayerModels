@@ -21,6 +21,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.config.ResourceLoader;
@@ -30,11 +31,11 @@ import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.SkinDataInputStream;
 import com.tom.cpm.shared.loaders.GistResourceLoader;
 import com.tom.cpm.shared.loaders.GithubRepoResourceLoader;
+import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartEnd;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartType;
-import com.tom.cpm.shared.util.Image;
 
 public class ModelDefinitionLoader {
 	public static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(0, 2, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
@@ -85,7 +86,7 @@ public class ModelDefinitionLoader {
 	}
 
 	public ModelDefinition loadModel(Image skin, Player player) {
-		try(SkinDataInputStream in = new SkinDataInputStream(skin, template, player.getSkinType())) {
+		try(SkinDataInputStream in = new SkinDataInputStream(skin, template, player.getSkinType().getChannel())) {
 			return loadModel(in, player);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -103,9 +104,9 @@ public class ModelDefinitionLoader {
 			if(part == null)continue;
 			if(part instanceof ModelPartSkinType && in instanceof SkinDataInputStream) {
 				SkinDataInputStream sin = (SkinDataInputStream) in;
-				int type = ((ModelPartSkinType)part).getSkinType();
-				if(type != sin.getChannel()) {
-					sin.setChannel(type);
+				SkinType type = ((ModelPartSkinType)part).getSkinType();
+				if(type != SkinType.UNKNOWN && type.getChannel() != sin.getChannel()) {
+					sin.setChannel(type.getChannel());
 					System.out.println("[WARN]: Mismatching skin type");
 				}
 			}

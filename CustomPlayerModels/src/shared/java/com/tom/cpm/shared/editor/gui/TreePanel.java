@@ -1,13 +1,13 @@
 package com.tom.cpm.shared.editor.gui;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.ButtonIcon;
+import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.Tree;
+import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.ButtonIcon;
-import com.tom.cpm.shared.gui.elements.Panel;
-import com.tom.cpm.shared.gui.elements.Tree;
-import com.tom.cpm.shared.math.Box;
 
 public class TreePanel extends Panel {
 

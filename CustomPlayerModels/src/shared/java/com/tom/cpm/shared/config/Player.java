@@ -5,12 +5,13 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.util.LegacySkinConverter;
 
 public abstract class Player {
@@ -44,7 +45,7 @@ public abstract class Player {
 		return Image.download(url).thenApply(i -> new LegacySkinConverter().convertSkin(i)).exceptionally(e -> null);
 	}
 
-	public abstract int getSkinType();
+	public abstract SkinType getSkinType();
 	public abstract void loadSkin(Runnable onLoaded);
 	public abstract UUID getUUID();
 	public abstract VanillaPose getPose();

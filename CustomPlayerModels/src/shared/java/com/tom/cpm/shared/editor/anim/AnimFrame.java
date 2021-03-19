@@ -7,13 +7,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.editor.util.PlayerPartValues;
 import com.tom.cpm.shared.editor.util.ValueOp;
-import com.tom.cpm.shared.math.Vec3f;
 import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.PlayerPartValues;
 
 public class AnimFrame {
 	private final Map<ModelElement, Data> components = new HashMap<>();
@@ -278,5 +278,9 @@ public class AnimFrame {
 		Data data = components.get(me);
 		if(data == null)return false;
 		return data.hasVisChanges();
+	}
+
+	public void copy(AnimFrame from) {
+		from.components.forEach((e, dt) -> components.put(e, new Data(dt)));
 	}
 }

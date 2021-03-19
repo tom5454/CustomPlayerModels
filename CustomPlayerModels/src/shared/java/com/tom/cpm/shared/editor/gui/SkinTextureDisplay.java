@@ -1,12 +1,14 @@
 package com.tom.cpm.shared.editor.gui;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.GuiElement;
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.gui.IGui;
-import com.tom.cpm.shared.gui.elements.GuiElement;
-import com.tom.cpm.shared.math.MathHelper;
-import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.PlayerPartValues;
 
 public class SkinTextureDisplay extends GuiElement {
 	private Editor editor;
@@ -17,7 +19,7 @@ public class SkinTextureDisplay extends GuiElement {
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
-		TextureProvider provider = editor.getTextureProvider();
+		EditorTexture provider = editor.getTextureProvider();
 		if(provider != null) {
 			gui.pushMatrix();
 			gui.setPosOffset(getBounds());
@@ -34,12 +36,19 @@ public class SkinTextureDisplay extends GuiElement {
 	}
 
 	public static void drawBoxTextureOverlay(IGui gui, Editor editor, int x, int y, float xs, float ys) {
-		if(editor.selectedElement != null) {
+		if(editor.drawAllUVs) {
+			EditorTexture provider = editor.getTextureProvider();
+			Editor.walkElements(editor.elements, e -> {
+				if(e.getTexture() == provider) {
+					e.drawTexture(gui, x, y, xs, ys);
+				}
+			});
+		} else if(editor.selectedElement != null) {
 			editor.selectedElement.drawTexture(gui, x, y, xs, ys);
 		}
 	}
 
-	public static void drawBoxTextureOverlay(IGui gui, ModelElement element, int x, int y, float xs, float ys) {
+	public static void drawBoxTextureOverlay(IGui gui, ModelElement element, int x, int y, float xs, float ys, int alpha) {
 		if(element.type == ElementType.NORMAL) {
 			int ts = Math.abs(element.texSize);
 			int bx = (int) (xs * element.u * ts);
@@ -47,12 +56,32 @@ public class SkinTextureDisplay extends GuiElement {
 			int dx = MathHelper.ceil(element.size.x * ts);
 			int dy = MathHelper.ceil(element.size.y * ts);
 			int dz = MathHelper.ceil(element.size.z * ts);
-			gui.drawBox(x + bx + dx * xs + dz * xs, y + by + dz * ys, dz * xs, dy * ys, 0xccff0000);
-			gui.drawBox(x + bx, y + by + dz * ys, dz * xs, dy * ys, 0xccdd0000);
-			gui.drawBox(x + bx + dz * xs, y + by, dx * xs, dz * ys, 0xcc00ff00);
-			gui.drawBox(x + bx + dz * xs + dx * xs, y + by, dx * xs, dz * ys, 0xcc00dd00);
-			gui.drawBox(x + bx + dz * xs, y + by + dz * ys, dx * xs, dy * ys, 0xcc0000ff);
-			gui.drawBox(x + bx + dz * xs * 2 + dx * xs, y + by + dz * ys, dx * xs, dy * ys, 0xcc0000dd);
+			int a = alpha << 24;
+			gui.drawBox(x + bx + dx * xs + dz * xs, y + by + dz * ys, dz * xs, dy * ys, 0xff0000 | a);
+			gui.drawBox(x + bx, y + by + dz * ys, dz * xs, dy * ys, 0xdd0000 | a);
+			gui.drawBox(x + bx + dz * xs, y + by, dx * xs, dz * ys, 0x00ff00 | a);
+			gui.drawBox(x + bx + dz * xs + dx * xs, y + by, dx * xs, dz * ys, 0x00dd00 | a);
+			gui.drawBox(x + bx + dz * xs, y + by + dz * ys, dx * xs, dy * ys, 0x0000ff | a);
+			gui.drawBox(x + bx + dz * xs * 2 + dx * xs, y + by + dz * ys, dx * xs, dy * ys, 0x0000dd | a);
+		} else if(element.type == ElementType.ROOT_PART && element.typeData instanceof PlayerModelParts) {
+			PlayerPartValues val = PlayerPartValues.getFor((PlayerModelParts) element.typeData, element.editor.skinType);
+			EditorTexture provider = element.getTexture();
+			xs = xs * provider.size.x / 64f;
+			ys = ys * provider.size.y / 64f;
+
+			int bx = (int) (xs * val.u);
+			int by = (int) (ys * val.v);
+			int dx = MathHelper.ceil(val.sx);
+			int dy = MathHelper.ceil(val.sy);
+			int dz = MathHelper.ceil(val.sz);
+			int a = alpha << 24;
+			gui.drawBox(x + bx + dx * xs + dz * xs, y + by + dz * ys, dz * xs, dy * ys, 0xff0000 | a);
+			gui.drawBox(x + bx, y + by + dz * ys, dz * xs, dy * ys, 0xdd0000 | a);
+			gui.drawBox(x + bx + dz * xs, y + by, dx * xs, dz * ys, 0x00ff00 | a);
+			gui.drawBox(x + bx + dz * xs + dx * xs, y + by, dx * xs, dz * ys, 0x00dd00 | a);
+			gui.drawBox(x + bx + dz * xs, y + by + dz * ys, dx * xs, dy * ys, 0x0000ff | a);
+			gui.drawBox(x + bx + dz * xs * 2 + dx * xs, y + by + dz * ys, dx * xs, dy * ys, 0x0000dd | a);
 		}
 	}
+
 }

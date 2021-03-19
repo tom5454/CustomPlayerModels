@@ -13,17 +13,19 @@ import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 
+import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.util.DynamicTexture.ITexture;
+import com.tom.cpl.util.Image;
+import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.gui.IKeybind;
-import com.tom.cpm.shared.util.DynamicTexture.ITexture;
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpm.shared.model.SkinType;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
 	private static final ResourceLocation TEXTURE_STEVE = new ResourceLocation("textures/entity/steve.png");
 	/** The default skin for the Alex model. */
-	private static final ResourceLocation TEXTURE_ALEX = new ResourceLocation("textures/entity/alex.png");
+	private static final ResourceLocation TEXTURE_ALEX = new ResourceLocation(CustomPlayerModels.ID, "textures/entity/alex.png");
 
 	private final Minecraft mc;
 	private final PlayerRenderManager prm;
@@ -35,9 +37,21 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public Image getVanillaSkin(int skinType) {
+	public Image getVanillaSkin(SkinType skinType) {
+		ResourceLocation loc;
+		switch (skinType) {
+		case SLIM:
+			loc = TEXTURE_ALEX;
+			break;
+
+		case DEFAULT:
+		case UNKNOWN:
+		default:
+			loc = TEXTURE_STEVE;
+			break;
+		}
 		try {
-			IResource r = mc.getResourceManager().getResource(skinType == 1 ? TEXTURE_STEVE : TEXTURE_ALEX);
+			IResource r = mc.getResourceManager().getResource(loc);
 			try (InputStream is = r.getInputStream()) {
 				return Image.loadFrom(is);
 			}
@@ -89,8 +103,8 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public int getSkinType() {
-		return 1;
+	public SkinType getSkinType() {
+		return SkinType.DEFAULT;
 	}
 
 	@Override

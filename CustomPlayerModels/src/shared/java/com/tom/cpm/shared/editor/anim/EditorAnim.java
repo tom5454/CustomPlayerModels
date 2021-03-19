@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
 
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
@@ -13,7 +14,6 @@ import com.tom.cpm.shared.animation.PolynomialSplineInterpolator;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.gui.AnimPanel.IAnim;
-import com.tom.cpm.shared.math.Vec3f;
 
 public class EditorAnim implements IAnim {
 	private List<ModelElement> components;
@@ -119,6 +119,7 @@ public class EditorAnim implements IAnim {
 		AnimFrame frm = new AnimFrame(this);
 		editor.addUndo(() -> frames.remove(frm));
 		editor.runOp(() -> frames.add(frm));
+		if(currentFrame != null)frm.copy(currentFrame);
 		currentFrame = frm;
 		components = null;
 		psfs = null;

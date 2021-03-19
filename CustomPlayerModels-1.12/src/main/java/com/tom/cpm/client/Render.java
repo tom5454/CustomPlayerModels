@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
 
-import com.tom.cpm.shared.math.Vec3f;
+import com.tom.cpl.math.Vec3f;
 
 public class Render {
 	public static void drawCube(double x, double y, double z, double w, double h, double d){

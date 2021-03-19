@@ -8,8 +8,8 @@ import net.minecraft.client.model.PositionTextureVertex;
 import net.minecraft.client.model.TexturedQuad;
 import net.minecraft.client.renderer.Tessellator;
 
-import com.tom.cpm.shared.math.MathHelper;
-import com.tom.cpm.shared.math.Vec3f;
+import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Vec3f;
 
 public class Render {
 	public static final BB t = new BB();

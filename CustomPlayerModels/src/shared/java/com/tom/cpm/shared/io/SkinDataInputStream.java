@@ -2,7 +2,7 @@ package com.tom.cpm.shared.io;
 
 import java.io.InputStream;
 
-import com.tom.cpm.shared.util.Image;
+import com.tom.cpl.util.Image;
 
 public class SkinDataInputStream extends InputStream {
 	private Image img, template;

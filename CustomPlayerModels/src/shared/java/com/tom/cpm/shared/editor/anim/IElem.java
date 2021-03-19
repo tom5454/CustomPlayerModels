@@ -1,7 +1,7 @@
 package com.tom.cpm.shared.editor.anim;
 
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
-import com.tom.cpm.shared.math.Vec3f;
 
 public interface IElem {
 	Vec3f getPosition();
