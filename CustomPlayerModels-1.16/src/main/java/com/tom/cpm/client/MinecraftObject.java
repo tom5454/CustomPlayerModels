@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
@@ -176,9 +175,5 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	public static ResourceLocation getDefaultSkin(UUID playerUUID) {
 		return DefaultPlayerSkin.getSkinType(playerUUID).equals("slim") ? TEXTURE_ALEX : TEXTURE_STEVE;
-	}
-
-	public static void main(String[] args) {
-		System.out.println(DefaultPlayerSkin.getSkinType(PlayerEntity.getOfflineUUID("Dev3")));
 	}
 }

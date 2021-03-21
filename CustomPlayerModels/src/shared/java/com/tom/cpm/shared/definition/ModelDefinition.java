@@ -199,6 +199,7 @@ public class ModelDefinition {
 		cubes.addAll(playerModelParts.values());
 		cubes.forEach(c -> cubeMap.put(c.getId(), c));
 		resolved.forEach(r -> r.apply(this));
+		resetAnimationPos();
 		resolveState = 2;
 		if(MinecraftObjectHolder.DEBUGGING)
 			System.out.println(this);
@@ -298,11 +299,12 @@ public class ModelDefinition {
 		return bb.toString();
 	}
 
-	public RootModelElement addRoot(ModelPart type) {
+	public RootModelElement addRoot(int baseID, ModelPart type) {
 		RootModelElement elem = new RootModelElement(type);
 		elem.children = new ArrayList<>();
 		rootRenderingCubes.computeIfAbsent(type, k -> new PartRoot(elem)).add(elem);
 		cubes.add(elem);
+		cubeMap.put(baseID, elem);
 		if(type instanceof PlayerModelParts && stitchedTexture) {
 			convertPart(elem);
 		}

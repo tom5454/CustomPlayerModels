@@ -123,7 +123,7 @@ public class PlayerProfile extends Player {
 		if(player.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE))encodedGesture |= 32;
 
 		ItemStack is = player.getEquipmentInSlot(1);
-		hasPlayerHead = is.getItem() instanceof ItemBlock && ((ItemBlock)is.getItem()).getBlock() instanceof BlockSkull;
+		hasPlayerHead = is != null && is.getItem() instanceof ItemBlock && ((ItemBlock)is.getItem()).getBlock() instanceof BlockSkull;
 	}
 
 	@Override

@@ -615,6 +615,10 @@ public class Editor {
 			map.put("pos", elem.pos.toMap());
 			map.put("rotation", elem.rotation.toMap());
 			map.put("dup", elem.duplicated);
+			if(elem.duplicated) {
+				storeIDgen.setID(elem);
+				map.put("storeID", elem.storeID);
+			}
 		}
 		data.put("version", projectFileVersion);
 		Map<String, Object> skinSize = new HashMap<>();
@@ -763,6 +767,7 @@ public class Editor {
 						break;
 					}
 				}
+				elem.storeID = ((Number) map.getOrDefault("storeID", 0)).longValue();
 			} else {
 				for (ModelElement e : elements) {
 					if(((PlayerModelParts) e.typeData).name().equalsIgnoreCase(key)) {

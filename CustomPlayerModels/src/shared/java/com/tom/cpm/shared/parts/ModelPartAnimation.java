@@ -525,8 +525,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			bb.append(frames);
 			bb.append("\n\tDuration: ");
 			bb.append(duration);
-			bb.append("ms\n\tComponent count: ");
+			bb.append("ms\n\tComponents: ");
 			bb.append(components.length);
+			bb.append("\n\t\t");
+			bb.append(Arrays.toString(components));
 			bb.append("\n\tPriority: ");
 			bb.append(priority);
 			bb.append("\n\tColorValues: \n\t\t[");

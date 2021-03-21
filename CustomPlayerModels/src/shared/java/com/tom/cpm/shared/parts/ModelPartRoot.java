@@ -45,7 +45,7 @@ public class ModelPartRoot implements IModelPart, IResolvedModelPart {
 		for(RenderedCube rc : elem.children) {
 			if(rc.getId() == id) {
 				elem.children.remove(rc);
-				RootModelElement e = def.addRoot(type);
+				RootModelElement e = def.addRoot(id, type);
 				e.children.addAll(rc.children);
 				rc.children.forEach(p -> p.setParent(e));
 				break;

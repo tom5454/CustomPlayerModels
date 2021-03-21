@@ -45,7 +45,7 @@ public class ModelPartDupRoot implements IModelPart, IResolvedModelPart {
 		for(RenderedCube rc : elem.children) {
 			if(rc.getId() == id) {
 				elem.children.remove(rc);
-				RootModelElement e = def.addRoot(type);
+				RootModelElement e = def.addRoot(id, type);
 				e.posN = rc.pos;
 				e.rotN = rc.rotation;
 				e.hidden = rc.hidden;

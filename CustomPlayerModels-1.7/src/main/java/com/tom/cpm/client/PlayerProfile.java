@@ -141,7 +141,7 @@ public class PlayerProfile extends Player {
 		else pose = VanillaPose.STANDING;
 
 		ItemStack is = player.getEquipmentInSlot(1);
-		hasPlayerHead = is.getItem() instanceof ItemBlock && ((ItemBlock)is.getItem()).field_150939_a instanceof BlockSkull;
+		hasPlayerHead = is != null && is.getItem() instanceof ItemBlock && ((ItemBlock)is.getItem()).field_150939_a instanceof BlockSkull;
 	}
 
 	@Override
