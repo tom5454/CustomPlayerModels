@@ -6,6 +6,7 @@ import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,7 +37,8 @@ public class PlayerProfile extends Player {
 	}
 
 	private PlayerProfile(GameProfile profile) {
-		this.profile = new GameProfile(profile.getId(), profile.getName());
+		this.profile = profile;
+		this.skinType = DefaultPlayerSkin.getSkinType(profile.getId());
 	}
 
 	@Override

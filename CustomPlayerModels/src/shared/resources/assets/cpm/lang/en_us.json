@@ -34,6 +34,7 @@
 	"button.cpm.file.save": "Save",
 	"label.cpm.createGist": "Please create a GitHub gist with the following text:",
 	"label.cpm.key_unbound": "Unbound",
+	"tooltip.cpm.glow": "Previously Glowing.\\Uses the vanilla glowing eyes effect used for Enderman and Spider eyes.",
 	"button.cpm.effect": "Effects",
 	"label.cpm.must_save": "You have unsaved changes.\\Save your project before converting to a template.",
 	"label.cpm.gesture": "Gesture",

@@ -151,7 +151,7 @@ public class EditorAnim implements IAnim {
 	}
 
 	public List<ModelElement> getComponentsFiltered() {
-		return components = frames.stream().flatMap(AnimFrame::getAllElementsFiltered).distinct().collect(Collectors.toList());
+		return frames.stream().flatMap(AnimFrame::getAllElementsFiltered).distinct().collect(Collectors.toList());
 	}
 
 	@Override
@@ -182,5 +182,10 @@ public class EditorAnim implements IAnim {
 
 	public boolean isCustom () {
 		return type == AnimationType.GESTURE || pose instanceof CustomPose;
+	}
+
+	public void clearCache() {
+		components = null;
+		psfs = null;
 	}
 }

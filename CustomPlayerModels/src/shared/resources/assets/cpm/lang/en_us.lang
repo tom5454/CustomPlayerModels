@@ -66,6 +66,7 @@ tooltip.cpm.new.template=Create a new Template project\Read the wiki on Using Te
 tooltip.cpm.anim_priority=Animation apply priority\Animations are applied in order from lowest to highest.
 tooltip.cpm.export_def=Create update for Gist linked to this skin.
 tooltip.cpm.config.titleScreenButton=Show Open Editor button on the Title Screen\Open Editor button is also available in Options/Skin Customization gui.
+tooltip.cpm.glow=Previously Glowing.\Uses the vanilla glowing eyes effect used for Enderman and Spider eyes.
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture

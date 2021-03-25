@@ -2,13 +2,13 @@ package com.tom.cpm.client;
 
 import java.util.UUID;
 
-import net.minecraft.block.BlockSkull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelPlayer;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EnumPlayerModelParts;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
@@ -33,7 +33,8 @@ public class PlayerProfile extends Player {
 	}
 
 	public PlayerProfile(GameProfile profile) {
-		this.profile = new GameProfile(profile.getId(), profile.getName());
+		this.profile = profile;
+		this.skinType = DefaultPlayerSkin.getSkinType(profile.getId());
 	}
 
 	public PlayerProfile() {
@@ -107,7 +108,7 @@ public class PlayerProfile extends Player {
 	public void updateFromPlayer(EntityPlayer player) {
 		if(player.isPlayerSleeping())pose = VanillaPose.SLEEPING;
 		else if(player.isDead)pose = VanillaPose.DYING;
-		else if(player.fallDistance > 4)pose = VanillaPose.FALLING;
+		else if(player.fallDistance > 4 && !player.capabilities.isFlying)pose = VanillaPose.FALLING;
 		else if(player.isRiding() && (player.ridingEntity != null && player.ridingEntity.shouldRiderSit()))pose = VanillaPose.RIDING;
 		else if(player.isSprinting())pose = VanillaPose.RUNNING;
 		else if(player.isSneaking())pose = VanillaPose.SNEAKING;
@@ -122,8 +123,8 @@ public class PlayerProfile extends Player {
 		if(player.isWearing(EnumPlayerModelParts.LEFT_SLEEVE))encodedGesture |= 16;
 		if(player.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE))encodedGesture |= 32;
 
-		ItemStack is = player.getEquipmentInSlot(1);
-		hasPlayerHead = is != null && is.getItem() instanceof ItemBlock && ((ItemBlock)is.getItem()).getBlock() instanceof BlockSkull;
+		ItemStack is = player.getEquipmentInSlot(4);
+		hasPlayerHead = is != null && is.getItem() instanceof ItemSkull;
 	}
 
 	@Override

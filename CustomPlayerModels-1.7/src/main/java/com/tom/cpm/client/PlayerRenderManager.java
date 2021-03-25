@@ -11,6 +11,7 @@ import net.minecraft.client.model.ModelBox;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.model.ModelSkeletonHead;
 import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.OpenGlHelper;
 
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.Cube;
@@ -306,8 +307,24 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				float b = ( cube.color & 0x0000ff       ) / 255f;
 				GL11.glColor4f(r, g, b, 1);
 			}
+			float lx = OpenGlHelper.lastBrightnessX, ly = OpenGlHelper.lastBrightnessY;
+			if(cube.glow) {
+				GL11.glEnable(GL11.GL_BLEND);
+				GL11.glDisable(GL11.GL_ALPHA_TEST);
+				GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
+				GL11.glDepthMask(true);
+				int i = 0xF0;
+				int j = i % 65536;
+				int k = i / 65536;
+				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
+			}
 			((DisplayList)cube.renderObject).call();
 			if(cube.color != 0xffffff)GL11.glColor4f(1, 1, 1, 1);
+			if(cube.glow) {
+				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lx, ly);
+				GL11.glDisable(GL11.GL_BLEND);
+				GL11.glEnable(GL11.GL_ALPHA_TEST);
+			}
 		}
 
 		private void drawSelect(RenderedCube cube, float scale) {
@@ -413,11 +430,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 		@Override
 		public void doRender(RootModelElement elem) {
-			if(holder.def.isEditor()) {
-				//GL11.glColor4f(1, 1, 1, 0.5f);
-				//parent.render(scale);
-				//GL11.glColor4f(1, 1, 1, 1);
-			}
+			this.elem = elem;
 			if(holder.def.isEditor() && elem.getSelected().isRenderOutline())drawSelectionOutline(scale);
 			GL11.glTranslatef(this.offsetX, this.offsetY, this.offsetZ);
 			if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
@@ -446,6 +459,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				GL11.glPopMatrix();
 			}
 			GL11.glTranslatef(-this.offsetX, -this.offsetY, -this.offsetZ);
+			this.elem = null;
 		}
 	}
 

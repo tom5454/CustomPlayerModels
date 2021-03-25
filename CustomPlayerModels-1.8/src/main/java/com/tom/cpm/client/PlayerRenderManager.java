@@ -11,6 +11,7 @@ import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.Cube;
@@ -316,9 +317,24 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				float b = ( cube.color & 0x0000ff       ) / 255f;
 				GlStateManager.color(r, g, b, 1);
 			}
+			float lx = OpenGlHelper.lastBrightnessX, ly = OpenGlHelper.lastBrightnessY;
+			if(cube.glow) {
+				GlStateManager.enableBlend();
+				GlStateManager.disableAlpha();
+				GlStateManager.blendFunc(1, 1);
+				GlStateManager.depthMask(true);
+				int i = 0xF0;
+				int j = i % 65536;
+				int k = i / 65536;
+				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
+			}
 			((DisplayList)cube.renderObject).call();
 			if(cube.color != 0xffffff)GlStateManager.color(1, 1, 1, 1);
-			drawSelect(cube, scale);
+			if(cube.glow) {
+				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lx, ly);
+				GlStateManager.disableBlend();
+				GlStateManager.enableAlpha();
+			}
 		}
 
 		private void drawSelect(RenderedCube cube, float scale) {
@@ -426,12 +442,8 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 		@Override
 		public void doRender(RootModelElement elem) {
-			if(holder.def.isEditor()) {
-				//GlStateManager.color(1, 1, 1, 0.5f);
-				//parent.render(scale);
-				//GlStateManager.color(1, 1, 1, 1);
-			}
-			if(holder.def.isEditor())drawSelectionOutline(scale);
+			this.elem = elem;
+			if(holder.def.isEditor() && elem.getSelected().isRenderOutline())drawSelectionOutline(scale);
 			GlStateManager.translate(this.offsetX, this.offsetY, this.offsetZ);
 			if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
 				if (this.rotationPointX == 0.0F && this.rotationPointY == 0.0F && this.rotationPointZ == 0.0F) {
@@ -459,6 +471,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				GlStateManager.popMatrix();
 			}
 			GlStateManager.translate(-this.offsetX, -this.offsetY, -this.offsetZ);
+			this.elem = null;
 		}
 	}
 

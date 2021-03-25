@@ -26,6 +26,7 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
+import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
 import com.tom.cpm.shared.editor.gui.popup.FileChooserGui;
@@ -345,6 +346,7 @@ public class EditorGui extends Frame {
 			if(b != null)boxGlow.setSelected(b);
 			else boxGlow.setSelected(false);
 		});
+		boxGlow.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.glow")));
 		pp.add(boxGlow);
 
 		Checkbox boxReColor = new Checkbox(gui, gui.i18nFormat("label.cpm.recolor"));
@@ -459,6 +461,7 @@ public class EditorGui extends Frame {
 			}
 			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
 				editor.restitchTexture();
+				editor.animations.forEach(EditorAnim::clearCache);
 			}
 		}
 	}

@@ -16,6 +16,7 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 
 public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderManager {
+	public static final Predicate<Player> ALWAYS = p -> true;
 	private Map<MB, RedirectHolder<MB, D, S, P>> holders = new HashMap<>();
 	private RedirectHolderFactory<D, S, P> factory;
 	private RedirectRendererFactory<MB, S, P> redirectFactory;
@@ -87,6 +88,11 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		return holders.computeIfAbsent(model, this::create);
 	}
 
+	public void copyModelForArmor(P from, P to) {
+		this.posSet.set(to, this.px.apply(from), this.py.apply(from), this.pz.apply(from));
+		this.rotSet.set(to, this.rx.apply(from), this.ry.apply(from), this.rz.apply(from));
+	}
+
 	@FunctionalInterface
 	public static interface RedirectHolderFactory<D, S, P> {
 		<M> RedirectHolder<M, D, S, P> create(M model);
@@ -103,8 +109,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public List<Field<P>> modelFields;
 		public List<RedirectRenderer<P>> redirectRenderers;
 		public boolean skinBound;
-		public Map<RedirectRenderer<P>, RedirectRenderer<P>> copyMap;
-		public Map<RedirectRenderer<P>, Predicate<Player>> testMap;
+		public Map<RedirectRenderer<P>, RedirectDataHolder<P>> partData;
 		public Player playerObj;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
@@ -112,8 +117,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			this.mngr = mngr;
 			modelFields = new ArrayList<>();
 			redirectRenderers = new ArrayList<>();
-			copyMap = new HashMap<>();
-			testMap = new HashMap<>();
+			partData = new HashMap<>();
 		}
 
 		public final void swapIn(ModelDefinition def, Predicate<Object> unbindRule, D addDt, Player playerObj) {
@@ -151,15 +155,15 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected void bindSkin() {}
 
 		protected RedirectRenderer<P> register(Field<P> f) {
-			return register(f, p -> true);
-		}
-
-		protected RedirectRenderer<P> register(Field<P> f, Predicate<Player> doRender) {
 			RedirectRenderer<P> rd = mngr.redirectFactory.create(model, this, f.get, f.part);
 			modelFields.add(f);
 			redirectRenderers.add(rd);
-			testMap.put(rd, doRender);
+			partData.put(rd, new RedirectDataHolder<>());
 			return rd;
+		}
+
+		protected RedirectRenderer<P> register(Field<P> f, Predicate<Player> doRender) {
+			return register(f).setRenderPredicate(doRender);
 		}
 
 		public void copyModel(P from, P to) {
@@ -173,6 +177,11 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		}
 	}
 
+	private static class RedirectDataHolder<P> {
+		private RedirectRenderer<P> copyFrom;
+		private Predicate<Player> renderPredicate = ALWAYS;
+	}
+
 	public static interface RedirectRenderer<P> {
 		P swapIn();
 		P swapOut();
@@ -184,7 +193,12 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		void doRender(RootModelElement elem);
 
 		default RedirectRenderer<P> setCopyFrom(RedirectRenderer<P> from) {
-			getHolder().copyMap.put(this, from);
+			getHolder().partData.get(this).copyFrom = from;
+			return this;
+		}
+
+		default RedirectRenderer<P> setRenderPredicate(Predicate<Player> renderPredicate) {
+			getHolder().partData.get(this).renderPredicate = renderPredicate;
 			return this;
 		}
 
@@ -193,8 +207,9 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			RedirectHolder<?, ?, ?, P> holder = getHolder();
 			ModelRenderManager<?, ?, P, ?> mngr = holder.mngr;
 			P tp = (P) this;
+			P parent = getParent();
 			if(holder.mngr.getVis.test(tp)) {
-				P parent = getParent();
+				RedirectDataHolder<P> dh = holder.partData.get(this);
 				if(holder.def != null) {
 					ModelPart part = getPart();
 					if(!holder.skinBound) {
@@ -202,9 +217,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						holder.bindSkin();
 					}
 					if(part == null) {
-						RedirectRenderer<P> copyFrom = holder.copyMap.get(this);
-						if(copyFrom != null) {
-							holder.copyModel((P) copyFrom, tp);
+						if(dh.copyFrom != null) {
+							holder.copyModel((P) dh.copyFrom, tp);
 						}
 						if(holder.unbindRule != null && holder.unbindRule.test(this))
 							holder.swapOut();
@@ -218,7 +232,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					float ry = mngr.ry.apply(tp);
 					float rz = mngr.rz.apply(tp);
 					PartRoot elems = holder.def.getModelElementFor(part);
-					if(holder.playerObj == null || holder.testMap.getOrDefault(this, p -> true).test(holder.playerObj)) {
+					if(holder.playerObj == null || dh.renderPredicate.test(holder.playerObj)) {
 						elems.forEach(elem -> {
 							if(!skipTransform) {
 								if(elem.forcePos) {

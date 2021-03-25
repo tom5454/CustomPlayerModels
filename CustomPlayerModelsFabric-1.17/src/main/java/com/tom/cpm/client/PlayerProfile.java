@@ -9,6 +9,7 @@ import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.texture.PlayerSkinProvider;
+import net.minecraft.client.util.DefaultSkinHelper;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,11 +38,8 @@ public class PlayerProfile extends Player {
 	}
 
 	public PlayerProfile(GameProfile profile) {
-		this.profile = new GameProfile(profile.getId(), profile.getName());
-	}
-
-	public PlayerProfile(MinecraftClient mc) {
-		this(mc.getSession().getProfile());
+		this.profile = profile;
+		this.skinType = DefaultSkinHelper.getModel(profile.getId());
 	}
 
 	@Override
