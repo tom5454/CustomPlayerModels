@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.CustomizeSkinScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
@@ -14,7 +12,6 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -30,7 +27,6 @@ import com.mojang.authlib.GameProfile;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.CommonProxy;
-import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
@@ -77,6 +73,7 @@ public class ClientProxy extends CommonProxy {
 	private boolean tryBindModel(GameProfile gprofile, PlayerEntity player, IRenderTypeBuffer buffer, Predicate<Object> unbindRule, Model toBind) {
 		if(gprofile == null)gprofile = player.getGameProfile();
 		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
+		if(profile == null)return false;
 		if(toBind == null)toBind = profile.getModel();
 		ModelDefinition def = profile.getAndResolveDefinition();
 		if(def != null) {
@@ -92,18 +89,6 @@ public class ClientProxy extends CommonProxy {
 		}
 		mc.getPlayerRenderManager().unbindModel(toBind);
 		return false;
-	}
-
-	public void getSkin(PlayerEntity player, CallbackInfoReturnable<ResourceLocation> cbi) {
-		GameProfile gprofile = player.getGameProfile();
-		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
-		ModelDefinition def = profile.getAndResolveDefinition();
-		if(def != null) {
-			if(def.getSkinOverride().texture != null) {
-				def.getSkinOverride().texture.bind();
-				cbi.setReturnValue(DynTexture.getBoundLoc());
-			}
-		}
 	}
 
 	@SubscribeEvent

@@ -2,21 +2,21 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "homepage-fabric": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
   "promos": {
-    "1.12.2-latest": "0.0.10c",
-    "1.12.2-recommended": "0.0.10c",
-    "1.16.4-latest": "0.0.10c",
-    "1.16.4-recommended": "0.0.10c",
-    "1.16.5-latest": "0.0.10c",
-    "1.16.5-recommended": "0.0.10c",
-    "1.8.9-latest": "0.0.10c",
-    "1.8.9-recommended": "0.0.10c",
-    "1.7.10-latest": "0.0.10c",
-    "1.7.10-recommended": "0.0.10c",
-    "1.15.2-latest": "0.0.10c",
-    "1.15.2-recommended": "0.0.10c",
-    "1.16.4-fabric-latest": "0.0.10c",
-    "1.16.5-fabric-latest": "0.0.10c",
-    "1.17-fabric-latest": "0.0.10c"
+    "1.12.2-latest": "0.0.10d",
+    "1.12.2-recommended": "0.0.10d",
+    "1.16.4-latest": "0.0.10d",
+    "1.16.4-recommended": "0.0.10d",
+    "1.16.5-latest": "0.0.10d",
+    "1.16.5-recommended": "0.0.10d",
+    "1.8.9-latest": "0.0.10d",
+    "1.8.9-recommended": "0.0.10d",
+    "1.7.10-latest": "0.0.10d",
+    "1.7.10-recommended": "0.0.10d",
+    "1.15.2-latest": "0.0.10d",
+    "1.15.2-recommended": "0.0.10d",
+    "1.16.4-fabric-latest": "0.0.10d",
+    "1.16.5-fabric-latest": "0.0.10d",
+    "1.17-fabric-latest": "0.0.10d"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -31,7 +31,8 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   },
   "1.16.4": {
     "0.0.5a": "First release",
@@ -47,7 +48,8 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   },
   "1.16.5": {
     "0.0.5a": "First release",
@@ -63,7 +65,8 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   },
   "1.16.4-fabric": {
     "0.0.5a": "First release",
@@ -79,7 +82,8 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   },
   "1.16.5-fabric": {
     "0.0.5a": "First release",
@@ -95,7 +99,8 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   },
   "1.17-fabric": {
     "0.0.5a": "First release",
@@ -111,7 +116,8 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   },
   "1.8.9": {
     "0.0.5a": "First release",
@@ -125,7 +131,8 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   },
   "1.7.10": {
     "0.0.5a": "First release",
@@ -139,7 +146,8 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   },
   "1.15.2": {
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
@@ -152,6 +160,7 @@
     "0.0.9b": "New features:\nConfig screen in Editor (Edit/Settings)\nChange rotation mouse button in Editor\nZoom with +, - keys in editor\n\nBug fixes:\nFixed texture editor drawing (Closes #33)\nFixed CustomSkinLoader crash (Closes #34)\nPlayer head no longer renders if wearing a player head",
     "0.0.10a": "New features:\nRoot parts can be duplicated (#29, #38)\nAnimation frame data is copied from selected frame to new frame (Closes #42)\n\nFixed config not saving (Closes #36)\nFixed slim model not converting properly (Closes #41).",
     "0.0.10b": "Fixed crash with 1.7.10 and 1.8.9\nFixed hand rendering not working\nFixed duplicated parts animations not working",
-    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s."
+    "0.0.10c": "Fixed animations displaying incorrectly in the editor (Closes #44)\nFixed editor crash on 1.7.10-1.12.2 (Closes #45)\nFixed animations not displaying correctly on 1.7.10-1.12.2 (Closes #43)\nAdded glowing effect to 1.7.10-1.12.2 (Closes #46)\nFixed custom skins not rendering on server NPC-s.",
+    "0.0.10d": "Fixed crash on multiplayer servers (Closes #51)\nFixed crash with player heads when using Optifine"
   }
 }

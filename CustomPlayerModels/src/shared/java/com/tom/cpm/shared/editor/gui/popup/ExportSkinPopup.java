@@ -205,12 +205,23 @@ public class ExportSkinPopup extends PopupPanel {
 				}
 				Exporter.exportSkin(editorGui.getEditor(), editorGui, selFile, forceLinkFile.isSelected());
 				break;
+
 				/*case B64:
-				Exporter.exportSkin(editorGui.getEditor(), editorGui, b64 -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "base64_model", b64)), forceLinkFile.isSelected());
+				if(editorGui.getEditor().templateSettings != null) {
+					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
+					return;
+				}
+				Exporter.exportB64(editorGui.getEditor(), editorGui, b64 -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "base64_model", b64)), forceLinkFile.isSelected());
 				break;
+
 			case MODEL:
-				editorGui.openPopup(new MessagePopup(gui, "Info", "This feature is not implemented yet."));
+				if(editorGui.getEditor().templateSettings != null) {
+					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
+					return;
+				}
+				Exporter.exportModel(editorGui.getEditor(), editorGui, selFile, nameField.getText(), descField.getText());
 				break;*/
+
 			case TEMPLATE:
 				if(editorGui.getEditor().templateSettings == null) {
 					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.projectNotTemplate")));
@@ -227,7 +238,7 @@ public class ExportSkinPopup extends PopupPanel {
 					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
 					return;
 				}
-				Exporter.exportSkin(editorGui.getEditor(), editorGui, gist -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "skin_update", gist)));
+				Exporter.exportGistUpdate(editorGui.getEditor(), editorGui, gist -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "skin_update", gist)));
 				break;
 
 			default:
@@ -263,7 +274,7 @@ public class ExportSkinPopup extends PopupPanel {
 		SKIN(true, 320, 190, 80, -1),
 		//B64(false, 160, 150, 55, -1),
 		TEMPLATE(false, 160, 190, -1, 55),
-		//MODEL(true, 185, 260, 55, 145),
+		//MODEL(true, 185, 260, -1, 145),
 		GIST_UPDATE,
 		;
 

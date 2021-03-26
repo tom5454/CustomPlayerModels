@@ -30,6 +30,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 	private DataInputStream din;
 	private DataOutputStream dout;
 	private ByteArrayOutputStream baos;
+	private byte[] dataIn;
 
 	public IOHelper(DataInputStream din) {
 		this.din = din;
@@ -50,6 +51,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 
 	public IOHelper(byte[] data) {
 		this(new ByteArrayInputStream(data));
+		this.dataIn = data;
 	}
 
 	public IOHelper() {
@@ -305,7 +307,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		if(size > 1024*1024 || size < 0)throw new IOException();
 		byte[] dt = new byte[size];
 		readFully(dt);
-		return new IOHelper(new ByteArrayInputStream(dt));
+		return new IOHelper(dt);
 	}
 
 	public IOHelper writeNextBlock() {
@@ -397,6 +399,20 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		baos.writeTo(to.dout);
 	}
 
+	public void writeByteArray(byte[] dataIn) throws IOException {
+		writeVarInt(dataIn.length);
+		write(dataIn);
+	}
+
+	public byte[] readByteArray() throws IOException {
+		int i = readVarInt();
+		if(i < 0)throw new IOException();
+		if(i == 0)return new byte[0];
+		byte[] s = new byte[i];
+		readFully(s);
+		return s;
+	}
+
 	public String toB64() throws IOException {
 		if(baos == null)throw new IOException("Not a byte array backed io handler");
 		return Base64.getEncoder().encodeToString(baos.toByteArray());
@@ -423,20 +439,22 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 
 		public ImageBlock(IOHelper io) throws IOException {
 			buf = io.readNextBlock();
-			try(ImageInputStream in = ImageIO.createImageInputStream(buf.getDin())){
-				final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-				if (readers.hasNext()) {
-					ImageReader reader = readers.next();
-					try {
-						reader.setInput(in);
-						w = reader.getWidth(0);
-						h = reader.getHeight(0);
-					} finally {
-						reader.dispose();
+			if(buf.dataIn.length != 0) {
+				try(ImageInputStream in = ImageIO.createImageInputStream(buf.getDin())){
+					final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
+					if (readers.hasNext()) {
+						ImageReader reader = readers.next();
+						try {
+							reader.setInput(in);
+							w = reader.getWidth(0);
+							h = reader.getHeight(0);
+						} finally {
+							reader.dispose();
+						}
 					}
 				}
+				buf.reset();
 			}
-			buf.reset();
 		}
 
 		public int getWidth() {
@@ -448,9 +466,11 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		}
 
 		public void doReadImage() throws IOException {
-			image = Image.loadFrom(buf.getDin());
-			w = image.getWidth();
-			h = image.getHeight();
+			if(buf.dataIn.length != 0) {
+				image = Image.loadFrom(buf.getDin());
+				w = image.getWidth();
+				h = image.getHeight();
+			}
 		}
 
 		public Image getImage() {

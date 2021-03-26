@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -22,6 +23,7 @@ import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.EditorGui;
@@ -66,16 +68,18 @@ public class Exporter {
 		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType.getChannel()), () -> {
 			img.storeTo(f);
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
-		}), forceOut);
+		}, (d, c) -> handleGistOverflow(d, c, gui)), forceOut);
 	}
 
-	public static void exportSkin(Editor e, EditorGui gui, Consumer<String> b64Out, boolean forceOut) {
+	public static void exportB64(Editor e, EditorGui gui, Consumer<String> b64Out, boolean forceOut) {
 		byte[] buffer = new byte[200];
 		int[] size = new int[] {0};
-		exportSkin0(e, gui, new Result(() -> new BAOS(buffer, size), () -> b64Out.accept(Base64.getEncoder().encodeToString(Arrays.copyOf(buffer, size[0])))), forceOut);
+		exportSkin0(e, gui, new Result(() -> new BAOS(buffer, size),
+				() -> b64Out.accept(Base64.getEncoder().encodeToString(Arrays.copyOf(buffer, size[0]))),
+				(d, c) -> handleGistOverflow(d, c, gui)), forceOut);
 	}
 
-	public static void exportSkin(Editor e, EditorGui gui, Consumer<String> b64Out) {
+	public static void exportGistUpdate(Editor e, EditorGui gui, Consumer<String> b64Out) {
 		try {
 			ModelPartDefinition def = prepareDefinition(e);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -185,9 +189,7 @@ public class Exporter {
 			def.write(new IOHelper(cos));
 			cos.close();
 		}
-		String b64 = Base64.getEncoder().encodeToString(baos.toByteArray());
-		System.out.println(b64);
-		gui.openPopup(new CreateGistPopup(gui, gui.getGui(), "skinOverflow", b64, link -> {
+		result.overflowWriter.accept(baos.toByteArray(), link -> {
 			try {
 				ModelPartDefinitionLink defLink = new ModelPartDefinitionLink(link);
 				try(OutputStream out = result.get()) {
@@ -205,7 +207,7 @@ public class Exporter {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-		}));
+		});
 	}
 
 	public static void exportTemplate(Editor e, EditorGui gui, String name, String desc, Consumer<String> templateOut) {
@@ -305,6 +307,12 @@ public class Exporter {
 		return true;
 	}
 
+	private static void handleGistOverflow(byte[] data, Consumer<Link> linkC, EditorGui gui) {
+		String b64 = Base64.getEncoder().encodeToString(data);
+		System.out.println(b64);
+		gui.openPopup(new CreateGistPopup(gui, gui.getGui(), "skinOverflow", b64, linkC));
+	}
+
 	public static class ExportException extends RuntimeException {
 		private static final long serialVersionUID = 3255847899314886673L;
 
@@ -320,10 +328,12 @@ public class Exporter {
 	private static class Result implements Supplier<OutputStream>, Closeable {
 		private Supplier<OutputStream> out;
 		private Closeable finish;
+		private BiConsumer<byte[], Consumer<Link>> overflowWriter;
 
-		public Result(Supplier<OutputStream> out, Closeable finish) {
+		public Result(Supplier<OutputStream> out, Closeable finish, BiConsumer<byte[], Consumer<Link>> overflowWriter) {
 			this.out = out;
 			this.finish = finish;
+			this.overflowWriter = overflowWriter;
 		}
 
 		@Override
@@ -353,6 +363,5 @@ public class Exporter {
 				throw new EOFException();
 			}
 		}
-
 	}
 }

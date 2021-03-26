@@ -123,7 +123,9 @@ public class ModelDefinitionLoader {
 	}
 
 	public InputStream load(Link link, ResourceEncoding enc) throws IOException {
-		return LOADERS.get(link.loader).loadResource(link.path, enc);
+		ResourceLoader rl = LOADERS.get(link.loader);
+		if(rl == null)throw new IOException("Couldn't find loader");
+		return rl.loadResource(link.path, enc);
 	}
 
 	public Image getTemplate() {

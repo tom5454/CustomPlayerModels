@@ -69,6 +69,7 @@ public class ClientProxy extends CommonProxy {
 	private boolean tryBindModel(GameProfile gprofile, PlayerEntity player, IRenderTypeBuffer buffer, Predicate<Object> unbindRule, Model toBind) {
 		if(gprofile == null)gprofile = player.getGameProfile();
 		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
+		if(profile == null)return false;
 		if(toBind == null)toBind = profile.getModel();
 		ModelDefinition def = profile.getAndResolveDefinition();
 		if(def != null) {

@@ -34,7 +34,8 @@ public class PlayerProfile extends Player {
 
 	public PlayerProfile(GameProfile profile) {
 		this.profile = profile;
-		this.skinType = DefaultPlayerSkin.getSkinType(profile.getId());
+		if(profile.getId() != null)
+			this.skinType = DefaultPlayerSkin.getSkinType(profile.getId());
 	}
 
 	public PlayerProfile() {

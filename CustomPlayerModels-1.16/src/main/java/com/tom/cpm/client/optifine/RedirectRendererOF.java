@@ -155,7 +155,7 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 	}
 
 	private void render(RenderedCube elem, MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-		if(elem.children == null)return;
+		if(elem.children == null || holder.defaultType == null)return;
 		for(RenderedCube cube : elem.children) {
 			if(!cube.display) {
 				continue;
