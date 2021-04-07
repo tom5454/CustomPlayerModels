@@ -2,12 +2,12 @@ package com.tom.cpm.common;
 
 import java.util.Base64;
 
-import net.fabricmc.fabric.impl.networking.CustomPayloadC2SPacketAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.MessageType;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -59,8 +59,8 @@ public class ServerHandler {
 		handler.sendPacket(new CustomPayloadS2CPacket(NetworkHandler.setSkin, writeSkinData(dt, target)));
 	}
 
-	public static void receivePacket(CustomPayloadC2SPacketAccessor packet, ServerNetH handler) {
-		Identifier rl = packet.getChannel();
+	public static void receivePacket(CustomPayloadC2SPacket packet, ServerNetH handler) {
+		Identifier rl = packet.channel;
 		ServerPlayNetworkHandler h = (ServerPlayNetworkHandler) handler;
 		if(NetworkHandler.helloPacket.equals(rl)) {
 			handler.cpm$getServer().execute(() -> {
@@ -78,7 +78,7 @@ public class ServerHandler {
 			});
 		} else if(NetworkHandler.setSkin.equals(rl)) {
 			if(handler.cpm$getEncodedModelData() == null || !handler.cpm$getEncodedModelData().forced) {
-				CompoundTag tag = packet.getData().readCompoundTag();
+				CompoundTag tag = packet.data.readCompoundTag();
 				handler.cpm$getServer().execute(() -> {
 					handler.cpm$setEncodedModelData(tag.contains("data") ? new PlayerData(tag.getByteArray("data"), false, false) : null);
 					NetworkHandler.sendToAllTrackingAndSelf(h.player, new CustomPayloadS2CPacket(NetworkHandler.setSkin, writeSkinData(handler.cpm$getEncodedModelData(), h.player)), ServerHandler::hasMod, null);

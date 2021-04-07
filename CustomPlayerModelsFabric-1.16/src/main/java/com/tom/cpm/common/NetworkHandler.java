@@ -2,8 +2,8 @@ package com.tom.cpm.common;
 
 import java.util.function.Predicate;
 
-import net.fabricmc.fabric.impl.networking.CustomPayloadC2SPacketAccessor;
 import net.minecraft.network.Packet;
+import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -25,7 +25,7 @@ public class NetworkHandler {
 	public static void handlePacket(Packet<?> packet, NetH handler, boolean client) {
 		try {
 			if(!client) {
-				ServerHandler.receivePacket((CustomPayloadC2SPacketAccessor) packet, (ServerNetH) handler);
+				ServerHandler.receivePacket((CustomPayloadC2SPacket) packet, (ServerNetH) handler);
 			} else {
 				CustomPlayerModelsClient.INSTANCE.receivePacket((CustomPayloadS2CPacket) packet, handler);
 			}

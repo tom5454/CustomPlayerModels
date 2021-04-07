@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.fabricmc.fabric.mixin.networking.accessor.CustomPayloadC2SPacketAccessor;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -38,7 +37,7 @@ public class ServerPlayNetHandlerMixin implements NetH, ServerNetH {
 
 	@Inject(at = @At("HEAD"), method = "onCustomPayload(Lnet/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket;)V", cancellable = true)
 	public void onProcessCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo cbi) {
-		if(((CustomPayloadC2SPacketAccessor) packet).getChannel().getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
+		if(packet.channel.getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
 			NetworkHandler.handlePacket(packet, this, false);
 			cbi.cancel();
 		}
