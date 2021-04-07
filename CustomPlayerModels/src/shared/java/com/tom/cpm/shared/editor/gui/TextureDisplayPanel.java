@@ -30,20 +30,24 @@ public class TextureDisplayPanel extends GuiElement {
 		mouseCursorPos.x = mouseX;
 		mouseCursorPos.y = mouseY;
 
+		gui.pushMatrix();
+		gui.setPosOffset(bounds);
+		gui.setupCut();
+
 		TextureProvider provider = editor.getTextureProvider();
 		if(provider != null && provider.texture != null) {
-			gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_fill);
+			gui.drawBox(0, 0, bounds.w, bounds.h, gui.getColors().button_fill);
 			provider.bind();
 			if(zoom == 0) {
 				zoom = bounds.h / (float) provider.getImage().getWidth();
 			}
 			int rw = (int) (zoom * provider.getImage().getWidth());
 			int rh = (int) (zoom * provider.getImage().getHeight());
-			gui.drawBox(bounds.x + offX, bounds.y + offY, rw, rh, 0xffffffff);
-			gui.drawTexture(bounds.x + offX, bounds.y + offY, rw, rh, 0, 0, 1, 1);
+			gui.drawBox(offX, offY, rw, rh, 0xffffffff);
+			gui.drawTexture(offX, offY, rw, rh, 0, 0, 1, 1);
 			int imgX = (int) ((mouseX - offX - bounds.x) / zoom);
 			int imgY = (int) ((mouseY - offY - bounds.y) / zoom);
-			SkinTextureDisplay.drawBoxTextureOverlay(gui, editor, bounds.x + offX, bounds.y + offY, zoom, zoom);
+			SkinTextureDisplay.drawBoxTextureOverlay(gui, editor, offX, offY, zoom, zoom);
 			Vec2i p1 = imgX >= 0 && imgY >= 0 && imgX < provider.getImage().getWidth() && imgY < provider.getImage().getHeight() ? new Vec2i(imgX, imgY) : null;
 			Vec2i p2 = editor.cursorPos.get();
 			Vec2i p = p2 != null ? p2 : p1;
@@ -53,11 +57,13 @@ public class TextureDisplayPanel extends GuiElement {
 				int a = (imgC >> 24) & 0xff;
 				if(a < 64)outlineColor = 0x000000;
 				if(a == 0)imgC = 0xffffffff;
-				gui.drawBox(bounds.x + p.x * zoom + offX, bounds.y + p.y * zoom + offY, zoom, zoom, 0xff000000 | outlineColor);
-				gui.drawBox(bounds.x + p.x * zoom + offX + 1, bounds.y + p.y * zoom + offY + 1, zoom - 2, zoom - 2, 0xff000000);
-				gui.drawBox(bounds.x + p.x * zoom + offX + 1, bounds.y + p.y * zoom + offY + 1, zoom - 2, zoom - 2, imgC);
+				gui.drawBox(p.x * zoom + offX, p.y * zoom + offY, zoom, zoom, 0xff000000 | outlineColor);
+				gui.drawBox(p.x * zoom + offX + 1, p.y * zoom + offY + 1, zoom - 2, zoom - 2, 0xff000000);
+				gui.drawBox(p.x * zoom + offX + 1, p.y * zoom + offY + 1, zoom - 2, zoom - 2, imgC);
 			}
 		}
+
+		gui.popMatrix();
 	}
 
 	@Override

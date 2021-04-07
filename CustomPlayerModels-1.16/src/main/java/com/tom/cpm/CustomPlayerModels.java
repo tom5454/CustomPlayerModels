@@ -15,8 +15,10 @@ import net.minecraftforge.fml.loading.FMLPaths;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.config.ModConfig;
 
 @Mod("cpm")
 public class CustomPlayerModels implements MinecraftCommonAccess {
@@ -26,6 +28,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 
 		MinecraftForge.EVENT_BUS.register(this);
+		MinecraftForge.EVENT_BUS.register(new ServerHandler());
 	}
 
 	public static CommonProxy proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
@@ -54,5 +57,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@SubscribeEvent
 	public void onStop(FMLServerStoppingEvent e) {
 		MinecraftObjectHolder.setServerObject(null);
+		ModConfig.getConfig().save();
 	}
 }

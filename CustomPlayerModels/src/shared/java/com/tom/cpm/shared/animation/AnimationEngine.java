@@ -6,6 +6,7 @@ import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
+import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -29,23 +30,31 @@ public class AnimationEngine {
 		return (long) ((tickCounter + partial) * 50);
 	}
 
-	public void handleAnimation(Player player) {
+	public void handleAnimation(Player<?, ?> player, AnimationMode mode) {
 		try {
-			VanillaPose pose = player.getPose();
 			ModelDefinition def = player.getModelDefinition();
-			int gesture = player.getEncodedGestureId();
-			AnimationRegistry reg = def.getAnimations();
-			if(pose != player.prevPose || gesture == reg.getPoseResetId()) {
-				player.currentPose = pose;
+			AnimationHandler h = player.getAnimationHandler(mode);
+			if(mode == AnimationMode.PLAYER) {
+				VanillaPose pose = player.getPose();
+				int gesture = player.getEncodedGestureId();
+				AnimationRegistry reg = def.getAnimations();
+				if(pose != player.prevPose || gesture == reg.getPoseResetId()) {
+					player.currentPose = pose;
+				}
+				player.currentPose = def.getAnimations().getPose(gesture, player.currentPose);
+				player.prevPose = pose;
+				List<Animation> anim = def.getAnimations().getPoseAnimations(player.currentPose);
+				List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
+				h.addAnimations(anim);
+				h.addAnimations(global);
+				h.setGesture(def.getAnimations().getGesture(gesture));
+			} else if(mode == AnimationMode.SKULL){
+				List<Animation> anim = def.getAnimations().getPoseAnimations(VanillaPose.SKULL_RENDER);
+				List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
+				h.addAnimations(anim);
+				h.addAnimations(global);
 			}
-			player.currentPose = def.getAnimations().getPose(gesture, player.currentPose);
-			player.prevPose = pose;
-			List<Animation> anim = def.getAnimations().getPoseAnimations(player.currentPose);
-			List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
-			player.getAnimationHandler().addAnimations(anim);
-			player.getAnimationHandler().addAnimations(global);
-			player.getAnimationHandler().setGesture(def.getAnimations().getGesture(gesture));
-			player.getAnimationHandler().animate(getTime());
+			h.animate(getTime());
 		} catch (Exception e) {
 			e.printStackTrace();
 			player.getModelDefinition().resetAnimationPos();
@@ -55,7 +64,7 @@ public class AnimationEngine {
 	public void onKeybind(int id) {
 		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
 		if(def != null) {
-			ConfigEntry ce = ModConfig.getConfig().getEntry("keybinds");
+			ConfigEntry ce = ModConfig.getConfig().getEntry(ConfigKeys.KEYBINDS);
 			String c = ce.getString("qa_" + id, null);
 			if(c != null) {
 				if(c.startsWith("p")) {
@@ -99,5 +108,10 @@ public class AnimationEngine {
 
 	public int getTicks() {
 		return (int) tickCounter;
+	}
+
+	public static enum AnimationMode {
+		PLAYER,
+		SKULL,
 	}
 }

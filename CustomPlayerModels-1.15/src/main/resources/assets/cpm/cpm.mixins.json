@@ -5,11 +5,14 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "cpm.mixins.refmap.json",
   "mixins": [
+  	"CommandsMixin",
+  	"ServerPlayNetHandlerMixin"
   ],
   "client": [
     "PlayerRendererMixin",
     "RenderTypeBuffersMixin",
-    "SkullTileEntityRendererMixin"
+    "SkullTileEntityRendererMixin",
+    "ClientPlayNetHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

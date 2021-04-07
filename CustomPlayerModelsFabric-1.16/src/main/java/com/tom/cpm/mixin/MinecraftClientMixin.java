@@ -34,4 +34,9 @@ public abstract class MinecraftClientMixin {
 			openScreen(((GuiImpl.Overlay)currentScreen).getGui());
 		}
 	}
+
+	@Inject(at = @At("HEAD"), method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V")
+	public void onDisconnect(Screen screen, CallbackInfo cbi) {
+		CustomPlayerModelsClient.INSTANCE.onLogout();
+	}
 }

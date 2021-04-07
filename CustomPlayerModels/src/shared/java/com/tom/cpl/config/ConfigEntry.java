@@ -75,6 +75,12 @@ public class ConfigEntry {
 		changeListener.run();
 	}
 
+	public void clearValue(String name) {
+		data.remove(name);
+		entries.remove(name);
+		changeListener.run();
+	}
+
 	public int getInt(String name, int def) {
 		try {
 			return ((Number) data.getOrDefault(name, def)).intValue();

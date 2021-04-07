@@ -26,6 +26,7 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.IResolvedModelPart;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
@@ -39,7 +40,7 @@ import com.tom.cpm.shared.util.TextureStitcher;
 public class ModelDefinition {
 	public static final ModelDefinition NULL_DEF = new ModelDefinition(null, Collections.emptyList(), null);
 	private final ModelDefinitionLoader loader;
-	private final Player playerObj;
+	private final Player<?, ?> playerObj;
 	private List<IModelPart> parts;
 	private List<IResolvedModelPart> resolved;
 	private ModelPartPlayer player;
@@ -51,8 +52,9 @@ public class ModelDefinition {
 	private int resolveState;
 	private AnimationRegistry animations = new AnimationRegistry();
 	private boolean stitchedTexture;
+	public boolean cloneable;
 
-	public ModelDefinition(ModelDefinitionLoader loader, List<IModelPart> parts, Player player) {
+	public ModelDefinition(ModelDefinitionLoader loader, List<IModelPart> parts, Player<?, ?> player) {
 		this.loader = loader;
 		this.parts = parts;
 		this.playerObj = player;
@@ -162,6 +164,7 @@ public class ModelDefinition {
 			} catch (InterruptedException | ExecutionException | TimeoutException e1) {
 				throw new IOException(e1);
 			}
+			if(skin == null)skin = MinecraftClientAccess.get().getVanillaSkin(playerObj.getSkinType());
 			stitcher.setBase(skin);
 		}
 		Vec2i whiteBox = new Vec2i(0, 0);
@@ -177,12 +180,14 @@ public class ModelDefinition {
 			}
 		});
 		if(whiteBox.x > 0 && whiteBox.y > 0) {
-			stitcher.allocSingleColor(whiteBox, 0xffffffff, uv -> coloredCubes.forEach(cube -> {
-				cube.recolor = true;
-				cube.getCube().texSize = 1;
-				cube.getCube().u = uv.x;
-				cube.getCube().v = uv.y;
-			}));
+			stitcher.allocSingleColor(whiteBox, 0xffffffff, uv -> {
+				coloredCubes.forEach(cube -> {
+					cube.recolor = true;
+					cube.getCube().texSize = 1;
+					cube.getCube().u = uv.x;
+					cube.getCube().v = uv.y;
+				});
+			});
 		}
 		resolved.forEach(r -> r.stitch(stitcher));
 		skinOverride = stitcher.finish();
@@ -256,7 +261,7 @@ public class ModelDefinition {
 		return animations;
 	}
 
-	public Player getPlayerObj() {
+	public Player<?, ?> getPlayerObj() {
 		return playerObj;
 	}
 
@@ -330,5 +335,9 @@ public class ModelDefinition {
 
 	public boolean isStitchedTexture() {
 		return stitchedTexture;
+	}
+
+	public SkinType getSkinType() {
+		return playerObj.getSkinType();
 	}
 }

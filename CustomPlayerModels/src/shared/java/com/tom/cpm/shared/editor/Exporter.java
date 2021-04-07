@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
 import com.tom.cpm.shared.editor.gui.popup.CreateGistPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
+import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.effects.EffectColor;
 import com.tom.cpm.shared.effects.EffectGlow;
 import com.tom.cpm.shared.effects.EffectHide;
@@ -57,6 +59,7 @@ import com.tom.cpm.shared.parts.ModelPartTemplate;
 import com.tom.cpm.shared.template.Template;
 
 public class Exporter {
+	public static final String TEMP_MODEL = ".temp.cpmmodel";
 	public static final Gson sgson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
 	public static void exportSkin(Editor e, EditorGui gui, File f, boolean forceOut) {
@@ -74,8 +77,10 @@ public class Exporter {
 	public static void exportB64(Editor e, EditorGui gui, Consumer<String> b64Out, boolean forceOut) {
 		byte[] buffer = new byte[200];
 		int[] size = new int[] {0};
-		exportSkin0(e, gui, new Result(() -> new BAOS(buffer, size),
-				() -> b64Out.accept(Base64.getEncoder().encodeToString(Arrays.copyOf(buffer, size[0]))),
+		exportSkin0(e, gui, new Result(() -> {
+			size[0] = 0;
+			return new BAOS(buffer, size);
+		}, () -> b64Out.accept(Base64.getEncoder().encodeToString(Arrays.copyOf(buffer, size[0]))),
 				(d, c) -> handleGistOverflow(d, c, gui)), forceOut);
 	}
 
@@ -97,6 +102,31 @@ public class Exporter {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public static void exportModel(Editor e, EditorGui gui, File f, ModelDescription desc) {
+		ModelWriter wr = new ModelWriter(gui, f);
+		wr.setDesc(desc.name, desc.desc, desc.icon);
+		exportSkin0(e, gui, new Result(wr::getOut, () -> {
+			if(wr.finish())
+				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
+		}, (d, c) -> handleGistOverflow(d, l -> {
+			wr.setOverflow(d, l);
+			c.accept(l);
+		}, gui)), false);
+	}
+
+	public static void exportTempModel(Editor e, EditorGui gui) {
+		File models = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+		models.mkdirs();
+		ModelWriter wr = new ModelWriter(gui, new File(models, TEMP_MODEL));
+		wr.setDesc("Test model", "", null);
+		exportSkin0(e, gui, new Result(wr::getOut, wr::finish,
+				(d, c) -> {
+					Link l = new Link("local:test");
+					wr.setOverflow(d, l);
+					c.accept(l);
+				}), false);
 	}
 
 	private static ModelPartDefinition prepareDefinition(Editor e) throws IOException {
@@ -210,7 +240,7 @@ public class Exporter {
 		});
 	}
 
-	public static void exportTemplate(Editor e, EditorGui gui, String name, String desc, Consumer<String> templateOut) {
+	public static void exportTemplate(Editor e, EditorGui gui, ModelDescription desc, Consumer<String> templateOut) {
 		try {
 			List<Cube> flatList = new ArrayList<>();
 			walkElements(e.elements, new int[] {Template.TEMPLATE_ID_OFFSET}, flatList);
@@ -255,8 +285,14 @@ public class Exporter {
 				e.skinProvider.write(h);
 				data.put("texture", h.toB64());
 			}
-			data.put("name", name);
-			data.put("desc", desc);
+			data.put("name", desc.name);
+			data.put("desc", desc.desc);
+			if(desc.icon != null) {
+				try(IOHelper icon = new IOHelper()) {
+					icon.writeImage(desc.icon);
+					data.put("icon", icon.toB64());
+				}
+			}
 			String result = sgson.toJson(data);
 			templateOut.accept(result);
 		} catch (ExportException ex) {
@@ -362,6 +398,68 @@ public class Exporter {
 			} else {
 				throw new EOFException();
 			}
+		}
+	}
+
+	private static class ModelWriter {
+		private final EditorGui gui;
+		private byte[] buffer = new byte[16*1024];
+		private int[] size = new int[] {0};
+		private byte[] overflow;
+		private File out;
+		private String name, desc;
+		private Link l;
+		private Image icon;
+
+		public ModelWriter(EditorGui gui, File out) {
+			this.gui = gui;
+			this.out = out;
+		}
+
+		public void setDesc(String name, String desc, Image icon) {
+			this.name = name;
+			this.desc = desc;
+			this.icon = icon;
+		}
+
+		public OutputStream getOut() {
+			size[0] = 0;
+			return new BAOS(buffer, size);
+		}
+
+		public void setOverflow(byte[] d, Link l) {
+			this.overflow = d;
+			this.l = l;
+		}
+
+		public boolean finish() {
+			try (FileOutputStream fout = new FileOutputStream(out)){
+				fout.write(ModelDefinitionLoader.HEADER);
+				ChecksumOutputStream cos = new ChecksumOutputStream(fout);
+				IOHelper h = new IOHelper(cos);
+				h.writeUTF(name);
+				h.writeUTF(desc);
+				h.writeVarInt(size[0]);
+				h.write(buffer, 0, size[0]);
+				if(overflow != null) {
+					h.writeByteArray(overflow);
+					l.write(h);
+				} else {
+					h.writeVarInt(0);
+				}
+				if(icon != null) {
+					h.writeImage(icon);
+				} else {
+					h.writeVarInt(0);
+				}
+				cos.close();
+				return true;
+			} catch (ExportException ex) {
+				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			return false;
 		}
 	}
 }

@@ -43,7 +43,7 @@ import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.shared.editor.gui.ViewportPanel;
+import com.tom.cpm.shared.gui.ViewportPanelBase;
 
 public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new GLFWKeyCodes();
@@ -58,7 +58,7 @@ public class GuiImpl extends Screen implements IGui {
 	public MatrixStack matrixStack;
 
 	static {
-		nativeComponents.register(ViewportPanel.class, ViewportPanelImpl::new);
+		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
 	}
 
@@ -260,7 +260,7 @@ public class GuiImpl extends Screen implements IGui {
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture) {
 		x += current.box.x;
 		y += current.box.y;
-		RenderSystem.setShader(GameRenderer::method_34542);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, new Identifier("cpm", "textures/gui/" + texture + ".png"));
 		drawTexture(matrixStack, x, y, u, v, w, h);
@@ -271,7 +271,7 @@ public class GuiImpl extends Screen implements IGui {
 		x += current.box.x;
 		y += current.box.y;
 		RenderSystem.setShaderTexture(0, DynTexture.getBoundLoc());
-		RenderSystem.setShader(GameRenderer::method_34542);
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		Matrix4f mat = matrixStack.peek().getModel();
 		float bo = getZOffset();
@@ -507,7 +507,7 @@ public class GuiImpl extends Screen implements IGui {
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShader(GameRenderer::method_34540);
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
 		Matrix4f mat = matrixStack.peek().getModel();

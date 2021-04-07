@@ -2,7 +2,8 @@ package com.tom.cpm.client;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.io.IOException;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
@@ -16,45 +17,38 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.ITextureObject;
-import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.editor.gui.ViewportPanel;
-import com.tom.cpm.shared.editor.gui.ViewportPanel.ViewportPanelNative;
-import com.tom.cpm.shared.util.PaintImageCreator;
+import com.tom.cpm.shared.gui.ViewportPanelBase;
+import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
+import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportPanelNative;
 
 public class ViewportPanelImpl extends ViewportPanelNative {
-	private static final ResourceLocation PAINT = new ResourceLocation("cpm:paint_texture");
-	private static final ITextureObject PAINT_TEX = new AbstractTexture() {
-
-		@Override
-		public void loadTexture(IResourceManager resourceManager) throws IOException {
-			TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), PaintImageCreator.createImage().toBufferedImage(), false, false);
-		}
-	};
 	private Minecraft mc;
-	public ViewportPanelImpl(ViewportPanel panel) {
+	public ViewportPanelImpl(ViewportPanelBase panel) {
 		super(panel);
 		mc = Minecraft.getMinecraft();
 	}
 
-	private void renderSetup() {
-		float pitch = (float) Math.asin(editor.look.y);
-		float yaw = editor.look.getYaw();
+	@Override
+	public void renderSetup() {
+		ViewportCamera cam = panel.getCamera();
+		float pitch = (float) Math.asin(cam.look.y);
+		float yaw = cam.look.getYaw();
 
 		GlStateManager.enableAlpha();
 		GlStateManager.enableColorMaterial();
 		GlStateManager.pushMatrix();
 		Box bounds = getBounds();
-		GlStateManager.translate(bounds.x + bounds.w / 2, bounds.y + bounds.h / 2, 50);
+		Vec2i off = panel.getGui().getOffset();
+		GlStateManager.translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 50);
 		//GlStateManager.translate(editor.position.x, editor.position.y, editor.position.z);
-		float scale = editor.camDist;
+		float scale = cam.camDist;
 		GlStateManager.scale((-scale), scale, 0.1f);
 		GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
 		//GlStateManager.rotate(135.0F, 0.0F, 1.0F, 0.0F);
@@ -62,7 +56,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		//GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
 		GlStateManager.rotate((float) Math.toDegrees(pitch), 1, 0, 0);
 		GlStateManager.rotate((float) Math.toDegrees(yaw), 0, 1, 0);
-		GlStateManager.translate(-editor.position.x, -editor.position.y, -editor.position.z);
+		GlStateManager.translate(-cam.position.x, -cam.position.y, -cam.position.z);
 		//glDisable(GL_SCISSOR_TEST);
 		float f = 1.0f;
 		glColor3f(f, f, f);
@@ -73,7 +67,8 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		GlStateManager.enableDepth();
 	}
 
-	private void renderFinish() {
+	@Override
+	public void renderFinish() {
 		//glEnable(GL_SCISSOR_TEST);
 		GlStateManager.disableDepth();
 		GlStateManager.popMatrix();
@@ -84,7 +79,8 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
 	}
 
-	private void renderBase() {
+	@Override
+	public void renderBase() {
 		GlStateManager.disableTexture2D();
 		GlStateManager.disableCull();
 		//glDisable(GL_CULL_FACE);
@@ -114,32 +110,25 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 	}
 
 	@Override
-	public void render(float partialTicks, int mouseX, int mouseY) {
-		renderSetup();
-		if(editor.renderPaint) {
+	public void render(float partialTicks) {
+		if(!panel.applyLighting()) {
 			GlStateManager.disableLighting();
-		} else if(editor.renderBase) renderBase();
-
-		RenderPlayer rp = mc.getRenderManager().getSkinMap().get(editor.skinType.getName());
-		if(editor.renderPaint) {
-			if(mc.getTextureManager().getTexture(PAINT) == null)
-				mc.getTextureManager().loadTexture(PAINT, PAINT_TEX);
-			rp.bindTexture(PAINT);
-		} else {
-			if(editor.skinProvider != null)editor.skinProvider.bind();
-			else rp.bindTexture(DefaultPlayerSkin.getDefaultSkin(mc.getSession().getProfile().getId()));
 		}
+
+		RenderPlayer rp = mc.getRenderManager().getSkinMap().get(panel.getSkinType().getName());
 		float scale = 1;//0.0625F
 		GlStateManager.translate(0.5f, 1.5f, 0.5f);
 		GlStateManager.rotate(90, 0, 1, 0);
 		GlStateManager.scale((-scale), -scale, scale);
 		ModelPlayer p = rp.getMainModel();
-		editor.preRender();
+		panel.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, editor.definition, null, null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, panel.getDefinition(), null, null);
+			if(panel.getDefinition().getSkinOverride() != null)panel.getDefinition().getSkinOverride().bind();
+			else rp.bindTexture(DefaultPlayerSkin.getDefaultSkin(mc.getSession().getProfile().getId()));
 			setupModel(p);
 			PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand);
-			if(!editor.applyAnim && editor.playerTpose) {
+			if(panel.isTpose()) {
 				p.bipedRightArm.rotateAngleZ = (float) Math.toRadians(90);
 				p.bipedLeftArm.rotateAngleZ = (float) Math.toRadians(-90);
 			}
@@ -147,7 +136,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			float lsa = 0.75f;
 			float ls = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTicks() * 0.2f - 1.5f * (1.0F - partialTicks);
 
-			editor.applyRenderPoseForAnim(pose -> {
+			panel.applyRenderPoseForAnim(pose -> {
 				switch (pose) {
 				case SLEEPING:
 					GlStateManager.translate(0.0D, 1.501F, 0.0D);
@@ -201,15 +190,6 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		} finally {
 			ClientProxy.mc.getPlayerRenderManager().unbindModel(p);
 		}
-
-		renderFinish();
-
-		if(editor.renderPaint) {
-			FloatBuffer buffer = BufferUtils.createFloatBuffer(3);
-			GL11.glReadPixels(Mouse.getX(), Mouse.getY(), 1, 1, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
-			colorUnderMouse = (((int)(buffer.get(0) * 255)) << 16) | (((int)(buffer.get(1) * 255)) << 8) | ((int)(buffer.get(2) * 255));
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		}
 	}
 
 	private void setupModel(ModelPlayer p) {
@@ -226,5 +206,40 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		p.isSneak = false;
 		p.swingProgress = 0;
 		p.isRiding = false;
+	}
+
+	@Override
+	public int getColorUnderMouse() {
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(3);
+		GL11.glReadPixels(Mouse.getX(), Mouse.getY(), 1, 1, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
+		int colorUnderMouse = (((int)(buffer.get(0) * 255)) << 16) | (((int)(buffer.get(1) * 255)) << 8) | ((int)(buffer.get(2) * 255));
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		return colorUnderMouse;
+	}
+
+	@Override
+	public Image takeScreenshot(Vec2i size) {
+		GuiImpl gui = (GuiImpl) panel.getGui();
+		float multiplierX = mc.displayWidth / (float)gui.width;
+		float multiplierY = mc.displayHeight / (float)gui.height;
+		int width = (int) (multiplierX * size.x);
+		int height = (int) (multiplierY * size.y);
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(width * height * 3);
+		GL11.glReadPixels((int) (multiplierX * renderPos.x), (int) (multiplierY * renderPos.y), width, height, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		for(int y = 0;y<height;y++) {
+			for(int x = 0;x<width;x++) {
+				float r = buffer.get((x + y * width) * 3);
+				float g = buffer.get((x + y * width) * 3 + 1);
+				float b = buffer.get((x + y * width) * 3 + 2);
+				int color = 0xff000000 | (((int)(r * 255)) << 16) | (((int)(g * 255)) << 8) | ((int)(b * 255));
+				img.setRGB(x, y, color);
+			}
+		}
+		BufferedImage rImg = new BufferedImage(size.x, size.y, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D gr = rImg.createGraphics();
+		gr.drawImage(img, 0, 0, size.x, size.y, null);
+		gr.dispose();
+		return new Image(rImg);
 	}
 }

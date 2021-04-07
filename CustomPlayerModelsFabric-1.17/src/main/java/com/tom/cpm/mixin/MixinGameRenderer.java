@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.class_5944;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
@@ -21,12 +20,12 @@ import com.tom.cpm.client.CustomRenderTypes;
 public abstract class MixinGameRenderer {
 
 	@Shadow
-	abstract class_5944 method_34522(ResourceFactory arg, String string, VertexFormat vertexFormat) throws IOException;
+	abstract net.minecraft.client.render.Shader loadShader(ResourceFactory arg, String string, VertexFormat vertexFormat) throws IOException;
 
-	@Inject(at = @At("TAIL"), method = "method_34538(Lnet/minecraft/resource/ResourceManager;)V")
+	@Inject(at = @At("TAIL"), method = "loadShaders(Lnet/minecraft/resource/ResourceManager;)V")
 	public void onShadersLoading(ResourceManager resourceManager, CallbackInfo cbi) {
 		try {
-			CustomRenderTypes.entityTranslucentCullNoLightShaderProgram = method_34522(resourceManager, "rendertype_entity_translucent_cull_no_light", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL);
+			CustomRenderTypes.entityTranslucentCullNoLightShaderProgram = loadShader(resourceManager, "rendertype_entity_translucent_cull_no_light", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL);
 		} catch (IOException e) {
 			System.err.println("Failed to load cpm paint shader");
 			e.printStackTrace();

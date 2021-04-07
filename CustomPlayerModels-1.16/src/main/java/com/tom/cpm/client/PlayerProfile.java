@@ -6,6 +6,7 @@ import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Pose;
@@ -25,7 +26,7 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 
-public class PlayerProfile extends Player {
+public class PlayerProfile extends Player<PlayerEntity, Model> {
 	private final GameProfile profile;
 	private String skinType;
 	private VanillaPose pose;
@@ -67,6 +68,7 @@ public class PlayerProfile extends Player {
 		return true;
 	}
 
+	@Override
 	public PlayerModel<AbstractClientPlayerEntity> getModel() {
 		return Minecraft.getInstance().getRenderManager().getSkinMap().get(skinType == null ? "default" : skinType).getEntityModel();
 	}
@@ -107,6 +109,7 @@ public class PlayerProfile extends Player {
 		return pose;
 	}
 
+	@Override
 	public void updateFromPlayer(PlayerEntity player) {
 		Pose p = player.getPose();
 		if(p == Pose.SLEEPING)pose = VanillaPose.SLEEPING;

@@ -44,7 +44,7 @@ import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.shared.editor.gui.ViewportPanel;
+import com.tom.cpm.shared.gui.ViewportPanelBase;
 
 public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new GLFWKeyCodes();
@@ -57,9 +57,10 @@ public class GuiImpl extends Screen implements IGui {
 	private Consumer<Runnable> closeListener;
 	private int keyModif;
 	public MatrixStack matrixStack;
+	private boolean noScissorTest;
 
 	static {
-		nativeComponents.register(ViewportPanel.class, ViewportPanelImpl::new);
+		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
 	}
 
@@ -73,6 +74,7 @@ public class GuiImpl extends Screen implements IGui {
 			e.printStackTrace();
 			displayError(e.toString());
 		}
+		noScissorTest = isCtrlDown();
 	}
 
 	private static <G extends Supplier<IGui>, N> NativeConstructor<G, N> local(Function<GuiImpl, N> fac) {
@@ -91,17 +93,20 @@ public class GuiImpl extends Screen implements IGui {
 			this.matrixStack = matrixStack;
 			matrixStack.push();
 			matrixStack.translate(0, 0, 1000);
-			GL11.glEnable(GL11.GL_SCISSOR_TEST);
+			if(!noScissorTest)
+				GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			current = new Ctx();
 			gui.draw(mouseX, mouseY, partialTicks);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			displayError(e.toString());
 		} finally {
-			GL11.glDisable(GL11.GL_SCISSOR_TEST);
+			if(!noScissorTest)
+				GL11.glDisable(GL11.GL_SCISSOR_TEST);
 			String s = "Minecraft " + SharedConstants.getVersion().getName() + " (" + minecraft.getVersion() + "/" + ClientBrandRetriever.getClientModName() + ("release".equalsIgnoreCase(minecraft.getVersionType()) ? "" : "/" + minecraft.getVersionType()) + ")";
 			font.drawString(matrixStack, s, width - font.getStringWidth(s) - 4, 2, 0xff000000);
 			s = minecraft.debug;
+			if(noScissorTest)s += " No Scissor";
 			font.drawString(matrixStack, s, width - font.getStringWidth(s) - 4, 11, 0xff000000);
 			this.matrixStack = null;
 			matrixStack.pop();
@@ -322,12 +327,14 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void setupCut() {
-		int dw = minecraft.getMainWindow().getWidth();
-		int dh = minecraft.getMainWindow().getHeight();
-		float multiplierX = dw / (float)width;
-		float multiplierY = dh / (float)height;
-		GL11.glScissor((int) (current.box.x * multiplierX), dh - (int) ((current.box.y + current.box.h) * multiplierY),
-				(int) (current.box.w * multiplierX), (int) (current.box.h * multiplierY));
+		if(!noScissorTest) {
+			int dw = minecraft.getMainWindow().getWidth();
+			int dh = minecraft.getMainWindow().getHeight();
+			float multiplierX = dw / (float)width;
+			float multiplierY = dh / (float)height;
+			GL11.glScissor((int) (current.box.x * multiplierX), dh - (int) ((current.box.y + current.box.h) * multiplierY),
+					(int) (current.box.w * multiplierX), (int) (current.box.h * multiplierY));
+		}
 	}
 
 	@Override

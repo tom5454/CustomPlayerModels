@@ -2,11 +2,13 @@ package com.tom.cpm.shared.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
@@ -14,20 +16,22 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.util.LegacySkinConverter;
 
-public abstract class Player {
+public abstract class Player<P, M> {
 	private static boolean enableRendering = true;
 	private static boolean enableNames = true;
 
 	private ModelDefinition definition;
-	private AnimationHandler animHandler = new AnimationHandler(this);
+	private EnumMap<AnimationMode, AnimationHandler> animHandler = new EnumMap<>(AnimationMode.class);
 	private CompletableFuture<Image> skinFuture;
 	public VanillaPose prevPose;
 	public IPose currentPose;
 	public String url;
+	public boolean forcedSkin;
 
 	public CompletableFuture<Image> getSkin() {
 		if(skinFuture != null)return skinFuture;
 		skinFuture = getSkin0();
+		if(skinFuture == null)return CompletableFuture.completedFuture(null);
 		return skinFuture;
 	}
 
@@ -41,7 +45,7 @@ public abstract class Player {
 				}
 			});
 		}
-		if(url == null)return CompletableFuture.completedFuture(null);
+		if(url == null)return null;
 		return Image.download(url).thenApply(i -> new LegacySkinConverter().convertSkin(i)).exceptionally(e -> null);
 	}
 
@@ -50,6 +54,8 @@ public abstract class Player {
 	public abstract UUID getUUID();
 	public abstract VanillaPose getPose();
 	public abstract int getEncodedGestureId();
+	public abstract M getModel();
+	public abstract void updateFromPlayer(P player);
 
 	public void setModelDefinition(ModelDefinition definition) {
 		this.definition = definition;
@@ -72,8 +78,8 @@ public abstract class Player {
 		return null;
 	}
 
-	public AnimationHandler getAnimationHandler() {
-		return animHandler;
+	public AnimationHandler getAnimationHandler(AnimationMode mode) {
+		return animHandler.computeIfAbsent(mode, k -> new AnimationHandler(this));
 	}
 
 	public static boolean isEnableRendering() {

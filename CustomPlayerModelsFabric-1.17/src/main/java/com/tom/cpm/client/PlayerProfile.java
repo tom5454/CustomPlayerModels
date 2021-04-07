@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.PlayerModelPart;
@@ -26,7 +27,7 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 
-public class PlayerProfile extends Player {
+public class PlayerProfile extends Player<PlayerEntity, Model> {
 	private final GameProfile profile;
 	private String skinType;
 	private VanillaPose pose;
@@ -68,6 +69,7 @@ public class PlayerProfile extends Player {
 		return true;
 	}
 
+	@Override
 	public PlayerEntityModel<AbstractClientPlayerEntity> getModel() {
 		return ((PlayerEntityRenderer) MinecraftClient.getInstance().getEntityRenderDispatcher().modelRenderers.get(skinType == null ? "default" : skinType)).getModel();
 	}
@@ -108,6 +110,7 @@ public class PlayerProfile extends Player {
 		return pose;
 	}
 
+	@Override
 	public void updateFromPlayer(PlayerEntity player) {
 		EntityPose p = player.getPose();
 		if(p == EntityPose.SLEEPING)pose = VanillaPose.SLEEPING;

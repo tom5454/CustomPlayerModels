@@ -10,6 +10,7 @@ public class MinecraftObjectHolder {
 	protected static MinecraftServerAccess serverAccess;
 
 	public static final boolean DEBUGGING = System.getProperty("cpm.debug", "false").equals("true");
+	public static final String NETWORK_ID = "cpm_net";
 
 	public static void setClientObject(MinecraftClientAccess clientObject) {
 		MinecraftObjectHolder.clientObject = clientObject;

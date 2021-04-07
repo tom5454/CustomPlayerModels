@@ -48,5 +48,4 @@ public class EditorTexture extends TextureProvider {
 		super.free();
 		file = null;
 	}
-	//TODO editable?
 }

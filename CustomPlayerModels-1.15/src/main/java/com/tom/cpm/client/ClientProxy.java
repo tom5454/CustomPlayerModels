@@ -1,19 +1,26 @@
 package com.tom.cpm.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.CustomizeSkinScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.CCustomPayloadPacket;
+import net.minecraft.util.ResourceLocation;
 
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
@@ -22,26 +29,33 @@ import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.network.ICustomPacket;
 
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.common.NetH;
+import com.tom.cpm.common.NetworkHandler;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
+import com.tom.cpm.shared.io.ModelFile;
+import com.tom.cpm.shared.model.RenderManager;
+
+import io.netty.buffer.Unpooled;
 
 public class ClientProxy extends CommonProxy {
 	public static ClientProxy INSTANCE = null;
 	public static MinecraftObject mc;
 	private ModelDefinitionLoader loader;
 	private Minecraft minecraft;
+	private RenderManager<GameProfile, PlayerEntity, Model, IRenderTypeBuffer> manager;
 
 	@Override
 	public void init() {
@@ -57,42 +71,17 @@ public class ClientProxy extends CommonProxy {
 		MinecraftObjectHolder.setClientObject(mc);
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
+		manager = new RenderManager<>(mc.getPlayerRenderManager(), loader, PlayerEntity::getGameProfile);
 	}
-
-	private PlayerProfile profile;
 
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		tryBindModel(null, event.getPlayer(), event.getBuffers(), null, null);
-	}
-
-	private boolean tryBindModel(GameProfile gprofile, PlayerEntity player, IRenderTypeBuffer buffer, Predicate<Object> unbindRule, Model toBind) {
-		if(gprofile == null)gprofile = player.getGameProfile();
-		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
-		if(profile == null)return false;
-		if(toBind == null)toBind = profile.getModel();
-		ModelDefinition def = profile.getAndResolveDefinition();
-		if(def != null) {
-			this.profile = profile;
-			if(player != null)
-				profile.updateFromPlayer(player);
-			else
-				profile.setRenderPose(VanillaPose.SKULL_RENDER);
-			mc.getPlayerRenderManager().bindModel(toBind, buffer, def, unbindRule, profile);
-			if(unbindRule == null || player == null)
-				mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
-			return true;
-		}
-		mc.getPlayerRenderManager().unbindModel(toBind);
-		return false;
+		manager.bindPlayer(event.getPlayer(), event.getBuffers());
 	}
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		if(profile != null) {
-			mc.getPlayerRenderManager().unbindModel(profile.getModel());
-			profile = null;
-		}
+		manager.tryUnbind();
 	}
 
 	@SubscribeEvent
@@ -104,14 +93,11 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public void renderHand(IRenderTypeBuffer buffer) {
-		tryBindModel(null, Minecraft.getInstance().player, buffer, PlayerRenderManager::unbindHand, null);
-		this.profile = null;
+		manager.bindHand(Minecraft.getInstance().player, buffer, PlayerRenderManager::unbindHand);
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, IRenderTypeBuffer buffer) {
-		PlayerProfile prev = this.profile;
-		tryBindModel(profile, null, buffer, PlayerRenderManager::unbindSkull, skullModel);
-		this.profile = prev;
+		manager.bindSkull(profile, buffer, PlayerRenderManager::unbindSkull, skullModel);
 	}
 
 	@SubscribeEvent
@@ -158,5 +144,57 @@ public class ClientProxy extends CommonProxy {
 			super(x, y, 100, 20, I18n.format("button.cpm.open_editor"), b -> r.run());
 		}
 
+	}
+
+	@SubscribeEvent
+	public void onLogout(ClientPlayerNetworkEvent.LoggedOutEvent evt) {
+		loader.clearServerData();
+	}
+
+	public void receivePacket(ICustomPacket<?> packet, NetH handler) {
+		ResourceLocation rl = packet.getName();
+		ClientPlayNetHandler h = (ClientPlayNetHandler) handler;
+		if(NetworkHandler.helloPacket.equals(rl)) {
+			PacketBuffer pb = packet.getInternalData();
+			CompoundNBT nbt = pb.readCompoundTag();
+			Minecraft.getInstance().execute(() -> {
+				handler.cpm$setHasMod(true);
+				loader.clearServerData();
+				h.sendPacket(new CCustomPayloadPacket(NetworkHandler.helloPacket, new PacketBuffer(Unpooled.EMPTY_BUFFER)));
+			});
+		} else if(NetworkHandler.setSkin.equals(rl)) {
+			PacketBuffer pb = packet.getInternalData();
+			int entId = pb.readVarInt();
+			CompoundNBT data = pb.readCompoundTag();
+			Minecraft.getInstance().execute(() -> {
+				Entity ent = Minecraft.getInstance().world.getEntityByID(entId);
+				if(ent instanceof PlayerEntity) {
+					loader.setModel(((PlayerEntity)ent).getGameProfile(), data.contains("data") ? data.getByteArray("data") : null, data.getBoolean("forced"));
+				}
+			});
+		} else if(NetworkHandler.getSkin.equals(rl)) {
+			sendSkinData(h);
+		}
+	}
+
+	public void sendSkinData(ClientPlayNetHandler h) {
+		String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
+		if(model != null) {
+			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+			try {
+				ModelFile file = ModelFile.load(new File(modelsDir, model));
+				PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
+				CompoundNBT data = new CompoundNBT();
+				data.putByteArray("data", file.getDataBlock());
+				pb.writeCompoundTag(data);
+				h.sendPacket(new CCustomPayloadPacket(NetworkHandler.setSkin, pb));
+			} catch (IOException e) {
+			}
+		} else {
+			PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
+			CompoundNBT data = new CompoundNBT();
+			pb.writeCompoundTag(data);
+			h.sendPacket(new CCustomPayloadPacket(NetworkHandler.setSkin, pb));
+		}
 	}
 }

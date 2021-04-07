@@ -16,7 +16,7 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 
 public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderManager {
-	public static final Predicate<Player> ALWAYS = p -> true;
+	public static final Predicate<Player<?, ?>> ALWAYS = p -> true;
 	private Map<MB, RedirectHolder<MB, D, S, P>> holders = new HashMap<>();
 	private RedirectHolderFactory<D, S, P> factory;
 	private RedirectRendererFactory<MB, S, P> redirectFactory;
@@ -61,7 +61,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.setVis = setVis;
 	}
 
-	public void bindModel(MB model, D addDt, ModelDefinition def, Predicate<Object> unbindRule, Player player) {
+	public void bindModel(MB model, D addDt, ModelDefinition def, Predicate<Object> unbindRule, Player<?, MB> player) {
 		holders.computeIfAbsent(model, this::create).swapIn(def, unbindRule, addDt, player);
 	}
 
@@ -110,7 +110,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public List<RedirectRenderer<P>> redirectRenderers;
 		public boolean skinBound;
 		public Map<RedirectRenderer<P>, RedirectDataHolder<P>> partData;
-		public Player playerObj;
+		public Player<?, M> playerObj;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
 			this.model = model;
@@ -120,7 +120,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			partData = new HashMap<>();
 		}
 
-		public final void swapIn(ModelDefinition def, Predicate<Object> unbindRule, D addDt, Player playerObj) {
+		public final void swapIn(ModelDefinition def, Predicate<Object> unbindRule, D addDt, Player<?, M> playerObj) {
 			this.def = def;
 			this.unbindRule = unbindRule;
 			this.addDt = addDt;
@@ -162,7 +162,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			return rd;
 		}
 
-		protected RedirectRenderer<P> register(Field<P> f, Predicate<Player> doRender) {
+		protected RedirectRenderer<P> register(Field<P> f, Predicate<Player<?, ?>> doRender) {
 			return register(f).setRenderPredicate(doRender);
 		}
 
@@ -179,7 +179,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 	private static class RedirectDataHolder<P> {
 		private RedirectRenderer<P> copyFrom;
-		private Predicate<Player> renderPredicate = ALWAYS;
+		private Predicate<Player<?, ?>> renderPredicate = ALWAYS;
 	}
 
 	public static interface RedirectRenderer<P> {
@@ -197,7 +197,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			return this;
 		}
 
-		default RedirectRenderer<P> setRenderPredicate(Predicate<Player> renderPredicate) {
+		default RedirectRenderer<P> setRenderPredicate(Predicate<Player<?, ?>> renderPredicate) {
 			getHolder().partData.get(this).renderPredicate = renderPredicate;
 			return this;
 		}

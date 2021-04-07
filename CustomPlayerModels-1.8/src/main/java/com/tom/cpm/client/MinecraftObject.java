@@ -1,9 +1,11 @@
 package com.tom.cpm.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -18,12 +20,15 @@ import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpmcore.CPMASMClientHooks;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -145,6 +150,21 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ServerStatus getServerSideStatus() {
-		return mc.thePlayer != null ? ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
+		return mc.thePlayer != null ? CPMASMClientHooks.hasMod(mc.getNetHandler()) ? ServerStatus.INSTALLED : ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
+	}
+
+	@Override
+	public File getGameDir() {
+		return mc.mcDataDir;
+	}
+
+	@Override
+	public void sendSkinUpdate() {
+		ClientProxy.INSTANCE.sendSkinData(mc.getNetHandler());
+	}
+
+	@Override
+	public void openGui(Function<IGui, Frame> creator) {
+		mc.displayGuiScreen(new GuiImpl(creator, mc.currentScreen));
 	}
 }

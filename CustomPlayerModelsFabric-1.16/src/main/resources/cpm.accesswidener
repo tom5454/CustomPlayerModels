@@ -20,3 +20,8 @@ mutable field net/minecraft/client/render/entity/model/SkullOverlayEntityModel s
 
 accessible field net/minecraft/client/render/entity/model/SkullEntityModel skull Lnet/minecraft/client/model/ModelPart;
 mutable field net/minecraft/client/render/entity/model/SkullEntityModel skull Lnet/minecraft/client/model/ModelPart;
+
+accessible class net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker
+accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage entityTrackers Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
+accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker playersTracking Ljava/util/Set;
+accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker entity Lnet/minecraft/entity/Entity;

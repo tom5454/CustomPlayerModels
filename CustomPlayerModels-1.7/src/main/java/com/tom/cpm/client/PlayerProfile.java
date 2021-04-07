@@ -3,6 +3,7 @@ package com.tom.cpm.client;
 import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
@@ -21,10 +22,11 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 
-public class PlayerProfile extends Player {
+public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 	private final GameProfile profile;
 	private VanillaPose pose;
 	public boolean hasPlayerHead;
+	public int encGesture;
 
 	public static PlayerProfile create(Object object) {
 		return new PlayerProfile((GameProfile) object);
@@ -59,6 +61,7 @@ public class PlayerProfile extends Player {
 		return true;
 	}
 
+	@Override
 	public ModelBiped getModel() {
 		return ((RenderPlayer) RenderManager.instance.entityRenderMap.get(EntityPlayer.class)).modelBipedMain;
 	}
@@ -103,6 +106,7 @@ public class PlayerProfile extends Player {
 		return pose;
 	}
 
+	@Override
 	public void updateFromPlayer(EntityPlayer player) {
 		if(player.isPlayerSleeping())pose = VanillaPose.SLEEPING;
 		else if(player.isDead)pose = VanillaPose.DYING;
@@ -119,7 +123,7 @@ public class PlayerProfile extends Player {
 
 	@Override
 	public int getEncodedGestureId() {
-		return -1;
+		return encGesture;
 	}
 
 	public void setRenderPose(VanillaPose pose) {

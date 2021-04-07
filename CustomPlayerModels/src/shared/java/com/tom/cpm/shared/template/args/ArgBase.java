@@ -51,7 +51,6 @@ public abstract class ArgBase implements IArg {
 			});
 		} else if(v instanceof Map) {
 			((Map<String, Object>) v).replaceAll((k, e) -> {
-				System.out.println(k + ": '" + e + "'     " + v.toString().isEmpty());
 				if(key.equals(e))return toJson();
 				walk(e);
 				return e;

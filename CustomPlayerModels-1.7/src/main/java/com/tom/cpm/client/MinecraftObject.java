@@ -1,8 +1,10 @@
 package com.tom.cpm.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.function.Function;
 
 import org.lwjgl.opengl.GL11;
 
@@ -11,15 +13,20 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpmcore.CPMASMClientHooks;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -109,6 +116,9 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public void setEncodedGesture(int value) {
+		if(getServerSideStatus() == ServerStatus.INSTALLED) {
+			mc.getNetHandler().addToSendQueue(new C17PacketCustomPayload(NetworkHandler.setLayer.toString(), new byte[] {(byte) value}));
+		}
 	}
 
 	@Override
@@ -128,6 +138,21 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ServerStatus getServerSideStatus() {
-		return mc.thePlayer != null ? ServerStatus.UNAVAILABLE : ServerStatus.OFFLINE;
+		return mc.thePlayer != null ? CPMASMClientHooks.hasMod(mc.getNetHandler()) ? ServerStatus.INSTALLED : ServerStatus.UNAVAILABLE : ServerStatus.OFFLINE;
+	}
+
+	@Override
+	public File getGameDir() {
+		return mc.mcDataDir;
+	}
+
+	@Override
+	public void sendSkinUpdate() {
+		ClientProxy.INSTANCE.sendSkinData(mc.getNetHandler());
+	}
+
+	@Override
+	public void openGui(Function<IGui, Frame> creator) {
+		mc.displayGuiScreen(new GuiImpl(creator, mc.currentScreen));
 	}
 }

@@ -14,6 +14,7 @@ import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.math.Box;
+import com.tom.cpm.shared.MinecraftClientAccess;
 
 public class FileChooserGui extends PopupPanel {
 	private File currDir;
@@ -34,7 +35,7 @@ public class FileChooserGui extends PopupPanel {
 		fileDescLabel = new Label(gui, "");
 		fileDescLabel.setBounds(new Box(5, 175, 200, 10));
 		addElement(fileDescLabel);
-		currDir = new File(".").getAbsoluteFile();
+		currDir = MinecraftClientAccess.get().getGameDir().getAbsoluteFile();
 		path = new TextField(gui);
 		name = new TextField(gui);
 		path.setBounds(new Box(5, 10, 200, 20));

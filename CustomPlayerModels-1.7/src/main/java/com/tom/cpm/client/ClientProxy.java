@@ -1,9 +1,9 @@
 package com.tom.cpm.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -11,9 +11,16 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiOptions;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -26,27 +33,32 @@ import com.mojang.authlib.GameProfile;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.common.NetworkHandler;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
+import com.tom.cpm.shared.io.ModelFile;
+import com.tom.cpm.shared.model.RenderManager;
+import com.tom.cpmcore.CPMASMClientHooks;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
+import io.netty.buffer.Unpooled;
 
 public class ClientProxy extends CommonProxy {
 	public static MinecraftObject mc;
 	private ModelDefinitionLoader loader;
 	private Minecraft minecraft;
-	public static ClientProxy instance;
+	public static ClientProxy INSTANCE;
+	private RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
 
 	@Override
 	public void init() {
@@ -56,49 +68,24 @@ public class ClientProxy extends CommonProxy {
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load template", e);
 		}
-		instance = this;
+		INSTANCE = this;
 		minecraft = Minecraft.getMinecraft();
 		mc = new MinecraftObject(minecraft, loader);
 		MinecraftObjectHolder.setClientObject(mc);
 		FMLCommonHandler.instance().bus().register(this);
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
+		manager = new RenderManager<>(mc.getPlayerRenderManager(), loader, EntityPlayer::getGameProfile);
 	}
-
-	private PlayerProfile profile;
 
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		tryBindModel(null, event.entityPlayer, null, null);
-	}
-
-	private boolean tryBindModel(GameProfile gprofile, EntityPlayer player, Predicate<Object> unbindRule, ModelBase toBind) {
-		if(gprofile == null)gprofile = player.getGameProfile();
-		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
-		if(profile == null)return false;
-		if(toBind == null)toBind = profile.getModel();
-		ModelDefinition def = profile.getAndResolveDefinition();
-		if(def != null) {
-			this.profile = profile;
-			if(player != null)
-				profile.updateFromPlayer(player);
-			else
-				profile.setRenderPose(VanillaPose.SKULL_RENDER);
-			mc.getPlayerRenderManager().bindModel(toBind, null, def, unbindRule, profile);
-			if(unbindRule == null || player == null)
-				mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
-			return true;
-		}
-		mc.getPlayerRenderManager().unbindModel(toBind);
-		return false;
+		manager.bindPlayer(event.entityPlayer, null);
 	}
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		if(profile != null) {
-			mc.getPlayerRenderManager().unbindModel(profile.getModel());
-			profile = null;
-		}
+		manager.tryUnbind();
 	}
 
 	@SubscribeEvent
@@ -125,14 +112,11 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void renderHand(RenderHandEvent evt) {
-		tryBindModel(null, Minecraft.getMinecraft().thePlayer, PlayerRenderManager::unbindHand, null);
-		this.profile = null;
+		manager.bindHand(Minecraft.getMinecraft().thePlayer, null, PlayerRenderManager::unbindHand);
 	}
 
 	public void renderSkull(ModelBase skullModel, GameProfile profile) {
-		PlayerProfile prev = this.profile;
-		tryBindModel(profile, null, PlayerRenderManager::unbindSkull, skullModel);
-		this.profile = prev;
+		manager.bindSkull(profile, null, PlayerRenderManager::unbindSkull, skullModel);
 	}
 
 	@SubscribeEvent
@@ -180,5 +164,79 @@ public class ClientProxy extends CommonProxy {
 			super(99, x, y, 100, 20, I18n.format("button.cpm.open_editor"));
 		}
 
+	}
+
+	public void onLogout() {
+		loader.clearServerData();
+	}
+
+	public void receivePacket(S3FPacketCustomPayload packet, NetHandlerPlayClient h) {
+		ResourceLocation rl = new ResourceLocation(packet.func_149169_c());
+		if(NetworkHandler.helloPacket.equals(rl)) {
+			PacketBuffer pb = new PacketBuffer(Unpooled.wrappedBuffer(packet.func_149168_d()));
+			try {
+				NBTTagCompound nbt = pb.readNBTTagCompoundFromBuffer();
+				Minecraft.getMinecraft().func_152344_a(() -> {
+					CPMASMClientHooks.setHasMod(h, true);
+					loader.clearServerData();
+					h.addToSendQueue(new C17PacketCustomPayload(NetworkHandler.helloPacket.toString(), new PacketBuffer(Unpooled.EMPTY_BUFFER)));
+				});
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else if(NetworkHandler.setSkin.equals(rl)) {
+			PacketBuffer pb = new PacketBuffer(Unpooled.wrappedBuffer(packet.func_149168_d()));
+			int entId = pb.readVarIntFromBuffer();
+			try {
+				NBTTagCompound data = pb.readNBTTagCompoundFromBuffer();
+				Minecraft.getMinecraft().func_152344_a(() -> {
+					Entity ent = Minecraft.getMinecraft().theWorld.getEntityByID(entId);
+					if(ent instanceof EntityPlayer) {
+						loader.setModel(((EntityPlayer)ent).getGameProfile(), data.hasKey("data") ? data.getByteArray("data") : null, data.getBoolean("forced"));
+					}
+				});
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else if(NetworkHandler.getSkin.equals(rl)) {
+			sendSkinData(h);
+		} else if(NetworkHandler.setLayer.equals(rl)) {
+			PacketBuffer pb = new PacketBuffer(Unpooled.wrappedBuffer(packet.func_149168_d()));
+			int entId = pb.readVarIntFromBuffer();
+			int layer = pb.readByte();
+			Minecraft.getMinecraft().func_152344_a(() -> {
+				Entity ent = Minecraft.getMinecraft().theWorld.getEntityByID(entId);
+				if(ent instanceof EntityPlayer) {
+					PlayerProfile profile = (PlayerProfile) loader.loadPlayer(((EntityPlayer) ent).getGameProfile());
+					profile.encGesture = layer;
+				}
+			});
+		}
+	}
+
+	public void sendSkinData(NetHandlerPlayClient h) {
+		String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
+		if(model != null) {
+			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+			try {
+				ModelFile file = ModelFile.load(new File(modelsDir, model));
+				PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
+				NBTTagCompound data = new NBTTagCompound();
+				data.setByteArray("data", file.getDataBlock());
+				pb.writeNBTTagCompoundToBuffer(data);
+				h.addToSendQueue(new C17PacketCustomPayload(NetworkHandler.setSkin.toString(), pb));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
+			NBTTagCompound data = new NBTTagCompound();
+			try {
+				pb.writeNBTTagCompoundToBuffer(data);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			h.addToSendQueue(new C17PacketCustomPayload(NetworkHandler.setSkin.toString(), pb));
+		}
 	}
 }

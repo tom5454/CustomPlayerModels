@@ -1,10 +1,10 @@
 package com.tom.cpm.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -17,29 +17,41 @@ import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpl.util.Image;
+import com.tom.cpm.common.NetH;
+import com.tom.cpm.common.NetworkHandler;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
+import com.tom.cpm.shared.io.ModelFile;
+import com.tom.cpm.shared.model.RenderManager;
+
+import io.netty.buffer.Unpooled;
 
 public class CustomPlayerModelsClient implements ClientModInitializer {
 	public static MinecraftObject mc;
 	private ModelDefinitionLoader loader;
-
 	public static CustomPlayerModelsClient INSTANCE;
+	private RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
 
 	@Override
 	public void onInitializeClient() {
@@ -74,40 +86,15 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 				}
 			}
 		});
+		manager = new RenderManager<>(mc.getPlayerRenderManager(), loader, PlayerEntity::getGameProfile);
 	}
-
-	private PlayerProfile profile;
 
 	public void playerRenderPre(AbstractClientPlayerEntity player, VertexConsumerProvider buffer) {
-		tryBindModel(null, player, buffer, null, null);
-	}
-
-	private boolean tryBindModel(GameProfile gprofile, PlayerEntity player, VertexConsumerProvider buffer, Predicate<Object> unbindRule, Model toBind) {
-		if(gprofile == null)gprofile = player.getGameProfile();
-		PlayerProfile profile = (PlayerProfile) loader.loadPlayer(gprofile);
-		if(profile == null)return false;
-		if(toBind == null)toBind = profile.getModel();
-		ModelDefinition def = profile.getAndResolveDefinition();
-		if(def != null) {
-			this.profile = profile;
-			if(player != null)
-				profile.updateFromPlayer(player);
-			else
-				profile.setRenderPose(VanillaPose.SKULL_RENDER);
-			mc.getPlayerRenderManager().bindModel(toBind, buffer, def, unbindRule, profile);
-			if(unbindRule == null || player == null)
-				mc.getPlayerRenderManager().getAnimationEngine().handleAnimation(profile);
-			return true;
-		}
-		mc.getPlayerRenderManager().unbindModel(toBind);
-		return false;
+		manager.bindPlayer(player, buffer);
 	}
 
 	public void playerRenderPost() {
-		if(profile != null) {
-			mc.getPlayerRenderManager().unbindModel(profile.getModel());
-			profile = null;
-		}
+		manager.tryUnbind();
 	}
 
 	public void initGui(Screen screen, List<Element> children, List<AbstractButtonWidget> buttons) {
@@ -120,14 +107,11 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void renderHand(VertexConsumerProvider buffer) {
-		tryBindModel(null, MinecraftClient.getInstance().player, buffer, PlayerRenderManager::unbindHand, null);
-		this.profile = null;
+		manager.bindHand(MinecraftClient.getInstance().player, buffer, PlayerRenderManager::unbindHand);
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, VertexConsumerProvider buffer) {
-		PlayerProfile prev = this.profile;
-		tryBindModel(profile, null, buffer, PlayerRenderManager::unbindSkull, skullModel);
-		this.profile = prev;
+		manager.bindSkull(profile, buffer, PlayerRenderManager::unbindSkull, skullModel);
 	}
 
 	public static class Button extends ButtonWidget {
@@ -138,4 +122,54 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 
 	}
 
+	public void onLogout() {
+		loader.clearServerData();
+	}
+
+	public void receivePacket(CustomPayloadS2CPacket packet, NetH handler) {
+		Identifier rl = packet.getChannel();
+		ClientPlayNetworkHandler h = (ClientPlayNetworkHandler) handler;
+		if(NetworkHandler.helloPacket.equals(rl)) {
+			PacketByteBuf pb = packet.getData();
+			NbtCompound nbt = pb.readCompound();
+			MinecraftClient.getInstance().execute(() -> {
+				handler.cpm$setHasMod(true);
+				loader.clearServerData();
+				h.sendPacket(new CustomPayloadC2SPacket(NetworkHandler.helloPacket, new PacketByteBuf(Unpooled.EMPTY_BUFFER)));
+			});
+		} else if(NetworkHandler.setSkin.equals(rl)) {
+			PacketByteBuf pb = packet.getData();
+			int entId = pb.readVarInt();
+			NbtCompound data = pb.readCompound();
+			MinecraftClient.getInstance().execute(() -> {
+				Entity ent = MinecraftClient.getInstance().world.getEntityById(entId);
+				if(ent instanceof PlayerEntity) {
+					loader.setModel(((PlayerEntity)ent).getGameProfile(), data.contains("data") ? data.getByteArray("data") : null, data.getBoolean("forced"));
+				}
+			});
+		} else if(NetworkHandler.getSkin.equals(rl)) {
+			sendSkinData(h);
+		}
+	}
+
+	public void sendSkinData(ClientPlayNetworkHandler h) {
+		String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
+		if(model != null) {
+			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+			try {
+				ModelFile file = ModelFile.load(new File(modelsDir, model));
+				PacketByteBuf pb = new PacketByteBuf(Unpooled.buffer());
+				NbtCompound data = new NbtCompound();
+				data.putByteArray("data", file.getDataBlock());
+				pb.writeCompound(data);
+				h.sendPacket(new CustomPayloadC2SPacket(NetworkHandler.setSkin, pb));
+			} catch (IOException e) {
+			}
+		} else {
+			PacketByteBuf pb = new PacketByteBuf(Unpooled.buffer());
+			NbtCompound data = new NbtCompound();
+			pb.writeCompound(data);
+			h.sendPacket(new CustomPayloadC2SPacket(NetworkHandler.setSkin, pb));
+		}
+	}
 }

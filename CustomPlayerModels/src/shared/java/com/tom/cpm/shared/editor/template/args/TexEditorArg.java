@@ -99,7 +99,6 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 			int bx = (int) (xs * u * texSize);
 			int by = (int) (ys * v * texSize);
 			Image img = et.getTemplateTexture().getImage();
-			Image skin = editor.skinProvider.getImage();
 
 			gui.drawBox(x + bx, y + by, img.getWidth() * xs, img.getHeight() * ys, 0xffffff | (alpha << 24));
 		}

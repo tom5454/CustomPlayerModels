@@ -23,9 +23,13 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 
+import com.tom.cpm.shared.config.PlayerData;
+
 public class CPMTransformerService implements IClassTransformer {
 	private static final String HOOKS_CLASS = "com/tom/cpmcore/CPMASMClientHooks";
 	private static final String NO_MODEL_SETUP_FIELD = "cpm$noModelSetup";
+	private static final String HAS_MOD_FIELD = "cpm$hasMod";
+	private static final String DATA_FIELD = "cpm$data";
 	private static Map<String, UnaryOperator<ClassNode>> transformers;
 
 	public static void init() {
@@ -133,6 +137,36 @@ public class CPMTransformerService implements IClassTransformer {
 						method.instructions.add(new InsnNode(Opcodes.RETURN));
 						System.out.println("CPM ASM fields/No Render: injected");
 					}
+					if(method.name.equals("hasMod")) {
+						method.instructions.clear();
+						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+						method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), HAS_MOD_FIELD, "Z"));
+						method.instructions.add(new InsnNode(Opcodes.IRETURN));
+						System.out.println("CPM ASM fields/Net/hasMod: injected");
+					}
+					if(method.name.equals("setHasMod")) {
+						method.instructions.clear();
+						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+						method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
+						method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), HAS_MOD_FIELD, "Z"));
+						method.instructions.add(new InsnNode(Opcodes.RETURN));
+						System.out.println("CPM ASM fields/Net/setHasMod: injected");
+					}
+					if(method.name.equals("getEncodedModelData")) {
+						method.instructions.clear();
+						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+						method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), DATA_FIELD, Type.getDescriptor(PlayerData.class)));
+						method.instructions.add(new InsnNode(Opcodes.ARETURN));
+						System.out.println("CPM ASM fields/ServerNet/getData: injected");
+					}
+					if(method.name.equals("setEncodedModelData")) {
+						method.instructions.clear();
+						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+						method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), DATA_FIELD, Type.getDescriptor(PlayerData.class)));
+						method.instructions.add(new InsnNode(Opcodes.RETURN));
+						System.out.println("CPM ASM fields/ServerNet/setData: injected");
+					}
 				}
 				return input;
 			}
@@ -160,6 +194,82 @@ public class CPMTransformerService implements IClassTransformer {
 				return input;
 			}
 		});
+		transformers.put("net.minecraft.client.Minecraft", new UnaryOperator<ClassNode>() {
+
+			@Override
+			public ClassNode apply(ClassNode input) {
+				InsnList lst = new InsnList();
+				lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onLogout", "()V", false));
+
+				for(MethodNode method : input.methods) {
+					if(method.name.equals("loadWorld") || (method.name.equals("a") && method.desc.equals("(Lbjf;Ljava/lang/String;)V"))) {
+						System.out.println("CPM ClientLogout Hook: Found loadWorld");
+						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
+							AbstractInsnNode insnNode = it.next();
+							if(insnNode instanceof MethodInsnNode) {
+								MethodInsnNode mn = (MethodInsnNode) insnNode;
+								if((mn.name.equals("b") && mn.desc.equals("()V") && mn.getPrevious() instanceof FieldInsnNode && ((FieldInsnNode)mn.getPrevious()).name.equals("q")) || mn.name.equals("func_146257_b")) {
+									method.instructions.insert(mn, lst);
+									System.out.println("CPM ClientLogout Hook: injected");
+								}
+							}
+						}
+					}
+				}
+				return input;
+			}
+		});
+		transformers.put("net.minecraft.client.network.NetHandlerPlayClient", new UnaryOperator<ClassNode>() {
+
+			@Override
+			public ClassNode apply(ClassNode input) {
+				InsnList lst = new InsnList();
+				lst.add(new VarInsnNode(Opcodes.ALOAD, 1));
+				lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onClientPacket", "(Lnet/minecraft/network/play/server/S3FPacketCustomPayload;Lnet/minecraft/client/network/NetHandlerPlayClient;)Z", false));
+				LabelNode lbln = new LabelNode();
+				lst.add(new JumpInsnNode(Opcodes.IFEQ, lbln));
+				lst.add(new InsnNode(Opcodes.RETURN));
+				lst.add(lbln);
+
+				input.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, HAS_MOD_FIELD, "Z", null, 0));
+
+				for(MethodNode method : input.methods) {
+					if(method.name.equals("handleCustomPayload") || (method.name.equals("a") && method.desc.equals("(Lgr;)V"))) {
+						System.out.println("CPM ClientNet Hook: Found handleCustomPayload");
+						method.instructions.insertBefore(method.instructions.getFirst(), lst);
+						System.out.println("CPM ClientNet Hook: injected");
+					}
+				}
+				return input;
+			}
+		});
+		transformers.put("net.minecraft.network.NetHandlerPlayServer", new UnaryOperator<ClassNode>() {
+
+			@Override
+			public ClassNode apply(ClassNode input) {
+				InsnList lst = new InsnList();
+				lst.add(new VarInsnNode(Opcodes.ALOAD, 1));
+				lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onServerPacket", "(Lnet/minecraft/network/play/client/C17PacketCustomPayload;Lnet/minecraft/network/NetHandlerPlayServer;)Z", false));
+				LabelNode lbln = new LabelNode();
+				lst.add(new JumpInsnNode(Opcodes.IFEQ, lbln));
+				lst.add(new InsnNode(Opcodes.RETURN));
+				lst.add(lbln);
+
+				input.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, HAS_MOD_FIELD, "Z", null, 0));
+				input.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, DATA_FIELD, Type.getDescriptor(PlayerData.class), null, null));
+
+				for(MethodNode method : input.methods) {
+					if(method.name.equals("processVanilla250Packet") || (method.name.equals("a") && method.desc.equals("(Liz;)V"))) {
+						System.out.println("CPM ServerNet Hook: Found processCustomPayload");
+						method.instructions.insertBefore(method.instructions.getFirst(), lst);
+						System.out.println("CPM ServerNet Hook: injected");
+					}
+				}
+				return input;
+			}
+		});
 	}
 
 	@Override
@@ -172,7 +282,7 @@ public class CPMTransformerService implements IClassTransformer {
 			classReader.accept(classNode, 0);
 			System.out.println("Applying cpm transformer: " + transformedName);
 			classNode = tr.apply(classNode);
-			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+			ClassWriter writer = new ClassWriter(0);
 			classNode.accept(writer);
 			return writer.toByteArray();
 		}

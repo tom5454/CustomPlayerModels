@@ -162,6 +162,7 @@ public abstract class Frame extends Panel {
 
 		public void close() {
 			Frame.this.popup.remove(this);
+			popup.onClosed();
 		}
 	}
 

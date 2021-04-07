@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -39,23 +39,30 @@ import com.tom.cpm.shared.parts.ModelPartType;
 
 public class ModelDefinitionLoader {
 	public static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(0, 2, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
-	private Function<Object, Player> playerFactory;
-	private final LoadingCache<Object, Player> cache = CacheBuilder.newBuilder().expireAfterAccess(15L, TimeUnit.SECONDS).build(new CacheLoader<Object, Player>() {
+	private Function<Object, Player<?, ?>> playerFactory;
+	private final LoadingCache<Object, Player<?, ?>> cache = CacheBuilder.newBuilder().expireAfterAccess(15L, TimeUnit.SECONDS).build(new CacheLoader<Object, Player<?, ?>>() {
 
 		@Override
-		public Player load(Object key) throws Exception {
-			Player player = playerFactory.apply(key);
-			player.loadSkin(() -> {
-				CompletableFuture<Image> skinF = player.getSkin();
-				skinF.thenAccept(skin -> {
-					if(skin != null && player.getModelDefinition() == null)
-						player.setModelDefinition(loadModel(skin, player));
+		public Player<?, ?> load(Object key) throws Exception {
+			Player<?, ?> player = playerFactory.apply(key);
+			if(serverModels.containsKey(key)) {
+				player.setModelDefinition(loadModel(serverModels.get(key), player));
+			} else {
+				player.loadSkin(() -> {
+					CompletableFuture<Image> skinF = player.getSkin();
+					skinF.thenAccept(skin -> {
+						if(skin != null && player.getModelDefinition() == null) {
+							player.setModelDefinition(loadModel(skin, player));
+						}
+					});
 				});
-			});
+			}
 			return player;
 		}
 	});
 	private static final Map<String, ResourceLoader> LOADERS = new HashMap<>();
+	private final Cache<Link, byte[]> localResources = CacheBuilder.newBuilder().expireAfterAccess(5L, TimeUnit.MINUTES).build();
+	private Map<Object, byte[]> serverModels = new HashMap<>();
 	static {
 		LOADERS.put("git", new GistResourceLoader());
 		LOADERS.put("gh", new GithubRepoResourceLoader());
@@ -63,12 +70,12 @@ public class ModelDefinitionLoader {
 	private Image template;
 	public static final int HEADER = 0x53;
 
-	public ModelDefinitionLoader(Image template, Function<Object, Player> playerFactory) {
+	public ModelDefinitionLoader(Image template, Function<Object, Player<?, ?>> playerFactory) {
 		this.template = template;
 		this.playerFactory = playerFactory;
 	}
 
-	public Player loadPlayer(Object player) {
+	public Player<?, ?> loadPlayer(Object player) {
 		try {
 			return cache.get(player);
 		} catch (ExecutionException | UncheckedExecutionException e) {
@@ -77,15 +84,15 @@ public class ModelDefinitionLoader {
 		}
 	}
 
-	public ModelDefinition loadModel(String data, Player player) {
-		try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(data))) {
+	public ModelDefinition loadModel(byte[] data, Player<?, ?> player) {
+		try(ByteArrayInputStream in = new ByteArrayInputStream(data)) {
 			return loadModel(in, player);
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-	public ModelDefinition loadModel(Image skin, Player player) {
+	public ModelDefinition loadModel(Image skin, Player<?, ?> player) {
 		try(SkinDataInputStream in = new SkinDataInputStream(skin, template, player.getSkinType().getChannel())) {
 			return loadModel(in, player);
 		} catch (Exception e) {
@@ -94,7 +101,7 @@ public class ModelDefinitionLoader {
 		}
 	}
 
-	private ModelDefinition loadModel(InputStream in, Player player) throws IOException {
+	private ModelDefinition loadModel(InputStream in, Player<?, ?> player) throws IOException {
 		if(in.read() != HEADER)return null;
 		ChecksumInputStream cis = new ChecksumInputStream(in);
 		IOHelper din = new IOHelper(cis);
@@ -123,16 +130,46 @@ public class ModelDefinitionLoader {
 	}
 
 	public InputStream load(Link link, ResourceEncoding enc) throws IOException {
-		ResourceLoader rl = LOADERS.get(link.loader);
-		if(rl == null)throw new IOException("Couldn't find loader");
-		return rl.loadResource(link.path, enc);
+		try {
+			ResourceLoader rl = LOADERS.get(link.loader);
+			if(rl == null)throw new IOException("Couldn't find loader");
+			return rl.loadResource(link.path, enc);
+		} catch (IOException e) {
+			byte[] cached = localResources.getIfPresent(link);
+			if(cached == null)throw e;
+			return new ByteArrayInputStream(cached);
+		}
 	}
 
 	public Image getTemplate() {
 		return template;
 	}
 
+	public void putLocalResource(Link key, byte[] value) {
+		localResources.put(key, value);
+	}
+
 	public void clearCache() {
 		cache.invalidateAll();
+	}
+
+	public void clearServerData() {
+		serverModels.clear();
+	}
+
+	public void setModel(Object forPlayer, byte[] data, boolean forced) {
+		if(data == null) {
+			serverModels.remove(forPlayer);
+			cache.invalidate(forPlayer);
+		} else {
+			Player<?, ?> player = loadPlayer(forPlayer);
+			player.setModelDefinition(loadModel(data, player));
+			player.forcedSkin = forced;
+			serverModels.put(forPlayer, data);
+		}
+	}
+
+	public void execute(Runnable task) {
+		THREAD_POOL.execute(task);
 	}
 }

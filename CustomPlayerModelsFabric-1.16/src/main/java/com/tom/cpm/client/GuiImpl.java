@@ -41,7 +41,7 @@ import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.shared.editor.gui.ViewportPanel;
+import com.tom.cpm.shared.gui.ViewportPanelBase;
 
 public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new GLFWKeyCodes();
@@ -56,7 +56,7 @@ public class GuiImpl extends Screen implements IGui {
 	public MatrixStack matrixStack;
 
 	static {
-		nativeComponents.register(ViewportPanel.class, ViewportPanelImpl::new);
+		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
 	}
 

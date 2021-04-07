@@ -12,15 +12,18 @@ import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
 import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class GestureGui extends Frame {
 	private GestureButton hoveredBtn;
@@ -37,7 +40,7 @@ public class GestureGui extends Frame {
 	@Override
 	public void keyPressed(KeyboardEvent event) {
 		if(hoveredBtn != null) {
-			ConfigEntry ce = ModConfig.getConfig().getEntry("keybinds");
+			ConfigEntry ce = ModConfig.getConfig().getEntry(ConfigKeys.KEYBINDS);
 			String hoveredID = hoveredBtn.pose != null ? "p" + hoveredBtn.pose.getName() : "g" + hoveredBtn.gesture.name;
 			String keybindPressed = null;
 			List<String> dup = new ArrayList<>();
@@ -158,6 +161,18 @@ public class GestureGui extends Frame {
 			Player.setEnableRendering(v);
 		});
 		btnPanel2.addElement(chbxRender);
+
+		Panel btnPanel3 = new Panel(gui);
+		btnPanel3.setBounds(new Box(0, height - 20, 160, 50));
+		addElement(btnPanel3);
+
+		Button btnSkinMenu = new Button(gui, gui.i18nFormat("button.cpm.models"), () -> MinecraftClientAccess.get().openGui(SkinsGui::new));
+		btnSkinMenu.setBounds(new Box(0, 0, 160, 20));
+		btnPanel3.addElement(btnSkinMenu);
+		if(MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.INSTALLED) {
+			btnSkinMenu.setEnabled(false);
+			btnSkinMenu.setTooltip(new Tooltip(this, gui.i18nFormat("label.cpm.feature_unavailable")));
+		}
 	}
 
 	@Override
@@ -171,6 +186,18 @@ public class GestureGui extends Frame {
 				String k = kb.getBoundKey();
 				if(k.isEmpty())k = gui.i18nFormat("label.cpm.key_unbound");
 				gui.drawText(10, i * 10, gui.i18nFormat("label.cpm.quick_key_bound", i, k), 0xffffffff);
+			}
+		}
+
+		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
+		if(MinecraftObjectHolder.DEBUGGING && gui.isAltDown()) {
+			TextureProvider skin = def.getSkinOverride();
+			if(skin != null && skin.texture != null) {
+				skin.bind();
+				int size = Math.min(bounds.w, bounds.h);
+				gui.drawText(514, 2, "Stitched: " + def.isStitchedTexture(), 0xffffffff);
+				gui.drawBox(0, 0, size, size, 0xffaaaaaa);
+				gui.drawTexture(0, 0, size, size, 0, 0, 1, 1);
 			}
 		}
 	}
@@ -210,7 +237,7 @@ public class GestureGui extends Frame {
 		}
 
 		public void getKb() {
-			ConfigEntry ce = ModConfig.getConfig().getEntry("keybinds");
+			ConfigEntry ce = ModConfig.getConfig().getEntry(ConfigKeys.KEYBINDS);
 			this.kb = null;
 			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
 				if(kb.getName().startsWith("qa")) {

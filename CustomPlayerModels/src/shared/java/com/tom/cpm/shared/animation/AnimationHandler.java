@@ -7,14 +7,14 @@ import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
 import com.tom.cpm.shared.config.Player;
 
 public class AnimationHandler {
-	private final Player player;
+	private final Player<?, ?> player;
 
 	private List<PlayingAnim> currentAnimations = new ArrayList<>();
 	private List<Animation> nextAnims = new ArrayList<>();
 
 	private Gesture currentGesture;
 
-	public AnimationHandler(Player player) {
+	public AnimationHandler(Player<?, ?> player) {
 		this.player = player;
 	}
 

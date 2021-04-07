@@ -17,6 +17,8 @@ import com.tom.cpm.shared.editor.gui.SkinTextureDisplay;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.util.ValueOp;
 import com.tom.cpm.shared.model.Cube;
+import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RenderedCube;
 
 public class ModelElement extends Cube implements IElem, TreeElement {
@@ -332,12 +334,20 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public Box getTextureBox() {
 		if(type == ElementType.ROOT_PART) {
-			return null;//TODO filter root types
+			PlayerPartValues ppv = PlayerPartValues.getFor((PlayerModelParts) typeData, editor.skinType);
+			int dx = MathHelper.ceil(ppv.sx);
+			int dy = MathHelper.ceil(ppv.sy);
+			int dz = MathHelper.ceil(ppv.sz);
+			return new Box(
+					(int) (ppv.u / 64f * editor.skinProvider.size.x),
+					(int) (ppv.v / 64f * editor.skinProvider.size.y),
+					(int) (2 * (dx + dz) / 64f * editor.skinProvider.size.x),
+					(int) ((dz + dy) / 64f * editor.skinProvider.size.y));
 		}
 		int dx = MathHelper.ceil(size.x);
 		int dy = MathHelper.ceil(size.y);
 		int dz = MathHelper.ceil(size.z);
-		return new Box(u, v, 2 * (dx + dz), dz + dy);
+		return new Box(u, v, 2 * (dx + dz) * texSize, (dz + dy) * texSize);
 	}
 
 	@Override

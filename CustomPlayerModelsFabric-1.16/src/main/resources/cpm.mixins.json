@@ -4,13 +4,17 @@
   "compatibilityLevel": "JAVA_8",
   "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "mixins": [
+  	"common.ServerPlayNetHandlerMixin",
+  	"common.PlayerManagerMixin",
+  	"common.EntityTrackerEntryMixin"
   ],
   "client": [
     "PlayerRendererMixin",
     "ScreenMixin",
     "BufferBuilderStorageMixin",
     "MinecraftClientMixin",
-    "SkullBlockEntityRendererMixin"
+    "SkullBlockEntityRendererMixin",
+    "ClientPlayNetHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

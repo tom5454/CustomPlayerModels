@@ -63,9 +63,9 @@ public class TextureStitcher {
 	public void stitchImage(Image img, Consumer<Vec2i> uvUpdater) {
 		Box b = new Box(0, 0, img.getWidth(), img.getHeight());
 		hasStitches = true;
-		for(int i = 0;i<512;i+=4*xs) {
+		for(int i = 0;i<512;i+=16*xs) {
 			b.x = i;
-			for(int y = 0;y<i;y+=4*ys) {
+			for(int y = 0;y<i;y+=16*ys) {
 				b.y = y;
 				if(usedSpaces.stream().noneMatch(u -> u.intersects(b))) {
 					usedSpaces.add(b);
@@ -77,7 +77,7 @@ public class TextureStitcher {
 				}
 			}
 			b.y = i;
-			for(int x = 0;x<i;x+=4*xs) {
+			for(int x = 0;x<i;x+=16*xs) {
 				b.x = x;
 				if(usedSpaces.stream().noneMatch(u -> u.intersects(b))) {
 					usedSpaces.add(b);

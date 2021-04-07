@@ -22,7 +22,7 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 
-public class PlayerProfile extends Player {
+public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 	private final GameProfile profile;
 	private String skinType;
 	private VanillaPose pose = VanillaPose.STANDING;
@@ -64,6 +64,7 @@ public class PlayerProfile extends Player {
 		return true;
 	}
 
+	@Override
 	public ModelPlayer getModel() {
 		return Minecraft.getMinecraft().getRenderManager().getSkinMap().get(skinType == null ? "default" : skinType).getMainModel();
 	}
@@ -103,6 +104,7 @@ public class PlayerProfile extends Player {
 		return pose;
 	}
 
+	@Override
 	public void updateFromPlayer(EntityPlayer player) {
 		if(player.isPlayerSleeping())pose = VanillaPose.SLEEPING;
 		else if(player.isDead)pose = VanillaPose.DYING;

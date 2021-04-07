@@ -3,6 +3,9 @@
   "package": "com.tom.cpm.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+  	"common.ServerPlayNetHandlerMixin",
+  	"common.PlayerManagerMixin",
+  	"common.EntityTrackerEntryMixin"
   ],
   "client": [
     "PlayerRendererMixin",
@@ -11,7 +14,8 @@
     "MinecraftClientMixin",
     "SkullBlockEntityRendererMixin",
     "BuiltinModelItemRendererMixin",
-    "MixinGameRenderer"
+    "MixinGameRenderer",
+    "ClientPlayNetHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

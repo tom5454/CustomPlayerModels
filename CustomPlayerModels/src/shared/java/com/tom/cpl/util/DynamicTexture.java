@@ -32,6 +32,7 @@ public class DynamicTexture {
 
 	public void free() {
 		if(texture != null)texture.free();
+		texture = null;
 	}
 
 	public ITexture getNative() {

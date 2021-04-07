@@ -1,7 +1,11 @@
 package com.tom.cpm.shared;
 
+import java.io.File;
 import java.util.List;
+import java.util.function.Function;
 
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
@@ -19,7 +23,7 @@ public interface MinecraftClientAccess {
 		return MinecraftObjectHolder.clientObject;
 	}
 
-	default Player getClientPlayer() {
+	default Player<?, ?> getClientPlayer() {
 		return getDefinitionLoader().loadPlayer(getPlayerIDObject());
 	}
 
@@ -29,8 +33,14 @@ public interface MinecraftClientAccess {
 	void setEncodedGesture(int value);
 	boolean isInGame();
 	List<IKeybind> getKeybinds();
-
+	File getGameDir();
 	ServerStatus getServerSideStatus();
+	void sendSkinUpdate();
+	void openGui(Function<IGui, Frame> creator);
+
+	default Runnable openSingleplayer() {
+		throw new UnsupportedOperationException();
+	}
 
 	public static enum ServerStatus {
 		OFFLINE,

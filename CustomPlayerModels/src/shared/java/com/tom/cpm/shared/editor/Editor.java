@@ -50,9 +50,11 @@ import com.tom.cpm.shared.editor.template.TemplateArgType;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
 import com.tom.cpm.shared.editor.util.ValueOp;
+import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
 import com.tom.cpm.shared.io.ProjectFile;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
@@ -101,15 +103,15 @@ public class Editor {
 	public Updater<Boolean> setAnimPlay = updaterReg.create();
 	public Updater<Integer> setAnimPriority = updaterReg.create();
 	public Updater<Void> gestureFinished = updaterReg.create();
+	public Updater<Boolean> displayViewport = updaterReg.create();
 
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
 	public int drawMode = 0;
 	public boolean drawAllUVs = false;
+	public boolean onlyDrawOnSelected = true;
 
-	public Vec3f position = new Vec3f(0.5f, 1, 0.5f);
-	public Vec3f look = new Vec3f(0.25f, 0.5f, 0.25f);
-	public float camDist = 64;
+	public ViewportCamera camera = new ViewportCamera();
 	public Stack<Runnable> undoQueue = new Stack<>();
 	public Stack<Runnable> redoQueue = new Stack<>();
 	public Runnable currentOp;
@@ -133,6 +135,7 @@ public class Editor {
 	public TemplateSettings templateSettings;
 	public SkinType skinType;
 	public boolean customSkinType;
+	public ModelDescription description;
 	public Image vanillaSkin;
 	public boolean dirty;
 	public ModelDefinition definition;
@@ -269,8 +272,20 @@ public class Editor {
 				selectedElement.v = 0;
 				refreshGui = true;
 			}
+			if(selectedElement.u > 255) {
+				selectedElement.u = 255;
+				refreshGui = true;
+			}
+			if(selectedElement.v > 255) {
+				selectedElement.v = 255;
+				refreshGui = true;
+			}
 			if(selectedElement.textureSize < 1) {
 				selectedElement.textureSize = 1;
+				refreshGui = true;
+			}
+			if(selectedElement.textureSize > 127) {
+				selectedElement.textureSize = 127;
 				refreshGui = true;
 			}
 			currentOp = new OpList(
@@ -402,7 +417,7 @@ public class Editor {
 		EditorTexture tex = getTextureProvider();
 		if(tex != null) {
 			Box box = selectedElement != null ? selectedElement.getTextureBox() : null;
-			if(box != null) {
+			if(box != null && onlyDrawOnSelected) {
 				if(!box.isInBounds(x, y))return;
 			}
 			Image img = tex.getImage();
@@ -461,6 +476,7 @@ public class Editor {
 		setHiddenEffect.accept(null);
 		setVis.accept(false);
 		setAnimPriority.accept(null);
+		displayViewport.accept(true);
 
 		if(templateSettings != null) {
 			templateSettings.templateArgs.forEach(TemplateArgHandler::applyToModel);
@@ -545,8 +561,9 @@ public class Editor {
 		selectedAnim = null;
 		currentOp = null;
 		animEnc = null;
+		description = null;
 		storeIDgen = new StoreIDGen();
-		Player profile = MinecraftClientAccess.get().getClientPlayer();
+		Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.loadSkin(() -> {
 			if(!customSkinType)skinType = profile.getSkinType();
 			CompletableFuture<Image> img = profile.getSkin();
@@ -699,6 +716,31 @@ public class Editor {
 			try(OutputStreamWriter os = new OutputStreamWriter(project.setAsStream("template_settings.json"))) {
 				gson.toJson(data, os);
 			}
+		}
+		if(description != null) {
+			data = new HashMap<>();
+			data.put("name", description.name);
+			data.put("desc", description.desc);
+			Map<String, Object> map = new HashMap<>();
+			data.put("cam", map);
+			map.put("zoom", description.camera.camDist);
+			map.put("look", description.camera.look.toMap());
+			map.put("pos", description.camera.position.toMap());
+			try(OutputStreamWriter os = new OutputStreamWriter(project.setAsStream("description.json"))) {
+				gson.toJson(data, os);
+			}
+			if(description.icon != null) {
+				try(OutputStream os = project.setAsStream("desc_icon.png")) {
+					description.icon.storeTo(os);
+				}
+			}
+		}
+		if(listIconProvider != null) {
+			try(OutputStream os = project.setAsStream("list_icon.png")) {
+				listIconProvider.getImage().storeTo(os);
+			}
+		} else {
+			project.delete("list_icon.png");
 		}
 		project.save(file);
 		this.file = file;
@@ -879,6 +921,40 @@ public class Editor {
 					e.templateElement = true;
 				}
 			});
+		}
+		ze = project.getEntry("description.json");
+		if(ze != null) {
+			try(InputStreamReader rd = new InputStreamReader(new ByteArrayInputStream(ze))) {
+				data = (Map<String, Object>) gson.fromJson(rd, Object.class);
+			}
+			description = new ModelDescription();
+			description.name = (String) data.get("name");
+			description.desc = (String) data.get("desc");
+			Map<String, Object> map = (Map<String, Object>) data.get("cam");
+			description.camera.camDist = ((Number)map.get("zoom")).floatValue();
+			description.camera.look = new Vec3f((Map<String, Object>) map.get("look"), description.camera.look);
+			description.camera.position = new Vec3f((Map<String, Object>) map.get("pos"), description.camera.position);
+		}
+		ze = project.getEntry("desc_icon.png");
+		if(ze != null) {
+			if(description == null)description = new ModelDescription();
+			description.icon = Image.loadFrom(new ByteArrayInputStream(ze));
+			if(description.icon.getWidth() != 256 || description.icon.getHeight() != 256) {
+				description.icon = null;
+				System.err.println("Illegal image size for model/template icon must be 256x256");
+			}
+		}
+		ze = project.getEntry("list_icon.png");
+		if(ze != null) {
+			if(listIconProvider == null)listIconProvider = new EditorTexture();
+			listIconProvider.size = new Vec2i(32, 32);
+			listIconProvider.setImage(Image.loadFrom(new ByteArrayInputStream(ze)));
+			if(listIconProvider.getImage().getWidth() > 32 || listIconProvider.getImage().getHeight() > 32 ||
+					listIconProvider.getImage().getWidth() != listIconProvider.getImage().getHeight()) {
+				listIconProvider.free();
+				listIconProvider = null;
+				System.err.println("Illegal image size for list icon must be 32x32 or less and square");
+			}
 		}
 		restitchTexture();
 		updateGui();
@@ -1308,6 +1384,7 @@ public class Editor {
 		skinProvider.free();
 		renderTexture.free();
 		if(listIconProvider != null)listIconProvider.free();
+		definition.cleanup();
 	}
 
 	public void refreshTexture(EditorTexture tex) {

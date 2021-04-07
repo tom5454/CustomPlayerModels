@@ -317,8 +317,9 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 				float b = ( cube.color & 0x0000ff       ) / 255f;
 				GlStateManager.color(r, g, b, 1);
 			}
+			boolean enableGlow = holder instanceof RedirectHolderPlayer;
 			float lx = OpenGlHelper.lastBrightnessX, ly = OpenGlHelper.lastBrightnessY;
-			if(cube.glow) {
+			if(cube.glow && enableGlow) {
 				GlStateManager.enableBlend();
 				GlStateManager.disableAlpha();
 				GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
@@ -331,7 +332,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			}
 			((DisplayList)cube.renderObject).call();
 			if(cube.color != 0xffffff)GlStateManager.color(1, 1, 1, 1);
-			if(cube.glow) {
+			if(cube.glow && enableGlow) {
 				Minecraft.getMinecraft().entityRenderer.setupFogColor(false);
 				OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lx, ly);
 				GlStateManager.disableBlend();

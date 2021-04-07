@@ -2,10 +2,15 @@ package com.tom.cpm;
 
 import java.io.File;
 
+import net.minecraftforge.common.MinecraftForge;
+
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpm.common.CommandCPM;
+import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.SidedProxy;
@@ -24,11 +29,15 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@EventHandler
 	public void init(FMLInitializationEvent evt) {
 		proxy.init();
+		ServerHandler sh = new ServerHandler();
+		MinecraftForge.EVENT_BUS.register(sh);
+		FMLCommonHandler.instance().bus().register(sh);
 	}
 
 	@EventHandler
 	public void serverStart(FMLServerStartingEvent evt) {
 		MinecraftObjectHolder.setServerObject(new MinecraftServerObject(evt.getServer()));
+		evt.registerServerCommand(new CommandCPM());
 	}
 
 	@EventHandler

@@ -27,6 +27,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.fml.common.Loader;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
@@ -40,7 +41,8 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
-import com.tom.cpm.shared.editor.gui.ViewportPanel;
+import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.shared.gui.ViewportPanelBase;
 
 public class GuiImpl extends GuiScreen implements IGui {
 	private static final KeyCodes CODES = new LWJGLKeyCodes();
@@ -53,7 +55,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 	private Consumer<Runnable> closeListener;
 
 	static {
-		nativeComponents.register(ViewportPanel.class, ViewportPanelImpl::new);
+		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
 	}
 
@@ -84,7 +86,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			displayError(e.toString());
 		} finally {
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
-			String s = "FPS: " + Minecraft.getDebugFPS();
+			String s = "FPS: " + Minecraft.getDebugFPS() + " " + Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
 			fontRendererObj.drawString(s, width - fontRendererObj.getStringWidth(s) - 4, 2, 0xff000000);
 		}
 		if(mc.thePlayer != null) {

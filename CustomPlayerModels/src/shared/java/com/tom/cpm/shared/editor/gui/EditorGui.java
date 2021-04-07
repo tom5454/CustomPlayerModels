@@ -22,15 +22,19 @@ import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.Image;
+import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
+import com.tom.cpm.shared.editor.Exporter;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
 import com.tom.cpm.shared.editor.gui.popup.FileChooserGui;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
+import com.tom.cpm.shared.editor.gui.popup.SkinsPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.TreeElement;
@@ -38,6 +42,7 @@ import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.model.SkinType;
 
 public class EditorGui extends Frame {
+	private static Editor toReopen;
 	private TabbedPanelManager tabs;
 	private HorizontalLayout topPanel;
 	private Editor editor;
@@ -45,9 +50,28 @@ public class EditorGui extends Frame {
 
 	public EditorGui(IGui gui) {
 		super(gui);
-		this.editor = new Editor(this);
-		this.editor.loadDefaultPlayerModel();
-
+		if(toReopen != null) {
+			this.editor = toReopen;
+			toReopen = null;
+			ModConfig.getConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
+			ModConfig.getConfig().save();
+		} else {
+			this.editor = new Editor(this);
+			String reopen = ModConfig.getConfig().getString(ConfigKeys.REOPEN_PROJECT, null);
+			if(reopen != null) {
+				ModConfig.getConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
+				ModConfig.getConfig().save();
+				load(new File(reopen));
+			} else {
+				this.editor.loadDefaultPlayerModel();
+			}
+		}
+		String old = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL_OLD, null);
+		if(old != null) {
+			ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL_OLD);
+			ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, old);
+			ModConfig.getConfig().save();
+		}
 		gui.setCloseListener(c -> {
 			checkUnsaved(() -> {
 				editor.free();
@@ -113,6 +137,7 @@ public class EditorGui extends Frame {
 		ViewportPanel view = new ViewportPanel(gui, editor);
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
+		editor.displayViewport.add(view::setEnabled);
 	}
 
 	private void initTexturePanel(int width, int height) {
@@ -120,14 +145,15 @@ public class EditorGui extends Frame {
 		textureEditor.setBounds(new Box(0, 0, width, height - 20));
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.texture"), textureEditor));
 
-		TextureDisplayPanel tdp = new TextureDisplayPanel(gui, editor, height / 2);
-		tdp.setBounds(new Box(width - height / 2, 0, height / 2, height / 2));
-		textureEditor.addElement(tdp);
-
 		ViewportPaintPanel viewT = new ViewportPaintPanel(gui, editor);
 		viewT.setBounds(new Box(0, 0, width - height / 2, height - 20));
 		textureEditor.addElement(viewT);
 		editor.cursorPos = viewT::getHoveredTexPos;
+		editor.displayViewport.add(viewT::setEnabled);
+
+		TextureDisplayPanel tdp = new TextureDisplayPanel(gui, editor, height / 2);
+		tdp.setBounds(new Box(width - height / 2, 0, height / 2, height / 2));
+		textureEditor.addElement(tdp);
 
 		Panel p = new Panel(gui);
 		int treeW = Math.min(150, height / 2);
@@ -196,6 +222,7 @@ public class EditorGui extends Frame {
 		ViewportPanelAnim view = new ViewportPanelAnim(gui, editor);
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
+		editor.displayViewport.add(view::setEnabled);
 	}
 
 	private void newModel(SkinType type) {
@@ -273,7 +300,40 @@ public class EditorGui extends Frame {
 			openPopup(fc);
 		});
 
-		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> openPopup(new ExportSkinPopup(gui, this)));
+		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> openPopup(ExportSkinPopup.createPopup(this)));
+
+		pp.addButton(gui.i18nFormat("button.cpm.file.test"), () -> {
+			if(editor.dirty) {
+				openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.must_save.test")));
+				return;
+			}
+			try {
+				Runnable open;
+				if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
+					open = () -> {
+						MinecraftClientAccess.get().sendSkinUpdate();
+						openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.test_model_exported")));
+					};
+				} else if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.OFFLINE)
+					open = MinecraftClientAccess.get().openSingleplayer();
+				else
+					throw new UnsupportedOperationException();
+				Exporter.exportTempModel(editor, this);
+				String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
+				if(model != null) {
+					ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, model);
+				} else {
+					ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL_OLD);
+				}
+				ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, Exporter.TEMP_MODEL);
+				open.run();
+				ModConfig.getConfig().setString(ConfigKeys.REOPEN_PROJECT, editor.file.getAbsolutePath());
+				ModConfig.getConfig().save();
+				toReopen = editor;
+			} catch (UnsupportedOperationException e) {
+				openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.test_unsupported")));
+			}
+		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.exit"), gui::close);
 	}
@@ -325,6 +385,10 @@ public class EditorGui extends Frame {
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.settings"), () -> openPopup(new SettingsPopup(this)));
+
+		pp.addButton(gui.i18nFormat("button.cpm.models"), () -> openPopup(new SkinsPopup(this)));
+
+		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(gui, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
 	}
 
 	private void setupTemplate() {
@@ -404,6 +468,15 @@ public class EditorGui extends Frame {
 			editor.drawAllUVs = !chxbxAllUVs.isSelected();
 			chxbxAllUVs.setSelected(editor.drawAllUVs);
 		});
+
+		Checkbox chxbxFilterDraw = new Checkbox(gui, gui.i18nFormat("label.cpm.display.onlyDrawOnSelected"));
+		pp.add(chxbxFilterDraw);
+		chxbxFilterDraw.setSelected(editor.onlyDrawOnSelected);
+		chxbxFilterDraw.setAction(() -> {
+			editor.onlyDrawOnSelected = !chxbxFilterDraw.isSelected();
+			chxbxFilterDraw.setSelected(editor.onlyDrawOnSelected);
+		});
+		chxbxFilterDraw.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.onlyDrawOnSelected")));
 	}
 
 	private void load(File file) {
@@ -468,5 +541,9 @@ public class EditorGui extends Frame {
 
 	public static int getRotateMouseButton() {
 		return ModConfig.getConfig().getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2);
+	}
+
+	public static boolean doOpenEditor() {
+		return toReopen != null || ModConfig.getConfig().getString(ConfigKeys.REOPEN_PROJECT, null) != null;
 	}
 }

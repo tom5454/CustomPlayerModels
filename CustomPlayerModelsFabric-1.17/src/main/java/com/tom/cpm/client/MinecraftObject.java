@@ -1,21 +1,27 @@
 package com.tom.cpm.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.TextureUtil;
 import net.minecraft.client.util.DefaultSkinHelper;
 import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 
+import com.mojang.blaze3d.platform.TextureUtil;
+
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
+import com.tom.cpm.common.NetH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
@@ -86,7 +92,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 		public void load(Image texture) {
 			NativeImage ni = createFromBufferedImage(texture);
 			setImage(ni);
-			TextureUtil.allocate(this.getGlId(), ni.getWidth(), ni.getHeight());
+			TextureUtil.prepareImage(this.getGlId(), ni.getWidth(), ni.getHeight());
 			upload();
 		}
 
@@ -164,6 +170,21 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ServerStatus getServerSideStatus() {
-		return mc.player != null ? ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
+		return mc.player != null ? ((NetH)mc.getNetworkHandler()).cpm$hasMod() ? ServerStatus.INSTALLED : ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
+	}
+
+	@Override
+	public File getGameDir() {
+		return mc.runDirectory;
+	}
+
+	@Override
+	public void sendSkinUpdate() {
+		CustomPlayerModelsClient.INSTANCE.sendSkinData(mc.getNetworkHandler());
+	}
+
+	@Override
+	public void openGui(Function<IGui, Frame> creator) {
+		mc.openScreen(new GuiImpl(creator, mc.currentScreen));
 	}
 }

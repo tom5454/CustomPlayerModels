@@ -38,6 +38,7 @@ public class ColorEditorArg implements TemplateArg<ColorArg> {
 		return new ColorArg(name, value);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void applyArgs(Map<String, Object> data, List<ModelElement> parts) {
 		List<Map<String, Object>> cubesList = (List<Map<String, Object>>) data.get("cubes");

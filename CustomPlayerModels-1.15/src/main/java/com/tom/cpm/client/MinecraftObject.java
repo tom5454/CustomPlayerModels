@@ -1,8 +1,10 @@
 package com.tom.cpm.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
@@ -16,9 +18,12 @@ import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
+import com.tom.cpm.common.NetH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
@@ -172,6 +177,21 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ServerStatus getServerSideStatus() {
-		return mc.player != null ? ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
+		return mc.player != null ? ((NetH)mc.getConnection()).cpm$hasMod() ? ServerStatus.INSTALLED : ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
+	}
+
+	@Override
+	public File getGameDir() {
+		return mc.gameDir;
+	}
+
+	@Override
+	public void sendSkinUpdate() {
+		ClientProxy.INSTANCE.sendSkinData(mc.getConnection());
+	}
+
+	@Override
+	public void openGui(Function<IGui, Frame> creator) {
+		mc.displayGuiScreen(new GuiImpl(creator, mc.currentScreen));
 	}
 }

@@ -2,56 +2,59 @@ package com.tom.cpm.shared.editor.gui;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.math.Vec2i;
-import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.gui.ViewportPanelBase;
+import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.util.PaintImageCreator;
 
-public class ViewportPaintPanel extends ViewportPanel {
+public class ViewportPaintPanel extends ViewportPanelBase {
 	private int color;
 	private int dragging;
+	protected Editor editor;
 
 	public ViewportPaintPanel(IGui gui, Editor editor) {
-		super(gui, editor);
+		super(gui);
+		this.editor = editor;
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
-		mouseCursorPos.x = mouseX;
-		mouseCursorPos.y = mouseY;
-
-		gui.pushMatrix();
-		gui.setPosOffset(bounds);
-		gui.setupCut();
+	public void draw0(float partialTicks) {
 		gui.drawBox(0, 0, bounds.w, bounds.h, 0xff333333);
 
 		TreeElement e = editor.selectedElement;
 		editor.selectedElement = null;
 		editor.renderPaint = true;
-		nat.render(partialTicks, mouseX, mouseY);
+		nat.renderSetup();
+		nat.render(partialTicks);
+		nat.renderFinish();
+		editor.renderPaint = false;
+		int colorUnderMouse = nat.getColorUnderMouse();
 
-		if(bounds.isInBounds(mouseX - bounds.x, mouseY - bounds.y)) {
-			color = nat.colorUnderMouse;
+		if(bounds.isInBounds(mouseCursorPos.x - bounds.x, mouseCursorPos.y - bounds.y)) {
+			color = colorUnderMouse;
 		} else
 			color = 0;
 
-		editor.renderPaint = false;
 		editor.selectedElement = e;
 
-		if(!MinecraftObjectHolder.DEBUGGING || !gui.isAltDown()) {
+		gui.drawText(0, 0, "", 0);
+
+		if(!gui.isAltDown()) {//!MinecraftObjectHolder.DEBUGGING ||
 			gui.drawBox(0, 0, bounds.w, bounds.h, 0xff333333);
-			nat.render(partialTicks, mouseX, mouseY);
+			nat.renderSetup();
+			if(editor.renderBase)nat.renderBase();
+			nat.render(partialTicks);
+			nat.renderFinish();
 		}
 
-		if(MinecraftObjectHolder.DEBUGGING) {
+		if(true) {//MinecraftObjectHolder.DEBUGGING
 			Vec2i v = getHoveredTexPos();
 			if(v != null)gui.drawText(0, 0, v.x + " " + v.y, 0xffffffff);
 			gui.drawBox(bounds.x, bounds.y + 10, 16, 16, 0xffffffff);
 			gui.drawBox(bounds.x + 1, bounds.y + 11, 14, 14, color | 0xff000000);
 		}
-
-		gui.popMatrix();
-		gui.setupCut();
 	}
 
 	public Vec2i getHoveredTexPos() {
@@ -100,5 +103,35 @@ public class ViewportPaintPanel extends ViewportPanel {
 			return true;
 		}
 		return super.mouseRelease(x, y, btn);
+	}
+
+	@Override
+	public ViewportCamera getCamera() {
+		return editor.camera;
+	}
+
+	@Override
+	public void preRender() {
+		editor.preRender();
+	}
+
+	@Override
+	public SkinType getSkinType() {
+		return editor.skinType;
+	}
+
+	@Override
+	public ModelDefinition getDefinition() {
+		return editor.definition;
+	}
+
+	@Override
+	public boolean isTpose() {
+		return editor.playerTpose;
+	}
+
+	@Override
+	public boolean applyLighting() {
+		return !editor.renderPaint;
 	}
 }
