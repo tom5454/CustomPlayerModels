@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.WorldSelectionScreen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -193,5 +194,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public void openGui(Function<IGui, Frame> creator) {
 		mc.displayGuiScreen(new GuiImpl(creator, mc.currentScreen));
+	}
+
+	@Override
+	public Runnable openSingleplayer() {
+		return () -> mc.displayGuiScreen(new WorldSelectionScreen(mc.currentScreen));
 	}
 }

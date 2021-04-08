@@ -214,6 +214,8 @@ label.cpm.screenshotPopup=Set Icon
 label.cpm.loading=Loading...
 label.cpm.skinForced=Your skin was force set by the server operators.
 label.cpm.controls.text=Camera:\Hold the Middle mouse button to rotate the view.\Hold Shift+Middle mouse button to pan the view.\Can be changed to right click in Edit/Settings.\Number fields:\Shift to change by 0.1\Image Editor:\Ctrl+click to pick hovered color.
+label.cpm.animationSettings.new=New Animation
+label.cpm.animationSettings.edit=Edit Animation
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body

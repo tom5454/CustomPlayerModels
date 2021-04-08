@@ -19,8 +19,8 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
+import com.tom.cpm.shared.editor.gui.popup.AnimationSettinsPopup;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
-import com.tom.cpm.shared.editor.gui.popup.NewAnimationPopup;
 
 public class AnimPanel extends Panel {
 	private Editor editor;
@@ -47,7 +47,7 @@ public class AnimPanel extends Panel {
 		});
 		editor.setSelAnim.add(animSel::setSelected);
 
-		ButtonIcon newAnimBtn = new ButtonIcon(gui, "editor", 0, 16, () -> e.openPopup(new NewAnimationPopup(gui, editor)));
+		ButtonIcon newAnimBtn = new ButtonIcon(gui, "editor", 0, 16, () -> e.openPopup(new AnimationSettinsPopup(gui, editor, false)));
 		newAnimBtn.setBounds(new Box(5, 30, 18, 18));
 		addElement(newAnimBtn);
 
@@ -55,6 +55,11 @@ public class AnimPanel extends Panel {
 		delAnimBtn.setBounds(new Box(25, 30, 18, 18));
 		addElement(delAnimBtn);
 		editor.setAnimDelEn.add(delAnimBtn::setEnabled);
+
+		Button editBtn = new Button(gui, gui.i18nFormat("button.cpm.edit"), () -> e.openPopup(new AnimationSettinsPopup(gui, editor, true)));
+		editBtn.setBounds(new Box(45, 30, 80, 18));
+		addElement(editBtn);
+		editor.setAnimDelEn.add(editBtn::setEnabled);
 
 		Label currFrame = new Label(gui, "");
 		currFrame.setBounds(new Box(30, 65, 110, 10));

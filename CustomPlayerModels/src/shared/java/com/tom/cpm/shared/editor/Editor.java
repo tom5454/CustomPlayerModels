@@ -1193,6 +1193,34 @@ public class Editor {
 		updateGui();
 	}
 
+	public void editAnim(IPose pose, String displayName, boolean add, boolean loop) {
+		if(selectedAnim != null) {
+			boolean addOld = selectedAnim.add;
+			boolean loopOld = selectedAnim.loop;
+			String dispName = selectedAnim.displayName;
+			IPose oldPose = selectedAnim.pose;
+			AnimationType oldType = selectedAnim.type;
+			EditorAnim anim = selectedAnim;
+			addUndo(() -> {
+				anim.add = addOld;
+				anim.loop = loopOld;
+				anim.displayName = dispName;
+				anim.pose = oldPose;
+				anim.type = oldType;
+			});
+			runOp(() -> {
+				anim.pose = pose;
+				anim.add = add;
+				anim.loop = loop;
+				anim.displayName = displayName;
+				if(pose != null)anim.type = AnimationType.POSE;
+				else anim.type = AnimationType.GESTURE;
+			});
+			markDirty();
+			updateGui();
+		}
+	}
+
 	public void delSelectedAnim() {
 		if(selectedAnim != null) {
 			EditorAnim anim = selectedAnim;

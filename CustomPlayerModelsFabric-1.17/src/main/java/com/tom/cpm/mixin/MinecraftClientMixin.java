@@ -8,10 +8,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.render.RenderTickCounter;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.GuiImpl;
+import com.tom.cpm.shared.editor.gui.EditorGui;
 
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin {
@@ -32,6 +34,10 @@ public abstract class MinecraftClientMixin {
 		if(screen == null && currentScreen instanceof GuiImpl.Overlay) {
 			cbi.cancel();
 			openScreen(((GuiImpl.Overlay)currentScreen).getGui());
+		}
+		if(screen instanceof TitleScreen && EditorGui.doOpenEditor()) {
+			cbi.cancel();
+			openScreen(new GuiImpl(EditorGui::new, screen));
 		}
 	}
 }

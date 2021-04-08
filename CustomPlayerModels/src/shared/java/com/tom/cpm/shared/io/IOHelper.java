@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.io;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.DataInput;
@@ -50,7 +49,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 	}
 
 	public IOHelper(byte[] data) {
-		this(new ByteArrayInputStream(data));
+		this(new FastByteArrayInputStream(data));
 		this.dataIn = data;
 	}
 

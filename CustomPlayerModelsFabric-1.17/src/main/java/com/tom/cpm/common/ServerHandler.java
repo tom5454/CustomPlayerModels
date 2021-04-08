@@ -31,7 +31,7 @@ public class ServerHandler {
 	public static void onPlayerJoin(ServerPlayerEntity spe) {
 		PacketByteBuf pb = new PacketByteBuf(Unpooled.buffer());
 		NbtCompound data = new NbtCompound();
-		pb.writeCompound(data);
+		pb.writeNbt(data);
 		spe.networkHandler.sendPacket(new CustomPayloadS2CPacket(NetworkHandler.helloPacket, pb));
 		if(spe.getServer().isDedicated()) {
 			ServerNetH snh = (ServerNetH) spe.networkHandler;
@@ -78,7 +78,7 @@ public class ServerHandler {
 			});
 		} else if(NetworkHandler.setSkin.equals(rl)) {
 			if(handler.cpm$getEncodedModelData() == null || !handler.cpm$getEncodedModelData().forced) {
-				NbtCompound tag = packet.data.readCompound();
+				NbtCompound tag = packet.data.readNbt();
 				handler.cpm$getServer().execute(() -> {
 					handler.cpm$setEncodedModelData(tag.contains("data") ? new PlayerData(tag.getByteArray("data"), false, false) : null);
 					NetworkHandler.sendToAllTrackingAndSelf(h.player, new CustomPayloadS2CPacket(NetworkHandler.setSkin, writeSkinData(handler.cpm$getEncodedModelData(), h.player)), ServerHandler::hasMod, null);
@@ -100,7 +100,7 @@ public class ServerHandler {
 			data.putBoolean("forced", dt.forced);
 			data.putByteArray("data", dt.data);
 		}
-		pb.writeCompound(data);
+		pb.writeNbt(data);
 		return pb;
 	}
 

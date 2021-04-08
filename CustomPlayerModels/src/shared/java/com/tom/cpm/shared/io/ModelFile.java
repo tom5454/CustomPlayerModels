@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper.ImageBlock;
@@ -13,7 +12,7 @@ public class ModelFile {
 	private String name, desc, fname;
 	private Link link;
 	private byte[] dataBlock, overflowLocal;
-	private Image icon;
+	private ImageBlock icon;
 
 	public static ModelFile load(File in) throws IOException {
 		try (FileInputStream fin = new FileInputStream(in)) {
@@ -33,8 +32,7 @@ public class ModelFile {
 			ImageBlock block = h.readImage();
 			if(block.getWidth() > 256 || block.getHeight() > 256)
 				throw new IOException("Texture size too large");
-			block.doReadImage();
-			mf.icon = block.getImage();
+			mf.icon = block;
 			cis.checkSum();
 			return mf;
 		}
@@ -44,7 +42,7 @@ public class ModelFile {
 		return dataBlock;
 	}
 
-	public Image getIcon() {
+	public ImageBlock getIcon() {
 		return icon;
 	}
 

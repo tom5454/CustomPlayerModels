@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.gui;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Exporter;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
+import com.tom.cpm.shared.io.IOHelper.ImageBlock;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.skin.TextureProvider;
 
@@ -135,8 +137,16 @@ public class SkinsPanel extends Panel {
 			select.setBounds(new Box(WIDTH - 50, 2, 40, 20));
 			addElement(select);
 
-			if(file.getIcon() != null) {
-				icon = new TextureProvider(file.getIcon(), null);
+			if(file.getIcon() != null && file.getIcon().getWidth() > 0) {
+				MinecraftClientAccess.get().getDefinitionLoader().execute(() -> {
+					ImageBlock block = file.getIcon();
+					try {
+						block.doReadImage();
+						if(block.getImage() != null)
+							icon = new TextureProvider(block.getImage(), null);
+					} catch (IOException e) {
+					}
+				});
 			}
 
 			setBounds(new Box(0, 0, WIDTH, Math.max(64, lines.length * 10 + 30)));

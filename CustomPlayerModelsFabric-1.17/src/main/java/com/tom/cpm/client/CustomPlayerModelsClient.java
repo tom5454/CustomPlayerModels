@@ -131,7 +131,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		ClientPlayNetworkHandler h = (ClientPlayNetworkHandler) handler;
 		if(NetworkHandler.helloPacket.equals(rl)) {
 			PacketByteBuf pb = packet.getData();
-			NbtCompound nbt = pb.readCompound();
+			NbtCompound nbt = pb.readNbt();
 			MinecraftClient.getInstance().execute(() -> {
 				handler.cpm$setHasMod(true);
 				loader.clearServerData();
@@ -140,7 +140,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		} else if(NetworkHandler.setSkin.equals(rl)) {
 			PacketByteBuf pb = packet.getData();
 			int entId = pb.readVarInt();
-			NbtCompound data = pb.readCompound();
+			NbtCompound data = pb.readNbt();
 			MinecraftClient.getInstance().execute(() -> {
 				Entity ent = MinecraftClient.getInstance().world.getEntityById(entId);
 				if(ent instanceof PlayerEntity) {
@@ -161,14 +161,14 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 				PacketByteBuf pb = new PacketByteBuf(Unpooled.buffer());
 				NbtCompound data = new NbtCompound();
 				data.putByteArray("data", file.getDataBlock());
-				pb.writeCompound(data);
+				pb.writeNbt(data);
 				h.sendPacket(new CustomPayloadC2SPacket(NetworkHandler.setSkin, pb));
 			} catch (IOException e) {
 			}
 		} else {
 			PacketByteBuf pb = new PacketByteBuf(Unpooled.buffer());
 			NbtCompound data = new NbtCompound();
-			pb.writeCompound(data);
+			pb.writeNbt(data);
 			h.sendPacket(new CustomPayloadC2SPacket(NetworkHandler.setSkin, pb));
 		}
 	}

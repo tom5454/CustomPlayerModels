@@ -9,6 +9,7 @@ import java.util.function.Function;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiSelectWorld;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResource;
@@ -154,5 +155,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public void openGui(Function<IGui, Frame> creator) {
 		mc.displayGuiScreen(new GuiImpl(creator, mc.currentScreen));
+	}
+
+	@Override
+	public Runnable openSingleplayer() {
+		return () -> mc.displayGuiScreen(new GuiSelectWorld(mc.currentScreen));
 	}
 }

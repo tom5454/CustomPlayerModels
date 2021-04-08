@@ -18,6 +18,15 @@ public class ChecksumInputStream extends InputStream {
 		return v;
 	}
 
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+		int rd = is.read(b, off, len);
+		for(int i = 0;i<rd;i++) {
+			sum += Byte.toUnsignedInt(b[off + i]);
+		}
+		return rd;
+	}
+
 	public short getSum() {
 		return sum;
 	}

@@ -136,6 +136,9 @@ public class ClientProxy extends CommonProxy {
 		if(openGui.getGui() == null && minecraft.currentScreen instanceof GuiImpl.Overlay) {
 			openGui.setGui(((GuiImpl.Overlay) minecraft.currentScreen).getGui());
 		}
+		if(openGui.getGui() instanceof MainMenuScreen && EditorGui.doOpenEditor()) {
+			openGui.setGui(new GuiImpl(EditorGui::new, openGui.getGui()));
+		}
 	}
 
 	public static class Button extends net.minecraft.client.gui.widget.button.Button {

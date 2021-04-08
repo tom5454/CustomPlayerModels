@@ -23,7 +23,7 @@ public class EditorAnim implements IAnim {
 	private AnimFrame currentFrame;
 	public final Editor editor;
 	public final String filename;
-	public final AnimationType type;
+	public AnimationType type;
 	public IPose pose;
 	public String displayName;
 	public boolean add = true;
