@@ -13,7 +13,10 @@ public class DynamicTexture {
 	}
 
 	public void bind() {
-		if(texture == null)this.texture = MinecraftClientAccess.get().createTexture();
+		if(texture == null) {
+			this.texture = MinecraftClientAccess.get().createTexture();
+			needReload = true;
+		}
 		if(needReload) {
 			texture.load(image);
 			needReload = false;

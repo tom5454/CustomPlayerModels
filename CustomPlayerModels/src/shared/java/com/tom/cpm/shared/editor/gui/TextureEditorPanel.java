@@ -5,21 +5,25 @@ import java.util.function.Supplier;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.elements.GuiElement;
+import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.ElementType;
+import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.skin.TextureProvider;
 
-public class TextureDisplayPanel extends GuiElement {
+public class TextureEditorPanel extends GuiElement {
 	private int lastMx, lastMy;
 	private boolean dragging;
 	private float zoom;
-	private int offX, offY;
+	private int offX, offY, dragX, dragY;
 	private Editor editor;
 	public Supplier<Vec2i> cursorPos;
 	private Vec2i mouseCursorPos = new Vec2i();
+	private ModelElement draggingElem;
 
-	public TextureDisplayPanel(IGui gui, Editor editor, int zoom) {
+	public TextureEditorPanel(IGui gui, Editor editor, int zoom) {
 		super(gui);
 		this.editor = editor;
 		this.zoom = 0;
@@ -47,23 +51,57 @@ public class TextureDisplayPanel extends GuiElement {
 			gui.drawTexture(offX, offY, rw, rh, 0, 0, 1, 1);
 			int imgX = (int) ((mouseX - offX - bounds.x) / zoom);
 			int imgY = (int) ((mouseY - offY - bounds.y) / zoom);
-			SkinTextureDisplay.drawBoxTextureOverlay(gui, editor, offX, offY, zoom, zoom);
+			TextureDisplay.drawBoxTextureOverlay(gui, editor, offX, offY, zoom, zoom);
 			Vec2i p1 = imgX >= 0 && imgY >= 0 && imgX < provider.getImage().getWidth() && imgY < provider.getImage().getHeight() ? new Vec2i(imgX, imgY) : null;
-			Vec2i p2 = editor.cursorPos.get();
-			Vec2i p = p2 != null ? p2 : p1;
-			if(p != null && p.x >= 0 && p.y >= 0 && p.x < provider.getImage().getWidth() && p.y < provider.getImage().getHeight()) {
-				int imgC = provider.getImage().getRGB(p.x, p.y);
-				int outlineColor = ((0xffffff - (imgC & 0xffffff)) & 0xffffff);
-				int a = (imgC >> 24) & 0xff;
-				if(a < 64)outlineColor = 0x000000;
-				if(a == 0)imgC = 0xffffffff;
-				gui.drawBox(p.x * zoom + offX, p.y * zoom + offY, zoom, zoom, 0xff000000 | outlineColor);
-				gui.drawBox(p.x * zoom + offX + 1, p.y * zoom + offY + 1, zoom - 2, zoom - 2, 0xff000000);
-				gui.drawBox(p.x * zoom + offX + 1, p.y * zoom + offY + 1, zoom - 2, zoom - 2, imgC);
+			switch (editor.drawMode) {
+			case MOVE_UV:
+			{
+				if(p1 != null) {
+					ModelElement e = getElementUnderMouse(p1.x, p1.y);
+					if(dragging)e = editor.getSelectedElement();
+					if(e != null) {
+						Box b = e.getTextureBox();
+						gui.drawRectangle(b.x * zoom + offX, b.y * zoom + offY, b.w * zoom, b.h * zoom, 0xff000000);
+					}
+				}
+			}
+			break;
+			case PEN:
+			case RUBBER:
+			{
+				Vec2i p2 = editor.cursorPos.get();
+				Vec2i p = p2 != null ? p2 : p1;
+				if(p != null && p.x >= 0 && p.y >= 0 && p.x < provider.getImage().getWidth() && p.y < provider.getImage().getHeight()) {
+					int imgC = provider.getImage().getRGB(p.x, p.y);
+					int outlineColor = ((0xffffff - (imgC & 0xffffff)) & 0xffffff);
+					int a = (imgC >> 24) & 0xff;
+					if(a < 64)outlineColor = 0x000000;
+					if(a == 0)imgC = 0xffffffff;
+					gui.drawBox(p.x * zoom + offX, p.y * zoom + offY, zoom, zoom, 0xff000000 | outlineColor);
+					gui.drawBox(p.x * zoom + offX + 1, p.y * zoom + offY + 1, zoom - 2, zoom - 2, 0xff000000);
+					gui.drawBox(p.x * zoom + offX + 1, p.y * zoom + offY + 1, zoom - 2, zoom - 2, imgC);
+				}
+			}
+			break;
+			default:
+				break;
 			}
 		}
 
 		gui.popMatrix();
+	}
+
+	private ModelElement getElementUnderMouse(int x, int y) {
+		ModelElement[] elem = new ModelElement[1];
+		Editor.walkElements(editor.elements, e -> {
+			if(elem[0] != null)return;
+			if(e.type != ElementType.NORMAL)return;
+			Box b = e.getTextureBox();
+			if(b != null && b.isInBounds(x, y)) {
+				elem[0] = e;
+			}
+		});
+		return elem[0];
 	}
 
 	@Override
@@ -86,12 +124,30 @@ public class TextureDisplayPanel extends GuiElement {
 				int px = (int) ((x - offX - bounds.x) / zoom);
 				int py = (int) ((y - offY - bounds.y) / zoom);
 				if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
-					if(gui.isCtrlDown()) {
-						editor.penColor = provider.getImage().getRGB(px, py);
-						editor.setPenColor.accept(editor.penColor);
-						dragging = false;
-					} else
-						editor.drawPixel(px, py);
+					switch (editor.drawMode) {
+					case PEN:
+					case RUBBER:
+					{
+						if(gui.isCtrlDown()) {
+							editor.penColor = provider.getImage().getRGB(px, py);
+							editor.setPenColor.accept(editor.penColor);
+							dragging = false;
+						} else
+							editor.drawPixel(px, py);
+					}
+					break;
+
+					case MOVE_UV:
+					{
+						dragX = px;
+						dragY = py;
+						editor.selectedElement = getElementUnderMouse(px, py);
+					}
+					break;
+
+					default:
+						break;
+					}
 				}
 			}
 			return true;
@@ -116,7 +172,32 @@ public class TextureDisplayPanel extends GuiElement {
 					int px = (int) ((x - offX - bounds.x) / zoom);
 					int py = (int) ((y - offY - bounds.y) / zoom);
 					if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
-						editor.drawPixel(px, py);
+						switch (editor.drawMode) {
+						case PEN:
+						case RUBBER:
+							editor.drawPixel(px, py);
+							break;
+
+						case MOVE_UV:
+						{
+							if(editor.getSelectedElement() != null) {
+								int xoff = px - dragX;
+								int yoff = py - dragY;
+								dragX = px;
+								dragY = py;
+								editor.getSelectedElement().u += xoff;
+								editor.getSelectedElement().v += yoff;
+								if(xoff > 0 || yoff > 0) {
+									editor.updateGui();
+									editor.markDirty();
+								}
+							}
+						}
+						break;
+
+						default:
+							break;
+						}
 					}
 				}
 
@@ -130,7 +211,7 @@ public class TextureDisplayPanel extends GuiElement {
 
 	@Override
 	public boolean mouseRelease(int x, int y, int btn) {
-		if(bounds.isInBounds(x, y)) {
+		if(bounds.isInBounds(x, y) || dragging) {
 			dragging = false;
 			return true;
 		}

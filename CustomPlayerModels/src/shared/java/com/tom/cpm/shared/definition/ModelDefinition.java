@@ -32,6 +32,7 @@ import com.tom.cpm.shared.parts.IResolvedModelPart;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
 import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
+import com.tom.cpm.shared.parts.ModelPartScale;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinLink;
 import com.tom.cpm.shared.skin.TextureProvider;
@@ -51,6 +52,7 @@ public class ModelDefinition {
 	private Map<ModelPart, PartRoot> rootRenderingCubes;
 	private int resolveState;
 	private AnimationRegistry animations = new AnimationRegistry();
+	private ModelPartScale scale;
 	private boolean stitchedTexture;
 	public boolean cloneable;
 
@@ -339,5 +341,13 @@ public class ModelDefinition {
 
 	public SkinType getSkinType() {
 		return playerObj.getSkinType();
+	}
+
+	public void setScale(ModelPartScale scale) {
+		this.scale = scale;
+	}
+
+	public ModelPartScale getScale() {
+		return scale;
 	}
 }

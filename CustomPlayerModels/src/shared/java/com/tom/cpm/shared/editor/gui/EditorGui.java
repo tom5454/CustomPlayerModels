@@ -21,6 +21,7 @@ import com.tom.cpl.gui.elements.Tree;
 import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
@@ -29,8 +30,11 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Exporter;
+import com.tom.cpm.shared.editor.Generators;
+import com.tom.cpm.shared.editor.HeldItem;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
+import com.tom.cpm.shared.editor.gui.popup.DescPopup;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
 import com.tom.cpm.shared.editor.gui.popup.FileChooserGui;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
@@ -42,6 +46,7 @@ import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.model.SkinType;
 
 public class EditorGui extends Frame {
+	private static final String VANILLA_MODEL = "~~VANILLA~~";
 	private static Editor toReopen;
 	private TabbedPanelManager tabs;
 	private HorizontalLayout topPanel;
@@ -52,11 +57,13 @@ public class EditorGui extends Frame {
 		super(gui);
 		if(toReopen != null) {
 			this.editor = toReopen;
+			this.editor.setGui(this);
 			toReopen = null;
 			ModConfig.getConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
 			ModConfig.getConfig().save();
 		} else {
-			this.editor = new Editor(this);
+			this.editor = new Editor();
+			this.editor.setGui(this);
 			String reopen = ModConfig.getConfig().getString(ConfigKeys.REOPEN_PROJECT, null);
 			if(reopen != null) {
 				ModConfig.getConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
@@ -69,7 +76,10 @@ public class EditorGui extends Frame {
 		String old = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL_OLD, null);
 		if(old != null) {
 			ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL_OLD);
-			ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, old);
+			if(VANILLA_MODEL.equals(old))
+				ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL);
+			else
+				ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, old);
 			ModConfig.getConfig().save();
 		}
 		gui.setCloseListener(c -> {
@@ -88,6 +98,14 @@ public class EditorGui extends Frame {
 
 	@Override
 	public void initFrame(int width, int height) {
+		int scale = ModConfig.getConfig().getInt(ConfigKeys.EDITOR_SCALE, -1);
+		if(scale != -1) {
+			if(gui.getScale() != scale) {
+				gui.setScale(scale);
+				return;
+			}
+		}
+
 		editor.updaterReg.reset();
 
 		tabs = new TabbedPanelManager(gui);
@@ -129,6 +147,7 @@ public class EditorGui extends Frame {
 		ScrollPanel sp = new ScrollPanel(gui);
 		sp.setDisplay(new PosPanel(gui, this));
 		sp.setBounds(new Box(0, 0, 170, height - 20));
+		sp.setScrollBarSide(true);
 		mainPanel.addElement(sp);
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.model"), mainPanel));
 
@@ -138,6 +157,7 @@ public class EditorGui extends Frame {
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
 		editor.displayViewport.add(view::setEnabled);
+		editor.heldRenderEnable.accept(view.canRenderHeldItem());
 	}
 
 	private void initTexturePanel(int width, int height) {
@@ -151,7 +171,7 @@ public class EditorGui extends Frame {
 		editor.cursorPos = viewT::getHoveredTexPos;
 		editor.displayViewport.add(viewT::setEnabled);
 
-		TextureDisplayPanel tdp = new TextureDisplayPanel(gui, editor, height / 2);
+		TextureEditorPanel tdp = new TextureEditorPanel(gui, editor, height / 2);
 		tdp.setBounds(new Box(width - height / 2, 0, height / 2, height / 2));
 		textureEditor.addElement(tdp);
 
@@ -195,10 +215,12 @@ public class EditorGui extends Frame {
 		ScrollPanel spSetup = new ScrollPanel(gui);
 		spSetup.setBounds(new Box(0, 0, 170, height - 40));
 		spSetup.setDisplay(new AnimPanel(gui, this));
+		spSetup.setScrollBarSide(true);
 
 		ScrollPanel spTest = new ScrollPanel(gui);
 		spTest.setBounds(new Box(0, 0, 170, height - 40));
 		spTest.setDisplay(new AnimTestPanel(gui, this));
+		spTest.setScrollBarSide(true);
 
 		buttons.add(animPanelTabs.createTab(gui.i18nFormat("tab.cpm.animation.setup"), spSetup));
 		buttons.add(animPanelTabs.createTab(gui.i18nFormat("tab.cpm.animation.test"), spTest));
@@ -235,14 +257,13 @@ public class EditorGui extends Frame {
 	}
 
 	private void initFileMenu() {
-		PopupMenu pp = new PopupMenu(gui);
-		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.file"), () -> pp.display(this, 0, 20)));
+		PopupMenu pp = new PopupMenu(gui, this);
+		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.file"), () -> pp.display(0, 20)));
 
-		PopupMenu newMenu = new PopupMenu(gui);
-		PopupMenu newModelMenu = new PopupMenu(gui);
-		int x = topPanel.getX();
+		PopupMenu newMenu = new PopupMenu(gui, this);
+		PopupMenu newModelMenu = new PopupMenu(gui, this);
 
-		newMenu.addButton(gui.i18nFormat("button.cpm.new.model"), () -> newModelMenu.display(this, x, 20));
+		newMenu.addMenuButton(gui.i18nFormat("button.cpm.new.model"), newModelMenu);
 
 		for (SkinType type : SkinType.VALUES) {
 			if(type == SkinType.UNKNOWN)continue;
@@ -252,14 +273,14 @@ public class EditorGui extends Frame {
 		Button newTempl = newMenu.addButton(gui.i18nFormat("button.cpm.new.template"), () -> checkUnsaved(() -> {
 			this.editor.loadDefaultPlayerModel();
 			editor.templateSettings = new TemplateSettings(editor);
-			editor.setupTemplateModel();
+			Generators.setupTemplateModel(editor);
 			editor.skinProvider.setImage(new Image(64, 64));
 			editor.skinProvider.texture.markDirty();
 			this.editor.updateGui();
 		}));
 		newTempl.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.new.template")));
 
-		pp.addButton(gui.i18nFormat("button.cpm.file.new"), () -> newMenu.display(this, x, 20));
+		pp.addMenuButton(gui.i18nFormat("button.cpm.file.new"), newMenu);
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.load"), () -> checkUnsaved(() -> {
 			FileChooserGui fc = new FileChooserGui(this);
@@ -318,12 +339,12 @@ public class EditorGui extends Frame {
 					open = MinecraftClientAccess.get().openSingleplayer();
 				else
 					throw new UnsupportedOperationException();
-				Exporter.exportTempModel(editor, this);
+				if(!Exporter.exportTempModel(editor, this))return;
 				String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
 				if(model != null) {
 					ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, model);
 				} else {
-					ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL_OLD);
+					ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, VANILLA_MODEL);
 				}
 				ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, Exporter.TEMP_MODEL);
 				open.run();
@@ -339,9 +360,9 @@ public class EditorGui extends Frame {
 	}
 
 	private void initEditMenu() {
-		PopupMenu pp = new PopupMenu(gui);
+		PopupMenu pp = new PopupMenu(gui, this);
 		int x = topPanel.getX();
-		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.edit"), () -> pp.display(this, x, 20)));
+		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.edit"), () -> pp.display(x, 20)));
 
 		Button undo = pp.addButton(gui.i18nFormat("button.cpm.edit.undo"), editor::undo);
 		editor.setUndoEn.add(undo::setEnabled);
@@ -349,12 +370,25 @@ public class EditorGui extends Frame {
 		Button redo = pp.addButton(gui.i18nFormat("button.cpm.edit.redo"), editor::redo);
 		editor.setRedoEn.add(redo::setEnabled);
 
-		pp.add(new Label(gui, "=========").setBounds(new Box(5, 5, 0, 0)));
+		PopupMenu tools = new PopupMenu(gui, this);
+		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.tools"), tools);
 
-		Button convertToCustom = pp.addButton(gui.i18nFormat("button.cpm.edit.convert_model_custom"), editor::convertModel);
-		convertToCustom.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.edit.convert_model_custom")));
+		tools.addButton(gui.i18nFormat("button.cpm.edit.convert_model_custom"), () -> Generators.convertModel(editor)).setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.edit.convert_model_custom")));
 
-		pp.addButton(gui.i18nFormat("button.cpm.edit.add_skin_layer2"), editor::addSkinLayer);
+		tools.addButton(gui.i18nFormat("button.cpm.edit.add_skin_layer2"), () -> Generators.addSkinLayer(editor));
+
+		tools.addButton(gui.i18nFormat("button.cpm.edit.convert2template"), () -> {
+			if (editor.templateSettings == null) {
+				if (editor.dirty) {
+					openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.must_save")));
+				} else {
+					if(editor.file == null)
+						setupTemplate();
+					else
+						openPopup(new ConfirmPopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warn_c2t"), this::setupTemplate, null));
+				}
+			}
+		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.add_template"), new InputPopup(this, gui.i18nFormat("label.cpm.template_link_input"), gui.i18nFormat("label.cpm.template_link_input.desc"), link -> {
 			new ProcessPopup<>(this, gui.i18nFormat("label.cpm.loading_template"), gui.i18nFormat("label.cpm.loading_template.desc"), () -> {
@@ -371,18 +405,9 @@ public class EditorGui extends Frame {
 			}).start();
 		}, null));
 
-		pp.addButton(gui.i18nFormat("button.cpm.edit.convert2template"), () -> {
-			if (editor.templateSettings == null) {
-				if (editor.dirty) {
-					openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.must_save")));
-				} else {
-					if(editor.file == null)
-						setupTemplate();
-					else
-						openPopup(new ConfirmPopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warn_c2t"), this::setupTemplate, null));
-				}
-			}
-		});
+		pp.addButton(gui.i18nFormat("label.cpm.desc"), () -> openPopup(new DescPopup(this)));
+
+		pp.add(new Label(gui, "=========").setBounds(new Box(5, 5, 0, 0)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.settings"), () -> openPopup(new SettingsPopup(this)));
 
@@ -393,34 +418,30 @@ public class EditorGui extends Frame {
 
 	private void setupTemplate() {
 		editor.templateSettings = new TemplateSettings(editor);
-		editor.setupTemplateModel();
+		Generators.setupTemplateModel(editor);
 		editor.markDirty();
 		editor.updateGui();
 	}
 
 	private void initEffectMenu() {
-		PopupMenu pp = new PopupMenu(gui);
+		PopupMenu pp = new PopupMenu(gui, this);
 		int x = topPanel.getX();
-		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.effect"), () -> pp.display(this, x, 20)));
+		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.effect"), () -> pp.display(x, 20)));
 
-		Checkbox boxGlow = new Checkbox(gui, gui.i18nFormat("label.cpm.glow"));
-		boxGlow.setAction(editor::switchGlow);
+		Checkbox boxGlow = pp.addCheckbox(gui.i18nFormat("label.cpm.glow"), editor::switchGlow);
 		editor.setGlow.add(b -> {
 			boxGlow.setEnabled(b != null);
 			if(b != null)boxGlow.setSelected(b);
 			else boxGlow.setSelected(false);
 		});
 		boxGlow.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.glow")));
-		pp.add(boxGlow);
 
-		Checkbox boxReColor = new Checkbox(gui, gui.i18nFormat("label.cpm.recolor"));
-		boxReColor.setAction(editor::switchReColorEffect);
+		Checkbox boxReColor = pp.addCheckbox(gui.i18nFormat("label.cpm.recolor"), editor::switchReColorEffect);
 		editor.setReColor.add(b -> {
 			boxReColor.setEnabled(b != null);
 			if(b != null)boxReColor.setSelected(b);
 			else boxReColor.setSelected(false);
 		});
-		pp.add(boxReColor);
 
 		ColorButton colorBtn = new ColorButton(gui, editor.frame, editor::setColor);
 		editor.setPartColor.add(c -> {
@@ -430,53 +451,70 @@ public class EditorGui extends Frame {
 		});
 		pp.add(colorBtn);
 
-		Checkbox boxHidden = new Checkbox(gui, gui.i18nFormat("label.cpm.hidden_effect"));
-		boxHidden.setAction(editor::switchHide);
+		Checkbox boxHidden = pp.addCheckbox(gui.i18nFormat("label.cpm.hidden_effect"), editor::switchHide);
 		editor.setHiddenEffect.add(b -> {
 			boxHidden.setEnabled(b != null);
 			if(b != null)boxHidden.setSelected(b);
 			else boxHidden.setSelected(false);
 		});
-		pp.add(boxHidden);
 	}
 
 	private void initDisplayMenu() {
-		PopupMenu pp = new PopupMenu(gui);
+		PopupMenu pp = new PopupMenu(gui, this);
 		int x = topPanel.getX();
-		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.display"), () -> pp.display(this, x, 20)));
+		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.display"), () -> pp.display(x, 20)));
 
-		Checkbox chxbxBase = new Checkbox(gui, gui.i18nFormat("label.cpm.display.drawBase"));
-		pp.add(chxbxBase);
+		Checkbox chxbxBase = pp.addCheckbox(gui.i18nFormat("label.cpm.display.drawBase"), b -> {
+			editor.renderBase = !b.isSelected();
+			b.setSelected(editor.renderBase);
+		});
 		chxbxBase.setSelected(editor.renderBase);
-		chxbxBase.setAction(() -> {
-			editor.renderBase = !chxbxBase.isSelected();
-			chxbxBase.setSelected(editor.renderBase);
-		});
 
-		Checkbox chxbxTpose = new Checkbox(gui, gui.i18nFormat("label.cpm.display.player_tpose"));
-		pp.add(chxbxTpose);
+		Checkbox chxbxTpose = pp.addCheckbox(gui.i18nFormat("label.cpm.display.player_tpose"), b -> {
+			editor.playerTpose = !b.isSelected();
+			b.setSelected(editor.playerTpose);
+		});
 		chxbxTpose.setSelected(editor.playerTpose);
-		chxbxTpose.setAction(() -> {
-			editor.playerTpose = !chxbxTpose.isSelected();
-			chxbxTpose.setSelected(editor.playerTpose);
-		});
 
-		Checkbox chxbxAllUVs = new Checkbox(gui, gui.i18nFormat("label.cpm.display.allUVs"));
-		pp.add(chxbxAllUVs);
+		Checkbox chxbxAllUVs = pp.addCheckbox(gui.i18nFormat("label.cpm.display.allUVs"), b -> {
+			editor.drawAllUVs = !b.isSelected();
+			b.setSelected(editor.drawAllUVs);
+		});
 		chxbxAllUVs.setSelected(editor.drawAllUVs);
-		chxbxAllUVs.setAction(() -> {
-			editor.drawAllUVs = !chxbxAllUVs.isSelected();
-			chxbxAllUVs.setSelected(editor.drawAllUVs);
+
+		Checkbox chxbxFilterDraw = pp.addCheckbox(gui.i18nFormat("label.cpm.display.onlyDrawOnSelected"), b -> {
+			editor.onlyDrawOnSelected = !b.isSelected();
+			b.setSelected(editor.onlyDrawOnSelected);
+		});
+		chxbxFilterDraw.setSelected(editor.onlyDrawOnSelected);
+		chxbxFilterDraw.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.onlyDrawOnSelected")));
+
+		PopupMenu heldItemRight = new PopupMenu(gui, this);
+		Button btnHeldRight = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.right"), heldItemRight);
+		initHeldItemPopup(heldItemRight, Hand.RIGHT);
+		editor.heldRenderEnable.add(e -> {
+			if(!e)btnHeldRight.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.heldItem.notSupported")));
+			btnHeldRight.setEnabled(e);
 		});
 
-		Checkbox chxbxFilterDraw = new Checkbox(gui, gui.i18nFormat("label.cpm.display.onlyDrawOnSelected"));
-		pp.add(chxbxFilterDraw);
-		chxbxFilterDraw.setSelected(editor.onlyDrawOnSelected);
-		chxbxFilterDraw.setAction(() -> {
-			editor.onlyDrawOnSelected = !chxbxFilterDraw.isSelected();
-			chxbxFilterDraw.setSelected(editor.onlyDrawOnSelected);
+		PopupMenu heldItemLeft = new PopupMenu(gui, this);
+		Button btnHeldLeft = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
+		initHeldItemPopup(heldItemLeft, Hand.LEFT);
+		editor.heldRenderEnable.add(btnHeldLeft::setEnabled);
+
+		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), b -> {
+			if(editor.scaling != 0)editor.scaling = 0;
+			else editor.scaling = 1;
+			editor.updateGui();
 		});
-		chxbxFilterDraw.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.onlyDrawOnSelected")));
+		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scaling != 0));
+		chxbxScale.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.scaling")));
+	}
+
+	private void initHeldItemPopup(PopupMenu pp, Hand hand) {
+		for(HeldItem item : HeldItem.VALUES) {
+			pp.addButton(gui.i18nFormat("button.cpm.heldItem." + item.name().toLowerCase()), () -> editor.handDisplay.put(hand, item));
+		}
 	}
 
 	private void load(File file) {

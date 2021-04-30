@@ -1,0 +1,20 @@
+name: CustomizablePlayerModels
+version: 1.0
+description: Customizable Player Models server-side plugin.
+author: tom5454
+website: ...
+main: com.tom.cpm.bukkit.CPMBukkitPlugin
+api-version: "1.13"
+commands:
+  cpm:
+    description: Customizable Player Models command
+    usage: /<command> setskin
+    permission: cpm.command
+    permission-message: You don't have <permission>
+permissions:
+  cpm.*:
+    children:
+      cpm.command: true
+  cpm.command:
+    default: op
+    description: access to cpm command

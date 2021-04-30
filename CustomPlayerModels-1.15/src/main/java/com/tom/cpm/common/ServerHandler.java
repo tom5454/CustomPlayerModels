@@ -1,9 +1,6 @@
 package com.tom.cpm.common;
 
-import java.util.Base64;
-
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -20,37 +17,46 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.network.ICustomPacket;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import com.mojang.brigadier.CommandDispatcher;
 
-import com.tom.cpl.config.ConfigEntry;
-import com.tom.cpm.common.NetH.ServerNetH;
-import com.tom.cpm.shared.config.ConfigKeys;
-import com.tom.cpm.shared.config.ModConfig;
-import com.tom.cpm.shared.config.PlayerData;
+import com.tom.cpm.shared.network.NetH;
+import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
 
 public class ServerHandler {
+	public static NetHandler<ResourceLocation, CompoundNBT, ServerPlayerEntity, PacketBuffer, ServerPlayNetHandler> netHandler;
+
+	static {
+		netHandler = new NetHandler<>(ResourceLocation::new);
+		netHandler.setNewNbt(CompoundNBT::new);
+		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
+		netHandler.setIsDedicatedServer(p -> p.getServer().isDedicatedServer());
+		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUniqueID);
+		netHandler.setWriteCompound(PacketBuffer::writeCompoundTag, PacketBuffer::readCompoundTag);
+		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new SCustomPayloadPlayPacket(rl, pb)), (spe, rl, pb) -> NetworkHandler.sendToAllTrackingAndSelf(spe, new SCustomPayloadPlayPacket(rl, pb), ServerHandler::hasMod, null));
+		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getEntityId()));
+		netHandler.setNBTSetters(CompoundNBT::putBoolean, CompoundNBT::putByteArray, CompoundNBT::putFloat);
+		netHandler.setNBTGetters(CompoundNBT::getBoolean, CompoundNBT::getByteArray, CompoundNBT::getFloat);
+		netHandler.setContains(CompoundNBT::contains);
+		netHandler.setFindTracking((p, f) -> {
+			for(EntityTracker tr : ((ServerWorld)p.world).getChunkProvider().chunkManager.entities.values()) {
+				if(tr.entity instanceof PlayerEntity && tr.trackingPlayers.contains(p)) {
+					f.accept((ServerPlayerEntity) tr.entity);
+				}
+			}
+		});
+		netHandler.setSendChat((p, m) -> p.connection.sendPacket(new SChatPacket(new TranslationTextComponent(m), ChatType.CHAT)));
+		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
+		netHandler.setGetNet(spe -> spe.connection);
+		netHandler.setGetPlayer(net -> net.player);
+	}
 
 	@SubscribeEvent
 	public void onPlayerJoin(PlayerLoggedInEvent evt) {
-		PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
-		CompoundNBT data = new CompoundNBT();
-		pb.writeCompoundTag(data);
-		ServerPlayerEntity spe = (ServerPlayerEntity) evt.getPlayer();
-		spe.connection.sendPacket(new SCustomPayloadPlayPacket(NetworkHandler.helloPacket, pb));
-		if(evt.getPlayer().getServer().isDedicatedServer()) {
-			ServerNetH snh = (ServerNetH) spe.connection;
-			ConfigEntry e = ModConfig.getConfig().getEntry(ConfigKeys.SERVER_SKINS).getEntry(spe.getUniqueID().toString());
-			boolean forced = e.getBoolean(ConfigKeys.FORCED, false);
-			String b64 = e.getString(ConfigKeys.MODEL, null);
-			if(b64 != null) {
-				snh.cpm$setEncodedModelData(new PlayerData(Base64.getDecoder().decode(b64), forced, true));
-			}
-		}
+		netHandler.onJoin((ServerPlayerEntity) evt.getPlayer());
 	}
 
 	@SubscribeEvent
@@ -59,63 +65,13 @@ public class ServerHandler {
 		NetH h = (NetH) handler;
 		if(h.cpm$hasMod()) {
 			if(evt.getTarget() instanceof PlayerEntity) {
-				sendPlayerData((ServerPlayerEntity) evt.getTarget(), handler);
+				netHandler.sendPlayerData((ServerPlayerEntity) evt.getTarget(), (ServerPlayerEntity)evt.getPlayer());
 			}
 		}
 	}
 
 	public static void registerCommands(CommandDispatcher<CommandSource> dispatcher) {
 		CommandCPM.register(dispatcher);
-	}
-
-	private static void sendPlayerData(ServerPlayerEntity target, ServerPlayNetHandler handler) {
-		PlayerData dt = ((ServerNetH)target.connection).cpm$getEncodedModelData();
-		handler.sendPacket(new SCustomPayloadPlayPacket(NetworkHandler.setSkin, writeSkinData(dt, target)));
-	}
-
-	public static void receivePacket(ICustomPacket<?> packet, ServerNetH handler) {
-		ResourceLocation rl = packet.getName();
-		ServerPlayNetHandler h = (ServerPlayNetHandler) handler;
-		if(NetworkHandler.helloPacket.equals(rl)) {
-			ServerLifecycleHooks.getCurrentServer().execute(() -> {
-				handler.cpm$setHasMod(true);
-				for(EntityTracker tr : ((ServerWorld)h.player.world).getChunkProvider().chunkManager.entities.values()) {
-					if(tr.entity instanceof PlayerEntity && tr.trackingPlayers.contains(h.player)) {
-						sendPlayerData((ServerPlayerEntity) tr.entity, h);
-					}
-				}
-				if(handler.cpm$getEncodedModelData() != null) {
-					h.sendPacket(new SCustomPayloadPlayPacket(NetworkHandler.setSkin, writeSkinData(handler.cpm$getEncodedModelData(), h.player)));
-				} else {
-					h.sendPacket(new SCustomPayloadPlayPacket(NetworkHandler.getSkin, new PacketBuffer(Unpooled.EMPTY_BUFFER)));
-				}
-			});
-		} else if(NetworkHandler.setSkin.equals(rl)) {
-			if(handler.cpm$getEncodedModelData() == null || !handler.cpm$getEncodedModelData().forced) {
-				CompoundNBT tag = packet.getInternalData().readCompoundTag();
-				ServerLifecycleHooks.getCurrentServer().execute(() -> {
-					handler.cpm$setEncodedModelData(tag.contains("data") ? new PlayerData(tag.getByteArray("data"), false, false) : null);
-					NetworkHandler.sendToAllTrackingAndSelf(h.player, new SCustomPayloadPlayPacket(NetworkHandler.setSkin, writeSkinData(handler.cpm$getEncodedModelData(), h.player)), ServerHandler::hasMod, null);
-					ConfigEntry e = ModConfig.getConfig().getEntry(ConfigKeys.SERVER_SKINS);
-					e.clearValue(h.player.getUniqueID().toString());
-					ModConfig.getConfig().save();
-				});
-			} else {
-				h.sendPacket(new SChatPacket(new TranslationTextComponent("chat.cpm.skinForced"), ChatType.CHAT));
-			}
-		}
-	}
-
-	public static PacketBuffer writeSkinData(PlayerData dt, Entity ent) {
-		PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
-		pb.writeVarInt(ent.getEntityId());
-		CompoundNBT data = new CompoundNBT();
-		if(dt != null) {
-			data.putBoolean("forced", dt.forced);
-			data.putByteArray("data", dt.data);
-		}
-		pb.writeCompoundTag(data);
-		return pb;
 	}
 
 	public static boolean hasMod(ServerPlayerEntity spe) {

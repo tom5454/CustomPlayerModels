@@ -1,7 +1,6 @@
 package com.tom.cpm.shared.model;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
@@ -22,7 +21,7 @@ public class RenderManager<G, P, M, D> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean tryBindModel(G gprofile, P player, D buffer, Predicate<Object> unbindRule, M toBind, AnimationMode mode) {
+	public boolean tryBindModel(G gprofile, P player, D buffer, M toBind, AnimationMode mode) {
 		if(gprofile == null)gprofile = getProfile.apply(player);
 		Player<P, M> profile = (Player<P, M>) loader.loadPlayer(gprofile);
 		if(profile == null)return false;
@@ -32,9 +31,8 @@ public class RenderManager<G, P, M, D> {
 			this.profile = profile;
 			if(player != null)
 				profile.updateFromPlayer(player);
-			renderManager.bindModel(toBind, buffer, def, unbindRule, profile);
-			if(unbindRule == null || player == null)
-				renderManager.getAnimationEngine().handleAnimation(profile, mode);
+			renderManager.bindModel(toBind, buffer, def, profile);
+			renderManager.getAnimationEngine().handleAnimation(profile, mode);
 			return true;
 		}
 		renderManager.unbindModel(toBind);
@@ -48,18 +46,29 @@ public class RenderManager<G, P, M, D> {
 		}
 	}
 
-	public void bindHand(P player, D buffer, Predicate<Object> unbindRule) {
-		tryBindModel(null, player, buffer, unbindRule, null, AnimationMode.PLAYER);
-		this.profile = null;
+	public void tryUnbind(M model) {
+		renderManager.unbindModel(model);
 	}
 
-	public void bindSkull(G profile, D buffer, Predicate<Object> unbindRule, M model) {
+	@SuppressWarnings("unchecked")
+	public void tryUnbindPlayer(P player) {
+		G gprofile = getProfile.apply(player);
+		Player<P, M> profile = (Player<P, M>) loader.loadPlayer(gprofile);
+		if(profile == null)return;
+		renderManager.unbindModel(profile.getModel());
+	}
+
+	public void bindHand(P player, D buffer) {
+		tryBindModel(null, player, buffer, null, AnimationMode.HAND);
+	}
+
+	public void bindSkull(G profile, D buffer, M model) {
 		Player<P, M> prev = this.profile;
-		tryBindModel(profile, null, buffer, unbindRule, model, AnimationMode.SKULL);
+		tryBindModel(profile, null, buffer, model, AnimationMode.SKULL);
 		this.profile = prev;
 	}
 
 	public void bindPlayer(P player, D buffer) {
-		tryBindModel(null, player, buffer, null, null, AnimationMode.PLAYER);
+		tryBindModel(null, player, buffer, null, AnimationMode.PLAYER);
 	}
 }

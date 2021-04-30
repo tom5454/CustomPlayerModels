@@ -190,7 +190,7 @@ public class GestureGui extends Frame {
 		}
 
 		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
-		if(MinecraftObjectHolder.DEBUGGING && gui.isAltDown()) {
+		if(MinecraftObjectHolder.DEBUGGING && gui.isAltDown() && def != null) {
 			TextureProvider skin = def.getSkinOverride();
 			if(skin != null && skin.texture != null) {
 				skin.bind();

@@ -22,7 +22,7 @@ public class EditorAnim implements IAnim {
 	private DoubleUnaryOperator[][] psfs;
 	private AnimFrame currentFrame;
 	public final Editor editor;
-	public final String filename;
+	public String filename;
 	public AnimationType type;
 	public IPose pose;
 	public String displayName;

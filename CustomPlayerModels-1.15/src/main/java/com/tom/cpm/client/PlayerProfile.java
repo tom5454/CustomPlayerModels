@@ -1,6 +1,7 @@
 package com.tom.cpm.client;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.Minecraft;
@@ -8,7 +9,7 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.client.resources.SkinManager;
+import net.minecraft.client.resources.SkinManager.ISkinAvailableCallback;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
@@ -21,7 +22,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
@@ -74,9 +74,9 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 	}
 
 	@Override
-	public void loadSkin(Runnable onLoaded) {
-		Minecraft mc = Minecraft.getInstance();
-		mc.getSkinManager().loadProfileTextures(profile, new SkinManager.ISkinAvailableCallback() {
+	public CompletableFuture<Void> loadSkin0() {
+		CompletableFuture<Void> cf = new CompletableFuture<>();
+		Minecraft.getInstance().getSkinManager().loadProfileTextures(profile, new ISkinAvailableCallback() {
 
 			@Override
 			public void onSkinTextureAvailable(Type typeIn, ResourceLocation location, MinecraftProfileTexture profileTexture) {
@@ -88,7 +88,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 						skinType = "default";
 					}
 					url = profileTexture.getUrl();
-					if(onLoaded != null)onLoaded.run();
+					cf.complete(null);
 
 					break;
 				default:
@@ -96,7 +96,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 				}
 			}
 		}, true);
-		if(MinecraftObjectHolder.DEBUGGING && onLoaded != null)onLoaded.run();
+		return cf;
 	}
 
 	@Override

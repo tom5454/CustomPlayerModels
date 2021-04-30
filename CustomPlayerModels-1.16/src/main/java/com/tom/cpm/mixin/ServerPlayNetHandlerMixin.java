@@ -8,14 +8,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
 
-import com.tom.cpm.common.NetH;
 import com.tom.cpm.common.NetworkHandler;
-import com.tom.cpm.common.NetH.ServerNetH;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.PlayerData;
+import com.tom.cpm.shared.network.NetH.ServerNetH;
 
 @Mixin(ServerPlayNetHandler.class)
-public class ServerPlayNetHandlerMixin implements NetH, ServerNetH {
+public class ServerPlayNetHandlerMixin implements ServerNetH {
 	private boolean cpm$hasMod;
 	private PlayerData cpm$data;
 

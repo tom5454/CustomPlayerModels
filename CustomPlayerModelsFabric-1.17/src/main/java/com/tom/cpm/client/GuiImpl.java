@@ -1,6 +1,5 @@
 package com.tom.cpm.client;
 
-import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -8,6 +7,7 @@ import java.util.function.Supplier;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.MinecraftClient;
@@ -50,12 +50,12 @@ public class GuiImpl extends Screen implements IGui {
 	private static final NativeGuiComponents nativeComponents = new NativeGuiComponents();
 	private Frame gui;
 	private Screen parent;
-	private Stack<Ctx> posOff = new Stack<>();
-	private Ctx current = new Ctx();
+	private CtxStack stack;
 	private UIColors colors;
 	private Consumer<Runnable> closeListener;
 	private int keyModif;
 	public MatrixStack matrixStack;
+	private int vanillaScale = -1;
 
 	static {
 		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
@@ -86,14 +86,15 @@ public class GuiImpl extends Screen implements IGui {
 			matrixStack.push();
 			matrixStack.translate(0, 0, 1000);
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			current = new Ctx();
+			stack = new CtxStack(width, height);
 			gui.draw(mouseX, mouseY, partialTicks);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			displayError(e.toString());
 		} finally {
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
-			String s = "Minecraft " + SharedConstants.getGameVersion().getName() + " (" + this.client.getGameVersion() + "/" + ClientBrandRetriever.getClientModName() + ")";
+			String modVer = FabricLoader.getInstance().getModContainer("cpm").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
+			String s = "Minecraft " + SharedConstants.getGameVersion().getName() + " (" + this.client.getGameVersion() + "/" + ClientBrandRetriever.getClientModName() + ") " + modVer;
 			textRenderer.draw(matrixStack, s, width - textRenderer.getWidth(s) - 4, 2, 0xff000000);
 			s = this.client.fpsDebugString;
 			textRenderer.draw(matrixStack, s, width - textRenderer.getWidth(s) - 4, 11, 0xff000000);
@@ -110,6 +111,10 @@ public class GuiImpl extends Screen implements IGui {
 			parent = null;
 			client.openScreen(p);
 		}
+		if(vanillaScale != -1 && vanillaScale != client.options.guiScale) {
+			client.options.guiScale = vanillaScale;
+			client.onResolutionChanged();
+		}
 	}
 
 	@Override
@@ -119,8 +124,8 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void drawBox(int x, int y, int w, int h, int color) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		fill(matrixStack, x, y, x+w, y+h, color);
 	}
 
@@ -136,8 +141,8 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void drawText(int x, int y, String text, int color) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		textRenderer.draw(matrixStack, text, x, y, color);
 	}
 
@@ -258,8 +263,8 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, new Identifier("cpm", "textures/gui/" + texture + ".png"));
@@ -268,8 +273,8 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		RenderSystem.setShaderTexture(0, DynTexture.getBoundLoc());
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -291,40 +296,14 @@ public class GuiImpl extends Screen implements IGui {
 	}
 
 	@Override
-	public void pushMatrix() {
-		posOff.push(current);
-		current = new Ctx(current);
-	}
-
-	@Override
-	public void setPosOffset(Box box) {
-		current.box = new Box(current.box.x + box.x, current.box.y + box.y, box.w, box.h);
-	}
-
-	@Override
 	public void setupCut() {
 		int dw = client.getWindow().getWidth();
 		int dh = client.getWindow().getHeight();
 		float multiplierX = dw / (float)width;
 		float multiplierY = dh / (float)height;
-		GL11.glScissor((int) (current.box.x * multiplierX), dh - (int) ((current.box.y + current.box.h) * multiplierY),
-				(int) (current.box.w * multiplierX), (int) (current.box.h * multiplierY));
-	}
-
-	@Override
-	public void popMatrix() {
-		current = posOff.pop();
-	}
-
-	private class Ctx {
-		private Box box;
-		public Ctx(Ctx old) {
-			box = new Box(old.box.x, old.box.y, old.box.w, old.box.h);
-		}
-
-		public Ctx() {
-			box = new Box(0, 0, width, height);
-		}
+		Box box = getContext().cutBox;
+		GL11.glScissor((int) (box.x * multiplierX), dh - (int) ((box.y + box.h) * multiplierY),
+				(int) (box.w * multiplierX), (int) (box.h * multiplierY));
 	}
 
 	@Override
@@ -353,10 +332,11 @@ public class GuiImpl extends Screen implements IGui {
 
 		@Override
 		public void draw(int mouseX, int mouseY, float partialTicks, Box bounds) {
-			field.x = bounds.x + current.box.x + 4;
-			field.y = bounds.y + current.box.y + 6;
-			currentOff.x = current.box.x;
-			currentOff.y = current.box.y;
+			Vec2i off = getOffset();
+			field.x = bounds.x + off.x + 4;
+			field.y = bounds.y + off.y + 6;
+			currentOff.x = off.x;
+			currentOff.y = off.y;
 			this.bounds.x = bounds.x;
 			this.bounds.y = bounds.y;
 			this.bounds.w = bounds.w;
@@ -438,11 +418,6 @@ public class GuiImpl extends Screen implements IGui {
 	}
 
 	@Override
-	public Vec2i getOffset() {
-		return new Vec2i(current.box.x, current.box.y);
-	}
-
-	@Override
 	public boolean isShiftDown() {
 		return hasShiftDown();
 	}
@@ -482,8 +457,8 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public void drawGradientBox(int x, int y, int w, int h, int topLeft, int topRight, int bottomLeft,
 			int bottomRight) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		int left = x;
 		int top = y;
 		int right = x + w;
@@ -539,5 +514,37 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public String getClipboardText() {
 		return client.keyboard.getClipboard();
+	}
+
+	@Override
+	public void setScale(int value) {
+		if(value != client.options.guiScale) {
+			if(vanillaScale == -1)vanillaScale = client.options.guiScale;
+			if(value == -1) {
+				if(client.options.guiScale != vanillaScale) {
+					client.options.guiScale = vanillaScale;
+					vanillaScale = -1;
+					client.onResolutionChanged();
+				}
+			} else {
+				client.options.guiScale = value;
+				client.onResolutionChanged();
+			}
+		}
+	}
+
+	@Override
+	public int getScale() {
+		return client.options.guiScale;
+	}
+
+	@Override
+	public int getMaxScale() {
+		return client.getWindow().calculateScaleFactor(0, client.forcesUnicodeFont()) + 1;
+	}
+
+	@Override
+	public CtxStack getStack() {
+		return stack;
 	}
 }

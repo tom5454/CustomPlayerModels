@@ -17,6 +17,7 @@ public enum ModelPartType {
 	LIST_ICON(ModelPartListIcon::new),
 	DUP_ROOT(ModelPartDupRoot::new),
 	CLONEABLE(ModelPartCloneable::new),
+	SCALE(ModelPartScale::new),
 	;
 	public static final ModelPartType[] VALUES = values();
 	private final IModelPart.Factory factory;

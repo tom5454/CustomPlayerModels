@@ -30,6 +30,7 @@ public abstract class Frame extends Panel {
 		setBounds(new Box(0, 0, width, height));
 		elements.clear();
 		initFrame(width, height);
+		elements.remove(popup);
 		addElement(popup);
 	}
 

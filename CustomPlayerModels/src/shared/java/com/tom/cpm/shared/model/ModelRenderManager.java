@@ -61,8 +61,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.setVis = setVis;
 	}
 
-	public void bindModel(MB model, D addDt, ModelDefinition def, Predicate<Object> unbindRule, Player<?, MB> player) {
-		holders.computeIfAbsent(model, this::create).swapIn(def, unbindRule, addDt, player);
+	public void bindModel(MB model, D addDt, ModelDefinition def, Player<?, MB> player) {
+		holders.computeIfAbsent(model, this::create).swapIn(def, addDt, player);
 	}
 
 	private RedirectHolder<MB, D, S, P> create(MB model) {
@@ -102,7 +102,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected final ModelRenderManager<D, S, P, M> mngr;
 		public final M model;
 		public ModelDefinition def;
-		public Predicate<Object> unbindRule;
 		public boolean swappedIn;
 		public int sheetX, sheetY;
 		public D addDt;
@@ -120,9 +119,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			partData = new HashMap<>();
 		}
 
-		public final void swapIn(ModelDefinition def, Predicate<Object> unbindRule, D addDt, Player<?, M> playerObj) {
+		public final void swapIn(ModelDefinition def, D addDt, Player<?, M> playerObj) {
 			this.def = def;
-			this.unbindRule = unbindRule;
 			this.addDt = addDt;
 			if(swappedIn)return;
 			swapIn0();
@@ -136,7 +134,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		public final void swapOut() {
 			this.def = null;
-			this.unbindRule = null;
 			this.addDt = null;
 			skinBound = false;
 			this.playerObj = null;
@@ -220,28 +217,24 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						if(dh.copyFrom != null) {
 							holder.copyModel((P) dh.copyFrom, tp);
 						}
-						if(holder.unbindRule != null && holder.unbindRule.test(this))
-							holder.swapOut();
 						return;
 					}
-					boolean skipTransform = holder.unbindRule != null || holder.skipTransform(this);
+					PartRoot elems = holder.def.getModelElementFor(part);
+					if(elems.isEmpty())return;
 					float px = mngr.px.apply(tp);
 					float py = mngr.py.apply(tp);
 					float pz = mngr.pz.apply(tp);
 					float rx = mngr.rx.apply(tp);
 					float ry = mngr.ry.apply(tp);
 					float rz = mngr.rz.apply(tp);
-					PartRoot elems = holder.def.getModelElementFor(part);
 					if(holder.playerObj == null || dh.renderPredicate.test(holder.playerObj)) {
 						elems.forEach(elem -> {
-							if(!skipTransform) {
-								if(elem.forcePos) {
-									mngr.posSet.set(tp, elem.pos);
-									mngr.rotSet.set(tp, elem.rotation);
-								} else {
-									mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
-									mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
-								}
+							if(elem.forcePos) {
+								mngr.posSet.set(tp, elem.pos);
+								mngr.rotSet.set(tp, elem.rotation);
+							} else {
+								mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
+								mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
 							}
 							if(elem.doDisplay()) {
 								holder.copyModel(tp, parent);
@@ -253,23 +246,19 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						mngr.posSet.set(parent, px, py, pz);
 						mngr.rotSet.set(parent, rx, ry, rz);
 					}
-					if(!skipTransform) {
-						RootModelElement elem = elems.getMainRoot();
-						if(elem.forcePos) {
-							mngr.posSet.set(tp, elem.pos);
-							mngr.rotSet.set(tp, elem.rotation);
-						} else {
-							mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
-							mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
-						}
+					RootModelElement elem = elems.getMainRoot();
+					if(elem.forcePos) {
+						mngr.posSet.set(tp, elem.pos);
+						mngr.rotSet.set(tp, elem.rotation);
+					} else {
+						mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
+						mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
 					}
 				} else {
 					holder.copyModel(tp, parent);
 					renderParent();
 				}
 			}
-			if(holder.unbindRule != null && holder.unbindRule.test(this))
-				holder.swapOut();
 		}
 	}
 

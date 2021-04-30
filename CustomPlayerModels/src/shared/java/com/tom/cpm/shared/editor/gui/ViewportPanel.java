@@ -3,9 +3,11 @@ package com.tom.cpm.shared.editor.gui;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.util.Hand;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.HeldItem;
 import com.tom.cpm.shared.gui.ViewportPanelBase;
 import com.tom.cpm.shared.model.SkinType;
 
@@ -62,5 +64,15 @@ public class ViewportPanel extends ViewportPanelBase {
 	@Override
 	public void applyRenderPoseForAnim(Consumer<VanillaPose> func) {
 		editor.applyRenderPoseForAnim(func);
+	}
+
+	@Override
+	public HeldItem getHeldItem(Hand hand) {
+		return editor.handDisplay.getOrDefault(hand, HeldItem.NONE);
+	}
+
+	@Override
+	public float getScale() {
+		return editor.applyScaling ? editor.scaling : 1;
 	}
 }

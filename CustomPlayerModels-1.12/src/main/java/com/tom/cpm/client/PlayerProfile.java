@@ -1,6 +1,7 @@
 package com.tom.cpm.client;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelPlayer;
@@ -17,7 +18,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
@@ -70,7 +70,8 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 	}
 
 	@Override
-	public void loadSkin(Runnable onLoaded) {
+	public CompletableFuture<Void> loadSkin0() {
+		CompletableFuture<Void> cf = new CompletableFuture<>();
 		Minecraft.getMinecraft().getSkinManager().loadProfileTextures(profile, new SkinManager.SkinAvailableCallback() {
 
 			@Override
@@ -83,7 +84,7 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 						skinType = "default";
 					}
 					url = profileTexture.getUrl();
-					if(onLoaded != null)onLoaded.run();
+					cf.complete(null);
 
 					break;
 				default:
@@ -91,7 +92,7 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 				}
 			}
 		}, true);
-		if(MinecraftObjectHolder.DEBUGGING && onLoaded != null)onLoaded.run();
+		return cf;
 	}
 
 	@Override

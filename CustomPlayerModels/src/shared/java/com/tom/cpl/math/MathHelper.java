@@ -30,4 +30,12 @@ public class MathHelper {
 		int i = (int)value;
 		return value > i ? i + 1 : i;
 	}
+
+	public static float round(float number, int scale) {
+		int pow = 1;
+		for (int i = 0; i < scale; i++)
+			pow *= 10;
+		float tmp = number * pow;
+		return ( (float) ( (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) ) ) / pow;
+	}
 }

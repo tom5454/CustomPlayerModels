@@ -1,6 +1,5 @@
 package com.tom.cpm.client;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -18,6 +17,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.entity.Entity;
@@ -25,17 +25,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpl.util.Image;
-import com.tom.cpm.common.NetH;
-import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.mixinplugin.OFDetector;
-import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -43,8 +39,8 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
-import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.RenderManager;
+import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
 
@@ -54,6 +50,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public static CustomPlayerModelsClient INSTANCE;
 	public static boolean optifineLoaded;
 	private RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
+	public NetHandler<Identifier, CompoundTag, PlayerEntity, PacketByteBuf, ClientPlayNetworkHandler> netHandler;
 
 	@Override
 	public void onInitializeClient() {
@@ -75,21 +72,40 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 			if (client.player == null)
 				return;
 
-			if(KeyBindings.gestureMenuBinding.isPressed()) {
+			if(KeyBindings.gestureMenuBinding.wasPressed()) {
 				client.openScreen(new GuiImpl(GestureGui::new, null));
 			}
 
-			if(KeyBindings.renderToggleBinding.isPressed()) {
+			if(KeyBindings.renderToggleBinding.wasPressed()) {
 				Player.setEnableRendering(!Player.isEnableRendering());
 			}
 
 			for (Entry<Integer, KeyBinding> e : KeyBindings.quickAccess.entrySet()) {
-				if(e.getValue().isPressed()) {
+				if(e.getValue().wasPressed()) {
 					mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
 				}
 			}
 		});
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), loader, PlayerEntity::getGameProfile);
+		netHandler = new NetHandler<>(Identifier::new);
+		netHandler.setNewNbt(CompoundTag::new);
+		netHandler.setNewPacketBuffer(() -> new PacketByteBuf(Unpooled.buffer()));
+		netHandler.setWriteCompound(PacketByteBuf::writeCompoundTag, PacketByteBuf::readCompoundTag);
+		netHandler.setNBTSetters(CompoundTag::putBoolean, CompoundTag::putByteArray, CompoundTag::putFloat);
+		netHandler.setNBTGetters(CompoundTag::getBoolean, CompoundTag::getByteArray, CompoundTag::getFloat);
+		netHandler.setContains(CompoundTag::contains);
+		netHandler.setExecutor(MinecraftClient::getInstance);
+		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadC2SPacket(rl, pb)), null);
+		netHandler.setPlayerToLoader(PlayerEntity::getGameProfile);
+		netHandler.setReadPlayerId(PacketByteBuf::readVarInt, id -> {
+			Entity ent = MinecraftClient.getInstance().world.getEntityById(id);
+			if(ent instanceof PlayerEntity) {
+				return (PlayerEntity) ent;
+			}
+			return null;
+		});
+		netHandler.setGetClient(() -> MinecraftClient.getInstance().player);
+		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).networkHandler);
 	}
 
 	public void playerRenderPre(AbstractClientPlayerEntity player, VertexConsumerProvider buffer) {
@@ -110,11 +126,15 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void renderHand(VertexConsumerProvider buffer) {
-		manager.bindHand(MinecraftClient.getInstance().player, buffer, PlayerRenderManager::unbindHand);
+		manager.bindHand(MinecraftClient.getInstance().player, buffer);
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, VertexConsumerProvider buffer) {
-		manager.bindSkull(profile, buffer, PlayerRenderManager::unbindSkull, skullModel);
+		manager.bindSkull(profile, buffer, skullModel);
+	}
+
+	public void unbind(Model model) {
+		manager.tryUnbind(model);
 	}
 
 	public static class Button extends ButtonWidget {
@@ -127,52 +147,5 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 
 	public void onLogout() {
 		loader.clearServerData();
-	}
-
-	public void receivePacket(CustomPayloadS2CPacket packet, NetH handler) {
-		Identifier rl = packet.getChannel();
-		ClientPlayNetworkHandler h = (ClientPlayNetworkHandler) handler;
-		if(NetworkHandler.helloPacket.equals(rl)) {
-			PacketByteBuf pb = packet.getData();
-			CompoundTag nbt = pb.readCompoundTag();
-			MinecraftClient.getInstance().execute(() -> {
-				handler.cpm$setHasMod(true);
-				loader.clearServerData();
-				h.sendPacket(new CustomPayloadC2SPacket(NetworkHandler.helloPacket, new PacketByteBuf(Unpooled.EMPTY_BUFFER)));
-			});
-		} else if(NetworkHandler.setSkin.equals(rl)) {
-			PacketByteBuf pb = packet.getData();
-			int entId = pb.readVarInt();
-			CompoundTag data = pb.readCompoundTag();
-			MinecraftClient.getInstance().execute(() -> {
-				Entity ent = MinecraftClient.getInstance().world.getEntityById(entId);
-				if(ent instanceof PlayerEntity) {
-					loader.setModel(((PlayerEntity)ent).getGameProfile(), data.contains("data") ? data.getByteArray("data") : null, data.getBoolean("forced"));
-				}
-			});
-		} else if(NetworkHandler.getSkin.equals(rl)) {
-			sendSkinData(h);
-		}
-	}
-
-	public void sendSkinData(ClientPlayNetworkHandler h) {
-		String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
-		if(model != null) {
-			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
-			try {
-				ModelFile file = ModelFile.load(new File(modelsDir, model));
-				PacketByteBuf pb = new PacketByteBuf(Unpooled.buffer());
-				CompoundTag data = new CompoundTag();
-				data.putByteArray("data", file.getDataBlock());
-				pb.writeCompoundTag(data);
-				h.sendPacket(new CustomPayloadC2SPacket(NetworkHandler.setSkin, pb));
-			} catch (IOException e) {
-			}
-		} else {
-			PacketByteBuf pb = new PacketByteBuf(Unpooled.buffer());
-			CompoundTag data = new CompoundTag();
-			pb.writeCompoundTag(data);
-			h.sendPacket(new CustomPayloadC2SPacket(NetworkHandler.setSkin, pb));
-		}
 	}
 }

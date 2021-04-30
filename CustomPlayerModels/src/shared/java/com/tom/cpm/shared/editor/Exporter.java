@@ -45,6 +45,7 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartAnimation;
+import com.tom.cpm.shared.parts.ModelPartCloneable;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
 import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
 import com.tom.cpm.shared.parts.ModelPartDupRoot;
@@ -53,9 +54,11 @@ import com.tom.cpm.shared.parts.ModelPartListIcon;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
 import com.tom.cpm.shared.parts.ModelPartPlayerPos;
 import com.tom.cpm.shared.parts.ModelPartRenderEffect;
+import com.tom.cpm.shared.parts.ModelPartScale;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartTemplate;
+import com.tom.cpm.shared.parts.ModelPartUUIDLockout;
 import com.tom.cpm.shared.template.Template;
 
 public class Exporter {
@@ -65,6 +68,10 @@ public class Exporter {
 	public static void exportSkin(Editor e, EditorGui gui, File f, boolean forceOut) {
 		if(e.vanillaSkin == null) {
 			gui.openPopup(new MessagePopup(gui.getGui(), "Unknown Error", "Couldn't load vanilla skin"));
+			return;
+		}
+		if(e.vanillaSkin.getWidth() != 64 || e.vanillaSkin.getHeight() != 64) {
+			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.vanillaSkinSize")));
 			return;
 		}
 		Image img = new Image(e.vanillaSkin);
@@ -116,12 +123,12 @@ public class Exporter {
 		}, gui)), false);
 	}
 
-	public static void exportTempModel(Editor e, EditorGui gui) {
+	public static boolean exportTempModel(Editor e, EditorGui gui) {
 		File models = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 		models.mkdirs();
 		ModelWriter wr = new ModelWriter(gui, new File(models, TEMP_MODEL));
 		wr.setDesc("Test model", "", null);
-		exportSkin0(e, gui, new Result(wr::getOut, wr::finish,
+		return exportSkin0(e, gui, new Result(wr::getOut, wr::finish,
 				(d, c) -> {
 					Link l = new Link("local:test");
 					wr.setOverflow(d, l);
@@ -177,17 +184,32 @@ public class Exporter {
 		for (EditorTemplate et : e.templates) {
 			otherParts.add(new ModelPartTemplate(et));
 		}
+		if(e.scaling != 0 && e.scaling != 1)otherParts.add(new ModelPartScale(e.scaling));
+		if(e.description != null) {
+			switch (e.description.copyProtection) {
+			case CLONEABLE:
+				otherParts.add(new ModelPartCloneable());
+				break;
+			case NORMAL:
+				break;
+			case UUID_LOCK:
+				otherParts.add(new ModelPartUUIDLockout(MinecraftClientAccess.get().getClientPlayer().getUUID()));
+				break;
+			default:
+				break;
+			}
+		}
 		def.setOtherParts(otherParts);
 		if(MinecraftObjectHolder.DEBUGGING)System.out.println(def);
 		return def;
 	}
 
-	private static void exportSkin0(Editor e, EditorGui gui, Result result, boolean forceOut) {
+	private static boolean exportSkin0(Editor e, EditorGui gui, Result result, boolean forceOut) {
 		try {
 			ModelPartDefinition def = prepareDefinition(e);
 			if(forceOut) {
 				writeOut(e, gui, def, result);
-				return;
+				return true;
 			}
 			try(OutputStream out = result.get()) {
 				out.write(ModelDefinitionLoader.HEADER);
@@ -199,15 +221,18 @@ public class Exporter {
 				}
 			} catch (EOFException unusedException) {
 				writeOut(e, gui, def, result);
-				return;
+				return true;
 			} catch (IOException e1) {
 				throw new ExportException("error.cpm.unknownError", e1);
 			}
 			result.close();
+			return true;
 		} catch (ExportException ex) {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+			return false;
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			return false;
 		}
 	}
 
@@ -403,7 +428,7 @@ public class Exporter {
 
 	private static class ModelWriter {
 		private final EditorGui gui;
-		private byte[] buffer = new byte[16*1024];
+		private byte[] buffer = new byte[2*1024];
 		private int[] size = new int[] {0};
 		private byte[] overflow;
 		private File out;

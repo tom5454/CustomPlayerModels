@@ -39,7 +39,7 @@ public class AnimationSettinsPopup extends PopupPanel {
 		ats.add(typePose);
 		AnimType typeGesture = new AnimType("gesture", true);
 		ats.add(typeGesture);
-		if(edit && editor.selectedAnim != null) {
+		if(edit && editor.selectedAnim != null && sel == null) {
 			if(editor.selectedAnim.pose == null)sel = typeGesture;
 			else sel = typePose;
 		}

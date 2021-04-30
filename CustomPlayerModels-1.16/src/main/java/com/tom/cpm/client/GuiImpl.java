@@ -1,7 +1,6 @@
 package com.tom.cpm.client;
 
 import java.lang.reflect.Method;
-import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -17,6 +16,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ChatVisibility;
@@ -27,6 +27,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.fml.ModList;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -51,13 +52,13 @@ public class GuiImpl extends Screen implements IGui {
 	private static final NativeGuiComponents nativeComponents = new NativeGuiComponents();
 	private Frame gui;
 	private Screen parent;
-	private Stack<Ctx> posOff = new Stack<>();
-	private Ctx current = new Ctx();
+	private CtxStack stack;
 	private UIColors colors;
 	private Consumer<Runnable> closeListener;
 	private int keyModif;
 	public MatrixStack matrixStack;
 	private boolean noScissorTest;
+	private int vanillaScale = -1;
 
 	static {
 		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
@@ -95,7 +96,7 @@ public class GuiImpl extends Screen implements IGui {
 			matrixStack.translate(0, 0, 1000);
 			if(!noScissorTest)
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			current = new Ctx();
+			stack = new CtxStack(width, height);
 			gui.draw(mouseX, mouseY, partialTicks);
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -103,7 +104,8 @@ public class GuiImpl extends Screen implements IGui {
 		} finally {
 			if(!noScissorTest)
 				GL11.glDisable(GL11.GL_SCISSOR_TEST);
-			String s = "Minecraft " + SharedConstants.getVersion().getName() + " (" + minecraft.getVersion() + "/" + ClientBrandRetriever.getClientModName() + ("release".equalsIgnoreCase(minecraft.getVersionType()) ? "" : "/" + minecraft.getVersionType()) + ")";
+			String modVer = ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
+			String s = "Minecraft " + SharedConstants.getVersion().getName() + " (" + minecraft.getVersion() + "/" + ClientBrandRetriever.getClientModName() + ("release".equalsIgnoreCase(minecraft.getVersionType()) ? "" : "/" + minecraft.getVersionType()) + ") " + modVer;
 			font.drawString(matrixStack, s, width - font.getStringWidth(s) - 4, 2, 0xff000000);
 			s = minecraft.debug;
 			if(noScissorTest)s += " No Scissor";
@@ -128,13 +130,58 @@ public class GuiImpl extends Screen implements IGui {
 			parent = null;
 			minecraft.displayGuiScreen(p);
 		}
+		if(vanillaScale != -1 && vanillaScale != minecraft.gameSettings.guiScale) {
+			minecraft.gameSettings.guiScale = vanillaScale;
+			minecraft.updateWindowSize();
+		}
 	}
 
 	@Override
 	public void drawBox(int x, int y, int w, int h, int color) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		fill(matrixStack, x, y, x+w, y+h, color);
+	}
+
+	@Override
+	public void drawBox(float x, float y, float w, float h, int color) {
+		x += getOffset().x;
+		y += getOffset().y;
+
+		float minX = x;
+		float minY = y;
+		float maxX = x+w;
+		float maxY = y+h;
+
+		if (minX < maxX) {
+			float i = minX;
+			minX = maxX;
+			maxX = i;
+		}
+
+		if (minY < maxY) {
+			float j = minY;
+			minY = maxY;
+			maxY = j;
+		}
+		Matrix4f matrix = matrixStack.getLast().getMatrix();
+		float f3 = (color >> 24 & 255) / 255.0F;
+		float f = (color >> 16 & 255) / 255.0F;
+		float f1 = (color >> 8 & 255) / 255.0F;
+		float f2 = (color & 255) / 255.0F;
+		BufferBuilder bufferbuilder = Tessellator.getInstance().getBuffer();
+		RenderSystem.enableBlend();
+		RenderSystem.disableTexture();
+		RenderSystem.defaultBlendFunc();
+		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		bufferbuilder.pos(matrix, minX, maxY, 0.0F).color(f, f1, f2, f3).endVertex();
+		bufferbuilder.pos(matrix, maxX, maxY, 0.0F).color(f, f1, f2, f3).endVertex();
+		bufferbuilder.pos(matrix, maxX, minY, 0.0F).color(f, f1, f2, f3).endVertex();
+		bufferbuilder.pos(matrix, minX, minY, 0.0F).color(f, f1, f2, f3).endVertex();
+		bufferbuilder.finishDrawing();
+		WorldVertexBufferUploader.draw(bufferbuilder);
+		RenderSystem.enableTexture();
+		RenderSystem.disableBlend();
 	}
 
 	@Override
@@ -148,8 +195,8 @@ public class GuiImpl extends Screen implements IGui {
 	}
 	@Override
 	public void drawText(int x, int y, String text, int color) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		font.drawString(matrixStack, text, x, y, color);
 	}
 
@@ -283,8 +330,8 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture) {
 		minecraft.getTextureManager().bindTexture(new ResourceLocation("cpm", "textures/gui/" + texture + ".png"));
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		RenderSystem.color4f(1, 1, 1, 1);
 		blit(matrixStack, x, y, u, v, w, h);
 	}
@@ -292,8 +339,8 @@ public class GuiImpl extends Screen implements IGui {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		RenderSystem.color4f(1, 1, 1, 1);
 		minecraft.getTextureManager().bindTexture(DynTexture.getBoundLoc());
 		Tessellator tessellator = Tessellator.getInstance();
@@ -315,41 +362,15 @@ public class GuiImpl extends Screen implements IGui {
 	}
 
 	@Override
-	public void pushMatrix() {
-		posOff.push(current);
-		current = new Ctx(current);
-	}
-
-	@Override
-	public void setPosOffset(Box box) {
-		current.box = new Box(current.box.x + box.x, current.box.y + box.y, box.w, box.h);
-	}
-
-	@Override
 	public void setupCut() {
 		if(!noScissorTest) {
 			int dw = minecraft.getMainWindow().getWidth();
 			int dh = minecraft.getMainWindow().getHeight();
 			float multiplierX = dw / (float)width;
 			float multiplierY = dh / (float)height;
-			GL11.glScissor((int) (current.box.x * multiplierX), dh - (int) ((current.box.y + current.box.h) * multiplierY),
-					(int) (current.box.w * multiplierX), (int) (current.box.h * multiplierY));
-		}
-	}
-
-	@Override
-	public void popMatrix() {
-		current = posOff.pop();
-	}
-
-	private class Ctx {
-		private Box box;
-		public Ctx(Ctx old) {
-			box = new Box(old.box.x, old.box.y, old.box.w, old.box.h);
-		}
-
-		public Ctx() {
-			box = new Box(0, 0, width, height);
+			Box box = getContext().cutBox;
+			GL11.glScissor((int) (box.x * multiplierX), dh - (int) ((box.y + box.h) * multiplierY),
+					(int) (box.w * multiplierX), (int) (box.h * multiplierY));
 		}
 	}
 
@@ -380,10 +401,11 @@ public class GuiImpl extends Screen implements IGui {
 
 		@Override
 		public void draw(int mouseX, int mouseY, float partialTicks, Box bounds) {
-			field.x = bounds.x + current.box.x + 4;
-			field.y = bounds.y + current.box.y + 6;
-			currentOff.x = current.box.x;
-			currentOff.y = current.box.y;
+			Vec2i off = getOffset();
+			field.x = bounds.x + off.x + 4;
+			field.y = bounds.y + off.y + 6;
+			currentOff.x = off.x;
+			currentOff.y = off.y;
 			this.bounds.x = bounds.x;
 			this.bounds.y = bounds.y;
 			this.bounds.w = bounds.w;
@@ -466,11 +488,6 @@ public class GuiImpl extends Screen implements IGui {
 	}
 
 	@Override
-	public Vec2i getOffset() {
-		return new Vec2i(current.box.x, current.box.y);
-	}
-
-	@Override
 	public boolean isShiftDown() {
 		return hasShiftDown();
 	}
@@ -511,8 +528,8 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public void drawGradientBox(int x, int y, int w, int h, int topLeft, int topRight, int bottomLeft,
 			int bottomRight) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		int left = x;
 		int top = y;
 		int right = x + w;
@@ -571,5 +588,37 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public String getClipboardText() {
 		return minecraft.keyboardListener.getClipboardString();
+	}
+
+	@Override
+	public void setScale(int value) {
+		if(value != minecraft.gameSettings.guiScale) {
+			if(vanillaScale == -1)vanillaScale = minecraft.gameSettings.guiScale;
+			if(value == -1) {
+				if(minecraft.gameSettings.guiScale != vanillaScale) {
+					minecraft.gameSettings.guiScale = vanillaScale;
+					vanillaScale = -1;
+					minecraft.updateWindowSize();
+				}
+			} else {
+				minecraft.gameSettings.guiScale = value;
+				minecraft.updateWindowSize();
+			}
+		}
+	}
+
+	@Override
+	public int getScale() {
+		return minecraft.gameSettings.guiScale;
+	}
+
+	@Override
+	public int getMaxScale() {
+		return minecraft.getMainWindow().calcGuiScale(0, minecraft.getForceUnicodeFont()) + 1;
+	}
+
+	@Override
+	public CtxStack getStack() {
+		return stack;
 	}
 }

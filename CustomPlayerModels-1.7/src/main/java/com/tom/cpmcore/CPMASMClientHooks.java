@@ -7,8 +7,6 @@ import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 
@@ -21,13 +19,22 @@ import com.tom.cpm.client.PlayerProfile;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.config.PlayerData;
 
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
 		if(profile != null) {
 			ClientProxy.INSTANCE.renderSkull(skullModel, profile);
 		}
+	}
+
+	public static void renderSkullPost(ModelBase skullModel, GameProfile profile) {
+		if(profile != null) {
+			ClientProxy.INSTANCE.unbind(skullModel);
+		}
+	}
+
+	public static void unbindHand() {
+		ClientProxy.INSTANCE.unbind();
 	}
 
 	public static void loadSkinHook(MinecraftProfileTexture tex, final Type type, final SkinManager.SkinAvailableCallback cb) {
@@ -59,30 +66,6 @@ public class CPMASMClientHooks {
 		throw new AbstractMethodError();//model.cpm$noModelSetup = value;
 	}
 
-	public static boolean hasMod(NetHandlerPlayClient handler) {
-		throw new AbstractMethodError();//return handler.cpm$hasMod;
-	}
-
-	public static boolean hasMod(NetHandlerPlayServer handler) {
-		throw new AbstractMethodError();//return handler.cpm$hasMod;
-	}
-
-	public static void setHasMod(NetHandlerPlayClient handler, boolean v) {
-		throw new AbstractMethodError();//handler.cpm$hasMod = v;
-	}
-
-	public static void setHasMod(NetHandlerPlayServer handler, boolean v) {
-		throw new AbstractMethodError();//handler.cpm$hasMod = v;
-	}
-
-	public static PlayerData getEncodedModelData(NetHandlerPlayServer handler) {
-		throw new AbstractMethodError();//return handler.cpm$data;
-	}
-
-	public static void setEncodedModelData(NetHandlerPlayServer handler, PlayerData data) {
-		throw new AbstractMethodError();//handler.cpm$data = data;
-	}
-
 	public static void onLogout() {
 		ClientProxy.INSTANCE.onLogout();
 	}
@@ -90,14 +73,6 @@ public class CPMASMClientHooks {
 	public static boolean onClientPacket(S3FPacketCustomPayload pckt, NetHandlerPlayClient handler) {
 		if(pckt.func_149169_c().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
 			NetworkHandler.handlePacket(pckt, handler, true);
-			return true;
-		}
-		return false;
-	}
-
-	public static boolean onServerPacket(C17PacketCustomPayload pckt, NetHandlerPlayServer handler) {
-		if(pckt.func_149559_c().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			NetworkHandler.handlePacket(pckt, handler, false);
 			return true;
 		}
 		return false;

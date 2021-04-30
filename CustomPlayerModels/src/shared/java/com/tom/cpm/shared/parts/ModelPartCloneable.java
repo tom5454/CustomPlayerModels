@@ -11,6 +11,9 @@ public class ModelPartCloneable implements IModelPart, IResolvedModelPart {
 	public ModelPartCloneable(IOHelper is, ModelDefinitionLoader loader) throws IOException {
 	}
 
+	public ModelPartCloneable() {
+	}
+
 	@Override
 	public IResolvedModelPart resolve() throws IOException {
 		return this;

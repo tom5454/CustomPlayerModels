@@ -1,12 +1,9 @@
 package com.tom.cpm.common;
 
-import java.util.Base64;
-
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -14,12 +11,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import com.tom.cpl.config.ConfigEntry;
-import com.tom.cpm.common.NetH.ServerNetH;
-import com.tom.cpm.shared.config.ConfigKeys;
-import com.tom.cpm.shared.config.ModConfig;
-import com.tom.cpm.shared.config.PlayerData;
 
 public class CommandCPM {
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
@@ -56,20 +47,7 @@ public class CommandCPM {
 
 	private static int execute(CommandContext<CommandSource> context, String skin, boolean force, boolean save) throws CommandSyntaxException {
 		ServerPlayerEntity player = EntityArgument.getPlayer(context, "target");
-		ServerNetH handler = (ServerNetH) player.connection;
-		handler.cpm$setEncodedModelData(skin != null ? new PlayerData(Base64.getDecoder().decode(skin), force, save) : null);
-		NetworkHandler.sendToAllTrackingAndSelf(player, new SCustomPayloadPlayPacket(NetworkHandler.setSkin, ServerHandler.writeSkinData(handler.cpm$getEncodedModelData(), player)), ServerHandler::hasMod, null);
-		if(save && context.getSource().getServer().isDedicatedServer()) {
-			ConfigEntry e = ModConfig.getConfig().getEntry(ConfigKeys.SERVER_SKINS);
-			if(skin == null)
-				e.clearValue(player.getUniqueID().toString());
-			else {
-				e = e.getEntry(player.getUniqueID().toString());
-				e.setString(ConfigKeys.MODEL, skin);
-				e.setBoolean(ConfigKeys.FORCED, force);
-			}
-			ModConfig.getConfig().save();
-		}
+		ServerHandler.netHandler.onCommand(player, skin, force, save);
 		if(force)context.getSource().sendFeedback(new TranslationTextComponent("commands.cpm.setskin.success.force", player.getDisplayName()), true);
 		else context.getSource().sendFeedback(new TranslationTextComponent("commands.cpm.setskin.success", player.getDisplayName()), true);
 		return 1;

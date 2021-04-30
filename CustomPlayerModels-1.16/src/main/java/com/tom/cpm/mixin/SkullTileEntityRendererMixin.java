@@ -55,10 +55,21 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 			method = "render(Lnet/minecraft/util/Direction;FLnet/minecraft/block/SkullBlock$ISkullType;"
 					+ "Lcom/mojang/authlib/GameProfile;FLcom/mojang/blaze3d/matrix/MatrixStack;"
 					+ "Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
-	private static void onRender(@Nullable Direction directionIn, float p_228879_1_, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, CallbackInfo cbi) {
+	private static void onRenderPre(@Nullable Direction directionIn, float p_228879_1_, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, CallbackInfo cbi) {
 		if (skullType == SkullBlock.Types.PLAYER && gameProfileIn != null) {
 			GenericHeadModel model = MODELS.get(skullType);
 			ClientProxy.INSTANCE.renderSkull(model, gameProfileIn, buffer);
+		}
+	}
+
+	@Inject(at = @At("RETURN"),
+			method = "render(Lnet/minecraft/util/Direction;FLnet/minecraft/block/SkullBlock$ISkullType;"
+					+ "Lcom/mojang/authlib/GameProfile;FLcom/mojang/blaze3d/matrix/MatrixStack;"
+					+ "Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
+	private static void onRenderPost(@Nullable Direction directionIn, float p_228879_1_, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, CallbackInfo cbi) {
+		if (skullType == SkullBlock.Types.PLAYER && gameProfileIn != null) {
+			GenericHeadModel model = MODELS.get(skullType);
+			ClientProxy.INSTANCE.unbind(model);
 		}
 	}
 }

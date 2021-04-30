@@ -64,4 +64,12 @@ public abstract class SkullBlockEntityRendererMixin {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi);
 		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
 	}
+
+	@Inject(at = @At("RETURN"),
+			method = "renderSkull(Lnet/minecraft/util/math/Direction;FF"
+					+ "Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I"
+					+ "Lnet/minecraft/client/render/block/entity/SkullBlockEntityModel;Lnet/minecraft/client/render/RenderLayer;)V")
+	private static void renderSkullPost(Direction direction, float yaw, float animationProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, SkullBlockEntityModel model, RenderLayer renderLayer, CallbackInfo cbi) {
+		CustomPlayerModelsClient.INSTANCE.unbind(model);
+	}
 }

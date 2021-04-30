@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
@@ -11,6 +12,7 @@ import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -24,18 +26,19 @@ import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.skin.TextureProvider;
 
 public class SkinsPanel extends Panel {
-	private static final int WIDTH = 300;
 	public ViewportCamera camera;
 	private ScrollPanel list;
 	private SkinDisplayPanel display;
 	private ModelDefinition selectedDef;
 	private String selected;
 	private List<SkinPanel> panels;
+	private List<Consumer<Vec2i>> sizeSetters;
 	private Button set;
 
 	public SkinsPanel(IGui gui, ViewportCamera camera) {
 		super(gui);
 		this.camera = camera;
+		sizeSetters = new ArrayList<>();
 
 		list = new ScrollPanel(gui);
 		Panel panel = new Panel(gui);
@@ -51,28 +54,24 @@ public class SkinsPanel extends Panel {
 				MinecraftClientAccess.get().sendSkinUpdate();
 			}
 		});
-		reset.setBounds(new Box(0, 0, WIDTH, 20));
+		sizeSetters.add(s -> reset.setBounds(new Box(0, 0, s.x, 20)));
 		panel.addElement(reset);
+		sizeSetters.add(s -> panel.setBounds(new Box(0, 0, s.x, 40)));
 		panels = new ArrayList<>();
 		if(fs == null || fs.length == 0) {
 			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.no_skins"));
 			lbl.setBounds(new Box(5, 25, 0, 0));
 			panel.addElement(lbl);
-			panel.setBounds(new Box(0, 0, WIDTH, 40));
 		} else {
 			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.loading"));
 			lbl.setBounds(new Box(5, 25, 0, 0));
-			panel.addElement(lbl);
-			panel.setBounds(new Box(0, 0, WIDTH, 40));
 			MinecraftClientAccess.get().getDefinitionLoader().execute(() -> {
 				int y = 20;
 				for (int i = 0; i < fs.length; i++) {
 					if(fs[i].getName().equals(Exporter.TEMP_MODEL))continue;
 					try {
-						SkinPanel p = new SkinPanel(gui, ModelFile.load(fs[i]), model != null && fs[i].getName().equals(model));
-						Box b = p.getBounds();
-						p.setBounds(new Box(0, y, b.w, b.h));
-						y += b.h;
+						SkinPanel p = new SkinPanel(gui, ModelFile.load(fs[i]), model != null && fs[i].getName().equals(model), y);
+						y += p.getHeight();
 						panels.add(p);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -81,7 +80,15 @@ public class SkinsPanel extends Panel {
 				final int fy = y;
 				MinecraftClientAccess.get().executeLater(() -> {
 					panels.forEach(panel::addElement);
-					panel.setBounds(new Box(0, 0, WIDTH, fy));
+					if(panel.getBounds() != null) {
+						int w = panel.getBounds().w;
+						panels.forEach(p -> p.setSize(w));
+						panel.setBounds(new Box(0, 0, w, fy));
+					}
+					sizeSetters.add(s -> {
+						panel.setBounds(new Box(0, 0, s.x, fy));
+						panels.forEach(p -> p.setSize(s.x));
+					});
 					panel.getElements().remove(lbl);
 				});
 			});
@@ -108,16 +115,21 @@ public class SkinsPanel extends Panel {
 	}
 
 	public void setSize(int width, int height) {
-		list.setBounds(new Box(40, 40, WIDTH, height - 80));
-		set.setBounds(new Box(width / 2 + 128 - 50, height / 2 + 128, 100, 20));
-		display.setBounds(new Box(width / 2, height / 2 - 128, 256, 256));
+		Vec2i s = new Vec2i(width / 2 - 30, height - 50);
+		list.setBounds(new Box(20, 40, s.x, s.y));
+		sizeSetters.forEach(c -> c.accept(s));
+		int dispSize = Math.min(width / 2 - 40, height - 100);
+		set.setBounds(new Box(width / 2 + (dispSize / 2) - 50, height / 2 + (dispSize / 2) + 10, 100, 20));
+		display.setBounds(new Box(width / 2 + 10, height / 2 - (dispSize / 2), dispSize, dispSize));
 		setBounds(new Box(0, 0, width, height));
 	}
 
 	private class SkinPanel extends Panel {
 		private TextureProvider icon;
+		private Button select;
+		private int linesC, y;
 
-		public SkinPanel(IGui gui, ModelFile file, boolean sel) {
+		public SkinPanel(IGui gui, ModelFile file, boolean sel, int y) {
 			super(gui);
 			Label lbl = new Label(gui, file.getName());
 			lbl.setBounds(new Box(68, 5, 100, 10));
@@ -128,13 +140,14 @@ public class SkinsPanel extends Panel {
 			for (int i = 0; i < lines.length; i++) {
 				addElement(new Label(gui, lines[i]).setBounds(new Box(68, 20 + i * 10, 0, 0)));
 			}
+			linesC = lines.length;
+			this.y = y;
 
-			Button select = new Button(gui, gui.i18nFormat("button.cpm.select"), () -> {
+			select = new Button(gui, gui.i18nFormat("button.cpm.select"), () -> {
 				selected = file.getFileName();
 				selectedDef = MinecraftClientAccess.get().getDefinitionLoader().loadModel(file.getDataBlock(), MinecraftClientAccess.get().getClientPlayer());
 				file.registerLocalCache(MinecraftClientAccess.get().getDefinitionLoader());
 			});
-			select.setBounds(new Box(WIDTH - 50, 2, 40, 20));
 			addElement(select);
 
 			if(file.getIcon() != null && file.getIcon().getWidth() > 0) {
@@ -148,8 +161,15 @@ public class SkinsPanel extends Panel {
 					}
 				});
 			}
+		}
 
-			setBounds(new Box(0, 0, WIDTH, Math.max(64, lines.length * 10 + 30)));
+		public void setSize(int w) {
+			select.setBounds(new Box(w - 50, 2, 40, 20));
+			setBounds(new Box(0, y, w, getHeight()));
+		}
+
+		public int getHeight() {
+			return Math.max(64, linesC * 10 + 30);
 		}
 
 		@Override

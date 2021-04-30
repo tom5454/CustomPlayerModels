@@ -28,7 +28,7 @@ import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
-import com.tom.cpmcore.CPMASMClientHooks;
+import com.tom.cpm.shared.network.NetHandler;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -146,18 +146,8 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public ServerStatus getServerSideStatus() {
-		return mc.player != null ? CPMASMClientHooks.hasMod(mc.getConnection()) ? ServerStatus.INSTALLED : ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
-	}
-
-	@Override
 	public File getGameDir() {
 		return mc.mcDataDir;
-	}
-
-	@Override
-	public void sendSkinUpdate() {
-		ClientProxy.INSTANCE.sendSkinData(mc.getConnection());
 	}
 
 	@Override
@@ -168,5 +158,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public Runnable openSingleplayer() {
 		return () -> mc.displayGuiScreen(new GuiWorldSelection(mc.currentScreen));
+	}
+
+	@Override
+	public NetHandler<?, ?, ?, ?, ?> getNetHandler() {
+		return ClientProxy.INSTANCE.netHandler;
 	}
 }

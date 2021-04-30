@@ -2,7 +2,6 @@ package com.tom.cpm.client;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -49,10 +48,10 @@ public class GuiImpl extends GuiScreen implements IGui {
 	private static final NativeGuiComponents nativeComponents = new NativeGuiComponents();
 	private Frame gui;
 	private GuiScreen parent;
-	private Stack<Ctx> posOff = new Stack<>();
-	private Ctx current = new Ctx();
+	private CtxStack stack;
 	private UIColors colors;
 	private Consumer<Runnable> closeListener;
+	private int vanillaScale = -1;
 
 	static {
 		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
@@ -79,7 +78,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 		this.drawDefaultBackground();
 		try {
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
-			current = new Ctx();
+			stack = new CtxStack(width, height);
 			gui.draw(mouseX, mouseY, partialTicks);
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -102,6 +101,9 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void onGuiClosed() {
+		if(vanillaScale != -1 && vanillaScale != mc.gameSettings.guiScale) {
+			mc.gameSettings.guiScale = vanillaScale;
+		}
 		if(parent != null) {
 			GuiScreen p = parent;
 			parent = null;
@@ -111,8 +113,8 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void drawBox(int x, int y, int w, int h, int color) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		drawRect(x, y, x+w, y+h, color);
 	}
 
@@ -128,8 +130,8 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void drawText(int x, int y, String text, int color) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		fontRendererObj.drawString(text, x, y, color);
 	}
 
@@ -243,16 +245,16 @@ public class GuiImpl extends GuiScreen implements IGui {
 	@Override
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture) {
 		mc.getTextureManager().bindTexture(new ResourceLocation("cpm", "textures/gui/" + texture + ".png"));
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		GlStateManager.color(1, 1, 1, 1);
 		drawTexturedModalRect(x, y, u, v, w, h);
 	}
 
 	@Override
 	public void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2) {
-		x += current.box.x;
-		y += current.box.y;
+		x += getOffset().x;
+		y += getOffset().y;
 		GlStateManager.color(1, 1, 1, 1);
 		Tessellator tessellator = Tessellator.getInstance();
 		WorldRenderer bufferbuilder = tessellator.getWorldRenderer();
@@ -270,38 +272,12 @@ public class GuiImpl extends GuiScreen implements IGui {
 	}
 
 	@Override
-	public void pushMatrix() {
-		posOff.push(current);
-		current = new Ctx(current);
-	}
-
-	@Override
-	public void setPosOffset(Box box) {
-		current.box = new Box(current.box.x + box.x, current.box.y + box.y, box.w, box.h);
-	}
-
-	@Override
 	public void setupCut() {
 		float multiplierX = mc.displayWidth / (float)width;
 		float multiplierY = mc.displayHeight / (float)height;
-		GL11.glScissor((int) (current.box.x * multiplierX), mc.displayHeight - (int) ((current.box.y + current.box.h) * multiplierY),
-				(int) (current.box.w * multiplierX), (int) (current.box.h * multiplierY));
-	}
-
-	@Override
-	public void popMatrix() {
-		current = posOff.pop();
-	}
-
-	private class Ctx {
-		private Box box;
-		public Ctx(Ctx old) {
-			box = new Box(old.box.x, old.box.y, old.box.w, old.box.h);
-		}
-
-		public Ctx() {
-			box = new Box(0, 0, width, height);
-		}
+		Box box = getContext().cutBox;
+		GL11.glScissor((int) (box.x * multiplierX), mc.displayHeight - (int) ((box.y + box.h) * multiplierY),
+				(int) (box.w * multiplierX), (int) (box.h * multiplierY));
 	}
 
 	@Override
@@ -330,10 +306,11 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 		@Override
 		public void draw(int mouseX, int mouseY, float partialTicks, Box bounds) {
-			field.xPosition = bounds.x + current.box.x + 4;
-			field.yPosition = bounds.y + current.box.y + 6;
-			currentOff.x = current.box.x;
-			currentOff.y = current.box.y;
+			Vec2i off = getOffset();
+			field.xPosition = bounds.x + off.x + 4;
+			field.yPosition = bounds.y + off.y + 6;
+			currentOff.x = off.x;
+			currentOff.y = off.y;
 			this.bounds.x = bounds.x;
 			this.bounds.y = bounds.y;
 			this.bounds.w = bounds.w;
@@ -411,11 +388,6 @@ public class GuiImpl extends GuiScreen implements IGui {
 	@Override
 	public void setCloseListener(Consumer<Runnable> listener) {
 		this.closeListener = listener;
-	}
-
-	@Override
-	public Vec2i getOffset() {
-		return new Vec2i(current.box.x, current.box.y);
 	}
 
 	@Override
@@ -511,5 +483,43 @@ public class GuiImpl extends GuiScreen implements IGui {
 	@Override
 	public String getClipboardText() {
 		return getClipboardString();
+	}
+
+	@Override
+	public void setScale(int value) {
+		if(value != mc.gameSettings.guiScale) {
+			if(vanillaScale == -1)vanillaScale = mc.gameSettings.guiScale;
+			if(value == -1) {
+				if(mc.gameSettings.guiScale != vanillaScale) {
+					mc.gameSettings.guiScale = vanillaScale;
+					vanillaScale = -1;
+					ScaledResolution scaledresolution = new ScaledResolution(this.mc);
+					int j = scaledresolution.getScaledWidth();
+					int k = scaledresolution.getScaledHeight();
+					this.setWorldAndResolution(this.mc, j, k);
+				}
+			} else {
+				mc.gameSettings.guiScale = value;
+				ScaledResolution scaledresolution = new ScaledResolution(this.mc);
+				int j = scaledresolution.getScaledWidth();
+				int k = scaledresolution.getScaledHeight();
+				this.setWorldAndResolution(this.mc, j, k);
+			}
+		}
+	}
+
+	@Override
+	public int getScale() {
+		return mc.gameSettings.guiScale;
+	}
+
+	@Override
+	public int getMaxScale() {
+		return 4;
+	}
+
+	@Override
+	public CtxStack getStack() {
+		return stack;
 	}
 }

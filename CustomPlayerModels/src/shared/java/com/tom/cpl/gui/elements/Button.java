@@ -23,8 +23,9 @@ public class Button extends GuiElement {
 		} else if(bounds.isInBounds(mouseX, mouseY)) {
 			color = gui.getColors().button_text_hover;
 			bgColor = gui.getColors().button_hover;
-			if(tooltip != null)tooltip.set();
 		}
+		if(bounds.isInBounds(mouseX, mouseY) && tooltip != null)
+			tooltip.set();
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
 		gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 - 4, name, color);

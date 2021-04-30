@@ -1,5 +1,6 @@
 package com.tom.cpmcore;
 
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelRenderer;
@@ -7,8 +8,6 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.server.SPacketCustomPayload;
 
 import com.mojang.authlib.GameProfile;
@@ -17,13 +16,22 @@ import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.config.PlayerData;
 
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
 		if(profile != null) {
 			ClientProxy.INSTANCE.renderSkull(skullModel, profile);
 		}
+	}
+
+	public static void renderSkullPost(ModelBase skullModel, GameProfile profile) {
+		if(profile != null) {
+			ClientProxy.INSTANCE.unbind(skullModel);
+		}
+	}
+
+	public static void unbindHand(AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.unbindHand(player);
 	}
 
 	public static void renderArmor(ModelBase in, Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale, RenderLivingBase<?> renderer) {
@@ -46,30 +54,6 @@ public class CPMASMClientHooks {
 		throw new AbstractMethodError();//model.cpm$noModelSetup = value;
 	}
 
-	public static boolean hasMod(NetHandlerPlayClient handler) {
-		throw new AbstractMethodError();//return handler.cpm$hasMod;
-	}
-
-	public static boolean hasMod(NetHandlerPlayServer handler) {
-		throw new AbstractMethodError();//return handler.cpm$hasMod;
-	}
-
-	public static void setHasMod(NetHandlerPlayClient handler, boolean v) {
-		throw new AbstractMethodError();//handler.cpm$hasMod = v;
-	}
-
-	public static void setHasMod(NetHandlerPlayServer handler, boolean v) {
-		throw new AbstractMethodError();//handler.cpm$hasMod = v;
-	}
-
-	public static PlayerData getEncodedModelData(NetHandlerPlayServer handler) {
-		throw new AbstractMethodError();//return handler.cpm$data;
-	}
-
-	public static void setEncodedModelData(NetHandlerPlayServer handler, PlayerData data) {
-		throw new AbstractMethodError();//handler.cpm$data = data;
-	}
-
 	public static void postRenderSkull(ModelRenderer r, float scale, RenderPlayer rpe) {
 		rpe.getMainModel().bipedHead.postRender(scale);
 	}
@@ -81,14 +65,6 @@ public class CPMASMClientHooks {
 	public static boolean onClientPacket(SPacketCustomPayload pckt, NetHandlerPlayClient handler) {
 		if(pckt.getChannelName().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
 			NetworkHandler.handlePacket(pckt, handler, true);
-			return true;
-		}
-		return false;
-	}
-
-	public static boolean onServerPacket(CPacketCustomPayload pckt, NetHandlerPlayServer handler) {
-		if(pckt.getChannelName().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			NetworkHandler.handlePacket(pckt, handler, false);
 			return true;
 		}
 		return false;

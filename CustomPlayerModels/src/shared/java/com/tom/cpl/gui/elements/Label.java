@@ -14,7 +14,10 @@ public class Label extends GuiElement {
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
-		gui.drawText(bounds.x, bounds.y, text, color);
+		if(text == null)
+			gui.drawText(bounds.x, bounds.y, "~~NULL~~", color);
+		else
+			gui.drawText(bounds.x, bounds.y, text, color);
 
 		if(bounds.isInBounds(mouseX, mouseY)) {
 			if(tooltip != null)tooltip.set();

@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 
 import com.tom.cpl.gui.Frame;
@@ -23,11 +22,10 @@ import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.CustomPlayerModels;
-import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
-import com.tom.cpmcore.CPMASMClientHooks;
+import com.tom.cpm.shared.network.NetHandler;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -117,9 +115,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public void setEncodedGesture(int value) {
-		if(getServerSideStatus() == ServerStatus.INSTALLED) {
-			mc.getNetHandler().addToSendQueue(new C17PacketCustomPayload(NetworkHandler.setLayer.toString(), new byte[] {(byte) value}));
-		}
+		ClientProxy.INSTANCE.netHandler.sendLayer(value);
 	}
 
 	@Override
@@ -139,17 +135,12 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ServerStatus getServerSideStatus() {
-		return mc.thePlayer != null ? CPMASMClientHooks.hasMod(mc.getNetHandler()) ? ServerStatus.INSTALLED : ServerStatus.UNAVAILABLE : ServerStatus.OFFLINE;
+		return isInGame() ? getNetHandler().hasModClient() ? ServerStatus.INSTALLED : ServerStatus.UNAVAILABLE : ServerStatus.OFFLINE;
 	}
 
 	@Override
 	public File getGameDir() {
 		return mc.mcDataDir;
-	}
-
-	@Override
-	public void sendSkinUpdate() {
-		ClientProxy.INSTANCE.sendSkinData(mc.getNetHandler());
 	}
 
 	@Override
@@ -160,5 +151,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public Runnable openSingleplayer() {
 		return () -> mc.displayGuiScreen(new GuiSelectWorld(mc.currentScreen));
+	}
+
+	@Override
+	public NetHandler<?, ?, ?, ?, ?> getNetHandler() {
+		return ClientProxy.INSTANCE.netHandler;
 	}
 }

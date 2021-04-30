@@ -9,9 +9,11 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.editor.HeldItem;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.skin.TextureProvider;
@@ -164,6 +166,7 @@ public abstract class ViewportPanelBase extends GuiElement {
 		public abstract void render(float partialTicks);
 		public abstract int getColorUnderMouse();
 		public abstract Image takeScreenshot(Vec2i size);
+		public abstract boolean canRenderHeldItem();
 
 		public Box getBounds() {
 			return panel.bounds;
@@ -179,6 +182,9 @@ public abstract class ViewportPanelBase extends GuiElement {
 	}
 	public abstract boolean isTpose();
 	public abstract boolean applyLighting();
+	public HeldItem getHeldItem(Hand hand) {
+		return HeldItem.NONE;
+	}
 
 	public static class ViewportCamera {
 		public Vec3f position = new Vec3f(0.5f, 1, 0.5f);
@@ -194,5 +200,13 @@ public abstract class ViewportPanelBase extends GuiElement {
 
 	public IGui getGui() {
 		return gui;
+	}
+
+	public boolean canRenderHeldItem() {
+		return nat.canRenderHeldItem();
+	}
+
+	public float getScale() {
+		return 1;
 	}
 }

@@ -3,13 +3,12 @@ package com.tom.cpm;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import com.tom.cpm.shared.config.PlayerData;
-import com.tom.cpmcore.CPMASMClientHooks;
+import com.tom.cpm.shared.network.NetH.ServerNetH;
 
 public class PlayerDataExt extends PlayerData {
 	private int skinLayer;
-	public PlayerDataExt(byte[] data, boolean forced, boolean save, int skinLayer) {
-		super(data, forced, save);
-		this.skinLayer = skinLayer;
+
+	public PlayerDataExt() {
 	}
 
 	public boolean hasModel() {
@@ -17,16 +16,12 @@ public class PlayerDataExt extends PlayerData {
 	}
 
 	public static int getSkinLayer(EntityPlayerMP player) {
-		PlayerData pd = CPMASMClientHooks.getEncodedModelData(player.playerNetServerHandler);
+		PlayerData pd = ((ServerNetH)player.playerNetServerHandler).cpm$getEncodedModelData();
 		return pd == null ? 0 : ((PlayerDataExt)pd).skinLayer;
 	}
 
 	public static void setSkinLayer(EntityPlayerMP player, int layer) {
-		PlayerData pd = CPMASMClientHooks.getEncodedModelData(player.playerNetServerHandler);
-		if(pd == null) {
-			pd = new PlayerDataExt(null, false, false, layer);
-			CPMASMClientHooks.setEncodedModelData(player.playerNetServerHandler, pd);
-		} else
-			((PlayerDataExt)pd).skinLayer = layer;
+		PlayerData pd = ((ServerNetH)player.playerNetServerHandler).cpm$getEncodedModelData();
+		((PlayerDataExt)pd).skinLayer = layer;
 	}
 }

@@ -34,6 +34,7 @@ public abstract interface TreeElement {
 				e.elements.forEach(c);
 				e.templates.forEach(c);
 				if(e.templateSettings != null)c.accept(e.templateSettings);
+				if(e.scaling != 0)c.accept(e.scalingElem);
 			} else
 				parent.getTreeElements(c);
 		}
@@ -55,7 +56,7 @@ public abstract interface TreeElement {
 		@Override
 		protected void onClick(MouseEvent evt, TreeElement elem) {
 			if(evt.btn == 1 && elem != null) {
-				PopupMenu popup = new PopupMenu(e.gui());
+				PopupMenu popup = new PopupMenu(e.gui(), e.frame);
 				if(elem.canMove() || (moveElem != null && elem.canAccept(moveElem))) {
 					popup.addButton(moveElem != null ? e.gui().i18nFormat("button.cpm.tree.put") : e.gui().i18nFormat("button.cpm.tree.move"), () -> {
 						if(moveElem != null) {
@@ -68,7 +69,7 @@ public abstract interface TreeElement {
 				elem.populatePopup(popup);
 				if(!popup.getElements().isEmpty()) {
 					Vec2i p = evt.getPos();
-					popup.display(e.frame, p.x, p.y);
+					popup.display(p.x, p.y);
 				}
 			} else {
 				if(elem != null)elem.onClick(evt);
@@ -128,4 +129,6 @@ public abstract interface TreeElement {
 	public default void setMCScale(float scale) {}
 	public default void switchVis() {}
 	public default void switchEffect(Effect effect) {}
+	public default float getValue() { return 0; }
+	public default void setValue(float value) {}
 }

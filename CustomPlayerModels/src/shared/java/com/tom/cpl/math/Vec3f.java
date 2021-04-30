@@ -86,4 +86,10 @@ public class Vec3f {
 		if (Float.floatToIntBits(z) != Float.floatToIntBits(other.z)) return false;
 		return true;
 	}
+
+	public void round(int i) {
+		x = Math.round(x * i) / (float) i;
+		y = Math.round(y * i) / (float) i;
+		z = Math.round(z * i) / (float) i;
+	}
 }

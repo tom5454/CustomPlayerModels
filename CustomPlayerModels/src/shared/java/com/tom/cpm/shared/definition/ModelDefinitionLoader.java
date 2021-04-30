@@ -48,7 +48,7 @@ public class ModelDefinitionLoader {
 			if(serverModels.containsKey(key)) {
 				player.setModelDefinition(loadModel(serverModels.get(key), player));
 			} else {
-				player.loadSkin(() -> {
+				player.loadSkin().thenRun(() -> {
 					CompletableFuture<Image> skinF = player.getSkin();
 					skinF.thenAccept(skin -> {
 						if(skin != null && player.getModelDefinition() == null) {
@@ -88,6 +88,7 @@ public class ModelDefinitionLoader {
 		try(ByteArrayInputStream in = new ByteArrayInputStream(data)) {
 			return loadModel(in, player);
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 	}

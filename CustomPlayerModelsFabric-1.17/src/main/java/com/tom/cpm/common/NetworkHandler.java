@@ -2,33 +2,32 @@ package com.tom.cpm.common;
 
 import java.util.function.Predicate;
 
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.EntityTrackingListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage.EntityTracker;
-import net.minecraft.util.Identifier;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
-import com.tom.cpm.common.NetH.ServerNetH;
-import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.network.NetH;
 
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
 public class NetworkHandler {
-	public static final Identifier helloPacket = new Identifier(MinecraftObjectHolder.NETWORK_ID, "hello");
-	public static final Identifier setSkin = new Identifier(MinecraftObjectHolder.NETWORK_ID, "set_skin");
-	public static final Identifier getSkin = new Identifier(MinecraftObjectHolder.NETWORK_ID, "get_skin");
 
 	public static void handlePacket(Packet<?> packet, NetH handler, boolean client) {
 		try {
 			if(!client) {
-				ServerHandler.receivePacket((CustomPayloadC2SPacket) packet, (ServerNetH) handler);
+				CustomPayloadC2SPacket p = (CustomPayloadC2SPacket) packet;
+				ServerHandler.netHandler.receiveServer(p.channel, p.data, (ServerPlayNetworkHandler) handler);
 			} else {
-				CustomPlayerModelsClient.INSTANCE.receivePacket((CustomPayloadS2CPacket) packet, handler);
+				CustomPayloadS2CPacket p = (CustomPayloadS2CPacket) packet;
+				CustomPlayerModelsClient.INSTANCE.netHandler.receiveClient(p.getChannel(), p.getData(), (ClientPlayNetworkHandler) handler);
 			}
 		} catch (Throwable e) {
 			System.out.println("Exception while processing cpm packet");

@@ -11,6 +11,7 @@ import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.util.ElementGroup;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
@@ -74,6 +75,7 @@ public class PosPanel extends Panel {
 			Button modeBtn = new Button(gui, gui.i18nFormat("button.cpm.mode"), editor::switchMode);
 			modeBtn.setBounds(new Box(5, ys, 160, 16));
 
+			ElementGroup<ModeDisplType> group = new ElementGroup<>();
 			Spinner spinnerU = new Spinner(gui);
 			Spinner spinnerV = new Spinner(gui);
 			Spinner spinnerT = new Spinner(gui);
@@ -84,19 +86,31 @@ public class PosPanel extends Panel {
 			lblV.setBounds(new Box(60, ys + 20, 50, 18));
 			Label lblT = new Label(gui, gui.i18nFormat("label.cpm.texSize"));
 			lblT.setBounds(new Box(115, ys + 20, 50, 18));
+			Spinner spinnerS = new Spinner(gui);
 
 			spinnerU.setBounds(new Box(5, ys + 30, 50, 18));
 			spinnerV.setBounds(new Box(60, ys + 30, 50, 18));
 			spinnerT.setBounds(new Box(115, ys + 30, 50, 18));
 			colorBtn.setBounds(new Box(5, ys + 20, 160, 16));
+			spinnerS.setBounds(new Box(5, ys + 30, 150, 18));
 			spinnerU.setDp(0);
 			spinnerV.setDp(0);
 			spinnerT.setDp(0);
+			spinnerS.setDp(2);
+			group.addElement(ModeDisplType.TEX, spinnerU);
+			group.addElement(ModeDisplType.TEX, spinnerV);
+			group.addElement(ModeDisplType.TEX, spinnerT);
+			group.addElement(ModeDisplType.TEX, lblU);
+			group.addElement(ModeDisplType.TEX, lblV);
+			group.addElement(ModeDisplType.TEX, lblT);
+			group.addElement(ModeDisplType.COLOR, colorBtn);
+			group.addElement(ModeDisplType.VALUE, spinnerS);
 
 			Runnable r = () -> editor.setVec(new Vec3f(spinnerU.getValue(), spinnerV.getValue(), spinnerT.getValue()), VecType.TEXTURE);
 			spinnerU.addChangeListener(r);
 			spinnerV.addChangeListener(r);
 			spinnerT.addChangeListener(r);
+			spinnerS.addChangeListener(() -> editor.setValue(spinnerS.getValue()));
 
 			editor.setModeBtn.add(b -> {
 				if(b == null) {
@@ -107,28 +121,7 @@ public class PosPanel extends Panel {
 					modeBtn.setText(b);
 				}
 			});
-			editor.setModePanel.add(t -> {
-				boolean color = false, texture = false;
-				switch (t) {
-				case COLOR:
-					color = true;
-					break;
-				case NULL:
-					break;
-				case TEX:
-					texture = true;
-					break;
-				default:
-					break;
-				}
-				spinnerU.setVisible(texture);
-				spinnerV.setVisible(texture);
-				spinnerT.setVisible(texture);
-				lblU.setVisible(texture);
-				lblV.setVisible(texture);
-				lblT.setVisible(texture);
-				colorBtn.setVisible(color);
-			});
+			editor.setModePanel.add(group::set);
 			editor.setTexturePanel.add(v -> {
 				if(v != null) {
 					spinnerU.setValue(v.x);
@@ -139,6 +132,7 @@ public class PosPanel extends Panel {
 			editor.setPartColor.add(c -> {
 				if(c != null)colorBtn.setColor(c);
 			});
+			editor.setValue.add(spinnerS::setValue);
 			addElement(modeBtn);
 			addElement(spinnerU);
 			addElement(spinnerV);
@@ -147,6 +141,7 @@ public class PosPanel extends Panel {
 			addElement(lblV);
 			addElement(lblT);
 			addElement(colorBtn);
+			addElement(spinnerS);
 
 			String skinLbl = gui.i18nFormat("label.cpm.skin");
 			Label lblS = new Label(gui, skinLbl);
@@ -157,7 +152,7 @@ public class PosPanel extends Panel {
 				else lblS.setText(skinLbl);
 			});
 
-			SkinTextureDisplay skinDisp = new SkinTextureDisplay(gui, editor);
+			TextureDisplay skinDisp = new TextureDisplay(gui, editor);
 			skinDisp.setBounds(new Box(5, ys + 60, 160, 160));
 			addElement(skinDisp);
 
@@ -217,6 +212,6 @@ public class PosPanel extends Panel {
 	}
 
 	public static enum ModeDisplType {
-		NULL, COLOR, TEX
+		NULL, COLOR, TEX, VALUE
 	}
 }

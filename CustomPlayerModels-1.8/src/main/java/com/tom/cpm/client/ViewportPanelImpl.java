@@ -127,7 +127,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		ModelPlayer p = rp.getMainModel();
 		panel.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, panel.getDefinition(), null, null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, panel.getDefinition(), null);
 			setupModel(p);
 			if(panel.isTpose()) {
 				p.bipedRightArm.rotateAngleZ = (float) Math.toRadians(90);
@@ -161,13 +161,14 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case FLYING:
+					p.bipedHead.rotateAngleX = -(float)Math.PI / 4F;
+				case SWIMMING:
+					GlStateManager.translate(0.0D, 1.0D, -0.5d);
+					GlStateManager.rotate(90, 1, 0, 0);
 					break;
 
 				case RUNNING:
 					p.setRotationAngles(ls, 1f, 0, 0, 0, 0.0625F, playerObj);
-					break;
-
-				case SWIMMING:
 					break;
 
 				case WALKING:
@@ -239,5 +240,10 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		gr.drawImage(img, 0, 0, size.x, size.y, null);
 		gr.dispose();
 		return new Image(rImg);
+	}
+
+	@Override
+	public boolean canRenderHeldItem() {
+		return false;
 	}
 }

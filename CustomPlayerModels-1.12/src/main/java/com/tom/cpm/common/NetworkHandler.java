@@ -13,19 +13,17 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldServer;
 
 import com.tom.cpm.client.ClientProxy;
-import com.tom.cpm.shared.MinecraftObjectHolder;
 
 public class NetworkHandler {
-	public static final ResourceLocation helloPacket = new ResourceLocation(MinecraftObjectHolder.NETWORK_ID, "hello");
-	public static final ResourceLocation setSkin = new ResourceLocation(MinecraftObjectHolder.NETWORK_ID, "set_skin");
-	public static final ResourceLocation getSkin = new ResourceLocation(MinecraftObjectHolder.NETWORK_ID, "get_skin");
 
 	public static void handlePacket(Packet<?> packet, Object handler, boolean client) {
 		try {
 			if(!client) {
-				ServerHandler.receivePacket((CPacketCustomPayload) packet, (NetHandlerPlayServer) handler);
+				CPacketCustomPayload pckt = (CPacketCustomPayload) packet;
+				ServerHandler.netHandler.receiveServer(new ResourceLocation(pckt.getChannelName()), pckt.getBufferData(), (NetHandlerPlayServer) handler);
 			} else {
-				ClientProxy.INSTANCE.receivePacket((SPacketCustomPayload) packet, (NetHandlerPlayClient) handler);
+				SPacketCustomPayload pckt = (SPacketCustomPayload) packet;
+				ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.getChannelName()), pckt.getBufferData(), (NetHandlerPlayClient) handler);
 			}
 		} catch (Throwable e) {
 			System.out.println("Exception while processing cpm packet");

@@ -265,6 +265,20 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		dout.write(MathHelper.clamp((int) (v.z * 10), 0, 255));
 	}
 
+	public Vec3f readVec3b() throws IOException {
+		Vec3f v = new Vec3f();
+		v.x = din.readByte() / 10f;
+		v.y = din.readByte() / 10f;
+		v.z = din.readByte() / 10f;
+		return v;
+	}
+
+	public void writeVec3b(Vec3f v) throws IOException {
+		dout.writeByte(MathHelper.clamp((int) (v.x * 10), Byte.MIN_VALUE, Byte.MAX_VALUE));
+		dout.writeByte(MathHelper.clamp((int) (v.y * 10), Byte.MIN_VALUE, Byte.MAX_VALUE));
+		dout.writeByte(MathHelper.clamp((int) (v.z * 10), Byte.MIN_VALUE, Byte.MAX_VALUE));
+	}
+
 	public Vec3f readAngle() throws IOException {
 		Vec3f v = new Vec3f();
 		v.x = (float) (din.readShort() / 65535f * 2 * Math.PI);
@@ -415,6 +429,11 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 	public String toB64() throws IOException {
 		if(baos == null)throw new IOException("Not a byte array backed io handler");
 		return Base64.getEncoder().encodeToString(baos.toByteArray());
+	}
+
+	public byte[] toBytes() throws IOException {
+		if(baos == null)throw new IOException("Not a byte array backed io handler");
+		return baos.toByteArray();
 	}
 
 	@FunctionalInterface

@@ -34,7 +34,27 @@ public class SettingsPopup extends PopupPanel {
 		buttonRMB.setBounds(new Box(5, 30, 200, 20));
 		addElement(buttonRMB);
 
+		Button guiScale = new Button(gui, gui.i18nFormat("button.cpm.config.scale", getScale()), null);
+		guiScale.setAction(() -> {
+			int scale = ModConfig.getConfig().getInt(ConfigKeys.EDITOR_SCALE, -1) + 1;
+			if(scale >= gui.getMaxScale()) {
+				scale = -1;
+			}
+			ModConfig.getConfig().setInt(ConfigKeys.EDITOR_SCALE, scale);
+			gui.setScale(scale);
+			guiScale.setText(gui.i18nFormat("button.cpm.config.scale", getScale()));
+			close();
+			frm.openPopup(this);
+		});
+		guiScale.setBounds(new Box(5, 55, 200, 20));
+		addElement(guiScale);
+
 		setBounds(new Box(0, 0, 210, 100));
+	}
+
+	private String getScale() {
+		int scale = ModConfig.getConfig().getInt(ConfigKeys.EDITOR_SCALE, -1);
+		return scale == -1 ? gui.i18nFormat("button.cpm.config.scale.vanilla") : scale == 0 ? gui.i18nFormat("button.cpm.config.scale.auto") : Integer.toString(scale);
 	}
 
 	private String getRotateBtn() {

@@ -22,10 +22,11 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
-import com.tom.cpm.common.NetH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.network.NetH;
+import com.tom.cpm.shared.network.NetHandler;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private static final Identifier STEVE_SKIN = new Identifier("textures/entity/steve.png");
@@ -146,7 +147,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 		setEncPart(s, value, 3, PlayerModelPart.RIGHT_PANTS_LEG);
 		setEncPart(s, value, 4, PlayerModelPart.LEFT_SLEEVE);
 		setEncPart(s, value, 5, PlayerModelPart.RIGHT_SLEEVE);
-		mc.options.onPlayerModelPartChange();
+		mc.options.sendClientSettings();
 	}
 
 	private static void setEncPart(Set<PlayerModelPart> s, int value, int off, PlayerModelPart part) {
@@ -180,11 +181,6 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public void sendSkinUpdate() {
-		CustomPlayerModelsClient.INSTANCE.sendSkinData(mc.getNetworkHandler());
-	}
-
-	@Override
 	public void openGui(Function<IGui, Frame> creator) {
 		mc.openScreen(new GuiImpl(creator, mc.currentScreen));
 	}
@@ -192,5 +188,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public Runnable openSingleplayer() {
 		return () -> mc.openScreen(new SelectWorldScreen(mc.currentScreen));
+	}
+
+	@Override
+	public NetHandler<?, ?, ?, ?, ?> getNetHandler() {
+		return CustomPlayerModelsClient.INSTANCE.netHandler;
 	}
 }

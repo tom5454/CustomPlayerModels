@@ -10,15 +10,35 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.parts.ModelPartScale;
 
 public class AnimationEngine {
 	private long tickCounter;
 	private float partial;
+	private ModelPartScale modelScale;
 
 	public void tick() {
 		tickCounter++;
 		if(MinecraftClientAccess.get().isInGame()) {
-			MinecraftClientAccess.get().getClientPlayer();//Keep client player loaded
+			Player<?, ?> player = MinecraftClientAccess.get().getClientPlayer();//Keep client player loaded
+			ModelDefinition def = player.getModelDefinition();
+			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
+				if(def != null && def.doRender()) {
+					if(def.getScale() != modelScale) {
+						modelScale = def.getScale();
+						if(modelScale == null) {
+							MinecraftClientAccess.get().setModelScale(0);
+						} else {
+							MinecraftClientAccess.get().setModelScale(modelScale.getScale());
+						}
+					}
+				} else if(modelScale != null) {
+					MinecraftClientAccess.get().setModelScale(0);
+					modelScale = null;
+				}
+			}
+		} else {
+			modelScale = null;
 		}
 	}
 
@@ -34,7 +54,12 @@ public class AnimationEngine {
 		try {
 			ModelDefinition def = player.getModelDefinition();
 			AnimationHandler h = player.getAnimationHandler(mode);
-			if(mode == AnimationMode.PLAYER) {
+			switch (mode) {
+			case HAND:
+				def.resetAnimationPos();
+				return;
+			case PLAYER:
+			{
 				VanillaPose pose = player.getPose();
 				int gesture = player.getEncodedGestureId();
 				AnimationRegistry reg = def.getAnimations();
@@ -48,11 +73,18 @@ public class AnimationEngine {
 				h.addAnimations(anim);
 				h.addAnimations(global);
 				h.setGesture(def.getAnimations().getGesture(gesture));
-			} else if(mode == AnimationMode.SKULL){
+			}
+			break;
+			case SKULL:
+			{
 				List<Animation> anim = def.getAnimations().getPoseAnimations(VanillaPose.SKULL_RENDER);
 				List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
 				h.addAnimations(anim);
 				h.addAnimations(global);
+			}
+			break;
+			default:
+				break;
 			}
 			h.animate(getTime());
 		} catch (Exception e) {
@@ -113,5 +145,6 @@ public class AnimationEngine {
 	public static enum AnimationMode {
 		PLAYER,
 		SKULL,
+		HAND,
 	}
 }

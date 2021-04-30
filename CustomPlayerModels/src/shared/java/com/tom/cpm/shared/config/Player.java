@@ -23,6 +23,7 @@ public abstract class Player<P, M> {
 	private ModelDefinition definition;
 	private EnumMap<AnimationMode, AnimationHandler> animHandler = new EnumMap<>(AnimationMode.class);
 	private CompletableFuture<Image> skinFuture;
+	private CompletableFuture<Void> loadFuture;
 	public VanillaPose prevPose;
 	public IPose currentPose;
 	public String url;
@@ -49,8 +50,15 @@ public abstract class Player<P, M> {
 		return Image.download(url).thenApply(i -> new LegacySkinConverter().convertSkin(i)).exceptionally(e -> null);
 	}
 
+	public CompletableFuture<Void> loadSkin() {
+		if(loadFuture == null) {
+			loadFuture = loadSkin0();
+		}
+		return loadFuture;
+	}
+
 	public abstract SkinType getSkinType();
-	public abstract void loadSkin(Runnable onLoaded);
+	public abstract CompletableFuture<Void> loadSkin0();
 	public abstract UUID getUUID();
 	public abstract VanillaPose getPose();
 	public abstract int getEncodedGestureId();

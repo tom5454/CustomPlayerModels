@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
+import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -48,9 +50,11 @@ import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.template.TemplateArgType;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
+import com.tom.cpm.shared.editor.tree.ScalingElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.editor.util.ModelDescription;
+import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
 import com.tom.cpm.shared.editor.util.ValueOp;
@@ -104,12 +108,17 @@ public class Editor {
 	public Updater<Integer> setAnimPriority = updaterReg.create();
 	public Updater<Void> gestureFinished = updaterReg.create();
 	public Updater<Boolean> displayViewport = updaterReg.create();
+	public Updater<Boolean> heldRenderEnable = updaterReg.create();
+	public Updater<Float> setValue = updaterReg.create();
+	public Updater<EditorTool> setTool = updaterReg.create();
 
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
-	public int drawMode = 0;
+	public EditorTool drawMode = EditorTool.PEN;
 	public boolean drawAllUVs = false;
 	public boolean onlyDrawOnSelected = true;
+	public EnumMap<Hand, HeldItem> handDisplay = new EnumMap<>(Hand.class);
+	public ScalingElement scalingElem = new ScalingElement(this);
 
 	public ViewportCamera camera = new ViewportCamera();
 	public Stack<Runnable> undoQueue = new Stack<>();
@@ -120,6 +129,7 @@ public class Editor {
 	public boolean applyAnim;
 	public boolean playFullAnim;
 	public boolean playerTpose;
+	public boolean applyScaling;
 	public long playStartTime, gestureStartTime;
 	private StoreIDGen storeIDgen;
 	public AnimationEncodingData animEnc;
@@ -136,6 +146,7 @@ public class Editor {
 	public SkinType skinType;
 	public boolean customSkinType;
 	public ModelDescription description;
+	public float scaling;
 	public Image vanillaSkin;
 	public boolean dirty;
 	public ModelDefinition definition;
@@ -146,8 +157,11 @@ public class Editor {
 	public File file;
 	public ProjectFile project = new ProjectFile();
 
-	public Editor(EditorGui gui) {
+	public Editor() {
 		this.definition = new EditorDefinition(this);
+	}
+
+	public void setGui(EditorGui gui) {
 		this.frame = gui;
 	}
 
@@ -188,6 +202,7 @@ public class Editor {
 				selectedElement.size.z = 25;
 				changed = true;
 			}
+			selectedElement.size.round(10);
 			currentOp = new ValueOp<>(selectedElement, selectedElement.size, (a, b) -> a.size = b);
 			if(changed)setSize.accept(selectedElement.size);
 		}
@@ -295,8 +310,6 @@ public class Editor {
 					);
 			if(selectedElement.texture && refreshGui)
 				setTexturePanel.accept(new Vec3i(selectedElement.u, selectedElement.v, selectedElement.textureSize));
-			markDirty();
-
 		}
 		break;
 		default:
@@ -323,6 +336,15 @@ public class Editor {
 			changed = true;
 		}
 		if(changed)setter.accept(pos);
+	}
+
+	public void setValue(float value) {
+		if(selectedElement != null) {
+			addUndo(new ValueOp<>(selectedElement, selectedElement.getValue(), TreeElement::setValue));
+			selectedElement.setValue(value);
+			currentOp = new ValueOp<>(selectedElement, selectedElement.getValue(), TreeElement::setValue);
+			markDirty();
+		}
 	}
 
 	public void setName(String name) {
@@ -400,11 +422,11 @@ public class Editor {
 
 	public void drawPixel(int x, int y) {
 		switch (drawMode) {
-		case 0:
+		case PEN:
 			setPixel(x, y, penColor | 0xff000000);
 			break;
 
-		case 1:
+		case RUBBER:
 			setPixel(x, y, 0);
 			break;
 
@@ -477,6 +499,7 @@ public class Editor {
 		setVis.accept(false);
 		setAnimPriority.accept(null);
 		displayViewport.accept(true);
+		applyScaling = false;
 
 		if(templateSettings != null) {
 			templateSettings.templateArgs.forEach(TemplateArgHandler::applyToModel);
@@ -545,6 +568,7 @@ public class Editor {
 		skinProvider.free();
 		skinProvider.texture = null;
 		skinProvider.setEdited(false);
+		skinProvider.file = null;
 		if(listIconProvider != null)listIconProvider.free();
 		listIconProvider = null;
 		undoQueue.clear();
@@ -562,9 +586,10 @@ public class Editor {
 		currentOp = null;
 		animEnc = null;
 		description = null;
+		scaling = 0;
 		storeIDgen = new StoreIDGen();
 		Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
-		profile.loadSkin(() -> {
+		profile.loadSkin().thenRun(() -> {
 			if(!customSkinType)skinType = profile.getSkinType();
 			CompletableFuture<Image> img = profile.getSkin();
 			this.vanillaSkin = MinecraftClientAccess.get().getVanillaSkin(skinType);
@@ -643,6 +668,7 @@ public class Editor {
 		skinSize.put("x", skinProvider.size.x);
 		skinSize.put("y", skinProvider.size.y);
 		data.put("skinType", skinType.getName());
+		data.put("scaling", scaling);
 		try(OutputStreamWriter os = new OutputStreamWriter(project.setAsStream("config.json"))) {
 			gson.toJson(data, os);
 		}
@@ -726,6 +752,7 @@ public class Editor {
 			map.put("zoom", description.camera.camDist);
 			map.put("look", description.camera.look.toMap());
 			map.put("pos", description.camera.position.toMap());
+			map.put("copyProt", description.copyProtection.name().toLowerCase());
 			try(OutputStreamWriter os = new OutputStreamWriter(project.setAsStream("description.json"))) {
 				gson.toJson(data, os);
 			}
@@ -834,6 +861,7 @@ public class Editor {
 		List<String> anims = project.listEntires("animations");
 		Map<String, Object> skinTexSize = (Map<String, Object>) data.get("skinSize");
 		skinProvider.size = new Vec2i(((Number)skinTexSize.get("x")).intValue(), ((Number)skinTexSize.get("y")).intValue());
+		scaling = ((Number)data.getOrDefault("scaling", 0)).floatValue();
 		if(anims != null) {
 			for (String anim : anims) {
 				try(InputStreamReader rd = new InputStreamReader(project.getAsStream("animations/" + anim))) {
@@ -934,6 +962,7 @@ public class Editor {
 			description.camera.camDist = ((Number)map.get("zoom")).floatValue();
 			description.camera.look = new Vec3f((Map<String, Object>) map.get("look"), description.camera.look);
 			description.camera.position = new Vec3f((Map<String, Object>) map.get("pos"), description.camera.position);
+			description.copyProtection = CopyProtection.lookup((String) map.getOrDefault("copyProt", "normal"));
 		}
 		ze = project.getEntry("desc_icon.png");
 		if(ze != null) {
@@ -1030,6 +1059,10 @@ public class Editor {
 		else undoQueue.push(new OpList(r));
 	}
 
+	public void addUndo(List<Runnable> r) {
+		undoQueue.push(new OpList(r));
+	}
+
 	public void appendCurrentOp(Runnable r) {
 		if(currentOp == null)currentOp = r;
 		else if(currentOp instanceof OpList) {
@@ -1053,6 +1086,11 @@ public class Editor {
 		currentOp.run();
 	}
 
+	public void runOp(List<Runnable> r) {
+		currentOp = new OpList(r);
+		currentOp.run();
+	}
+
 	public void setCurrentOp(Runnable... r) {
 		if(r.length == 1) {
 			currentOp = r[0];
@@ -1068,6 +1106,10 @@ public class Editor {
 			rs = new ArrayList<>(Arrays.asList(r));
 		}
 
+		public OpList(List<Runnable> r) {
+			rs = r;
+		}
+
 		@Override
 		public void run() {
 			rs.forEach(Runnable::run);
@@ -1077,6 +1119,12 @@ public class Editor {
 	public <E, T> void updateValueOp(E elem, T currVal, T newVal, BiConsumer<E, T> setter, Updater<T> updater) {
 		addUndo(new ValueOp<>(elem, currVal, setter));
 		updater.accept(newVal);
+		runOp(new ValueOp<>(elem, newVal, setter));
+		markDirty();
+	}
+
+	public <E, T> void updateValueOp(E elem, T currVal, T newVal, BiConsumer<E, T> setter) {
+		addUndo(new ValueOp<>(elem, currVal, setter));
 		runOp(new ValueOp<>(elem, newVal, setter));
 		markDirty();
 	}
@@ -1200,6 +1248,7 @@ public class Editor {
 			String dispName = selectedAnim.displayName;
 			IPose oldPose = selectedAnim.pose;
 			AnimationType oldType = selectedAnim.type;
+			String fname = selectedAnim.filename;
 			EditorAnim anim = selectedAnim;
 			addUndo(() -> {
 				anim.add = addOld;
@@ -1207,6 +1256,7 @@ public class Editor {
 				anim.displayName = dispName;
 				anim.pose = oldPose;
 				anim.type = oldType;
+				anim.filename = fname;
 			});
 			runOp(() -> {
 				anim.pose = pose;
@@ -1215,6 +1265,8 @@ public class Editor {
 				anim.displayName = displayName;
 				if(pose != null)anim.type = AnimationType.POSE;
 				else anim.type = AnimationType.GESTURE;
+				String[] sp = anim.filename.split("_", 2);
+				anim.filename = (pose instanceof VanillaPose ? "v" : (pose != null ? "c" : "g")) + "_" + sp[1];
 			});
 			markDirty();
 			updateGui();
@@ -1247,12 +1299,12 @@ public class Editor {
 
 	public void setAnimDuration(int value) {
 		if(selectedAnim == null)return;
-		updateValueOp(selectedAnim, selectedAnim.duration, value, (a, b) -> a.duration = b, setAnimDuration);
+		updateValueOp(selectedAnim, selectedAnim.duration, value, (a, b) -> a.duration = b);
 	}
 
 	public void setAnimPriority(int value) {
 		if(selectedAnim == null)return;
-		updateValueOp(selectedAnim, selectedAnim.priority, value, (a, b) -> a.priority = b, setAnimPriority);
+		updateValueOp(selectedAnim, selectedAnim.priority, value, (a, b) -> a.priority = b);
 	}
 
 	public void animPrevFrm() {
@@ -1294,95 +1346,6 @@ public class Editor {
 
 	public UIColors colors() {
 		return frame.getGui().getColors();
-	}
-
-	public void addSkinLayer() {
-		OpList l = new OpList();
-		OpList u = new OpList(() -> selectedElement = null);
-		for(PlayerModelParts p : PlayerModelParts.VALUES) {
-			for (ModelElement el : elements) {
-				if(el.type == ElementType.ROOT_PART && el.typeData == p) {
-					ModelElement elem = new ModelElement(this);
-					l.rs.add(() -> el.children.add(elem));
-					u.rs.add(() -> el.children.remove(elem));
-					elem.parent = el;
-					PlayerPartValues val = PlayerPartValues.getFor(p, skinType);
-					elem.size = val.getSize();
-					elem.offset = val.getOffset();
-					elem.texture = true;
-					elem.u = val.u2;
-					elem.v = val.v2;
-					elem.name = frame.getGui().i18nFormat("label.cpm.layer_" + val.layer.getLowerName());
-					elem.mcScale = 0.25F;
-					break;
-				}
-			}
-		}
-		runOp(l);
-		addUndo(u);
-		markDirty();
-		updateGui();
-	}
-
-	public void convertModel() {
-		OpList l = new OpList();
-		OpList u = new OpList(() -> selectedElement = null);
-		for(PlayerModelParts p : PlayerModelParts.VALUES) {
-			for (ModelElement el : elements) {
-				if(el.type == ElementType.ROOT_PART && el.typeData == p) {
-					if(el.show) {
-						ModelElement elem = new ModelElement(this);
-						l.rs.add(() -> el.children.add(elem));
-						u.rs.add(() -> el.children.remove(elem));
-						elem.parent = el;
-						PlayerPartValues val = PlayerPartValues.getFor(p, skinType);
-						elem.size = val.getSize();
-						elem.offset = val.getOffset();
-						elem.texture = true;
-						elem.u = val.u;
-						elem.v = val.v;
-						elem.name = el.name;
-						elem.generated = true;
-						l.rs.add(() -> el.show = false);
-						u.rs.add(() -> el.show = true);
-					}
-					break;
-				}
-			}
-		}
-		runOp(l);
-		addUndo(u);
-		markDirty();
-		updateGui();
-	}
-
-	public void setupTemplateModel() {
-		OpList l = new OpList();
-		OpList u = new OpList(() -> selectedElement = null);
-		for(PlayerModelParts p : PlayerModelParts.VALUES) {
-			for (ModelElement el : elements) {
-				if(el.type == ElementType.ROOT_PART && el.typeData == p) {
-					if(el.show) {
-						ModelElement elem = new ModelElement(this);
-						l.rs.add(() -> el.children.add(elem));
-						u.rs.add(() -> el.children.remove(elem));
-						elem.parent = el;
-						PlayerPartValues val = PlayerPartValues.getFor(p, skinType);
-						elem.size = val.getSize();
-						elem.offset = val.getOffset();
-						elem.texture = false;
-						elem.rgb = 0xffffff;
-						elem.name = el.name;
-						elem.templateElement = true;
-						l.rs.add(() -> el.show = false);
-						u.rs.add(() -> el.show = true);
-					}
-					break;
-				}
-			}
-		}
-		runOp(l);
-		addUndo(u);
 	}
 
 	public boolean hasVanillaParts() {
@@ -1427,7 +1390,7 @@ public class Editor {
 		stitcher.finish(renderTexture);
 		renderTexture.markDirty();
 		if(stitcher.hasStitches() && hasVanillaParts()) {
-			convertModel();
+			Generators.convertModel(this);
 		}
 	}
 }

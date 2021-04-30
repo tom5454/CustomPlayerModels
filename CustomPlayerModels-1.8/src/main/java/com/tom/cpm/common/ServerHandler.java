@@ -1,16 +1,13 @@
 package com.tom.cpm.common;
 
 import java.io.IOException;
-import java.util.Base64;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ChatComponentTranslation;
@@ -22,97 +19,61 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 
-import com.tom.cpl.config.ConfigEntry;
-import com.tom.cpm.shared.config.ConfigKeys;
-import com.tom.cpm.shared.config.ModConfig;
-import com.tom.cpm.shared.config.PlayerData;
-import com.tom.cpmcore.CPMASMClientHooks;
+import com.tom.cpm.shared.network.NetH.ServerNetH;
+import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
 
 public class ServerHandler {
+	public static NetHandler<ResourceLocation, NBTTagCompound, EntityPlayerMP, PacketBuffer, NetHandlerPlayServer> netHandler;
+
+	static {
+		netHandler = new NetHandler<>(ResourceLocation::new);
+		netHandler.setNewNbt(NBTTagCompound::new);
+		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
+		netHandler.setIsDedicatedServer(p -> p.mcServer.isDedicatedServer());
+		netHandler.setGetPlayerUUID(EntityPlayerMP::getUniqueID);
+		netHandler.setWriteCompound(PacketBuffer::writeNBTTagCompoundToBuffer, t -> {
+			try {
+				return t.readNBTTagCompoundFromBuffer();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new S3FPacketCustomPayload(rl.toString(), pb)), (spe, rl, pb) -> NetworkHandler.sendToAllTrackingAndSelf(spe, new S3FPacketCustomPayload(rl.toString(), pb), ServerHandler::hasMod));
+		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarIntToBuffer(pl.getEntityId()));
+		netHandler.setNBTSetters(NBTTagCompound::setBoolean, NBTTagCompound::setByteArray, NBTTagCompound::setFloat);
+		netHandler.setNBTGetters(NBTTagCompound::getBoolean, NBTTagCompound::getByteArray, NBTTagCompound::getFloat);
+		netHandler.setContains(NBTTagCompound::hasKey);
+		netHandler.setFindTracking((p, f) -> {
+			for(EntityTrackerEntry tr : ((WorldServer)p.worldObj).getEntityTracker().trackedEntities) {
+				if(tr.trackedEntity instanceof EntityPlayer && tr.trackingPlayers.contains(p)) {
+					f.accept((EntityPlayerMP) tr.trackedEntity);
+				}
+			}
+		});
+		netHandler.setSendChat((p, m) -> p.playerNetServerHandler.sendPacket(new S02PacketChat(new ChatComponentTranslation(m))));
+		netHandler.setExecutor(() -> FMLCommonHandler.instance().getMinecraftServerInstance()::addScheduledTask);
+		netHandler.setGetNet(spe -> spe.playerNetServerHandler);
+		netHandler.setGetPlayer(net -> net.playerEntity);
+	}
 
 	@SubscribeEvent
 	public void onPlayerJoin(PlayerLoggedInEvent evt) {
-		PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
-		NBTTagCompound data = new NBTTagCompound();
-		pb.writeNBTTagCompoundToBuffer(data);
-		EntityPlayerMP spe = (EntityPlayerMP) evt.player;
-		spe.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload(NetworkHandler.helloPacket.toString(), pb));
-		if(spe.mcServer.isDedicatedServer()) {
-			ConfigEntry e = ModConfig.getConfig().getEntry(ConfigKeys.SERVER_SKINS).getEntry(spe.getUniqueID().toString());
-			boolean forced = e.getBoolean(ConfigKeys.FORCED, false);
-			String b64 = e.getString(ConfigKeys.MODEL, null);
-			if(b64 != null) {
-				CPMASMClientHooks.setEncodedModelData(spe.playerNetServerHandler, new PlayerData(Base64.getDecoder().decode(b64), forced, true));
-			}
-		}
+		netHandler.onJoin((EntityPlayerMP) evt.player);
 	}
 
 	@SubscribeEvent
 	public void onTrackingStart(PlayerEvent.StartTracking evt) {
 		NetHandlerPlayServer handler = ((EntityPlayerMP)evt.entityPlayer).playerNetServerHandler;
-		if(CPMASMClientHooks.hasMod(handler)) {
+		if(((ServerNetH)handler).cpm$hasMod()) {
 			if(evt.target instanceof EntityPlayer) {
-				sendPlayerData((EntityPlayerMP) evt.target, handler);
+				netHandler.sendPlayerData((EntityPlayerMP) evt.target, (EntityPlayerMP) evt.entityPlayer);
 			}
 		}
-	}
-
-	private static void sendPlayerData(EntityPlayerMP target, NetHandlerPlayServer handler) {
-		PlayerData dt = CPMASMClientHooks.getEncodedModelData(target.playerNetServerHandler);
-		handler.sendPacket(new S3FPacketCustomPayload(NetworkHandler.setSkin.toString(), writeSkinData(dt, target)));
-	}
-
-	public static void receivePacket(C17PacketCustomPayload packet, NetHandlerPlayServer h) {
-		ResourceLocation rl = new ResourceLocation(packet.getChannelName());
-		if(NetworkHandler.helloPacket.equals(rl)) {
-			FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
-				CPMASMClientHooks.setHasMod(h, true);
-				for(EntityTrackerEntry tr : ((WorldServer)h.playerEntity.worldObj).getEntityTracker().trackedEntities) {
-					if(tr.trackedEntity instanceof EntityPlayer && tr.trackingPlayers.contains(h.playerEntity)) {
-						sendPlayerData((EntityPlayerMP) tr.trackedEntity, h);
-					}
-				}
-				if(CPMASMClientHooks.getEncodedModelData(h) != null) {
-					h.sendPacket(new S3FPacketCustomPayload(NetworkHandler.setSkin.toString(), writeSkinData(CPMASMClientHooks.getEncodedModelData(h), h.playerEntity)));
-				} else {
-					h.sendPacket(new S3FPacketCustomPayload(NetworkHandler.getSkin.toString(), new PacketBuffer(Unpooled.EMPTY_BUFFER)));
-				}
-			});
-		} else if(NetworkHandler.setSkin.equals(rl)) {
-			if(CPMASMClientHooks.getEncodedModelData(h) == null || !CPMASMClientHooks.getEncodedModelData(h).forced) {
-				NBTTagCompound tag;
-				try {
-					tag = packet.getBufferData().readNBTTagCompoundFromBuffer();
-					FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
-						CPMASMClientHooks.setEncodedModelData(h, tag.hasKey("data") ? new PlayerData(tag.getByteArray("data"), false, false) : null);
-						NetworkHandler.sendToAllTrackingAndSelf(h.playerEntity, new S3FPacketCustomPayload(NetworkHandler.setSkin.toString(), writeSkinData(CPMASMClientHooks.getEncodedModelData(h), h.playerEntity)), ServerHandler::hasMod);
-						ConfigEntry e = ModConfig.getConfig().getEntry(ConfigKeys.SERVER_SKINS);
-						e.clearValue(h.playerEntity.getUniqueID().toString());
-						ModConfig.getConfig().save();
-					});
-				} catch (IOException e1) {}
-			} else {
-				h.sendPacket(new S02PacketChat(new ChatComponentTranslation("chat.cpm.skinForced")));
-			}
-		}
-	}
-
-	public static PacketBuffer writeSkinData(PlayerData dt, Entity ent) {
-		PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
-		pb.writeVarIntToBuffer(ent.getEntityId());
-		NBTTagCompound data = new NBTTagCompound();
-		if(dt != null) {
-			data.setBoolean("forced", dt.forced);
-			data.setByteArray("data", dt.data);
-		}
-		pb.writeNBTTagCompoundToBuffer(data);
-		return pb;
 	}
 
 	public static boolean hasMod(EntityPlayerMP spe) {
-		return CPMASMClientHooks.hasMod(spe.playerNetServerHandler);
+		return ((ServerNetH)spe.playerNetServerHandler).cpm$hasMod();
 	}
-
 }

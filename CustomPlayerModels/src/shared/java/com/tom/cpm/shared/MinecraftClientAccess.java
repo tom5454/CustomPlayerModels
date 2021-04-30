@@ -12,6 +12,7 @@ import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.network.NetHandler;
 
 public interface MinecraftClientAccess {
 	IPlayerRenderManager getPlayerRenderManager();
@@ -34,8 +35,7 @@ public interface MinecraftClientAccess {
 	boolean isInGame();
 	List<IKeybind> getKeybinds();
 	File getGameDir();
-	ServerStatus getServerSideStatus();
-	void sendSkinUpdate();
+	NetHandler<?, ?, ?, ?, ?> getNetHandler();
 	void openGui(Function<IGui, Frame> creator);
 
 	default Runnable openSingleplayer() {
@@ -47,5 +47,17 @@ public interface MinecraftClientAccess {
 		UNAVAILABLE,
 		SKIN_LAYERS_ONLY,
 		INSTALLED
+	}
+
+	default void sendSkinUpdate() {
+		getNetHandler().sendSkinData();
+	}
+
+	default void setModelScale(float scl) {
+		getNetHandler().setScale(scl);
+	}
+
+	default ServerStatus getServerSideStatus() {
+		return isInGame() ? getNetHandler().hasModClient() ? ServerStatus.INSTALLED : ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
 	}
 }

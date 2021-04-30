@@ -11,14 +11,14 @@ import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 
-import com.tom.cpm.common.NetH;
-import com.tom.cpm.common.NetH.ServerNetH;
+import com.tom.cpm.common.IServerNetHandler;
 import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.PlayerData;
+import com.tom.cpm.shared.network.NetH.ServerNetH;
 
 @Mixin(ServerPlayNetworkHandler.class)
-public class ServerPlayNetHandlerMixin implements NetH, ServerNetH {
+public class ServerPlayNetHandlerMixin implements ServerNetH, IServerNetHandler {
 
 	@Shadow @Final MinecraftServer server;
 

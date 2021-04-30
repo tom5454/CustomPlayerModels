@@ -41,7 +41,7 @@ public class DropDownBox<T> extends GuiElement {
 	@Override
 	public void mouseClick(MouseEvent evt) {
 		if(enabled && evt.isInBounds(bounds) && !evt.isConsumed()) {
-			PopupMenu pmenu = new PopupMenu(gui);
+			PopupMenu pmenu = new PopupMenu(gui, frm);
 			for (T t : values) {
 				pmenu.addButton(String.valueOf(t), () -> {
 					setSelected(t);
@@ -53,7 +53,7 @@ public class DropDownBox<T> extends GuiElement {
 				pmenu.addButton(gui.i18nFormat("label.cpm.no_elements"), null).setEnabled(false);
 			}
 			Vec2i p = evt.getPos();
-			pmenu.display(frm, p.x - evt.x + bounds.x, p.y - evt.y + bounds.h + bounds.y, bounds.w);
+			pmenu.display(p.x - evt.x + bounds.x, p.y - evt.y + bounds.h + bounds.y, bounds.w);
 			evt.consume();
 		}
 	}

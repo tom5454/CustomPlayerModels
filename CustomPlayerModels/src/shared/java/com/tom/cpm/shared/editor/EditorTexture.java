@@ -42,10 +42,4 @@ public class EditorTexture extends TextureProvider {
 	public void setEdited(boolean edited) {
 		this.edited = edited;
 	}
-
-	@Override
-	public void free() {
-		super.free();
-		file = null;
-	}
 }

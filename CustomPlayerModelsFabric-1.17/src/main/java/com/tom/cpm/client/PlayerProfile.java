@@ -1,6 +1,7 @@
 package com.tom.cpm.client;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.MinecraftClient;
@@ -9,7 +10,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.texture.PlayerSkinProvider;
+import net.minecraft.client.texture.PlayerSkinProvider.SkinTextureAvailableCallback;
 import net.minecraft.client.util.DefaultSkinHelper;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EquipmentSlot;
@@ -22,7 +23,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
@@ -75,9 +75,9 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 	}
 
 	@Override
-	public void loadSkin(Runnable onLoaded) {
-		MinecraftClient mc = MinecraftClient.getInstance();
-		mc.getSkinProvider().loadSkin(profile, new PlayerSkinProvider.SkinTextureAvailableCallback() {
+	public CompletableFuture<Void> loadSkin0() {
+		CompletableFuture<Void> cf = new CompletableFuture<>();
+		MinecraftClient.getInstance().getSkinProvider().loadSkin(profile, new SkinTextureAvailableCallback() {
 
 			@Override
 			public void onSkinTextureAvailable(Type typeIn, Identifier identifier, MinecraftProfileTexture profileTexture) {
@@ -89,7 +89,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 						skinType = "default";
 					}
 					url = profileTexture.getUrl();
-					if(onLoaded != null)onLoaded.run();
+					cf.complete(null);
 
 					break;
 				default:
@@ -97,7 +97,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 				}
 			}
 		}, true);
-		if(MinecraftObjectHolder.DEBUGGING && onLoaded != null)onLoaded.run();
+		return cf;
 	}
 
 	@Override

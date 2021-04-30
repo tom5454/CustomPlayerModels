@@ -1,7 +1,6 @@
 package com.tom.cpm.common;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,16 +9,9 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
-
-import com.tom.cpl.config.ConfigEntry;
-import com.tom.cpm.shared.config.ConfigKeys;
-import com.tom.cpm.shared.config.ModConfig;
-import com.tom.cpm.shared.config.PlayerData;
-import com.tom.cpmcore.CPMASMClientHooks;
 
 public class CommandCPM extends CommandBase {
 
@@ -79,19 +71,7 @@ public class CommandCPM extends CommandBase {
 	}
 
 	private void execute(EntityPlayerMP player, ICommandSender sender, String skin, boolean force, boolean save) {
-		CPMASMClientHooks.setEncodedModelData(player.playerNetServerHandler, skin != null ? new PlayerData(Base64.getDecoder().decode(skin), force, save) : null);
-		NetworkHandler.sendToAllTrackingAndSelf(player, new S3FPacketCustomPayload(NetworkHandler.setSkin.toString(), ServerHandler.writeSkinData(CPMASMClientHooks.getEncodedModelData(player.playerNetServerHandler), player)), ServerHandler::hasMod);
-		if(save && player.mcServer.isDedicatedServer()) {
-			ConfigEntry e = ModConfig.getConfig().getEntry(ConfigKeys.SERVER_SKINS);
-			if(skin == null)
-				e.clearValue(player.getUniqueID().toString());
-			else {
-				e = e.getEntry(player.getUniqueID().toString());
-				e.setString(ConfigKeys.MODEL, skin);
-				e.setBoolean(ConfigKeys.FORCED, force);
-			}
-			ModConfig.getConfig().save();
-		}
+		ServerHandler.netHandler.onCommand(player, skin, force, save);
 		if(sender.sendCommandFeedback()) {
 			if(force)sender.addChatMessage(new ChatComponentTranslation("commands.cpm.setskin.success.force", player.getDisplayName()));
 			else sender.addChatMessage(new ChatComponentTranslation("commands.cpm.setskin.success", player.getDisplayName()));

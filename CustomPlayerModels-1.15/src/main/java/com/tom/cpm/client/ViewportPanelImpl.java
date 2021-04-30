@@ -3,13 +3,16 @@ package com.tom.cpm.client;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.nio.FloatBuffer;
+import java.util.function.Consumer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Quaternion;
@@ -18,8 +21,12 @@ import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel.ArmPose;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -28,6 +35,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -106,7 +114,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		PlayerModel<AbstractClientPlayerEntity> p = rp.getEntityModel();
 		panel.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, mc.getRenderTypeBuffers().getBufferSource(), panel.getDefinition(), null, null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, mc.getRenderTypeBuffers().getBufferSource(), panel.getDefinition(), null);
 			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true);
 			cbi.setReturnValue(DefaultPlayerSkin.getDefaultSkin(playerObj.getUniqueID()));
 			ClientProxy.mc.getPlayerRenderManager().bindSkin(p, cbi);
@@ -116,6 +124,8 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			RenderType rt = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.getEntityTranslucent(cbi.getReturnValue());
 			IVertexBuilder buffer = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
 			((RDH)ClientProxy.mc.getPlayerRenderManager().getHolder(p)).defaultType = rt;
+			setHeldItem(Hand.RIGHT, ap -> p.rightArmPose = ap);
+			setHeldItem(Hand.LEFT, ap -> p.leftArmPose = ap);
 			p.setRotationAngles(playerObj, 0, 0, 0, 0, 0);
 
 			if(panel.isTpose()) {
@@ -143,6 +153,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					p.isSitting = true;
 					p.setRotationAngles(playerObj, 0, 0, 0, 0, 0);
 					break;
+
 				case CUSTOM:
 				case DYING:
 				case FALLING:
@@ -150,6 +161,9 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case FLYING:
+					matrixstack.translate(0.0D, 1.0D, -0.5d);
+					matrixstack.rotate(Vector3f.XP.rotationDegrees(90));
+					p.bipedHead.rotateAngleX = -(float)Math.PI / 4F;
 					break;
 
 				case RUNNING:
@@ -157,6 +171,8 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case SWIMMING:
+					matrixstack.translate(0.0D, 1.0D, -0.5d);
+					matrixstack.rotate(Vector3f.XP.rotationDegrees(90));
 					break;
 
 				case WALKING:
@@ -177,8 +193,51 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			p.render(matrixstack, buffer, light, overlay, 1, 1, 1, 1);
 			mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
 			mc.getRenderTypeBuffers().getBufferSource().finish();
+
+			this.renderItem(p, getHandStack(Hand.RIGHT), ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HandSide.RIGHT, matrixstack, mc.getRenderTypeBuffers().getBufferSource(), light);
+			this.renderItem(p, getHandStack(Hand.LEFT), ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HandSide.LEFT, matrixstack, mc.getRenderTypeBuffers().getBufferSource(), light);
 		} finally {
 			ClientProxy.mc.getPlayerRenderManager().unbindModel(p);
+		}
+	}
+
+	private void setHeldItem(Hand hand, Consumer<ArmPose> pose) {
+		switch (panel.getHeldItem(hand)) {
+		case BLOCK:
+		case SWORD:
+			pose.accept(ArmPose.ITEM);
+			break;
+		case NONE:
+		default:
+			pose.accept(ArmPose.EMPTY);
+			break;
+		}
+	}
+
+	private ItemStack getHandStack(Hand hand) {
+		switch (panel.getHeldItem(hand)) {
+		case BLOCK:
+			return new ItemStack(Blocks.STONE);
+		case NONE:
+			break;
+		case SWORD:
+			return new ItemStack(Items.DIAMOND_SWORD);
+		default:
+			break;
+		}
+		return ItemStack.EMPTY;
+	}
+
+	private void renderItem(PlayerModel<AbstractClientPlayerEntity> model, ItemStack p_229135_2_, ItemCameraTransforms.TransformType p_229135_3_, HandSide p_229135_4_, MatrixStack p_229135_5_, IRenderTypeBuffer p_229135_6_, int p_229135_7_) {
+		if (!p_229135_2_.isEmpty()) {
+			p_229135_5_.push();
+			model.translateHand(p_229135_4_, p_229135_5_);
+			p_229135_5_.rotate(Vector3f.XP.rotationDegrees(-90.0F));
+			p_229135_5_.rotate(Vector3f.YP.rotationDegrees(180.0F));
+			boolean flag = p_229135_4_ == HandSide.LEFT;
+			p_229135_5_.translate((flag ? -1 : 1) / 16.0F, 0.125D, -0.625D);
+			Minecraft.getInstance().getItemRenderer().renderItem(null, p_229135_2_, p_229135_3_, flag, p_229135_5_, p_229135_6_, null, p_229135_7_, OverlayTexture.NO_OVERLAY);
+			p_229135_5_.pop();
 		}
 	}
 
@@ -233,5 +292,10 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		gr.drawImage(img, 0, 0, size.x, size.y, null);
 		gr.dispose();
 		return new Image(rImg);
+	}
+
+	@Override
+	public boolean canRenderHeldItem() {
+		return true;
 	}
 }

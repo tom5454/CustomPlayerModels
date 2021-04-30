@@ -13,7 +13,7 @@ import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
-import com.tom.cpm.shared.editor.gui.SkinTextureDisplay;
+import com.tom.cpm.shared.editor.gui.TextureDisplay;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.util.ValueOp;
 import com.tom.cpm.shared.model.Cube;
@@ -160,7 +160,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
 		if(show || editor.selectedElement == this)
-			SkinTextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys, editor.selectedElement == this ? 0xcc : 0x55);
+			TextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys, editor.selectedElement == this ? 0xcc : 0x55);
 	}
 
 	@Override

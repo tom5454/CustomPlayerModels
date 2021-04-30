@@ -6,13 +6,13 @@ import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.EditorTool;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.SkinSettingsPopup;
 
 public class DrawToolsPanel extends Panel {
 	private Editor editor;
-	private ColorButton colorBtn;
-	private ButtonIcon pen, rubber;
+
 	public DrawToolsPanel(EditorGui e, int x, int y, int w, int h) {
 		super(e.getGui());
 		this.editor = e.getEditor();
@@ -35,7 +35,7 @@ public class DrawToolsPanel extends Panel {
 			refreshSkinBtn.setTooltip(new Tooltip(e, f != null ? gui.i18nFormat("tooltip.cpm.reloadSkin.file", f) : gui.i18nFormat("tooltip.cpm.reloadSkin.no_file")));
 		});
 
-		colorBtn = new ColorButton(gui, e, c -> {
+		ColorButton colorBtn = new ColorButton(gui, e, c -> {
 			editor.penColor = c;
 			editor.setPenColor.accept(c);
 		});
@@ -44,25 +44,16 @@ public class DrawToolsPanel extends Panel {
 		colorBtn.setBounds(new Box(5, 55, w - 10, 20));
 		addElement(colorBtn);
 
-		pen = new ButtonIcon(gui, "editor", 0, 32, () -> {
-			editor.drawMode = 0;
-			setMode();
-		});
-		pen.setBounds(new Box(5, 80, 20, 20));
-		addElement(pen);
+		for(EditorTool tool : EditorTool.VALUES) {
+			ButtonIcon button = new ButtonIcon(gui, "editor", tool.ordinal() * 16, 32, () -> {
+				editor.drawMode = tool;
+				editor.setTool.accept(tool);
+			});
+			button.setBounds(new Box(5 + 25 * tool.ordinal(), 80, 20, 20));
+			editor.setTool.add(tool.setEnabled(button));
+			addElement(button);
+		}
 
-		rubber = new ButtonIcon(gui, "editor", 16, 32, () -> {
-			editor.drawMode = 1;
-			setMode();
-		});
-		rubber.setBounds(new Box(30, 80, 20, 20));
-		addElement(rubber);
-
-		setMode();
-	}
-
-	private void setMode() {
-		pen.setEnabled(editor.drawMode != 0);
-		rubber.setEnabled(editor.drawMode != 1);
+		editor.setTool.accept(editor.drawMode);
 	}
 }

@@ -24,9 +24,12 @@ import org.objectweb.asm.tree.VarInsnNode;
 import net.minecraft.launchwrapper.IClassTransformer;
 
 import com.tom.cpm.shared.config.PlayerData;
+import com.tom.cpm.shared.network.NetH;
+import com.tom.cpm.shared.network.NetH.ServerNetH;
 
 public class CPMTransformerService implements IClassTransformer {
 	private static final String HOOKS_CLASS = "com/tom/cpmcore/CPMASMClientHooks";
+	private static final String HOOKS_CLASS_SERVER = "com/tom/cpmcore/CPMASMServerHooks";
 	private static final String NO_MODEL_SETUP_FIELD = "cpm$noModelSetup";
 	private static final String HAS_MOD_FIELD = "cpm$hasMod";
 	private static final String DATA_FIELD = "cpm$data";
@@ -45,6 +48,11 @@ public class CPMTransformerService implements IClassTransformer {
 				lst.add(new VarInsnNode(Opcodes.ALOAD, 7));//GameProfile profile
 				lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "renderSkull", "(Lnet/minecraft/client/model/ModelBase;Lcom/mojang/authlib/GameProfile;)V", false));
 
+				InsnList lst2 = new InsnList();
+				lst2.add(new VarInsnNode(Opcodes.ALOAD, modelBase));//ModelBase modelbase
+				lst2.add(new VarInsnNode(Opcodes.ALOAD, 7));//GameProfile profile
+				lst2.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "renderSkullPost", "(Lnet/minecraft/client/model/ModelBase;Lcom/mojang/authlib/GameProfile;)V", false));
+
 				MethodNode m = null;
 
 				for(MethodNode method : input.methods) {
@@ -61,8 +69,12 @@ public class CPMTransformerService implements IClassTransformer {
 						VarInsnNode nd = (VarInsnNode) insnNode;
 						if(nd.getOpcode() == Opcodes.ALOAD && nd.var == modelBase) {
 							m.instructions.insertBefore(nd, lst);
-							System.out.println("CPM Skull Hook: injected");
-							break;
+							System.out.println("CPM Skull Hook: injected (Pre)");
+						} else if(insnNode instanceof InsnNode){
+							if(insnNode.getOpcode() == Opcodes.RETURN) {
+								m.instructions.insertBefore(insnNode, lst2);
+								System.out.println("CPM Skull Hook: injected (Post)");
+							}
 						}
 					}
 				}
@@ -74,7 +86,6 @@ public class CPMTransformerService implements IClassTransformer {
 			@Override
 			public ClassNode apply(ClassNode input) {
 				for(MethodNode m : input.methods) {
-					System.out.println("Method: " + m.name + " " + m.desc);
 					if((m.name.equals("a") && m.desc.equals("(Lcom/mojang/authlib/minecraft/MinecraftProfileTexture;Lcom/mojang/authlib/minecraft/MinecraftProfileTexture$Type;Lbro;)Lbqx;")) || m.name.equals("func_152789_a")) {
 						System.out.println("CPM Load Skin Hook: Found loadSkin method");
 						InsnList lst = new InsnList();
@@ -136,36 +147,6 @@ public class CPMTransformerService implements IClassTransformer {
 						method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), NO_MODEL_SETUP_FIELD, "Z"));
 						method.instructions.add(new InsnNode(Opcodes.RETURN));
 						System.out.println("CPM ASM fields/No Render: injected");
-					}
-					if(method.name.equals("hasMod")) {
-						method.instructions.clear();
-						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-						method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), HAS_MOD_FIELD, "Z"));
-						method.instructions.add(new InsnNode(Opcodes.IRETURN));
-						System.out.println("CPM ASM fields/Net/hasMod: injected");
-					}
-					if(method.name.equals("setHasMod")) {
-						method.instructions.clear();
-						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-						method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
-						method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), HAS_MOD_FIELD, "Z"));
-						method.instructions.add(new InsnNode(Opcodes.RETURN));
-						System.out.println("CPM ASM fields/Net/setHasMod: injected");
-					}
-					if(method.name.equals("getEncodedModelData")) {
-						method.instructions.clear();
-						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-						method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), DATA_FIELD, Type.getDescriptor(PlayerData.class)));
-						method.instructions.add(new InsnNode(Opcodes.ARETURN));
-						System.out.println("CPM ASM fields/ServerNet/getData: injected");
-					}
-					if(method.name.equals("setEncodedModelData")) {
-						method.instructions.clear();
-						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-						method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-						method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), DATA_FIELD, Type.getDescriptor(PlayerData.class)));
-						method.instructions.add(new InsnNode(Opcodes.RETURN));
-						System.out.println("CPM ASM fields/ServerNet/setData: injected");
 					}
 				}
 				return input;
@@ -232,6 +213,8 @@ public class CPMTransformerService implements IClassTransformer {
 				lst.add(new InsnNode(Opcodes.RETURN));
 				lst.add(lbln);
 
+				input.interfaces.add(Type.getInternalName(NetH.class));
+
 				input.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, HAS_MOD_FIELD, "Z", null, 0));
 
 				for(MethodNode method : input.methods) {
@@ -241,6 +224,9 @@ public class CPMTransformerService implements IClassTransformer {
 						System.out.println("CPM ClientNet Hook: injected");
 					}
 				}
+
+				injectHasMod("ClientNet", input);
+
 				return input;
 			}
 		});
@@ -251,11 +237,13 @@ public class CPMTransformerService implements IClassTransformer {
 				InsnList lst = new InsnList();
 				lst.add(new VarInsnNode(Opcodes.ALOAD, 1));
 				lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onServerPacket", "(Lnet/minecraft/network/play/client/C17PacketCustomPayload;Lnet/minecraft/network/NetHandlerPlayServer;)Z", false));
+				lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS_SERVER, "onServerPacket", "(Lnet/minecraft/network/play/client/C17PacketCustomPayload;Lnet/minecraft/network/NetHandlerPlayServer;)Z", false));
 				LabelNode lbln = new LabelNode();
 				lst.add(new JumpInsnNode(Opcodes.IFEQ, lbln));
 				lst.add(new InsnNode(Opcodes.RETURN));
 				lst.add(lbln);
+
+				input.interfaces.add(Type.getInternalName(ServerNetH.class));
 
 				input.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, HAS_MOD_FIELD, "Z", null, 0));
 				input.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, DATA_FIELD, Type.getDescriptor(PlayerData.class), null, null));
@@ -267,9 +255,72 @@ public class CPMTransformerService implements IClassTransformer {
 						System.out.println("CPM ServerNet Hook: injected");
 					}
 				}
+
+				injectHasMod("ServerNet", input);
+
+				MethodNode method = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$getEncodedModelData", Type.getMethodDescriptor(Type.getType(PlayerData.class)), null, null);
+				input.methods.add(method);
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, DATA_FIELD, Type.getDescriptor(PlayerData.class)));
+				method.instructions.add(new InsnNode(Opcodes.ARETURN));
+				System.out.println("CPM ServerNet/getData: injected");
+
+				method = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$setEncodedModelData", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(PlayerData.class)), null, null);
+				input.methods.add(method);
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+				method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, input.name, DATA_FIELD, Type.getDescriptor(PlayerData.class)));
+				method.instructions.add(new InsnNode(Opcodes.RETURN));
+				System.out.println("CPM ServerNet/setData: injected");
 				return input;
 			}
 		});
+		transformers.put("net.minecraft.client.renderer.EntityRenderer", new UnaryOperator<ClassNode>() {
+
+			@Override
+			public ClassNode apply(ClassNode input) {
+				for(MethodNode method : input.methods) {
+					if(method.desc.equals("(FJ)V") && (method.name.equals("a") || method.name.equals("renderWorld"))) {
+						System.out.println("CPM Hand hook: found renderWorld method");
+						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
+							AbstractInsnNode insnNode = it.next();
+							if(insnNode instanceof MethodInsnNode) {
+								MethodInsnNode mn = (MethodInsnNode) insnNode;
+								if(mn.desc.equals("(FI)V") && (mn.name.equals("renderHand") || (mn.owner.equals("blt") && mn.name.equals("b")))) {
+									System.out.println("CPM Hand hook: found renderHand method node");
+									while (it.hasNext()) {
+										insnNode = it.next();
+										if(insnNode instanceof VarInsnNode) {
+											method.instructions.insertBefore(insnNode, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "unbindHand", "()V", false));
+											System.out.println("CPM Hand hook: injected");
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				return input;
+			}
+		});
+	}
+
+	private static void injectHasMod(String name, ClassNode input) {
+		MethodNode method = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$hasMod", "()Z", null, null);
+		input.methods.add(method);
+		method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, HAS_MOD_FIELD, "Z"));
+		method.instructions.add(new InsnNode(Opcodes.IRETURN));
+		System.out.println("CPM " + name + "/hasMod: injected");
+
+		method = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$setHasMod", "(Z)V", null, null);
+		input.methods.add(method);
+		method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+		method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
+		method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, input.name, HAS_MOD_FIELD, "Z"));
+		method.instructions.add(new InsnNode(Opcodes.RETURN));
+		System.out.println("CPM " + name + "/setHasMod: injected");
 	}
 
 	@Override

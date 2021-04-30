@@ -8,9 +8,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 
-import com.tom.cpm.common.NetH;
 import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.network.NetH;
 
 @Mixin(ClientPlayNetHandler.class)
 public class ClientPlayNetHandlerMixin implements NetH {

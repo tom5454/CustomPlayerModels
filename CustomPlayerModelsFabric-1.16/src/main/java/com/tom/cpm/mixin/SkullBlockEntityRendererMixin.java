@@ -54,10 +54,21 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 			method = "render(Lnet/minecraft/util/math/Direction;FLnet/minecraft/block/SkullBlock$SkullType;"
 					+ "Lcom/mojang/authlib/GameProfile;FLnet/minecraft/client/util/math/MatrixStack;"
 					+ "Lnet/minecraft/client/render/VertexConsumerProvider;I)V")
-	private static void onRender(Direction directionIn, float p_228879_1_, SkullBlock.SkullType skullType, GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, VertexConsumerProvider buffer, int combinedLight, CallbackInfo cbi) {
+	private static void onRenderPre(Direction directionIn, float p_228879_1_, SkullBlock.SkullType skullType, GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, VertexConsumerProvider buffer, int combinedLight, CallbackInfo cbi) {
 		if (skullType == SkullBlock.Type.PLAYER && gameProfileIn != null) {
 			SkullEntityModel model = MODELS.get(skullType);
 			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfileIn, buffer);
+		}
+	}
+
+	@Inject(at = @At("RETURN"),
+			method = "render(Lnet/minecraft/util/math/Direction;FLnet/minecraft/block/SkullBlock$SkullType;"
+					+ "Lcom/mojang/authlib/GameProfile;FLnet/minecraft/client/util/math/MatrixStack;"
+					+ "Lnet/minecraft/client/render/VertexConsumerProvider;I)V")
+	private static void onRenderPost(Direction directionIn, float p_228879_1_, SkullBlock.SkullType skullType, GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, VertexConsumerProvider buffer, int combinedLight, CallbackInfo cbi) {
+		if (skullType == SkullBlock.Type.PLAYER && gameProfileIn != null) {
+			SkullEntityModel model = MODELS.get(skullType);
+			CustomPlayerModelsClient.INSTANCE.unbind(model);
 		}
 	}
 }

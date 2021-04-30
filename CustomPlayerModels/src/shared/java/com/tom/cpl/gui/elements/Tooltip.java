@@ -35,7 +35,6 @@ public class Tooltip extends Panel {
 	public void draw(int mouseX, int mouseY, float partialTicks) {
 		gui.pushMatrix();
 		gui.setPosOffset(getBounds());
-		Box bounds = getBounds();
 		gui.drawBox(0, 0, bounds.w, bounds.h, backgroundColor);
 		gui.drawBox(1, 1, bounds.w - 2, bounds.h - 2, gui.getColors().panel_background);
 		for (GuiElement guiElement : elements) {

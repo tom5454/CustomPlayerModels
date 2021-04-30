@@ -74,7 +74,8 @@ public class Spinner extends GuiElement {
 	}
 
 	public void setValue(float value) {
-		this.value = value;
+		double d = Math.pow(10, dp);
+		this.value = (float) (((int) (value * d)) / d);
 		txtf.setText(String.format("%." + dp + "f", value));
 	}
 

@@ -10,4 +10,5 @@ public class ConfigKeys {
 	public static final String FORCED = "forced";
 	public static final String SELECTED_MODEL_OLD = "selectedModelOld";
 	public static final String REOPEN_PROJECT = "reopenProject";
+	public static final String EDITOR_SCALE = "editorScale";
 }

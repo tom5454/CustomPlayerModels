@@ -1,6 +1,4 @@
-package com.tom.cpm.common;
-
-import net.minecraft.server.MinecraftServer;
+package com.tom.cpm.shared.network;
 
 import com.tom.cpm.shared.config.PlayerData;
 
@@ -11,7 +9,5 @@ public interface NetH {
 	public static interface ServerNetH extends NetH {
 		PlayerData cpm$getEncodedModelData();
 		void cpm$setEncodedModelData(PlayerData data);
-
-		MinecraftServer cpm$getServer();
 	}
 }

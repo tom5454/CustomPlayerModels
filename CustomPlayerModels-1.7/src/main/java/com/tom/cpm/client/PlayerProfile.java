@@ -1,6 +1,7 @@
 package com.tom.cpm.client;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
@@ -17,7 +18,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
@@ -67,16 +67,17 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 	}
 
 	@Override
-	public void loadSkin(Runnable onLoaded) {
-		Minecraft.getMinecraft().func_152342_ad().func_152790_a(profile, new SkinCB(onLoaded), true);
-		if(MinecraftObjectHolder.DEBUGGING && onLoaded != null)onLoaded.run();
+	public CompletableFuture<Void> loadSkin0() {
+		CompletableFuture<Void> cf = new CompletableFuture<>();
+		Minecraft.getMinecraft().func_152342_ad().func_152790_a(profile, new SkinCB(cf), true);
+		return cf;
 	}
 
 	public class SkinCB implements SkinManager.SkinAvailableCallback {
-		private final Runnable onLoaded;
+		private final CompletableFuture<Void> cf;
 
-		public SkinCB(Runnable onLoaded) {
-			this.onLoaded = onLoaded;
+		public SkinCB(CompletableFuture<Void> cf) {
+			this.cf = cf;
 		}
 
 		@Override
@@ -87,7 +88,7 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 			switch (typeIn) {
 			case SKIN:
 				url = profileTexture.getUrl();
-				if(onLoaded != null)onLoaded.run();
+				cf.complete(null);
 
 				break;
 			default:

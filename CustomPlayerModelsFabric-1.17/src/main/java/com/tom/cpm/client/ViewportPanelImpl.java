@@ -3,11 +3,13 @@ package com.tom.cpm.client;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.nio.FloatBuffer;
+import java.util.function.Consumer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
@@ -16,13 +18,18 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormat.DrawMode;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.model.BipedEntityModel.ArmPose;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.DefaultSkinHelper;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
@@ -31,6 +38,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -113,7 +121,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		PlayerEntityModel<AbstractClientPlayerEntity> p = rp.getModel();
 		panel.preRender();
 		try {
-			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(p, mc.getBufferBuilders().getEntityVertexConsumers(), panel.getDefinition(), null, null);
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(p, mc.getBufferBuilders().getEntityVertexConsumers(), panel.getDefinition(), null);
 			CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true);
 			cbi.setReturnValue(DefaultSkinHelper.getTexture(mc.getSession().getProfile().getId()));
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(p, cbi);
@@ -123,6 +131,8 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			RenderLayer rt = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderLayer.getEntityTranslucentCull(cbi.getReturnValue());
 			VertexConsumer buffer = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rt);
 			((RDH)CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolder(p)).defaultType = rt;
+			setHeldItem(Hand.RIGHT, ap -> p.rightArmPose = ap);
+			setHeldItem(Hand.LEFT, ap -> p.leftArmPose = ap);
 			PlayerModelSetup.setAngles(p, 0, 0, 0, 0, mc.options.mainArm, false);
 
 			if(panel.isTpose()) {
@@ -157,6 +167,9 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 					break;
 
 				case FLYING:
+					matrixstack.translate(0.0D, 1.0D, -0.5d);
+					matrixstack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_X.getDegreesQuaternion(90));
+					p.head.pitch = -(float)Math.PI / 4F;
 					break;
 
 				case RUNNING:
@@ -187,8 +200,51 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			p.render(matrixstack, buffer, light, overlay, 1, 1, 1, 1);
 			mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rt);
 			mc.getBufferBuilders().getEntityVertexConsumers().draw();
+
+			this.renderItem(p, getHandStack(Hand.RIGHT), ModelTransformation.Mode.THIRD_PERSON_RIGHT_HAND, Arm.RIGHT, matrixstack, mc.getBufferBuilders().getEntityVertexConsumers(), light);
+			this.renderItem(p, getHandStack(Hand.LEFT), ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND, Arm.LEFT, matrixstack, mc.getBufferBuilders().getEntityVertexConsumers(), light);
 		} finally {
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().unbindModel(p);
+		}
+	}
+
+	private void setHeldItem(Hand hand, Consumer<ArmPose> pose) {
+		switch (panel.getHeldItem(hand)) {
+		case BLOCK:
+		case SWORD:
+			pose.accept(ArmPose.ITEM);
+			break;
+		case NONE:
+		default:
+			pose.accept(ArmPose.EMPTY);
+			break;
+		}
+	}
+
+	private ItemStack getHandStack(Hand hand) {
+		switch (panel.getHeldItem(hand)) {
+		case BLOCK:
+			return new ItemStack(Blocks.STONE);
+		case NONE:
+			break;
+		case SWORD:
+			return new ItemStack(Items.NETHERITE_SWORD);
+		default:
+			break;
+		}
+		return ItemStack.EMPTY;
+	}
+
+	private void renderItem(PlayerEntityModel<AbstractClientPlayerEntity> model, ItemStack p_229135_2_, ModelTransformation.Mode p_229135_3_, Arm p_229135_4_, MatrixStack p_229135_5_, VertexConsumerProvider p_229135_6_, int p_229135_7_) {
+		if (!p_229135_2_.isEmpty()) {
+			p_229135_5_.push();
+			model.setArmAngle(p_229135_4_, p_229135_5_);
+			p_229135_5_.multiply(net.minecraft.util.math.Vec3f.POSITIVE_X.getDegreesQuaternion(-90.0F));
+			p_229135_5_.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
+			boolean flag = p_229135_4_ == Arm.LEFT;
+			p_229135_5_.translate((flag ? -1 : 1) / 16.0F, 0.125D, -0.625D);
+			mc.getItemRenderer().renderItem(null, p_229135_2_, p_229135_3_, flag, p_229135_5_, p_229135_6_, null, p_229135_7_, OverlayTexture.DEFAULT_UV, 0);
+			p_229135_5_.pop();
 		}
 	}
 
@@ -243,5 +299,10 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		gr.drawImage(img, 0, 0, size.x, size.y, null);
 		gr.dispose();
 		return new Image(rImg);
+	}
+
+	@Override
+	public boolean canRenderHeldItem() {
+		return true;
 	}
 }

@@ -7,26 +7,26 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldServer;
 
 import com.tom.cpm.client.ClientProxy;
-import com.tom.cpm.shared.MinecraftObjectHolder;
+
+import io.netty.buffer.Unpooled;
 
 public class NetworkHandler {
-	public static final ResourceLocation helloPacket = new ResourceLocation(MinecraftObjectHolder.NETWORK_ID, "hello");
-	public static final ResourceLocation setSkin = new ResourceLocation(MinecraftObjectHolder.NETWORK_ID, "set_skin");
-	public static final ResourceLocation getSkin = new ResourceLocation(MinecraftObjectHolder.NETWORK_ID, "get_skin");
-	public static final ResourceLocation setLayer = new ResourceLocation(MinecraftObjectHolder.NETWORK_ID, "layer");
 
 	public static void handlePacket(Packet packet, Object handler, boolean client) {
 		try {
 			if(!client) {
-				ServerHandler.receivePacket((C17PacketCustomPayload) packet, (NetHandlerPlayServer) handler);
+				C17PacketCustomPayload p = (C17PacketCustomPayload) packet;
+				ServerHandler.netHandler.receiveServer(new ResourceLocation(p.func_149559_c()), new PacketBuffer(Unpooled.wrappedBuffer(p.func_149558_e())), (NetHandlerPlayServer) handler);
 			} else {
-				ClientProxy.INSTANCE.receivePacket((S3FPacketCustomPayload) packet, (NetHandlerPlayClient) handler);
+				S3FPacketCustomPayload p = (S3FPacketCustomPayload) packet;
+				ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(p.func_149169_c()), new PacketBuffer(Unpooled.wrappedBuffer(p.func_149168_d())), (NetHandlerPlayClient) handler);
 			}
 		} catch (Throwable e) {
 			System.out.println("Exception while processing cpm packet");

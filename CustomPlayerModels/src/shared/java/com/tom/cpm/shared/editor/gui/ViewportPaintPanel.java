@@ -2,6 +2,7 @@ package com.tom.cpm.shared.editor.gui;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.tree.TreeElement;
@@ -41,7 +42,7 @@ public class ViewportPaintPanel extends ViewportPanelBase {
 
 		gui.drawText(0, 0, "", 0);
 
-		if(!gui.isAltDown()) {//!MinecraftObjectHolder.DEBUGGING ||
+		if(!MinecraftObjectHolder.DEBUGGING ||!gui.isAltDown()) {
 			gui.drawBox(0, 0, bounds.w, bounds.h, 0xff333333);
 			nat.renderSetup();
 			if(editor.renderBase)nat.renderBase();
@@ -49,7 +50,7 @@ public class ViewportPaintPanel extends ViewportPanelBase {
 			nat.renderFinish();
 		}
 
-		if(true) {//MinecraftObjectHolder.DEBUGGING
+		if(MinecraftObjectHolder.DEBUGGING) {
 			Vec2i v = getHoveredTexPos();
 			if(v != null)gui.drawText(0, 0, v.x + " " + v.y, 0xffffffff);
 			gui.drawBox(bounds.x, bounds.y + 10, 16, 16, 0xffffffff);

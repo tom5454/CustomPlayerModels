@@ -1,11 +1,11 @@
 package com.tom.cpm.client;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map.Entry;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.CustomizeSkinScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
@@ -29,15 +29,11 @@ import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.network.ICustomPacket;
 
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.CommonProxy;
-import com.tom.cpm.common.NetH;
-import com.tom.cpm.common.NetworkHandler;
-import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -45,8 +41,8 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
-import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.RenderManager;
+import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
 
@@ -56,6 +52,7 @@ public class ClientProxy extends CommonProxy {
 	private ModelDefinitionLoader loader;
 	private Minecraft minecraft;
 	private RenderManager<GameProfile, PlayerEntity, Model, IRenderTypeBuffer> manager;
+	public NetHandler<ResourceLocation, CompoundNBT, PlayerEntity, PacketBuffer, ClientPlayNetHandler> netHandler;
 
 	@Override
 	public void init() {
@@ -72,6 +69,25 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), loader, PlayerEntity::getGameProfile);
+		netHandler = new NetHandler<>(ResourceLocation::new);
+		netHandler.setNewNbt(CompoundNBT::new);
+		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
+		netHandler.setWriteCompound(PacketBuffer::writeCompoundTag, PacketBuffer::readCompoundTag);
+		netHandler.setNBTSetters(CompoundNBT::putBoolean, CompoundNBT::putByteArray, CompoundNBT::putFloat);
+		netHandler.setNBTGetters(CompoundNBT::getBoolean, CompoundNBT::getByteArray, CompoundNBT::getFloat);
+		netHandler.setContains(CompoundNBT::contains);
+		netHandler.setExecutor(() -> minecraft);
+		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CCustomPayloadPacket(rl, pb)), null);
+		netHandler.setPlayerToLoader(PlayerEntity::getGameProfile);
+		netHandler.setReadPlayerId(PacketBuffer::readVarInt, id -> {
+			Entity ent = Minecraft.getInstance().world.getEntityByID(id);
+			if(ent instanceof PlayerEntity) {
+				return (PlayerEntity) ent;
+			}
+			return null;
+		});
+		netHandler.setGetClient(() -> minecraft.player);
+		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).connection);
 	}
 
 	@SubscribeEvent
@@ -93,11 +109,11 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public void renderHand(IRenderTypeBuffer buffer) {
-		manager.bindHand(Minecraft.getInstance().player, buffer, PlayerRenderManager::unbindHand);
+		manager.bindHand(Minecraft.getInstance().player, buffer);
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, IRenderTypeBuffer buffer) {
-		manager.bindSkull(profile, buffer, PlayerRenderManager::unbindSkull, skullModel);
+		manager.bindSkull(profile, buffer, skullModel);
 	}
 
 	@SubscribeEvent
@@ -154,50 +170,7 @@ public class ClientProxy extends CommonProxy {
 		loader.clearServerData();
 	}
 
-	public void receivePacket(ICustomPacket<?> packet, NetH handler) {
-		ResourceLocation rl = packet.getName();
-		ClientPlayNetHandler h = (ClientPlayNetHandler) handler;
-		if(NetworkHandler.helloPacket.equals(rl)) {
-			PacketBuffer pb = packet.getInternalData();
-			CompoundNBT nbt = pb.readCompoundTag();
-			Minecraft.getInstance().execute(() -> {
-				handler.cpm$setHasMod(true);
-				loader.clearServerData();
-				h.sendPacket(new CCustomPayloadPacket(NetworkHandler.helloPacket, new PacketBuffer(Unpooled.EMPTY_BUFFER)));
-			});
-		} else if(NetworkHandler.setSkin.equals(rl)) {
-			PacketBuffer pb = packet.getInternalData();
-			int entId = pb.readVarInt();
-			CompoundNBT data = pb.readCompoundTag();
-			Minecraft.getInstance().execute(() -> {
-				Entity ent = Minecraft.getInstance().world.getEntityByID(entId);
-				if(ent instanceof PlayerEntity) {
-					loader.setModel(((PlayerEntity)ent).getGameProfile(), data.contains("data") ? data.getByteArray("data") : null, data.getBoolean("forced"));
-				}
-			});
-		} else if(NetworkHandler.getSkin.equals(rl)) {
-			sendSkinData(h);
-		}
-	}
-
-	public void sendSkinData(ClientPlayNetHandler h) {
-		String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
-		if(model != null) {
-			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
-			try {
-				ModelFile file = ModelFile.load(new File(modelsDir, model));
-				PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
-				CompoundNBT data = new CompoundNBT();
-				data.putByteArray("data", file.getDataBlock());
-				pb.writeCompoundTag(data);
-				h.sendPacket(new CCustomPayloadPacket(NetworkHandler.setSkin, pb));
-			} catch (IOException e) {
-			}
-		} else {
-			PacketBuffer pb = new PacketBuffer(Unpooled.buffer());
-			CompoundNBT data = new CompoundNBT();
-			pb.writeCompoundTag(data);
-			h.sendPacket(new CCustomPayloadPacket(NetworkHandler.setSkin, pb));
-		}
+	public void unbind(Model model) {
+		manager.tryUnbind(model);
 	}
 }

@@ -24,10 +24,11 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
-import com.tom.cpm.common.NetH;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.network.NetH;
+import com.tom.cpm.shared.network.NetHandler;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -187,11 +188,6 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public void sendSkinUpdate() {
-		ClientProxy.INSTANCE.sendSkinData(mc.getConnection());
-	}
-
-	@Override
 	public void openGui(Function<IGui, Frame> creator) {
 		mc.displayGuiScreen(new GuiImpl(creator, mc.currentScreen));
 	}
@@ -199,5 +195,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public Runnable openSingleplayer() {
 		return () -> mc.displayGuiScreen(new WorldSelectionScreen(mc.currentScreen));
+	}
+
+	@Override
+	public NetHandler<?, ?, ?, ?, ?> getNetHandler() {
+		return ClientProxy.INSTANCE.netHandler;
 	}
 }

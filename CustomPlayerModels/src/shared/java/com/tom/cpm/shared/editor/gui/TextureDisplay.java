@@ -10,9 +10,9 @@ import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
 
-public class SkinTextureDisplay extends GuiElement {
+public class TextureDisplay extends GuiElement {
 	private Editor editor;
-	public SkinTextureDisplay(IGui gui, Editor editor) {
+	public TextureDisplay(IGui gui, Editor editor) {
 		super(gui);
 		this.editor = editor;
 	}
