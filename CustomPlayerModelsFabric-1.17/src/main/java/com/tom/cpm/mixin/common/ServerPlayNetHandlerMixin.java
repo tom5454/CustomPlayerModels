@@ -12,7 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 
 import com.tom.cpm.common.IServerNetHandler;
-import com.tom.cpm.common.NetworkHandler;
+import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
@@ -38,7 +38,7 @@ public class ServerPlayNetHandlerMixin implements ServerNetH, IServerNetHandler 
 	@Inject(at = @At("HEAD"), method = "onCustomPayload(Lnet/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket;)V", cancellable = true)
 	public void onProcessCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo cbi) {
 		if(packet.channel.getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
-			NetworkHandler.handlePacket(packet, this, false);
+			ServerHandler.netHandler.receiveServer(packet.channel, packet.data, this);
 			cbi.cancel();
 		}
 	}

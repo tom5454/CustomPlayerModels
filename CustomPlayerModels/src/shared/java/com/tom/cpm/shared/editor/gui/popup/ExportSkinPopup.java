@@ -25,6 +25,7 @@ import com.tom.cpm.shared.editor.Exporter;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
+import com.tom.cpm.shared.util.Log;
 
 public abstract class ExportSkinPopup extends PopupPanel {
 	protected final EditorGui editorGui;
@@ -471,7 +472,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			}
 		}
 		IGui gui = e.getGui();
-		System.err.println("Project can't be exported in any format");
+		Log.error("Project can't be exported in any format");
 		return new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.unknownError"));
 	}
 }

@@ -2,6 +2,9 @@ package com.tom.cpm;
 
 import java.io.File;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -14,6 +17,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.util.ILogger;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
@@ -31,6 +35,9 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		MinecraftForge.EVENT_BUS.register(new ServerHandler());
 	}
 
+	public static final Logger LOG = LogManager.getLogger("CPM");
+	public static final ILogger log = new Log4JLogger(LOG);
+
 	public static CommonProxy proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
 
 	private void doClientStuff(final FMLClientSetupEvent event) {
@@ -42,6 +49,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	public void setup(FMLCommonSetupEvent evt) {
 		cfg = new ModConfigFile(new File(FMLPaths.CONFIGDIR.get().toFile(), "cpm.json"));
 		MinecraftObjectHolder.setCommonObject(this);
+		LOG.info("Customizable Player Models Initialized");
 	}
 
 	@Override
@@ -58,5 +66,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	public void onStop(FMLServerStoppingEvent e) {
 		MinecraftObjectHolder.setServerObject(null);
 		ModConfig.getConfig().save();
+	}
+
+	@Override
+	public ILogger getLogger() {
+		return log;
 	}
 }

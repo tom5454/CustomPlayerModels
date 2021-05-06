@@ -11,6 +11,7 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.HeldItem;
@@ -138,7 +139,7 @@ public abstract class ViewportPanelBase extends GuiElement {
 		ViewportCamera cam = getCamera();
 		cam.camDist += (dir * (cam.camDist / 16f));
 		if(cam.camDist < 32)cam.camDist = 32;
-		if(cam.camDist > 512)cam.camDist = 512;
+		if(cam.camDist > 4096)cam.camDist = 4096;
 	}
 
 	@Override
@@ -184,6 +185,9 @@ public abstract class ViewportPanelBase extends GuiElement {
 	public abstract boolean applyLighting();
 	public HeldItem getHeldItem(Hand hand) {
 		return HeldItem.NONE;
+	}
+	public AnimationMode getAnimMode() {
+		return AnimationMode.PLAYER;
 	}
 
 	public static class ViewportCamera {

@@ -20,6 +20,7 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
+import com.tom.cpm.shared.util.Log;
 
 public class NetHandler<RL, NBT, P, PB, NET> {
 	public static final String GET_SKIN = "get_skin";
@@ -91,62 +92,72 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 		return new PlayerData();
 	}
 
-	public void receiveServer(RL key, PB data, NET from) {
-		P pl = getPlayer.apply(from);
-		ServerNetH net = (ServerNetH) from;
-		if(key.equals(helloPacket)) {
-			executor.apply(from).execute(() -> {
-				net.cpm$setHasMod(true);
-				findTracking.accept(pl, p -> sendPlayerData(p, pl));
+	@SuppressWarnings("unchecked")
+	public void receiveServer(RL key, PB data, ServerNetH net) {
+		try {
+			NET from = (NET) net;
+			P pl = getPlayer.apply(from);
+			if(key.equals(helloPacket)) {
+				executor.apply(from).execute(() -> {
+					net.cpm$setHasMod(true);
+					findTracking.accept(pl, p -> sendPlayerData(p, pl));
+					PlayerData pd = net.cpm$getEncodedModelData();
+					if(pd.canChangeModel()) {
+						sendPacket.accept(from, getSkin, newPacketBuffer.get());
+					} else {
+						sendPacket.accept(from, setSkin, writeSkinData(pd, pl));
+					}
+				});
+			} else if(key.equals(setSkin)) {
 				PlayerData pd = net.cpm$getEncodedModelData();
 				if(pd.canChangeModel()) {
-					sendPacket.accept(from, getSkin, newPacketBuffer.get());
+					NBT tag = readCompound.apply(data);
+					executor.apply(from).execute(() -> {
+						pd.setModel(contains.test(tag, DATA_TAG) ? getByteArray.get(tag, DATA_TAG) : null, false, false);
+						sendToAllTracking.accept(pl, setSkin, writeSkinData(pd, pl));
+						pd.save(getPlayerUUID.apply(pl).toString());
+					});
 				} else {
-					sendPacket.accept(from, setSkin, writeSkinData(pd, pl));
+					sendChat.accept(pl, FORCED_CHAT_MSG);
 				}
-			});
-		} else if(key.equals(setSkin)) {
-			PlayerData pd = net.cpm$getEncodedModelData();
-			if(pd.canChangeModel()) {
+			} else if(key.equals(setScale)) {
 				NBT tag = readCompound.apply(data);
-				executor.apply(from).execute(() -> {
-					pd.setModel(contains.test(tag, DATA_TAG) ? getByteArray.get(tag, DATA_TAG) : null, false, false);
-					sendToAllTracking.accept(pl, setSkin, writeSkinData(pd, pl));
-					pd.save(getPlayerUUID.apply(pl).toString());
-				});
-			} else {
-				sendChat.accept(pl, FORCED_CHAT_MSG);
+				float scale = getFloat.get(tag, SCALE_TAG);
+				if(scaleSetter != null) {
+					scaleSetter.accept(pl, scale);
+					net.cpm$getEncodedModelData().scale = scale;
+				}
 			}
-		} else if(key.equals(setScale)) {
-			NBT tag = readCompound.apply(data);
-			float scale = getFloat.get(tag, SCALE_TAG);
-			if(scaleSetter != null) {
-				scaleSetter.accept(pl, scale);
-				net.cpm$getEncodedModelData().scale = scale;
-			}
+		} catch (Throwable e) {
+			Log.error("Exception while processing cpm packet", e);
 		}
 	}
 
-	public void receiveClient(RL key, PB data, NET from) {
-		NetH net = (NetH) from;
-		if(key.equals(helloPacket)) {
-			NBT nbt = readCompound.apply(data);
-			executor.apply(from).execute(() -> {
-				net.cpm$setHasMod(true);
-				MinecraftClientAccess.get().getDefinitionLoader().clearServerData();
-				sendPacket.accept(from, helloPacket, newPacketBuffer.get());
-			});
-		} else if(key.equals(setSkin)) {
-			Object pl = readPlayerId.apply(data);
-			NBT tag = readCompound.apply(data);
-			executor.apply(from).execute(() -> {
-				P player = getPlayerById.apply(pl);
-				if(player != null) {
-					MinecraftClientAccess.get().getDefinitionLoader().setModel(playerToLoader.apply(player), contains.test(tag, DATA_TAG) ? getByteArray.get(tag, DATA_TAG) : null, getBoolean.get(tag, FORCED_TAG));
-				}
-			});
-		} else if(key.equals(getSkin)) {
-			sendSkinData(from);
+	@SuppressWarnings("unchecked")
+	public void receiveClient(RL key, PB data, NetH net) {
+		try {
+			NET from = (NET) net;
+			if(key.equals(helloPacket)) {
+				NBT nbt = readCompound.apply(data);
+				executor.apply(from).execute(() -> {
+					net.cpm$setHasMod(true);
+					MinecraftClientAccess.get().getDefinitionLoader().clearServerData();
+					sendPacket.accept(from, helloPacket, newPacketBuffer.get());
+				});
+			} else if(key.equals(setSkin)) {
+				Object pl = readPlayerId.apply(data);
+				NBT tag = readCompound.apply(data);
+				executor.apply(from).execute(() -> {
+					P player = getPlayerById.apply(pl);
+					if(player != null) {
+						MinecraftClientAccess.get().getDefinitionLoader().setModel(playerToLoader.apply(player), contains.test(tag, DATA_TAG) ? getByteArray.get(tag, DATA_TAG) : null, getBoolean.get(tag, FORCED_TAG));
+					}
+				});
+			} else if(key.equals(getSkin)) {
+				sendSkinData(from);
+			}
+		} catch (Throwable e) {
+			Log.error("Exception while processing cpm packet", e);
 		}
 	}
 

@@ -115,7 +115,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		ModelBiped p = rp.modelBipedMain;
 		panel.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, panel.getDefinition(), null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, panel.getDefinition(), null, panel.getAnimMode());
 			if(panel.getDefinition().getSkinOverride() != null)panel.getDefinition().getSkinOverride().bind();
 			else mc.renderEngine.bindTexture(new ResourceLocation("textures/entity/steve.png"));
 			setupModel(p);

@@ -1,6 +1,7 @@
 package com.tom.cpm.shared;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.util.ILogger;
 
 public interface MinecraftCommonAccess {
 
@@ -9,4 +10,5 @@ public interface MinecraftCommonAccess {
 	}
 
 	public ModConfigFile getConfig();
+	public ILogger getLogger();
 }

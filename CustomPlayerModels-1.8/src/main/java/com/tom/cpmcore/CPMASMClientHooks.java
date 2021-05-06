@@ -9,13 +9,14 @@ import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.PlayerRenderManager;
-import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.network.NetH;
 
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
@@ -68,7 +69,7 @@ public class CPMASMClientHooks {
 
 	public static boolean onClientPacket(S3FPacketCustomPayload pckt, NetHandlerPlayClient handler) {
 		if(pckt.getChannelName().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			NetworkHandler.handlePacket(pckt, handler, true);
+			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.getChannelName()), pckt.getBufferData(), (NetH) handler);
 			return true;
 		}
 		return false;

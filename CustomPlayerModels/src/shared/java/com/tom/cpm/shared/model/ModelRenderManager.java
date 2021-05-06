@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.IPlayerRenderManager;
 import com.tom.cpm.shared.animation.AnimationEngine;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -61,8 +62,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.setVis = setVis;
 	}
 
-	public void bindModel(MB model, D addDt, ModelDefinition def, Player<?, MB> player) {
-		holders.computeIfAbsent(model, this::create).swapIn(def, addDt, player);
+	public void bindModel(MB model, D addDt, ModelDefinition def, Player<?, MB> player, AnimationMode mode) {
+		holders.computeIfAbsent(model, this::create).swapIn(def, addDt, player, mode);
 	}
 
 	private RedirectHolder<MB, D, S, P> create(MB model) {
@@ -110,6 +111,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public boolean skinBound;
 		public Map<RedirectRenderer<P>, RedirectDataHolder<P>> partData;
 		public Player<?, M> playerObj;
+		public AnimationMode mode;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
 			this.model = model;
@@ -119,9 +121,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			partData = new HashMap<>();
 		}
 
-		public final void swapIn(ModelDefinition def, D addDt, Player<?, M> playerObj) {
+		public final void swapIn(ModelDefinition def, D addDt, Player<?, M> playerObj, AnimationMode mode) {
 			this.def = def;
 			this.addDt = addDt;
+			this.mode = mode;
 			if(swappedIn)return;
 			swapIn0();
 			for (int i = 0; i < modelFields.size(); i++) {
@@ -221,6 +224,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					}
 					PartRoot elems = holder.def.getModelElementFor(part);
 					if(elems.isEmpty())return;
+					boolean skipTransform = holder.mode == AnimationMode.SKULL || holder.mode == AnimationMode.HAND || holder.skipTransform(this);
 					float px = mngr.px.apply(tp);
 					float py = mngr.py.apply(tp);
 					float pz = mngr.pz.apply(tp);
@@ -229,12 +233,14 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					float rz = mngr.rz.apply(tp);
 					if(holder.playerObj == null || dh.renderPredicate.test(holder.playerObj)) {
 						elems.forEach(elem -> {
-							if(elem.forcePos) {
-								mngr.posSet.set(tp, elem.pos);
-								mngr.rotSet.set(tp, elem.rotation);
-							} else {
-								mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
-								mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
+							if(!skipTransform) {
+								if(elem.forcePos) {
+									mngr.posSet.set(tp, elem.pos);
+									mngr.rotSet.set(tp, elem.rotation);
+								} else {
+									mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
+									mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
+								}
 							}
 							if(elem.doDisplay()) {
 								holder.copyModel(tp, parent);
@@ -246,13 +252,15 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						mngr.posSet.set(parent, px, py, pz);
 						mngr.rotSet.set(parent, rx, ry, rz);
 					}
-					RootModelElement elem = elems.getMainRoot();
-					if(elem.forcePos) {
-						mngr.posSet.set(tp, elem.pos);
-						mngr.rotSet.set(tp, elem.rotation);
-					} else {
-						mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
-						mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
+					if(!skipTransform) {
+						RootModelElement elem = elems.getMainRoot();
+						if(elem.forcePos) {
+							mngr.posSet.set(tp, elem.pos);
+							mngr.rotSet.set(tp, elem.rotation);
+						} else {
+							mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
+							mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
+						}
 					}
 				} else {
 					holder.copyModel(tp, parent);

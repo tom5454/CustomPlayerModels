@@ -65,8 +65,7 @@ public class GuiImpl extends Screen implements IGui {
 		try {
 			this.gui = creator.apply(this);
 		} catch (Throwable e) {
-			e.printStackTrace();
-			displayError(e.toString());
+			onGuiException("Error creating gui", e, true);
 		}
 	}
 
@@ -90,8 +89,7 @@ public class GuiImpl extends Screen implements IGui {
 			stack = new CtxStack(width, height);
 			gui.draw(mouseX, mouseY, partialTicks);
 		} catch (Throwable e) {
-			e.printStackTrace();
-			displayError(e.toString());
+			onGuiException("Error drawing gui", e, true);
 		} finally {
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
 			String modVer = ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
@@ -134,8 +132,7 @@ public class GuiImpl extends Screen implements IGui {
 		try {
 			gui.init(width, height);
 		} catch (Throwable e) {
-			e.printStackTrace();
-			displayError(e.toString());
+			onGuiException("Error in init gui", e, true);
 		}
 	}
 	@Override
@@ -159,8 +156,7 @@ public class GuiImpl extends Screen implements IGui {
 			}
 			return true;
 		} catch (Throwable e) {
-			e.printStackTrace();
-			logError(e.toString());
+			onGuiException("Error processing key event", e, false);
 			return true;
 		}
 	}
@@ -173,8 +169,7 @@ public class GuiImpl extends Screen implements IGui {
 			gui.keyPressed(evt);
 			return evt.isConsumed();
 		} catch (Throwable e) {
-			e.printStackTrace();
-			logError(e.toString());
+			onGuiException("Error processing key event", e, false);
 			return true;
 		}
 	}
@@ -186,8 +181,7 @@ public class GuiImpl extends Screen implements IGui {
 			gui.mouseClick(evt);
 			return evt.isConsumed();
 		} catch (Throwable e) {
-			e.printStackTrace();
-			logError(e.toString());
+			onGuiException("Error processing mouse event", e, false);
 			return true;
 		}
 	}
@@ -199,8 +193,7 @@ public class GuiImpl extends Screen implements IGui {
 			gui.mouseDrag(evt);
 			return evt.isConsumed();
 		} catch (Throwable e) {
-			e.printStackTrace();
-			logError(e.toString());
+			onGuiException("Error processing mouse event", e, false);
 			return true;
 		}
 	}
@@ -212,8 +205,7 @@ public class GuiImpl extends Screen implements IGui {
 			gui.mouseRelease(evt);
 			return evt.isConsumed();
 		} catch (Throwable e) {
-			e.printStackTrace();
-			logError(e.toString());
+			onGuiException("Error processing mouse event", e, false);
 			return true;
 		}
 	}
@@ -226,27 +218,15 @@ public class GuiImpl extends Screen implements IGui {
 				gui.mouseWheel(evt);
 				return evt.isConsumed();
 			} catch (Throwable e) {
-				e.printStackTrace();
-				logError(e.toString());
+				onGuiException("Error processing mouse event", e, false);
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private void logError(String e) {
-		if(gui != null) {
-			try {
-				gui.logMessage(e);
-			} catch (Throwable ex) {
-				ex.printStackTrace();
-				ex.addSuppressed(new RuntimeException(e));
-				displayError(ex.toString());
-			}
-		}
-	}
-
-	private void displayError(String e) {
+	@Override
+	public void displayError(String e) {
 		Screen p = parent;
 		parent = null;
 		Minecraft.getInstance().displayGuiScreen(new ErrorScreen(new StringTextComponent("Custom Player Models"), I18n.format("error.cpm.crash", e)) {

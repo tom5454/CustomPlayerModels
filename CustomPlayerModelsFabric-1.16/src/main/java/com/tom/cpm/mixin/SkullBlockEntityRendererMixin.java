@@ -50,6 +50,21 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
 	}
 
+	@Redirect(at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/render/RenderLayer;getEntityCutoutNoCull("
+					+ "Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/render/RenderLayer;",
+					ordinal = 0
+			),
+			method = "method_3578(Lnet/minecraft/block/SkullBlock$SkullType;Lcom/mojang/authlib/GameProfile;)"
+					+ "Lnet/minecraft/client/render/RenderLayer;")
+	private static RenderLayer onGetRenderTypeNoSkin(Identifier resLoc, SkullBlock.SkullType skullType, GameProfile gameProfileIn) {
+		SkullEntityModel model = MODELS.get(skullType);
+		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi);
+		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
+	}
+
 	@Inject(at = @At("HEAD"),
 			method = "render(Lnet/minecraft/util/math/Direction;FLnet/minecraft/block/SkullBlock$SkullType;"
 					+ "Lcom/mojang/authlib/GameProfile;FLnet/minecraft/client/util/math/MatrixStack;"

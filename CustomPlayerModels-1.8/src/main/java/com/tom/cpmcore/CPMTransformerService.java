@@ -5,6 +5,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -28,6 +30,7 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 
 public class CPMTransformerService implements IClassTransformer {
+	public static final Logger LOG = LogManager.getLogger("CPM Core");
 	private static final String HOOKS_CLASS = "com/tom/cpmcore/CPMASMClientHooks";
 	private static final String HOOKS_CLASS_SERVER = "com/tom/cpmcore/CPMASMServerHooks";
 	private static final String NO_MODEL_SETUP_FIELD = "cpm$noModelSetup";
@@ -60,7 +63,7 @@ public class CPMTransformerService implements IClassTransformer {
 					if(method.desc.equals("(FFFLnet/minecraft/util/EnumFacing;FILcom/mojang/authlib/GameProfile;I)V") ||
 							method.desc.equals("(FFFLcq;FILcom/mojang/authlib/GameProfile;I)V")) {
 						m = method;
-						System.out.println("CPM Skull Hook: found method");
+						LOG.info("CPM Skull Hook: found method");
 						break;
 					}
 				}
@@ -71,12 +74,12 @@ public class CPMTransformerService implements IClassTransformer {
 						VarInsnNode nd = (VarInsnNode) insnNode;
 						if(nd.getOpcode() == Opcodes.ALOAD && nd.var == modelBase) {
 							m.instructions.insertBefore(nd, lst);
-							System.out.println("CPM Skull Hook: injected (Pre)");
+							LOG.info("CPM Skull Hook: injected (Pre)");
 						}
 					} else if(insnNode instanceof InsnNode){
 						if(insnNode.getOpcode() == Opcodes.RETURN) {
 							m.instructions.insertBefore(insnNode, lst2);
-							System.out.println("CPM Skull Hook: injected (Post)");
+							LOG.info("CPM Skull Hook: injected (Post)");
 						}
 					}
 				}
@@ -91,7 +94,7 @@ public class CPMTransformerService implements IClassTransformer {
 
 				for(MethodNode method : input.methods) {
 					if((method.name.equals("a") && method.desc.equals("(FFFFFFLpk;)V")) || method.name.equals("setRotationAngles")) {
-						System.out.println("CPM Armor Hook/No setup: found setRotationAngles method");
+						LOG.info("CPM Armor Hook/No setup: found setRotationAngles method");
 						InsnList lst = new InsnList();
 						lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
 						lst.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, NO_MODEL_SETUP_FIELD, "Z"));
@@ -100,7 +103,7 @@ public class CPMTransformerService implements IClassTransformer {
 						lst.add(new InsnNode(Opcodes.RETURN));
 						lst.add(lbln);
 						method.instructions.insertBefore(method.instructions.getFirst(), lst);
-						System.out.println("CPM Armor Hook/No setup: injected");
+						LOG.info("CPM Armor Hook/No setup: injected");
 					}
 				}
 				return input;
@@ -114,20 +117,20 @@ public class CPMTransformerService implements IClassTransformer {
 				for(FieldNode fn : input.fields) {
 					if(fn.name.equals("a") || fn.name.equals("renderer")) {
 						rendererField = fn;
-						System.out.println("CPM Armor Hook/Layer: Found renderer field");
+						LOG.info("CPM Armor Hook/Layer: Found renderer field");
 					}
 				}
 				Type renderer = Type.getType(rendererField.desc);
 
 				for(MethodNode method : input.methods) {
 					if((method.name.equals("a") && method.desc.equals("(Lpr;FFFFFFFI)V")) || method.name.equals("renderLayer")) {
-						System.out.println("CPM Armor Hook/Layer: Found renderLayer method");
+						LOG.info("CPM Armor Hook/Layer: Found renderLayer method");
 						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
 							AbstractInsnNode insnNode = it.next();
 							if(insnNode instanceof MethodInsnNode) {
 								MethodInsnNode mn = (MethodInsnNode) insnNode;
 								if((mn.name.equals("a") && mn.desc.equals("(Lpk;FFFFFF)V")) || mn.name.equals("render")) {
-									System.out.println("CPM Armor Hook/Layer: Found render call");
+									LOG.info("CPM Armor Hook/Layer: Found render call");
 									Type[] argsD = Type.getArgumentTypes(mn.desc);
 									Type[] args = new Type[argsD.length + 2];
 									args[0] = Type.getObjectType(mn.owner);
@@ -141,7 +144,7 @@ public class CPMTransformerService implements IClassTransformer {
 									lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
 									lst.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, rendererField.name, rendererField.desc));
 									method.instructions.insertBefore(insnNode, lst);
-									System.out.println("CPM Armor Hook/Layer: injected");
+									LOG.info("CPM Armor Hook/Layer: injected");
 								}
 							}
 						}
@@ -161,7 +164,7 @@ public class CPMTransformerService implements IClassTransformer {
 						method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
 						method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, Type.getArgumentTypes(method.desc)[0].getInternalName(), NO_MODEL_SETUP_FIELD, "Z"));
 						method.instructions.add(new InsnNode(Opcodes.RETURN));
-						System.out.println("CPM ASM fields/No Render: injected");
+						LOG.info("CPM ASM fields/No Render: injected");
 					}
 				}
 				return input;
@@ -174,13 +177,13 @@ public class CPMTransformerService implements IClassTransformer {
 				input.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, RENDER_PLAYER_FIELD, "Lnet/minecraft/client/renderer/entity/RenderPlayer;", null, null));
 				for(MethodNode method : input.methods) {
 					if(method.name.equals("a") || method.name.equals("doRenderLayer")) {
-						System.out.println("CPM Armor Hook/Skull: Found doRenderLayer method");
+						LOG.info("CPM Armor Hook/Skull: Found doRenderLayer method");
 						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
 							AbstractInsnNode insnNode = it.next();
 							if(insnNode instanceof MethodInsnNode) {
 								MethodInsnNode mn = (MethodInsnNode) insnNode;
 								if((mn.name.equals("c") || mn.name.equals("postRender")) && mn.desc.equals("(F)V")) {
-									System.out.println("CPM Armor Hook/Skull: Found postRender call");
+									LOG.info("CPM Armor Hook/Skull: Found postRender call");
 									InsnList lst = new InsnList();
 									lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
 									lst.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, RENDER_PLAYER_FIELD, "Lnet/minecraft/client/renderer/entity/RenderPlayer;"));
@@ -194,7 +197,7 @@ public class CPMTransformerService implements IClassTransformer {
 									mn.setOpcode(Opcodes.INVOKESTATIC);
 									mn.owner = HOOKS_CLASS;
 									method.instructions.insertBefore(insnNode, lst);
-									System.out.println("CPM Armor Hook/Skull: injected");
+									LOG.info("CPM Armor Hook/Skull: injected");
 								}
 							}
 						}
@@ -209,20 +212,20 @@ public class CPMTransformerService implements IClassTransformer {
 			public ClassNode apply(ClassNode input) {
 				for(MethodNode method : input.methods) {
 					if(method.name.equals("<init>")) {
-						System.out.println("CPM RenderPlayer Hook: Found constructor");
+						LOG.info("CPM RenderPlayer Hook: Found constructor");
 						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
 							AbstractInsnNode insnNode = it.next();
 							if(insnNode instanceof FieldInsnNode) {
 								FieldInsnNode fn = (FieldInsnNode) insnNode;
-								System.out.println("FieldNode: " + fn.name + " " + fn.desc);
+								LOG.info("FieldNode: " + fn.name + " " + fn.desc);
 								if(fn.name.equals("e") || fn.name.equals("bipedHead")) {
-									System.out.println("CPM RenderPlayer Hook: Found bipedHead field insn");
+									LOG.info("CPM RenderPlayer Hook: Found bipedHead field insn");
 									InsnList lst = new InsnList();
 									lst.add(new InsnNode(Opcodes.DUP));
 									lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
 									lst.add(new FieldInsnNode(Opcodes.PUTFIELD, "net/minecraft/client/renderer/entity/layers/LayerCustomHead", RENDER_PLAYER_FIELD, "Lnet/minecraft/client/renderer/entity/RenderPlayer;"));
 									method.instructions.insert(fn.getNext(), lst);
-									System.out.println("CPM RenderPlayer Hook: injected");
+									LOG.info("CPM RenderPlayer Hook: injected");
 								}
 							}
 						}
@@ -240,14 +243,14 @@ public class CPMTransformerService implements IClassTransformer {
 
 				for(MethodNode method : input.methods) {
 					if(method.name.equals("loadWorld") || (method.name.equals("a") && method.desc.equals("(Lbdb;Ljava/lang/String;)V"))) {
-						System.out.println("CPM ClientLogout Hook: Found loadWorld");
+						LOG.info("CPM ClientLogout Hook: Found loadWorld");
 						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
 							AbstractInsnNode insnNode = it.next();
 							if(insnNode instanceof MethodInsnNode) {
 								MethodInsnNode mn = (MethodInsnNode) insnNode;
 								if((mn.name.equals("b") && mn.desc.equals("()V") && mn.getPrevious() instanceof FieldInsnNode && ((FieldInsnNode)mn.getPrevious()).name.equals("p")) || mn.name.equals("clearAchievements")) {
 									method.instructions.insert(mn, lst);
-									System.out.println("CPM ClientLogout Hook: injected");
+									LOG.info("CPM ClientLogout Hook: injected");
 								}
 							}
 						}
@@ -275,9 +278,9 @@ public class CPMTransformerService implements IClassTransformer {
 
 				for(MethodNode method : input.methods) {
 					if(method.name.equals("handleCustomPayload") || (method.name.equals("a") && method.desc.equals("(Lgg;)V"))) {
-						System.out.println("CPM ClientNet Hook: Found handleCustomPayload");
+						LOG.info("CPM ClientNet Hook: Found handleCustomPayload");
 						method.instructions.insertBefore(method.instructions.getFirst(), lst);
-						System.out.println("CPM ClientNet Hook: injected");
+						LOG.info("CPM ClientNet Hook: injected");
 					}
 				}
 
@@ -306,9 +309,9 @@ public class CPMTransformerService implements IClassTransformer {
 
 				for(MethodNode method : input.methods) {
 					if(method.name.equals("processVanilla250Packet") || (method.name.equals("a") && method.desc.equals("(Lim;)V"))) {
-						System.out.println("CPM ServerNet Hook: Found processCustomPayload");
+						LOG.info("CPM ServerNet Hook: Found processCustomPayload");
 						method.instructions.insertBefore(method.instructions.getFirst(), lst);
-						System.out.println("CPM ServerNet Hook: injected");
+						LOG.info("CPM ServerNet Hook: injected");
 					}
 				}
 
@@ -319,7 +322,7 @@ public class CPMTransformerService implements IClassTransformer {
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, DATA_FIELD, Type.getDescriptor(PlayerData.class)));
 				method.instructions.add(new InsnNode(Opcodes.ARETURN));
-				System.out.println("CPM ServerNet/getData: injected");
+				LOG.info("CPM ServerNet/getData: injected");
 
 				method = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$setEncodedModelData", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(PlayerData.class)), null, null);
 				input.methods.add(method);
@@ -327,7 +330,7 @@ public class CPMTransformerService implements IClassTransformer {
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
 				method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, input.name, DATA_FIELD, Type.getDescriptor(PlayerData.class)));
 				method.instructions.add(new InsnNode(Opcodes.RETURN));
-				System.out.println("CPM ServerNet/setData: injected");
+				LOG.info("CPM ServerNet/setData: injected");
 				return input;
 			}
 		});
@@ -344,7 +347,7 @@ public class CPMTransformerService implements IClassTransformer {
 				for(MethodNode method : input.methods) {
 					if(method.desc.equals("(F)V") && (method.name.equals("a") || method.name.equals("renderItemInFirstPerson"))) {
 						m = method;
-						System.out.println("CPM Render Hand Hook: found method");
+						LOG.info("CPM Render Hand Hook: found method");
 						break;
 					}
 				}
@@ -354,7 +357,7 @@ public class CPMTransformerService implements IClassTransformer {
 					if(insnNode instanceof InsnNode){
 						if(insnNode.getOpcode() == Opcodes.RETURN) {
 							m.instructions.insertBefore(insnNode, lst);
-							System.out.println("CPM Render Hand Hook: injected");
+							LOG.info("CPM Render Hand Hook: injected");
 						}
 					}
 				}
@@ -369,7 +372,7 @@ public class CPMTransformerService implements IClassTransformer {
 		method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, HAS_MOD_FIELD, "Z"));
 		method.instructions.add(new InsnNode(Opcodes.IRETURN));
-		System.out.println("CPM " + name + "/hasMod: injected");
+		LOG.info("CPM " + name + "/hasMod: injected");
 
 		method = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$setHasMod", "(Z)V", null, null);
 		input.methods.add(method);
@@ -377,7 +380,7 @@ public class CPMTransformerService implements IClassTransformer {
 		method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
 		method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, input.name, HAS_MOD_FIELD, "Z"));
 		method.instructions.add(new InsnNode(Opcodes.RETURN));
-		System.out.println("CPM " + name + "/setHasMod: injected");
+		LOG.info("CPM " + name + "/setHasMod: injected");
 	}
 
 	@Override
@@ -388,7 +391,7 @@ public class CPMTransformerService implements IClassTransformer {
 			ClassNode classNode = new ClassNode();
 			ClassReader classReader = new ClassReader(basicClass);
 			classReader.accept(classNode, 0);
-			System.out.println("Applying cpm transformer: " + transformedName);
+			LOG.info("Applying cpm transformer: " + transformedName);
 			classNode = tr.apply(classNode);
 			ClassWriter writer = new ClassWriter(0);//ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES
 			classNode.accept(writer);

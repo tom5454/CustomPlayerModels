@@ -22,7 +22,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import com.tom.cpl.util.Image;
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.config.ResourceLoader;
 import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
@@ -36,6 +35,7 @@ import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartEnd;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartType;
+import com.tom.cpm.shared.util.Log;
 
 public class ModelDefinitionLoader {
 	public static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(0, 2, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
@@ -115,7 +115,7 @@ public class ModelDefinitionLoader {
 				SkinType type = ((ModelPartSkinType)part).getSkinType();
 				if(type != SkinType.UNKNOWN && type.getChannel() != sin.getChannel()) {
 					sin.setChannel(type.getChannel());
-					System.out.println("[WARN]: Mismatching skin type");
+					Log.debug("Mismatching skin type");
 				}
 			}
 			if(part instanceof ModelPartEnd) {
@@ -126,7 +126,7 @@ public class ModelDefinitionLoader {
 		}
 		ModelDefinition def = new ModelDefinition(this, parts, player);
 		def.validate();
-		if(MinecraftObjectHolder.DEBUGGING)System.out.println(def);
+		Log.debug(def);
 		return def;
 	}
 

@@ -1,9 +1,12 @@
 package com.tom.cpm.common;
 
+import java.util.function.Predicate;
+
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SChatPacket;
@@ -25,6 +28,8 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
 	public static NetHandler<ResourceLocation, CompoundNBT, ServerPlayerEntity, PacketBuffer, ServerPlayNetHandler> netHandler;
@@ -36,7 +41,7 @@ public class ServerHandler {
 		netHandler.setIsDedicatedServer(p -> p.getServer().isDedicatedServer());
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUniqueID);
 		netHandler.setWriteCompound(PacketBuffer::writeCompoundTag, PacketBuffer::readCompoundTag);
-		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new SCustomPayloadPlayPacket(rl, pb)), (spe, rl, pb) -> NetworkHandler.sendToAllTrackingAndSelf(spe, new SCustomPayloadPlayPacket(rl, pb), ServerHandler::hasMod, null));
+		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new SCustomPayloadPlayPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SCustomPayloadPlayPacket(rl, pb), ServerHandler::hasMod, null));
 		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getEntityId()));
 		netHandler.setNBTSetters(CompoundNBT::putBoolean, CompoundNBT::putByteArray, CompoundNBT::putFloat);
 		netHandler.setNBTGetters(CompoundNBT::getBoolean, CompoundNBT::getByteArray, CompoundNBT::getFloat);
@@ -78,4 +83,13 @@ public class ServerHandler {
 		return ((NetH)spe.connection).cpm$hasMod();
 	}
 
+	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, IPacket<?> pckt, Predicate<ServerPlayerEntity> test, GenericFutureListener<? extends Future<? super Void>> future) {
+		EntityTracker tr = ((ServerWorld)ent.world).getChunkProvider().chunkManager.entities.get(ent.getEntityId());
+		for (ServerPlayerEntity p : tr.trackingPlayers) {
+			if(test.test(p)) {
+				p.connection.sendPacket(pckt, future);
+			}
+		}
+		ent.connection.sendPacket(pckt, future);
+	}
 }

@@ -1,14 +1,18 @@
 package com.tom.cpm.common;
 
+import java.util.function.Predicate;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.MessageType;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.EntityTrackingListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage.EntityTracker;
 import net.minecraft.text.TranslatableText;
@@ -19,6 +23,8 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
 	public static NetHandler<Identifier, NbtCompound, ServerPlayerEntity, PacketByteBuf, ServerPlayNetworkHandler> netHandler;
@@ -30,7 +36,7 @@ public class ServerHandler {
 		netHandler.setIsDedicatedServer(p -> p.getServer().isDedicated());
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUuid);
 		netHandler.setWriteCompound(PacketByteBuf::writeNbt, PacketByteBuf::readNbt);
-		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), (spe, rl, pb) -> NetworkHandler.sendToAllTrackingAndSelf(spe, new CustomPayloadS2CPacket(rl, pb), ServerHandler::hasMod, null));
+		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new CustomPayloadS2CPacket(rl, pb), ServerHandler::hasMod, null));
 		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getId()));
 		netHandler.setNBTSetters(NbtCompound::putBoolean, NbtCompound::putByteArray, NbtCompound::putFloat);
 		netHandler.setNBTGetters(NbtCompound::getBoolean, NbtCompound::getByteArray, NbtCompound::getFloat);
@@ -64,5 +70,16 @@ public class ServerHandler {
 
 	public static boolean hasMod(ServerPlayerEntity spe) {
 		return ((NetH)spe.networkHandler).cpm$hasMod();
+	}
+
+
+	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, Packet<?> pckt, Predicate<ServerPlayerEntity> test, GenericFutureListener<? extends Future<? super Void>> future) {
+		EntityTracker tr = ((ServerWorld)ent.world).getChunkManager().threadedAnvilChunkStorage.entityTrackers.get(ent.getId());
+		for (EntityTrackingListener p : tr.listeners) {
+			if(test.test(p.getPlayer())) {
+				p.getPlayer().networkHandler.sendPacket(pckt, future);
+			}
+		}
+		ent.networkHandler.sendPacket(pckt, future);
 	}
 }

@@ -1,5 +1,6 @@
 package com.tom.cpm.client;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -68,6 +69,12 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 
 	@Override
 	public CompletableFuture<Void> loadSkin0() {
+		Map<Type, MinecraftProfileTexture> map = Minecraft.getMinecraft().func_152342_ad().func_152788_a(profile);
+		if (map.containsKey(Type.SKIN)) {
+			MinecraftProfileTexture tex = map.get(Type.SKIN);
+			url = tex.getUrl();
+			return CompletableFuture.completedFuture(null);
+		}
 		CompletableFuture<Void> cf = new CompletableFuture<>();
 		Minecraft.getMinecraft().func_152342_ad().func_152790_a(profile, new SkinCB(cf), true);
 		return cf;

@@ -15,7 +15,6 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.config.Player;
@@ -36,6 +35,7 @@ import com.tom.cpm.shared.parts.ModelPartScale;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinLink;
 import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ModelDefinition {
@@ -208,8 +208,7 @@ public class ModelDefinition {
 		resolved.forEach(r -> r.apply(this));
 		resetAnimationPos();
 		resolveState = 2;
-		if(MinecraftObjectHolder.DEBUGGING)
-			System.out.println(this);
+		Log.debug(this);
 	}
 
 	private void convertPart(RootModelElement p) {

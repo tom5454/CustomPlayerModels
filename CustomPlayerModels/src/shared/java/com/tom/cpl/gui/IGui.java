@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.util.Log;
 
 public interface IGui {
 	void drawBox(int x, int y, int w, int h, int color);
@@ -30,6 +31,7 @@ public interface IGui {
 	int getScale();
 	int getMaxScale();
 	CtxStack getStack();
+	void displayError(String msg);
 
 	default void drawBox(float x, float y, float w, float h, int color) {
 		drawBox((int) x, (int) y, (int) w, (int) h, color);
@@ -118,5 +120,24 @@ public interface IGui {
 		drawBox(x, y, 1, h, color);
 		drawBox(x, y+h-1, w, 1, color);
 		drawBox(x+w-1, y, 1, h, color);
+	}
+
+	default void onGuiException(String msg, Throwable e, boolean fatal) {
+		Log.error(msg, e);
+		if(fatal) {
+			displayError(msg + ": " + e.toString());
+		} else {
+			Frame frm = getFrame();
+			if(frm != null) {
+				try {
+					frm.logMessage(msg + ": " + e.toString());
+				} catch (Throwable ex) {
+					e.addSuppressed(ex);
+					onGuiException(msg, e, true);
+				}
+			} else {
+				displayError(msg + "\n" + e.toString());
+			}
+		}
 	}
 }

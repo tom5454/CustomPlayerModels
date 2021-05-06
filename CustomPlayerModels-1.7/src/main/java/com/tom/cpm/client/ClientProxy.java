@@ -210,10 +210,10 @@ public class ClientProxy extends CommonProxy {
 		}
 
 		@Override
-		public void receiveClient(ResourceLocation key, PacketBuffer pb, NetHandlerPlayClient from) {
+		public void receiveClient(ResourceLocation key, PacketBuffer data, com.tom.cpm.shared.network.NetH net) {
 			if(key.equals(setLayer)) {
-				int entId = pb.readVarIntFromBuffer();
-				int layer = pb.readByte();
+				int entId = data.readVarIntFromBuffer();
+				int layer = data.readByte();
 				Minecraft.getMinecraft().func_152344_a(() -> {
 					Entity ent = Minecraft.getMinecraft().theWorld.getEntityByID(entId);
 					if(ent instanceof EntityPlayer) {
@@ -222,7 +222,7 @@ public class ClientProxy extends CommonProxy {
 					}
 				});
 			} else
-				super.receiveClient(key, pb, from);
+				super.receiveClient(key, data, net);
 		}
 
 		public void sendLayer(int value) {

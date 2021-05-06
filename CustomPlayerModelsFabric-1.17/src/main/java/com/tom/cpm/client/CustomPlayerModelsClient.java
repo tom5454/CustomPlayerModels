@@ -31,6 +31,7 @@ import net.minecraft.util.Identifier;
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpl.util.Image;
+import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -52,6 +53,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		CustomPlayerModels.LOG.info("Customizable Player Models Client Init started");
 		INSTANCE = this;
 		try(InputStream is = CustomPlayerModelsClient.class.getResourceAsStream("/assets/cpm/textures/template/free_space_template.png")) {
 			loader = new ModelDefinitionLoader(Image.loadFrom(is), PlayerProfile::create);
@@ -103,6 +105,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		});
 		netHandler.setGetClient(() -> MinecraftClient.getInstance().player);
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).networkHandler);
+		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
 	}
 
 	public void playerRenderPre(AbstractClientPlayerEntity player, VertexConsumerProvider buffer) {

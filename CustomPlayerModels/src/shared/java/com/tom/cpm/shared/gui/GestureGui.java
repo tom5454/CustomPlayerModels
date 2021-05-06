@@ -24,6 +24,7 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.Log;
 
 public class GestureGui extends Frame {
 	private GestureButton hoveredBtn;
@@ -70,7 +71,7 @@ public class GestureGui extends Frame {
 	@Override
 	public void initFrame(int width, int height) {
 		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
-		if(MinecraftObjectHolder.DEBUGGING)System.out.println(def);
+		Log.debug(def);
 		ServerStatus status = MinecraftClientAccess.get().getServerSideStatus();
 		if(status == ServerStatus.OFFLINE) {
 			String str = "How did you get here?";

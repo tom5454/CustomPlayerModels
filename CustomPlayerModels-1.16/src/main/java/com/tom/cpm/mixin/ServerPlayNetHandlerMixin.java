@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
 
-import com.tom.cpm.common.NetworkHandler;
+import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
@@ -31,7 +31,7 @@ public class ServerPlayNetHandlerMixin implements ServerNetH {
 	@Inject(at = @At("HEAD"), method = "processCustomPayload(Lnet/minecraft/network/play/client/CCustomPayloadPacket;)V", cancellable = true)
 	public void onProcessCustomPayload(CCustomPayloadPacket packet, CallbackInfo cbi) {
 		if(packet.getName().getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
-			NetworkHandler.handlePacket(packet, this, false);
+			ServerHandler.netHandler.receiveServer(packet.getName(), packet.getInternalData(), this);
 			cbi.cancel();
 		}
 	}

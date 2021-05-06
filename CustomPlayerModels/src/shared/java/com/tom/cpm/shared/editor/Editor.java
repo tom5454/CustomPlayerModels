@@ -63,6 +63,7 @@ import com.tom.cpm.shared.io.ProjectFile;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.TextureStitcher;
 
 public class Editor {
@@ -970,7 +971,7 @@ public class Editor {
 			description.icon = Image.loadFrom(new ByteArrayInputStream(ze));
 			if(description.icon.getWidth() != 256 || description.icon.getHeight() != 256) {
 				description.icon = null;
-				System.err.println("Illegal image size for model/template icon must be 256x256");
+				Log.error("Illegal image size for model/template icon must be 256x256");
 			}
 		}
 		ze = project.getEntry("list_icon.png");
@@ -982,7 +983,7 @@ public class Editor {
 					listIconProvider.getImage().getWidth() != listIconProvider.getImage().getHeight()) {
 				listIconProvider.free();
 				listIconProvider = null;
-				System.err.println("Illegal image size for list icon must be 32x32 or less and square");
+				Log.error("Illegal image size for list icon must be 32x32 or less and square");
 			}
 		}
 		restitchTexture();
@@ -1032,7 +1033,7 @@ public class Editor {
 				setSkinEdited.accept(true);
 				restitchTexture();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.error("Failed to load image", e);
 				frame.openPopup(new MessagePopup(frame.getGui(), frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
 			}
 		}
@@ -1045,6 +1046,7 @@ public class Editor {
 				tex.getImage().storeTo(f);
 				tex.file = f;
 			} catch (IOException e) {
+				Log.error("Failed to save image", e);
 				frame.openPopup(new MessagePopup(frame.getGui(), frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_save_failed", e.getLocalizedMessage())));
 			}
 		}

@@ -1,12 +1,14 @@
 package com.tom.cpm.common;
 
 import java.io.IOException;
+import java.util.function.Predicate;
 
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCustomPayload;
@@ -42,7 +44,7 @@ public class ServerHandler {
 				throw new RuntimeException(e);
 			}
 		});
-		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new SPacketCustomPayload(rl.toString(), pb)), (spe, rl, pb) -> NetworkHandler.sendToAllTrackingAndSelf(spe, new SPacketCustomPayload(rl.toString(), pb), ServerHandler::hasMod));
+		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new SPacketCustomPayload(rl.toString(), pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SPacketCustomPayload(rl.toString(), pb), ServerHandler::hasMod));
 		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getEntityId()));
 		netHandler.setNBTSetters(NBTTagCompound::setBoolean, NBTTagCompound::setByteArray, NBTTagCompound::setFloat);
 		netHandler.setNBTGetters(NBTTagCompound::getBoolean, NBTTagCompound::getByteArray, NBTTagCompound::getFloat);
@@ -77,5 +79,15 @@ public class ServerHandler {
 
 	public static boolean hasMod(EntityPlayerMP spe) {
 		return ((ServerNetH)spe.connection).cpm$hasMod();
+	}
+
+	public static void sendToAllTrackingAndSelf(EntityPlayerMP ent, Packet<?> pckt, Predicate<EntityPlayerMP> test) {
+		for (EntityPlayer pl : ((WorldServer)ent.world).getEntityTracker().getTrackingPlayers(ent)) {
+			EntityPlayerMP p = (EntityPlayerMP) pl;
+			if(test.test(p)) {
+				p.connection.sendPacket(pckt);
+			}
+		}
+		ent.connection.sendPacket(pckt);
 	}
 }

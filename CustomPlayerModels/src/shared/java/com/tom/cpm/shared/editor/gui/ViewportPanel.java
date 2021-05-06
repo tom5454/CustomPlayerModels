@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.util.Hand;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
@@ -43,7 +44,7 @@ public class ViewportPanel extends ViewportPanelBase {
 
 	@Override
 	public SkinType getSkinType() {
-		return editor.skinType;
+		return editor.skinType == SkinType.UNKNOWN ? SkinType.DEFAULT : editor.skinType;
 	}
 
 	@Override
@@ -74,5 +75,10 @@ public class ViewportPanel extends ViewportPanelBase {
 	@Override
 	public float getScale() {
 		return editor.applyScaling ? editor.scaling : 1;
+	}
+
+	@Override
+	public AnimationMode getAnimMode() {
+		return AnimationMode.PLAYER;
 	}
 }

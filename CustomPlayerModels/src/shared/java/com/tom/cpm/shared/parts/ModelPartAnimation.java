@@ -29,6 +29,7 @@ import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.util.Log;
 
 public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 	private Map<Integer, ResolvedData> parsedData = new HashMap<>();
@@ -195,7 +196,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.gid &= valMask;
 			rd.gid |= defMask;
 			parsedData.put(id, rd);
-			System.out.println(ea.filename + " " + Integer.toString(rd.gid, 2));
+			Log.debug(ea.filename + " " + Integer.toString(rd.gid, 2));
 			List<ModelElement> elems = ea.getComponentsFiltered();
 			List<AnimFrame> frames = ea.getFrames();
 			int fc = frames.size();

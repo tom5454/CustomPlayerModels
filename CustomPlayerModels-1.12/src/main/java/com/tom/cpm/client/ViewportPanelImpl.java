@@ -123,7 +123,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		ModelPlayer p = rp.getMainModel();
 		panel.preRender();
 		try {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, panel.getDefinition(), null);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, null, panel.getDefinition(), null, panel.getAnimMode());
 			if(panel.getDefinition().getSkinOverride() != null)panel.getDefinition().getSkinOverride().bind();
 			else rp.bindTexture(DefaultPlayerSkin.getDefaultSkin(mc.getSession().getProfile().getId()));
 			setupModel(p);

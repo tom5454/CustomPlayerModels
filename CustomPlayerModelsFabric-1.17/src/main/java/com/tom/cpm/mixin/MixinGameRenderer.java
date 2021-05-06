@@ -15,6 +15,7 @@ import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.ResourceManager;
 
 import com.tom.cpm.client.CustomRenderTypes;
+import com.tom.cpm.shared.util.Log;
 
 @Mixin(GameRenderer.class)
 public abstract class MixinGameRenderer {
@@ -27,8 +28,7 @@ public abstract class MixinGameRenderer {
 		try {
 			CustomRenderTypes.entityTranslucentCullNoLightShaderProgram = loadShader(resourceManager, "rendertype_entity_translucent_cull_no_light", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL);
 		} catch (IOException e) {
-			System.err.println("Failed to load cpm paint shader");
-			e.printStackTrace();
+			Log.error("Failed to load cpm paint shader", e);
 			CustomRenderTypes.entityTranslucentCullNoLightShaderProgram = null;
 		}
 	}

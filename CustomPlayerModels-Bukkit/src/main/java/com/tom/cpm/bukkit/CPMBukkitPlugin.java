@@ -22,6 +22,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.util.ILogger;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 
@@ -29,6 +30,7 @@ public class CPMBukkitPlugin extends JavaPlugin {
 	public ModConfigFile config;
 	private Network net;
 	public I18n i18n;
+	private BukkitLogger log;
 
 	@Override
 	public void onDisable() {
@@ -41,20 +43,21 @@ public class CPMBukkitPlugin extends JavaPlugin {
 	public void onEnable() {
 		super.onEnable();
 		getDataFolder().mkdirs();
+		log = new BukkitLogger(getLogger());
 		config = new ModConfigFile(new File(getDataFolder(), "cpm.json"));
 		File tr = new File(getDataFolder(), "cpm.lang");
 		if(tr.exists()) {
 			try {
 				i18n = I18n.loadLocaleData(new FileInputStream(tr));
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.warn("Failed to load localization from cpm.lang", e);
 			}
 		}
 		if(i18n == null) {
 			try {
 				i18n = I18n.loadLocaleData(CPMBukkitPlugin.class.getResourceAsStream("/assets/cpm/lang/en_us.lang"));
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("Failed to load localization from builtin lang file", e);
 				i18n = new I18n() {
 					@Override
 					public String format(String translateKey, Object... parameters) {
@@ -70,10 +73,16 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			public ModConfigFile getConfig() {
 				return config;
 			}
+
+			@Override
+			public ILogger getLogger() {
+				return log;
+			}
 		});
 		net = new Network(this);
 		net.register();
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new PlayerTracker(net), 0, 20);
+		log.info("Customizable Player Models Initialized");
 	}
 
 	@Override

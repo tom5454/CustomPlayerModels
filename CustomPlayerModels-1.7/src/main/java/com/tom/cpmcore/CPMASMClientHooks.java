@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 
@@ -17,8 +18,10 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.PlayerProfile;
 import com.tom.cpm.client.PlayerRenderManager;
-import com.tom.cpm.common.NetworkHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.network.NetH;
+
+import io.netty.buffer.Unpooled;
 
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
@@ -72,7 +75,7 @@ public class CPMASMClientHooks {
 
 	public static boolean onClientPacket(S3FPacketCustomPayload pckt, NetHandlerPlayClient handler) {
 		if(pckt.func_149169_c().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			NetworkHandler.handlePacket(pckt, handler, true);
+			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.func_149169_c()), new PacketBuffer(Unpooled.wrappedBuffer(pckt.func_149168_d())), (NetH) handler);
 			return true;
 		}
 		return false;

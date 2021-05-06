@@ -2,9 +2,13 @@ package com.tom.cpm;
 
 import java.io.File;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.minecraftforge.common.MinecraftForge;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.util.ILogger;
 import com.tom.cpm.common.CommandCPM;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
@@ -26,12 +30,16 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@SidedProxy(clientSide = "com.tom.cpm.client.ClientProxy", serverSide = "com.tom.cpm.CommonProxy")
 	public static CommonProxy proxy;
 
+	public static final Logger LOG = LogManager.getLogger("CPM");
+	public static final ILogger log = new Log4JLogger(LOG);
+
 	@EventHandler
 	public void init(FMLInitializationEvent evt) {
 		proxy.init();
 		ServerHandler sh = new ServerHandler();
 		MinecraftForge.EVENT_BUS.register(sh);
 		FMLCommonHandler.instance().bus().register(sh);
+		LOG.info("Customizable Player Models Initialized");
 	}
 
 	@EventHandler
@@ -56,5 +64,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public ModConfigFile getConfig() {
 		return cfg;
+	}
+
+	@Override
+	public ILogger getLogger() {
+		return log;
 	}
 }

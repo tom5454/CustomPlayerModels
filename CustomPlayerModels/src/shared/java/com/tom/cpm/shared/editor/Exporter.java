@@ -60,6 +60,7 @@ import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartTemplate;
 import com.tom.cpm.shared.parts.ModelPartUUIDLockout;
 import com.tom.cpm.shared.template.Template;
+import com.tom.cpm.shared.util.Log;
 
 public class Exporter {
 	public static final String TEMP_MODEL = ".temp.cpmmodel";
@@ -102,12 +103,12 @@ public class Exporter {
 				cos.close();
 			}
 			String b64 = Base64.getEncoder().encodeToString(baos.toByteArray());
-			System.out.println(b64);
+			Log.info(b64);
 			b64Out.accept(b64);
 		} catch (ExportException ex) {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			Log.error("Error while exporting", ex);
 		}
 	}
 
@@ -200,7 +201,7 @@ public class Exporter {
 			}
 		}
 		def.setOtherParts(otherParts);
-		if(MinecraftObjectHolder.DEBUGGING)System.out.println(def);
+		if(MinecraftObjectHolder.DEBUGGING)Log.info(def);
 		return def;
 	}
 
@@ -231,7 +232,7 @@ public class Exporter {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 			return false;
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			Log.error("Error while exporting", ex);
 			return false;
 		}
 	}
@@ -260,7 +261,7 @@ public class Exporter {
 			} catch (ExportException ex) {
 				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", ex.getMessage())));
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				Log.error("Error while exporting", ex);
 			}
 		});
 	}
@@ -323,7 +324,7 @@ public class Exporter {
 		} catch (ExportException ex) {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			Log.error("Error while exporting", ex);
 		}
 	}
 
@@ -370,7 +371,7 @@ public class Exporter {
 
 	private static void handleGistOverflow(byte[] data, Consumer<Link> linkC, EditorGui gui) {
 		String b64 = Base64.getEncoder().encodeToString(data);
-		System.out.println(b64);
+		Log.info(b64);
 		gui.openPopup(new CreateGistPopup(gui, gui.getGui(), "skinOverflow", b64, linkC));
 	}
 
@@ -482,7 +483,7 @@ public class Exporter {
 			} catch (ExportException ex) {
 				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				Log.error("Error while exporting", ex);
 			}
 			return false;
 		}

@@ -1,10 +1,13 @@
 package com.tom.cpm.common;
 
+import java.util.function.Predicate;
+
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.MessageType;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
@@ -20,6 +23,8 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
 	public static NetHandler<Identifier, CompoundTag, ServerPlayerEntity, PacketByteBuf, ServerPlayNetworkHandler> netHandler;
@@ -31,7 +36,7 @@ public class ServerHandler {
 		netHandler.setIsDedicatedServer(p -> p.getServer().isDedicated());
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUuid);
 		netHandler.setWriteCompound(PacketByteBuf::writeCompoundTag, PacketByteBuf::readCompoundTag);
-		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), (spe, rl, pb) -> NetworkHandler.sendToAllTrackingAndSelf(spe, new CustomPayloadS2CPacket(rl, pb), ServerHandler::hasMod, null));
+		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new CustomPayloadS2CPacket(rl, pb), ServerHandler::hasMod, null));
 		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getEntityId()));
 		netHandler.setNBTSetters(CompoundTag::putBoolean, CompoundTag::putByteArray, CompoundTag::putFloat);
 		netHandler.setNBTGetters(CompoundTag::getBoolean, CompoundTag::getByteArray, CompoundTag::getFloat);
@@ -74,5 +79,15 @@ public class ServerHandler {
 
 	public static boolean hasMod(ServerPlayerEntity spe) {
 		return ((NetH)spe.networkHandler).cpm$hasMod();
+	}
+
+	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, Packet<?> pckt, Predicate<ServerPlayerEntity> test, GenericFutureListener<? extends Future<? super Void>> future) {
+		EntityTracker tr = ((ServerWorld)ent.world).getChunkManager().threadedAnvilChunkStorage.entityTrackers.get(ent.getEntityId());
+		for (ServerPlayerEntity p : tr.playersTracking) {
+			if(test.test(p)) {
+				p.networkHandler.sendPacket(pckt, future);
+			}
+		}
+		ent.networkHandler.sendPacket(pckt, future);
 	}
 }
