@@ -63,4 +63,8 @@ public class ModelFile {
 	public String getFileName() {
 		return fname;
 	}
+
+	public boolean convertable() {
+		return dataBlock.length <= 2048;
+	}
 }

@@ -1,7 +1,5 @@
 package com.tom.cpm.client;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -30,14 +28,11 @@ import net.minecraft.util.Identifier;
 
 import com.mojang.authlib.GameProfile;
 
-import com.tom.cpl.util.Image;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
@@ -47,7 +42,6 @@ import io.netty.buffer.Unpooled;
 
 public class CustomPlayerModelsClient implements ClientModInitializer {
 	public static MinecraftObject mc;
-	private ModelDefinitionLoader loader;
 	public static CustomPlayerModelsClient INSTANCE;
 	public static boolean optifineLoaded;
 	private RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
@@ -57,14 +51,8 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Init started");
 		INSTANCE = this;
-		try(InputStream is = CustomPlayerModelsClient.class.getResourceAsStream("/assets/cpm/textures/template/free_space_template.png")) {
-			loader = new ModelDefinitionLoader(Image.loadFrom(is), PlayerProfile::create);
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to load template", e);
-		}
-		mc = new MinecraftObject(MinecraftClient.getInstance(), loader);
+		mc = new MinecraftObject(MinecraftClient.getInstance());
 		optifineLoaded = OFDetector.doApply();
-		MinecraftObjectHolder.setClientObject(mc);
 		ClientTickEvents.START_CLIENT_TICK.register(cl -> {
 			if(!cl.isPaused())
 				mc.getPlayerRenderManager().getAnimationEngine().tick();
@@ -88,7 +76,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 				}
 			}
 		});
-		manager = new RenderManager<>(mc.getPlayerRenderManager(), loader, PlayerEntity::getGameProfile);
+		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerEntity::getGameProfile);
 		netHandler = new NetHandler<>(Identifier::new);
 		netHandler.setNewNbt(CompoundTag::new);
 		netHandler.setNewPacketBuffer(() -> new PacketByteBuf(Unpooled.buffer()));
@@ -149,6 +137,6 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void onLogout() {
-		loader.clearServerData();
+		mc.getDefinitionLoader().clearServerData();
 	}
 }

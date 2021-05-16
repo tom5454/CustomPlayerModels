@@ -1,91 +1,85 @@
 package com.tom.cpm.shared.util;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
-
 import com.tom.cpl.util.Image;
 
 public class LegacySkinConverter {
-	private int[] imageData;
-	private int imageWidth;
-	private int imageHeight;
 
-	public Image convertSkin(Image image) {
-		if (image == null) {
+	public static Image processLegacySkin(Image nativeImageIn) {
+		if (nativeImageIn == null) {
 			return null;
 		} else {
-			this.imageWidth = 64;
-			this.imageHeight = 64;
-			Image img;
-			boolean flag = image.getHeight() == 32;
-			if(flag) {
-				BufferedImage bufferedimage = new BufferedImage(this.imageWidth, this.imageHeight, 2);
-				Graphics graphics = bufferedimage.getGraphics();
-				graphics.drawImage(image.toBufferedImage(), 0, 0, (ImageObserver)null);
-
-				graphics.setColor(new Color(0, 0, 0, 0));
-				graphics.fillRect(0, 32, 64, 32);
-				graphics.drawImage(bufferedimage, 24, 48, 20, 52, 4, 16, 8, 20, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 28, 48, 24, 52, 8, 16, 12, 20, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 20, 52, 16, 64, 8, 20, 12, 32, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 24, 52, 20, 64, 4, 20, 8, 32, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 28, 52, 24, 64, 0, 20, 4, 32, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 32, 52, 28, 64, 12, 20, 16, 32, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 40, 48, 36, 52, 44, 16, 48, 20, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 44, 48, 40, 52, 48, 16, 52, 20, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 36, 52, 32, 64, 48, 20, 52, 32, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 40, 52, 36, 64, 44, 20, 48, 32, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 44, 52, 40, 64, 40, 20, 44, 32, (ImageObserver)null);
-				graphics.drawImage(bufferedimage, 48, 52, 44, 64, 52, 20, 56, 32, (ImageObserver)null);
-				graphics.dispose();
-
-				img = new Image(bufferedimage);
-			} else {
-				img = new Image(64, 64);
-				img.draw(image);
-			}
-
-			this.imageData = img.getData();
-			this.setAreaOpaque(0, 0, 32, 16);
-
+			boolean flag = nativeImageIn.getHeight() == 32;
 			if (flag) {
-				this.setAreaTransparent(32, 0, 64, 32);
+				Image nativeimage = new Image(64, 64);
+				nativeimage.draw(nativeImageIn);
+				nativeImageIn = nativeimage;
+				fillAreaRGBA(nativeimage, 0, 32, 64, 32, 0);
+				copyAreaRGBA(nativeimage, 4, 16, 16, 32, 4, 4, true, false);
+				copyAreaRGBA(nativeimage, 8, 16, 16, 32, 4, 4, true, false);
+				copyAreaRGBA(nativeimage, 0, 20, 24, 32, 4, 12, true, false);
+				copyAreaRGBA(nativeimage, 4, 20, 16, 32, 4, 12, true, false);
+				copyAreaRGBA(nativeimage, 8, 20, 8, 32, 4, 12, true, false);
+				copyAreaRGBA(nativeimage, 12, 20, 16, 32, 4, 12, true, false);
+				copyAreaRGBA(nativeimage, 44, 16, -8, 32, 4, 4, true, false);
+				copyAreaRGBA(nativeimage, 48, 16, -8, 32, 4, 4, true, false);
+				copyAreaRGBA(nativeimage, 40, 20, 0, 32, 4, 12, true, false);
+				copyAreaRGBA(nativeimage, 44, 20, -8, 32, 4, 12, true, false);
+				copyAreaRGBA(nativeimage, 48, 20, -16, 32, 4, 12, true, false);
+				copyAreaRGBA(nativeimage, 52, 20, -8, 32, 4, 12, true, false);
 			}
 
-			this.setAreaOpaque(0, 16, 64, 32);
-			this.setAreaOpaque(16, 48, 48, 64);
+			setAreaOpaque(nativeImageIn, 0, 0, 32, 16);
+			if (flag) {
+				setAreaTransparent(nativeImageIn, 32, 0, 64, 32);
+			}
 
-			return img;
+			setAreaOpaque(nativeImageIn, 0, 16, 64, 32);
+			setAreaOpaque(nativeImageIn, 16, 48, 48, 64);
+			return nativeImageIn;
 		}
 	}
 
-	private void setAreaTransparent(int x, int y, int width, int height) {
-		for (int i = x; i < width; ++i) {
-			for (int j = y; j < height; ++j) {
-				int k = this.imageData[i + j * this.imageWidth];
-
+	private static void setAreaTransparent(Image image, int x, int y, int width, int height) {
+		for(int i = x; i < width; ++i) {
+			for(int j = y; j < height; ++j) {
+				int k = image.getRGB(i, j);
 				if ((k >> 24 & 255) < 128) {
 					return;
 				}
 			}
 		}
 
-		for (int l = x; l < width; ++l) {
-			for (int i1 = y; i1 < height; ++i1) {
-				this.imageData[l + i1 * this.imageWidth] &= 16777215;
+		for(int l = x; l < width; ++l) {
+			for(int i1 = y; i1 < height; ++i1) {
+				image.setRGB(l, i1, image.getRGB(l, i1) & 16777215);
+			}
+		}
+
+	}
+
+	private static void setAreaOpaque(Image image, int x, int y, int width, int height) {
+		for(int i = x; i < width; ++i) {
+			for(int j = y; j < height; ++j) {
+				image.setRGB(i, j, image.getRGB(i, j) | -16777216);
 			}
 		}
 	}
 
-	/**
-	 * Makes the given area of the image opaque
-	 */
-	private void setAreaOpaque(int x, int y, int width, int height) {
-		for (int i = x; i < width; ++i) {
-			for (int j = y; j < height; ++j) {
-				this.imageData[i + j * this.imageWidth] |= -16777216;
+	private static void fillAreaRGBA(Image image, int x, int y, int widthIn, int heightIn, int value) {
+		for(int i = y; i < y + heightIn; ++i) {
+			for(int j = x; j < x + widthIn; ++j) {
+				image.setRGB(j, i, value);
+			}
+		}
+	}
+
+	private static void copyAreaRGBA(Image image, int xFrom, int yFrom, int xToDelta, int yToDelta, int widthIn, int heightIn, boolean mirrorX, boolean mirrorY) {
+		for(int i = 0; i < heightIn; ++i) {
+			for(int j = 0; j < widthIn; ++j) {
+				int k = mirrorX ? widthIn - 1 - j : j;
+				int l = mirrorY ? heightIn - 1 - i : i;
+				int i1 = image.getRGB(xFrom + j, yFrom + i);
+				image.setRGB(xFrom + xToDelta + k, yFrom + yToDelta + l, i1);
 			}
 		}
 	}

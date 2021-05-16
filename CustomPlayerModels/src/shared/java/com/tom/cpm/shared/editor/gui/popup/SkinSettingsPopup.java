@@ -3,6 +3,8 @@ package com.tom.cpm.shared.editor.gui.popup;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.elements.FileChooserPopup;
+import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
@@ -32,10 +34,10 @@ public class SkinSettingsPopup extends PopupPanel {
 		EditorTexture tex = editor.getTextureProvider();
 
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.openSkin"), () -> {
-			FileChooserGui fc = new FileChooserGui(editor.frame);
+			FileChooserPopup fc = new FileChooserPopup(editor.frame);
 			fc.setTitle(gui.i18nFormat("label.cpm.loadSkin"));
 			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
-			fc.setFilter((f, n) -> n.endsWith(".png") && !f.isDirectory());
+			fc.setFilter(new FileFilter("png"));
 			fc.setAccept(e::loadSkin);
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
 			e.openPopup(fc);
@@ -46,10 +48,10 @@ public class SkinSettingsPopup extends PopupPanel {
 
 		Button saveSkin = new Button(gui, gui.i18nFormat("button.cpm.saveSkin"), () -> {
 			if(gui.isShiftDown() || tex.file == null) {
-				FileChooserGui fc = new FileChooserGui(editor.frame);
+				FileChooserPopup fc = new FileChooserPopup(editor.frame);
 				fc.setTitle(gui.i18nFormat("label.cpm.saveSkin"));
 				fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
-				fc.setFilter((f, n) -> n.endsWith(".png") && !f.isDirectory());
+				fc.setFilter(new FileFilter("png"));
 				fc.setSaveDialog(true);
 				fc.setExtAdder(f -> f + ".png");
 				fc.setButtonText(gui.i18nFormat("button.cpm.ok"));

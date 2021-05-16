@@ -46,16 +46,15 @@ public class ModelDefinitionLoader {
 		public Player<?, ?> load(Object key) throws Exception {
 			Player<?, ?> player = playerFactory.apply(key);
 			if(serverModels.containsKey(key)) {
-				player.setModelDefinition(loadModel(serverModels.get(key), player));
+				player.setModelDefinition(CompletableFuture.completedFuture(loadModel(serverModels.get(key), player)));
 			} else {
-				player.loadSkin().thenRun(() -> {
-					CompletableFuture<Image> skinF = player.getSkin();
-					skinF.thenAccept(skin -> {
-						if(skin != null && player.getModelDefinition() == null) {
-							player.setModelDefinition(loadModel(skin, player));
-						}
-					});
-				});
+				player.setModelDefinition(player.loadSkin().thenCompose(v -> player.getSkin()).thenApply(skin -> {
+					if(skin != null && player.getModelDefinition() == null) {
+						return loadModel(skin, player);
+					} else {
+						return null;
+					}
+				}));
 			}
 			return player;
 		}
@@ -70,8 +69,12 @@ public class ModelDefinitionLoader {
 	private Image template;
 	public static final int HEADER = 0x53;
 
-	public ModelDefinitionLoader(Image template, Function<Object, Player<?, ?>> playerFactory) {
-		this.template = template;
+	public ModelDefinitionLoader(Function<Object, Player<?, ?>> playerFactory) {
+		try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/free_space_template.png")) {
+			this.template = Image.loadFrom(is);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to load template", e);
+		}
 		this.playerFactory = playerFactory;
 	}
 
@@ -164,7 +167,7 @@ public class ModelDefinitionLoader {
 			cache.invalidate(forPlayer);
 		} else {
 			Player<?, ?> player = loadPlayer(forPlayer);
-			player.setModelDefinition(loadModel(data, player));
+			player.setModelDefinition(CompletableFuture.completedFuture(loadModel(data, player)));
 			player.forcedSkin = forced;
 			serverModels.put(forPlayer, data);
 		}

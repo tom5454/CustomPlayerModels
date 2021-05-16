@@ -1,4 +1,4 @@
-package com.tom.cpm.shared.editor.gui.popup;
+package com.tom.cpl.gui.elements;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,16 +7,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.tom.cpl.gui.Frame;
-import com.tom.cpl.gui.elements.Button;
-import com.tom.cpl.gui.elements.ConfirmPopup;
-import com.tom.cpl.gui.elements.GuiElement;
-import com.tom.cpl.gui.elements.Label;
-import com.tom.cpl.gui.elements.PopupPanel;
-import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 
-public class FileChooserGui extends PopupPanel {
+public class FileChooserPopup extends PopupPanel {
 	private File currDir;
 	private File selected;
 	private TextField path, name;
@@ -29,7 +23,7 @@ public class FileChooserGui extends PopupPanel {
 	private Label fileDescLabel;
 	private String title;
 
-	public FileChooserGui(Frame frame) {
+	public FileChooserPopup(Frame frame) {
 		super(frame.getGui());
 		setBounds(new Box(0, 0, 210, 210));
 		fileDescLabel = new Label(gui, "");
@@ -107,8 +101,20 @@ public class FileChooserGui extends PopupPanel {
 		files.refresh();
 	}
 
+	public File getCurrentDirectory() {
+		return currDir;
+	}
+
 	public File getSelected() {
 		return selected;
+	}
+
+	public void setSelected(File sel) {
+		selected = sel;
+		this.currDir = sel.getParentFile();
+		name.setText(sel.getName());
+		path.setText(currDir.getAbsolutePath());
+		files.refresh();
 	}
 
 	public void setAccept(Runnable accept) {
@@ -236,5 +242,44 @@ public class FileChooserGui extends PopupPanel {
 	@Override
 	public String getTitle() {
 		return title;
+	}
+
+	public String getDesc() {
+		return fileDescLabel.getText();
+	}
+
+	public BiPredicate<File, String> getFilter() {
+		return filter;
+	}
+
+	public static class FileFilter implements BiPredicate<File, String> {
+		private boolean folder;
+		private String ext;
+		public FileFilter(String ext) {
+			this.ext = ext;
+		}
+
+		public FileFilter(boolean allowFolder) {
+			this.folder = allowFolder;
+		}
+
+		@Override
+		public boolean test(File f, String n) {
+			if(ext != null && !n.endsWith("." + ext))return false;
+			if(folder != f.isDirectory())return false;
+			return true;
+		}
+
+		public String getExt() {
+			return ext;
+		}
+
+		public boolean isFolder() {
+			return folder;
+		}
+	}
+
+	public boolean isSaveDialog() {
+		return saveDialog;
 	}
 }

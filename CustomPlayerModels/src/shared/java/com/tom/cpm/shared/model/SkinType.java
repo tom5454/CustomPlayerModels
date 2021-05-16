@@ -1,18 +1,19 @@
 package com.tom.cpm.shared.model;
 
 public enum SkinType {
-	SLIM(0),
-	DEFAULT(1),
-	UNKNOWN(-1),
+	SLIM(0, "Slim"),
+	DEFAULT(1, "Classic"),
+	UNKNOWN(-1, "Classic"),
 	;
 
 	private final int channel;
-	private final String lowerName;
+	private final String lowerName, apiName;
 	public static final SkinType[] VALUES = values();
 
-	private SkinType(int channel) {
+	private SkinType(int channel, String apiName) {
 		this.channel = channel;
 		lowerName = name().toLowerCase();
+		this.apiName = apiName;
 	}
 
 	public static SkinType get(String name) {
@@ -30,5 +31,9 @@ public enum SkinType {
 
 	public String getName() {
 		return lowerName;
+	}
+
+	public String getApiName() {
+		return apiName;
 	}
 }

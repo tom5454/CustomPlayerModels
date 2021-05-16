@@ -19,13 +19,17 @@ import net.minecraft.util.ResourceLocation;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.util.AWTImageIO;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ImageIO.IImageIO;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.util.MojangSkinsAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -36,10 +40,11 @@ public class MinecraftObject implements MinecraftClientAccess {
 	private final Minecraft mc;
 	private final PlayerRenderManager prm;
 	private final ModelDefinitionLoader loader;
-	public MinecraftObject(Minecraft mc, ModelDefinitionLoader loader) {
+	public MinecraftObject(Minecraft mc) {
 		this.mc = mc;
+		MinecraftObjectHolder.setClientObject(this);
+		loader = new ModelDefinitionLoader(PlayerProfile::create);
 		prm = new PlayerRenderManager(loader);
-		this.loader = loader;
 	}
 
 	@Override
@@ -86,7 +91,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 		@Override
 		public void load(Image image) {
 			this.deleteGlTexture();
-			TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), image.toBufferedImage(), false, false);
+			TextureUtil.uploadTextureImageAllocate(this.getGlTextureId(), AWTImageIO.toBufferedImage(image), false, false);
 		}
 
 		@Override
@@ -156,5 +161,16 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public NetHandler<?, ?, ?, ?, ?> getNetHandler() {
 		return ClientProxy.INSTANCE.netHandler;
+	}
+
+	@Override
+	public IImageIO getImageIO() {
+		return new AWTImageIO();
+	}
+
+	@Override
+	public void applySkin(Image skin, SkinType type) throws IOException {
+		MojangSkinsAPI.uploadSkin(mc.getSession().func_148256_e().getId(), mc.getSession().getToken(), type, skin);
+		MojangSkinsAPI.clearYggdrasilCache(mc.func_152347_ac());
 	}
 }

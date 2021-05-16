@@ -229,7 +229,9 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					rd.show[i] = new boolean[fc];
 					for (int j = 0; j < frames.size(); j++) {
 						AnimFrame frm = frames.get(j);
-						rd.show[i][j] = frm.getData(elem).isVisible();
+						IElem dt = frm.getData(elem);
+						if(dt == null)dt = elem;
+						rd.show[i][j] = dt.isVisible();
 					}
 				}
 			}

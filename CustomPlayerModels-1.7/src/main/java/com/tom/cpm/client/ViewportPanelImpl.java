@@ -2,8 +2,6 @@ package com.tom.cpm.client;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
@@ -207,7 +205,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		int height = (int) (multiplierY * size.y);
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(width * height * 3);
 		GL11.glReadPixels((int) (multiplierX * renderPos.x), (int) (multiplierY * renderPos.y), width, height, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
-		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Image img = new Image(width, height);
 		for(int y = 0;y<height;y++) {
 			for(int x = 0;x<width;x++) {
 				float r = buffer.get((x + y * width) * 3);
@@ -217,11 +215,9 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 				img.setRGB(x, y, color);
 			}
 		}
-		BufferedImage rImg = new BufferedImage(size.x, size.y, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D gr = rImg.createGraphics();
-		gr.drawImage(img, 0, 0, size.x, size.y, null);
-		gr.dispose();
-		return new Image(rImg);
+		Image rImg = new Image(size.x, size.y);
+		rImg.draw(img, 0, 0, size.x, size.y);
+		return rImg;
 	}
 
 	@Override

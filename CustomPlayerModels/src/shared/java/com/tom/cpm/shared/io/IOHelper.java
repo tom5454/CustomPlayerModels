@@ -11,18 +11,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Iterator;
 import java.util.UUID;
 import java.util.function.Function;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ImageIO;
 
 public class IOHelper implements DataInput, DataOutput, Closeable {
 	private static final int DIV = Short.MAX_VALUE / Vec3f.MAX_POS;
@@ -458,19 +454,9 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		public ImageBlock(IOHelper io) throws IOException {
 			buf = io.readNextBlock();
 			if(buf.dataIn.length != 0) {
-				try(ImageInputStream in = ImageIO.createImageInputStream(buf.getDin())){
-					final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-					if (readers.hasNext()) {
-						ImageReader reader = readers.next();
-						try {
-							reader.setInput(in);
-							w = reader.getWidth(0);
-							h = reader.getHeight(0);
-						} finally {
-							reader.dispose();
-						}
-					}
-				}
+				Vec2i size = ImageIO.getSize(buf.getDin());
+				w = size.x;
+				h = size.y;
 				buf.reset();
 			}
 		}

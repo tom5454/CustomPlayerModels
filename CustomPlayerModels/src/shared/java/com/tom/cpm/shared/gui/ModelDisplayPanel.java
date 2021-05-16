@@ -5,10 +5,10 @@ import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.SkinType;
 
-public class SkinDisplayPanel extends ViewportPanelBase {
-	private SkinsPanel skins;
+public class ModelDisplayPanel extends ViewportPanelBase {
+	private IModelDisplayPanel skins;
 
-	public SkinDisplayPanel(IGui gui, SkinsPanel skins) {
+	public ModelDisplayPanel(IGui gui, IModelDisplayPanel skins) {
 		super(gui);
 		this.skins = skins;
 	}
@@ -18,8 +18,9 @@ public class SkinDisplayPanel extends ViewportPanelBase {
 		Box bounds = getBounds();
 		gui.drawBox(0, 0, bounds.w, bounds.h, 0xff000000);
 		gui.drawBox(1, 1, bounds.w-2, bounds.h-2, 0xff555555);
+		if(!skins.doRender())return;
 		if(skins.getSelectedDefinition() == null) {
-			//TODO loading text
+			gui.drawText(5, 5, gui.i18nFormat("label.cpm.loading"), gui.getColors().label_text_color);
 		} else {
 			nat.renderSetup();
 			nat.render(partialTicks);
@@ -29,7 +30,7 @@ public class SkinDisplayPanel extends ViewportPanelBase {
 
 	@Override
 	public ViewportCamera getCamera() {
-		return skins.camera;
+		return skins.getCamera();
 	}
 
 	@Override
@@ -55,5 +56,12 @@ public class SkinDisplayPanel extends ViewportPanelBase {
 	@Override
 	public boolean applyLighting() {
 		return true;
+	}
+
+	public interface IModelDisplayPanel {
+		ModelDefinition getSelectedDefinition();
+		ViewportCamera getCamera();
+		void preRender();
+		boolean doRender();
 	}
 }

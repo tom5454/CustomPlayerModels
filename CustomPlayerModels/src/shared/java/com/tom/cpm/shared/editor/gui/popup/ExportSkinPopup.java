@@ -1,7 +1,6 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -9,14 +8,17 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.elements.FileChooserPopup;
+import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
@@ -25,6 +27,7 @@ import com.tom.cpm.shared.editor.Exporter;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
+import com.tom.cpm.shared.gui.SelectSkinPopup;
 import com.tom.cpm.shared.util.Log;
 
 public abstract class ExportSkinPopup extends PopupPanel {
@@ -93,11 +96,11 @@ public abstract class ExportSkinPopup extends PopupPanel {
 
 	private static class Skin extends ExportSkinPopup {
 		private EditorTexture vanillaSkin;
-		private Button okDef;
+		private Button okDef, okUpload;
 		private File selFile;
 		private Checkbox forceLinkFile, chbxClone, chbxUUIDLock;
 		private Link defLink;
-		private boolean gist;
+		private boolean gist, upload;
 
 		protected Skin(EditorGui e) {
 			super(e, 320, 235, ExportMode.SKIN);
@@ -111,26 +114,14 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			addElement(encSettings);
 
 			Button changeVanillaSkin = new Button(gui, gui.i18nFormat("button.cpm.change_vanilla_skin"), () -> {
-				FileChooserGui fc = new FileChooserGui(editor.frame);
-				fc.setTitle(gui.i18nFormat("button.cpm.change_vanilla_skin"));
-				fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
-				fc.setFilter((f, n) -> n.endsWith(".png") && !f.isDirectory());
-				fc.setAccept(f -> {
-					try {
-						Image img = Image.loadFrom(f);
-						if(img.getWidth() != 64 || img.getHeight() != 64) {
-							e.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.vanillaSkinSize")));
-							return;
-						}
-						editor.vanillaSkin = img;
-						vanillaSkin.setImage(img);
-						detectDef();
-					} catch (IOException ex) {
-						e.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.img_load_failed", ex.getLocalizedMessage())));
-					}
+				SelectSkinPopup ssp = new SelectSkinPopup(editor.frame, editor.skinType, (type, img) -> {
+					editor.vanillaSkin = img;
+					vanillaSkin.setImage(img);
+					detectDef();
 				});
-				fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
-				e.openPopup(fc);
+				ssp.setOnClosed(() -> editor.displayViewport.accept(true));
+				editor.frame.openPopup(ssp);
+				editor.displayViewport.accept(false);
 			});
 			changeVanillaSkin.setBounds(new Box(5, 55, 135, 20));
 			addElement(changeVanillaSkin);
@@ -153,10 +144,10 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			addElement(exportName);
 
 			Button setOut = new Button(gui, "...", () -> {
-				FileChooserGui fc = new FileChooserGui(e);
+				FileChooserPopup fc = new FileChooserPopup(e);
 				fc.setTitle(gui.i18nFormat("label.cpm.exportSkin"));
 				fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
-				fc.setFilter((f, n) -> n.endsWith(".png") && !f.isDirectory());
+				fc.setFilter(new FileFilter("png"));
 				fc.setSaveDialog(true);
 				fc.setExtAdder(n -> n + ".png");
 				fc.setAccept(f -> {
@@ -210,6 +201,17 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			okDef.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export_def")));
 			okDef.setBounds(new Box(90, 210, 80, 20));
 			addElement(okDef);
+
+			okUpload = new Button(gui, gui.i18nFormat("button.cpm.export.skin.exportApply"), () -> {
+				upload = true;
+				close();
+				export();
+			});
+			okUpload.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skin.exportApply")));
+			okUpload.setBounds(new Box(175, 210, 100, 20));
+			okUpload.setEnabled(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.OFFLINE);
+			addElement(okUpload);
+
 			ok.setEnabled(false);
 			detectDef();
 		}
@@ -240,28 +242,38 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		@Override
 		protected void export0() {
 			Editor e = editorGui.getEditor();
-			if(gist) {
-				if(e.description == null && (chbxClone.isSelected() || chbxUUIDLock.isSelected())) {
-					e.description = new ModelDescription();
+			if(editorGui.getEditor().templateSettings != null) {
+				editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
+				return;
+			}
+			if(e.description == null && (chbxClone.isSelected() || chbxUUIDLock.isSelected())) {
+				e.description = new ModelDescription();
+				e.markDirty();
+			}
+			if(e.description != null) {
+				CopyProtection cp = chbxUUIDLock.isSelected() ? CopyProtection.UUID_LOCK : chbxClone.isSelected() ? CopyProtection.CLONEABLE : CopyProtection.NORMAL;
+				if(e.description.copyProtection != cp) {
+					e.description.copyProtection = cp;
 					e.markDirty();
 				}
-				if(e.description != null) {
-					CopyProtection cp = chbxUUIDLock.isSelected() ? CopyProtection.UUID_LOCK : chbxClone.isSelected() ? CopyProtection.CLONEABLE : CopyProtection.NORMAL;
-					if(e.description.copyProtection != cp) {
-						e.description.copyProtection = cp;
-						e.markDirty();
-					}
-				}
-				if(editorGui.getEditor().templateSettings != null) {
-					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
-					return;
-				}
+			}
+			if(gist) {
 				Exporter.exportGistUpdate(e, editorGui, gist -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "skin_update", gist)));
+			} else if(upload) {
+				editorGui.openPopup(new ConfirmPopup(editorGui, gui.i18nFormat("label.cpm.export.upload"), gui.i18nFormat("label.cpm.export.upload.desc"), () -> {
+					Exporter.exportSkin(e, editorGui, img -> new ProcessPopup<>(editorGui, gui.i18nFormat("label.cpm.uploading"), gui.i18nFormat("label.cpm.uploading.skin"),
+							() -> {
+								MinecraftClientAccess.get().applySkin(img, e.skinType);
+								return null;
+							}, v -> {
+								editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.skinUpload.success")));
+							}, exc -> {
+								if(exc == null)return;
+								Log.warn("Failed to apply skin", exc);
+								editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", exc.getMessage())));
+							}).start(), forceLinkFile.isSelected());
+				}, null));
 			} else {
-				if(editorGui.getEditor().templateSettings != null) {
-					editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
-					return;
-				}
 				Exporter.exportSkin(e, editorGui, selFile, forceLinkFile.isSelected());
 			}
 		}
@@ -373,6 +385,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 	private static class Model extends ExportSkinPopup {
 		private TextField nameField, descField;
 		private EditorTexture icon;
+		private Checkbox skinCompat, chbxClone, chbxUUIDLock;
 
 		protected Model(EditorGui e) {
 			super(e, 320, 260, ExportMode.MODEL);
@@ -380,19 +393,19 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			Editor editor = e.getEditor();
 
 			Label nameLbl = new Label(gui, gui.i18nFormat("label.cpm.name"));
-			nameLbl.setBounds(new Box(5, 55, 130, 10));
+			nameLbl.setBounds(new Box(5, 35, 130, 10));
 			addElement(nameLbl);
 
 			nameField = new TextField(gui);
-			nameField.setBounds(new Box(5, 65, 130, 20));
+			nameField.setBounds(new Box(5, 45, 130, 20));
 			addElement(nameField);
 
 			Label descLbl = new Label(gui, gui.i18nFormat("label.cpm.desc"));
-			descLbl.setBounds(new Box(5, 90, 130, 10));
+			descLbl.setBounds(new Box(5, 70, 130, 10));
 			addElement(descLbl);
 
 			descField = new TextField(gui);
-			descField.setBounds(new Box(5, 100, 130, 20));
+			descField.setBounds(new Box(5, 80, 130, 20));
 			addElement(descField);
 
 			icon = new EditorTexture();
@@ -405,8 +418,45 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			}
 
 			Button setIcon = new Button(gui, gui.i18nFormat("button.cpm.setIcon"), () -> openScreenshot(e, icon, this));
-			setIcon.setBounds(new Box(5, 125, 100, 20));
+			setIcon.setBounds(new Box(5, 105, 100, 20));
 			addElement(setIcon);
+
+			skinCompat = new Checkbox(gui, gui.i18nFormat("label.cpm.export.skinCompat"));
+			skinCompat.setSelected(true);
+			skinCompat.setBounds(new Box(5, 130, 100, 20));
+			skinCompat.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skinCompat")));
+			addElement(skinCompat);
+			skinCompat.setAction(() -> skinCompat.setSelected(!skinCompat.isSelected()));
+
+			chbxClone = new Checkbox(gui, gui.i18nFormat("label.cpm.cloneable"));
+			chbxClone.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.cloneable")));
+			chbxClone.setBounds(new Box(5, 155, 60, 20));
+			chbxClone.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.CLONEABLE);
+			addElement(chbxClone);
+
+			chbxUUIDLock = new Checkbox(gui, gui.i18nFormat("label.cpm.uuidlock"));
+			chbxUUIDLock.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.uuidlock", MinecraftClientAccess.get().getClientPlayer().getUUID().toString())));
+			chbxUUIDLock.setBounds(new Box(5, 180, 60, 20));
+			chbxUUIDLock.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
+			addElement(chbxUUIDLock);
+
+			chbxClone.setAction(() -> {
+				if(!chbxClone.isSelected()) {
+					chbxUUIDLock.setSelected(false);
+					chbxClone.setSelected(true);
+				} else {
+					chbxClone.setSelected(false);
+				}
+			});
+
+			chbxUUIDLock.setAction(() -> {
+				if(!chbxUUIDLock.isSelected()) {
+					chbxUUIDLock.setSelected(true);
+					chbxClone.setSelected(false);
+				} else {
+					chbxUUIDLock.setSelected(false);
+				}
+			});
 		}
 
 		@Override
@@ -426,6 +476,11 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			if(!descChanged && !editor.description.desc.equals(descField.getText()))descChanged = true;
 			editor.description.name = nameField.getText();
 			editor.description.desc = descField.getText();
+			CopyProtection cp = chbxUUIDLock.isSelected() ? CopyProtection.UUID_LOCK : chbxClone.isSelected() ? CopyProtection.CLONEABLE : CopyProtection.NORMAL;
+			if(editor.description.copyProtection != cp) {
+				editor.description.copyProtection = cp;
+				descChanged = true;
+			}
 			if(descChanged)editor.markDirty();
 
 			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
@@ -434,10 +489,10 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			File selFile = new File(modelsDir, fileName);
 			if(selFile.exists()) {
 				editorGui.openPopup(new ConfirmPopup(editorGui, gui.i18nFormat("label.cpm.overwrite"), gui.i18nFormat("label.cpm.overwrite"),
-						() -> Exporter.exportModel(editor, editorGui, selFile, editor.description),
+						() -> Exporter.exportModel(editor, editorGui, selFile, editor.description, skinCompat.isSelected()),
 						null));
 			} else {
-				Exporter.exportModel(editor, editorGui, selFile, editor.description);
+				Exporter.exportModel(editor, editorGui, selFile, editor.description, skinCompat.isSelected());
 			}
 		}
 

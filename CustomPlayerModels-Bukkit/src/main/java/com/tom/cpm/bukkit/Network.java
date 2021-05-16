@@ -5,6 +5,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,15 +110,11 @@ public class Network implements PluginMessageListener, Listener {
 			netHandler.setSendPacket((pl, pck, dt) -> pl.owner.sendPluginMessage(plugin, pck, dt.array()), this::sendToAllTrackingAndSelf);
 			netHandler.setWritePlayerId((b, pl) -> writeVarInt(b, pl.getEntityId()));
 			netHandler.setNBTSetters(
-					(NBTSetter<Object, Boolean>) LambdaMetafactory.metafactory(lookup, "set",
-							MethodType.methodType(NBTSetter.class),
-							MethodType.methodType(void.class, Object.class, String.class, Object.class), setBool, setBool.type()).getTarget().invoke(),
+					(n, k, v) -> invoke(setBoolean, n, k, v),
 					(NBTSetter<Object, byte[]>) LambdaMetafactory.metafactory(lookup, "set",
 							MethodType.methodType(NBTSetter.class),
 							MethodType.methodType(void.class, Object.class, String.class, Object.class), setByteArr, setByteArr.type()).getTarget().invoke(),
-					(NBTSetter<Object, Float>) LambdaMetafactory.metafactory(lookup, "set",
-							MethodType.methodType(NBTSetter.class),
-							MethodType.methodType(void.class, Object.class, String.class, Object.class), setFlt, setFlt.type()).getTarget().invoke());
+					(n, k, v) -> invoke(setFloat, n, k, v));
 			netHandler.setNBTGetters(
 					(NBTGetter<Object, Boolean>) LambdaMetafactory.metafactory(lookup, "get",
 							MethodType.methodType(NBTGetter.class),
@@ -137,6 +134,14 @@ public class Network implements PluginMessageListener, Listener {
 			netHandler.setGetNet(this::getMetadata);
 			netHandler.setGetPlayer(n -> n.owner);
 		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Object invoke(Method m, Object obj, Object... args) {
+		try {
+			return m.invoke(obj, args);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 	}

@@ -5,7 +5,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,22 +46,11 @@ public class Util {
 		else return data;
 	}
 
-	public static MethodHandles.Lookup lookupTo(Class clazz){
-		try {
-			Constructor<MethodHandles.Lookup> lookupCons = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
-			lookupCons.setAccessible(true);
-			return lookupCons.newInstance(clazz);
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	public static <T> Supplier<T> constructor(Class<T> clazz) {
 		try {
 			Constructor<T> c = clazz.getConstructor();
 			c.setAccessible(true);
-			MethodHandles.Lookup lookup = Util.lookupTo(clazz);
+			MethodHandles.Lookup lookup = MethodHandles.publicLookup();
 			MethodHandle mh = lookup.unreflectConstructor(c);
 			Method im = Supplier.class.getDeclaredMethods()[0];
 			MethodType imt = MethodType.methodType(im.getReturnType(), im.getParameterTypes());
@@ -77,7 +65,7 @@ public class Util {
 		try {
 			Constructor<T> c = clazz.getConstructor(arg1);
 			c.setAccessible(true);
-			MethodHandles.Lookup lookup = Util.lookupTo(clazz);
+			MethodHandles.Lookup lookup = MethodHandles.publicLookup();
 			MethodHandle mh = lookup.unreflectConstructor(c);
 			return (Function<A, T>) LambdaMetafactory.metafactory(MethodHandles.lookup(), "apply",
 					MethodType.methodType(Function.class),

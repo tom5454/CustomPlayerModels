@@ -42,7 +42,7 @@ public interface IGui {
 			try {
 				r.run();
 			} catch (Throwable e) {
-				e.printStackTrace();
+				Log.error("Exception while executing task", e);
 				getFrame().logMessage(e.getMessage());
 			}
 		});

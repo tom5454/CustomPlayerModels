@@ -8,13 +8,13 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
 
-public class SkinsGui extends Frame {
+public class ModelsGui extends Frame {
 	public ViewportCamera camera = new ViewportCamera();
-	private SkinsPanel panel;
+	private ModelsPanel panel;
 
-	public SkinsGui(IGui gui) {
+	public ModelsGui(IGui gui) {
 		super(gui);
-		panel = new SkinsPanel(gui, camera);
+		panel = new ModelsPanel(this, camera);
 		gui.setCloseListener(c -> {
 			panel.onClosed();
 			c.run();

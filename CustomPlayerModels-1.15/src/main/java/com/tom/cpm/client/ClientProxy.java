@@ -1,7 +1,5 @@
 package com.tom.cpm.client;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map.Entry;
 
 import net.minecraft.client.Minecraft;
@@ -32,13 +30,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.mojang.authlib.GameProfile;
 
-import com.tom.cpl.util.Image;
 import com.tom.cpm.CommonProxy;
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
@@ -49,7 +44,6 @@ import io.netty.buffer.Unpooled;
 public class ClientProxy extends CommonProxy {
 	public static ClientProxy INSTANCE = null;
 	public static MinecraftObject mc;
-	private ModelDefinitionLoader loader;
 	private Minecraft minecraft;
 	private RenderManager<GameProfile, PlayerEntity, Model, IRenderTypeBuffer> manager;
 	public NetHandler<ResourceLocation, CompoundNBT, PlayerEntity, PacketBuffer, ClientPlayNetHandler> netHandler;
@@ -58,17 +52,11 @@ public class ClientProxy extends CommonProxy {
 	public void init() {
 		super.init();
 		INSTANCE = this;
-		try(InputStream is = ClientProxy.class.getResourceAsStream("/assets/cpm/textures/template/free_space_template.png")) {
-			loader = new ModelDefinitionLoader(Image.loadFrom(is), PlayerProfile::create);
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to load template", e);
-		}
 		minecraft = Minecraft.getInstance();
-		mc = new MinecraftObject(minecraft, loader);
-		MinecraftObjectHolder.setClientObject(mc);
+		mc = new MinecraftObject(minecraft);
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
-		manager = new RenderManager<>(mc.getPlayerRenderManager(), loader, PlayerEntity::getGameProfile);
+		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerEntity::getGameProfile);
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setNewNbt(CompoundNBT::new);
 		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
@@ -167,7 +155,7 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void onLogout(ClientPlayerNetworkEvent.LoggedOutEvent evt) {
-		loader.clearServerData();
+		mc.getDefinitionLoader().clearServerData();
 	}
 
 	public void unbind(Model model) {

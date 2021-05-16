@@ -6,11 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.ScrollPanel;
+import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -20,23 +25,29 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Exporter;
+import com.tom.cpm.shared.gui.ModelDisplayPanel.IModelDisplayPanel;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
 import com.tom.cpm.shared.io.IOHelper.ImageBlock;
 import com.tom.cpm.shared.io.ModelFile;
+import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.Log;
 
-public class SkinsPanel extends Panel {
-	public ViewportCamera camera;
+public class ModelsPanel extends Panel implements IModelDisplayPanel {
+	private ViewportCamera camera;
+	private Frame frm;
 	private ScrollPanel list;
-	private SkinDisplayPanel display;
+	private ModelDisplayPanel display;
 	private ModelDefinition selectedDef;
 	private String selected;
-	private List<SkinPanel> panels;
+	private List<ModelPanel> panels;
 	private List<Consumer<Vec2i>> sizeSetters;
-	private Button set;
+	private Button set, upload;
+	private boolean doRender = true;
 
-	public SkinsPanel(IGui gui, ViewportCamera camera) {
-		super(gui);
+	public ModelsPanel(Frame frm, ViewportCamera camera) {
+		super(frm.getGui());
+		this.frm = frm;
 		this.camera = camera;
 		sizeSetters = new ArrayList<>();
 
@@ -70,7 +81,7 @@ public class SkinsPanel extends Panel {
 				for (int i = 0; i < fs.length; i++) {
 					if(fs[i].getName().equals(Exporter.TEMP_MODEL))continue;
 					try {
-						SkinPanel p = new SkinPanel(gui, ModelFile.load(fs[i]), model != null && fs[i].getName().equals(model), y);
+						ModelPanel p = new ModelPanel(gui, ModelFile.load(fs[i]), model != null && fs[i].getName().equals(model), y);
 						y += p.getHeight();
 						panels.add(p);
 					} catch (Exception e) {
@@ -98,14 +109,22 @@ public class SkinsPanel extends Panel {
 		panel.setBackgroundColor(gui.getColors().panel_background & 0x00_ffffff | 0x80_000000);
 		addElement(list);
 
-		display = new SkinDisplayPanel(gui, this);
+		display = new ModelDisplayPanel(gui, this);
 		addElement(display);
 
 		set = new Button(gui, gui.i18nFormat("button.cpm.applySkin"), this::applySelected);
 		addElement(set);
 
+		if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.OFFLINE) {
+			upload = new Button(gui, gui.i18nFormat("button.cpm.uploadSkin"), this::uploadSelected);
+			upload.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.uploadSkin")));
+			addElement(upload);
+		}
+
 		Player<?, ?> player = MinecraftClientAccess.get().getClientPlayer();
-		selectedDef = player.getModelDefinition();
+		player.getDefinitionFuture().thenAccept(d -> {
+			if(selectedDef == null)selectedDef = d;
+		});
 		if(player.forcedSkin) {
 			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.skinForced"));
 			lbl.setColor(0xffff0000);
@@ -119,17 +138,22 @@ public class SkinsPanel extends Panel {
 		list.setBounds(new Box(20, 40, s.x, s.y));
 		sizeSetters.forEach(c -> c.accept(s));
 		int dispSize = Math.min(width / 2 - 40, height - 100);
-		set.setBounds(new Box(width / 2 + (dispSize / 2) - 50, height / 2 + (dispSize / 2) + 10, 100, 20));
+		if(upload != null) {
+			set.setBounds(new Box(width / 2 + (dispSize / 2) - 102, height / 2 + (dispSize / 2) + 10, 100, 20));
+			upload.setBounds(new Box(width / 2 + (dispSize / 2) + 2, height / 2 + (dispSize / 2) + 10, 100, 20));
+		} else {
+			set.setBounds(new Box(width / 2 + (dispSize / 2) - 50, height / 2 + (dispSize / 2) + 10, 100, 20));
+		}
 		display.setBounds(new Box(width / 2 + 10, height / 2 - (dispSize / 2), dispSize, dispSize));
 		setBounds(new Box(0, 0, width, height));
 	}
 
-	private class SkinPanel extends Panel {
+	private class ModelPanel extends Panel {
 		private TextureProvider icon;
 		private Button select;
 		private int linesC, y;
 
-		public SkinPanel(IGui gui, ModelFile file, boolean sel, int y) {
+		public ModelPanel(IGui gui, ModelFile file, boolean sel, int y) {
 			super(gui);
 			Label lbl = new Label(gui, file.getName());
 			lbl.setBounds(new Box(68, 5, 100, 10));
@@ -187,6 +211,7 @@ public class SkinsPanel extends Panel {
 		}
 	}
 
+	@Override
 	public ModelDefinition getSelectedDefinition() {
 		if(selectedDef != null) {
 			if(selectedDef.getResolveState() == 0)selectedDef.startResolve();
@@ -197,6 +222,7 @@ public class SkinsPanel extends Panel {
 		return null;
 	}
 
+	@Override
 	public void preRender() {
 
 	}
@@ -209,7 +235,55 @@ public class SkinsPanel extends Panel {
 		}
 	}
 
+	private void uploadSelected() {
+		if(selected != null) {
+			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+			File modelF = new File(modelsDir, selected);
+			ModelFile file;
+			try {
+				file = ModelFile.load(modelF);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
+			if(!file.convertable()) {
+				frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", gui.i18nFormat("label.cpm.modelNotSkinCompatible"))));
+				return;
+			}
+			SelectSkinPopup ssp = new SelectSkinPopup(frm, SkinType.DEFAULT, (type, img) -> {
+				frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.export.upload"), gui.i18nFormat("label.cpm.export.upload.desc"), () -> {
+					Exporter.convert(file, img, type, out -> new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.uploading"), gui.i18nFormat("label.cpm.uploading.skin"),
+							() -> {
+								MinecraftClientAccess.get().applySkin(out, type);
+								return null;
+							}, v -> {
+								frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.skinUpload.success")));
+							}, exc -> {
+								if(exc == null)return;
+								Log.warn("Failed to apply skin", exc);
+								frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", exc.getMessage())));
+							}).start(), () -> {
+								frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", gui.i18nFormat("label.cpm.convertFail"))));
+							});
+				}, null));
+			});
+			ssp.setOnClosed(() -> doRender = true);
+			doRender = false;
+			frm.openPopup(ssp);
+		}
+	}
+
 	public void onClosed() {
-		panels.forEach(SkinPanel::onClosed);
+		panels.forEach(ModelPanel::onClosed);
+	}
+
+	@Override
+	public ViewportCamera getCamera() {
+		return camera;
+	}
+
+	@Override
+	public boolean doRender() {
+		return doRender;
 	}
 }

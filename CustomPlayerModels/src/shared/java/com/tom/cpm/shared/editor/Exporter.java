@@ -39,10 +39,12 @@ import com.tom.cpm.shared.effects.EffectHide;
 import com.tom.cpm.shared.effects.EffectScale;
 import com.tom.cpm.shared.io.ChecksumOutputStream;
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.io.SkinDataOutputStream;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartAnimation;
 import com.tom.cpm.shared.parts.ModelPartCloneable;
@@ -82,6 +84,21 @@ public class Exporter {
 		}, (d, c) -> handleGistOverflow(d, c, gui)), forceOut);
 	}
 
+	public static void exportSkin(Editor e, EditorGui gui, Consumer<Image> out, boolean forceOut) {
+		if(e.vanillaSkin == null) {
+			gui.openPopup(new MessagePopup(gui.getGui(), "Unknown Error", "Couldn't load vanilla skin"));
+			return;
+		}
+		if(e.vanillaSkin.getWidth() != 64 || e.vanillaSkin.getHeight() != 64) {
+			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.vanillaSkinSize")));
+			return;
+		}
+		Image img = new Image(e.vanillaSkin);
+		exportSkin0(e, gui,
+				new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType.getChannel()),
+						() -> out.accept(img), (d, c) -> handleGistOverflow(d, c, gui)), forceOut);
+	}
+
 	public static void exportB64(Editor e, EditorGui gui, Consumer<String> b64Out, boolean forceOut) {
 		byte[] buffer = new byte[200];
 		int[] size = new int[] {0};
@@ -108,12 +125,12 @@ public class Exporter {
 		} catch (ExportException ex) {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
-			Log.error("Error while exporting", ex);
+			gui.getGui().onGuiException("Error while exporting", ex, false);
 		}
 	}
 
-	public static void exportModel(Editor e, EditorGui gui, File f, ModelDescription desc) {
-		ModelWriter wr = new ModelWriter(gui, f);
+	public static void exportModel(Editor e, EditorGui gui, File f, ModelDescription desc, boolean skinCompat) {
+		ModelWriter wr = new ModelWriter(gui, f, skinCompat);
 		wr.setDesc(desc.name, desc.desc, desc.icon);
 		exportSkin0(e, gui, new Result(wr::getOut, () -> {
 			if(wr.finish())
@@ -127,7 +144,7 @@ public class Exporter {
 	public static boolean exportTempModel(Editor e, EditorGui gui) {
 		File models = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 		models.mkdirs();
-		ModelWriter wr = new ModelWriter(gui, new File(models, TEMP_MODEL));
+		ModelWriter wr = new ModelWriter(gui, new File(models, TEMP_MODEL), false);
 		wr.setDesc("Test model", "", null);
 		return exportSkin0(e, gui, new Result(wr::getOut, wr::finish,
 				(d, c) -> {
@@ -232,7 +249,7 @@ public class Exporter {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 			return false;
 		} catch (Exception ex) {
-			Log.error("Error while exporting", ex);
+			gui.getGui().onGuiException("Error while exporting", ex, false);
 			return false;
 		}
 	}
@@ -261,7 +278,7 @@ public class Exporter {
 			} catch (ExportException ex) {
 				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", ex.getMessage())));
 			} catch (Exception ex) {
-				Log.error("Error while exporting", ex);
+				gui.getGui().onGuiException("Error while exporting", ex, false);
 			}
 		});
 	}
@@ -324,7 +341,7 @@ public class Exporter {
 		} catch (ExportException ex) {
 			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
-			Log.error("Error while exporting", ex);
+			gui.getGui().onGuiException("Error while exporting", ex, false);
 		}
 	}
 
@@ -429,7 +446,7 @@ public class Exporter {
 
 	private static class ModelWriter {
 		private final EditorGui gui;
-		private byte[] buffer = new byte[2*1024];
+		private byte[] buffer;
 		private int[] size = new int[] {0};
 		private byte[] overflow;
 		private File out;
@@ -437,9 +454,10 @@ public class Exporter {
 		private Link l;
 		private Image icon;
 
-		public ModelWriter(EditorGui gui, File out) {
+		public ModelWriter(EditorGui gui, File out, boolean skinCompat) {
 			this.gui = gui;
 			this.out = out;
+			buffer = new byte[skinCompat ? 2*1024 : 32*1024];
 		}
 
 		public void setDesc(String name, String desc, Image icon) {
@@ -483,9 +501,21 @@ public class Exporter {
 			} catch (ExportException ex) {
 				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 			} catch (Exception ex) {
-				Log.error("Error while exporting", ex);
+				gui.getGui().onGuiException("Error while exporting", ex, false);
 			}
 			return false;
 		}
+	}
+
+	public static void convert(ModelFile file, Image imgIn, SkinType type, Consumer<Image> outCons, Runnable error) {
+		Image img = new Image(imgIn);
+		try(SkinDataOutputStream out = new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), type.getChannel())) {
+			out.write(file.getDataBlock());
+		} catch (IOException e) {
+			Log.error("Failed to convert model file to skin", e);
+			error.run();
+			return;
+		}
+		outCons.accept(img);
 	}
 }

@@ -122,7 +122,7 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 		else if(player.isRiding())pose = VanillaPose.RIDING;
 		else if(player.isSprinting())pose = VanillaPose.RUNNING;
 		else if(player.isSneaking())pose = VanillaPose.SNEAKING;
-		else if(player.distanceWalkedModified - player.prevDistanceWalkedModified > 0)pose = VanillaPose.WALKING;
+		else if(Math.abs(player.posX - player.prevPosX) > 0 || Math.abs(player.posZ - player.prevPosZ) > 0)pose = VanillaPose.WALKING;
 		else pose = VanillaPose.STANDING;
 
 		ItemStack is = player.getEquipmentInSlot(4);

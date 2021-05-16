@@ -20,7 +20,7 @@ public abstract class Player<P, M> {
 	private static boolean enableRendering = true;
 	private static boolean enableNames = true;
 
-	private ModelDefinition definition;
+	private CompletableFuture<ModelDefinition> definition;
 	private EnumMap<AnimationMode, AnimationHandler> animHandler = new EnumMap<>(AnimationMode.class);
 	private CompletableFuture<Image> skinFuture;
 	private CompletableFuture<Void> loadFuture;
@@ -47,7 +47,7 @@ public abstract class Player<P, M> {
 			});
 		}
 		if(url == null)return null;
-		return Image.download(url).thenApply(i -> new LegacySkinConverter().convertSkin(i)).exceptionally(e -> null);
+		return Image.download(url).thenApply(LegacySkinConverter::processLegacySkin).exceptionally(e -> null);
 	}
 
 	public CompletableFuture<Void> loadSkin() {
@@ -65,12 +65,16 @@ public abstract class Player<P, M> {
 	public abstract M getModel();
 	public abstract void updateFromPlayer(P player);
 
-	public void setModelDefinition(ModelDefinition definition) {
+	public void setModelDefinition(CompletableFuture<ModelDefinition> definition) {
 		this.definition = definition;
 	}
 
 	public ModelDefinition getModelDefinition() {
-		return enableRendering ? definition : null;
+		try {
+			return enableRendering && definition != null ? definition.getNow(null) : null;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public ModelDefinition getAndResolveDefinition() {
@@ -84,6 +88,10 @@ public abstract class Player<P, M> {
 			}
 		}
 		return null;
+	}
+
+	public CompletableFuture<ModelDefinition> getDefinitionFuture() {
+		return definition;
 	}
 
 	public AnimationHandler getAnimationHandler(AnimationMode mode) {

@@ -35,4 +35,8 @@ public class Label extends GuiElement {
 	public void setTooltip(Tooltip tooltip) {
 		this.tooltip = tooltip;
 	}
+
+	public String getText() {
+		return text;
+	}
 }

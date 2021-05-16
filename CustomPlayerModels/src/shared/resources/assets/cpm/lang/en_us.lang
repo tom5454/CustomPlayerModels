@@ -71,6 +71,9 @@ button.cpm.heldItem.sword=Sword
 button.cpm.config.scale=Scale: %s
 button.cpm.config.scale.vanilla=Vanilla
 button.cpm.config.scale.auto=Auto
+button.cpm.export.skin.exportApply=Export & Upload
+button.cpm.uploadSkin=Upload Skin
+button.cpm.display.errorLog=Error Log
 
 tooltip.cpm.export.as_skin=Export Model as a skin file.
 tooltip.cpm.export.as_b64=Export Model as a Base64 String.\You probably want to export as skin instead of Base64.\Can be loaded with \'/cpm setskin [-f | -t] <player> <base64_string>'\ ingame if server-side mod is loaded and you are an op.
@@ -90,6 +93,9 @@ tooltip.cpm.heldItem.notSupported=Held Item display is not available on this ver
 tooltip.cpm.display.scaling=Enable model scaling using the Pehkui or Shrink mods.\Customizable Player Models and Pehkui or Shrink is required on both the client and server.\Without these mods the model scale won't be affected.\When enabled select the 'Scaling' on the right to see the effect.
 tooltip.cpm.cloneable=This model can be cloned and used by anyone.\Clone a model in the player settings menu.\!! This option is here for future versions. !!\!! Cloning is not implemented yet. !!
 tooltip.cpm.uuidlock=Locks model definition to the current players UUID.\Current UUID: %s.\This can prevent model stealing with simple skin stealers.
+tooltip.cpm.export.skinCompat=Exports a skin type compatible model.\! The export size limit is much lower before needing a gist !\You can apply skin compatible models in-game without restarting the game,\with the built-in skin changer in the models menu,\accessible from the Editor under Edit/Models.\You must open the editor from the Title Screen for this to work.
+tooltip.cpm.export.skin.exportApply=Exports then uploads the exported skin to minecraft.net.\!!! This will change your current minecraft skin !!!
+tooltip.cpm.uploadSkin=Converts and uploads the selected model to minecraft.net.\!!! This will change your current minecraft skin !!!
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -235,6 +241,16 @@ label.cpm.uuidlock=UUID Lock
 label.cpm.display.firstPersonHand=Offset First Person Hand
 label.cpm.firstPersonHand.offset_0=Left Hand
 label.cpm.firstPersonHand.offset_1=Right Hand
+label.cpm.export.skinCompat=Skin Compatible
+label.cpm.uploading=Uploading
+label.cpm.uploading.skin=Uploading skin to minecraft.net...
+label.cpm.skinUpload.fail=Failed to upload skin to minecraft.net\Error: %s
+label.cpm.skinUpload.success=Successfully uploaded skin to minecraft.net
+label.cpm.export.upload=Upload?
+label.cpm.export.upload.desc=Exports then uploads the exported skin to minecraft.net.\!!! This will change your current minecraft skin !!!\If this doesn't work, export to an image and use your minecraft launcher to apply,\may need minecraft restart if you use your launcher.
+label.cpm.addSkinToFolder=Add skin to list?
+label.cpm.modelNotSkinCompatible=Model file is not skin compatible
+label.cpm.convertFail=Failed to convert model to skin
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body

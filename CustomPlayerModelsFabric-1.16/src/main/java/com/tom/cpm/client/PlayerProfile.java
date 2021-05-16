@@ -132,7 +132,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 		else if(p == EntityPose.SWIMMING)pose = VanillaPose.SWIMMING;
 		else if(player.isSprinting())pose = VanillaPose.RUNNING;
 		else if(p == EntityPose.CROUCHING)pose = VanillaPose.SNEAKING;
-		else if(player.horizontalSpeed - player.prevHorizontalSpeed > 0)pose = VanillaPose.WALKING;
+		else if(Math.abs(player.getX() - player.prevX) > 0 || Math.abs(player.getZ() - player.prevZ) > 0)pose = VanillaPose.WALKING;
 		else pose = VanillaPose.STANDING;
 
 		encodedGesture = 0;

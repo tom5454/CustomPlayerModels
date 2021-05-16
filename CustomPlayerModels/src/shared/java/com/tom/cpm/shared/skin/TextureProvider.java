@@ -3,11 +3,10 @@ package com.tom.cpm.shared.skin;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.imageio.ImageIO;
-
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.DynamicTexture;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ImageIO;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.IOHelper.ImageBlock;
 
@@ -36,7 +35,7 @@ public class TextureProvider {
 	public void write(IOHelper dout) throws IOException {
 		dout.write2s(size);
 		try (OutputStream baos = dout.writeNextBlock().getDout()) {
-			ImageIO.write(texture.getImage().toBufferedImage(), "PNG", baos);
+			ImageIO.write(texture.getImage(), baos);
 		}
 	}
 

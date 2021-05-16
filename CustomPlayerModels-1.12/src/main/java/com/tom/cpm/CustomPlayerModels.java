@@ -21,7 +21,7 @@ import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 
-@Mod(modid = CustomPlayerModels.ID, clientSideOnly = true, updateJSON = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json")
+@Mod(modid = CustomPlayerModels.ID, acceptableRemoteVersions = "*", updateJSON = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json")
 public class CustomPlayerModels implements MinecraftCommonAccess {
 	public static final String ID = "customplayermodels";
 

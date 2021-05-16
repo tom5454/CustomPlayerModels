@@ -13,7 +13,7 @@ public class Log4JLogger implements ILogger {
 
 	@Override
 	public void warn(String text, Throwable thr) {
-		log.warn(text);
+		log.warn(text, thr);
 	}
 
 	@Override

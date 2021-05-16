@@ -22,11 +22,14 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ImageIO.IImageIO;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.util.MojangSkinsAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private static final Identifier STEVE_SKIN = new Identifier("textures/entity/steve.png");
@@ -35,10 +38,11 @@ public class MinecraftObject implements MinecraftClientAccess {
 	private final MinecraftClient mc;
 	private final PlayerRenderManager prm;
 	private final ModelDefinitionLoader loader;
-	public MinecraftObject(MinecraftClient mc, ModelDefinitionLoader loader) {
+	public MinecraftObject(MinecraftClient mc) {
 		this.mc = mc;
+		MinecraftObjectHolder.setClientObject(this);
+		loader = new ModelDefinitionLoader(PlayerProfile::create);
 		prm = new PlayerRenderManager(loader);
-		this.loader = loader;
 	}
 
 	@Override
@@ -92,7 +96,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 		@Override
 		public void load(Image texture) {
-			NativeImage ni = createFromBufferedImage(texture);
+			NativeImage ni = NativeImageIO.createFromBufferedImage(texture);
 			setImage(ni);
 			TextureUtil.prepareImage(this.getGlId(), ni.getWidth(), ni.getHeight());
 			upload();
@@ -106,21 +110,6 @@ public class MinecraftObject implements MinecraftClientAccess {
 		public void free() {
 			mc.getTextureManager().destroyTexture(loc);
 		}
-	}
-
-	public static NativeImage createFromBufferedImage(Image texture) {
-		NativeImage ni = new NativeImage(texture.getWidth(), texture.getHeight(), false);
-		for(int y = 0;y<texture.getHeight();y++) {
-			for(int x = 0;x<texture.getWidth();x++) {
-				int rgb = texture.getRGB(x, y);
-				int a = (rgb >> 24 & 255);
-				int r = (rgb >> 16 & 255);
-				int g = (rgb >> 8 & 255);
-				int b = (rgb & 255);
-				ni.setPixelColor(x, y, (a << 24) | (b << 16) | (g << 8) | r);
-			}
-		}
-		return ni;
 	}
 
 	@Override
@@ -193,5 +182,18 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public NetHandler<?, ?, ?, ?, ?> getNetHandler() {
 		return CustomPlayerModelsClient.INSTANCE.netHandler;
+	}
+
+	@Override
+	public IImageIO getImageIO() {
+		return new NativeImageIO();
+	}
+
+	@Override
+	public void applySkin(Image skin, SkinType type) throws IOException {
+		MojangSkinsAPI.uploadSkin(mc.getSession().getProfile().getId(), mc.getSession().getAccessToken(), type, skin);
+		MojangSkinsAPI.clearYggdrasilCache(mc.getSessionService());
+		mc.getSessionProperties().clear();
+		mc.getSessionProperties();//refresh
 	}
 }

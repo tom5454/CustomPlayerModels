@@ -190,6 +190,7 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 
 	public void sendPlayerData(P target, P to) {
 		PlayerData dt = getSNetH(target).cpm$getEncodedModelData();
+		if(dt == null)return;
 		sendPacket.accept(getNet.apply(to), setSkin, writeSkinData(dt, target));
 	}
 

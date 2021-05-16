@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
@@ -49,7 +50,7 @@ public class ModelDefinition {
 	private TextureProvider listIconOverride;
 	private List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
-	private Map<ModelPart, PartRoot> rootRenderingCubes;
+	protected Map<ModelPart, PartRoot> rootRenderingCubes;
 	private int resolveState;
 	private AnimationRegistry animations = new AnimationRegistry();
 	private ModelPartScale scale;
@@ -211,7 +212,7 @@ public class ModelDefinition {
 		Log.debug(this);
 	}
 
-	private void convertPart(RootModelElement p) {
+	protected void convertPart(RootModelElement p) {
 		PlayerModelParts part = (PlayerModelParts) p.getPart();
 		if(!p.hidden) {
 			p.hidden = true;
@@ -348,5 +349,9 @@ public class ModelDefinition {
 
 	public ModelPartScale getScale() {
 		return scale;
+	}
+
+	public static ModelDefinition createVanilla(Supplier<TextureProvider> texture, SkinType type) {
+		return new VanillaDefinition(texture, type);
 	}
 }

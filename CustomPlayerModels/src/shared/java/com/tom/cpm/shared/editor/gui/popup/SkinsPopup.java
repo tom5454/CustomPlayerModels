@@ -3,16 +3,16 @@ package com.tom.cpm.shared.editor.gui.popup;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.gui.EditorGui;
-import com.tom.cpm.shared.gui.SkinsPanel;
+import com.tom.cpm.shared.gui.ModelsPanel;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
 
 public class SkinsPopup extends PopupPanel {
 	public ViewportCamera camera = new ViewportCamera();
-	private SkinsPanel panel;
+	private ModelsPanel panel;
 
 	public SkinsPopup(EditorGui gui) {
 		super(gui.getGui());
-		panel = new SkinsPanel(this.gui, camera);
+		panel = new ModelsPanel(gui, camera);
 		addElement(panel);
 		panel.setSize(700, 400);
 		setOnClosed(() -> {

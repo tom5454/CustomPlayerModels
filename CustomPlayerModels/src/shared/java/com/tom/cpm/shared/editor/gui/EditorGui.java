@@ -9,6 +9,8 @@ import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.elements.FileChooserPopup;
+import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
 import com.tom.cpl.gui.elements.InputPopup;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.MessagePopup;
@@ -23,20 +25,16 @@ import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
-import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
-import com.tom.cpm.shared.editor.Exporter;
 import com.tom.cpm.shared.editor.Generators;
 import com.tom.cpm.shared.editor.HeldItem;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.DescPopup;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
-import com.tom.cpm.shared.editor.gui.popup.FileChooserGui;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
 import com.tom.cpm.shared.editor.gui.popup.SkinsPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
@@ -44,9 +42,9 @@ import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.util.Log;
 
 public class EditorGui extends Frame {
-	private static final String VANILLA_MODEL = "~~VANILLA~~";
 	private static Editor toReopen;
 	private TabbedPanelManager tabs;
 	private HorizontalLayout topPanel;
@@ -73,15 +71,7 @@ public class EditorGui extends Frame {
 				this.editor.loadDefaultPlayerModel();
 			}
 		}
-		String old = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL_OLD, null);
-		if(old != null) {
-			ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL_OLD);
-			if(VANILLA_MODEL.equals(old))
-				ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL);
-			else
-				ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, old);
-			ModConfig.getConfig().save();
-		}
+		TestIngameManager.checkConfig();
 		gui.setCloseListener(c -> {
 			checkUnsaved(() -> {
 				editor.free();
@@ -283,10 +273,10 @@ public class EditorGui extends Frame {
 		pp.addMenuButton(gui.i18nFormat("button.cpm.file.new"), newMenu);
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.load"), () -> checkUnsaved(() -> {
-			FileChooserGui fc = new FileChooserGui(this);
+			FileChooserPopup fc = new FileChooserPopup(this);
 			fc.setTitle(gui.i18nFormat("label.cpm.loadFile"));
 			fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
-			fc.setFilter((f, n) -> n.endsWith(".cpmproject") && !f.isDirectory());
+			fc.setFilter(new FileFilter("cpmproject"));
 			fc.setAccept(this::load);
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
 			openPopup(fc);
@@ -296,10 +286,10 @@ public class EditorGui extends Frame {
 			if(editor.file != null) {
 				save(editor.file);
 			} else {
-				FileChooserGui fc = new FileChooserGui(this);
+				FileChooserPopup fc = new FileChooserPopup(this);
 				fc.setTitle(gui.i18nFormat("label.cpm.saveFile"));
 				fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
-				fc.setFilter((f, n) -> n.endsWith(".cpmproject") && !f.isDirectory());
+				fc.setFilter(new FileFilter("cpmproject"));
 				fc.setSaveDialog(true);
 				fc.setExtAdder(n -> n + ".cpmproject");
 				fc.setFileName(editor.file != null ? editor.file.getName() : gui.i18nFormat("label.cpm.new_project"));
@@ -310,10 +300,10 @@ public class EditorGui extends Frame {
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.saveAs"), () -> {
-			FileChooserGui fc = new FileChooserGui(this);
+			FileChooserPopup fc = new FileChooserPopup(this);
 			fc.setTitle(gui.i18nFormat("label.cpm.saveFile"));
 			fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
-			fc.setFilter((f, n) -> n.endsWith(".cpmproject") && !f.isDirectory());
+			fc.setFilter(new FileFilter("cpmproject"));
 			fc.setSaveDialog(true);
 			fc.setExtAdder(n -> n + ".cpmproject");
 			fc.setAccept(this::save);
@@ -324,36 +314,7 @@ public class EditorGui extends Frame {
 		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> openPopup(ExportSkinPopup.createPopup(this)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.test"), () -> {
-			if(editor.dirty) {
-				openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.must_save.test")));
-				return;
-			}
-			try {
-				Runnable open;
-				if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
-					open = () -> {
-						MinecraftClientAccess.get().sendSkinUpdate();
-						openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.test_model_exported")));
-					};
-				} else if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.OFFLINE)
-					open = MinecraftClientAccess.get().openSingleplayer();
-				else
-					throw new UnsupportedOperationException();
-				if(!Exporter.exportTempModel(editor, this))return;
-				String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
-				if(model != null) {
-					ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, model);
-				} else {
-					ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, VANILLA_MODEL);
-				}
-				ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, Exporter.TEMP_MODEL);
-				open.run();
-				ModConfig.getConfig().setString(ConfigKeys.REOPEN_PROJECT, editor.file.getAbsolutePath());
-				ModConfig.getConfig().save();
-				toReopen = editor;
-			} catch (UnsupportedOperationException e) {
-				openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.test_unsupported")));
-			}
+			if(TestIngameManager.openTestIngame(this))toReopen = editor;
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.exit"), gui::close);
@@ -400,7 +361,7 @@ public class EditorGui extends Frame {
 				editor.updateGui();
 			}, e -> {
 				if(e == null)return;
-				e.printStackTrace();
+				Log.warn("Failed to download template", e);
 				openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.template_load_error", e.getMessage())));
 			}).start();
 		}, null));
@@ -457,6 +418,14 @@ public class EditorGui extends Frame {
 			if(b != null)boxHidden.setSelected(b);
 			else boxHidden.setSelected(false);
 		});
+
+		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), b -> {
+			if(editor.scaling != 0)editor.scaling = 0;
+			else editor.scaling = 1;
+			editor.updateGui();
+		});
+		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scaling != 0));
+		chxbxScale.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.scaling")));
 	}
 
 	private void initDisplayMenu() {
@@ -501,14 +470,6 @@ public class EditorGui extends Frame {
 		Button btnHeldLeft = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
 		initHeldItemPopup(heldItemLeft, Hand.LEFT);
 		editor.heldRenderEnable.add(btnHeldLeft::setEnabled);
-
-		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), b -> {
-			if(editor.scaling != 0)editor.scaling = 0;
-			else editor.scaling = 1;
-			editor.updateGui();
-		});
-		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scaling != 0));
-		chxbxScale.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.scaling")));
 	}
 
 	private void initHeldItemPopup(PopupMenu pp, Hand hand) {
@@ -584,4 +545,7 @@ public class EditorGui extends Frame {
 	public static boolean doOpenEditor() {
 		return toReopen != null || ModConfig.getConfig().getString(ConfigKeys.REOPEN_PROJECT, null) != null;
 	}
+
+	@Override
+	public void logMessage(String msg) {}
 }

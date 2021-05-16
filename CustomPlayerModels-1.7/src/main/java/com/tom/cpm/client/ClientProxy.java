@@ -1,7 +1,6 @@
 package com.tom.cpm.client;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
@@ -31,13 +30,10 @@ import net.minecraftforge.common.MinecraftForge;
 
 import com.mojang.authlib.GameProfile;
 
-import com.tom.cpl.util.Image;
 import com.tom.cpm.CommonProxy;
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
@@ -52,7 +48,6 @@ import io.netty.buffer.Unpooled;
 
 public class ClientProxy extends CommonProxy {
 	public static MinecraftObject mc;
-	private ModelDefinitionLoader loader;
 	private Minecraft minecraft;
 	public static ClientProxy INSTANCE;
 	private RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
@@ -61,19 +56,13 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void init() {
 		super.init();
-		try(InputStream is = ClientProxy.class.getResourceAsStream("/assets/cpm/textures/template/free_space_template.png")) {
-			loader = new ModelDefinitionLoader(Image.loadFrom(is), PlayerProfile::create);
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to load template", e);
-		}
 		INSTANCE = this;
 		minecraft = Minecraft.getMinecraft();
-		mc = new MinecraftObject(minecraft, loader);
-		MinecraftObjectHolder.setClientObject(mc);
+		mc = new MinecraftObject(minecraft);
 		FMLCommonHandler.instance().bus().register(this);
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
-		manager = new RenderManager<>(mc.getPlayerRenderManager(), loader, EntityPlayer::getGameProfile);
+		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), EntityPlayer::getGameProfile);
 		netHandler = new NetH();
 		netHandler.setNewNbt(NBTTagCompound::new);
 		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
@@ -200,7 +189,7 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public void onLogout() {
-		loader.clearServerData();
+		mc.getDefinitionLoader().clearServerData();
 	}
 
 	public static class NetH extends NetHandler<ResourceLocation, NBTTagCompound, EntityPlayer, PacketBuffer, NetHandlerPlayClient> {
@@ -217,7 +206,7 @@ public class ClientProxy extends CommonProxy {
 				Minecraft.getMinecraft().func_152344_a(() -> {
 					Entity ent = Minecraft.getMinecraft().theWorld.getEntityByID(entId);
 					if(ent instanceof EntityPlayer) {
-						PlayerProfile profile = (PlayerProfile) ClientProxy.INSTANCE.loader.loadPlayer(((EntityPlayer) ent).getGameProfile());
+						PlayerProfile profile = (PlayerProfile) ClientProxy.mc.getDefinitionLoader().loadPlayer(((EntityPlayer) ent).getGameProfile());
 						profile.encGesture = layer;
 					}
 				});
