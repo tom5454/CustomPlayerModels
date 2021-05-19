@@ -18,6 +18,7 @@ import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -42,7 +43,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	private String selected;
 	private List<ModelPanel> panels;
 	private List<Consumer<Vec2i>> sizeSetters;
-	private Button set, upload;
+	private Button set, upload, simpleSkin;
 	private boolean doRender = true;
 
 	public ModelsPanel(Frame frm, ViewportCamera camera) {
@@ -119,9 +120,21 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			upload = new Button(gui, gui.i18nFormat("button.cpm.uploadSkin"), this::uploadSelected);
 			upload.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.uploadSkin")));
 			addElement(upload);
+
+			simpleSkin = new Button(gui, gui.i18nFormat("button.cpm.changeSkin"), () -> {
+				SelectSkinPopup ssp = new SelectSkinPopup(frm, SkinType.DEFAULT, (type, img) -> {
+					frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.export.upload"),
+							gui.i18nFormat("label.cpm.export.upload.desc"), () -> upload(type, img), null));
+				});
+				ssp.setOnClosed(() -> doRender = true);
+				doRender = false;
+				frm.openPopup(ssp);
+			});
+			simpleSkin.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.changeSkin")));
+			addElement(simpleSkin);
 		}
 
-		Player<?, ?> player = MinecraftClientAccess.get().getClientPlayer();
+		Player<?, ?> player = MinecraftClientAccess.get().getCurrentClientPlayer();
 		player.getDefinitionFuture().thenAccept(d -> {
 			if(selectedDef == null)selectedDef = d;
 		});
@@ -141,6 +154,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		if(upload != null) {
 			set.setBounds(new Box(width / 2 + (dispSize / 2) - 102, height / 2 + (dispSize / 2) + 10, 100, 20));
 			upload.setBounds(new Box(width / 2 + (dispSize / 2) + 2, height / 2 + (dispSize / 2) + 10, 100, 20));
+			simpleSkin.setBounds(new Box(width / 2 + (dispSize / 2) - 50, 5, 100, 20));
 		} else {
 			set.setBounds(new Box(width / 2 + (dispSize / 2) - 50, height / 2 + (dispSize / 2) + 10, 100, 20));
 		}
@@ -252,25 +266,29 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			}
 			SelectSkinPopup ssp = new SelectSkinPopup(frm, SkinType.DEFAULT, (type, img) -> {
 				frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.export.upload"), gui.i18nFormat("label.cpm.export.upload.desc"), () -> {
-					Exporter.convert(file, img, type, out -> new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.uploading"), gui.i18nFormat("label.cpm.uploading.skin"),
-							() -> {
-								MinecraftClientAccess.get().applySkin(out, type);
-								return null;
-							}, v -> {
-								frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.skinUpload.success")));
-							}, exc -> {
-								if(exc == null)return;
-								Log.warn("Failed to apply skin", exc);
-								frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", exc.getMessage())));
-							}).start(), () -> {
-								frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", gui.i18nFormat("label.cpm.convertFail"))));
-							});
+					Exporter.convert(file, img, type, out -> upload(type, out), () -> {
+						frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", gui.i18nFormat("label.cpm.convertFail"))));
+					});
 				}, null));
 			});
 			ssp.setOnClosed(() -> doRender = true);
 			doRender = false;
 			frm.openPopup(ssp);
 		}
+	}
+
+	private void upload(SkinType type, Image img) {
+		new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.uploading"), gui.i18nFormat("label.cpm.uploading.skin"),
+				() -> {
+					MinecraftClientAccess.get().applySkin(img, type);
+					return null;
+				}, v -> {
+					frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.skinUpload.success")));
+				}, exc -> {
+					if(exc == null)return;
+					Log.warn("Failed to apply skin", exc);
+					frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", exc.getMessage())));
+				}).start();
 	}
 
 	public void onClosed() {

@@ -20,7 +20,7 @@ public class AnimationEngine {
 	public void tick() {
 		tickCounter++;
 		if(MinecraftClientAccess.get().isInGame()) {
-			Player<?, ?> player = MinecraftClientAccess.get().getClientPlayer();//Keep client player loaded
+			Player<?, ?> player = MinecraftClientAccess.get().getCurrentClientPlayer();//Keep client player loaded
 			ModelDefinition def = player.getModelDefinition();
 			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 				if(def != null && def.doRender()) {
@@ -94,7 +94,7 @@ public class AnimationEngine {
 	}
 
 	public void onKeybind(int id) {
-		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
+		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		if(def != null) {
 			ConfigEntry ce = ModConfig.getConfig().getEntry(ConfigKeys.KEYBINDS);
 			String c = ce.getString("qa_" + id, null);
@@ -119,7 +119,7 @@ public class AnimationEngine {
 		if(status == ServerStatus.OFFLINE || status == ServerStatus.UNAVAILABLE)return;
 		int enc = pose == null ? reg.getPoseResetId() : reg.getEncoded(pose);
 		if(enc != -1) {
-			if(enc == MinecraftClientAccess.get().getClientPlayer().getEncodedGestureId()) {
+			if(enc == MinecraftClientAccess.get().getCurrentClientPlayer().getEncodedGestureId()) {
 				enc = reg.getPoseResetId();
 			}
 			MinecraftClientAccess.get().setEncodedGesture(enc);
@@ -131,7 +131,7 @@ public class AnimationEngine {
 		if(status == ServerStatus.OFFLINE || status == ServerStatus.UNAVAILABLE)return;
 		int enc = g == null ? reg.getBlankGesture() : reg.getEncoded(g);
 		if(enc != -1) {
-			if(enc == MinecraftClientAccess.get().getClientPlayer().getEncodedGestureId()) {
+			if(enc == MinecraftClientAccess.get().getCurrentClientPlayer().getEncodedGestureId()) {
 				enc = reg.getBlankGesture();
 			}
 			MinecraftClientAccess.get().setEncodedGesture(enc);

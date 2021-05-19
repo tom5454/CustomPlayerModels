@@ -70,7 +70,7 @@ public class GestureGui extends Frame {
 
 	@Override
 	public void initFrame(int width, int height) {
-		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
+		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		Log.debug(def);
 		ServerStatus status = MinecraftClientAccess.get().getServerSideStatus();
 		if(status == ServerStatus.OFFLINE) {
@@ -190,7 +190,7 @@ public class GestureGui extends Frame {
 			}
 		}
 
-		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
+		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		if(MinecraftObjectHolder.DEBUGGING && gui.isAltDown() && def != null) {
 			TextureProvider skin = def.getSkinOverride();
 			if(skin != null && skin.texture != null) {
@@ -204,12 +204,12 @@ public class GestureGui extends Frame {
 	}
 
 	private void setGesture(Gesture g) {
-		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
+		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().playGesture(def.getAnimations(), g);
 	}
 
 	private void setPose(CustomPose pose) {
-		ModelDefinition def = MinecraftClientAccess.get().getClientPlayer().getModelDefinition();
+		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setCustomPose(def.getAnimations(), pose);
 	}
 

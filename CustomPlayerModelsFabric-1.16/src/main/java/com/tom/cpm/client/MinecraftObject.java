@@ -149,6 +149,11 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
+	public Object getCurrentPlayerIDObject() {
+		return mc.player != null ? mc.player.getGameProfile() : null;
+	}
+
+	@Override
 	public boolean isInGame() {
 		return mc.player != null;
 	}

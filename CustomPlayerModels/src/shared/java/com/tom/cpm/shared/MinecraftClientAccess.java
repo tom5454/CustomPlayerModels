@@ -30,7 +30,14 @@ public interface MinecraftClientAccess {
 		return getDefinitionLoader().loadPlayer(getPlayerIDObject());
 	}
 
+	default Player<?, ?> getCurrentClientPlayer() {
+		Object v = getCurrentPlayerIDObject();
+		if(v == null)return getClientPlayer();
+		return getDefinitionLoader().loadPlayer(v);
+	}
+
 	Object getPlayerIDObject();
+	Object getCurrentPlayerIDObject();
 	SkinType getSkinType();
 	Image getVanillaSkin(SkinType skinType);
 	void setEncodedGesture(int value);

@@ -162,6 +162,11 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
+	public Object getCurrentPlayerIDObject() {
+		return mc.player != null ? mc.player.getGameProfile() : null;
+	}
+
+	@Override
 	public List<IKeybind> getKeybinds() {
 		return KeyBindings.kbs;
 	}

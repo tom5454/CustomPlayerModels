@@ -16,7 +16,7 @@
   "license": "MIT",
   "icon": "assets/cpm/icon.png",
 
-  "environment": "client",
+  "environment": "*",
   "entrypoints": {
   	"main": [
   		"com.tom.cpm.CustomPlayerModels"

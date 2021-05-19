@@ -1,5 +1,6 @@
 plugins {
     id 'java-library' 
+    id "fr.il_totore.manadrop" version "0.4.1-SNAPSHOT"
 }
 
 version = project.mod_version
@@ -34,6 +35,37 @@ sourceSets {
         resources.srcDirs += shared.resources.srcDirs
     }
 }
+
+spigot {
+    desc {
+        named 'CustomizablePlayerModels' //Default: the project name
+        version project.version //Default: the project version
+        authors 'tom5454'
+        main 'com.tom.cpm.bukkit.CPMBukkitPlugin'
+        description 'Customizable Player Models server-side plugin.'
+        apiVersion '1.13'
+        command {
+        	named 'cpm'
+            description 'Customizable Player Models command'
+            usage '/<command> setskin'
+            permission 'cpm.command'
+        }
+        permission {
+        	named 'cpm.*'
+        	child {
+        		named 'cpm.command'
+                inherit true
+        	}
+        }
+        permission {
+            named 'cpm.command'
+            description 'access to cpm command'
+            defaultType 'grant_op'
+        }
+    }
+}
+
+processResources.finalizedBy(spigotPlugin)
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {

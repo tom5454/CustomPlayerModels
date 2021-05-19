@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -28,6 +29,7 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
 import com.tom.cpm.shared.gui.SelectSkinPopup;
+import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.util.Log;
 
 public abstract class ExportSkinPopup extends PopupPanel {
@@ -386,6 +388,9 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		private TextField nameField, descField;
 		private EditorTexture icon;
 		private Checkbox skinCompat, chbxClone, chbxUUIDLock;
+		private Link defLink;
+		private Button okDef;
+		private boolean gist;
 
 		protected Model(EditorGui e) {
 			super(e, 320, 260, ExportMode.MODEL);
@@ -457,6 +462,19 @@ public abstract class ExportSkinPopup extends PopupPanel {
 					chbxUUIDLock.setSelected(false);
 				}
 			});
+
+			okDef = new Button(gui, gui.i18nFormat("button.cpm.export_def"), () -> {
+				if(defLink != null) {
+					gist = true;
+					close();
+					export();
+				}
+			});
+			okDef.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export_def")));
+			okDef.setBounds(new Box(90, 235, 80, 20));
+			addElement(okDef);
+
+			updateHasGist();
 		}
 
 		@Override
@@ -483,17 +501,41 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			}
 			if(descChanged)editor.markDirty();
 
+			if(gist) {
+				Exporter.exportGistUpdate(editor, editorGui, gist -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "skin_update", gist)));
+			} else {
+				File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+				modelsDir.mkdirs();
+				String fileName = nameField.getText().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + ".cpmmodel";
+				File selFile = new File(modelsDir, fileName);
+				if(selFile.exists()) {
+					editorGui.openPopup(new ConfirmPopup(editorGui, gui.i18nFormat("label.cpm.overwrite"), gui.i18nFormat("label.cpm.overwrite"),
+							() -> Exporter.exportModel(editor, editorGui, selFile, editor.description, skinCompat.isSelected()),
+							null));
+				} else {
+					Exporter.exportModel(editor, editorGui, selFile, editor.description, skinCompat.isSelected());
+				}
+			}
+		}
+
+		private void updateHasGist() {
 			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 			modelsDir.mkdirs();
 			String fileName = nameField.getText().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + ".cpmmodel";
 			File selFile = new File(modelsDir, fileName);
+			defLink = null;
 			if(selFile.exists()) {
-				editorGui.openPopup(new ConfirmPopup(editorGui, gui.i18nFormat("label.cpm.overwrite"), gui.i18nFormat("label.cpm.overwrite"),
-						() -> Exporter.exportModel(editor, editorGui, selFile, editor.description, skinCompat.isSelected()),
-						null));
-			} else {
-				Exporter.exportModel(editor, editorGui, selFile, editor.description, skinCompat.isSelected());
+				try {
+					ModelFile mf = ModelFile.load(selFile);
+					ModelDefinition def = MinecraftClientAccess.get().getDefinitionLoader().loadModel(mf.getDataBlock(), MinecraftClientAccess.get().getClientPlayer());
+					if(def != null) {
+						defLink = def.findDefLink();
+					}
+				} catch (IOException e) {
+					Log.error("Failed to load file", e);
+				}
 			}
+			okDef.setEnabled(defLink != null);
 		}
 
 		@Override
