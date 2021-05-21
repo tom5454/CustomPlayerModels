@@ -152,6 +152,9 @@ dependencies {
   	compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.0.4-beta-7:api")
   	// at runtime, use the full TOP jar
   	runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.0.4-beta-7")
+  	
+  	compileOnly files("of.jar")
+  	compileOnly files("stubs.jar")
 }
 
 sourceSets {
@@ -173,14 +176,14 @@ sourceSets {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "examplemod",
-            "Specification-Vendor": "examplemodsareus",
+            "Specification-Title": project.name,
+            "Specification-Vendor": "tom5454",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"examplemodsareus",
+            "Implementation-Vendor" : "tom5454",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            "MixinConfigs": "assets/cpm/cpm.mixins.json"
+            "MixinConfigs": "assets/cpm/cpm.mixins.json,assets/cpm/cpm.mixins.of.json"
         ])
     }
 }
