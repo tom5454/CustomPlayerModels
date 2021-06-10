@@ -24,6 +24,10 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	
+	modImplementation ('com.github.Virtuoel:Pehkui:1.17-SNAPSHOT') {
+    	transitive = false
+    }
 }
 
 minecraft {

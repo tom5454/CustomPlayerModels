@@ -5,9 +5,10 @@ import java.util.function.Supplier;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.gui.util.TabFocusHandler.Focusable;
 import com.tom.cpl.math.Box;
 
-public class TextField extends GuiElement implements Supplier<IGui> {
+public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 	private ITextField field;
 	public TextField(IGui gui) {
 		super(gui);
@@ -38,6 +39,8 @@ public class TextField extends GuiElement implements Supplier<IGui> {
 		void setText(String txt);
 		void setEventListener(Runnable eventListener);
 		void setEnabled(boolean enabled);
+		boolean isFocused();
+		void setFocused(boolean focused);
 	}
 
 	public String getText() {
@@ -61,5 +64,15 @@ public class TextField extends GuiElement implements Supplier<IGui> {
 	@Override
 	public IGui get() {
 		return gui;
+	}
+
+	@Override
+	public boolean isFocused() {
+		return field.isFocused();
+	}
+
+	@Override
+	public void setFocused(boolean focused) {
+		field.setFocused(focused);
 	}
 }

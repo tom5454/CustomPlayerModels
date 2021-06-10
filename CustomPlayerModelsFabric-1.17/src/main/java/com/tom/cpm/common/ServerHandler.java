@@ -2,6 +2,7 @@ package com.tom.cpm.common;
 
 import java.util.function.Predicate;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -33,7 +34,6 @@ public class ServerHandler {
 		netHandler = new NetHandler<>(Identifier::new);
 		netHandler.setNewNbt(NbtCompound::new);
 		netHandler.setNewPacketBuffer(() -> new PacketByteBuf(Unpooled.buffer()));
-		netHandler.setIsDedicatedServer(p -> p.getServer().isDedicated());
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUuid);
 		netHandler.setWriteCompound(PacketByteBuf::writeNbt, PacketByteBuf::readNbt);
 		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new CustomPayloadS2CPacket(rl, pb), ServerHandler::hasMod, null));
@@ -50,6 +50,15 @@ public class ServerHandler {
 		});
 		netHandler.setSendChat((p, m) -> p.networkHandler.sendPacket(new GameMessageS2CPacket(new TranslatableText(m), MessageType.CHAT, Util.NIL_UUID)));
 		netHandler.setExecutor(n -> ((IServerNetHandler)n).cpm$getServer());
+		netHandler.setScaleSetter((spe, sc) -> {
+			if(FabricLoader.getInstance().isModLoaded("pehkui")) {
+				if(sc == 0) {
+					PehkuiInterface.setScale(spe, 1);
+				} else {
+					PehkuiInterface.setScale(spe, sc);
+				}
+			}
+		});
 		netHandler.setGetNet(spe -> spe.networkHandler);
 		netHandler.setGetPlayer(net -> net.player);
 	}
@@ -58,7 +67,7 @@ public class ServerHandler {
 		netHandler.onJoin(spe);
 	}
 
-	public static void onTrackingStart(ServerPlayerEntity spe, Entity target) {
+	public static void onTrackingStart(Entity target, ServerPlayerEntity spe) {
 		ServerPlayNetworkHandler handler = spe.networkHandler;
 		NetH h = (NetH) handler;
 		if(h.cpm$hasMod()) {

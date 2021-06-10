@@ -20,6 +20,7 @@ import com.tom.cpm.common.CommandCPM;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.config.ModConfig;
 
 @Mod(modid = CustomPlayerModels.ID, acceptableRemoteVersions = "*", updateJSON = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json")
 public class CustomPlayerModels implements MinecraftCommonAccess {
@@ -46,6 +47,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 
 	@EventHandler
 	public void serverStop(FMLServerStoppingEvent evt) {
+		ModConfig.getWorldConfig().save();
 		MinecraftObjectHolder.setServerObject(null);
 	}
 

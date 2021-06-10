@@ -29,7 +29,7 @@ public class PlayerData {
 	}
 
 	public void load(String id) {
-		ConfigEntry e = ModConfig.getConfig().getEntry(ConfigKeys.SERVER_SKINS).getEntry(id);
+		ConfigEntry e = ModConfig.getWorldConfig().getEntry(ConfigKeys.SERVER_SKINS).getEntry(id);
 		boolean forced = e.getBoolean(ConfigKeys.FORCED, false);
 		String b64 = e.getString(ConfigKeys.MODEL, null);
 		if(b64 != null) {
@@ -38,7 +38,7 @@ public class PlayerData {
 	}
 
 	public void save(String id) {
-		ConfigEntry e = ModConfig.getConfig().getEntry(ConfigKeys.SERVER_SKINS);
+		ConfigEntry e = ModConfig.getWorldConfig().getEntry(ConfigKeys.SERVER_SKINS);
 		if(save) {
 			if(data == null)
 				e.clearValue(id);
@@ -50,6 +50,6 @@ public class PlayerData {
 		} else {
 			e.clearValue(id);
 		}
-		ModConfig.getConfig().save();
+		ModConfig.getWorldConfig().save();
 	}
 }

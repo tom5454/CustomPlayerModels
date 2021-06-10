@@ -29,6 +29,8 @@ public class MojangSkinsAPI {
 			httpCon.setRequestProperty("Authorization", "Bearer " + auth);
 			web = httpCon.getInputStream();
 			Log.info("[MojangSkinsAPI.uploadSkin]: Response " + httpCon.getResponseCode());
+		} catch (IOException e) {
+			Log.warn("Mojang API error", e);
 		} finally {
 			if(httpCon != null)httpCon.disconnect();
 			if(web != null)

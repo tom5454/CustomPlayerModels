@@ -432,6 +432,10 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		return baos.toByteArray();
 	}
 
+	public IOHelper flip() throws IOException {
+		return new IOHelper(toBytes());
+	}
+
 	@FunctionalInterface
 	public static interface ObjectReader<T, R> {
 		R read(T type, IOHelper block) throws IOException;

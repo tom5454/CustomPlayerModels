@@ -9,6 +9,6 @@ public interface MinecraftCommonAccess {
 		return MinecraftObjectHolder.commonObject;
 	}
 
-	public ModConfigFile getConfig();
+	ModConfigFile getConfig();
 	public ILogger getLogger();
 }

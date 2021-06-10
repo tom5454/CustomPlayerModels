@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
@@ -14,6 +15,7 @@ public class Tree<T> extends GuiElement {
 	private Map<Integer, TreeElement> map = new HashMap<>();
 	private TreeModel<T> model;
 	private Frame frame;
+	private IntConsumer sizeUpdate;
 
 	public Tree(Frame gui, TreeModel<T> model) {
 		super(gui.getGui());
@@ -32,6 +34,7 @@ public class Tree<T> extends GuiElement {
 			if(elem != null) {
 				if(evt.btn == 0 && evt.x < 5 + elem.depth * 5 && elem != root && !elem.children.isEmpty()) {
 					elem.showChildren = !elem.showChildren;
+					if(sizeUpdate != null)sizeUpdate.accept(getHeight());
 				} else {
 					model.onClick(evt, elem.value);
 				}
@@ -43,6 +46,21 @@ public class Tree<T> extends GuiElement {
 		}
 	}
 
+
+	public int getHeight() {
+		int[] y = new int[1];
+		walk(y, root);
+		return y[0] * 10;
+	}
+
+	private void walk(int[] y, TreeElement e) {
+		y[0]++;
+		if(e.showChildren) {
+			for (TreeElement i : e.children) {
+				walk(y, i);
+			}
+		}
+	}
 
 	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
@@ -93,6 +111,7 @@ public class Tree<T> extends GuiElement {
 			model.refresh(e);
 			walkChildren(t, oldTree != null ? oldTree.children : null);
 		});
+		if(sizeUpdate != null)sizeUpdate.accept(getHeight());
 	}
 
 	private TreeElement find(List<TreeElement> list, T elem) {
@@ -117,6 +136,10 @@ public class Tree<T> extends GuiElement {
 			if(oldTree != null)t.showChildren = oldTree.showChildren;
 			walkChildren(t, oldTree != null ? oldTree.children : null);
 		});
+	}
+
+	public void setSizeUpdate(IntConsumer sizeUpdate) {
+		this.sizeUpdate = sizeUpdate;
 	}
 
 	private class TreeElement {

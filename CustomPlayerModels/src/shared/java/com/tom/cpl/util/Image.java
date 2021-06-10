@@ -74,7 +74,9 @@ public class Image {
 	public void draw(Image i, int xs, int ys) {
 		for(int x = 0;x + xs < w && x < i.w;x++) {
 			for(int y = 0;y + ys < h && y < i.h;y++) {
-				data[(y + ys) * w + x + xs] = i.data[y * i.w + x];
+				int p = (y + ys) * w + x + xs;
+				if(p < 0)continue;
+				data[p] = i.data[y * i.w + x];
 			}
 		}
 	}
@@ -114,6 +116,14 @@ public class Image {
 		for(int y = 0;y<h;y++) {
 			for(int x = 0;x<w;x++) {
 				data[y * w + x] = color;
+			}
+		}
+	}
+
+	public void fill(int xs, int ys, int w, int h, int color) {
+		for(int x = 0;x + xs < this.w && x < w;x++) {
+			for(int y = 0;y + ys < this.h && y < h;y++) {
+				data[(y + ys) * this.w + x + xs] = color;
 			}
 		}
 	}

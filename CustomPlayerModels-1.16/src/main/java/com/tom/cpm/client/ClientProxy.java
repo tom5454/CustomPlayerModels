@@ -95,7 +95,7 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void initGui(GuiScreenEvent.InitGuiEvent.Post evt) {
-		if((evt.getGui() instanceof MainMenuScreen && ModConfig.getConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
+		if((evt.getGui() instanceof MainMenuScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				evt.getGui() instanceof CustomizeSkinScreen) {
 			evt.addWidget(new Button(0, 0, () -> Minecraft.getInstance().displayGuiScreen(new GuiImpl(EditorGui::new, evt.getGui()))));
 		}

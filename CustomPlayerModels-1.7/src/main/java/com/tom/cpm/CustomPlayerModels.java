@@ -13,6 +13,7 @@ import com.tom.cpm.common.CommandCPM;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.config.ModConfig;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -50,6 +51,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 
 	@EventHandler
 	public void serverStop(FMLServerStoppingEvent evt) {
+		ModConfig.getWorldConfig().save();
 		MinecraftObjectHolder.setServerObject(null);
 	}
 

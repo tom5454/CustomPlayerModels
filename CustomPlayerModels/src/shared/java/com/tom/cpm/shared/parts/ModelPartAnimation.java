@@ -353,7 +353,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					try(IOHelper d = dout.writeNextBlock()) {
 						d.write(id);
 						d.write(i);
-						for(int f = 0;f<dt.frames;f++) {
+						for(int f = 0;f<dt.frames;f+=8) {
 							int flgs = 0;
 							for(int j = 0;f+j < dt.frames && j < 8;j++) {
 								if(dt.show[i][f+j])flgs |= (1 << j);

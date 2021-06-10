@@ -108,7 +108,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void initGui(Screen screen, List<Element> children, List<AbstractButtonWidget> buttons) {
-		if((screen instanceof TitleScreen && ModConfig.getConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
+		if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				screen instanceof SkinOptionsScreen) {
 			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen)));
 			buttons.add(btn);

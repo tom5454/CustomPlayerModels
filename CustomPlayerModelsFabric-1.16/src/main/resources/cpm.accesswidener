@@ -28,3 +28,5 @@ accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTrac
 
 accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket channel Lnet/minecraft/util/Identifier;
 accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket data Lnet/minecraft/network/PacketByteBuf;
+
+accessible method net/minecraft/util/WorldSavePath <init> (Ljava/lang/String;)V

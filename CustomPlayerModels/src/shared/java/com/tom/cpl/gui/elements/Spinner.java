@@ -6,13 +6,15 @@ import java.util.List;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.gui.util.TabFocusHandler.Focusable;
 import com.tom.cpl.math.Box;
 
-public class Spinner extends GuiElement {
+public class Spinner extends GuiElement implements Focusable {
 	private float value;
 	private int dp = 3;
 	private List<Runnable> changeListeners = new ArrayList<>();
 	private TextField txtf;
+	private boolean txtfNeedsUpdate;
 	public Spinner(IGui gui) {
 		super(gui);
 		txtf = new TextField(gui);
@@ -29,6 +31,10 @@ public class Spinner extends GuiElement {
 		Box bDown = new Box(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, bounds.w, bounds.h / 2);
 		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + 1, 8, 8, enabled ? bounds.isInBounds(mouseX, mouseY) && bUp.isInBounds(mouseX, mouseY) ? 16 : 8 : 0, 0, "editor");
 		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, 8, 8, enabled ? bounds.isInBounds(mouseX, mouseY) && bDown.isInBounds(mouseX, mouseY) ? 16 : 8 : 0, 8, "editor");
+		if(txtfNeedsUpdate && !txtf.isFocused()) {
+			txtfNeedsUpdate = false;
+			txtf.setText(String.format("%." + dp + "f", value));
+		}
 	}
 
 	@Override
@@ -76,7 +82,9 @@ public class Spinner extends GuiElement {
 	public void setValue(float value) {
 		double d = Math.pow(10, dp);
 		this.value = (float) (((int) (value * d)) / d);
-		txtf.setText(String.format("%." + dp + "f", value));
+		if(!txtf.isFocused())
+			txtf.setText(String.format("%." + dp + "f", value));
+		else txtfNeedsUpdate = true;
 	}
 
 	public void setDp(int dp) {
@@ -98,5 +106,15 @@ public class Spinner extends GuiElement {
 			changeListeners.forEach(Runnable::run);
 		} catch (NumberFormatException e) {
 		}
+	}
+
+	@Override
+	public boolean isFocused() {
+		return txtf.isFocused();
+	}
+
+	@Override
+	public void setFocused(boolean focused) {
+		txtf.setFocused(focused);
 	}
 }

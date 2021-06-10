@@ -7,10 +7,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.option.SkinOptionsScreen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -104,8 +104,8 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		manager.tryUnbind();
 	}
 
-	public void initGui(Screen screen, List<Element> children, List<AbstractButtonWidget> buttons) {
-		if((screen instanceof TitleScreen && ModConfig.getConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
+	public void initGui(Screen screen, List<Element> children, List<Selectable> buttons) {
+		if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				screen instanceof SkinOptionsScreen) {
 			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen)));
 			buttons.add(btn);

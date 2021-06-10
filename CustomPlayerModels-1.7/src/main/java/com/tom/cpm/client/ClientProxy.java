@@ -109,7 +109,7 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void initGui(GuiScreenEvent.InitGuiEvent.Post evt) {
-		if((evt.gui instanceof GuiMainMenu && ModConfig.getConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
+		if((evt.gui instanceof GuiMainMenu && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				evt.gui instanceof GuiOptions) {
 			evt.buttonList.add(new Button(0, 0));
 		}

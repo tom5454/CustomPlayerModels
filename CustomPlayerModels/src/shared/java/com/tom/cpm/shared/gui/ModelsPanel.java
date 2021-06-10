@@ -57,11 +57,11 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 
 		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 		File[] fs = modelsDir.exists() ? modelsDir.listFiles((f, n) -> n.endsWith(".cpmmodel")) : null;
-		String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
+		String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
 
 		Button reset = new Button(gui, gui.i18nFormat(model == null ? "button.cpm.reset_skin.sel" : "button.cpm.reset_skin"), () -> {
-			ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL);
-			ModConfig.getConfig().save();
+			ModConfig.getCommonConfig().clearValue(ConfigKeys.SELECTED_MODEL);
+			ModConfig.getCommonConfig().save();
 			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 				MinecraftClientAccess.get().sendSkinUpdate();
 			}
@@ -242,8 +242,8 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	}
 
 	private void applySelected() {
-		ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, selected);
-		ModConfig.getConfig().save();
+		ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL, selected);
+		ModConfig.getCommonConfig().save();
 		if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 			MinecraftClientAccess.get().sendSkinUpdate();
 		}

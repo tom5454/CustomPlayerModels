@@ -16,11 +16,11 @@ public class SettingsPopup extends PopupPanel {
 		super(frm.getGui());
 
 		Checkbox chxbxTSBtn = new Checkbox(gui, gui.i18nFormat("label.cpm.config.titleScreenButton"));
-		chxbxTSBtn.setSelected(ModConfig.getConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true));
+		chxbxTSBtn.setSelected(ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true));
 		chxbxTSBtn.setAction(() -> {
-			boolean b = !ModConfig.getConfig().getBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true);
+			boolean b = !ModConfig.getCommonConfig().getBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true);
 			chxbxTSBtn.setSelected(b);
-			ModConfig.getConfig().setBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, b);
+			ModConfig.getCommonConfig().setBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, b);
 		});
 		chxbxTSBtn.setBounds(new Box(5, 5, 200, 20));
 		chxbxTSBtn.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.config.titleScreenButton")));
@@ -28,7 +28,7 @@ public class SettingsPopup extends PopupPanel {
 
 		Button buttonRMB = new Button(gui, gui.i18nFormat("button.cpm.config.rotateButton", getRotateBtn()), null);
 		buttonRMB.setAction(() -> {
-			ModConfig.getConfig().setInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, EditorGui.getRotateMouseButton() == 2 ? 1 : 2);
+			ModConfig.getCommonConfig().setInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, EditorGui.getRotateMouseButton() == 2 ? 1 : 2);
 			buttonRMB.setText(gui.i18nFormat("button.cpm.config.rotateButton", getRotateBtn()));
 		});
 		buttonRMB.setBounds(new Box(5, 30, 200, 20));
@@ -36,11 +36,11 @@ public class SettingsPopup extends PopupPanel {
 
 		Button guiScale = new Button(gui, gui.i18nFormat("button.cpm.config.scale", getScale()), null);
 		guiScale.setAction(() -> {
-			int scale = ModConfig.getConfig().getInt(ConfigKeys.EDITOR_SCALE, -1) + 1;
+			int scale = ModConfig.getCommonConfig().getInt(ConfigKeys.EDITOR_SCALE, -1) + 1;
 			if(scale >= gui.getMaxScale()) {
 				scale = -1;
 			}
-			ModConfig.getConfig().setInt(ConfigKeys.EDITOR_SCALE, scale);
+			ModConfig.getCommonConfig().setInt(ConfigKeys.EDITOR_SCALE, scale);
 			gui.setScale(scale);
 			guiScale.setText(gui.i18nFormat("button.cpm.config.scale", getScale()));
 			close();
@@ -53,7 +53,7 @@ public class SettingsPopup extends PopupPanel {
 	}
 
 	private String getScale() {
-		int scale = ModConfig.getConfig().getInt(ConfigKeys.EDITOR_SCALE, -1);
+		int scale = ModConfig.getCommonConfig().getInt(ConfigKeys.EDITOR_SCALE, -1);
 		return scale == -1 ? gui.i18nFormat("button.cpm.config.scale.vanilla") : scale == 0 ? gui.i18nFormat("button.cpm.config.scale.auto") : Integer.toString(scale);
 	}
 
@@ -68,6 +68,6 @@ public class SettingsPopup extends PopupPanel {
 
 	@Override
 	public void onClosed() {
-		ModConfig.getConfig().save();
+		ModConfig.getCommonConfig().save();
 	}
 }

@@ -33,7 +33,7 @@ public class GestureGui extends Frame {
 	public GestureGui(IGui gui) {
 		super(gui);
 		gui.setCloseListener(r -> {
-			ModConfig.getConfig().save();
+			ModConfig.getCommonConfig().save();
 			r.run();
 		});
 	}
@@ -41,7 +41,7 @@ public class GestureGui extends Frame {
 	@Override
 	public void keyPressed(KeyboardEvent event) {
 		if(hoveredBtn != null) {
-			ConfigEntry ce = ModConfig.getConfig().getEntry(ConfigKeys.KEYBINDS);
+			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
 			String hoveredID = hoveredBtn.pose != null ? "p" + hoveredBtn.pose.getName() : "g" + hoveredBtn.gesture.name;
 			String keybindPressed = null;
 			List<String> dup = new ArrayList<>();
@@ -238,7 +238,7 @@ public class GestureGui extends Frame {
 		}
 
 		public void getKb() {
-			ConfigEntry ce = ModConfig.getConfig().getEntry(ConfigKeys.KEYBINDS);
+			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
 			this.kb = null;
 			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
 				if(kb.getName().startsWith("qa")) {

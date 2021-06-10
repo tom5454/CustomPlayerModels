@@ -107,6 +107,14 @@ public class EditorAnim implements IAnim {
 		psfs = null;
 	}
 
+	public void clearSelectedData() {
+		if(currentFrame != null && editor.getSelectedElement() != null) {
+			currentFrame.clearSelectedData(editor.getSelectedElement());
+		}
+		components = null;
+		psfs = null;
+	}
+
 	public void setColor(int rgb) {
 		if(currentFrame != null && editor.getSelectedElement() != null) {
 			currentFrame.setColor(editor.getSelectedElement(), rgb);
@@ -128,8 +136,14 @@ public class EditorAnim implements IAnim {
 	public void deleteFrame() {
 		if(currentFrame != null) {
 			AnimFrame frm = currentFrame;
-			editor.addUndo(() -> frames.add(frm));
-			editor.runOp(() -> frames.remove(frm));
+			int ind = frames.indexOf(frm);
+			if(ind != -1) {
+				editor.addUndo(() -> frames.add(ind, frm));
+				editor.runOp(() -> frames.remove(frm));
+				currentFrame = frames.size() <= ind ? frames.isEmpty() ? null : frames.get(0) : frames.get(ind);
+			} else {
+				currentFrame = null;
+			}
 		}
 		components = null;
 		psfs = null;

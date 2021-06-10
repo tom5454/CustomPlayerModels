@@ -366,6 +366,16 @@ public class GuiImpl extends GuiScreen implements IGui {
 		public void setEnabled(boolean enabled) {
 			field.setEnabled(enabled);
 		}
+
+		@Override
+		public boolean isFocused() {
+			return field.isFocused();
+		}
+
+		@Override
+		public void setFocused(boolean focused) {
+			field.setFocused(focused);
+		}
 	}
 
 	@Override
@@ -509,5 +519,14 @@ public class GuiImpl extends GuiScreen implements IGui {
 	@Override
 	public CtxStack getStack() {
 		return stack;
+	}
+
+	@Override
+	public void updateScreen() {
+		try {
+			gui.tick();
+		} catch (Throwable e) {
+			onGuiException("Error in tick gui", e, true);
+		}
 	}
 }

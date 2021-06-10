@@ -8,9 +8,9 @@ public class Slider extends GuiElement {
 	private Runnable action;
 	private boolean enableDrag;
 	protected float v;
-	public Slider(IGui gui, String value) {
+	public Slider(IGui gui, String name) {
 		super(gui);
-		this.name = value;
+		this.name = name;
 	}
 
 	@Override

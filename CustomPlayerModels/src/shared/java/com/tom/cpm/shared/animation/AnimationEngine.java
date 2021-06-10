@@ -96,7 +96,7 @@ public class AnimationEngine {
 	public void onKeybind(int id) {
 		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		if(def != null) {
-			ConfigEntry ce = ModConfig.getConfig().getEntry(ConfigKeys.KEYBINDS);
+			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
 			String c = ce.getString("qa_" + id, null);
 			if(c != null) {
 				if(c.startsWith("p")) {

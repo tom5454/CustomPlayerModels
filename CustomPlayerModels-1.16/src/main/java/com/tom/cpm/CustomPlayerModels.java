@@ -64,8 +64,8 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 
 	@SubscribeEvent
 	public void onStop(FMLServerStoppingEvent e) {
+		ModConfig.getWorldConfig().save();
 		MinecraftObjectHolder.setServerObject(null);
-		ModConfig.getConfig().save();
 	}
 
 	@Override

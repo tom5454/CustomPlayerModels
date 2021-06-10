@@ -385,6 +385,16 @@ public class GuiImpl extends Screen implements IGui {
 		public void setEnabled(boolean enabled) {
 			field.setEditable(enabled);
 		}
+
+		@Override
+		public boolean isFocused() {
+			return field.isFocused();
+		}
+
+		@Override
+		public void setFocused(boolean focused) {
+			field.setTextFieldFocused(focused);
+		}
 	}
 
 	@Override
@@ -526,5 +536,14 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public CtxStack getStack() {
 		return stack;
+	}
+
+	@Override
+	public void tick() {
+		try {
+			gui.tick();
+		} catch (Throwable e) {
+			onGuiException("Error in tick gui", e, true);
+		}
 	}
 }

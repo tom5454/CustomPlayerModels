@@ -25,6 +25,7 @@ import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.MinecraftServerAccess;
 
 public class CPMBukkitPlugin extends JavaPlugin {
 	public ModConfigFile config;
@@ -36,6 +37,7 @@ public class CPMBukkitPlugin extends JavaPlugin {
 	public void onDisable() {
 		super.onDisable();
 		MinecraftObjectHolder.setCommonObject(null);
+		MinecraftObjectHolder.setServerObject(null);
 		config.save();
 	}
 
@@ -77,6 +79,13 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			@Override
 			public ILogger getLogger() {
 				return log;
+			}
+		});
+		MinecraftObjectHolder.setServerObject(new MinecraftServerAccess() {
+
+			@Override
+			public ModConfigFile getConfig() {
+				return config;
 			}
 		});
 		net = new Network(this);

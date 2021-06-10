@@ -3,7 +3,9 @@ package com.tom.cpm.shared.editor.gui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.util.ElementGroup;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTool;
@@ -52,6 +54,21 @@ public class DrawToolsPanel extends Panel {
 			button.setBounds(new Box(5 + 25 * tool.ordinal(), 80, 20, 20));
 			editor.setTool.add(tool.setEnabled(button));
 			addElement(button);
+		}
+
+		{
+			ElementGroup<EditorTool> group = new ElementGroup<>();
+			editor.setTool.add(group);
+
+			Slider sizeSlider = new Slider(gui, gui.i18nFormat("label.cpm.brushSize", editor.brushSize));
+			group.addElement(EditorTool.PEN, sizeSlider);
+			group.addElement(EditorTool.RUBBER, sizeSlider);
+			sizeSlider.setAction(() -> {
+				editor.brushSize = Math.max(1, (int) (sizeSlider.getValue() * 10));
+				sizeSlider.setText(gui.i18nFormat("label.cpm.brushSize", editor.brushSize));
+			});
+			sizeSlider.setBounds(new Box(5, 105, w - 10, 20));
+			//addElement(sizeSlider);//TODO
 		}
 
 		editor.setTool.accept(editor.drawMode);

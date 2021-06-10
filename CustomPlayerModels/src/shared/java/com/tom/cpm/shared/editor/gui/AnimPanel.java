@@ -12,6 +12,7 @@ import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.ListView;
@@ -25,9 +26,11 @@ import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 public class AnimPanel extends Panel {
 	private Editor editor;
 	private DropDownBox<IAnim> animSel;
+	private TabFocusHandler tabHandler;
 
 	public AnimPanel(IGui gui, EditorGui e) {
 		super(gui);
+		tabHandler = new TabFocusHandler(gui);
 		editor = e.getEditor();
 		setBounds(new Box(0, 0, 170, 330));
 		setBackgroundColor(gui.getColors().panel_background);
@@ -117,9 +120,10 @@ public class AnimPanel extends Panel {
 			else duration.setValue(1000);
 		});
 		duration.addChangeListener(() -> editor.setAnimDuration((int) duration.getValue()));
+		tabHandler.add(duration);
 
-		PosPanel.addVec3("rotation", 145, v -> editor.setAnimRot(v), this, editor.setAnimRot, 1);
-		PosPanel.addVec3("position", 175, v -> editor.setAnimPos(v), this, editor.setAnimPos, 2);
+		PosPanel.addVec3("rotation", 145, v -> editor.setAnimRot(v), this, editor.setAnimRot, 1, tabHandler);
+		PosPanel.addVec3("position", 175, v -> editor.setAnimPos(v), this, editor.setAnimPos, 2, tabHandler);
 
 		ColorButton colorBtn = new ColorButton(gui, e, editor::setAnimColor);
 		colorBtn.setBounds(new Box(5, 205, 140, 20));
@@ -149,6 +153,11 @@ public class AnimPanel extends Panel {
 		lblPri.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim_priority")));
 		addElement(lblPri);
 
+		Button clearAnimData = new Button(gui, gui.i18nFormat("button.cpm.clearAnimData"), new ConfirmPopup(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimPartData, null));
+		clearAnimData.setBounds(new Box(110, 120, 55, 18));
+		clearAnimData.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.clearAnimData")));
+		addElement(clearAnimData);
+
 		Spinner animPriority = new Spinner(gui);
 		editor.setAnimPriority.add(v -> {
 			animPriority.setEnabled(v != null);
@@ -159,6 +168,7 @@ public class AnimPanel extends Panel {
 		animPriority.setDp(0);
 		animPriority.addChangeListener(() -> editor.setAnimPriority((int) animPriority.getValue()));
 		addElement(animPriority);
+		tabHandler.add(animPriority);
 	}
 
 	public interface IAnim {}

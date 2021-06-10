@@ -20,7 +20,7 @@ accessible field net/minecraft/client/model/ModelPart children Ljava/util/Map;
 
 accessible field net/minecraft/client/render/entity/EntityRenderDispatcher modelRenderers Ljava/util/Map;
 
-accessible field net/minecraft/client/gui/widget/AbstractButtonWidget height I
+accessible field net/minecraft/client/gui/widget/ClickableWidget height I
 
 accessible field net/minecraft/client/option/GameOptions enabledPlayerModelParts Ljava/util/Set;
 
@@ -39,3 +39,5 @@ accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTrac
 
 accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket channel Lnet/minecraft/util/Identifier;
 accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket data Lnet/minecraft/network/PacketByteBuf;
+
+accessible method net/minecraft/util/WorldSavePath <init> (Ljava/lang/String;)V

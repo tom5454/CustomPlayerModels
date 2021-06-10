@@ -12,6 +12,7 @@ import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.ElementGroup;
+import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
@@ -20,9 +21,12 @@ import com.tom.cpm.shared.editor.gui.popup.SkinSettingsPopup;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 
 public class PosPanel extends Panel {
+	private TabFocusHandler tabHandler;
 
 	public PosPanel(IGui gui, EditorGui e) {
 		super(gui);
+		tabHandler = new TabFocusHandler(gui);
+		addElement(tabHandler);
 		Editor editor = e.getEditor();
 		setBounds(new Box(0, 0, 170, 475));
 		setBackgroundColor(gui.getColors().panel_background);
@@ -38,13 +42,14 @@ public class PosPanel extends Panel {
 			});
 			nameField.setEventListener(() -> editor.setName(nameField.getText()));
 			addElement(nameField);
+			tabHandler.add(nameField);
 		}
 
-		addVec3("size", 40, v -> editor.setVec(v, VecType.SIZE), this, editor.setSize, 1);
-		addVec3("offset", 70, v -> editor.setVec(v, VecType.OFFSET), this, editor.setOffset, 2);
-		addVec3("rotation", 100, v -> editor.setVec(v, VecType.ROTATION), this, editor.setRot, 1);
-		addVec3("position", 130, v -> editor.setVec(v, VecType.POSITION), this, editor.setPosition, 2);
-		addVec3("scale", 160, v -> editor.setVec(v, VecType.SCALE), this, editor.setScale, 2);
+		addVec3("size", 40, v -> editor.setVec(v, VecType.SIZE), this, editor.setSize, 1, tabHandler);
+		addVec3("offset", 70, v -> editor.setVec(v, VecType.OFFSET), this, editor.setOffset, 2, tabHandler);
+		addVec3("rotation", 100, v -> editor.setVec(v, VecType.ROTATION), this, editor.setRot, 1, tabHandler);
+		addVec3("position", 130, v -> editor.setVec(v, VecType.POSITION), this, editor.setPosition, 2, tabHandler);
+		addVec3("scale", 160, v -> editor.setVec(v, VecType.SCALE), this, editor.setScale, 2, tabHandler);
 
 		{
 			addElement(new Label(gui, gui.i18nFormat("label.cpm.mcScale")).setBounds(new Box(5, 190, 0, 0)));
@@ -58,6 +63,7 @@ public class PosPanel extends Panel {
 			spinnerS.addChangeListener(() -> editor.setMcScale(spinnerS.getValue()));
 			spinnerS.setDp(3);
 			addElement(spinnerS);
+			tabHandler.add(spinnerS);
 
 			Checkbox box = new Checkbox(gui, gui.i18nFormat("label.cpm.mirror"));
 			box.setBounds(new Box(80, 200, 70, 18));
@@ -112,6 +118,11 @@ public class PosPanel extends Panel {
 			spinnerT.addChangeListener(r);
 			spinnerS.addChangeListener(() -> editor.setValue(spinnerS.getValue()));
 
+			tabHandler.add(spinnerU);
+			tabHandler.add(spinnerV);
+			tabHandler.add(spinnerT);
+			tabHandler.add(spinnerS);
+
 			editor.setModeBtn.add(b -> {
 				if(b == null) {
 					modeBtn.setEnabled(false);
@@ -121,7 +132,7 @@ public class PosPanel extends Panel {
 					modeBtn.setText(b);
 				}
 			});
-			editor.setModePanel.add(group::set);
+			editor.setModePanel.add(group);
 			editor.setTexturePanel.add(v -> {
 				if(v != null) {
 					spinnerU.setValue(v.x);
@@ -170,7 +181,7 @@ public class PosPanel extends Panel {
 		}
 	}
 
-	public static void addVec3(String name, int y, Consumer<Vec3f> consumer, Panel panel, Updater<Vec3f> updater, int dp) {
+	public static void addVec3(String name, int y, Consumer<Vec3f> consumer, Panel panel, Updater<Vec3f> updater, int dp, TabFocusHandler tabHandler) {
 		IGui gui = panel.getGui();
 		Spinner spinnerX = new Spinner(gui);
 		Spinner spinnerY = new Spinner(gui);
@@ -192,6 +203,10 @@ public class PosPanel extends Panel {
 		panel.addElement(spinnerX);
 		panel.addElement(spinnerY);
 		panel.addElement(spinnerZ);
+
+		tabHandler.add(spinnerX);
+		tabHandler.add(spinnerY);
+		tabHandler.add(spinnerZ);
 
 		updater.add(v -> {
 			boolean en = v != null;

@@ -7,7 +7,8 @@ import com.tom.cpl.gui.elements.GuiElement;
 public enum EditorTool {
 	PEN,
 	RUBBER,
-	MOVE_UV
+	MOVE_UV,
+	FILL
 	;
 	public static final EditorTool[] VALUES = values();
 

@@ -21,9 +21,7 @@ public class ScrollPanel extends Panel {
 		display.mouseWheel(event.offset(bounds).offset(-xScroll, -yScroll));
 		if(!event.isConsumed() && event.isInBounds(bounds)) {
 			int newScroll = yScroll - event.btn * 5;
-			if(newScroll >= 0 && newScroll <= (display.getBounds().h - bounds.h)) {
-				yScroll = newScroll;
-			}
+			yScroll = Math.max(0, Math.min(newScroll, display.getBounds().h - bounds.h - 1));
 			event.consume();
 		}
 	}

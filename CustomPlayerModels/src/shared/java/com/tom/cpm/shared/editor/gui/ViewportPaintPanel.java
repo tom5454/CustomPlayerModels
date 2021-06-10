@@ -73,7 +73,7 @@ public class ViewportPaintPanel extends ViewportPanelBase {
 					editor.setPenColor.accept(editor.penColor);
 					dragging = 2;
 				} else
-					editor.drawPixel(v.x, v.y);
+					editor.drawPixel(v.x, v.y, true);
 			}
 			return true;
 		}
@@ -86,7 +86,7 @@ public class ViewportPaintPanel extends ViewportPanelBase {
 			Vec2i v = getHoveredTexPos();
 			if(v != null) {
 				if(dragging == 1) {
-					editor.drawPixel(v.x, v.y);
+					editor.drawPixel(v.x, v.y, true);
 				} else if(dragging == 2) {
 					editor.penColor = editor.skinProvider.getImage().getRGB(v.x, v.y);
 					editor.setPenColor.accept(editor.penColor);

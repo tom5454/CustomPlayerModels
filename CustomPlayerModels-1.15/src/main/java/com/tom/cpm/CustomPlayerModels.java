@@ -22,6 +22,7 @@ import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.config.ModConfig;
 
 @Mod("cpm")
 public class CustomPlayerModels implements MinecraftCommonAccess {
@@ -63,6 +64,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 
 	@SubscribeEvent
 	public void onStop(FMLServerStoppingEvent e) {
+		ModConfig.getWorldConfig().save();
 		MinecraftObjectHolder.setServerObject(null);
 	}
 

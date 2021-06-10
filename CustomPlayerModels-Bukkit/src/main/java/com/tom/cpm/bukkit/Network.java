@@ -31,6 +31,7 @@ import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.network.NetHandler.NBTGetter;
 import com.tom.cpm.shared.network.NetHandler.NBTSetter;
+import com.tom.cpm.shared.util.Log;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -87,7 +88,6 @@ public class Network implements PluginMessageListener, Listener {
 			netHandler.setNewNbt((Supplier<Object>) Util.constructor(NBTTagCompound));
 			newPB = (Function<ByteBuf, ByteBuf>) Util.constructor(PacketDataSerializer, ByteBuf.class);
 			netHandler.setNewPacketBuffer(() -> newPB.apply(Unpooled.buffer()));
-			netHandler.setIsDedicatedServer(p -> true);
 			netHandler.setGetPlayerUUID(Player::getUniqueId);
 			MethodHandles.Lookup lookup = MethodHandles.lookup();
 			MethodHandle writeC = lookup.unreflect(writeCompound);
@@ -214,8 +214,9 @@ public class Network implements PluginMessageListener, Listener {
 				}
 			}
 		}
-		System.out.println("Created player data for player");
+		Log.info("Created player data for player");
 		Meta mt = new Meta(player);
+		mt.cpm$setEncodedModelData(new PlayerData());
 		player.setMetadata(PLAYER_DATA, new FixedMetadataValue(plugin, mt));
 		return mt;
 	}

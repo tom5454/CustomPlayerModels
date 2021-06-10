@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
   	"common.ServerPlayNetHandlerMixin",
-  	"common.PlayerManagerMixin",
-  	"common.EntityTrackerEntryMixin"
+  	"common.PlayerManagerMixin"
   ],
   "client": [
     "PlayerRendererMixin",

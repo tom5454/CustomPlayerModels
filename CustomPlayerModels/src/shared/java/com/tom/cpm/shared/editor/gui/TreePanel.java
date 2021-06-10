@@ -3,6 +3,7 @@ package com.tom.cpm.shared.editor.gui;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tree;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.Editor;
@@ -17,10 +18,21 @@ public class TreePanel extends Panel {
 		setBackgroundColor(gui.getColors().panel_background);
 		Editor editor = e.getEditor();
 
+		ScrollPanel treePanel = new ScrollPanel(gui);
+		treePanel.setBounds(new Box(0, 0, 150, height - 30));
+		addElement(treePanel);
+
 		Tree<TreeElement> tree = new Tree<>(e, new ModelTree(editor));
-		tree.setBounds(new Box(0, 0, 150, height - 20));
-		addElement(tree);
 		editor.updateGui.add(tree::updateTree);
+
+		Panel tp = new Panel(gui);
+		treePanel.setDisplay(tp);
+		tp.addElement(tree);
+
+		tree.setSizeUpdate(h -> {
+			tp.setBounds(new Box(0, 0, 150, h));
+			tree.setBounds(new Box(0, 0, 150, h));
+		});
 
 		ButtonIcon newBtn = new ButtonIcon(gui, "editor", 0, 16, editor::addNew);
 		newBtn.setBounds(new Box(5, height - 24, 18, 18));

@@ -399,16 +399,4 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			this.elem = null;
 		}
 	}
-
-	public static boolean unbindHand(Object v) {
-		RedirectModelRendererBase rd = (RedirectModelRendererBase) v;
-		RedirectHolderPlayer rdhp = (RedirectHolderPlayer) rd.holder;
-		return rd == rdhp.bipedLeftArmwear || rd == rdhp.bipedRightArmwear;
-	}
-
-	public static boolean unbindSkull(Object v) {
-		RedirectModelRendererBase rd = (RedirectModelRendererBase) v;
-		RedirectHolderSkull rdhs = (RedirectHolderSkull) rd.holder;
-		return rd == rdhs.hat;
-	}
 }

@@ -62,7 +62,16 @@ public class Cube {
 		dout.writeVec3ub(cube.size);
 		dout.writeVec6b(cube.pos);
 		dout.writeVec6b(cube.offset);
-		dout.writeAngle(cube.rotation);
+		Vec3f rot = new Vec3f(cube.rotation);
+		if(rot.x < 0 || rot.x > 360 || rot.y < 0 || rot.y > 360 || rot.z < 0 || rot.z > 360) {
+			while(rot.x < 0)   rot.x += 360;
+			while(rot.x >= 360)rot.x -= 360;
+			while(rot.y < 0)   rot.y += 360;
+			while(rot.y >= 360)rot.y -= 360;
+			while(rot.z < 0)   rot.z += 360;
+			while(rot.z >= 360)rot.z -= 360;
+		}
+		dout.writeAngle(rot);
 		dout.writeVarInt(cube.parentId);
 		dout.writeByte(cube.texSize);
 		if(cube.texSize == 0) {

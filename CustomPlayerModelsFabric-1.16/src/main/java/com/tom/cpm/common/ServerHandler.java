@@ -33,7 +33,6 @@ public class ServerHandler {
 		netHandler = new NetHandler<>(Identifier::new);
 		netHandler.setNewNbt(CompoundTag::new);
 		netHandler.setNewPacketBuffer(() -> new PacketByteBuf(Unpooled.buffer()));
-		netHandler.setIsDedicatedServer(p -> p.getServer().isDedicated());
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUuid);
 		netHandler.setWriteCompound(PacketByteBuf::writeCompoundTag, PacketByteBuf::readCompoundTag);
 		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new CustomPayloadS2CPacket(rl, pb), ServerHandler::hasMod, null));

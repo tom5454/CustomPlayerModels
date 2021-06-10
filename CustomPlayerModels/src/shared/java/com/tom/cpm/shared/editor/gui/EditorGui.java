@@ -57,15 +57,15 @@ public class EditorGui extends Frame {
 			this.editor = toReopen;
 			this.editor.setGui(this);
 			toReopen = null;
-			ModConfig.getConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
-			ModConfig.getConfig().save();
+			ModConfig.getCommonConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
+			ModConfig.getCommonConfig().save();
 		} else {
 			this.editor = new Editor();
 			this.editor.setGui(this);
-			String reopen = ModConfig.getConfig().getString(ConfigKeys.REOPEN_PROJECT, null);
+			String reopen = ModConfig.getCommonConfig().getString(ConfigKeys.REOPEN_PROJECT, null);
 			if(reopen != null) {
-				ModConfig.getConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
-				ModConfig.getConfig().save();
+				ModConfig.getCommonConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
+				ModConfig.getCommonConfig().save();
 				load(new File(reopen));
 			} else {
 				this.editor.loadDefaultPlayerModel();
@@ -88,7 +88,7 @@ public class EditorGui extends Frame {
 
 	@Override
 	public void initFrame(int width, int height) {
-		int scale = ModConfig.getConfig().getInt(ConfigKeys.EDITOR_SCALE, -1);
+		int scale = ModConfig.getCommonConfig().getInt(ConfigKeys.EDITOR_SCALE, -1);
 		if(scale != -1) {
 			if(gui.getScale() != scale) {
 				gui.setScale(scale);
@@ -168,11 +168,24 @@ public class EditorGui extends Frame {
 		Panel p = new Panel(gui);
 		int treeW = Math.min(150, height / 2);
 		p.setBounds(new Box(width - treeW, height / 2, treeW, height / 2));
-		Tree<TreeElement> tree = new Tree<>(this, new ModelTree(editor));
-		tree.setBounds(new Box(0, 0, treeW, height / 2 - 25));
-		p.addElement(tree);
 		p.setBackgroundColor(gui.getColors().panel_background);
+
+		ScrollPanel treePanel = new ScrollPanel(gui);
+		treePanel.setBounds(new Box(0, 0, treeW, height / 2 - 45));
+		p.addElement(treePanel);
+
+		Tree<TreeElement> tree = new Tree<>(this, new ModelTree(editor));
 		editor.updateGui.add(tree::updateTree);
+
+		Panel tp = new Panel(gui);
+		treePanel.setDisplay(tp);
+		tp.addElement(tree);
+
+		tree.setSizeUpdate(h -> {
+			tp.setBounds(new Box(0, 0, treeW, h));
+			tree.setBounds(new Box(0, 0, treeW, h));
+		});
+
 		textureEditor.addElement(p);
 
 		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - treeW, height / 2));
@@ -282,34 +295,9 @@ public class EditorGui extends Frame {
 			openPopup(fc);
 		}));
 
-		pp.addButton(gui.i18nFormat("button.cpm.file.save"), () -> {
-			if(editor.file != null) {
-				save(editor.file);
-			} else {
-				FileChooserPopup fc = new FileChooserPopup(this);
-				fc.setTitle(gui.i18nFormat("label.cpm.saveFile"));
-				fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
-				fc.setFilter(new FileFilter("cpmproject"));
-				fc.setSaveDialog(true);
-				fc.setExtAdder(n -> n + ".cpmproject");
-				fc.setFileName(editor.file != null ? editor.file.getName() : gui.i18nFormat("label.cpm.new_project"));
-				fc.setAccept(this::save);
-				fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
-				openPopup(fc);
-			}
-		});
+		pp.addButton(gui.i18nFormat("button.cpm.file.save"), this::save);
 
-		pp.addButton(gui.i18nFormat("button.cpm.file.saveAs"), () -> {
-			FileChooserPopup fc = new FileChooserPopup(this);
-			fc.setTitle(gui.i18nFormat("label.cpm.saveFile"));
-			fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
-			fc.setFilter(new FileFilter("cpmproject"));
-			fc.setSaveDialog(true);
-			fc.setExtAdder(n -> n + ".cpmproject");
-			fc.setAccept(this::save);
-			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
-			openPopup(fc);
-		});
+		pp.addButton(gui.i18nFormat("button.cpm.file.saveAs"), this::saveAs);
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> openPopup(ExportSkinPopup.createPopup(this)));
 
@@ -318,6 +306,26 @@ public class EditorGui extends Frame {
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.exit"), gui::close);
+	}
+
+	private void save() {
+		if(editor.file != null) {
+			saveProject(editor.file);
+		} else {
+			saveAs();
+		}
+	}
+
+	private void saveAs() {
+		FileChooserPopup fc = new FileChooserPopup(this);
+		fc.setTitle(gui.i18nFormat("label.cpm.saveFile"));
+		fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
+		fc.setFilter(new FileFilter("cpmproject"));
+		fc.setSaveDialog(true);
+		fc.setExtAdder(n -> n + ".cpmproject");
+		fc.setAccept(this::saveProject);
+		fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
+		openPopup(fc);
 	}
 
 	private void initEditMenu() {
@@ -334,21 +342,9 @@ public class EditorGui extends Frame {
 		PopupMenu tools = new PopupMenu(gui, this);
 		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.tools"), tools);
 
-		tools.addButton(gui.i18nFormat("button.cpm.edit.convert_model_custom"), () -> Generators.convertModel(editor)).setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.edit.convert_model_custom")));
-
-		tools.addButton(gui.i18nFormat("button.cpm.edit.add_skin_layer2"), () -> Generators.addSkinLayer(editor));
-
-		tools.addButton(gui.i18nFormat("button.cpm.edit.convert2template"), () -> {
-			if (editor.templateSettings == null) {
-				if (editor.dirty) {
-					openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.must_save")));
-				} else {
-					if(editor.file == null)
-						setupTemplate();
-					else
-						openPopup(new ConfirmPopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warn_c2t"), this::setupTemplate, null));
-				}
-			}
+		Generators.generators.forEach(g -> {
+			Button btn = tools.addButton(g.name, () -> g.func.accept(this));
+			if(g.tooltip != null)btn.setTooltip(new Tooltip(this, gui.i18nFormat(g.tooltip)));
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.add_template"), new InputPopup(this, gui.i18nFormat("label.cpm.template_link_input"), gui.i18nFormat("label.cpm.template_link_input.desc"), link -> {
@@ -375,13 +371,6 @@ public class EditorGui extends Frame {
 		pp.addButton(gui.i18nFormat("button.cpm.models"), () -> openPopup(new SkinsPopup(this)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(gui, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
-	}
-
-	private void setupTemplate() {
-		editor.templateSettings = new TemplateSettings(editor);
-		Generators.setupTemplateModel(editor);
-		editor.markDirty();
-		editor.updateGui();
 	}
 
 	private void initEffectMenu() {
@@ -488,7 +477,7 @@ public class EditorGui extends Frame {
 		}
 	}
 
-	private void save(File file) {
+	private void saveProject(File file) {
 		try {
 			editor.save(file);
 		} catch (Exception e) {
@@ -530,6 +519,9 @@ public class EditorGui extends Frame {
 					editor.redo();
 					event.consume();
 				}
+				if(event.matches("s")) {
+					save();
+				}
 			}
 			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
 				editor.restitchTexture();
@@ -539,13 +531,18 @@ public class EditorGui extends Frame {
 	}
 
 	public static int getRotateMouseButton() {
-		return ModConfig.getConfig().getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2);
+		return ModConfig.getCommonConfig().getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2);
 	}
 
 	public static boolean doOpenEditor() {
-		return toReopen != null || ModConfig.getConfig().getString(ConfigKeys.REOPEN_PROJECT, null) != null;
+		return toReopen != null || ModConfig.getCommonConfig().getString(ConfigKeys.REOPEN_PROJECT, null) != null;
 	}
 
 	@Override
 	public void logMessage(String msg) {}
+
+	@Override
+	public void tick() {
+		editor.tick();
+	}
 }

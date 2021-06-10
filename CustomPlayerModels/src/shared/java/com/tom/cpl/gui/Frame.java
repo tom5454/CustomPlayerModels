@@ -172,6 +172,8 @@ public abstract class Frame extends Panel {
 	}
 
 	public void logMessage(String msg) {
+	}
 
+	public void tick() {
 	}
 }

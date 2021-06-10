@@ -21,7 +21,6 @@ public class TextureEditorPanel extends GuiElement {
 	private Editor editor;
 	public Supplier<Vec2i> cursorPos;
 	private Vec2i mouseCursorPos = new Vec2i();
-	private ModelElement draggingElem;
 
 	public TextureEditorPanel(IGui gui, Editor editor, int zoom) {
 		super(gui);
@@ -127,13 +126,14 @@ public class TextureEditorPanel extends GuiElement {
 					switch (editor.drawMode) {
 					case PEN:
 					case RUBBER:
+					case FILL:
 					{
 						if(gui.isCtrlDown()) {
 							editor.penColor = provider.getImage().getRGB(px, py);
 							editor.setPenColor.accept(editor.penColor);
 							dragging = false;
 						} else
-							editor.drawPixel(px, py);
+							editor.drawPixel(px, py, false);
 					}
 					break;
 
@@ -141,7 +141,14 @@ public class TextureEditorPanel extends GuiElement {
 					{
 						dragX = px;
 						dragY = py;
-						editor.selectedElement = getElementUnderMouse(px, py);
+						ModelElement me = getElementUnderMouse(px, py);
+						editor.selectedElement = me;
+						int u = me.u;
+						int v = me.v;
+						editor.addUndo(() -> {
+							me.u = u;
+							me.v = v;
+						});
 					}
 					break;
 
@@ -175,7 +182,8 @@ public class TextureEditorPanel extends GuiElement {
 						switch (editor.drawMode) {
 						case PEN:
 						case RUBBER:
-							editor.drawPixel(px, py);
+						case FILL:
+							editor.drawPixel(px, py, false);
 							break;
 
 						case MOVE_UV:
@@ -213,6 +221,24 @@ public class TextureEditorPanel extends GuiElement {
 	public boolean mouseRelease(int x, int y, int btn) {
 		if(bounds.isInBounds(x, y) || dragging) {
 			dragging = false;
+			switch (editor.drawMode) {
+			case MOVE_UV:
+			{
+				ModelElement me = editor.getSelectedElement();
+				if(me != null) {
+					int u = me.u;
+					int v = me.v;
+					editor.setCurrentOp(() -> {
+						me.u = u;
+						me.v = v;
+					});
+				}
+			}
+			break;
+
+			default:
+				break;
+			}
 			return true;
 		}
 		return false;

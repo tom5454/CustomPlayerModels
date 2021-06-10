@@ -56,7 +56,10 @@ public class CPMASMClientHooks {
 	}
 
 	public static void postRenderSkull(ModelRenderer r, float scale, RenderPlayer rpe) {
-		rpe.getMainModel().bipedHead.postRender(scale);
+		if(rpe != null)
+			rpe.getMainModel().bipedHead.postRender(scale);
+		else
+			r.postRender(scale);
 	}
 
 	public static void onLogout() {

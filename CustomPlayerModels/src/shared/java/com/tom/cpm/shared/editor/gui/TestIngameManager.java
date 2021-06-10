@@ -11,14 +11,14 @@ public class TestIngameManager {
 	private static final String VANILLA_MODEL = "~~VANILLA~~";
 
 	public static void checkConfig() {
-		String old = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL_OLD, null);
+		String old = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL_OLD, null);
 		if(old != null) {
-			ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL_OLD);
+			ModConfig.getCommonConfig().clearValue(ConfigKeys.SELECTED_MODEL_OLD);
 			if(VANILLA_MODEL.equals(old))
-				ModConfig.getConfig().clearValue(ConfigKeys.SELECTED_MODEL);
+				ModConfig.getCommonConfig().clearValue(ConfigKeys.SELECTED_MODEL);
 			else
-				ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, old);
-			ModConfig.getConfig().save();
+				ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL, old);
+			ModConfig.getCommonConfig().save();
 		}
 	}
 
@@ -39,16 +39,16 @@ public class TestIngameManager {
 			else
 				throw new UnsupportedOperationException();
 			if(!Exporter.exportTempModel(e.getEditor(), e))return false;
-			String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
+			String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
 			if(model != null) {
-				ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, model);
+				ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, model);
 			} else {
-				ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, VANILLA_MODEL);
+				ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, VANILLA_MODEL);
 			}
-			ModConfig.getConfig().setString(ConfigKeys.SELECTED_MODEL, Exporter.TEMP_MODEL);
+			ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL, Exporter.TEMP_MODEL);
 			open.run();
-			ModConfig.getConfig().setString(ConfigKeys.REOPEN_PROJECT, e.getEditor().file.getAbsolutePath());
-			ModConfig.getConfig().save();
+			ModConfig.getCommonConfig().setString(ConfigKeys.REOPEN_PROJECT, e.getEditor().file.getAbsolutePath());
+			ModConfig.getCommonConfig().save();
 			return true;
 		} catch (UnsupportedOperationException ex) {
 			e.openPopup(new MessagePopup(e.getGui(), e.getGui().i18nFormat("label.cpm.error"), e.getGui().i18nFormat("label.cpm.test_unsupported")));

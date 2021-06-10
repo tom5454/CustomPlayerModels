@@ -283,4 +283,8 @@ public class AnimFrame {
 	public void copy(AnimFrame from) {
 		from.components.forEach((e, dt) -> components.put(e, new Data(dt)));
 	}
+
+	public void clearSelectedData(ModelElement me) {
+		components.remove(me);
+	}
 }

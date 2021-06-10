@@ -387,17 +387,4 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			this.elem = null;
 		}
 	}
-
-	public static boolean unbindHand(Object v) {
-		RedirectModelRenderer rd = (RedirectModelRenderer) v;
-		RedirectHolderPlayer rdhp = (RedirectHolderPlayer) rd.holder;
-		return rd == rdhp.bipedLeftArmwear || rd == rdhp.bipedRightArmwear;
-	}
-
-	public static boolean unbindSkull(Object v) {
-		RedirectModelRenderer rd = (RedirectModelRenderer) v;
-		RedirectHolderSkull rdhs = (RedirectHolderSkull) rd.holder;
-		//return rd == rdhs.hat;
-		return true;
-	}
 }

@@ -12,8 +12,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -116,6 +118,7 @@ public class Editor {
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
 	public EditorTool drawMode = EditorTool.PEN;
+	public int brushSize = 1;
 	public boolean drawAllUVs = false;
 	public boolean onlyDrawOnSelected = true;
 	public EnumMap<Hand, HeldItem> handDisplay = new EnumMap<>(Hand.class);
@@ -149,7 +152,8 @@ public class Editor {
 	public ModelDescription description;
 	public float scaling;
 	public Image vanillaSkin;
-	public boolean dirty;
+	public boolean dirty, autoSaveDirty;
+	public long lastEdit;
 	public ModelDefinition definition;
 	public EditorTexture skinProvider = new EditorTexture();
 	public EditorTexture renderTexture = new EditorTexture();
@@ -219,11 +223,11 @@ public class Editor {
 			selectedElement.rotation = v;
 			if(v.x < 0 || v.x > 360 || v.y < 0 || v.y > 360 || v.z < 0 || v.z > 360) {
 				while(selectedElement.rotation.x < 0)selectedElement.rotation.x += 360;
-				while(selectedElement.rotation.x > 360)selectedElement.rotation.x -= 360;
+				while(selectedElement.rotation.x >= 360)selectedElement.rotation.x -= 360;
 				while(selectedElement.rotation.y < 0)selectedElement.rotation.y += 360;
-				while(selectedElement.rotation.y > 360)selectedElement.rotation.y -= 360;
+				while(selectedElement.rotation.y >= 360)selectedElement.rotation.y -= 360;
 				while(selectedElement.rotation.z < 0)selectedElement.rotation.z += 360;
-				while(selectedElement.rotation.z > 360)selectedElement.rotation.z -= 360;
+				while(selectedElement.rotation.z >= 360)selectedElement.rotation.z -= 360;
 				setRot.accept(selectedElement.rotation);
 			}
 			currentOp = new ValueOp<>(selectedElement, selectedElement.rotation, (a, b) -> a.rotation = b);
@@ -421,7 +425,7 @@ public class Editor {
 		if(selectedElement != null)selectedElement.switchEffect(Effect.RECOLOR);
 	}
 
-	public void drawPixel(int x, int y) {
+	public void drawPixel(int x, int y, boolean isSkin) {
 		switch (drawMode) {
 		case PEN:
 			setPixel(x, y, penColor | 0xff000000);
@@ -431,12 +435,54 @@ public class Editor {
 			setPixel(x, y, 0);
 			break;
 
+		case FILL:
+		{
+			EditorTexture tex = getTextureProvider();
+			if(tex != null) {
+				Box box = selectedElement != null ? selectedElement.getTextureBox() : null;
+				if(box != null && onlyDrawOnSelected) {
+					if(!box.isInBounds(x, y))return;
+				}
+				Image img = tex.getImage();
+				if(x < 0 || y < 0 || x >= img.getWidth() || y >= img.getHeight())return;
+				int old = img.getRGB(x, y);
+				if((old & 0xffffff) == penColor)return;
+				if(!tex.isEdited())setSkinEdited.accept(true);
+				Set<Vec2i> pixels = new HashSet<>();
+				Stack<Vec2i> nextPixels = new Stack<>();
+				nextPixels.add(new Vec2i(x, y));
+				while(!nextPixels.empty()) {
+					Vec2i p = nextPixels.pop();
+					if(pixels.contains(p) || p.x < 0 || p.y < 0 || p.x >= img.getWidth() || p.y >= img.getHeight())continue;
+					int color = img.getRGB(p.x, p.y);
+					if(color == old) {
+						pixels.add(p);
+						nextPixels.add(new Vec2i(p.x - 1, p.y));
+						nextPixels.add(new Vec2i(p.x + 1, p.y));
+						nextPixels.add(new Vec2i(p.x, p.y - 1));
+						nextPixels.add(new Vec2i(p.x, p.y + 1));
+					}
+				}
+				int color = penColor | 0xff000000;
+				addUndo(() -> {
+					pixels.forEach(p -> tex.setRGB(p.x, p.y, old));
+					refreshTexture(tex);
+				});
+				runOp(() -> {
+					pixels.forEach(p -> tex.setRGB(p.x, p.y, color));
+					refreshTexture(tex);
+				});
+				markDirty();
+			}
+		}
+		break;
+
 		default:
 			break;
 		}
 	}
 
-	public void setPixel(int x, int y, int color) {
+	private void setPixel(int x, int y, int color) {
 		EditorTexture tex = getTextureProvider();
 		if(tex != null) {
 			Box box = selectedElement != null ? selectedElement.getTextureBox() : null;
@@ -463,6 +509,8 @@ public class Editor {
 	public void markDirty() {
 		setNameDisplay.accept((file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : file.getName()) + "*");
 		dirty = true;
+		if(!autoSaveDirty)lastEdit = System.currentTimeMillis();
+		autoSaveDirty = true;
 		redoQueue.clear();
 		setUndoEn.accept(true);
 		setRedoEn.accept(false);
@@ -581,6 +629,7 @@ public class Editor {
 		skinProvider.setImage(new Image(skin));
 		skinProvider.size = new Vec2i(skin.getWidth(), skin.getHeight());
 		dirty = false;
+		autoSaveDirty = false;
 		file = null;
 		selectedElement = null;
 		selectedAnim = null;
@@ -641,7 +690,7 @@ public class Editor {
 		}
 	}
 
-	public void save(File file) throws IOException {
+	private void save0(File file) throws IOException {
 		Map<String, Object> data = new HashMap<>();
 		List<Map<String, Object>> lst = new ArrayList<>();
 		data.put("elements", lst);
@@ -771,8 +820,13 @@ public class Editor {
 			project.delete("list_icon.png");
 		}
 		project.save(file);
+	}
+
+	public void save(File file) throws IOException {
+		save0(file);
 		this.file = file;
 		dirty = false;
+		autoSaveDirty = false;
 		updateGui();
 	}
 
@@ -1182,7 +1236,7 @@ public class Editor {
 	private boolean checkChild(List<ModelElement> elem, ModelElement to) {
 		for (ModelElement modelElement : elem) {
 			if(modelElement == to)return true;
-			if(checkChild(elem, to))return true;
+			if(checkChild(modelElement.children, to))return true;
 		}
 		return false;
 	}
@@ -1330,6 +1384,12 @@ public class Editor {
 		}
 	}
 
+	public void delSelectedAnimPartData() {
+		if(selectedAnim != null) {
+			selectedAnim.clearSelectedData();
+		}
+	}
+
 	public void switchAnimShow() {
 		if(selectedAnim != null) {
 			selectedAnim.switchVisible();
@@ -1393,6 +1453,22 @@ public class Editor {
 		renderTexture.markDirty();
 		if(stitcher.hasStitches() && hasVanillaParts()) {
 			Generators.convertModel(this);
+		}
+	}
+
+	public void tick() {
+		if(autoSaveDirty && lastEdit + 5*60*1000 < System.currentTimeMillis()) {
+			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+			File autosaves = new File(modelsDir, "autosaves");
+			autosaves.mkdirs();
+			File file = new File(autosaves, String.format("autosave-%1$tY%1$tm%1$td-%1$tH%1$tM%1$tS-", System.currentTimeMillis()) + (this.file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : this.file.getName()));
+			Log.info("Editor autosave: " + file.getName());
+			try {
+				save0(file);
+			} catch (Exception e) {
+				frame.getGui().onGuiException("Failed to autosave", e, false);
+			}
+			autoSaveDirty = false;
 		}
 	}
 }

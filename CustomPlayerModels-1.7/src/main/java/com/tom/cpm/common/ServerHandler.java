@@ -50,7 +50,6 @@ public class ServerHandler {
 		};
 		netHandler.setNewNbt(NBTTagCompound::new);
 		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
-		netHandler.setIsDedicatedServer(p -> p.mcServer.isDedicatedServer());
 		netHandler.setGetPlayerUUID(EntityPlayerMP::getUniqueID);
 		netHandler.setWriteCompound((t, u) -> {
 			try {

@@ -9,7 +9,6 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.tom.cpl.util.TriConsumer;
@@ -37,7 +36,6 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 
 	protected Supplier<PB> newPacketBuffer;
 	protected Supplier<NBT> newNbt;
-	protected Predicate<P> isDedicatedServer;
 	protected Function<P, UUID> getPlayerUUID;
 	protected BiConsumer<PB, NBT> writeCompound;
 	protected Function<PB, NBT> readCompound;
@@ -83,9 +81,7 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 		PlayerData pd = newData();
 		getSNetH(player).cpm$setEncodedModelData(pd);
 		sendPacket.accept(getNet.apply(player), helloPacket, pb);
-		if(isDedicatedServer.test(player)) {
-			pd.load(getPlayerUUID.apply(player).toString());
-		}
+		pd.load(getPlayerUUID.apply(player).toString());
 	}
 
 	protected PlayerData newData() {
@@ -167,7 +163,7 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 	}
 
 	private void sendSkinData(NET pl) {
-		String model = ModConfig.getConfig().getString(ConfigKeys.SELECTED_MODEL, null);
+		String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
 		if(model != null) {
 			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 			try {
@@ -213,9 +209,7 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 			sendPacket.accept(getNet.apply(pl), getSkin, newPacketBuffer.get());
 		}
 		sendToAllTracking.accept(pl, setSkin, writeSkinData(pd, pl));
-		if(isDedicatedServer.test(pl)) {
-			pd.save(getPlayerUUID.apply(pl).toString());
-		}
+		pd.save(getPlayerUUID.apply(pl).toString());
 	}
 
 	public void setScale(float scl) {
@@ -259,10 +253,6 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 
 	public void setNewNbt(Supplier<NBT> newNbt) {
 		this.newNbt = newNbt;
-	}
-
-	public void setIsDedicatedServer(Predicate<P> isDedicatedServer) {
-		this.isDedicatedServer = isDedicatedServer;
 	}
 
 	public void setGetPlayerUUID(Function<P, UUID> getPlayerUUID) {
