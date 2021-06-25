@@ -5,9 +5,7 @@ import java.util.Map.Entry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.option.SkinOptionsScreen;
@@ -113,7 +111,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public static interface IScreen {
-		<T extends Element & Drawable & Selectable> T cpm$addDrawableChild(T drawableElement);
+		void cpm$addDrawableChild(Element drawableElement);
 	}
 
 	public void renderHand(VertexConsumerProvider buffer) {
