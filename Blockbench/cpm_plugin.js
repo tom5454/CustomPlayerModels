@@ -5,7 +5,7 @@
         author: 'tom5454',
         description: 'Customizable Player Models Project (.cpmproject) support for Blockbench.',
         icon: 'icon-player',
-        version: '0.0.1',
+        version: '0.0.2',
         variant: 'both',
         onload() {
         	var VANILLA_VALUES = {
@@ -214,11 +214,22 @@
 							e.name = cube.name;
 							modelTree[group.parent.uuid].push(e);
 						}
+						if(!e) {
+							e = jQuery.extend(true, {}, elem);
+							e.u = 0;
+							e.v = 0;
+							e.mcScale = 0;
+							e.mirror = false;
+							e.show = true;
+							e.size = {x: 0, y: 0, z: 0};
+							modelTree[group.parent.uuid].push(e);
+						}
 						e.children = modelTree[group.uuid];
 					}
 					let zip = new JSZip();
 					zip.file("config.json", JSON.stringify(p));
 					var tex = Texture.all[0];
+					console.log(tex.source);
 					var idx = tex.source.indexOf('base64,') + 'base64,'.length;
 					var content = tex.source.substring(idx);
 					zip.file("skin.png", content, {base64: true});
@@ -241,6 +252,7 @@
 					}
 				},
 				export() {
+					console.log("Export");
 					var scope = codec;
 					scope.compile().then(content => {
 						Blockbench.export({
