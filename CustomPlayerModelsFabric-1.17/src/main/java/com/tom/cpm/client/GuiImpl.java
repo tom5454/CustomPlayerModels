@@ -99,7 +99,10 @@ public class GuiImpl extends Screen implements IGui {
 			this.matrixStack = null;
 			matrixStack.pop();
 		}
+		matrixStack.push();
+		matrixStack.translate(0.0D, client.getWindow().getScaledHeight() - 48, 0.0D);
 		client.inGameHud.getChatHud().render(matrixStack, client.inGameHud.getTicks());
+		matrixStack.pop();
 	}
 
 	@Override
@@ -113,11 +116,9 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void onClose() {
-		if(parent != null) {
-			Screen p = parent;
-			parent = null;
-			client.openScreen(p);
-		}
+		Screen p = parent;
+		parent = null;
+		client.openScreen(p);
 	}
 
 	@Override

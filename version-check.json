@@ -16,7 +16,7 @@
     "1.15.2-recommended": "0.0.15a",
     "1.16.4-fabric-latest": "0.0.15a",
     "1.16.5-fabric-latest": "0.0.15a",
-    "1.17-fabric-latest": "0.0.15a",
+    "1.17-fabric-latest": "0.0.15b",
     "bukkit-latest": "0.0.15a"
   },
   "1.12.2": {
@@ -169,7 +169,8 @@
     "0.0.13a": "Added: Skin changer\n\nModel files don\u0027t need gists if not skin compatible (Closes #75)\nFixed exporter crashing with certain models (Closes #77)\nFixed loading freeze on certain systems (#60)\nFixed crash with servers (Closes #74)\nFixed model changer not working on 1.12.2\nFixed walking animation not displaying for other players (Closes #78)",
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
-    "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1"
+    "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
+    "0.0.15b": "Fixed models menu couldn\u0027t be closed on 1.17"
   },
   "1.8.9": {
     "0.0.5a": "First release",
