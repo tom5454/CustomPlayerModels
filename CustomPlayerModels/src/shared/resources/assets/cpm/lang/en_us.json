@@ -180,6 +180,7 @@
 	"label.cpm.firstPersonHand.offset_1": "Right Hand",
 	"label.cpm.firstPersonHand.offset_0": "Left Hand",
 	"label.cpm.elem.head": "Head",
+	"tooltip.cpm.exp_error": "Parse error:\\%s",
 	"label.cpm.controls.text": "Camera:\\Hold the Middle mouse button to rotate the view.\\Hold Shift+Middle mouse button to pan the view.\\Can be changed to right click in Edit/Settings.\\Number fields:\\Shift to change by 0.1\\Image Editor:\\Ctrl+click to pick hovered color.",
 	"label.cpm.anim_frame_none": "No Animation",
 	"button.cpm.config.rotateButton": "Rotate Button: %s",

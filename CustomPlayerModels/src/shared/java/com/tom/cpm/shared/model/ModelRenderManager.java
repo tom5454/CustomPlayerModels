@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.IPlayerRenderManager;
 import com.tom.cpm.shared.animation.AnimationEngine;
@@ -24,7 +25,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 	private final ModelDefinitionLoader loader;
 	private AnimationEngine animEngine = new AnimationEngine();
 	private ModelPartVec3fSetter<P> posSet, rotSet;
-	private ToFloatFunc<P> px, py, pz, rx, ry, rz;
+	private ToFloatFunction<P> px, py, pz, rx, ry, rz;
 	private Predicate<P> getVis;
 	private BoolSetter<P> setVis;
 
@@ -45,13 +46,13 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.rotSet = rotSet;
 	}
 
-	public void setModelPosGetters(ToFloatFunc<P> x, ToFloatFunc<P> y, ToFloatFunc<P> z) {
+	public void setModelPosGetters(ToFloatFunction<P> x, ToFloatFunction<P> y, ToFloatFunction<P> z) {
 		this.px = x;
 		this.py = y;
 		this.pz = z;
 	}
 
-	public void setModelRotGetters(ToFloatFunc<P> x, ToFloatFunc<P> y, ToFloatFunc<P> z) {
+	public void setModelRotGetters(ToFloatFunction<P> x, ToFloatFunction<P> y, ToFloatFunction<P> z) {
 		this.rx = x;
 		this.ry = y;
 		this.rz = z;
@@ -300,11 +301,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		default void set(P p, Vec3f v) {
 			set(p, v.x, v.y, v.z);
 		}
-	}
-
-	@FunctionalInterface
-	public static interface ToFloatFunc<P> {
-		float apply(P v);
 	}
 
 	@FunctionalInterface

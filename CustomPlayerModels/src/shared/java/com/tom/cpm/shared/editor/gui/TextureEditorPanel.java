@@ -143,12 +143,14 @@ public class TextureEditorPanel extends GuiElement {
 						dragY = py;
 						ModelElement me = getElementUnderMouse(px, py);
 						editor.selectedElement = me;
-						int u = me.u;
-						int v = me.v;
-						editor.addUndo(() -> {
-							me.u = u;
-							me.v = v;
-						});
+						if(me != null) {
+							int u = me.u;
+							int v = me.v;
+							editor.addUndo(() -> {
+								me.u = u;
+								me.v = v;
+							});
+						}
 					}
 					break;
 
@@ -188,13 +190,14 @@ public class TextureEditorPanel extends GuiElement {
 
 						case MOVE_UV:
 						{
-							if(editor.getSelectedElement() != null) {
+							ModelElement me = editor.getSelectedElement();
+							if(me != null) {
 								int xoff = px - dragX;
 								int yoff = py - dragY;
-								dragX = px;
-								dragY = py;
-								editor.getSelectedElement().u += xoff;
-								editor.getSelectedElement().v += yoff;
+								if(Math.abs(xoff) >= me.textureSize)dragX = px;
+								if(Math.abs(yoff) >= me.textureSize)dragY = py;
+								me.u = MathHelper.clamp(me.u + xoff / me.textureSize, 0, 256);
+								me.v = MathHelper.clamp(me.v + yoff / me.textureSize, 0, 256);
 								if(xoff > 0 || yoff > 0) {
 									editor.updateGui();
 									editor.markDirty();

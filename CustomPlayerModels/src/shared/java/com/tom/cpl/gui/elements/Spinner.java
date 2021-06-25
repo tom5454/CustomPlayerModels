@@ -8,6 +8,8 @@ import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.util.TabFocusHandler.Focusable;
 import com.tom.cpl.math.Box;
+import com.tom.cpm.externals.com.udojava.evalex.Expression.ExpressionException;
+import com.tom.cpm.shared.util.ExpressionExt;
 
 public class Spinner extends GuiElement implements Focusable {
 	private float value;
@@ -15,6 +17,7 @@ public class Spinner extends GuiElement implements Focusable {
 	private List<Runnable> changeListeners = new ArrayList<>();
 	private TextField txtf;
 	private boolean txtfNeedsUpdate;
+	private String error;
 	public Spinner(IGui gui) {
 		super(gui);
 		txtf = new TextField(gui);
@@ -34,6 +37,12 @@ public class Spinner extends GuiElement implements Focusable {
 		if(txtfNeedsUpdate && !txtf.isFocused()) {
 			txtfNeedsUpdate = false;
 			txtf.setText(String.format("%." + dp + "f", value));
+		}
+		if(bounds.isInBounds(mouseX, mouseY) && txtf.isFocused() && error != null) {
+			new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.exp_error", error)).set();
+		}
+		if(txtf.isFocused() && error != null) {
+			gui.drawRectangle(bounds.x, bounds.y, bounds.w, bounds.h, 0xffff0000);
 		}
 	}
 
@@ -100,11 +109,14 @@ public class Spinner extends GuiElement implements Focusable {
 
 	private void updateTxtf() {
 		try {
-			float value = Float.parseFloat(txtf.getText().replace(',', '.'));
+			float value = new ExpressionExt(txtf.getText().replace(',', '.')).eval();
 			double d = Math.pow(10, dp);
 			this.value = (float) (((int) (value * d)) / d);
 			changeListeners.forEach(Runnable::run);
-		} catch (NumberFormatException e) {
+			error = null;
+			txtfNeedsUpdate = true;
+		} catch (ExpressionException e) {
+			error = e.getMessage();
 		}
 	}
 

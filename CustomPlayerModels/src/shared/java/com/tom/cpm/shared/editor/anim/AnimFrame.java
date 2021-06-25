@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
@@ -286,5 +287,18 @@ public class AnimFrame {
 
 	public void clearSelectedData(ModelElement me) {
 		components.remove(me);
+	}
+
+	public static float[] toArray(EditorAnim anim, ModelElement elem, InterpolatorChannel channel) {
+		float[] data = new float[anim.getFrames().size()];
+		for (int i = 0; i < anim.getFrames().size(); i++) {
+			AnimFrame frm = anim.getFrames().get(i);
+			IElem dt = frm.getData(elem);
+			if(dt == null) {
+				if(anim.add)data[i] = 0;
+				else data[i] = elem.part(channel);
+			} else data[i] = dt.part(channel);
+		}
+		return data;
 	}
 }

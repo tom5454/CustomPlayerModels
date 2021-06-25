@@ -5,7 +5,7 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 public class Animation {
 	private final IModelComponent[] componentIDs;
 	private final Interpolator[][] psfs;
-	private final boolean[][] show;
+	private final Boolean[][] show;
 	private boolean add;
 
 	protected final int duration;
@@ -22,7 +22,7 @@ public class Animation {
 	 *            attributeIDs: 0: rotationPointX 1: rotationPointY 2:
 	 *            rotationPointZ 3: rotationX 4: rotationY 5: rotationZ
 	 */
-	public Animation(IModelComponent[] components2, float[][][] data, boolean[][] show, int duration, int priority, boolean add) {
+	public Animation(IModelComponent[] components2, float[][][] data, Boolean[][] show, int duration, int priority, boolean add) {
 		this.componentIDs = components2;
 		this.duration = duration;
 		this.show = show;

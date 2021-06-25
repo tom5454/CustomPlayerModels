@@ -117,7 +117,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				ResolvedData rd = parsedData.get(id);
 				if(rd == null)continue;
 				int cid = block.read();
-				rd.show[cid] = new boolean[rd.frames];
+				rd.show[cid] = new Boolean[rd.frames];
 				for(int i = 0;i<rd.frames;i += 8) {
 					int dt = block.read();
 					for(int j = 0;i+j < rd.frames && j < 8;j++) {
@@ -141,7 +141,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd.pos = new Vec3f[count][];
 				rd.rot = new Vec3f[count][];
 				rd.color = new Vec3f[count][];
-				rd.show = new boolean[count][];
+				rd.show = new Boolean[count][];
 				rd.frames = frames;
 				rd.duration = duration;
 			}
@@ -207,7 +207,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.pos = new Vec3f[cs][];
 			rd.rot = new Vec3f[cs][];
 			rd.color = new Vec3f[cs][];
-			rd.show = new boolean[cs][];
+			rd.show = new Boolean[cs][];
 			rd.loop = ea.loop;
 			rd.priority = ea.priority;
 			for (int i = 0; i < cs; i++) {
@@ -215,24 +215,18 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd.components[i] = elem.id;
 				if(frames.stream().anyMatch(f -> f.hasPosChanges(elem))) {
 					rd.pos[i] = new Vec3f[fc];
-					fillArray(rd.pos[i], frames, elem, IElem::getPosition);
+					fillArray(rd.pos[i], frames, elem, IElem::getPosition, ea.add, new Vec3f());
 				}
 				if(frames.stream().anyMatch(f -> f.hasRotChanges(elem))) {
 					rd.rot[i] = new Vec3f[fc];
-					fillArray(rd.rot[i], frames, elem, IElem::getRotation);
+					fillArray(rd.rot[i], frames, elem, IElem::getRotation, ea.add, new Vec3f());
 				}
 				if(frames.stream().anyMatch(f -> f.hasColorChanges(elem))) {
 					rd.color[i] = new Vec3f[fc];
-					fillArray(rd.color[i], frames, elem, IElem::getColor);
+					fillArray(rd.color[i], frames, elem, IElem::getColor, ea.add, new Vec3f());
 				}
 				if(frames.stream().anyMatch(f -> f.hasVisChanges(elem))) {
-					rd.show[i] = new boolean[fc];
-					for (int j = 0; j < frames.size(); j++) {
-						AnimFrame frm = frames.get(j);
-						IElem dt = frm.getData(elem);
-						if(dt == null)dt = elem;
-						rd.show[i][j] = dt.isVisible();
-					}
+					fillArray(rd.show[i], frames, elem, IElem::isVisible, ea.add, !elem.hidden);
 				}
 			}
 		});
@@ -251,12 +245,14 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		rd.gid = PlayerSkinLayer.encode(encL);
 	}
 
-	private static <T> void fillArray(T[] array, List<AnimFrame> frames, ModelElement elem, Function<IElem, T> func) {
+	private static <T> void fillArray(T[] array, List<AnimFrame> frames, ModelElement elem, Function<IElem, T> func, boolean add, T empty) {
 		for (int i = 0; i < frames.size(); i++) {
 			AnimFrame frm = frames.get(i);
 			IElem dt = frm.getData(elem);
-			if(dt == null)dt = elem;
-			array[i] = func.apply(dt);
+			if(dt == null) {
+				if(add)array[i] = empty;
+				else array[i] = func.apply(elem);
+			} else array[i] = func.apply(dt);
 		}
 	}
 
@@ -423,7 +419,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					}
 				}
 				if(rd.show[i] == null) {
-					rd.show[i] = new boolean[rd.frames];
+					rd.show[i] = new Boolean[rd.frames];
 					Arrays.fill(rd.show[i], c.isVisible());
 				}
 			}
@@ -492,7 +488,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		private Vec3f[][] pos;
 		private Vec3f[][] rot;
 		private Vec3f[][] color;
-		private boolean[][] show;
+		private Boolean[][] show;
 		private int frames, duration;
 		private Animation anim;
 		private boolean loop;

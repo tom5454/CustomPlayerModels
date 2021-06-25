@@ -347,7 +347,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		int dx = MathHelper.ceil(size.x);
 		int dy = MathHelper.ceil(size.y);
 		int dz = MathHelper.ceil(size.z);
-		return new Box(u, v, 2 * (dx + dz) * texSize, (dz + dy) * texSize);
+		return new Box(u * textureSize, v * textureSize, 2 * (dx + dz) * textureSize, (dz + dy) * textureSize);
 	}
 
 	@Override

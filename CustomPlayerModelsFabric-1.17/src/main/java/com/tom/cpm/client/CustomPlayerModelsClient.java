@@ -1,11 +1,11 @@
 package com.tom.cpm.client;
 
-import java.util.List;
 import java.util.Map.Entry;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
@@ -104,13 +104,16 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		manager.tryUnbind();
 	}
 
-	public void initGui(Screen screen, List<Element> children, List<Selectable> buttons) {
+	public void initGui(Screen screen) {
 		if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				screen instanceof SkinOptionsScreen) {
 			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen)));
-			buttons.add(btn);
-			children.add(btn);
+			((IScreen)screen).cpm$addDrawableChild(btn);
 		}
+	}
+
+	public static interface IScreen {
+		<T extends Element & Drawable & Selectable> T cpm$addDrawableChild(T drawableElement);
 	}
 
 	public void renderHand(VertexConsumerProvider buffer) {

@@ -343,7 +343,7 @@ public class EditorGui extends Frame {
 		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.tools"), tools);
 
 		Generators.generators.forEach(g -> {
-			Button btn = tools.addButton(g.name, () -> g.func.accept(this));
+			Button btn = tools.addButton(gui.i18nFormat(g.name), () -> g.func.accept(this));
 			if(g.tooltip != null)btn.setTooltip(new Tooltip(this, gui.i18nFormat(g.tooltip)));
 		});
 
@@ -471,7 +471,7 @@ public class EditorGui extends Frame {
 		try {
 			editor.load(file);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.warn("Error loading project file", e);
 			showError("load", e.toString());
 			editor.loadDefaultPlayerModel();
 		}
@@ -481,6 +481,7 @@ public class EditorGui extends Frame {
 		try {
 			editor.save(file);
 		} catch (Exception e) {
+			Log.warn("Error saving project file", e);
 			showError("save", e.toString());
 		}
 	}

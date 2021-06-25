@@ -1387,6 +1387,7 @@ public class Editor {
 	public void delSelectedAnimPartData() {
 		if(selectedAnim != null) {
 			selectedAnim.clearSelectedData();
+			updateGui();
 		}
 	}
 

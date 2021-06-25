@@ -101,6 +101,7 @@ tooltip.cpm.export.skin.exportApply=Exports then uploads the exported skin to mi
 tooltip.cpm.uploadSkin=Converts and uploads the selected model to minecraft.net.\!!! This will change your current minecraft skin !!!
 tooltip.cpm.changeSkin=Uploads a skin to minecraft.net.\!!! This will change your current minecraft skin !!!
 tooltip.cpm.clearAnimData=Remove the selected part from the current animation frame.
+tooltip.cpm.exp_error=Parse error:\%s
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture

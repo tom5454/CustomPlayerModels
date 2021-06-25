@@ -14,7 +14,8 @@
     "SkullBlockEntityRendererMixin",
     "BuiltinModelItemRendererMixin",
     "MixinGameRenderer",
-    "ClientPlayNetHandlerMixin"
+    "ClientPlayNetHandlerMixin",
+	"HeadFeatureRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

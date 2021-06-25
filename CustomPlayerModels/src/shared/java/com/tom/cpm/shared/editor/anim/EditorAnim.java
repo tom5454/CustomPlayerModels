@@ -45,7 +45,7 @@ public class EditorAnim implements IAnim {
 		for (int component = 0; component < components.size(); component++) {
 			for (InterpolatorChannel channel : InterpolatorChannel.VALUES) {
 				PolynomialSplineInterpolator i = new PolynomialSplineInterpolator();
-				i.init(frames, components.get(component), channel);
+				i.init(AnimFrame.toArray(this, components.get(component), channel), channel);
 				psfs[component][channel.channelID()] = i;
 			}
 		}

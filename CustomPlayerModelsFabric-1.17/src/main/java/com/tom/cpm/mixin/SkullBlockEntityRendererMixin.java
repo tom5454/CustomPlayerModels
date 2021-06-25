@@ -58,6 +58,7 @@ public abstract class SkullBlockEntityRendererMixin {
 			method = "getRenderLayer(Lnet/minecraft/block/SkullBlock$SkullType;Lcom/mojang/authlib/GameProfile;)"
 					+ "Lnet/minecraft/client/render/RenderLayer;")
 	private static RenderLayer onGetRenderType(Identifier resLoc, SkullBlock.SkullType skullType, GameProfile gameProfileIn) {
+		if(RefHolder.CPM_MODELS == null)return RenderLayer.getEntityTranslucent(resLoc);
 		SkullBlockEntityModel model = RefHolder.CPM_MODELS.get(skullType);
 		RefHolder.CPM_MODELS = null;
 		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
@@ -73,6 +74,7 @@ public abstract class SkullBlockEntityRendererMixin {
 			method = "getRenderLayer(Lnet/minecraft/block/SkullBlock$SkullType;Lcom/mojang/authlib/GameProfile;)"
 					+ "Lnet/minecraft/client/render/RenderLayer;")
 	private static RenderLayer onGetRenderTypeNoSkin(Identifier resLoc, SkullBlock.SkullType skullType, GameProfile gameProfileIn) {
+		if(RefHolder.CPM_MODELS == null)return RenderLayer.getEntityCutoutNoCull(resLoc);
 		SkullBlockEntityModel model = RefHolder.CPM_MODELS.get(skullType);
 		RefHolder.CPM_MODELS = null;
 		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
