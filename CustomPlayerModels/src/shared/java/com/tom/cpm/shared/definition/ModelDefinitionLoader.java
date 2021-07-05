@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -61,7 +62,7 @@ public class ModelDefinitionLoader {
 	});
 	private static final Map<String, ResourceLoader> LOADERS = new HashMap<>();
 	private final Cache<Link, byte[]> localResources = CacheBuilder.newBuilder().expireAfterAccess(5L, TimeUnit.MINUTES).build();
-	private Map<Object, byte[]> serverModels = new HashMap<>();
+	private ConcurrentHashMap<Object, byte[]> serverModels = new ConcurrentHashMap<>();
 	static {
 		LOADERS.put("git", new GistResourceLoader());
 		LOADERS.put("gh", new GithubRepoResourceLoader());

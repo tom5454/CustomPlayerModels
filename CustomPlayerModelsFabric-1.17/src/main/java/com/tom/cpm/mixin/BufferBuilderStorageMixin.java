@@ -24,7 +24,6 @@ public class BufferBuilderStorageMixin {
 
 	@Inject(at = @At("RETURN"), method = "<init>()V")
 	public void insertCustomBuffer(CallbackInfo cbi){
-		assignBufferBuilder((Object2ObjectLinkedOpenHashMap<RenderLayer, BufferBuilder>) entityBuilders, CustomRenderTypes.getLinesNoDepth());
 		assignBufferBuilder((Object2ObjectLinkedOpenHashMap<RenderLayer, BufferBuilder>) entityBuilders, CustomRenderTypes.getEntityColorTranslucentCull());
 	}
 }

@@ -1,8 +1,8 @@
 package com.tom.cpm.shared.model;
 
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
-public enum PlayerModelParts implements ModelPart {
+public enum PlayerModelParts implements VanillaModelPart {
 	HEAD,
 	BODY,
 	LEFT_ARM,
@@ -21,5 +21,10 @@ public enum PlayerModelParts implements ModelPart {
 	@Override
 	public String getName() {
 		return name().toLowerCase();
+	}
+
+	@Override
+	public PartValues getDefaultSize(SkinType skinType) {
+		return PlayerPartValues.getFor(this, skinType);
 	}
 }

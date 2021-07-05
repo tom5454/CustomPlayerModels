@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.tom.cpl.math.Vec3f;
-
 public class PartRoot {
 	private List<RootModelElement> elements;
 	private RootModelElement mainRoot;
@@ -40,8 +38,8 @@ public class PartRoot {
 		this.mainRoot = mainRoot;
 	}
 
-	public void setOffset(Vec3f o) {
-		forEach(e -> e.setPosition(true, o.x, o.y, o.z));
+	public void setRootPosAndRot(float px, float py, float pz, float rx, float ry, float rz) {
+		forEach(e -> e.setPosAndRot(px, py, pz, rx, ry, rz));
 	}
 
 	public boolean isEmpty() {

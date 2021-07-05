@@ -2,10 +2,10 @@ package com.tom.cpm.shared.editor;
 
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.PaintImageCreator;
 
@@ -24,7 +24,7 @@ public class EditorDefinition extends ModelDefinition {
 	}
 
 	@Override
-	public PartRoot getModelElementFor(ModelPart part) {
+	public PartRoot getModelElementFor(VanillaModelPart part) {
 		PartRoot root = new PartRoot();
 		editor.elements.forEach(e -> {
 			RootModelElement el = (RootModelElement) e.rc;

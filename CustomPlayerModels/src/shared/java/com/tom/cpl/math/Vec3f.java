@@ -4,6 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Vec3f {
+	public static final Vec3f NEGATIVE_X = new Vec3f(-1.0F, 0.0F, 0.0F);
+	public static final Vec3f POSITIVE_X = new Vec3f(1.0F, 0.0F, 0.0F);
+	public static final Vec3f NEGATIVE_Y = new Vec3f(0.0F, -1.0F, 0.0F);
+	public static final Vec3f POSITIVE_Y = new Vec3f(0.0F, 1.0F, 0.0F);
+	public static final Vec3f NEGATIVE_Z = new Vec3f(0.0F, 0.0F, -1.0F);
+	public static final Vec3f POSITIVE_Z = new Vec3f(0.0F, 0.0F, 1.0F);
 	public static final int MAX_POS = 3 * 16;
 	public float x, y, z;
 
@@ -91,5 +97,28 @@ public class Vec3f {
 		x = Math.round(x * i) / (float) i;
 		y = Math.round(y * i) / (float) i;
 		z = Math.round(z * i) / (float) i;
+	}
+
+	public Quaternion getRadialQuaternion(float angle) {
+		return new Quaternion(this, angle, false);
+	}
+
+	public void mul(float x, float y, float z) {
+		this.x *= x;
+		this.y *= y;
+		this.z *= z;
+	}
+
+	public Vec3f copy() {
+		return new Vec3f(this);
+	}
+
+	public void transform(Mat3f matrixIn) {
+		float f = this.x;
+		float f1 = this.y;
+		float f2 = this.z;
+		this.x = matrixIn.m00 * f + matrixIn.m01 * f1 + matrixIn.m02 * f2;
+		this.y = matrixIn.m10 * f + matrixIn.m11 * f1 + matrixIn.m12 * f2;
+		this.z = matrixIn.m20 * f + matrixIn.m21 * f1 + matrixIn.m22 * f2;
 	}
 }

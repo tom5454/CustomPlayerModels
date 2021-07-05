@@ -1,4 +1,4 @@
-package com.tom.cpm.shared.model;
+package com.tom.cpm.shared.model.render;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,13 +9,22 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.tom.cpl.function.ToFloatFunction;
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.render.RenderTypes;
+import com.tom.cpl.render.VBuffers;
+import com.tom.cpl.render.VertexBuffer;
 import com.tom.cpm.shared.IPlayerRenderManager;
 import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.model.Cube;
+import com.tom.cpm.shared.model.PartRoot;
+import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
+import com.tom.cpm.shared.model.RootModelElement;
 
 public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderManager {
 	public static final Predicate<Player<?, ?>> ALWAYS = p -> true;
@@ -113,6 +122,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public Map<RedirectRenderer<P>, RedirectDataHolder<P>> partData;
 		public Player<?, M> playerObj;
 		public AnimationMode mode;
+		public RenderTypes<RenderMode> renderTypes;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
 			this.model = model;
@@ -120,6 +130,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			modelFields = new ArrayList<>();
 			redirectRenderers = new ArrayList<>();
 			partData = new HashMap<>();
+			renderTypes = new RenderTypes<>(RenderMode.class);
 		}
 
 		public final void swapIn(ModelDefinition def, D addDt, Player<?, M> playerObj, AnimationMode mode) {
@@ -140,6 +151,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			this.def = null;
 			this.addDt = null;
 			skinBound = false;
+			this.renderTypes.clear();
 			this.playerObj = null;
 			if(!swappedIn)return;
 			swapOut0();
@@ -154,6 +166,27 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected abstract void swapIn0();
 		protected abstract void swapOut0();
 		protected void bindSkin() {}
+
+		@SuppressWarnings("unchecked")
+		protected void bindFirstSetup() {
+			bindSkin();
+			for (int i = 0; i < redirectRenderers.size(); i++) {
+				RedirectRenderer<P> re = redirectRenderers.get(i);
+				VanillaModelPart part = re.getPart();
+				if(part == null)continue;
+				P tp = (P) re;
+				float px = mngr.px.apply(tp);
+				float py = mngr.py.apply(tp);
+				float pz = mngr.pz.apply(tp);
+				float rx = mngr.rx.apply(tp);
+				float ry = mngr.ry.apply(tp);
+				float rz = mngr.rz.apply(tp);
+				PartRoot elems = def.getModelElementFor(part);
+				elems.setRootPosAndRot(px, py, pz, rx, ry, rz);
+			}
+			if(playerObj != null)
+				mngr.animEngine.handleAnimation(playerObj, mode);
+		}
 
 		protected RedirectRenderer<P> register(Field<P> f) {
 			RedirectRenderer<P> rd = mngr.redirectFactory.create(model, this, f.get, f.part);
@@ -188,10 +221,9 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		P swapOut();
 		RedirectHolder<?, ?, ?, P> getHolder();
 		P getParent();
-		ModelPart getPart();
+		VanillaModelPart getPart();
 		void renderParent();
-		void renderWithParent(RootModelElement elem);
-		void doRender(RootModelElement elem);
+		VBuffers getVBuffers();
 
 		default RedirectRenderer<P> setCopyFrom(RedirectRenderer<P> from) {
 			getHolder().partData.get(this).copyFrom = from;
@@ -210,12 +242,12 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			P tp = (P) this;
 			P parent = getParent();
 			if(holder.mngr.getVis.test(tp)) {
-				RedirectDataHolder<P> dh = holder.partData.get(this);
 				if(holder.def != null) {
-					ModelPart part = getPart();
+					RedirectDataHolder<P> dh = holder.partData.get(this);
+					VanillaModelPart part = getPart();
 					if(!holder.skinBound) {
 						holder.skinBound = true;
-						holder.bindSkin();
+						holder.bindFirstSetup();
 					}
 					if(part == null) {
 						if(dh.copyFrom != null) {
@@ -235,19 +267,15 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					if(holder.playerObj == null || dh.renderPredicate.test(holder.playerObj)) {
 						elems.forEach(elem -> {
 							if(!skipTransform) {
-								if(elem.forcePos) {
-									mngr.posSet.set(tp, elem.pos);
-									mngr.rotSet.set(tp, elem.rotation);
-								} else {
-									mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
-									mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
-								}
+								mngr.posSet.set(tp, elem.pos);
+								mngr.rotSet.set(tp, elem.rotation);
 							}
 							if(elem.doDisplay()) {
 								holder.copyModel(tp, parent);
-								renderWithParent(elem);
+								renderParent();
+								doRender0(elem);
 							} else {
-								doRender(elem);
+								doRender0(elem);
 							}
 						});
 						mngr.posSet.set(parent, px, py, pz);
@@ -255,13 +283,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					}
 					if(!skipTransform) {
 						RootModelElement elem = elems.getMainRoot();
-						if(elem.forcePos) {
-							mngr.posSet.set(tp, elem.pos);
-							mngr.rotSet.set(tp, elem.rotation);
-						} else {
-							mngr.posSet.set(tp, px + elem.pos.x, py + elem.pos.y, pz + elem.pos.z);
-							mngr.rotSet.set(tp, rx + elem.rotation.x, ry + elem.rotation.y, rz + elem.rotation.z);
-						}
+						mngr.posSet.set(tp, elem.pos);
+						mngr.rotSet.set(tp, elem.rotation);
 					}
 				} else {
 					holder.copyModel(tp, parent);
@@ -269,20 +292,111 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				}
 			}
 		}
+
+		public static void translateRotate(RenderedCube rc, MatrixStack matrixStackIn) {
+			matrixStackIn.translate(rc.pos.x / 16.0F, rc.pos.y / 16.0F, rc.pos.z / 16.0F);
+			if (rc.rotation.z != 0.0F) {
+				matrixStackIn.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rc.rotation.z));
+			}
+
+			if (rc.rotation.y != 0.0F) {
+				matrixStackIn.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rc.rotation.y));
+			}
+
+			if (rc.rotation.x != 0.0F) {
+				matrixStackIn.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rc.rotation.x));
+			}
+		}
+
+		public default void render(RenderedCube elem, MatrixStack matrixStackIn, VBuffers buf, float red, float green, float blue, float alpha) {
+			RedirectHolder<?, ?, ?, P> holder = getHolder();
+			if(elem.children == null)return;
+			for(RenderedCube cube : elem.children) {
+				if(!cube.display) {
+					continue;
+				}
+				matrixStackIn.push();
+				translateRotate(cube, matrixStackIn);
+				float r = red;
+				float g = green;
+				float b = blue;
+				if(cube.color != 0xffffff) {
+					r *= ((cube.color & 0xff0000) >> 16) / 255f;
+					g *= ((cube.color & 0x00ff00) >> 8 ) / 255f;
+					b *= ( cube.color & 0x0000ff       ) / 255f;
+				}
+				if(cube.useDynamic || cube.renderObject == null) {
+					cube.renderObject = createBox(cube, holder);
+				}
+				Mesh mesh = cube.renderObject;
+				VertexBuffer buffer = buf.getBuffer(holder.renderTypes, mesh.getLayer());
+				if(holder.def.isEditor()) {
+					ElementSelectMode sel = cube.getSelected();
+					if(!sel.applyColor()) {
+						r = 1;
+						g = 1;
+						b = 1;
+					}else if(cube.glow) {
+						buffer = buf.getBuffer(holder.renderTypes, RenderMode.GLOW);
+					}
+				} else if(cube.glow) {
+					buffer = buf.getBuffer(holder.renderTypes, RenderMode.GLOW);
+				}
+				mesh.draw(matrixStackIn, buffer, r, g, b, alpha);
+				drawSelect(cube, matrixStackIn, buf);
+				render(cube, matrixStackIn, buf, red, green, blue, alpha);
+				matrixStackIn.pop();
+			}
+		}
+
+		public default void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, VBuffers bufferIn) {
+			RedirectHolder<?, ?, ?, P> holder = getHolder();
+			if(holder.def.isEditor()) {
+				ElementSelectMode sel = cube.getSelected();
+				if(sel.isRenderOutline()) {
+					boolean s = sel == ElementSelectMode.SELECTED;
+					if(s)BoxRender.drawOrigin(matrixStackIn, bufferIn.getBuffer(holder.renderTypes, RenderMode.OUTLINE), 1);
+					BoxRender.drawBoundingBox(
+							matrixStackIn, bufferIn.getBuffer(holder.renderTypes, RenderMode.OUTLINE),
+							cube.getBounds(),
+							s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
+							);
+				}
+			}
+		}
+
+		public default void doRender0(RootModelElement elem) {
+			MatrixStack stack = new MatrixStack();
+			translateRotate(elem, stack);
+			VBuffers buf = getVBuffers().replay();
+			drawSelect(elem, stack, buf);
+			render(elem, stack, buf, 1, 1, 1, 1);
+			buf.finishAll();
+		}
 	}
 
-	public static interface ModelPart {
-		default int getId(RenderedCube id) {
-			return id.getCube().id;
+	private static Mesh createBox(RenderedCube elem, RedirectHolder<?, ?, ?, ?> holder) {
+		Cube c = elem.getCube();
+		if(c.texSize == 0) {
+			return BoxRender.createColored(
+					c.offset.x, c.offset.y, c.offset.z,
+					c.size.x * c.scale.x, c.size.y * c.scale.y, c.size.z * c.scale.z,
+					c.mcScale, holder.sheetX, holder.sheetY
+					);
+		} else {
+			return BoxRender.createTextured(
+					c.offset, c.size, c.scale,
+					c.mcScale,
+					c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
+					);
 		}
-		String getName();
 	}
 
 	public static class Field<V> {
 		private Supplier<V> get;
 		private Consumer<V> set;
-		private ModelPart part;
-		public Field(Supplier<V> get, Consumer<V> set, ModelPart part) {
+		private VanillaModelPart part;
+		public Field(Supplier<V> get, Consumer<V> set, VanillaModelPart part) {
 			this.part = part;
 			this.get = get;
 			this.set = set;
@@ -291,7 +405,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 	@FunctionalInterface
 	public static interface RedirectRendererFactory<M, S, P> {
-		RedirectRenderer<P> create(M model, RedirectHolder<M, ?, S, P> access, Supplier<P> modelPart, ModelPart part);
+		RedirectRenderer<P> create(M model, RedirectHolder<M, ?, S, P> access, Supplier<P> modelPart, VanillaModelPart part);
 	}
 
 	@FunctionalInterface

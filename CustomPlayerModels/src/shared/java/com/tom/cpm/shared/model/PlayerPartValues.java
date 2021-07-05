@@ -1,9 +1,10 @@
 package com.tom.cpm.shared.model;
 
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 
-public enum PlayerPartValues {//                                                px, py, pz, ox, oy, oz, sx, sy, sz,  u,  v, u2, v2, [type]
+public enum PlayerPartValues implements PartValues {//                          px, py, pz, ox, oy, oz, sx, sy, sz,  u,  v, u2, v2, [type]
 	HEAD       (PlayerModelParts.HEAD,      PlayerSkinLayer.HAT,                 0,  0,  0, -4, -8, -4,  8,  8,  8,  0,  0, 32,  0),
 	BODY       (PlayerModelParts.BODY,      PlayerSkinLayer.JACKET,              0,  0,  0, -4,  0, -2,  8, 12,  4, 16, 16, 16, 32),
 	LEFT_ARM   (PlayerModelParts.LEFT_ARM,  PlayerSkinLayer.LEFT_SLEEVE,         5,  2,  0, -1, -2, -2,  4, 12,  4, 32, 48, 48, 48, SkinType.DEFAULT),
@@ -52,15 +53,23 @@ public enum PlayerPartValues {//                                                
 		return null;
 	}
 
+	@Override
 	public Vec3f getPos() {
 		return new Vec3f(px, py, pz);
 	}
 
+	@Override
 	public Vec3f getOffset() {
 		return new Vec3f(ox, oy, oz);
 	}
 
+	@Override
 	public Vec3f getSize() {
 		return new Vec3f(sx, sy, sz);
+	}
+
+	@Override
+	public Vec2i getUV() {
+		return new Vec2i(u, v);
 	}
 }

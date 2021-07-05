@@ -6,54 +6,53 @@ import java.util.function.Supplier;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.model.Model;
+import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.model.SkullEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
+import com.tom.cpl.render.VBuffers;
+import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.client.Render.Box;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.model.Cube;
-import com.tom.cpm.shared.model.ModelRenderManager;
 import com.tom.cpm.shared.model.PlayerModelParts;
-import com.tom.cpm.shared.model.RenderedCube;
-import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
-import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.render.ModelRenderManager;
+import com.tom.cpm.shared.model.render.RenderMode;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 
-public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart, Model> {
+public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart, Model> {
 
 	public PlayerRenderManager(ModelDefinitionLoader loader) {
 		super(loader);
 
-		setFactory(new RedirectHolderFactory<VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart>() {
+		setFactory(new RedirectHolderFactory<VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public <M> RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart> create(
+			public <M> RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart> create(
 					M model) {
 				if(model instanceof PlayerEntityModel) {
-					return (RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart>)
+					return (RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart>)
 							new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerEntityModel<AbstractClientPlayerEntity>) model);
 				} else if(model instanceof SkullEntityModel) {
-					return (RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart>)
+					return (RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart>)
 							new RedirectHolderSkull(PlayerRenderManager.this, (SkullEntityModel) model);
 				}
 				return null;
 			}
 		});
-		setRedirectFactory(new RedirectRendererFactory<Model, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart>() {
+		setRedirectFactory(new RedirectRendererFactory<Model, CallbackInfoReturnable<Identifier>, ModelPart>() {
 
 			@Override
-			public RedirectRenderer<net.minecraft.client.model.ModelPart> create(Model model,
-					RedirectHolder<Model, ?, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart> access,
-					Supplier<net.minecraft.client.model.ModelPart> modelPart, ModelPart part) {
+			public RedirectRenderer<ModelPart> create(Model model,
+					RedirectHolder<Model, ?, CallbackInfoReturnable<Identifier>, ModelPart> access,
+					Supplier<ModelPart> modelPart, VanillaModelPart part) {
 				return new RedirectModelRenderer(model, (RDH) access, modelPart, part);
 			}
 		});
@@ -71,19 +70,11 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		});
 	}
 
-	@Override
-	public void cleanupRenderedCube(RenderedCube cube) {
-		if(cube.renderObject != null) {
-			cube.renderObject = null;
-		}
-	}
-
-	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart> {
+	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart> {
 		public Identifier boundSkin;
-		public RenderLayer glowType, defaultType;
 
 		public RDH(
-				ModelRenderManager<VertexConsumerProvider, CallbackInfoReturnable<Identifier>, net.minecraft.client.model.ModelPart, Model> mngr,
+				ModelRenderManager<VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart, Model> mngr,
 				Model model) {
 			super(mngr, model);
 		}
@@ -102,15 +93,15 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 				sheetY = 64;
 			}
 			boundSkin = cbi.getReturnValue();
-			defaultType = RenderLayer.getEntityTranslucent(boundSkin);
-			glowType = RenderLayer.getEyes(boundSkin);
+			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RenderLayer.getEntityTranslucent(boundSkin), 0));
+			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderLayer.getEyes(boundSkin), 1));
+			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RenderLayer.getLines(), 2));
+			renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
 		}
 
 		@Override
 		public void swapOut0() {
 			this.boundSkin = null;
-			defaultType = null;
-			glowType = null;
 		}
 
 		@Override
@@ -118,11 +109,11 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 	}
 
 	private static class RedirectHolderPlayer extends RDH {
-		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedHead;
-		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedLeftArm;
-		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedRightArm;
-		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedLeftArmwear;
-		private RedirectRenderer<net.minecraft.client.model.ModelPart> bipedRightArmwear;
+		private RedirectRenderer<ModelPart> bipedHead;
+		private RedirectRenderer<ModelPart> bipedLeftArm;
+		private RedirectRenderer<ModelPart> bipedRightArm;
+		private RedirectRenderer<ModelPart> bipedLeftArmwear;
+		private RedirectRenderer<ModelPart> bipedRightArmwear;
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerEntityModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
@@ -143,7 +134,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public boolean skipTransform(RedirectRenderer<net.minecraft.client.model.ModelPart> part) {
+		public boolean skipTransform(RedirectRenderer<ModelPart> part) {
 			PlayerEntityModel<AbstractClientPlayerEntity> model = (PlayerEntityModel<AbstractClientPlayerEntity>) this.model;
 			boolean skipTransform = false;
 			if(bipedLeftArm == part && model.leftArmPose.ordinal() > 2) {
@@ -157,7 +148,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 	}
 
 	private static class RedirectHolderSkull extends RDH {
-		private RedirectRenderer<net.minecraft.client.model.ModelPart> hat;
+		private RedirectRenderer<ModelPart> hat;
 
 		public RedirectHolderSkull(PlayerRenderManager mngr, SkullEntityModel model) {
 			super(mngr, model);
@@ -167,21 +158,18 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 	}
 
-	private static class RedirectModelRenderer extends net.minecraft.client.model.ModelPart implements RedirectRenderer<net.minecraft.client.model.ModelPart> {
-		private static final String ID = "cpm:RedirectModelRenderer";
+	private static class RedirectModelRenderer extends ModelPart implements RedirectRenderer<ModelPart> {
 		private final RDH holder;
-		private final ModelPart part;
-		private final Supplier<net.minecraft.client.model.ModelPart> parentProvider;
-		private net.minecraft.client.model.ModelPart parent;
-		private RootModelElement elem;
-		private CubeModelRenderer dispRender;
+		private final VanillaModelPart part;
+		private final Supplier<ModelPart> parentProvider;
+		private ModelPart parent;
+		private VBuffers buffers;
 
-		public RedirectModelRenderer(Model model, RDH holder, Supplier<net.minecraft.client.model.ModelPart> parent, ModelPart part) {
+		public RedirectModelRenderer(Model model, RDH holder, Supplier<ModelPart> parent, VanillaModelPart part) {
 			super(Collections.emptyList(), Collections.emptyMap());
 			this.holder = holder;
 			this.parentProvider = parent;
 			this.part = part;
-			this.dispRender = new CubeModelRenderer();
 		}
 
 		private MatrixStack matrixStackIn;
@@ -199,136 +187,15 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			this.green           = green          ;
 			this.blue            = blue           ;
 			this.alpha           = alpha          ;
+			this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn));
 			render();
+			holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.NORMAL).getNativeType());
 			this.matrixStackIn = null;
 			this.bufferIn = null;
 		}
 
-		private class CubeModelRenderer extends net.minecraft.client.model.ModelPart {
-			public CubeModelRenderer() {
-				super(Collections.emptyList(), Collections.emptyMap());
-			}
-
-			@Override
-			public void render(MatrixStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-				RedirectModelRenderer.this.render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-				drawVanillaOutline(matrixStackIn, bufferIn);
-			}
-		}
-
-		private void drawVanillaOutline(MatrixStack matrixStackIn, VertexConsumer bufferIn) {
-			if(holder.def.isEditor()) {
-				ElementSelectMode sel = elem.getSelected();
-				if(sel.isRenderOutline()) {
-					float f = 0.001f;
-					float g = f * 2;
-					float scale = 1 / 16.0F;
-					for(Cuboid b : parent.cuboids) {
-						WorldRenderer.drawBox(
-								matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
-								b.minX * scale - f, b.minY * scale - f, b.minZ * scale - f,
-								b.maxX * scale + g, b.maxY * scale + g, b.maxZ * scale + g,
-								1, 1, sel == ElementSelectMode.SELECTED ? 1 : 0, 1);
-					}
-				}
-			}
-		}
-
-		private static void translateRotate(RenderedCube rc, MatrixStack matrixStackIn) {
-			matrixStackIn.translate(rc.pos.x / 16.0F, rc.pos.y / 16.0F, rc.pos.z / 16.0F);
-			if (rc.rotation.z != 0.0F) {
-				matrixStackIn.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Z.getRadialQuaternion(rc.rotation.z));
-			}
-
-			if (rc.rotation.y != 0.0F) {
-				matrixStackIn.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Y.getRadialQuaternion(rc.rotation.y));
-			}
-
-			if (rc.rotation.x != 0.0F) {
-				matrixStackIn.multiply(net.minecraft.util.math.Vec3f.POSITIVE_X.getRadialQuaternion(rc.rotation.x));
-			}
-
-		}
-
-		private void render(RenderedCube elem, MatrixStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-			if(elem.children == null || holder.defaultType == null)return;
-			for(RenderedCube cube : elem.children) {
-				if(!cube.display)continue;
-				matrixStackIn.push();
-				translateRotate(cube, matrixStackIn);
-				float r = red;
-				float g = green;
-				float b = blue;
-				if(cube.color != 0xffffff) {
-					r *= ((cube.color & 0xff0000) >> 16) / 255f;
-					g *= ((cube.color & 0x00ff00) >> 8 ) / 255f;
-					b *= ( cube.color & 0x0000ff       ) / 255f;
-				}
-				if(cube.useDynamic || cube.renderObject == null) {
-					cube.renderObject = createBox(cube);
-				}
-				VertexConsumer buffer = bufferIn;
-				if(holder.def.isEditor()) {
-					ElementSelectMode sel = cube.getSelected();
-					if(!sel.applyColor()) {
-						r = 1;
-						g = 1;
-						b = 1;
-					}
-					if(cube.glow && sel == ElementSelectMode.NULL) {
-						buffer = holder.addDt.getBuffer(holder.glowType);
-					}
-				} else if(cube.glow) {
-					buffer = holder.addDt.getBuffer(holder.glowType);
-				}
-				((Box)cube.renderObject).draw(matrixStackIn, buffer, holder.addDt, packedLightIn, packedOverlayIn, r, g, b, alpha);
-				holder.addDt.getBuffer(holder.defaultType);
-				drawSelect(cube, matrixStackIn, bufferIn);
-				render(cube, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-				matrixStackIn.pop();
-			}
-		}
-
-		private void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, VertexConsumer bufferIn) {
-			if(holder.def.isEditor()) {
-				ElementSelectMode sel = cube.getSelected();
-				if(sel.isRenderOutline()) {
-					float f = 0.001f;
-					float g = f * 2;
-					float scale = 1 / 16f;
-					boolean s = sel == ElementSelectMode.SELECTED;
-					if(s)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
-					Cube c = cube.getCube();
-					Render.drawBoundingBox(
-							matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
-							c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
-							c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
-							s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
-							);
-				}
-			}
-		}
-
-		private Box createBox(RenderedCube elem) {
-			Cube c = elem.getCube();
-			if(c.texSize == 0) {
-				return Render.createColored(
-						c.offset.x, c.offset.y, c.offset.z,
-						c.size.x * c.scale.x, c.size.y * c.scale.y, c.size.z * c.scale.z,
-						c.mcScale,
-						holder.sheetX, holder.sheetY
-						);
-			} else {
-				return Render.createTextured(
-						c.offset, c.size, c.scale,
-						c.mcScale,
-						c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
-						);
-			}
-		}
-
 		@Override
-		public net.minecraft.client.model.ModelPart swapIn() {
+		public ModelPart swapIn() {
 			if(parent != null) {
 				return this;
 			}
@@ -338,27 +205,27 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 
 		@Override
-		public net.minecraft.client.model.ModelPart swapOut() {
+		public ModelPart swapOut() {
 			if(parent == null) {
 				return parentProvider.get();
 			}
-			net.minecraft.client.model.ModelPart p = parent;
+			ModelPart p = parent;
 			parent = null;
 			return p;
 		}
 
 		@Override
-		public RedirectHolder<?, ?, ?, net.minecraft.client.model.ModelPart> getHolder() {
+		public RedirectHolder<?, ?, ?, ModelPart> getHolder() {
 			return holder;
 		}
 
 		@Override
-		public net.minecraft.client.model.ModelPart getParent() {
+		public ModelPart getParent() {
 			return parent;
 		}
 
 		@Override
-		public ModelPart getPart() {
+		public VanillaModelPart getPart() {
 			return part;
 		}
 
@@ -368,23 +235,8 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 
 		@Override
-		public void renderWithParent(RootModelElement elem) {
-			this.elem = elem;
-			parent.children.put(ID, dispRender);
-			parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-			parent.children.remove(ID);
-			this.elem = null;
-		}
-
-		@Override
-		public void doRender(RootModelElement elem) {
-			this.elem = elem;
-			matrixStackIn.push();
-			rotate(matrixStackIn);
-			drawVanillaOutline(matrixStackIn, bufferIn);
-			render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-			matrixStackIn.pop();
-			this.elem = null;
+		public VBuffers getVBuffers() {
+			return buffers;
 		}
 	}
 }

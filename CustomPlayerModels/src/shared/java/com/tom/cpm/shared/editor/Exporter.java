@@ -250,6 +250,7 @@ public class Exporter {
 			return false;
 		} catch (Exception ex) {
 			gui.getGui().onGuiException("Error while exporting", ex, false);
+			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.unknownError")));
 			return false;
 		}
 	}

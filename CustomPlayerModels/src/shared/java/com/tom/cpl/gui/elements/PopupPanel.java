@@ -1,7 +1,7 @@
 package com.tom.cpl.gui.elements;
 
-import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.Frame.PopupLayer;
+import com.tom.cpl.gui.IGui;
 
 public class PopupPanel extends Panel {
 	private Runnable onClosed;

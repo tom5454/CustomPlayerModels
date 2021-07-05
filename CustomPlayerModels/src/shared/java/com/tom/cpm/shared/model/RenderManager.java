@@ -6,6 +6,7 @@ import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.model.render.ModelRenderManager;
 
 public class RenderManager<G, P, M, D> {
 	private Player<P, M> profile;
@@ -32,7 +33,6 @@ public class RenderManager<G, P, M, D> {
 			if(player != null)
 				profile.updateFromPlayer(player);
 			renderManager.bindModel(toBind, buffer, def, profile, mode);
-			renderManager.getAnimationEngine().handleAnimation(profile, mode);
 			return true;
 		}
 		renderManager.unbindModel(toBind);

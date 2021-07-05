@@ -6,9 +6,9 @@ import java.util.Arrays;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class ModelPartPlayer implements IModelPart, IResolvedModelPart {
 	private boolean[] keep = new boolean[8];
@@ -26,7 +26,7 @@ public class ModelPartPlayer implements IModelPart, IResolvedModelPart {
 	public ModelPartPlayer(Editor editor) {
 		editor.elements.forEach(e -> {
 			if(e.rc instanceof RootModelElement && !e.duplicated) {
-				ModelPart part = ((RootModelElement)e.rc).getPart();
+				VanillaModelPart part = ((RootModelElement)e.rc).getPart();
 				if(part != null && part instanceof PlayerModelParts) {
 					keep[((PlayerModelParts)part).ordinal()] = e.show;
 				}

@@ -38,4 +38,12 @@ public class MathHelper {
 		float tmp = number * pow;
 		return ( (float) ( (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) ) ) / pow;
 	}
+
+	public static float fastInvCubeRoot(float number) {
+		int i = Float.floatToIntBits(number);
+		i = 1419967116 - i / 3;
+		float f = Float.intBitsToFloat(i);
+		f = 0.6666667F * f + 1.0F / (3.0F * f * f * number);
+		return 0.6666667F * f + 1.0F / (3.0F * f * f * number);
+	}
 }

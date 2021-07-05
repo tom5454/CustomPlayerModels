@@ -3,6 +3,7 @@ package com.tom.cpm.shared.util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.tom.cpl.function.FloatBiFunction;
@@ -137,6 +138,7 @@ public class ExpressionExt extends Expression {
 
 	public static class CompiledExpression {
 		private List<Op> operations;
+		private List<String> usedFields;
 
 		public CompiledExpression(IOHelper in, ExpContext ctx) throws IOException {
 			operations = new ArrayList<>();
@@ -281,5 +283,10 @@ public class ExpressionExt extends Expression {
 	public void setExpression(String expression) {
 		this.expression = expression;
 		rpn = null;
+	}
+
+	public ExpressionExt setVariables(Map<String, Float> variables) {
+		this.variables.putAll(variables);
+		return this;
 	}
 }

@@ -36,7 +36,8 @@ public class BuiltinModelItemRendererMixin {
 			),
 			method = "render(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformation$Mode;"
 					+ "Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V",
-					locals = LocalCapture.CAPTURE_FAILHARD)
+					locals = LocalCapture.CAPTURE_FAILHARD,
+					require = 0)//Optifine
 	public void onRender(ItemStack stack, ModelTransformation.Mode arg1, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int arg5, CallbackInfo ci, Item item, Block block, GameProfile gameProfile, SkullBlock.SkullType skullType, SkullBlockEntityModel model) {
 		RefHolder.CPM_MODELS = skullModels;
 		if(skullType == SkullBlock.Type.PLAYER && gameProfile != null) {

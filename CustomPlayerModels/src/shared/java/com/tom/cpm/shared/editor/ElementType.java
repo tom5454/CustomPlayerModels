@@ -6,9 +6,9 @@ import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.FlatListView;
 import com.tom.cpl.util.ListView;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.ArgElem;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public enum ElementType {
 	NORMAL(new ElementBuilder() {
@@ -63,11 +63,11 @@ public enum ElementType {
 
 		@Override
 		public void buildElement(IGui gui, Editor editor, ModelElement elem, Object typeData) {
-			ModelPart type = (ModelPart) typeData;
+			VanillaModelPart type = (VanillaModelPart) typeData;
 			elem.name = gui.i18nFormat("label.cpm.elem." + type.getName());
 			elem.pos = new Vec3f();
 			elem.rotation = new Vec3f();
-			elem.rc = new RootModelElement(type) {
+			elem.rc = new RootModelElement(type, editor.definition) {
 				@Override
 				public boolean doDisplay() {
 					return elem.show;
@@ -84,17 +84,16 @@ public enum ElementType {
 					return ElementSelectMode.NULL;
 				}
 			};
-			elem.rc.pos = elem.pos;
-			elem.rc.rotation = elem.rotation;
+			elem.rc.pos = new Vec3f();
+			elem.rc.rotation = new Vec3f();
 			elem.rc.children = new CombinedListView<>(new ListView<>(elem.children, m -> m.rc), new FlatListView<>(editor.templates, t -> t.getForPart(type).stream()));
 			elem.storeID = type.getId(elem.rc);
 		}
 
 		@Override
 		public void preRenderUpdate(ModelElement elem) {
-			elem.rc.pos = new Vec3f(elem.pos);
-			elem.rc.rotation = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
-			((RootModelElement)elem.rc).forcePos = false;
+			((RootModelElement)elem.rc).posN = new Vec3f(elem.pos);
+			((RootModelElement)elem.rc).rotN = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
 		}
 	}),
 	;

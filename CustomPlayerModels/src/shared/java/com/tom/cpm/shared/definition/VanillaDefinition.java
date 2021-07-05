@@ -24,7 +24,7 @@ public class VanillaDefinition extends ModelDefinition {
 
 		Map<Integer, RootModelElement> playerModelParts = new HashMap<>();
 		for(int i = 0;i<PlayerModelParts.VALUES.length;i++) {
-			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i]);
+			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i], this);
 			playerModelParts.put(i, elem);
 		}
 

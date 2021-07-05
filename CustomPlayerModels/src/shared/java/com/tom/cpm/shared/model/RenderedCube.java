@@ -3,9 +3,11 @@ package com.tom.cpm.shared.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tom.cpl.math.BoundingBox;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.IModelComponent;
+import com.tom.cpm.shared.model.render.Mesh;
 
 public class RenderedCube implements IModelComponent {
 	private Cube cube;
@@ -14,7 +16,7 @@ public class RenderedCube implements IModelComponent {
 	public Vec3f offset;
 	public Vec3f rotation;
 	public Vec3f pos;
-	public Object renderObject;
+	public Mesh renderObject;
 	public boolean display = true;
 	public boolean useDynamic = false;
 	public int color;
@@ -138,6 +140,14 @@ public class RenderedCube implements IModelComponent {
 	public int getRGB() {
 		if(cube == null)return -1;
 		return recolor || cube.texSize == 0 ? cube.rgb : -1;
+	}
+
+	public BoundingBox getBounds() {
+		float f = 0.001f;
+		float g = f * 2;
+		float scale = 1 / 16f;
+		return BoundingBox.create(offset.x * scale - f, offset.y * scale - f, offset.z * scale - f,
+				cube.size.x * scale * cube.scale.x + g, cube.size.y * scale * cube.scale.y + g, cube.size.z * scale * cube.scale.z + g);
 	}
 
 	public static enum ElementSelectMode {

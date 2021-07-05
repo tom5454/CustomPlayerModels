@@ -19,8 +19,8 @@ import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.template.args.TexEditorArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.template.Template;
 import com.tom.cpm.shared.util.TextureStitcher;
 
@@ -109,7 +109,7 @@ public class EditorTemplate extends Template implements TreeElement {
 		elems.forEach(c);
 	}
 
-	public List<RenderedCube> getForPart(ModelPart type) {
+	public List<RenderedCube> getForPart(VanillaModelPart type) {
 		return partToCubes.getOrDefault(type, Collections.emptyList());
 	}
 

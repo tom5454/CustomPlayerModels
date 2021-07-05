@@ -51,7 +51,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			}
 		});
 		modeBtn.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export.as_" + mode.name().toLowerCase())));
-		modeBtn.setBounds(new Box(5, 5, 135, 20));
+		modeBtn.setBounds(new Box(5, 5, 150, 20));
 		addElement(modeBtn);
 
 		ok = new Button(gui, gui.i18nFormat("button.cpm.file.export"), this::export);
@@ -102,6 +102,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		private File selFile;
 		private Checkbox forceLinkFile, chbxClone, chbxUUIDLock;
 		private Link defLink;
+		private Tooltip vanillaSkinTooltip;
 		private boolean gist, upload;
 
 		protected Skin(EditorGui e) {
@@ -112,7 +113,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			vanillaSkin.setImage(editor.vanillaSkin);
 
 			Button encSettings = new Button(gui, gui.i18nFormat("button.cpm.animEncSettings"), () -> e.openPopup(new AnimEncConfigPopup(gui, editor, vanillaSkin::markDirty)));
-			encSettings.setBounds(new Box(5, 30, 135, 20));
+			encSettings.setBounds(new Box(5, 30, 150, 20));
 			addElement(encSettings);
 
 			Button changeVanillaSkin = new Button(gui, gui.i18nFormat("button.cpm.change_vanilla_skin"), () -> {
@@ -125,7 +126,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 				editor.frame.openPopup(ssp);
 				editor.displayViewport.accept(false);
 			});
-			changeVanillaSkin.setBounds(new Box(5, 55, 135, 20));
+			changeVanillaSkin.setBounds(new Box(5, 55, 150, 20));
 			addElement(changeVanillaSkin);
 
 			Label vanillaSkinLbl = new Label(gui, gui.i18nFormat("label.cpm.vanilla_skin"));
@@ -138,11 +139,11 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			forceLinkFile.setAction(() -> forceLinkFile.setSelected(!forceLinkFile.isSelected()));
 
 			Label expOutLbl = new Label(gui, gui.i18nFormat("label.cpm.export_output"));
-			expOutLbl.setBounds(new Box(5, 105, 0, 0));
+			expOutLbl.setBounds(new Box(5, 160, 0, 0));
 			addElement(expOutLbl);
 
 			Label exportName = new Label(gui, gui.i18nFormat("label.cpm.no_file"));
-			exportName.setBounds(new Box(5, 125, 0, 0));
+			exportName.setBounds(new Box(5, 175, 0, 0));
 			addElement(exportName);
 
 			Button setOut = new Button(gui, "...", () -> {
@@ -155,23 +156,24 @@ public abstract class ExportSkinPopup extends PopupPanel {
 				fc.setAccept(f -> {
 					selFile = f;
 					ok.setEnabled(true);
+					ok.setTooltip(null);
 					exportName.setText(f.getName());
 				});
 				fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
 				e.openPopup(fc);
 			});
-			setOut.setBounds(new Box(150, 120, 30, 20));
+			setOut.setBounds(new Box(150, 170, 30, 20));
 			addElement(setOut);
 
 			chbxClone = new Checkbox(gui, gui.i18nFormat("label.cpm.cloneable"));
 			chbxClone.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.cloneable")));
-			chbxClone.setBounds(new Box(5, 145, 60, 20));
+			chbxClone.setBounds(new Box(5, 105, 60, 20));
 			chbxClone.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.CLONEABLE);
 			addElement(chbxClone);
 
 			chbxUUIDLock = new Checkbox(gui, gui.i18nFormat("label.cpm.uuidlock"));
 			chbxUUIDLock.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.uuidlock", MinecraftClientAccess.get().getClientPlayer().getUUID().toString())));
-			chbxUUIDLock.setBounds(new Box(5, 170, 60, 20));
+			chbxUUIDLock.setBounds(new Box(5, 130, 60, 20));
 			chbxUUIDLock.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
 			addElement(chbxUUIDLock);
 
@@ -200,7 +202,6 @@ public abstract class ExportSkinPopup extends PopupPanel {
 					export();
 				}
 			});
-			okDef.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export_def")));
 			okDef.setBounds(new Box(90, 210, 80, 20));
 			addElement(okDef);
 
@@ -209,13 +210,20 @@ public abstract class ExportSkinPopup extends PopupPanel {
 				close();
 				export();
 			});
-			okUpload.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skin.exportApply")));
 			okUpload.setBounds(new Box(175, 210, 100, 20));
-			okUpload.setEnabled(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.OFFLINE);
+			if(MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.OFFLINE) {
+				okUpload.setEnabled(false);
+				okUpload.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skin.cantUploadIngame")));
+			} else {
+				okUpload.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skin.exportApply")));
+			}
 			addElement(okUpload);
 
 			ok.setEnabled(false);
+			ok.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skin.noFile")));
 			detectDef();
+
+			vanillaSkinTooltip = new Tooltip(e,  gui.i18nFormat("tooltip.cpm.export.skin.vanillaSkinInfo"));
 		}
 
 		@Override
@@ -226,6 +234,8 @@ public abstract class ExportSkinPopup extends PopupPanel {
 
 			vanillaSkin.bind();
 			gui.drawTexture(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0, 0, 1, 1);
+
+			if(new Box(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128).isInBounds(mouseX, mouseY))vanillaSkinTooltip.set();
 		}
 
 		@Override
@@ -239,6 +249,11 @@ public abstract class ExportSkinPopup extends PopupPanel {
 				defLink = def.findDefLink();
 			}
 			okDef.setEnabled(defLink != null);
+			if(defLink != null) {
+				okDef.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export_def")));
+			} else {
+				okDef.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export_def.noLink")));
+			}
 		}
 
 		@Override
@@ -291,19 +306,19 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			Editor editor = e.getEditor();
 
 			Label nameLbl = new Label(gui, gui.i18nFormat("label.cpm.name"));
-			nameLbl.setBounds(new Box(5, 55, 130, 10));
+			nameLbl.setBounds(new Box(5, 55, 150, 10));
 			addElement(nameLbl);
 
 			nameField = new TextField(gui);
-			nameField.setBounds(new Box(5, 65, 130, 20));
+			nameField.setBounds(new Box(5, 65, 150, 20));
 			addElement(nameField);
 
 			Label descLbl = new Label(gui, gui.i18nFormat("label.cpm.desc"));
-			descLbl.setBounds(new Box(5, 90, 130, 10));
+			descLbl.setBounds(new Box(5, 90, 150, 10));
 			addElement(descLbl);
 
 			descField = new TextField(gui);
-			descField.setBounds(new Box(5, 100, 130, 20));
+			descField.setBounds(new Box(5, 100, 150, 20));
 			addElement(descField);
 
 			icon = new EditorTexture();
@@ -398,19 +413,19 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			Editor editor = e.getEditor();
 
 			Label nameLbl = new Label(gui, gui.i18nFormat("label.cpm.name"));
-			nameLbl.setBounds(new Box(5, 35, 130, 10));
+			nameLbl.setBounds(new Box(5, 35, 150, 10));
 			addElement(nameLbl);
 
 			nameField = new TextField(gui);
-			nameField.setBounds(new Box(5, 45, 130, 20));
+			nameField.setBounds(new Box(5, 45, 150, 20));
 			addElement(nameField);
 
 			Label descLbl = new Label(gui, gui.i18nFormat("label.cpm.desc"));
-			descLbl.setBounds(new Box(5, 70, 130, 10));
+			descLbl.setBounds(new Box(5, 70, 150, 10));
 			addElement(descLbl);
 
 			descField = new TextField(gui);
-			descField.setBounds(new Box(5, 80, 130, 20));
+			descField.setBounds(new Box(5, 80, 150, 20));
 			addElement(descField);
 
 			icon = new EditorTexture();

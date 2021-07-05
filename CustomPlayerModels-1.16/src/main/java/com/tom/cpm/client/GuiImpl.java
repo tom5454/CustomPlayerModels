@@ -96,7 +96,7 @@ public class GuiImpl extends Screen implements IGui {
 			if(!noScissorTest)
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			stack = new CtxStack(width, height);
-			gui.draw(mouseX, mouseY, partialTicks);
+			RenderSystem.runAsFancy(() -> gui.draw(mouseX, mouseY, partialTicks));
 		} catch (Throwable e) {
 			onGuiException("Error drawing gui", e, true);
 		} finally {

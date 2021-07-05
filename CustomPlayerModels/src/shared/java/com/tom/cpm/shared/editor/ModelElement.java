@@ -9,6 +9,7 @@ import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpm.shared.editor.anim.IElem;
@@ -17,9 +18,9 @@ import com.tom.cpm.shared.editor.gui.TextureDisplay;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.util.ValueOp;
 import com.tom.cpm.shared.model.Cube;
-import com.tom.cpm.shared.model.PlayerModelParts;
-import com.tom.cpm.shared.model.PlayerPartValues;
+import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class ModelElement extends Cube implements IElem, TreeElement {
 	private static boolean movePopupShown = false;
@@ -334,13 +335,15 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public Box getTextureBox() {
 		if(type == ElementType.ROOT_PART) {
-			PlayerPartValues ppv = PlayerPartValues.getFor((PlayerModelParts) typeData, editor.skinType);
-			int dx = MathHelper.ceil(ppv.sx);
-			int dy = MathHelper.ceil(ppv.sy);
-			int dz = MathHelper.ceil(ppv.sz);
+			PartValues pv = ((VanillaModelPart) typeData).getDefaultSize(editor.skinType);
+			Vec3f size = pv.getSize();
+			Vec2i uv = pv.getUV();
+			int dx = MathHelper.ceil(size.x);
+			int dy = MathHelper.ceil(size.y);
+			int dz = MathHelper.ceil(size.z);
 			return new Box(
-					(int) (ppv.u / 64f * editor.skinProvider.size.x),
-					(int) (ppv.v / 64f * editor.skinProvider.size.y),
+					(int) (uv.x / 64f * editor.skinProvider.size.x),
+					(int) (uv.y / 64f * editor.skinProvider.size.y),
 					(int) (2 * (dx + dz) / 64f * editor.skinProvider.size.x),
 					(int) ((dz + dy) / 64f * editor.skinProvider.size.y));
 		}

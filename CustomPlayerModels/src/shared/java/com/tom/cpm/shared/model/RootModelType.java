@@ -1,8 +1,8 @@
 package com.tom.cpm.shared.model;
 
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
-public enum RootModelType implements ModelPart {
+public enum RootModelType implements VanillaModelPart {
 	;
 
 	public static final RootModelType[] VALUES = values();
@@ -10,5 +10,10 @@ public enum RootModelType implements ModelPart {
 	@Override
 	public String getName() {
 		return name().toLowerCase();
+	}
+
+	@Override
+	public PartValues getDefaultSize(SkinType skinType) {
+		return null;
 	}
 }

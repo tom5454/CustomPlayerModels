@@ -20,6 +20,7 @@ import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.elements.Tree;
+import com.tom.cpl.gui.util.ButtonGroup;
 import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
@@ -458,13 +459,18 @@ public class EditorGui extends Frame {
 		PopupMenu heldItemLeft = new PopupMenu(gui, this);
 		Button btnHeldLeft = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
 		initHeldItemPopup(heldItemLeft, Hand.LEFT);
-		editor.heldRenderEnable.add(btnHeldLeft::setEnabled);
+		editor.heldRenderEnable.add(e -> {
+			if(!e)btnHeldLeft.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.heldItem.notSupported")));
+			btnHeldLeft.setEnabled(e);
+		});
 	}
 
 	private void initHeldItemPopup(PopupMenu pp, Hand hand) {
+		ButtonGroup<HeldItem, Checkbox> group = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> editor.handDisplay.put(hand, i));
 		for(HeldItem item : HeldItem.VALUES) {
-			pp.addButton(gui.i18nFormat("button.cpm.heldItem." + item.name().toLowerCase()), () -> editor.handDisplay.put(hand, item));
+			group.addElement(item, r -> pp.addCheckbox(gui.i18nFormat("button.cpm.heldItem." + item.name().toLowerCase()), r));
 		}
+		group.accept(editor.handDisplay.getOrDefault(hand, HeldItem.NONE));
 	}
 
 	private void load(File file) {

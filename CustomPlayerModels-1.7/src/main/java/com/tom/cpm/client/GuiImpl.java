@@ -36,6 +36,7 @@ import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.client.RetroGL.RetroTessellator;
 import com.tom.cpm.shared.gui.ViewportPanelBase;
 
 import cpw.mods.fml.common.Loader;
@@ -431,12 +432,13 @@ public class GuiImpl extends GuiScreen implements IGui {
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
 		OpenGlHelper.glBlendFunc(770, 771, 1, 0);
 		GL11.glShadeModel(GL11.GL_SMOOTH);
-		Render.t.startDrawing(7);
-		Render.t.pos(right, top, this.zLevel).color(rtr, gtr, btr, atr).endVertex();
-		Render.t.pos(left, top, this.zLevel).color(rtl, gtl, btl, atl).endVertex();
-		Render.t.pos(left, bottom, this.zLevel).color(rbl, gbl, bbl, abl).endVertex();
-		Render.t.pos(right, bottom, this.zLevel).color(rbr, gbr, bbr, abr).endVertex();
-		Render.t.draw();
+		RetroTessellator t = RetroGL.tessellator;
+		t.begin(7);
+		t.pos(right, top, this.zLevel).color(rtr, gtr, btr, atr).endVertex();
+		t.pos(left, top, this.zLevel).color(rtl, gtl, btl, atl).endVertex();
+		t.pos(left, bottom, this.zLevel).color(rbl, gbl, bbl, abl).endVertex();
+		t.pos(right, bottom, this.zLevel).color(rbr, gbr, bbr, abr).endVertex();
+		t.draw();
 		GL11.glShadeModel(GL11.GL_FLAT);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_ALPHA_TEST);

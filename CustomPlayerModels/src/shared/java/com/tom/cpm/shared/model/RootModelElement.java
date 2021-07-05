@@ -1,35 +1,31 @@
 package com.tom.cpm.shared.model;
 
+import com.tom.cpl.math.BoundingBox;
 import com.tom.cpl.math.Vec3f;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
+import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class RootModelElement extends RenderedCube {
-	private ModelPart part;
+	private VanillaModelPart part;
 	public Vec3f posN, rotN;
-	public boolean forcePos;
+	private ModelDefinition def;
 
-	public RootModelElement(ModelPart part) {
+	public RootModelElement(VanillaModelPart part, ModelDefinition def) {
 		this.part = part;
 		this.posN = new Vec3f();
 		this.rotN = new Vec3f();
 		this.pos = new Vec3f();
 		this.rotation = new Vec3f();
+		this.def = def;
 	}
 
-	public ModelPart getPart() {
+	public VanillaModelPart getPart() {
 		return part;
 	}
 
 	@Override
 	public void reset() {
-		rotation.x = rotN.x;
-		rotation.y = rotN.y;
-		rotation.z = rotN.z;
-		pos.x = posN.x;
-		pos.y = posN.y;
-		pos.z = posN.z;
 		display = !hidden;
-		forcePos = false;
 	}
 
 	@Override
@@ -44,14 +40,23 @@ public class RootModelElement extends RenderedCube {
 	}
 
 	@Override
-	public void setRotation(boolean add, float x, float y, float z) {
-		super.setRotation(add, x, y, z);
-		if(!add)forcePos = true;
+	public BoundingBox getBounds() {
+		PartValues v = part.getDefaultSize(def.getSkinType());
+		float f = 0.001f;
+		float g = f * 2;
+		float scale = 1 / 16f;
+		Vec3f offset = v.getOffset();
+		Vec3f size = v.getSize();
+		return BoundingBox.create(offset.x * scale - f, offset.y * scale - f, offset.z * scale - f,
+				size.x * scale + g, size.y * scale + g, size.z * scale + g);
 	}
 
-	@Override
-	public void setPosition(boolean add, float x, float y, float z) {
-		super.setPosition(add, x, y, z);
-		if(!add)forcePos = true;
+	public void setPosAndRot(float px, float py, float pz, float rx, float ry, float rz) {
+		pos.x = px + posN.x;
+		pos.y = py + posN.y;
+		pos.z = pz + posN.z;
+		rotation.x = rx + rotN.x;
+		rotation.y = ry + rotN.y;
+		rotation.z = rz + rotN.z;
 	}
 }

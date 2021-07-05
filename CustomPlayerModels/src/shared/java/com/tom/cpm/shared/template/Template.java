@@ -15,10 +15,10 @@ import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.editor.template.args.TexEditorArg;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.Cube;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelType;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.template.args.TexArg;
 
@@ -30,7 +30,7 @@ public class Template {
 	protected Map<String, Object> appliedData;
 	private List<Cube> cubes;
 	private List<RenderedCube> rc;
-	protected Map<ModelPart, List<RenderedCube>> partToCubes;
+	protected Map<VanillaModelPart, List<RenderedCube>> partToCubes;
 	protected Map<Integer, RootModelType> rootIDmap = new HashMap<>();
 	protected TextureProvider texture;
 	protected TexArg texArg;

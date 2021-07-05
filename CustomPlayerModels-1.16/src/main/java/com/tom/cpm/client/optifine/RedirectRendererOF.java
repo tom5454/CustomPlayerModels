@@ -1,42 +1,29 @@
 package com.tom.cpm.client.optifine;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.math.vector.Vector3f;
 import net.optifine.entity.model.anim.ModelUpdater;
-import net.optifine.model.ModelSprite;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import com.tom.cpm.client.CustomRenderTypes;
+import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.client.PlayerRenderManager.RedirectModelRendererBase;
-import com.tom.cpm.client.Render;
-import com.tom.cpm.client.Render.Box;
+import com.tom.cpm.client.VBuffer;
 import com.tom.cpm.client.optifine.proxy.IRenderTypeBufferOF;
 import com.tom.cpm.client.optifine.proxy.IVertexBuilderOF;
 import com.tom.cpm.client.optifine.proxy.ModelRendererOF;
 import com.tom.cpm.client.optifine.proxy.WorldRendererOF;
-import com.tom.cpm.shared.model.Cube;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
-import com.tom.cpm.shared.model.ModelRenderManager.RedirectHolder;
-import com.tom.cpm.shared.model.RenderedCube;
-import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
-import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class RedirectRendererOF extends RedirectModelRendererBase implements ModelRendererOF {
-	private CubeModelRenderer dispRender;
 
-	public RedirectRendererOF(Model model, RDH holder, Supplier<ModelRenderer> parent, ModelPart part) {
-		super(model, holder, parent, part);
-		this.dispRender = new CubeModelRenderer();
+	public RedirectRendererOF(RDH holder, Supplier<ModelRenderer> parent, VanillaModelPart part) {
+		super(holder, parent, part);
 	}
 
 	private MatrixStack matrixStackIn;
@@ -68,7 +55,17 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 		this.green           = green          ;
 		this.blue            = blue           ;
 		this.alpha           = alpha          ;
+		this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn));
 		render();
+		/*matrixStackIn.push();
+		translateRotate(matrixStackIn);
+		List<ModelSprite> spriteList = cpm$spriteList();
+		int spriteListSize = spriteList.size();
+		for (int ix = 0; ix < spriteListSize; ix++) {
+			ModelSprite sprite = spriteList.get(ix);
+			sprite.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		}
+		matrixStackIn.pop();*/
 		if (lastRenderType != null)
 			renderTypeBuffer.getBuffer(lastRenderType);
 		this.matrixStackIn = null;
@@ -78,189 +75,6 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 	@Override
 	public void renderParent() {
 		parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-	}
-
-	@Override
-	public void renderWithParent(RootModelElement elem) {
-		this.elem = elem;
-		parent.addChild(dispRender);
-		parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-		parent.childModels.remove(dispRender);
-		this.elem = null;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public void doRender(RootModelElement elem) {
-		this.elem = elem;
-		matrixStackIn.push();
-		translateRotate(matrixStackIn);
-		if(holder.def.isEditor())drawVanillaOutline(matrixStackIn, bufferIn);
-		render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-		List<ModelSprite> spriteList = cpm$spriteList();
-		int spriteListSize = spriteList.size();
-		for (int ix = 0; ix < spriteListSize; ix++) {
-			ModelSprite sprite = spriteList.get(ix);
-			sprite.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-		}
-		matrixStackIn.pop();
-		this.elem = null;
-	}
-
-	private class CubeModelRenderer extends ModelRenderer {
-
-		public CubeModelRenderer() {
-			super(0, 0, 0, 0);
-		}
-
-		@Override
-		public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-			RedirectRendererOF.this.render(elem, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-			if(holder.def.isEditor())drawVanillaOutline(matrixStackIn, bufferIn);
-		}
-	}
-
-	private void drawVanillaOutline(MatrixStack matrixStackIn, IVertexBuilder bufferIn) {
-		if(holder.def.isEditor()) {
-			ElementSelectMode sel = elem.getSelected();
-			if(sel.isRenderOutline()) {
-				float f = 0.001f;
-				float g = f * 2;
-				float scale = 1 / 16.0F;
-				if(sel == ElementSelectMode.SELECTED)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
-				for(ModelBox b : parent.cubeList) {
-					WorldRenderer.drawBoundingBox(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
-							b.posX1 * scale - f, b.posY1 * scale - f, b.posZ1 * scale - f,
-							b.posX2 * scale + g, b.posY2 * scale + g, b.posZ2 * scale + g,
-							1, 1, sel == ElementSelectMode.SELECTED ? 1 : 0, 1);
-				}
-			}
-		}
-	}
-
-	private static void translateRotate(RenderedCube rc, MatrixStack matrixStackIn) {
-		matrixStackIn.translate(rc.pos.x / 16.0F, rc.pos.y / 16.0F, rc.pos.z / 16.0F);
-		if (rc.rotation.z != 0.0F) {
-			matrixStackIn.rotate(Vector3f.ZP.rotation(rc.rotation.z));
-		}
-
-		if (rc.rotation.y != 0.0F) {
-			matrixStackIn.rotate(Vector3f.YP.rotation(rc.rotation.y));
-		}
-
-		if (rc.rotation.x != 0.0F) {
-			matrixStackIn.rotate(Vector3f.XP.rotation(rc.rotation.x));
-		}
-
-	}
-
-	private void render(RenderedCube elem, MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-		if(elem.children == null || holder.defaultType == null)return;
-		for(RenderedCube cube : elem.children) {
-			if(!cube.display) {
-				continue;
-			}
-			matrixStackIn.push();
-			translateRotate(cube, matrixStackIn);
-			float r = red;
-			float g = green;
-			float b = blue;
-			if(cube.color != 0xffffff) {
-				r *= ((cube.color & 0xff0000) >> 16) / 255f;
-				g *= ((cube.color & 0x00ff00) >> 8 ) / 255f;
-				b *= ( cube.color & 0x0000ff       ) / 255f;
-			}
-			if(cube.useDynamic || cube.renderObject == null) {
-				cube.renderObject = createBox(cube);
-			}
-			IVertexBuilder buffer = bufferIn;
-			if(holder.def.isEditor()) {
-				ElementSelectMode sel = cube.getSelected();
-				if(!sel.applyColor()) {
-					r = 1;
-					g = 1;
-					b = 1;
-				}
-				if(cube.glow && sel == ElementSelectMode.NULL) {
-					buffer = holder.addDt.getBuffer(holder.glowType);
-				}
-			} else if(cube.glow) {
-				buffer = holder.addDt.getBuffer(holder.glowType);
-			}
-			((Box)cube.renderObject).draw(matrixStackIn, buffer, holder.addDt, packedLightIn, packedOverlayIn, r, g, b, alpha);
-			holder.addDt.getBuffer(holder.defaultType);
-			drawSelect(cube, matrixStackIn, bufferIn);
-			render(cube, matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-			matrixStackIn.pop();
-		}
-	}
-
-	private void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, IVertexBuilder bufferIn) {
-		if(holder.def.isEditor()) {
-			ElementSelectMode sel = cube.getSelected();
-			if(sel.isRenderOutline()) {
-				float f = 0.001f;
-				float g = f * 2;
-				float scale = 1 / 16f;
-				boolean s = sel == ElementSelectMode.SELECTED;
-				if(s)Render.drawOrigin(matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()), 1);
-				Cube c = cube.getCube();
-				Render.drawBoundingBox(
-						matrixStackIn, holder.addDt.getBuffer(CustomRenderTypes.getLinesNoDepth()),
-						c.offset.x * scale - f, c.offset.y * scale - f, c.offset.z * scale - f,
-						c.size.x * scale * c.scale.x + g, c.size.y * scale * c.scale.y + g, c.size.z * scale * c.scale.z + g,
-						s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
-						);
-			}
-		}
-	}
-
-	private Box createBox(RenderedCube elem) {
-		Cube c = elem.getCube();
-		if(c.texSize == 0) {
-			return Render.createColored(
-					c.offset.x, c.offset.y, c.offset.z,
-					c.size.x * c.scale.x, c.size.y * c.scale.y, c.size.z * c.scale.z,
-					c.mcScale, holder.sheetX, holder.sheetY
-					);
-		} else {
-			return Render.createTextured(
-					c.offset, c.size, c.scale,
-					c.mcScale,
-					c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
-					);
-		}
-	}
-
-	@Override
-	public ModelRenderer swapIn() {
-		if(parent != null)return this;
-		parent = parentProvider.get();
-		holder.copyModel(parent, this);
-		return this;
-	}
-
-	@Override
-	public ModelRenderer swapOut() {
-		if(parent == null)return parentProvider.get();
-		ModelRenderer p = parent;
-		parent = null;
-		return p;
-	}
-
-	@Override
-	public RedirectHolder<?, ?, ?, ModelRenderer> getHolder() {
-		return holder;
-	}
-
-	@Override
-	public ModelRenderer getParent() {
-		return parent;
-	}
-
-	@Override
-	public ModelPart getPart() {
-		return part;
 	}
 
 	@Override

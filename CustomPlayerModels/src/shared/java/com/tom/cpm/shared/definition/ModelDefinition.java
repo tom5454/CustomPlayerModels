@@ -20,13 +20,13 @@ import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.Cube;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.IResolvedModelPart;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
@@ -50,7 +50,7 @@ public class ModelDefinition {
 	private TextureProvider listIconOverride;
 	private List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
-	protected Map<ModelPart, PartRoot> rootRenderingCubes;
+	protected Map<VanillaModelPart, PartRoot> rootRenderingCubes;
 	private int resolveState;
 	private AnimationRegistry animations = new AnimationRegistry();
 	private ModelPartScale scale;
@@ -138,7 +138,7 @@ public class ModelDefinition {
 		cubes = new ArrayList<>();
 		Map<Integer, RootModelElement> playerModelParts = new HashMap<>();
 		for(int i = 0;i<PlayerModelParts.VALUES.length;i++) {
-			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i]);
+			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i], this);
 			elem.hidden = !player.doRenderPart(PlayerModelParts.VALUES[i]);
 			playerModelParts.put(i, elem);
 		}
@@ -235,7 +235,10 @@ public class ModelDefinition {
 
 	public void cleanup() {
 		if(loader == null)return;
-		cubes.forEach(MinecraftClientAccess.get().getPlayerRenderManager()::cleanupRenderedCube);
+		cubes.forEach(c -> {
+			if(c.renderObject != null)c.renderObject.free();
+			c.renderObject = null;
+		});
 		if(skinOverride != null)skinOverride.free();
 	}
 
@@ -247,7 +250,7 @@ public class ModelDefinition {
 		return resolveState;
 	}
 
-	public PartRoot getModelElementFor(ModelPart part) {
+	public PartRoot getModelElementFor(VanillaModelPart part) {
 		return rootRenderingCubes.get(part);
 	}
 
@@ -306,8 +309,8 @@ public class ModelDefinition {
 		return bb.toString();
 	}
 
-	public RootModelElement addRoot(int baseID, ModelPart type) {
-		RootModelElement elem = new RootModelElement(type);
+	public RootModelElement addRoot(int baseID, VanillaModelPart type) {
+		RootModelElement elem = new RootModelElement(type, this);
 		elem.children = new ArrayList<>();
 		rootRenderingCubes.computeIfAbsent(type, k -> new PartRoot(elem)).add(elem);
 		cubes.add(elem);

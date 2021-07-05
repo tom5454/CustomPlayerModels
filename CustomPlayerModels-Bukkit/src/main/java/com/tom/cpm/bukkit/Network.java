@@ -49,20 +49,25 @@ public class Network implements PluginMessageListener, Listener {
 	public Network(CPMBukkitPlugin plugin) {
 		this.plugin = plugin;
 		try {
-			String pckg;
-			if(Bukkit.getServer() != null) {
-				Field console = Bukkit.getServer().getClass().getDeclaredField("console");
-				console.setAccessible(true);
-				Object dedicatedServer = console.get(Bukkit.getServer());
-				String dedicatedServerClazz = dedicatedServer.getClass().getName();
-				int ind = dedicatedServerClazz.lastIndexOf('.');
-				pckg = dedicatedServerClazz.substring(0, ind + 1);
-			} else {
-				pckg = "net.minecraft.server.v1_16_R3.";
-			}
-			NBTTagCompound = Class.forName(pckg + "NBTTagCompound");
+			try {
+				NBTTagCompound = Class.forName("net.minecraft.nbt.NBTTagCompound");
+				PacketDataSerializer = Class.forName("net.minecraft.network.PacketDataSerializer");
+			} catch (ClassNotFoundException e) {
+				String pckg;
+				if(Bukkit.getServer() != null) {
+					Field console = Bukkit.getServer().getClass().getDeclaredField("console");
+					console.setAccessible(true);
+					Object dedicatedServer = console.get(Bukkit.getServer());
+					String dedicatedServerClazz = dedicatedServer.getClass().getName();
+					int ind = dedicatedServerClazz.lastIndexOf('.');
+					pckg = dedicatedServerClazz.substring(0, ind + 1);
+				} else {
+					pckg = "net.minecraft.server.v1_16_R3.";
+				}
 
-			PacketDataSerializer = Class.forName(pckg + "PacketDataSerializer");
+				NBTTagCompound = Class.forName(pckg + "NBTTagCompound");
+				PacketDataSerializer = Class.forName(pckg + "PacketDataSerializer");
+			}
 
 			setBoolean = NBTTagCompound.getDeclaredMethod("setBoolean", String.class, boolean.class);
 			setByteArray = NBTTagCompound.getDeclaredMethod("setByteArray", String.class, byte[].class);

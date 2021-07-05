@@ -226,6 +226,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					fillArray(rd.color[i], frames, elem, IElem::getColor, ea.add, new Vec3f());
 				}
 				if(frames.stream().anyMatch(f -> f.hasVisChanges(elem))) {
+					rd.show[i] = new Boolean[fc];
 					fillArray(rd.show[i], frames, elem, IElem::isVisible, ea.add, !elem.hidden);
 				}
 			}

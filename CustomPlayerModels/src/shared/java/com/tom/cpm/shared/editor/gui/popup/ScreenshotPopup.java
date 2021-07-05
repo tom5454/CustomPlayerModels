@@ -13,10 +13,10 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.gui.ViewportPanelBase;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
-import com.tom.cpm.shared.model.ModelRenderManager.ModelPart;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 
 public class ScreenshotPopup extends PopupPanel {
@@ -115,7 +115,7 @@ public class ScreenshotPopup extends PopupPanel {
 		}
 
 		@Override
-		public PartRoot getModelElementFor(ModelPart part) {
+		public PartRoot getModelElementFor(VanillaModelPart part) {
 			PartRoot root = new PartRoot();
 			editor.elements.forEach(e -> {
 				RootModelElement el = (RootModelElement) e.rc;

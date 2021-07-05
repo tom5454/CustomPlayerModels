@@ -37,6 +37,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.client.PlayerRenderManager.RDH;
@@ -44,6 +45,7 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.gui.ViewportPanelBase;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportPanelNative;
+import com.tom.cpm.shared.model.render.RenderMode;
 
 public class ViewportPanelImpl extends ViewportPanelNative {
 	private MinecraftClient mc;
@@ -124,7 +126,7 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			int light = 15 << 4 | 15 << 20;
 			RenderLayer rt = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderLayer.getEntityTranslucentCull(cbi.getReturnValue());
 			VertexConsumer buffer = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rt);
-			((RDH)CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolder(p)).defaultType = rt;
+			((RDH)CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolder(p)).renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rt, 0));
 			setHeldItem(Hand.RIGHT, ap -> p.rightArmPose = ap);
 			setHeldItem(Hand.LEFT, ap -> p.leftArmPose = ap);
 			PlayerModelSetup.setAngles(p, 0, 0, 0, 0, mc.options.mainArm, false);
