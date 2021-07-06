@@ -664,6 +664,9 @@ public class Editor {
 
 	public void preRender() {
 		elements.forEach(ModelElement::preRender);
+	}
+
+	public void applyAnimations() {
 		if(this.applyAnim && this.selectedAnim != null) {
 			if(this.playFullAnim) {
 				long playTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
@@ -1088,7 +1091,7 @@ public class Editor {
 				restitchTexture();
 			} catch (IOException e) {
 				Log.error("Failed to load image", e);
-				frame.openPopup(new MessagePopup(frame.getGui(), frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
+				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
 			}
 		}
 	}
@@ -1101,7 +1104,7 @@ public class Editor {
 				tex.file = f;
 			} catch (IOException e) {
 				Log.error("Failed to save image", e);
-				frame.openPopup(new MessagePopup(frame.getGui(), frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_save_failed", e.getLocalizedMessage())));
+				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_save_failed", e.getLocalizedMessage())));
 			}
 		}
 	}

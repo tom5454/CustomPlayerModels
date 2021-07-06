@@ -56,4 +56,8 @@ public class EditorDefinition extends ModelDefinition {
 	public SkinType getSkinType() {
 		return editor.skinType;
 	}
+
+	public void bindFirstSetup() {
+		editor.applyAnimations();
+	}
 }

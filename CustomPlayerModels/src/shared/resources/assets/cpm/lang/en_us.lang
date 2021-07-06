@@ -77,6 +77,7 @@ button.cpm.display.errorLog=Error Log
 button.cpm.changeSkin=Change Skin
 button.cpm.clearAnimData=Clear
 button.cpm.tools.fillUV=Fill UV
+button.cpm.saveSkinFile=Save Skin File
 
 tooltip.cpm.export.as_skin=Export Model as a skin file.
 tooltip.cpm.export.as_b64=Export Model as a Base64 String.\You probably want to export as skin instead of Base64.\Can be loaded with \'/cpm setskin [-f | -t] <player> <base64_string>'\ ingame if server-side mod is loaded and you are an op.
@@ -106,6 +107,7 @@ tooltip.cpm.export.skin.noFile=No output file selected.
 tooltip.cpm.export.skin.cantUploadIngame=Can't upload skin while in-game.\Use 'Export: Model' on supported servers for in-game skin changing,\or Exit to the Title Screen and then try uploading.
 tooltip.cpm.export_def.noLink=Vanilla skin doesn't have an encoded link file
 tooltip.cpm.export.skin.vanillaSkinInfo=This is the skin that players without the will see\on multiplayer servers.
+tooltip.cpm.filechooser.openNative=Open System File Chooser
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -262,6 +264,11 @@ label.cpm.addSkinToFolder=Add skin to list?
 label.cpm.modelNotSkinCompatible=Model file is not skin compatible
 label.cpm.convertFail=Failed to convert model to skin
 label.cpm.brushSize=Brush Size: %dpx
+label.cpm.uploading.connecting=Connecting to minecraft.net...
+label.cpm.uploading.authFail=Failed to connect to minecraft.net\Please use your minecraft launcher, or minecraft.net\to upload the skin.
+label.cpm.filechooser.waitingForNative=Waiting for System File Chooser Popup.
+label.cpm.waiting=Waiting
+label.cpm.filechooser.nativeError=Failed to open System File Chooser\Error: %s
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body

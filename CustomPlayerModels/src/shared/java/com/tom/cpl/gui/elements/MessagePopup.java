@@ -1,13 +1,15 @@
 package com.tom.cpl.gui.elements;
 
-import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.Frame;
 import com.tom.cpl.math.Box;
 
-public class MessagePopup extends PopupPanel {
+public class MessagePopup extends PopupPanel implements Runnable {
 	private String title;
+	private Frame frame;
 
-	public MessagePopup(IGui gui, String title, String text) {
-		super(gui);
+	public MessagePopup(Frame frame, String title, String text) {
+		super(frame.getGui());
+		this.frame = frame;
 		this.title = title;
 		String[] lines = text.split("\\\\");
 
@@ -32,5 +34,10 @@ public class MessagePopup extends PopupPanel {
 	@Override
 	public String getTitle() {
 		return title;
+	}
+
+	@Override
+	public void run() {
+		frame.openPopup(this);
 	}
 }

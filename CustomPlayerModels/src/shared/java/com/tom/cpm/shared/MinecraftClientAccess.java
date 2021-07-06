@@ -1,7 +1,6 @@
 package com.tom.cpm.shared;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
@@ -15,6 +14,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.util.MojangSkinsAPI;
 
 public interface MinecraftClientAccess {
 	IPlayerRenderManager getPlayerRenderManager();
@@ -47,7 +47,8 @@ public interface MinecraftClientAccess {
 	NetHandler<?, ?, ?, ?, ?> getNetHandler();
 	void openGui(Function<IGui, Frame> creator);
 	IImageIO getImageIO();
-	void applySkin(Image skin, SkinType type) throws IOException;
+	MojangSkinsAPI getMojangAPI();
+	void clearSkinCache();
 
 	default Runnable openSingleplayer() {
 		throw new UnsupportedOperationException();

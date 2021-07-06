@@ -99,7 +99,7 @@ public class NewSkinPopup extends PopupPanel {
 				editor.restitchTexture();
 				editor.updateGui();
 				if(editor.hasVanillaParts() && (size.x != 64 || size.y != 64)) {
-					editor.frame.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));
+					editor.frame.openPopup(new MessagePopup(editor.frame, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));
 				}
 			}
 		});

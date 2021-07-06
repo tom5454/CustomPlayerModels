@@ -2,22 +2,22 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "homepage-fabric": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
   "promos": {
-    "1.12.2-latest": "0.0.16a",
-    "1.12.2-recommended": "0.0.16a",
-    "1.16.4-latest": "0.0.16a",
-    "1.16.4-recommended": "0.0.16a",
-    "1.16.5-latest": "0.0.16a",
-    "1.16.5-recommended": "0.0.16a",
-    "1.8.9-latest": "0.0.16a",
-    "1.8.9-recommended": "0.0.16a",
-    "1.7.10-latest": "0.0.16a",
-    "1.7.10-recommended": "0.0.16a",
-    "1.15.2-latest": "0.0.16a",
-    "1.15.2-recommended": "0.0.16a",
-    "1.16.4-fabric-latest": "0.0.16a",
-    "1.16.5-fabric-latest": "0.0.16a",
-    "1.17-fabric-latest": "0.0.16a",
-    "bukkit-latest": "0.0.16a"
+    "1.12.2-latest": "0.0.16b",
+    "1.12.2-recommended": "0.0.16b",
+    "1.16.4-latest": "0.0.16b",
+    "1.16.4-recommended": "0.0.16b",
+    "1.16.5-latest": "0.0.16b",
+    "1.16.5-recommended": "0.0.16b",
+    "1.8.9-latest": "0.0.16b",
+    "1.8.9-recommended": "0.0.16b",
+    "1.7.10-latest": "0.0.16b",
+    "1.7.10-recommended": "0.0.16b",
+    "1.15.2-latest": "0.0.16b",
+    "1.15.2-recommended": "0.0.16b",
+    "1.16.4-fabric-latest": "0.0.16b",
+    "1.16.5-fabric-latest": "0.0.16b",
+    "1.17-fabric-latest": "0.0.16b",
+    "bukkit-latest": "0.0.16b"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -42,7 +42,8 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "1.16.4": {
     "0.0.5a": "First release",
@@ -68,7 +69,8 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "1.16.5": {
     "0.0.5a": "First release",
@@ -94,7 +96,8 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "1.16.4-fabric": {
     "0.0.5a": "First release",
@@ -121,7 +124,8 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "1.16.5-fabric": {
     "0.0.5a": "First release",
@@ -148,7 +152,8 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "1.17-fabric": {
     "0.0.5a": "First release",
@@ -177,7 +182,8 @@
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
     "0.0.15b": "Fixed models menu couldn\u0027t be closed on 1.17",
     "0.0.15c": "Fixed mod not loading on 1.17",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "1.8.9": {
     "0.0.5a": "First release",
@@ -201,7 +207,8 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "1.7.10": {
     "0.0.5a": "First release",
@@ -225,7 +232,8 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "1.15.2": {
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
@@ -248,7 +256,8 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   },
   "bukkit": {
     "0.0.12a": "Added: display held item in the editor.\nAdded: player model scaling with Pehkui mod on 1.16 versions\nAdded: change gui scale for the editor independently from game gui scale\nAdded: scroll bars now show on scrollable elements and can be dragged\nAdded: drag UVs in texture tab\n\nFixed skins not loading correctly on Fabric 1.16 (Closes #57)\nFixed checking incorrect vanilla skin size (#63)\nFixed flying animation not displaying correctly in editor\nFixed log spam with skin loading\nFixed vanilla skin not always loading in editor\nFixed Test Ingame not working correctly (Closes #65, ? #67)\nRewritten networking\nFixed models not rendering correctly\nFixed models gui not displaying correctly on certain resolutions\nFixed keybinds not working properly on fabric (Closes #68)\nFixed editing animation types not working (#67)\nFixed various editor gui bugs",
@@ -257,6 +266,7 @@
     "0.0.13b": "Fixed fabric mod not loading on server (Closes #80)\nFixed gestures gui not using the correct model data in some cases",
     "0.0.14a": "Server-side models are saved inside world/data/cpm.json\nAdded clear button to animations editor to remove part from current animation frame. (Closes #81)\nAdded editor auto-saves project event 5 minutes\nAdded more keyboard shortcuts to editor Ctrl+S, Tab to switch text fields\nAdded fill UV option\nAdded bucket fill option for texture editor\nAdded scrollable model elements tree\n\nFixed animation visibility not exporting correctly (Closes #85)\nFixed using the drag UV tool not undoable\nFixed armor rendering in 1.12.2 (Closes #86)\nFixed moving multiple elements not working\nFixed exporter not exporting blockbench converted project.",
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
-    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code"
+    "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
+    "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)"
   }
 }

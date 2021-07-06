@@ -118,7 +118,7 @@ public class SkinSettingsPopup extends PopupPanel {
 		Runnable r = () -> {
 			if(editor.hasVanillaParts() && !shownWarning) {
 				shownWarning = true;
-				e.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));
+				e.openPopup(new MessagePopup(e, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));
 			} else
 				editor.setTexSize((int) spinnerTW.getValue(), (int) spinnerTH.getValue());
 		};

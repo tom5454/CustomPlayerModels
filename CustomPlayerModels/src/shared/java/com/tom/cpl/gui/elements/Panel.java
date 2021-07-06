@@ -116,4 +116,8 @@ public class Panel extends GuiElement {
 	public List<GuiElement> getElements() {
 		return elements;
 	}
+
+	public boolean remove(GuiElement o) {
+		return elements.remove(o);
+	}
 }

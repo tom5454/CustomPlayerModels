@@ -70,27 +70,27 @@ public class Exporter {
 
 	public static void exportSkin(Editor e, EditorGui gui, File f, boolean forceOut) {
 		if(e.vanillaSkin == null) {
-			gui.openPopup(new MessagePopup(gui.getGui(), "Unknown Error", "Couldn't load vanilla skin"));
+			gui.openPopup(new MessagePopup(gui, "Unknown Error", "Couldn't load vanilla skin"));
 			return;
 		}
 		if(e.vanillaSkin.getWidth() != 64 || e.vanillaSkin.getHeight() != 64) {
-			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.vanillaSkinSize")));
+			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.vanillaSkinSize")));
 			return;
 		}
 		Image img = new Image(e.vanillaSkin);
 		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType.getChannel()), () -> {
 			img.storeTo(f);
-			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
+			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
 		}, (d, c) -> handleGistOverflow(d, c, gui)), forceOut);
 	}
 
 	public static void exportSkin(Editor e, EditorGui gui, Consumer<Image> out, boolean forceOut) {
 		if(e.vanillaSkin == null) {
-			gui.openPopup(new MessagePopup(gui.getGui(), "Unknown Error", "Couldn't load vanilla skin"));
+			gui.openPopup(new MessagePopup(gui, "Unknown Error", "Couldn't load vanilla skin"));
 			return;
 		}
 		if(e.vanillaSkin.getWidth() != 64 || e.vanillaSkin.getHeight() != 64) {
-			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.vanillaSkinSize")));
+			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.vanillaSkinSize")));
 			return;
 		}
 		Image img = new Image(e.vanillaSkin);
@@ -123,7 +123,7 @@ public class Exporter {
 			Log.info(b64);
 			b64Out.accept(b64);
 		} catch (ExportException ex) {
-			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
 			gui.getGui().onGuiException("Error while exporting", ex, false);
 		}
@@ -134,7 +134,7 @@ public class Exporter {
 		wr.setDesc(desc.name, desc.desc, desc.icon);
 		exportSkin0(e, gui, new Result(wr::getOut, () -> {
 			if(wr.finish())
-				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
+				gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
 		}, (d, c) -> handleGistOverflow(d, l -> {
 			wr.setOverflow(d, l);
 			c.accept(l);
@@ -246,11 +246,11 @@ public class Exporter {
 			result.close();
 			return true;
 		} catch (ExportException ex) {
-			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 			return false;
 		} catch (Exception ex) {
 			gui.getGui().onGuiException("Error while exporting", ex, false);
-			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.unknownError")));
+			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.unknownError")));
 			return false;
 		}
 	}
@@ -277,7 +277,7 @@ public class Exporter {
 				}
 				result.close();
 			} catch (ExportException ex) {
-				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", ex.getMessage())));
+				gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", ex.getMessage())));
 			} catch (Exception ex) {
 				gui.getGui().onGuiException("Error while exporting", ex, false);
 			}
@@ -340,7 +340,7 @@ public class Exporter {
 			String result = sgson.toJson(data);
 			templateOut.accept(result);
 		} catch (ExportException ex) {
-			gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
 			gui.getGui().onGuiException("Error while exporting", ex, false);
 		}
@@ -500,7 +500,7 @@ public class Exporter {
 				cos.close();
 				return true;
 			} catch (ExportException ex) {
-				gui.openPopup(new MessagePopup(gui.getGui(), gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+				gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 			} catch (Exception ex) {
 				gui.getGui().onGuiException("Error while exporting", ex, false);
 			}

@@ -20,6 +20,7 @@ import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.editor.EditorDefinition;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RenderedCube;
@@ -186,6 +187,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			}
 			if(playerObj != null)
 				mngr.animEngine.handleAnimation(playerObj, mode);
+			else if(def instanceof EditorDefinition)
+				((EditorDefinition)def).bindFirstSetup();
 		}
 
 		protected RedirectRenderer<P> register(Field<P> f) {

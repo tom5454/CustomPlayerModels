@@ -13,6 +13,14 @@ public class ConfirmPopup extends PopupPanel implements Runnable {
 	}
 
 	public ConfirmPopup(Frame frame, String title, String msg, Runnable ok, Runnable cancel) {
+		this(frame,title, msg, ok, cancel, frame.getGui().i18nFormat("button.cpm.ok"));
+	}
+
+	public ConfirmPopup(Frame frame, String title, String msg, Runnable ok, Runnable cancel, String okTxt) {
+		this(frame,title, msg, ok, cancel, okTxt, frame.getGui().i18nFormat("button.cpm.cancel"));
+	}
+
+	public ConfirmPopup(Frame frame, String title, String msg, Runnable ok, Runnable cancel, String okTxt, String cancelTxt) {
 		super(frame.getGui());
 		this.frm = frame;
 		this.title = title;
@@ -32,17 +40,17 @@ public class ConfirmPopup extends PopupPanel implements Runnable {
 		}
 		setBounds(new Box(0, 0, wm + 20, 45 + lines.length * 10));
 
-		Button btn = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
+		Button btn = new Button(gui, okTxt, () -> {
 			okPressed = true;
 			close();
 			ok.run();
 		});
-		Button btnNo = new Button(gui, gui.i18nFormat("button.cpm.cancel"), () -> {
+		Button btnNo = new Button(gui, cancelTxt, () -> {
 			close();
 			if(cancel != null)cancel.run();
 		});
-		btn.setBounds(new Box(5, 20 + lines.length * 10, 40, 20));
-		btnNo.setBounds(new Box(50, 20 + lines.length * 10, 40, 20));
+		btn.setBounds(new Box(5, 20 + lines.length * 10, 25 + gui.textWidth(okTxt), 20));
+		btnNo.setBounds(new Box(35 + gui.textWidth(okTxt), 20 + lines.length * 10, 25 + gui.textWidth(cancelTxt), 20));
 		addElement(btn);
 		addElement(btnNo);
 		if(cancel != null) {

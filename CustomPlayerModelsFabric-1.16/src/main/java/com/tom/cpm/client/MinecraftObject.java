@@ -194,8 +194,12 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public void applySkin(Image skin, SkinType type) throws IOException {
-		MojangSkinsAPI.uploadSkin(mc.getSession().getProfile().getId(), mc.getSession().getAccessToken(), type, skin);
+	public MojangSkinsAPI getMojangAPI() {
+		return new MojangSkinsAPI(mc.getSession().getProfile().getId(), mc.getSession().getAccessToken());
+	}
+
+	@Override
+	public void clearSkinCache() {
 		MojangSkinsAPI.clearYggdrasilCache(mc.getSessionService());
 		mc.getSessionProperties().clear();
 		mc.getSessionProperties();//refresh

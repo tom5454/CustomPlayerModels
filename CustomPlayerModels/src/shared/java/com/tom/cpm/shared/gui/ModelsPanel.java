@@ -13,7 +13,6 @@ import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Panel;
-import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
@@ -32,7 +31,6 @@ import com.tom.cpm.shared.io.IOHelper.ImageBlock;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.skin.TextureProvider;
-import com.tom.cpm.shared.util.Log;
 
 public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	private ViewportCamera camera;
@@ -261,13 +259,13 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 				return;
 			}
 			if(!file.convertable()) {
-				frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", gui.i18nFormat("label.cpm.modelNotSkinCompatible"))));
+				frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", gui.i18nFormat("label.cpm.modelNotSkinCompatible"))));
 				return;
 			}
 			SelectSkinPopup ssp = new SelectSkinPopup(frm, SkinType.DEFAULT, (type, img) -> {
 				frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.export.upload"), gui.i18nFormat("label.cpm.export.upload.desc"), () -> {
 					Exporter.convert(file, img, type, out -> upload(type, out), () -> {
-						frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", gui.i18nFormat("label.cpm.convertFail"))));
+						frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", gui.i18nFormat("label.cpm.convertFail"))));
 					});
 				}, null));
 			});
@@ -278,17 +276,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	}
 
 	private void upload(SkinType type, Image img) {
-		new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.uploading"), gui.i18nFormat("label.cpm.uploading.skin"),
-				() -> {
-					MinecraftClientAccess.get().applySkin(img, type);
-					return null;
-				}, v -> {
-					frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.skinUpload.success")));
-				}, exc -> {
-					if(exc == null)return;
-					Log.warn("Failed to apply skin", exc);
-					frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", exc.getMessage())));
-				}).start();
+		new SkinUploadPopup(frm, type, img).start();
 	}
 
 	public void onClosed() {

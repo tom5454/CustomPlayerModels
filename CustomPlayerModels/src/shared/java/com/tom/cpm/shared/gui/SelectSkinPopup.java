@@ -104,7 +104,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 				try {
 					Image imgIn = Image.loadFrom(f);
 					if(imgIn.getWidth() != 64 || (imgIn.getHeight() != 64 && imgIn.getHeight() != 32)) {
-						frm.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.vanillaSkinSize")));
+						frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.vanillaSkinSize")));
 						return;
 					}
 					final Image img = imgIn.getHeight() == 32 ? LegacySkinConverter.processLegacySkin(imgIn) : imgIn;

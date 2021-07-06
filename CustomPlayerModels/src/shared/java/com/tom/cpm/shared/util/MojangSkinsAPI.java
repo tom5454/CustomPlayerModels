@@ -15,50 +15,19 @@ import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.model.SkinType;
 
 public class MojangSkinsAPI {
+	private String auth;
+	private UUID uuid;
 
-	public static void uploadSkin(UUID uuid, String auth, SkinType skinType, Image skin) throws IOException {
+	public MojangSkinsAPI(UUID uuid, String auth) {
+		this.uuid = uuid;
+		this.auth = auth;
+	}
+
+	public void uploadSkin(SkinType skinType, Image skin) throws IOException {
 		if(skinType == null || skinType == SkinType.UNKNOWN)throw new IOException("Invalid skin type");
 		if(uuid == null || auth == null)throw new IOException("Missing auth info");
 
-		URL url = new URL("https://api.mojang.com/user/security/location");
-		Log.info("[MojangSkinsAPI.uploadSkin]: Authorizing mojang api");
-		InputStream web = null;
-		HttpURLConnection httpCon = null;
-		try {
-			httpCon = (HttpURLConnection) url.openConnection();
-			httpCon.setRequestProperty("Authorization", "Bearer " + auth);
-			web = httpCon.getInputStream();
-			Log.info("[MojangSkinsAPI.uploadSkin]: Response " + httpCon.getResponseCode());
-		} catch (IOException e) {
-			Log.warn("Mojang API error", e);
-		} finally {
-			if(httpCon != null)httpCon.disconnect();
-			if(web != null)
-				try {
-					web.close();
-				} catch (IOException e) {
-				}
-		}
-
-		url = new URL("https://api.mojang.com/user/security/challenges");
-		Log.info("[MojangSkinsAPI.uploadSkin]: Authorizing mojang api pt2");
-		web = null;
-		httpCon = null;
-		try {
-			httpCon = (HttpURLConnection) url.openConnection();
-			httpCon.setRequestProperty("Authorization", "Bearer " + auth);
-			web = httpCon.getInputStream();
-			Log.info("[MojangSkinsAPI.uploadSkin]: Response " + httpCon.getResponseCode());
-		} finally {
-			if(httpCon != null)httpCon.disconnect();
-			if(web != null)
-				try {
-					web.close();
-				} catch (IOException e) {
-				}
-		}
-
-		url = new URL("https://api.minecraftservices.com/minecraft/profile/skins");
+		URL url = new URL("https://api.minecraftservices.com/minecraft/profile/skins");
 
 		HTTPMultipart req = new HTTPMultipart();
 		req.addString("variant", skinType.getApiName().toLowerCase());
@@ -68,8 +37,8 @@ public class MojangSkinsAPI {
 		req.encode();
 
 		Log.info("[MojangSkinsAPI.uploadSkin]: Uploading skin");
-		web = null;
-		httpCon = null;
+		InputStream web = null;
+		HttpURLConnection httpCon = null;
 		try {
 			httpCon = (HttpURLConnection) url.openConnection();
 			httpCon.setRequestProperty("Authorization", "Bearer " + auth);
@@ -90,7 +59,36 @@ public class MojangSkinsAPI {
 		}
 	}
 
-	public static void clearYggdrasilCache(Object yss) throws IOException {
+	public boolean checkAuth() {
+		try {
+			if(auth == null || true)throw new NullPointerException("Missing auth info");
+			URL url = new URL("https://api.mojang.com/user/security/location");
+			Log.info("[MojangSkinsAPI.checkAuth]: Authorizing mojang api");
+			InputStream web = null;
+			HttpURLConnection httpCon = null;
+			try {
+				httpCon = (HttpURLConnection) url.openConnection();
+				httpCon.setRequestProperty("Authorization", "Bearer " + auth);
+				web = httpCon.getInputStream();
+				Log.info("[MojangSkinsAPI.checkAuth]: Response " + httpCon.getResponseCode());
+				return true;
+			} catch (IOException e) {
+				Log.warn("Mojang API error", e);
+			} finally {
+				if(httpCon != null)httpCon.disconnect();
+				if(web != null)
+					try {
+						web.close();
+					} catch (IOException e) {
+					}
+			}
+		} catch (Exception e) {
+			Log.warn("[MojangSkinsAPI.checkAuth]: Failed to begin auth", e);
+		}
+		return false;
+	}
+
+	public static void clearYggdrasilCache(Object yss) {
 		try {
 			for(Field f : yss.getClass().getDeclaredFields()) {
 				if(f.getType() == LoadingCache.class) {
@@ -102,7 +100,7 @@ public class MojangSkinsAPI {
 			}
 			throw new NoSuchFieldError("Couldn't find cache in " + yss);
 		} catch (Throwable e) {
-			throw new IOException("Failed to clear skin cache", e);
+			Log.warn("Failed to clear skin cache", e);
 		}
 	}
 }

@@ -24,7 +24,7 @@ public class TestIngameManager {
 
 	public static boolean openTestIngame(EditorGui e) {
 		if(e.getEditor().dirty) {
-			e.openPopup(new MessagePopup(e.getGui(), e.getGui().i18nFormat("label.cpm.error"), e.getGui().i18nFormat("label.cpm.must_save.test")));
+			e.openPopup(new MessagePopup(e, e.getGui().i18nFormat("label.cpm.error"), e.getGui().i18nFormat("label.cpm.must_save.test")));
 			return false;
 		}
 		try {
@@ -32,7 +32,7 @@ public class TestIngameManager {
 			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 				open = () -> {
 					MinecraftClientAccess.get().sendSkinUpdate();
-					e.openPopup(new MessagePopup(e.getGui(), e.getGui().i18nFormat("label.cpm.info"), e.getGui().i18nFormat("label.cpm.test_model_exported")));
+					e.openPopup(new MessagePopup(e, e.getGui().i18nFormat("label.cpm.info"), e.getGui().i18nFormat("label.cpm.test_model_exported")));
 				};
 			} else if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.OFFLINE)
 				open = MinecraftClientAccess.get().openSingleplayer();
@@ -51,7 +51,7 @@ public class TestIngameManager {
 			ModConfig.getCommonConfig().save();
 			return true;
 		} catch (UnsupportedOperationException ex) {
-			e.openPopup(new MessagePopup(e.getGui(), e.getGui().i18nFormat("label.cpm.error"), e.getGui().i18nFormat("label.cpm.test_unsupported")));
+			e.openPopup(new MessagePopup(e, e.getGui().i18nFormat("label.cpm.error"), e.getGui().i18nFormat("label.cpm.test_unsupported")));
 		}
 		return false;
 	}

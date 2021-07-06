@@ -14,7 +14,6 @@ import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
-import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
@@ -29,6 +28,7 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
 import com.tom.cpm.shared.gui.SelectSkinPopup;
+import com.tom.cpm.shared.gui.SkinUploadPopup;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.util.Log;
 
@@ -260,7 +260,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		protected void export0() {
 			Editor e = editorGui.getEditor();
 			if(editorGui.getEditor().templateSettings != null) {
-				editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
+				editorGui.openPopup(new MessagePopup(editorGui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
 				return;
 			}
 			if(e.description == null && (chbxClone.isSelected() || chbxUUIDLock.isSelected())) {
@@ -278,17 +278,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 				Exporter.exportGistUpdate(e, editorGui, gist -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "skin_update", gist)));
 			} else if(upload) {
 				editorGui.openPopup(new ConfirmPopup(editorGui, gui.i18nFormat("label.cpm.export.upload"), gui.i18nFormat("label.cpm.export.upload.desc"), () -> {
-					Exporter.exportSkin(e, editorGui, img -> new ProcessPopup<>(editorGui, gui.i18nFormat("label.cpm.uploading"), gui.i18nFormat("label.cpm.uploading.skin"),
-							() -> {
-								MinecraftClientAccess.get().applySkin(img, e.skinType);
-								return null;
-							}, v -> {
-								editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.skinUpload.success")));
-							}, exc -> {
-								if(exc == null)return;
-								Log.warn("Failed to apply skin", exc);
-								editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.skinUpload.fail", exc.getMessage())));
-							}).start(), forceLinkFile.isSelected());
+					Exporter.exportSkin(e, editorGui, img -> new SkinUploadPopup(editorGui, e.skinType, img).start(), forceLinkFile.isSelected());
 				}, null));
 			} else {
 				Exporter.exportSkin(e, editorGui, selFile, forceLinkFile.isSelected());
@@ -340,7 +330,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			Editor editor = editorGui.getEditor();
 
 			if(editor.templateSettings == null) {
-				editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.projectNotTemplate")));
+				editorGui.openPopup(new MessagePopup(editorGui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.projectNotTemplate")));
 				return;
 			}
 
@@ -391,7 +381,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		@Override
 		protected void export0() {
 			if(editorGui.getEditor().templateSettings != null) {
-				editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
+				editorGui.openPopup(new MessagePopup(editorGui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
 				return;
 			}
 			Exporter.exportB64(editorGui.getEditor(), editorGui, b64 -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "base64_model", b64)), forceLinkFile.isSelected());
@@ -497,7 +487,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			Editor editor = editorGui.getEditor();
 
 			if(editor.templateSettings != null) {
-				editorGui.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
+				editorGui.openPopup(new MessagePopup(editorGui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
 				return;
 			}
 			boolean descChanged = false;
@@ -585,6 +575,6 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		}
 		IGui gui = e.getGui();
 		Log.error("Project can't be exported in any format");
-		return new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.unknownError"));
+		return new MessagePopup(e, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.unknownError"));
 	}
 }

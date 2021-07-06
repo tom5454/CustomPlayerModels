@@ -127,7 +127,7 @@ public class EditorGui extends Frame {
 
 		editor.updateGui();
 		if(smallGuiWarning && (height < 420 || width < 500)) {
-			openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.gui_scale_too_large")));
+			openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.gui_scale_too_large")));
 		}
 		smallGuiWarning = false;
 	}
@@ -359,7 +359,7 @@ public class EditorGui extends Frame {
 			}, e -> {
 				if(e == null)return;
 				Log.warn("Failed to download template", e);
-				openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.template_load_error", e.getMessage())));
+				openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.template_load_error", e.getMessage())));
 			}).start();
 		}, null));
 
@@ -371,7 +371,7 @@ public class EditorGui extends Frame {
 
 		pp.addButton(gui.i18nFormat("button.cpm.models"), () -> openPopup(new SkinsPopup(this)));
 
-		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(gui, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
+		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(this, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
 	}
 
 	private void initEffectMenu() {
@@ -501,7 +501,7 @@ public class EditorGui extends Frame {
 	}
 
 	private void showError(String msg, String error) {
-		openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.error." + msg), error));
+		openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.error." + msg), error));
 	}
 
 	public Editor getEditor() {

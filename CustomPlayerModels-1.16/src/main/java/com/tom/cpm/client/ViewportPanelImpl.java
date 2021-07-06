@@ -56,23 +56,24 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		ViewportCamera cam = panel.getCamera();
 		float pitch = (float) Math.asin(cam.look.y);
 		float yaw = cam.look.getYaw();
-
-		RenderSystem.pushMatrix();
 		Box bounds = getBounds();
 		Vec2i off = panel.getGui().getOffset();
+		float size = cam.camDist;
+
+		RenderSystem.pushMatrix();
 		RenderSystem.translatef(off.x + bounds.w / 2, off.y + bounds.h / 2, 600);
-		RenderSystem.enableDepthTest();
-		float scale = cam.camDist;
-		RenderSystem.scalef((-scale), scale, 0.1f);
+		RenderSystem.scalef(1.0F, 1.0F, -0.1F);
 		matrixstack = new MatrixStack();
-		matrixstack.scale(1, 1, 1);
+		matrixstack.translate(0.0D, 0.0D, 1000.0D);
+		matrixstack.scale(size, size, size);
 		Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-		Quaternion quaternion1 = Vector3f.XP.rotation(pitch);
+		Quaternion quaternion1 = Vector3f.XP.rotation(-pitch);
 		quaternion.multiply(quaternion1);
 		matrixstack.rotate(quaternion);
-		matrixstack.rotate(Vector3f.YP.rotation(yaw));
+
+		matrixstack.rotate(Vector3f.YP.rotation((float) (yaw + Math.PI)));
 		matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
-		RenderSystem.color4f(1, 1, 1, 1);
+		RenderSystem.enableDepthTest();
 	}
 
 	@Override

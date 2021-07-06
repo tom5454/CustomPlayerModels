@@ -7,8 +7,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.util.Log;
 
 public class FileChooserPopup extends PopupPanel {
 	private File currDir;
@@ -18,33 +20,50 @@ public class FileChooserPopup extends PopupPanel {
 	private Button acceptBtn;
 	private boolean saveDialog;
 	private FileDisplay files;
+	private ScrollPanel filesScroll;
 	private BiPredicate<File, String> filter;
 	private Function<String, String> extAdder;
 	private Label fileDescLabel;
 	private String title;
+	private Frame frm;
 
 	public FileChooserPopup(Frame frame) {
 		super(frame.getGui());
-		setBounds(new Box(0, 0, 210, 210));
+		this.frm = frame;
+		setBounds(new Box(0, 0, 310, 220));
 		fileDescLabel = new Label(gui, "");
-		fileDescLabel.setBounds(new Box(5, 175, 200, 10));
+		fileDescLabel.setBounds(new Box(5, 185, 200, 10));
 		addElement(fileDescLabel);
 		currDir = MinecraftClientAccess.get().getGameDir().getAbsoluteFile();
+		if(currDir.getAbsolutePath().endsWith("/.") || currDir.getAbsolutePath().endsWith("\\.")) {
+			currDir = currDir.getParentFile();
+		}
 		path = new TextField(gui);
 		name = new TextField(gui);
-		path.setBounds(new Box(5, 10, 200, 20));
-		name.setBounds(new Box(5, 185, 160, 20));
+		path.setBounds(new Box(5, 10, 300, 20));
+		name.setBounds(new Box(5, 195, 260, 20));
 		addElement(name);
 		addElement(path);
 		acceptBtn = new Button(gui, "", null);
-		acceptBtn.setBounds(new Box(165, 185, 40, 20));
+		acceptBtn.setBounds(new Box(265, 195, 40, 20));
 		addElement(acceptBtn);
 		path.setText(currDir.getAbsolutePath());
 		files = new FileDisplay();
-		files.setBounds(new Box(5, 35, 200, 135));
-		addElement(files);
+		files.setBackgroundColor(gui.getColors().panel_background);
+		files.setBounds(new Box(0, 0, 300, 0));
+		filesScroll = new ScrollPanel(gui);
+		filesScroll.setDisplay(files);
+		filesScroll.setBounds(new Box(5, 35, 300, 135));
+		addElement(filesScroll);
 		filter = (a, b) -> true;
 		extAdder = Function.identity();
+
+		if(gui.getNative().isSupported(FileChooserPopup.class)) {
+			Button openNative = new Button(gui, "...", this::openNative);
+			openNative.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.filechooser.openNative")));
+			openNative.setBounds(new Box(265, 175, 40, 20));
+			addElement(openNative);
+		}
 
 		acceptBtn.setAction(() -> {
 			if(selected != null) {
@@ -111,10 +130,12 @@ public class FileChooserPopup extends PopupPanel {
 
 	public void setSelected(File sel) {
 		selected = sel;
-		this.currDir = sel.getParentFile();
-		name.setText(sel.getName());
-		path.setText(currDir.getAbsolutePath());
-		files.refresh();
+		if(sel != null) {
+			this.currDir = sel.getParentFile();
+			name.setText(sel.getName());
+			path.setText(currDir.getAbsolutePath());
+			files.refresh();
+		}
 	}
 
 	public void setAccept(Runnable accept) {
@@ -151,12 +172,11 @@ public class FileChooserPopup extends PopupPanel {
 		selected = new File(currDir, name);
 	}
 
-	private class FileDisplay extends GuiElement {
-		private int scroll;
+	private class FileDisplay extends Panel {
 		private String[] files;
 
 		public FileDisplay() {
-			super(getGui());
+			super(FileChooserPopup.this.getGui());
 		}
 
 		@Override
@@ -166,7 +186,7 @@ public class FileChooserPopup extends PopupPanel {
 			mouseX -= bounds.x;
 			mouseY -= bounds.y;
 			int y = 0;
-			for (int i = scroll; i < files.length && (i - scroll) < (bounds.h / 10); i++) {
+			for (int i = 0; i < files.length; i++) {
 				String string = files[i];
 				int yp = y++;
 				int textColor = 0xffffffff;
@@ -182,9 +202,9 @@ public class FileChooserPopup extends PopupPanel {
 		}
 
 		@Override
-		public boolean mouseClick(int x, int y, int btn) {
-			if(bounds.isInBounds(x, y)) {
-				int yp = (y - bounds.y) / 10 + scroll;
+		public void mouseClick(MouseEvent event) {
+			if(event.isInBounds(bounds)) {
+				int yp = (event.y - bounds.y) / 10;
 				if(yp >= 0 && yp < files.length) {
 					String string = files[yp];
 					if(selected != null && selected.getName().equals(string) && selected.getParentFile().equals(currDir)) {
@@ -196,32 +216,19 @@ public class FileChooserPopup extends PopupPanel {
 							}
 							selected = null;
 							refresh();
-							return true;
+							event.consume();
+							return;
 						}
 					}
 					selected = new File(currDir, string);
 					if(filter.test(selected, string))
 						name.setText(selected.getName());
 				}
-				return true;
+				event.consume();
 			}
-			return false;
-		}
-
-		@Override
-		public boolean mouseWheel(int x, int y, int dir) {
-			if(bounds.isInBounds(x, y)) {
-				int newScroll = scroll - dir;
-				if(newScroll >= 0 && newScroll <= (files.length - bounds.h / 10)) {
-					scroll = newScroll;
-				}
-				return true;
-			}
-			return false;
 		}
 
 		private void refresh() {
-			scroll = 0;
 			String[] fs = currDir.list((a, name) -> {
 				File file = new File(currDir, name);
 				if(file.isHidden())return false;
@@ -236,6 +243,8 @@ public class FileChooserPopup extends PopupPanel {
 				System.arraycopy(fs, 0, files, 1, fs.length);
 			}
 			path.setText(currDir.getAbsolutePath());
+			setBounds(new Box(bounds.x, bounds.y, bounds.w, files.length * 10 + 2));
+			filesScroll.setScrollY(0);
 		}
 	}
 
@@ -281,5 +290,18 @@ public class FileChooserPopup extends PopupPanel {
 
 	public boolean isSaveDialog() {
 		return saveDialog;
+	}
+
+	public void openNative() {
+		NativeChooser nc = gui.getNative().getNative(FileChooserPopup.class, this);
+		new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.waiting"), gui.i18nFormat("label.cpm.filechooser.waitingForNative"), nc::open, this::setSelected, ex -> {
+			if(ex == null)return;
+			Log.error("Error while opening native file chooser", ex);
+			frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.filechooser.nativeError", ex.getMessage())));
+		}).start();
+	}
+
+	public interface NativeChooser {
+		File open();
 	}
 }

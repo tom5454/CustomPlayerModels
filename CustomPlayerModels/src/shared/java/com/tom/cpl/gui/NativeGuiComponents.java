@@ -15,6 +15,10 @@ public class NativeGuiComponents {
 		factories.put(clazz, factory);
 	}
 
+	public <G> boolean isSupported(Class<G> clazz) {
+		return factories.containsKey(clazz);
+	}
+
 	@FunctionalInterface
 	public static interface NativeConstructor<G, N> {
 		N create(G elem);

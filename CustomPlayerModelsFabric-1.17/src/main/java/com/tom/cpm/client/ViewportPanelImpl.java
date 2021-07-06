@@ -31,6 +31,7 @@ import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
+import net.minecraft.util.math.Vec3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -59,26 +60,26 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		ViewportCamera cam = panel.getCamera();
 		float pitch = (float) Math.asin(cam.look.y);
 		float yaw = cam.look.getYaw();
+		Box bounds = getBounds();
+		Vec2i off = panel.getGui().getOffset();
+		float size = cam.camDist;
 
 		MatrixStack matrixStack = RenderSystem.getModelViewStack();
 		matrixStack.push();
-		Box bounds = getBounds();
-		Vec2i off = panel.getGui().getOffset();
-		matrixStack.translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 500);
-		RenderSystem.enableDepthTest();
-		//RenderSystem.enableAlphaTest();
-		float scale = cam.camDist;
-		matrixStack.scale((-scale), scale, 0.1f);
+		matrixStack.translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 600.0D);//600
+		matrixStack.scale(1.0F, 1.0F, -0.1F);
 		RenderSystem.applyModelViewMatrix();
 		matrixstack = new MatrixStack();
-		matrixstack.scale(1, 1, 1);
-		Quaternion quaternion = net.minecraft.util.math.Vec3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
-		Quaternion quaternion1 = net.minecraft.util.math.Vec3f.POSITIVE_X.getRadialQuaternion(pitch);
-		quaternion.hamiltonProduct(quaternion1);
+		matrixstack.translate(0.0D, 0.0D, 1000.0D);
+		matrixstack.scale(size, size, size);
+		Quaternion quaternion = Vec3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
+		Quaternion quaternion2 = Vec3f.POSITIVE_X.getRadialQuaternion(-pitch);
+		quaternion.hamiltonProduct(quaternion2);
 		matrixstack.multiply(quaternion);
-		matrixstack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Y.getRadialQuaternion(yaw));
+
+		matrixstack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Y.getRadialQuaternion((float) (yaw + Math.PI)));
 		matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
-		//RenderSystem.color4f(1, 1, 1, 1);
+		RenderSystem.enableDepthTest();
 	}
 
 	@Override

@@ -131,7 +131,7 @@ public class Generators {
 		IGui gui = eg.getGui();
 		if (editor.templateSettings == null) {
 			if (editor.dirty) {
-				eg.openPopup(new MessagePopup(gui, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.must_save")));
+				eg.openPopup(new MessagePopup(eg, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.must_save")));
 			} else {
 				if(editor.file == null)
 					setupTemplate(editor);

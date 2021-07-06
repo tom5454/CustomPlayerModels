@@ -40,6 +40,7 @@ import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.NativeGuiComponents;
 import com.tom.cpl.gui.NativeGuiComponents.NativeConstructor;
 import com.tom.cpl.gui.UIColors;
+import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
@@ -63,6 +64,7 @@ public class GuiImpl extends Screen implements IGui {
 	static {
 		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
+		nativeComponents.register(FileChooserPopup.class, TinyFDChooser::new);
 	}
 
 	public GuiImpl(Function<IGui, Frame> creator, Screen parent) {

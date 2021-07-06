@@ -149,6 +149,11 @@ public abstract class ViewportPanelBase extends GuiElement {
 				zoom(1);
 			} else if(event.matches("-")) {
 				zoom(-1);
+			} else if(event.matches("r")) {
+				ViewportCamera cam = getCamera();
+				cam.camDist = 64;
+				cam.position = new Vec3f(0.5f, 1, 0.5f);
+				cam.look = new Vec3f(0.25f, 0.5f, 0.25f);
 			}
 		}
 	}

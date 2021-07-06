@@ -143,7 +143,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void setVec(Vec3f v, VecType object) {
 		if(type == ElementType.ROOT_PART && generated && object == VecType.POSITION && !movePopupShown) {
 			movePopupShown = true;
-			editor.frame.openPopup(new MessagePopup(editor.gui(), editor.gui().i18nFormat("label.cpm.info"), editor.gui().i18nFormat("label.cpm.warnMoveGenPart")));
+			editor.frame.openPopup(new MessagePopup(editor.frame, editor.gui().i18nFormat("label.cpm.info"), editor.gui().i18nFormat("label.cpm.warnMoveGenPart")));
 		}
 		editor.setVec(this, v, object);
 	}

@@ -4,6 +4,7 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.MathHelper;
 
 public class ScrollPanel extends Panel {
 	private Panel display;
@@ -21,7 +22,7 @@ public class ScrollPanel extends Panel {
 		display.mouseWheel(event.offset(bounds).offset(-xScroll, -yScroll));
 		if(!event.isConsumed() && event.isInBounds(bounds)) {
 			int newScroll = yScroll - event.btn * 5;
-			yScroll = Math.max(0, Math.min(newScroll, display.getBounds().h - bounds.h - 1));
+			yScroll = MathHelper.clamp(newScroll, 0, display.getBounds().h - bounds.h - 1);
 			event.consume();
 		}
 	}
@@ -82,11 +83,9 @@ public class ScrollPanel extends Panel {
 			switch (enableDrag) {
 			case 1:
 			{
-				int drag = event.y - dragY;
-				int newScroll = yScOld + drag*2;
-				if(newScroll >= 0 && newScroll <= (display.getBounds().h - bounds.h)) {
-					yScroll = newScroll;
-				}
+				int drag = (int) ((event.y - dragY) / (float) bounds.h * display.getBounds().h);
+				int newScroll = yScOld + drag;
+				yScroll = MathHelper.clamp(newScroll, 0, display.getBounds().h - bounds.h - 1);
 			}
 			break;
 
@@ -115,5 +114,13 @@ public class ScrollPanel extends Panel {
 
 	public void setScrollBarSide(boolean scrollBarSide) {
 		this.scrollBarSide = scrollBarSide;
+	}
+
+	public void setScrollX(int xScroll) {
+		this.xScroll = xScroll;
+	}
+
+	public void setScrollY(int yScroll) {
+		this.yScroll = yScroll;
 	}
 }
