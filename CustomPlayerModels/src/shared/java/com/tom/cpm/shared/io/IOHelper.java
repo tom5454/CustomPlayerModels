@@ -403,6 +403,11 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 	}
 
 	public void writeBlock(IOHelper to) throws IOException {
+		if(dataIn != null) {
+			to.writeVarInt(dataIn.length);
+			to.write(dataIn);
+			return;
+		}
 		if(baos == null)throw new IOException("Not a byte array backed io handler");
 		to.writeVarInt(baos.size());
 		baos.writeTo(to.dout);

@@ -1,10 +1,12 @@
 package com.tom.cpm.shared.editor.gui;
 
 import java.io.File;
+import java.util.Arrays;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
@@ -26,12 +28,14 @@ import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
+import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Generators;
 import com.tom.cpm.shared.editor.HeldItem;
+import com.tom.cpm.shared.editor.RootGroups;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.DescPopup;
@@ -43,7 +47,9 @@ import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.util.Log;
+import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class EditorGui extends Frame {
 	private static Editor toReopen;
@@ -148,7 +154,7 @@ public class EditorGui extends Frame {
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
 		editor.displayViewport.add(view::setEnabled);
-		editor.heldRenderEnable.accept(view.canRenderHeldItem());
+		editor.heldRenderEnable.accept(PlatformFeature.EDITOR_HELD_ITEM.isSupported());
 	}
 
 	private void initTexturePanel(int width, int height) {
@@ -238,9 +244,9 @@ public class EditorGui extends Frame {
 		mainPanel.addElement(new TreePanel(gui, this, width, height - 20) {
 
 			@Override
-			public void draw(int mouseX, int mouseY, float partialTicks) {
+			public void draw(MouseEvent event, float partialTicks) {
 				editor.applyAnim = true;
-				super.draw(mouseX, mouseY, partialTicks);
+				super.draw(event, partialTicks);
 				editor.applyAnim = false;
 			}
 		});
@@ -278,8 +284,9 @@ public class EditorGui extends Frame {
 			this.editor.loadDefaultPlayerModel();
 			editor.templateSettings = new TemplateSettings(editor);
 			Generators.setupTemplateModel(editor);
-			editor.skinProvider.setImage(new Image(64, 64));
-			editor.skinProvider.texture.markDirty();
+			ETextures skin = editor.textures.get(TextureSheetType.SKIN);
+			skin.setImage(new Image(64, 64));
+			skin.markDirty();
 			this.editor.updateGui();
 		}));
 		newTempl.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.new.template")));
@@ -335,10 +342,16 @@ public class EditorGui extends Frame {
 		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.edit"), () -> pp.display(x, 20)));
 
 		Button undo = pp.addButton(gui.i18nFormat("button.cpm.edit.undo"), editor::undo);
-		editor.setUndoEn.add(undo::setEnabled);
+		editor.setUndo.add(t -> {
+			undo.setEnabled(t != null);
+			undo.setText(t == null || t.isEmpty() ? gui.i18nFormat("button.cpm.edit.undo") : gui.i18nFormat("button.cpm.edit.undoAction", t));
+		});
 
 		Button redo = pp.addButton(gui.i18nFormat("button.cpm.edit.redo"), editor::redo);
-		editor.setRedoEn.add(redo::setEnabled);
+		editor.setRedo.add(t -> {
+			redo.setEnabled(t != null);
+			redo.setText(t == null || t.isEmpty() ? gui.i18nFormat("button.cpm.edit.redo") : gui.i18nFormat("button.cpm.edit.redoAction", t));
+		});
 
 		PopupMenu tools = new PopupMenu(gui, this);
 		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.tools"), tools);
@@ -353,7 +366,7 @@ public class EditorGui extends Frame {
 				return EditorTemplate.create(editor, link);
 			}, t -> {
 				editor.templates.add(t);
-				editor.restitchTexture();
+				editor.restitchTextures();
 				editor.markDirty();
 				editor.updateGui();
 			}, e -> {
@@ -364,6 +377,15 @@ public class EditorGui extends Frame {
 		}, null));
 
 		pp.addButton(gui.i18nFormat("label.cpm.desc"), () -> openPopup(new DescPopup(this)));
+
+		PopupMenu parts = new PopupMenu(gui, this);
+		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.parts"), parts);
+
+		RootGroups.forEach(c -> {
+			Button btn = parts.addButton(gui.i18nFormat("button.cpm.root_group." + c.name().toLowerCase()), () -> editor.addRoot(c));
+			if(c.feature != null && !c.feature.isSupported())
+				btn.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature." + c.feature.name().toLowerCase()))));
+		});
 
 		pp.add(new Label(gui, "=========").setBounds(new Box(5, 5, 0, 0)));
 
@@ -387,12 +409,29 @@ public class EditorGui extends Frame {
 		});
 		boxGlow.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.glow")));
 
+		Checkbox boxSingleTex = pp.addCheckbox(gui.i18nFormat("label.cpm.singleTex"), editor::switchSingleTex);
+		editor.setSingleTex.add(b -> {
+			boxSingleTex.setEnabled(b != null);
+			if(b != null)boxSingleTex.setSelected(b);
+			else boxSingleTex.setSelected(false);
+		});
+		boxSingleTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.singleTex")));
+
+		Checkbox boxPfUV = pp.addCheckbox(gui.i18nFormat("label.cpm.perfaceUV"), editor::switchPerfaceUV);
+		editor.setPerFaceUV.add(b -> {
+			boxPfUV.setEnabled(b != null);
+			if(b != null)boxPfUV.setSelected(b);
+			else boxPfUV.setSelected(false);
+		});
+		boxPfUV.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.perfaceUV")));
+
 		Checkbox boxReColor = pp.addCheckbox(gui.i18nFormat("label.cpm.recolor"), editor::switchReColorEffect);
 		editor.setReColor.add(b -> {
 			boxReColor.setEnabled(b != null);
 			if(b != null)boxReColor.setSelected(b);
 			else boxReColor.setSelected(false);
 		});
+		boxReColor.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.recolor")));
 
 		ColorButton colorBtn = new ColorButton(gui, editor.frame, editor::setColor);
 		editor.setPartColor.add(c -> {
@@ -400,6 +439,7 @@ public class EditorGui extends Frame {
 			if(c != null)colorBtn.setColor(c);
 			else colorBtn.setColor(0);
 		});
+		colorBtn.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.recolor.colorbtn")));
 		pp.add(colorBtn);
 
 		Checkbox boxHidden = pp.addCheckbox(gui.i18nFormat("label.cpm.hidden_effect"), editor::switchHide);
@@ -408,6 +448,7 @@ public class EditorGui extends Frame {
 			if(b != null)boxHidden.setSelected(b);
 			else boxHidden.setSelected(false);
 		});
+		boxHidden.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.hidden_effect")));
 
 		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), b -> {
 			if(editor.scaling != 0)editor.scaling = 0;
@@ -452,7 +493,7 @@ public class EditorGui extends Frame {
 		Button btnHeldRight = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.right"), heldItemRight);
 		initHeldItemPopup(heldItemRight, Hand.RIGHT);
 		editor.heldRenderEnable.add(e -> {
-			if(!e)btnHeldRight.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.heldItem.notSupported")));
+			if(!e)btnHeldRight.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.editor_held_item"))));
 			btnHeldRight.setEnabled(e);
 		});
 
@@ -460,9 +501,44 @@ public class EditorGui extends Frame {
 		Button btnHeldLeft = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
 		initHeldItemPopup(heldItemLeft, Hand.LEFT);
 		editor.heldRenderEnable.add(e -> {
-			if(!e)btnHeldLeft.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.heldItem.notSupported")));
+			if(!e)btnHeldLeft.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.editor_held_item"))));
 			btnHeldLeft.setEnabled(e);
 		});
+
+		addLayerToggle(pp, PlayerModelLayer.CAPE, PlatformFeature.RENDER_CAPE);
+
+		PopupMenu armor = new PopupMenu(gui, this);
+		Button armorBtn = pp.addMenuButton(gui.i18nFormat("button.cpm.display.armor"), armor);
+		for (PlayerModelLayer a : PlayerModelLayer.ARMOR) {
+			addLayerToggle(armor, a, PlatformFeature.RENDER_ARMOR);
+		}
+		armor.addButton(gui.i18nFormat("button.cpm.display.armor.toggle"), () -> {
+			if(Arrays.stream(PlayerModelLayer.ARMOR).anyMatch(r -> editor.modelDisplayLayers.stream().anyMatch(l -> l == r))) {
+				for (PlayerModelLayer a : PlayerModelLayer.ARMOR)editor.modelDisplayLayers.add(a);
+			} else {
+				for (PlayerModelLayer a : PlayerModelLayer.ARMOR)editor.modelDisplayLayers.remove(a);
+			}
+			editor.updateGui();
+		});
+		{
+			boolean sup = PlatformFeature.RENDER_ARMOR.isSupported();
+			armorBtn.setEnabled(sup);
+			if(!sup)armorBtn.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.render_armor"))));
+		}
+
+		addLayerToggle(pp, PlayerModelLayer.ELYTRA, PlatformFeature.RENDER_ELYTRA);
+	}
+
+	private void addLayerToggle(PopupMenu pp, PlayerModelLayer layer, PlatformFeature feature) {
+		Checkbox chbx = pp.addCheckbox(gui.i18nFormat("label.cpm.display." + layer.name().toLowerCase()), c -> {
+			if(!c.isSelected())editor.modelDisplayLayers.add(layer);
+			else editor.modelDisplayLayers.remove(layer);
+			editor.updateGui();
+		});
+		editor.updateGui.add(() -> chbx.setSelected(editor.modelDisplayLayers.contains(layer)));
+		boolean sup = feature.isSupported();
+		chbx.setEnabled(sup);
+		if(!sup)chbx.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature." + feature.name().toLowerCase()))));
 	}
 
 	private void initHeldItemPopup(PopupMenu pp, Hand hand) {
@@ -493,7 +569,7 @@ public class EditorGui extends Frame {
 	}
 
 	public void loadSkin(File file) {
-		EditorTexture tex = editor.getTextureProvider();
+		ETextures tex = editor.getTextureProvider();
 		if(tex != null) {
 			tex.file = file;
 			editor.reloadSkin();
@@ -531,7 +607,7 @@ public class EditorGui extends Frame {
 				}
 			}
 			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
-				editor.restitchTexture();
+				editor.restitchTextures();
 				editor.animations.forEach(EditorAnim::clearCache);
 			}
 		}

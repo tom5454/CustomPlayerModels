@@ -26,6 +26,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public class PlayerProfile extends Player<PlayerEntity, Model> {
 	private final GameProfile profile;
@@ -75,40 +76,46 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 	}
 
 	@Override
-	public CompletableFuture<Void> loadSkin0() {
-		Map<Type, MinecraftProfileTexture> map = MinecraftClient.getInstance().getSkinProvider().getTextures(profile);
-		if (map.containsKey(Type.SKIN)) {
-			MinecraftProfileTexture tex = map.get(Type.SKIN);
-			url = tex.getUrl();
-			skinType = tex.getMetadata("model");
-
-			if (skinType == null) {
-				skinType = "default";
-			}
-			return CompletableFuture.completedFuture(null);
-		}
-		CompletableFuture<Void> cf = new CompletableFuture<>();
-		MinecraftClient.getInstance().getSkinProvider().loadSkin(profile, new SkinTextureAvailableCallback() {
+	protected PlayerTextureLoader initTextures() {
+		return new PlayerTextureLoader() {
 
 			@Override
-			public void onSkinTextureAvailable(Type typeIn, Identifier identifier, MinecraftProfileTexture profileTexture) {
-				switch (typeIn) {
-				case SKIN:
-					skinType = profileTexture.getMetadata("model");
+			protected CompletableFuture<Void> load0() {
+				Map<Type, MinecraftProfileTexture> map = MinecraftClient.getInstance().getSkinProvider().getTextures(profile);
+				defineAll(map, MinecraftProfileTexture::getUrl);
+				if (map.containsKey(Type.SKIN)) {
+					MinecraftProfileTexture tex = map.get(Type.SKIN);
+					skinType = tex.getMetadata("model");
 
 					if (skinType == null) {
 						skinType = "default";
 					}
-					url = profileTexture.getUrl();
-					cf.complete(null);
-
-					break;
-				default:
-					break;
+					return CompletableFuture.completedFuture(null);
 				}
+				CompletableFuture<Void> cf = new CompletableFuture<>();
+				MinecraftClient.getInstance().getSkinProvider().loadSkin(profile, new SkinTextureAvailableCallback() {
+
+					@Override
+					public void onSkinTextureAvailable(Type typeIn, Identifier identifier, MinecraftProfileTexture profileTexture) {
+						defineTexture(typeIn, profileTexture.getUrl());
+						switch (typeIn) {
+						case SKIN:
+							skinType = profileTexture.getMetadata("model");
+
+							if (skinType == null) {
+								skinType = "default";
+							}
+							cf.complete(null);
+
+							break;
+						default:
+							break;
+						}
+					}
+				}, true);
+				return cf;
 			}
-		}, true);
-		return cf;
+		};
 	}
 
 	@Override

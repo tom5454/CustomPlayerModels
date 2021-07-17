@@ -26,6 +26,7 @@ import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.IResolvedModelPart;
@@ -36,6 +37,7 @@ import com.tom.cpm.shared.parts.ModelPartScale;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinLink;
 import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.TextureStitcher;
 
@@ -46,10 +48,9 @@ public class ModelDefinition {
 	private List<IModelPart> parts;
 	private List<IResolvedModelPart> resolved;
 	private ModelPartPlayer player;
-	private TextureProvider skinOverride;
-	private TextureProvider listIconOverride;
 	private List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
+	private Map<TextureSheetType, TextureProvider> textures;
 	protected Map<VanillaModelPart, PartRoot> rootRenderingCubes;
 	private int resolveState;
 	private AnimationRegistry animations = new AnimationRegistry();
@@ -118,12 +119,13 @@ public class ModelDefinition {
 		for (IModelPart part : parts) {
 			resolved.add(part.resolve());
 		}
+		textures = new HashMap<>();
 		for (IResolvedModelPart parts : resolved) {
 			TextureProvider img = parts.getSkin();
 			if(img != null) {
-				if(skinOverride != null)throw new IOException("Multiple skin tags");
+				if(textures.containsKey(TextureSheetType.SKIN))throw new IOException("Multiple skin tags");
 				else {
-					skinOverride = img;
+					textures.put(TextureSheetType.SKIN, img);
 				}
 			}
 			if(parts instanceof ModelPartDefinition) {
@@ -158,12 +160,12 @@ public class ModelDefinition {
 			cubes.addAll(cs);
 		}
 		TextureStitcher stitcher = new TextureStitcher();
-		if(skinOverride != null) {
-			stitcher.setBase(skinOverride);
+		if(textures.containsKey(TextureSheetType.SKIN)) {
+			stitcher.setBase(textures.get(TextureSheetType.SKIN));
 		} else {
 			Image skin;
 			try {
-				skin = playerObj.getSkin().get(5, TimeUnit.SECONDS);
+				skin = playerObj.getTextures().getTexture(TextureType.SKIN).get(5, TimeUnit.SECONDS);
 			} catch (InterruptedException | ExecutionException | TimeoutException e1) {
 				throw new IOException(e1);
 			}
@@ -193,7 +195,7 @@ public class ModelDefinition {
 			});
 		}
 		resolved.forEach(r -> r.stitch(stitcher));
-		skinOverride = stitcher.finish();
+		textures.put(TextureSheetType.SKIN, stitcher.finish());
 		stitchedTexture = stitcher.hasStitches();
 		if(stitchedTexture) {
 			for (PlayerModelParts part : PlayerModelParts.VALUES) {
@@ -239,7 +241,7 @@ public class ModelDefinition {
 			if(c.renderObject != null)c.renderObject.free();
 			c.renderObject = null;
 		});
-		if(skinOverride != null)skinOverride.free();
+		textures.values().forEach(TextureProvider::free);
 	}
 
 	public boolean doRender() {
@@ -256,10 +258,6 @@ public class ModelDefinition {
 
 	public boolean isEditor() {
 		return false;
-	}
-
-	public TextureProvider getSkinOverride() {
-		return skinOverride;
 	}
 
 	public AnimationRegistry getAnimations() {
@@ -321,12 +319,12 @@ public class ModelDefinition {
 		return elem;
 	}
 
-	public void setListIconOverride(TextureProvider listIconOverride) {
-		this.listIconOverride = listIconOverride;
+	public TextureProvider getTexture(TextureSheetType key) {
+		return key.editable ? textures == null ? null : textures.get(key) : null;
 	}
 
-	public TextureProvider getListIconOverride() {
-		return listIconOverride;
+	public void setTexture(TextureSheetType key, TextureProvider value) {
+		textures.put(key, value);
 	}
 
 	public Link findDefLink() {
@@ -356,5 +354,13 @@ public class ModelDefinition {
 
 	public static ModelDefinition createVanilla(Supplier<TextureProvider> texture, SkinType type) {
 		return new VanillaDefinition(texture, type);
+	}
+
+	public TextureProvider getSkinOverride() {
+		return getTexture(TextureSheetType.SKIN);
+	}
+
+	public boolean hasRoot(VanillaModelPart type) {
+		return rootRenderingCubes.containsKey(type);
 	}
 }

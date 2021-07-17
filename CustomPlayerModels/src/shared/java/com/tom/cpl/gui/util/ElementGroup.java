@@ -1,29 +1,34 @@
 package com.tom.cpl.gui.util;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import com.tom.cpl.gui.elements.GuiElement;
+public class ElementGroup<S, P> implements Consumer<S> {
+	private Map<S, Set<P>> map = new HashMap<>();
+	private BiConsumer<P, Boolean> setValue;
 
-public class ElementGroup<S> implements Consumer<S> {
-	private Map<S, Set<GuiElement>> map = new HashMap<>();
+	public ElementGroup(BiConsumer<P, Boolean> setValue) {
+		this.setValue = setValue;
+	}
 
-	public void addElement(S type, GuiElement elem) {
+	public void addElement(S type, P elem) {
 		map.computeIfAbsent(type, k -> new HashSet<>()).add(elem);
 	}
 
 	@Override
 	public void accept(S type) {
-		for (Entry<S, Set<GuiElement>> e : map.entrySet()) {
-			for (GuiElement elem : e.getValue()) {
-				elem.setVisible(false);
-			}
-		}
-		map.getOrDefault(type, Collections.emptySet()).forEach(e -> e.setVisible(true));
+		map.values().stream().flatMap(Set::stream).forEach(e -> setValue.accept(e, false));
+		map.getOrDefault(type, Collections.emptySet()).forEach(e -> setValue.accept(e, true));
+	}
+
+	public void accept(Collection<S> type) {
+		map.values().stream().flatMap(Set::stream).forEach(e -> setValue.accept(e, false));
+		type.stream().map(map::get).filter(e -> e != null).flatMap(Set::stream).forEach(e -> setValue.accept(e, true));
 	}
 }

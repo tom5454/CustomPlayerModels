@@ -12,7 +12,10 @@
     "PlayerRendererMixin",
     "RenderTypeBuffersMixin",
     "SkullTileEntityRendererMixin",
-    "ClientPlayNetHandlerMixin"
+    "ClientPlayNetHandlerMixin",
+	"CapeLayerMixin",
+	"ElytraLayerMixin",
+	"ArmorLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

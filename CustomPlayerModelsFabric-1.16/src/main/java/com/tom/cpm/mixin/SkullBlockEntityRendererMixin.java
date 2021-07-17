@@ -26,6 +26,7 @@ import net.minecraft.util.math.Direction;
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(SkullBlockEntityRenderer.class)
 public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<BlockEntity> {
@@ -46,7 +47,7 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 	private static RenderLayer onGetRenderType(Identifier resLoc, SkullBlock.SkullType skullType, GameProfile gameProfileIn) {
 		SkullEntityModel model = MODELS.get(skullType);
 		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
 		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
 	}
 
@@ -61,7 +62,7 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 	private static RenderLayer onGetRenderTypeNoSkin(Identifier resLoc, SkullBlock.SkullType skullType, GameProfile gameProfileIn) {
 		SkullEntityModel model = MODELS.get(skullType);
 		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
 		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
 	}
 

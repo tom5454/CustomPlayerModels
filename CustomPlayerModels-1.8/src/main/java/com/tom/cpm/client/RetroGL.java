@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.DirectBuffer;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpl.render.VertexBuffer;
@@ -123,6 +124,14 @@ public class RetroGL {
 			tes.draw();
 			stage.end();
 		}
+	}
 
+	public static Vec4f getColor() {
+		GlStateManager.Color c = GlStateManager.colorState;
+		return new Vec4f(val(c.red), val(c.green), val(c.blue), val(c.alpha));
+	}
+
+	private static float val(float color) {
+		return color == -1 ? 1 : color;
 	}
 }

@@ -15,7 +15,11 @@
     "BuiltinModelItemRendererMixin",
     "MixinGameRenderer",
     "ClientPlayNetHandlerMixin",
-	"HeadFeatureRendererMixin"
+	"HeadFeatureRendererMixin",
+	"EntityRenderDispatcherMixin",
+	"ArmorFeatureRendererMixin",
+	"ElytraFeatureRendererMixin",
+	"CapeFeatureRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

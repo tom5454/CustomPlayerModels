@@ -34,10 +34,9 @@ public abstract class Frame extends Panel {
 		addElement(popup);
 	}
 
-	@Override
 	public void draw(int mouseX, int mouseY, float partialTicks) {
 		tooltipBox = null;
-		super.draw(mouseX, mouseY, partialTicks);
+		draw(new MouseEvent(mouseX, mouseY, 0), partialTicks);
 
 		if(tooltipBox != null) {
 			Box b = tooltipBox.getBounds();
@@ -45,8 +44,28 @@ public abstract class Frame extends Panel {
 			int ty = Math.min(mouseY + b.h + 5, bounds.h - 1);
 			tooltipBox.setBounds(new Box(tx - b.w, ty - b.h, b.w, b.h));
 
-			tooltipBox.draw(Integer.MIN_VALUE, Integer.MIN_VALUE, partialTicks);
+			tooltipBox.draw(new MouseEvent(Integer.MAX_VALUE, Integer.MAX_VALUE, 0), partialTicks);
 		}
+	}
+
+	@Override
+	public void draw(MouseEvent event, float partialTicks) {
+		gui.pushMatrix();
+		gui.setPosOffset(getBounds());
+		gui.setupCut();
+		Box bounds = getBounds();
+		if(backgroundColor != 0)
+			gui.drawBox(0, 0, bounds.w, bounds.h, backgroundColor);
+		for (GuiElement guiElement : elements) {
+			if(guiElement.isVisible()) {
+				if(guiElement == popup || popup.getElements().isEmpty())
+					guiElement.draw(event.offset(bounds), partialTicks);
+				else
+					guiElement.draw(event.offset(bounds).cancelled(), partialTicks);
+			}
+		}
+		gui.popMatrix();
+		gui.setupCut();
 	}
 
 	public abstract void initFrame(int width, int height);
@@ -76,6 +95,32 @@ public abstract class Frame extends Panel {
 		@Override
 		public Box getBounds() {
 			return Frame.this.bounds;
+		}
+
+		@Override
+		public void draw(MouseEvent event, float partialTicks) {
+			if(elements.isEmpty())return;
+			setTooltip(null);
+			gui.pushMatrix();
+			gui.setPosOffset(getBounds());
+			gui.setupCut();
+			Box bounds = getBounds();
+			GuiElement top = null;
+			for (GuiElement guiElement : elements) {
+				if(guiElement.isVisible()) {
+					top = guiElement;
+				}
+			}
+			for (GuiElement guiElement : elements) {
+				if(guiElement.isVisible()) {
+					if(guiElement == top)
+						guiElement.draw(event.offset(bounds), partialTicks);
+					else
+						guiElement.draw(event.offset(bounds).cancelled(), partialTicks);
+				}
+			}
+			gui.popMatrix();
+			gui.setupCut();
 		}
 	}
 
@@ -113,7 +158,7 @@ public abstract class Frame extends Panel {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
+		public void draw(MouseEvent event, float partialTicks) {
 			gui.pushMatrix();
 			gui.setPosOffset(bounds);
 			gui.setupCut();
@@ -121,7 +166,7 @@ public abstract class Frame extends Panel {
 			gui.drawBox(1, 1, bounds.w - 2, bounds.h - 2, gui.getColors().popup_background);
 			for (GuiElement guiElement : elements) {
 				if(guiElement.isVisible())
-					guiElement.draw(mouseX - bounds.x, mouseY - bounds.y, partialTicks);
+					guiElement.draw(event.offset(bounds), partialTicks);
 			}
 			gui.popMatrix();
 			gui.setupCut();

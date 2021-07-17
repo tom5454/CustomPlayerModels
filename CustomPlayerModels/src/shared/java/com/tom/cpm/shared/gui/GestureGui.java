@@ -8,6 +8,7 @@ import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
@@ -23,6 +24,7 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.Log;
 
@@ -192,7 +194,7 @@ public class GestureGui extends Frame {
 
 		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		if(MinecraftObjectHolder.DEBUGGING && gui.isAltDown() && def != null) {
-			TextureProvider skin = def.getSkinOverride();
+			TextureProvider skin = def.getTexture(TextureSheetType.CAPE);
 			if(skin != null && skin.texture != null) {
 				skin.bind();
 				int size = Math.min(bounds.w, bounds.h);
@@ -258,14 +260,14 @@ public class GestureGui extends Frame {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
+		public void draw(MouseEvent event, float partialTicks) {
 			int w = gui.textWidth(name);
 			int bgColor = gui.getColors().button_fill;
 			int color = gui.getColors().button_text_color;
 			if(!enabled) {
 				color = gui.getColors().button_text_disabled;
 				bgColor = gui.getColors().button_disabled;
-			} else if(bounds.isInBounds(mouseX, mouseY)) {
+			} else if(event.isHovered(bounds)) {
 				color = gui.getColors().button_text_hover;
 				bgColor = gui.getColors().button_hover;
 			}
@@ -282,7 +284,7 @@ public class GestureGui extends Frame {
 					}
 				}
 			}
-			if(bounds.isInBounds(mouseX, mouseY)) {
+			if(event.isHovered(bounds)) {
 				hoveredBtn = this;
 			}
 		}

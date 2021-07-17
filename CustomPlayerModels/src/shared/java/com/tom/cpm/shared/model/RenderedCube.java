@@ -8,6 +8,7 @@ import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.model.render.Mesh;
+import com.tom.cpm.shared.model.render.PerFaceUV;
 
 public class RenderedCube implements IModelComponent {
 	private Cube cube;
@@ -27,6 +28,10 @@ public class RenderedCube implements IModelComponent {
 	public boolean hidden = false;
 	//Render Effect Recolor
 	public boolean recolor = false;
+	//Render Effect Single Texture
+	public boolean singleTex = false;
+	//Render Effect PerFaceUV
+	public PerFaceUV faceUVs;
 
 	protected RenderedCube() {
 	}

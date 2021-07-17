@@ -14,10 +14,11 @@ public enum ModelPartType {
 	ANIMATION_DATA(ModelPartAnimation::new),
 	SKIN_TYPE(ModelPartSkinType::new),
 	MODEL_ROOT(ModelPartRoot::new),
-	LIST_ICON(ModelPartListIcon::new),
+	@Deprecated LIST_ICON(ModelPartListIcon::new),
 	DUP_ROOT(ModelPartDupRoot::new),
 	CLONEABLE(ModelPartCloneable::new),
 	SCALE(ModelPartScale::new),
+	TEXTURE(ModelPartTexture::new),
 	;
 	public static final ModelPartType[] VALUES = values();
 	private final IModelPart.Factory factory;

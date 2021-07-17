@@ -28,7 +28,7 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
-import com.tom.cpm.shared.util.MojangSkinsAPI;
+import com.tom.cpm.shared.util.MojangSkinUploadAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private static final Identifier STEVE_SKIN = new Identifier("textures/entity/steve.png");
@@ -194,13 +194,13 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public MojangSkinsAPI getMojangAPI() {
-		return new MojangSkinsAPI(mc.getSession().getProfile().getId(), mc.getSession().getAccessToken());
+	public MojangSkinUploadAPI getUploadAPI() {
+		return new MojangSkinUploadAPI(mc.getSession().getProfile().getId(), mc.getSession().getAccessToken());
 	}
 
 	@Override
 	public void clearSkinCache() {
-		MojangSkinsAPI.clearYggdrasilCache(mc.getSessionService());
+		MojangSkinUploadAPI.clearYggdrasilCache(mc.getSessionService());
 		mc.getSessionProperties().clear();
 		mc.getSessionProperties();//refresh
 	}

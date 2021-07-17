@@ -9,6 +9,7 @@ import java.util.function.IntConsumer;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.math.Box;
 
 public class Tree<T> extends GuiElement {
 	private TreeElement root;
@@ -63,12 +64,12 @@ public class Tree<T> extends GuiElement {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		map.clear();
-		drawTree(mouseX, mouseY, 0, new int[1], root);
+		drawTree(event, 0, new int[1], root);
 	}
 
-	private void drawTree(int mouseX, int mouseY, int x, int[] y, TreeElement e) {
+	private void drawTree(MouseEvent event, int x, int[] y, TreeElement e) {
 		int yp = y[0]++;
 		int textColor = gui.getColors().button_text_color;
 		int bg = e.value == null ? 0 : model.bgColor(e.value);
@@ -79,7 +80,7 @@ public class Tree<T> extends GuiElement {
 		if(txtc != 0) {
 			textColor = txtc;
 		}
-		if(mouseX > bounds.x && mouseY > yp * 10 && mouseY < (yp+1) * 10) {
+		if (event.isHovered(new Box(bounds.x, yp * 10, bounds.w, 10))) {
 			textColor = gui.getColors().button_text_hover;
 			Tooltip tt = model.getTooltip(e.value);
 			if(tt != null)tt.set();
@@ -90,7 +91,7 @@ public class Tree<T> extends GuiElement {
 		if(e.showChildren) {
 			if(e != root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 24, 8, "editor");
 			for (TreeElement i : e.children) {
-				drawTree(mouseX, mouseY, x + 1, y, i);
+				drawTree(event, x + 1, y, i);
 			}
 		} else {
 			if(e != root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 24, 0, "editor");

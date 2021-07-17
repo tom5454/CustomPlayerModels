@@ -36,6 +36,7 @@ import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartEnd;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartType;
+import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
 
 public class ModelDefinitionLoader {
@@ -49,7 +50,7 @@ public class ModelDefinitionLoader {
 			if(serverModels.containsKey(key)) {
 				player.setModelDefinition(CompletableFuture.completedFuture(loadModel(serverModels.get(key), player)));
 			} else {
-				player.setModelDefinition(player.loadSkin().thenCompose(v -> player.getSkin()).thenApply(skin -> {
+				player.setModelDefinition(player.getTextures().load().thenCompose(v -> player.getTextures().getTexture(TextureType.SKIN)).thenApply(skin -> {
 					if(skin != null && player.getModelDefinition() == null) {
 						return loadModel(skin, player);
 					} else {

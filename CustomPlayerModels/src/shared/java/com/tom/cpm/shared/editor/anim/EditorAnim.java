@@ -125,28 +125,15 @@ public class EditorAnim implements IAnim {
 
 	public void addFrame() {
 		AnimFrame frm = new AnimFrame(this);
-		editor.addUndo(() -> frames.remove(frm));
-		editor.runOp(() -> frames.add(frm));
+		editor.action("add", "action.cpm.animFrame").addToList(frames, frm).onAction(this::clearCache).execute();
 		if(currentFrame != null)frm.copy(currentFrame);
 		currentFrame = frm;
-		components = null;
-		psfs = null;
 	}
 
 	public void deleteFrame() {
 		if(currentFrame != null) {
-			AnimFrame frm = currentFrame;
-			int ind = frames.indexOf(frm);
-			if(ind != -1) {
-				editor.addUndo(() -> frames.add(ind, frm));
-				editor.runOp(() -> frames.remove(frm));
-				currentFrame = frames.size() <= ind ? frames.isEmpty() ? null : frames.get(0) : frames.get(ind);
-			} else {
-				currentFrame = null;
-			}
+			editor.action("remove", "action.cpm.animFrame").removeFromList(frames, currentFrame).onAction(this::clearCache).execute();
 		}
-		components = null;
-		psfs = null;
 	}
 
 	public void loadFrame(Map<String, Object> data) {

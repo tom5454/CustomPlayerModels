@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
@@ -99,8 +100,8 @@ public class DescPopup extends PopupPanel {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
-		super.draw(mouseX, mouseY, partialTicks);
+	public void draw(MouseEvent event, float partialTicks) {
+		super.draw(event, partialTicks);
 
 		if(icon.getImage() != null) {
 			gui.drawBox(bounds.x + bounds.w - 136, bounds.y + 14, 130, 130, gui.getColors().color_picker_border);

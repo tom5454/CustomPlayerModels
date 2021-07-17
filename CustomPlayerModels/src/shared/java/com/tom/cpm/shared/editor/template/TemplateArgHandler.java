@@ -84,9 +84,7 @@ public class TemplateArgHandler implements TreeElement {
 							collect(Collectors.toList()),
 							elem -> {
 								if(elem != null) {
-									editor.addUndo(() -> effectedElems.remove(elem.getElem()));
-									editor.runOp(() -> effectedElems.add(elem.getElem()));
-									editor.markDirty();
+									editor.action("addToArg").addToList(effectedElems, elem.getElem()).execute();
 									editor.updateGui();
 								}
 							}, null)
@@ -119,12 +117,7 @@ public class TemplateArgHandler implements TreeElement {
 
 	@Override
 	public void delete() {
-		List<TemplateArgHandler> a = new ArrayList<>(editor.templateSettings.templateArgs);
-		editor.addUndo(() -> {
-			editor.templateSettings.templateArgs = a;
-		});
-		editor.runOp(() -> editor.templateSettings.templateArgs.remove(this));
-		editor.markDirty();
+		editor.action("remove", "action.cpm.arg").removeFromList(editor.templateSettings.templateArgs, this).execute();
 		editor.updateGui();
 	}
 
@@ -158,9 +151,7 @@ public class TemplateArgHandler implements TreeElement {
 
 		@Override
 		public void delete() {
-			editor.addUndo(() -> effectedElems.add(elem));
-			editor.runOp(() -> effectedElems.remove(elem));
-			editor.markDirty();
+			editor.action("rmFromArg").removeFromList(effectedElems, elem).execute();
 			editor.updateGui();
 		}
 

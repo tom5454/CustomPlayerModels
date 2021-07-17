@@ -14,7 +14,10 @@
     "BufferBuilderStorageMixin",
     "MinecraftClientMixin",
     "SkullBlockEntityRendererMixin",
-    "ClientPlayNetHandlerMixin"
+    "ClientPlayNetHandlerMixin",
+	"ArmorFeatureRendererMixin",
+	"ElytraFeatureRendererMixin",
+	"CapeFeatureRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

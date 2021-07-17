@@ -17,28 +17,28 @@ public class Spinner extends GuiElement implements Focusable {
 	private List<Runnable> changeListeners = new ArrayList<>();
 	private TextField txtf;
 	private boolean txtfNeedsUpdate;
-	private String error;
+	private String error, lastValue;
 	public Spinner(IGui gui) {
 		super(gui);
 		txtf = new TextField(gui);
 		txtf.setEventListener(this::updateTxtf);
-		txtf.setText(String.format("%." + dp + "f", value));
+		txtf.setText(lastValue = String.format("%." + dp + "f", value));
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x + 1, bounds.y + 1, bounds.w - 2, bounds.h - 2, enabled ? gui.getColors().button_fill : gui.getColors().button_disabled);
-		txtf.draw(mouseX, mouseY, partialTicks);
-		Box bUp = new Box(bounds.x + bounds.w - 9, bounds.y, bounds.w, bounds.h / 2);
-		Box bDown = new Box(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, bounds.w, bounds.h / 2);
-		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + 1, 8, 8, enabled ? bounds.isInBounds(mouseX, mouseY) && bUp.isInBounds(mouseX, mouseY) ? 16 : 8 : 0, 0, "editor");
-		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, 8, 8, enabled ? bounds.isInBounds(mouseX, mouseY) && bDown.isInBounds(mouseX, mouseY) ? 16 : 8 : 0, 8, "editor");
+		txtf.draw(event, partialTicks);
+		Box bUp = new Box(bounds.x + bounds.w - 9, bounds.y, 9, bounds.h / 2);
+		Box bDown = new Box(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, 9, bounds.h / 2);
+		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + 1, 8, 8, enabled ? event.isHovered(bUp) ? 16 : 8 : 0, 0, "editor");
+		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, 8, 8, enabled ? event.isHovered(bDown) ? 16 : 8 : 0, 8, "editor");
 		if(txtfNeedsUpdate && !txtf.isFocused()) {
 			txtfNeedsUpdate = false;
-			txtf.setText(String.format("%." + dp + "f", value));
+			txtf.setText(lastValue = String.format("%." + dp + "f", value));
 		}
-		if(bounds.isInBounds(mouseX, mouseY) && txtf.isFocused() && error != null) {
+		if(event.isHovered(bounds) && txtf.isFocused() && error != null) {
 			new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.exp_error", error)).set();
 		}
 		if(txtf.isFocused() && error != null) {
@@ -56,12 +56,12 @@ public class Spinner extends GuiElement implements Focusable {
 				if(bUp.isInBounds(e.x, e.y)) {
 					value += v;
 					changeListeners.forEach(Runnable::run);
-					txtf.setText(String.format("%." + dp + "f", value));
+					txtf.setText(lastValue = String.format("%." + dp + "f", value));
 					e.consume();
 				} else if(bDown.isInBounds(e.x, e.y)) {
 					value -= v;
 					changeListeners.forEach(Runnable::run);
-					txtf.setText(String.format("%." + dp + "f", value));
+					txtf.setText(lastValue = String.format("%." + dp + "f", value));
 					e.consume();
 				}
 			}
@@ -92,13 +92,13 @@ public class Spinner extends GuiElement implements Focusable {
 		double d = Math.pow(10, dp);
 		this.value = (float) (((int) (value * d)) / d);
 		if(!txtf.isFocused())
-			txtf.setText(String.format("%." + dp + "f", value));
+			txtf.setText(lastValue = String.format("%." + dp + "f", value));
 		else txtfNeedsUpdate = true;
 	}
 
 	public void setDp(int dp) {
 		this.dp = dp;
-		txtf.setText(String.format("%." + dp + "f", value));
+		txtf.setText(lastValue = String.format("%." + dp + "f", value));
 	}
 
 	@Override
@@ -108,6 +108,7 @@ public class Spinner extends GuiElement implements Focusable {
 	}
 
 	private void updateTxtf() {
+		if(lastValue.equals(txtf.getText()))return;
 		try {
 			float value = new ExpressionExt(txtf.getText().replace(',', '.')).eval();
 			double d = Math.pow(10, dp);

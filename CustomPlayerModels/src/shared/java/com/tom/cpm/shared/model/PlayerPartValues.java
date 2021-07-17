@@ -72,4 +72,14 @@ public enum PlayerPartValues implements PartValues {//                          
 	public Vec2i getUV() {
 		return new Vec2i(u, v);
 	}
+
+	@Override
+	public boolean isMirror() {
+		return false;
+	}
+
+	@Override
+	public float getMCScale() {
+		return 0;
+	}
 }

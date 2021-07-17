@@ -7,6 +7,7 @@ import java.util.function.IntConsumer;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.Slider;
@@ -30,13 +31,15 @@ public class ColorButton extends Button {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		int bgColor = gui.getColors().button_fill;
 		if(!enabled) {
 			bgColor = gui.getColors().button_disabled;
-		} else if(bounds.isInBounds(mouseX, mouseY)) {
+		} else if(event.isHovered(bounds)) {
 			bgColor = gui.getColors().button_hover;
 		}
+		if(event.isHovered(bounds) && tooltip != null)
+			tooltip.set();
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
 		gui.drawBox(bounds.x+3, bounds.y+3, bounds.w-6, bounds.h-6, 0xff000000 | color);
@@ -181,8 +184,8 @@ public class ColorButton extends Button {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
-			super.draw(mouseX, mouseY, partialTicks);
+		public void draw(MouseEvent event, float partialTicks) {
+			super.draw(event, partialTicks);
 			gui.drawBox(bounds.x + bounds.w - 35, bounds.y + 5, 30, 20, gui.getColors().color_picker_border);
 			gui.drawBox(bounds.x + bounds.w - 34, bounds.y + 6, 28, 18, getColor() | 0xff000000);
 		}
@@ -329,12 +332,12 @@ public class ColorButton extends Button {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
+		public void draw(MouseEvent event, float partialTicks) {
 			int textw = gui.textWidth(name);
 			int color = gui.getColors().button_text_color;
 			if(!enabled) {
 				color = gui.getColors().button_text_disabled;
-			} else if(bounds.isInBounds(mouseX, mouseY)) {
+			} else if(event.isHovered(bounds)) {
 				color = gui.getColors().button_text_hover;
 			}
 			gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);

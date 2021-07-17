@@ -1,6 +1,7 @@
 package com.tom.cpl.gui.elements;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 
 public class Label extends GuiElement {
 	private String text;
@@ -13,13 +14,13 @@ public class Label extends GuiElement {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		if(text == null)
 			gui.drawText(bounds.x, bounds.y, "~~NULL~~", color);
 		else
 			gui.drawText(bounds.x, bounds.y, text, color);
 
-		if(bounds.isInBounds(mouseX, mouseY)) {
+		if(event.isHovered(bounds)) {
 			if(tooltip != null)tooltip.set();
 		}
 	}

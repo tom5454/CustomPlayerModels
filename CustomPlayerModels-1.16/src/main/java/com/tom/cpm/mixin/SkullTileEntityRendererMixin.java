@@ -28,6 +28,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(SkullTileEntityRenderer.class)
 public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<SkullTileEntity> {
@@ -47,7 +48,7 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 	private static RenderType onGetRenderType(ResourceLocation resLoc, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn) {
 		GenericHeadModel model = MODELS.get(skullType);
 		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi);
+		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
 		return RenderType.getEntityTranslucent(cbi.getReturnValue());
 	}
 
@@ -62,7 +63,7 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 	private static RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn) {
 		GenericHeadModel model = MODELS.get(skullType);
 		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi);
+		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
 		return RenderType.getEntityTranslucent(cbi.getReturnValue());
 	}
 

@@ -10,11 +10,14 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.model.ElytraEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.model.SkullOverlayEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
@@ -22,6 +25,8 @@ import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.RedirectRendererOF;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.RootModelType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
 import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -36,14 +41,18 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public <M> RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart> create(
-					M model) {
+			public <M> RedirectHolder<?, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart> create(
+					M model, String arg) {
 				if(model instanceof PlayerEntityModel) {
-					return (RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart>)
-							new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerEntityModel<AbstractClientPlayerEntity>) model);
+					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerEntityModel<AbstractClientPlayerEntity>) model);
 				} else if(model instanceof SkullOverlayEntityModel) {
-					return (RedirectHolder<M, VertexConsumerProvider, CallbackInfoReturnable<Identifier>, ModelPart>)
-							new RedirectHolderSkull(PlayerRenderManager.this, (SkullOverlayEntityModel) model);
+					return new RedirectHolderSkull(PlayerRenderManager.this, (SkullOverlayEntityModel) model);
+				} else if(model instanceof ElytraEntityModel) {
+					return new RedirectHolderElytra(PlayerRenderManager.this, (ElytraEntityModel<AbstractClientPlayerEntity>) model);
+				} else if(model instanceof BipedEntityModel && "armor1".equals(arg)) {
+					return new RedirectHolderArmor1(PlayerRenderManager.this, (BipedEntityModel<AbstractClientPlayerEntity>) model);
+				} else if(model instanceof BipedEntityModel && "armor2".equals(arg)) {
+					return new RedirectHolderArmor2(PlayerRenderManager.this, (BipedEntityModel<AbstractClientPlayerEntity>) model);
 				}
 				return null;
 			}
@@ -83,9 +92,9 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 
 		@Override
-		public void bindTexture(CallbackInfoReturnable<Identifier> cbi) {
+		public void bindTexture(CallbackInfoReturnable<Identifier> cbi, TextureSheetType tex) {
 			if(def == null)return;
-			TextureProvider skin = def.getSkinOverride();
+			TextureProvider skin = def.getTexture(tex);
 			if(skin != null && skin.texture != null) {
 				skin.bind();
 				OptifineTexture.applyOptifineTexture(cbi.getReturnValue(), skin);
@@ -163,6 +172,44 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 	}
 
+	private static class RedirectHolderElytra extends RDH {
+
+		public RedirectHolderElytra(PlayerRenderManager mngr, ElytraEntityModel<AbstractClientPlayerEntity> model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.field_3364, v -> model.field_3364 = v, RootModelType.ELYTRA_RIGHT));
+			register(new Field<>(() -> model.field_3365, v -> model.field_3365 = v, RootModelType.ELYTRA_LEFT));
+		}
+
+	}
+
+	private static class RedirectHolderArmor1 extends RDH {
+
+		public RedirectHolderArmor1(PlayerRenderManager mngr, BipedEntityModel<AbstractClientPlayerEntity> model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.head,      v -> model.head      = v, RootModelType.ARMOR_HELMET));
+			register(new Field<>(() -> model.torso,     v -> model.torso     = v, RootModelType.ARMOR_BODY));
+			register(new Field<>(() -> model.rightArm,  v -> model.rightArm  = v, RootModelType.ARMOR_RIGHT_ARM));
+			register(new Field<>(() -> model.leftArm,   v -> model.leftArm   = v, RootModelType.ARMOR_LEFT_ARM));
+			register(new Field<>(() -> model.rightLeg,  v -> model.rightLeg  = v, RootModelType.ARMOR_RIGHT_FOOT));
+			register(new Field<>(() -> model.leftLeg,   v -> model.leftLeg   = v, RootModelType.ARMOR_LEFT_FOOT));
+		}
+
+	}
+
+	private static class RedirectHolderArmor2 extends RDH {
+
+		public RedirectHolderArmor2(PlayerRenderManager mngr, BipedEntityModel<AbstractClientPlayerEntity> model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.torso,     v -> model.torso     = v, RootModelType.ARMOR_LEGGINGS_BODY));
+			register(new Field<>(() -> model.rightLeg,  v -> model.rightLeg  = v, RootModelType.ARMOR_RIGHT_LEG));
+			register(new Field<>(() -> model.leftLeg,   v -> model.leftLeg   = v, RootModelType.ARMOR_LEFT_LEG));
+		}
+
+	}
+
 	public static abstract class RedirectModelRendererBase extends ModelPart implements RedirectRenderer<ModelPart> {
 		public final RDH holder;
 		public final VanillaModelPart part;
@@ -216,6 +263,13 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		public VBuffers getVBuffers() {
 			return buffers;
 		}
+
+		protected float red, green, blue, alpha;
+
+		@Override
+		public Vec4f getColor() {
+			return new Vec4f(red, green, blue, alpha);
+		}
 	}
 
 	private static class RedirectModelRendererVanilla extends RedirectModelRendererBase {
@@ -227,7 +281,6 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		private MatrixStack matrixStackIn;
 		private VertexConsumer bufferIn;
 		private int packedLightIn, packedOverlayIn;
-		private float red, green, blue, alpha;
 
 		@Override
 		public void render(MatrixStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {

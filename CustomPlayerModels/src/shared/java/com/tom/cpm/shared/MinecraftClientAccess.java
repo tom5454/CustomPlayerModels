@@ -14,7 +14,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
-import com.tom.cpm.shared.util.MojangSkinsAPI;
+import com.tom.cpm.shared.util.MojangSkinUploadAPI;
 
 public interface MinecraftClientAccess {
 	IPlayerRenderManager getPlayerRenderManager();
@@ -47,7 +47,7 @@ public interface MinecraftClientAccess {
 	NetHandler<?, ?, ?, ?, ?> getNetHandler();
 	void openGui(Function<IGui, Frame> creator);
 	IImageIO getImageIO();
-	MojangSkinsAPI getMojangAPI();
+	MojangSkinUploadAPI getUploadAPI();
 	void clearSkinCache();
 
 	default Runnable openSingleplayer() {

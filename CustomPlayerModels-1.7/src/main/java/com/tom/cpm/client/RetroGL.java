@@ -5,12 +5,15 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.DirectBuffer;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpl.render.VertexBuffer;
 
 public class RetroGL {
 	public static final RetroTessellator tessellator = new RetroTessellator(Tessellator.instance);
+	public static int renderCallLoc;
+	public static final int HURT_OVERLAY_LOC = 3;
 
 	private static final RenderStage lines = new RenderStage(true, false, false, () -> {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
@@ -32,6 +35,7 @@ public class RetroGL {
 
 	private static float lx, ly;
 	private static final RenderStage eyes = new RenderStage(true, true, true, () -> {
+		if(renderCallLoc == RetroGL.HURT_OVERLAY_LOC)return;
 		lx = OpenGlHelper.lastBrightnessX;
 		ly = OpenGlHelper.lastBrightnessY;
 		GL11.glEnable(GL11.GL_BLEND);
@@ -43,6 +47,7 @@ public class RetroGL {
 		int k = i / 65536;
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
 	}, () -> {
+		if(renderCallLoc == RetroGL.HURT_OVERLAY_LOC)return;
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lx, ly);
 		OpenGlHelper.glBlendFunc(770, 771, 1, 0);
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
@@ -160,5 +165,19 @@ public class RetroGL {
 		public int draw() {
 			return t.draw();
 		}
+	}
+
+	public static Vec4f getColor() {
+		return new Vec4f(red, green, blue, alpha);
+	}
+
+	private static float red, green, blue, alpha;
+
+	public static void color4f(float r, float g, float b, float a) {
+		red = r;
+		green = g;
+		blue = b;
+		alpha = a;
+		GL11.glColor4f(r, g, b, a);
 	}
 }

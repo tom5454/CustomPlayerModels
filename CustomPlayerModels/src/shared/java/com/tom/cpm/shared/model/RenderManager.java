@@ -22,7 +22,7 @@ public class RenderManager<G, P, M, D> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean tryBindModel(G gprofile, P player, D buffer, M toBind, AnimationMode mode) {
+	public boolean tryBindModel(G gprofile, P player, D buffer, M toBind, String arg, AnimationMode mode) {
 		if(gprofile == null)gprofile = getProfile.apply(player);
 		Player<P, M> profile = (Player<P, M>) loader.loadPlayer(gprofile);
 		if(profile == null)return false;
@@ -32,7 +32,7 @@ public class RenderManager<G, P, M, D> {
 			this.profile = profile;
 			if(player != null)
 				profile.updateFromPlayer(player);
-			renderManager.bindModel(toBind, buffer, def, profile, mode);
+			renderManager.bindModel(toBind, arg, buffer, def, profile, mode);
 			return true;
 		}
 		renderManager.unbindModel(toBind);
@@ -59,16 +59,28 @@ public class RenderManager<G, P, M, D> {
 	}
 
 	public void bindHand(P player, D buffer) {
-		tryBindModel(null, player, buffer, null, AnimationMode.HAND);
+		tryBindModel(null, player, buffer, null, null, AnimationMode.HAND);
 	}
 
 	public void bindSkull(G profile, D buffer, M model) {
 		Player<P, M> prev = this.profile;
-		tryBindModel(profile, null, buffer, model, AnimationMode.SKULL);
+		tryBindModel(profile, null, buffer, model, null, AnimationMode.SKULL);
 		this.profile = prev;
 	}
 
 	public void bindPlayer(P player, D buffer) {
-		tryBindModel(null, player, buffer, null, AnimationMode.PLAYER);
+		tryBindModel(null, player, buffer, null, null, AnimationMode.PLAYER);
+	}
+
+	public void bindElytra(P player, D buffer, M model) {
+		tryBindModel(null, player, buffer, model, null, AnimationMode.PLAYER);
+	}
+
+	public void bindArmor(P player, D buffer, M model, int layer) {
+		tryBindModel(null, player, buffer, model, "armor" + layer, AnimationMode.PLAYER);
+	}
+
+	public Player<P, M> getBoundPlayer() {
+		return profile;
 	}
 }

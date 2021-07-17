@@ -3,6 +3,7 @@ package com.tom.cpm.client;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
@@ -22,6 +23,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 	private final GameProfile profile;
@@ -68,23 +70,30 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 	}
 
 	@Override
-	public CompletableFuture<Void> loadSkin0() {
-		Map<Type, MinecraftProfileTexture> map = Minecraft.getMinecraft().func_152342_ad().func_152788_a(profile);
-		if (map.containsKey(Type.SKIN)) {
-			MinecraftProfileTexture tex = map.get(Type.SKIN);
-			url = tex.getUrl();
-			return CompletableFuture.completedFuture(null);
-		}
-		CompletableFuture<Void> cf = new CompletableFuture<>();
-		Minecraft.getMinecraft().func_152342_ad().func_152790_a(profile, new SkinCB(cf), true);
-		return cf;
+	protected PlayerTextureLoader initTextures() {
+		return new PlayerTextureLoader() {
+
+			@Override
+			protected CompletableFuture<Void> load0() {
+				Map<Type, MinecraftProfileTexture> map = Minecraft.getMinecraft().func_152342_ad().func_152788_a(profile);
+				defineAll(map, MinecraftProfileTexture::getUrl);
+				if (map.containsKey(Type.SKIN)) {
+					return CompletableFuture.completedFuture(null);
+				}
+				CompletableFuture<Void> cf = new CompletableFuture<>();
+				Minecraft.getMinecraft().func_152342_ad().func_152790_a(profile, new SkinCB(cf, this::defineTexture), true);
+				return cf;
+			}
+		};
 	}
 
 	public class SkinCB implements SkinManager.SkinAvailableCallback {
 		private final CompletableFuture<Void> cf;
+		private final BiConsumer<Type, String> define;
 
-		public SkinCB(CompletableFuture<Void> cf) {
+		public SkinCB(CompletableFuture<Void> cf, BiConsumer<Type, String> define) {
 			this.cf = cf;
+			this.define = define;
 		}
 
 		@Override
@@ -92,9 +101,9 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 
 		//Called from CPMASMClientHooks.loadSkinHook 1.8+ implementation
 		public void skinAvailable(Type typeIn, ResourceLocation location, MinecraftProfileTexture profileTexture) {
+			define.accept(typeIn, profileTexture.getUrl());
 			switch (typeIn) {
 			case SKIN:
-				url = profileTexture.getUrl();
 				cf.complete(null);
 
 				break;

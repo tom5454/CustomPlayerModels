@@ -20,7 +20,7 @@ public class DropDownBox<T> extends GuiElement {
 	protected Runnable action;
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		String v = values.size() > selectedId && selectedId >= 0 ? String.valueOf(values.get(selectedId)) : gui.i18nFormat("label.cpm.no_elements");
 		int w = gui.textWidth(v);
 		int bgColor = gui.getColors().button_fill;
@@ -28,7 +28,7 @@ public class DropDownBox<T> extends GuiElement {
 		if(!enabled) {
 			color = gui.getColors().button_text_disabled;
 			bgColor = gui.getColors().button_disabled;
-		} else if(bounds.isInBounds(mouseX, mouseY)) {
+		} else if(event.isHovered(bounds)) {
 			color = gui.getColors().button_text_hover;
 			bgColor = gui.getColors().button_hover;
 		}

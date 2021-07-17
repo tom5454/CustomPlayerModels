@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.editor;
 
-import java.io.File;
 import java.io.IOException;
 
 import com.tom.cpl.math.Box;
@@ -10,7 +9,6 @@ import com.tom.cpm.shared.skin.TextureProvider;
 
 public class EditorTexture extends TextureProvider {
 	private boolean edited;
-	public File file;
 	public Box stitchPos;
 
 	public EditorTexture() {

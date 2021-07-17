@@ -11,9 +11,8 @@ import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.util.Image;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 
 public class SkinSettingsPopup extends PopupPanel {
@@ -21,8 +20,8 @@ public class SkinSettingsPopup extends PopupPanel {
 
 	public static void showPopup(EditorGui e) {
 		Editor editor = e.getEditor();
-		EditorTexture tex = editor.getTextureProvider();
-		if(tex != null) {
+		ETextures tex = editor.getTextureProvider();
+		if(tex != null && tex.isEditable()) {
 			e.openPopup(new SkinSettingsPopup(e.getGui(), e));
 		}
 	}
@@ -31,7 +30,7 @@ public class SkinSettingsPopup extends PopupPanel {
 		super(gui);
 
 		Editor editor = e.getEditor();
-		EditorTexture tex = editor.getTextureProvider();
+		ETextures tex = editor.getTextureProvider();
 
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.openSkin"), () -> {
 			FileChooserPopup fc = new FileChooserPopup(editor.frame);
@@ -76,18 +75,10 @@ public class SkinSettingsPopup extends PopupPanel {
 			boolean edited = tex.isEdited();
 			if(edited) {
 				e.openPopup(new ConfirmPopup(e, gui.i18nFormat("label.cpm.delSkin"), () -> {
-					Image img = tex.getImage();
-					editor.addUndo(() -> {
-						tex.setImage(img);
-						tex.setEdited(true);
-					});
-					Image vskin = new Image(editor.vanillaSkin);
-					editor.runOp(() -> {
-						tex.setImage(vskin);
-						tex.setEdited(false);
-						editor.markDirty();
-						editor.updateGui();
-					});
+					editor.action("delTexture").
+					updateValueOp(tex, tex.getImage(), tex.copyDefaultImg(), ETextures::setImage).
+					updateValueOp(tex, tex.isEdited(), false, ETextures::setEdited).
+					execute();
 				}, null));
 			}
 		});
@@ -124,8 +115,8 @@ public class SkinSettingsPopup extends PopupPanel {
 		};
 		spinnerTW.addChangeListener(r);
 		spinnerTH.addChangeListener(r);
-		spinnerTW.setValue(tex.size.x);
-		spinnerTH.setValue(tex.size.y);
+		spinnerTW.setValue(tex.provider.size.x);
+		spinnerTH.setValue(tex.provider.size.y);
 
 		setBounds(new Box(0, 0, 210, 140));
 	}

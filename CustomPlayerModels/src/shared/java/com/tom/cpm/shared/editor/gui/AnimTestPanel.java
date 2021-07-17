@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.DropDownBox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
@@ -86,8 +87,8 @@ public class AnimTestPanel extends Panel {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
-		super.draw(mouseX, mouseY, partialTicks);
+	public void draw(MouseEvent event, float partialTicks) {
+		super.draw(event, partialTicks);
 		editor.animsToPlay.clear();
 		NamedElement<IPose> pose = poseSel.getSelected();
 		if(pose != null) {

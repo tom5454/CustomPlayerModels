@@ -36,4 +36,9 @@ public class CustomRenderTypes extends RenderLayer {
 		MultiPhaseParameters multiPhaseParameters = MultiPhaseParameters.builder().texture(new RenderPhase.Texture(texture, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).diffuseLighting(DISABLE_DIFFUSE_LIGHTING).alpha(ONE_TENTH_ALPHA).lightmap(DISABLE_LIGHTMAP).overlay(DISABLE_OVERLAY_COLOR).build(true);
 		return of("cpm:entity_translucent_cull_nolight", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, 7, 256, true, true, multiPhaseParameters);
 	}
+
+	public static RenderLayer getTexCutout(Identifier locationIn) {
+		MultiPhaseParameters multiPhaseParameters = MultiPhaseParameters.builder().texture(new RenderPhase.Texture(locationIn, false, false)).transparency(NO_TRANSPARENCY).cull(DISABLE_CULLING).alpha(ONE_TENTH_ALPHA).build(true);
+		return of("cpm:cutout", VertexFormats.POSITION_TEXTURE, 7, 256, true, false, multiPhaseParameters);
+	}
 }

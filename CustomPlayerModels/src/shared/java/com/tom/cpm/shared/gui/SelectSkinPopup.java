@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup;
@@ -199,8 +200,8 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
-			super.draw(mouseX, mouseY, partialTicks);
+		public void draw(MouseEvent event, float partialTicks) {
+			super.draw(event, partialTicks);
 
 			if(icon != null) {
 				icon.bind();

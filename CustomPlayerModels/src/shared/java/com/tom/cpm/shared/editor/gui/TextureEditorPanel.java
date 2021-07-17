@@ -4,14 +4,15 @@ import java.util.function.Supplier;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.skin.TextureProvider;
 
 public class TextureEditorPanel extends GuiElement {
 	private int lastMx, lastMy;
@@ -21,6 +22,7 @@ public class TextureEditorPanel extends GuiElement {
 	private Editor editor;
 	public Supplier<Vec2i> cursorPos;
 	private Vec2i mouseCursorPos = new Vec2i();
+	private Vec2i moveStart = new Vec2i();
 
 	public TextureEditorPanel(IGui gui, Editor editor, int zoom) {
 		super(gui);
@@ -29,18 +31,18 @@ public class TextureEditorPanel extends GuiElement {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
-		mouseCursorPos.x = mouseX;
-		mouseCursorPos.y = mouseY;
+	public void draw(MouseEvent event, float partialTicks) {
+		mouseCursorPos.x = event.x;
+		mouseCursorPos.y = event.y;
 
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);
 		gui.setupCut();
 
-		TextureProvider provider = editor.getTextureProvider();
-		if(provider != null && provider.texture != null) {
+		ETextures provider = editor.getTextureProvider();
+		if(provider != null) {
 			gui.drawBox(0, 0, bounds.w, bounds.h, gui.getColors().button_fill);
-			provider.bind();
+			provider.provider.bind();
 			if(zoom == 0) {
 				zoom = bounds.h / (float) provider.getImage().getWidth();
 			}
@@ -48,10 +50,10 @@ public class TextureEditorPanel extends GuiElement {
 			int rh = (int) (zoom * provider.getImage().getHeight());
 			gui.drawBox(offX, offY, rw, rh, 0xffffffff);
 			gui.drawTexture(offX, offY, rw, rh, 0, 0, 1, 1);
-			int imgX = (int) ((mouseX - offX - bounds.x) / zoom);
-			int imgY = (int) ((mouseY - offY - bounds.y) / zoom);
+			int imgX = (int) ((event.x - offX - bounds.x) / zoom);
+			int imgY = (int) ((event.y - offY - bounds.y) / zoom);
 			TextureDisplay.drawBoxTextureOverlay(gui, editor, offX, offY, zoom, zoom);
-			Vec2i p1 = imgX >= 0 && imgY >= 0 && imgX < provider.getImage().getWidth() && imgY < provider.getImage().getHeight() ? new Vec2i(imgX, imgY) : null;
+			Vec2i p1 = event.isHovered(bounds) && imgX >= 0 && imgY >= 0 && imgX < provider.getImage().getWidth() && imgY < provider.getImage().getHeight() ? new Vec2i(imgX, imgY) : null;
 			switch (editor.drawMode) {
 			case MOVE_UV:
 			{
@@ -118,7 +120,7 @@ public class TextureEditorPanel extends GuiElement {
 			lastMx = x;
 			lastMy = y;
 			dragging = true;
-			TextureProvider provider = editor.getTextureProvider();
+			ETextures provider = editor.getTextureProvider();
 			if(btn == 0) {
 				int px = (int) ((x - offX - bounds.x) / zoom);
 				int py = (int) ((y - offY - bounds.y) / zoom);
@@ -144,12 +146,8 @@ public class TextureEditorPanel extends GuiElement {
 						ModelElement me = getElementUnderMouse(px, py);
 						editor.selectedElement = me;
 						if(me != null) {
-							int u = me.u;
-							int v = me.v;
-							editor.addUndo(() -> {
-								me.u = u;
-								me.v = v;
-							});
+							moveStart.x = me.u;
+							moveStart.y = me.v;
 						}
 					}
 					break;
@@ -170,7 +168,7 @@ public class TextureEditorPanel extends GuiElement {
 			if(dragging) {
 				int dx = x - lastMx;
 				int dy = y - lastMy;
-				TextureProvider provider = editor.getTextureProvider();
+				ETextures provider = editor.getTextureProvider();
 
 				if(btn == EditorGui.getRotateMouseButton()) {
 					offX += dx;
@@ -229,12 +227,10 @@ public class TextureEditorPanel extends GuiElement {
 			{
 				ModelElement me = editor.getSelectedElement();
 				if(me != null) {
-					int u = me.u;
-					int v = me.v;
-					editor.setCurrentOp(() -> {
-						me.u = u;
-						me.v = v;
-					});
+					editor.action("move", "action.cpm.texUV").updateValueOp(me, new Vec2i(moveStart), new Vec2i(me.u, me.v), (a, b) -> {
+						a.u = b.x;
+						a.v = b.y;
+					}).execute();
 				}
 			}
 			break;
@@ -248,7 +244,7 @@ public class TextureEditorPanel extends GuiElement {
 	}
 
 	private void zoom(int x, int y, int dir) {
-		TextureProvider provider = editor.getTextureProvider();
+		ETextures provider = editor.getTextureProvider();
 		float zv = (dir * (zoom / 8f));
 		float iw = provider.getImage().getWidth() * zoom;
 		float ih = provider.getImage().getHeight() * zoom;

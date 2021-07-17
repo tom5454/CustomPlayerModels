@@ -1,9 +1,12 @@
 package com.tom.cpm.shared.gui;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
@@ -17,7 +20,9 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.HeldItem;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public abstract class ViewportPanelBase extends GuiElement {
 	protected int mx, my;
@@ -33,9 +38,9 @@ public abstract class ViewportPanelBase extends GuiElement {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
-		mouseCursorPos.x = mouseX;
-		mouseCursorPos.y = mouseY;
+	public void draw(MouseEvent event, float partialTicks) {
+		mouseCursorPos.x = event.x;
+		mouseCursorPos.y = event.y;
 
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);
@@ -172,7 +177,6 @@ public abstract class ViewportPanelBase extends GuiElement {
 		public abstract void render(float partialTicks);
 		public abstract int getColorUnderMouse();
 		public abstract Image takeScreenshot(Vec2i size);
-		public abstract boolean canRenderHeldItem();
 
 		public Box getBounds() {
 			return panel.bounds;
@@ -184,7 +188,7 @@ public abstract class ViewportPanelBase extends GuiElement {
 	public abstract SkinType getSkinType();
 	public abstract ModelDefinition getDefinition();
 	public TextureProvider getTextureSheet() {
-		return getDefinition().getSkinOverride();
+		return getDefinition().getTexture(TextureSheetType.SKIN);
 	}
 	public abstract boolean isTpose();
 	public abstract boolean applyLighting();
@@ -193,6 +197,10 @@ public abstract class ViewportPanelBase extends GuiElement {
 	}
 	public AnimationMode getAnimMode() {
 		return AnimationMode.PLAYER;
+	}
+
+	public Set<PlayerModelLayer> getArmorLayers() {
+		return Collections.emptySet();
 	}
 
 	public static class ViewportCamera {
@@ -209,10 +217,6 @@ public abstract class ViewportPanelBase extends GuiElement {
 
 	public IGui getGui() {
 		return gui;
-	}
-
-	public boolean canRenderHeldItem() {
-		return nat.canRenderHeldItem();
 	}
 
 	public float getScale() {

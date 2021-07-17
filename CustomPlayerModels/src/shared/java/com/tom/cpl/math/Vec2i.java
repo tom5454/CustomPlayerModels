@@ -42,4 +42,9 @@ public class Vec2i {
 		if (y != other.y) return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return String.format("Vec2[%s, %s]", x, y);
+	}
 }

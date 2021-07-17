@@ -15,14 +15,22 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.model.ElytraEntityModel;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import com.mojang.authlib.GameProfile;
 
@@ -30,6 +38,7 @@ import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
@@ -40,7 +49,7 @@ import io.netty.buffer.Unpooled;
 public class CustomPlayerModelsClient implements ClientModInitializer {
 	public static MinecraftObject mc;
 	public static CustomPlayerModelsClient INSTANCE;
-	private RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
+	public RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
 	public NetHandler<Identifier, NbtCompound, PlayerEntity, PacketByteBuf, ClientPlayNetworkHandler> netHandler;
 
 	@Override
@@ -122,6 +131,16 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		manager.bindSkull(profile, buffer, skullModel);
 	}
 
+	public void renderElytra(PlayerEntity player, VertexConsumerProvider buffer, ElytraEntityModel<LivingEntity> model) {
+		manager.bindElytra(player, buffer, model);
+	}
+
+	public void renderArmor(BipedEntityModel<LivingEntity> modelArmor, BipedEntityModel<LivingEntity> modelLeggings,
+			PlayerEntity player, VertexConsumerProvider bufferIn) {
+		manager.bindArmor(player, bufferIn, modelArmor, 1);
+		manager.bindArmor(player, bufferIn, modelLeggings, 2);
+	}
+
 	public void unbind(Model model) {
 		manager.tryUnbind(model);
 	}
@@ -136,5 +155,61 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 
 	public void onLogout() {
 		mc.getDefinitionLoader().clearServerData();
+	}
+
+	//Copy from CapeFeatureRenderer
+	public static void renderCape(MatrixStack matrixStack, VertexConsumer buffer, int packedLightIn,
+			AbstractClientPlayerEntity abstractClientPlayerEntity, float partialTicks, PlayerEntityModel<AbstractClientPlayerEntity> model,
+			ModelDefinition modelDefinition) {
+		matrixStack.push();
+		matrixStack.translate(0.0D, 0.0D, 0.125D);
+
+		float r, q, s;
+
+		if(abstractClientPlayerEntity != null) {
+			double d = MathHelper.lerp(partialTicks, abstractClientPlayerEntity.prevCapeX,
+					abstractClientPlayerEntity.capeX)
+					- MathHelper.lerp(partialTicks, abstractClientPlayerEntity.prevX,
+							abstractClientPlayerEntity.getX());
+			double e = MathHelper.lerp(partialTicks, abstractClientPlayerEntity.prevCapeY,
+					abstractClientPlayerEntity.capeY)
+					- MathHelper.lerp(partialTicks, abstractClientPlayerEntity.prevY,
+							abstractClientPlayerEntity.getY());
+			double m = MathHelper.lerp(partialTicks, abstractClientPlayerEntity.prevCapeZ,
+					abstractClientPlayerEntity.capeZ)
+					- MathHelper.lerp(partialTicks, abstractClientPlayerEntity.prevZ,
+							abstractClientPlayerEntity.getZ());
+			float n = abstractClientPlayerEntity.prevBodyYaw
+					+ (abstractClientPlayerEntity.bodyYaw - abstractClientPlayerEntity.prevBodyYaw);
+			double o = MathHelper.sin(n * 0.017453292F);
+			double p = (-MathHelper.cos(n * 0.017453292F));
+			q = (float) e * 10.0F;
+			q = MathHelper.clamp(q, -6.0F, 32.0F);
+			r = (float) (d * o + m * p) * 100.0F;
+			r = MathHelper.clamp(r, 0.0F, 150.0F);
+			s = (float) (d * p - m * o) * 100.0F;
+			s = MathHelper.clamp(s, -20.0F, 20.0F);
+			if (r < 0.0F) {
+				r = 0.0F;
+			}
+
+			float t = MathHelper.lerp(partialTicks, abstractClientPlayerEntity.prevStrideDistance,
+					abstractClientPlayerEntity.strideDistance);
+			q += MathHelper.sin(MathHelper.lerp(partialTicks, abstractClientPlayerEntity.prevHorizontalSpeed,
+					abstractClientPlayerEntity.horizontalSpeed) * 6.0F) * 32.0F * t;
+			if (abstractClientPlayerEntity.isInSneakingPose()) {
+				q += 25.0F;
+			}
+		} else {
+			r = 0;
+			q = 0;
+			s = 0;
+		}
+
+		matrixStack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_X.getDegreesQuaternion(6.0F + r / 2.0F + q));
+		matrixStack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Z.getDegreesQuaternion(s / 2.0F));
+		matrixStack.multiply(net.minecraft.util.math.Vec3f.POSITIVE_Y.getDegreesQuaternion(180.0F - s / 2.0F));
+		model.renderCape(matrixStack, buffer, packedLightIn, OverlayTexture.DEFAULT_UV);
+		matrixStack.pop();
 	}
 }

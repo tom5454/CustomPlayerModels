@@ -46,10 +46,20 @@ public class ModelPartRoot implements IModelPart, IResolvedModelPart {
 			if(rc.getId() == id) {
 				elem.children.remove(rc);
 				RootModelElement e = def.addRoot(id, type);
-				e.children.addAll(rc.children);
-				rc.children.forEach(p -> p.setParent(e));
+				e.posN = rc.pos;
+				e.rotN = rc.rotation;
+				e.hidden = rc.hidden;
+				if(rc.children != null) {
+					e.children.addAll(rc.children);
+					rc.children.forEach(p -> p.setParent(e));
+				}
 				break;
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "Root: " + type + " " + id;
 	}
 }

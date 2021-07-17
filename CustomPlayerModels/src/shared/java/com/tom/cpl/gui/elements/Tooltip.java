@@ -1,11 +1,12 @@
 package com.tom.cpl.gui.elements;
 
 import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
 
 public class Tooltip extends Panel {
 	private final Frame frm;
-	public Tooltip(Frame frm) {
+	protected Tooltip(Frame frm) {
 		super(frm.getGui());
 		this.frm = frm;
 		setBackgroundColor(gui.getColors().popup_border);
@@ -32,14 +33,14 @@ public class Tooltip extends Panel {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		gui.pushMatrix();
 		gui.setPosOffset(getBounds());
 		gui.drawBox(0, 0, bounds.w, bounds.h, backgroundColor);
 		gui.drawBox(1, 1, bounds.w - 2, bounds.h - 2, gui.getColors().panel_background);
 		for (GuiElement guiElement : elements) {
 			if(guiElement.isVisible())
-				guiElement.draw(mouseX - bounds.x, mouseY - bounds.y, partialTicks);
+				guiElement.draw(event.offset(bounds), partialTicks);
 		}
 		gui.popMatrix();
 	}

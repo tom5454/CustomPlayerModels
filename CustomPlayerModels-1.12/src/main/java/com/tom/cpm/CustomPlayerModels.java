@@ -1,6 +1,7 @@
 package com.tom.cpm;
 
 import java.io.File;
+import java.util.EnumSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,7 @@ import com.tom.cpm.common.CommandCPM;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
 
 @Mod(modid = CustomPlayerModels.ID, acceptableRemoteVersions = "*", updateJSON = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json")
@@ -67,5 +69,12 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public ILogger getLogger() {
 		return log;
+	}
+
+	private static final EnumSet<PlatformFeature> features = EnumSet.noneOf(PlatformFeature.class);
+
+	@Override
+	public EnumSet<PlatformFeature> getSupportedFeatures() {
+		return features;
 	}
 }

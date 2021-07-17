@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
 
 public class ModelPartSkin implements IModelPart, IResolvedModelPart {
@@ -15,7 +16,7 @@ public class ModelPartSkin implements IModelPart, IResolvedModelPart {
 	}
 
 	public ModelPartSkin(Editor editor) {
-		this.image = editor.skinProvider;
+		this.image = editor.textures.get(TextureSheetType.SKIN).provider;
 	}
 
 	@Override

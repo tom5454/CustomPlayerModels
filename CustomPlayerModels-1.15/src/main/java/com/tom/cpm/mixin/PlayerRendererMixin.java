@@ -21,6 +21,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(value = PlayerRenderer.class, priority = 900)
 public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
@@ -35,7 +36,7 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 			method = "getEntityTexture(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)Lnet/minecraft/util/ResourceLocation;",
 			cancellable = true)
 	public void onGetEntityTexture(AbstractClientPlayerEntity entity, CallbackInfoReturnable<ResourceLocation> cbi) {
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(getEntityModel(), cbi);
+		ClientProxy.mc.getPlayerRenderManager().bindSkin(getEntityModel(), cbi, TextureSheetType.SKIN);
 	}
 
 	@Redirect(at =

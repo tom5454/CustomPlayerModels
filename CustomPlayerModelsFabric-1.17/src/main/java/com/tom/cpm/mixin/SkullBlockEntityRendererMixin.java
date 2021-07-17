@@ -27,6 +27,7 @@ import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.RefHolder;
+import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(SkullBlockEntityRenderer.class)
 public abstract class SkullBlockEntityRendererMixin {
@@ -62,7 +63,7 @@ public abstract class SkullBlockEntityRendererMixin {
 		SkullBlockEntityModel model = RefHolder.CPM_MODELS.get(skullType);
 		RefHolder.CPM_MODELS = null;
 		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
 		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
 	}
 
@@ -78,7 +79,7 @@ public abstract class SkullBlockEntityRendererMixin {
 		SkullBlockEntityModel model = RefHolder.CPM_MODELS.get(skullType);
 		RefHolder.CPM_MODELS = null;
 		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
 		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
 	}
 

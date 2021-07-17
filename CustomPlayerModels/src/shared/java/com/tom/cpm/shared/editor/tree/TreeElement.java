@@ -10,8 +10,8 @@ import com.tom.cpl.gui.elements.Tree.TreeModel;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Effect;
 
 public abstract interface TreeElement {
@@ -35,6 +35,7 @@ public abstract interface TreeElement {
 				e.templates.forEach(c);
 				if(e.templateSettings != null)c.accept(e.templateSettings);
 				if(e.scaling != 0)c.accept(e.scalingElem);
+				c.accept(e.texElem);
 			} else
 				parent.getTreeElements(c);
 		}
@@ -118,7 +119,7 @@ public abstract interface TreeElement {
 	public default void setElemName(String name) {}
 	public default String getElemName() { return ""; }
 	public default void drawTexture(IGui gui, int x, int y, float xs, float ys) {}
-	public default EditorTexture getTexture() { return null; }
+	public default ETextures getTexture() { return null; }
 	public default Box getTextureBox() { return null; }
 	public default void modeSwitch() {}
 	public default void updateGui() {}

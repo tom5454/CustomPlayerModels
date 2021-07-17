@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.ResourceLocation;
 
 public class CustomRenderTypes extends RenderType {
-	public static final RenderType LINES_NO_NEPTH = makeType("cpm:lines_no_depth", DefaultVertexFormats.POSITION_COLOR, 1, 256, RenderType.State.getBuilder().line(new RenderState.LineState(OptionalDouble.empty())).layer(field_239235_M_).transparency(TRANSLUCENT_TRANSPARENCY).target(field_241712_U_).depthTest(DEPTH_ALWAYS).writeMask(COLOR_DEPTH_WRITE).build(false));
+	public static final RenderType LINES_NO_NEPTH = makeType("cpm:lines_no_depth", DefaultVertexFormats.POSITION_COLOR, 1, 256, RenderType.State.getBuilder().line(new RenderState.LineState(OptionalDouble.empty())).layer(VIEW_OFFSET_Z_LAYERING).transparency(TRANSLUCENT_TRANSPARENCY).target(ITEM_ENTITY_TARGET).depthTest(DEPTH_ALWAYS).writeMask(COLOR_DEPTH_WRITE).build(false));
 	public static final RenderType ENTITY_COLOR = makeType("cpm:entity_color_translucent_cull", DefaultVertexFormats.ENTITY, 7, 256, true, true, RenderType.State.getBuilder().transparency(TRANSLUCENT_TRANSPARENCY).texture(NO_TEXTURE).diffuseLighting(DIFFUSE_LIGHTING_ENABLED).alpha(DEFAULT_ALPHA).lightmap(LIGHTMAP_ENABLED).overlay(OVERLAY_ENABLED).build(true));
 
 	public CustomRenderTypes(String nameIn, VertexFormat formatIn, int drawModeIn, int bufferSizeIn,

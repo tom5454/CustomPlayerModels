@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.FlatListView;
@@ -8,6 +9,7 @@ import com.tom.cpl.util.ListView;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.ArgElem;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public enum ElementType {
@@ -56,6 +58,8 @@ public enum ElementType {
 			elem.rc.display = elem.show;
 			elem.rc.rotation = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
 			elem.rc.glow = elem.glow;
+			elem.rc.singleTex = elem.singleTex;
+			elem.rc.faceUVs = elem.faceUV;
 		}
 
 	}),
@@ -84,10 +88,16 @@ public enum ElementType {
 					return ElementSelectMode.NULL;
 				}
 			};
+			elem.rc.setCube(elem);
 			elem.rc.pos = new Vec3f();
 			elem.rc.rotation = new Vec3f();
 			elem.rc.children = new CombinedListView<>(new ListView<>(elem.children, m -> m.rc), new FlatListView<>(editor.templates, t -> t.getForPart(type).stream()));
 			elem.storeID = type.getId(elem.rc);
+			if(typeData instanceof RootModelType) {
+				RootGroups gr = RootGroups.getGroup((RootModelType) typeData);
+				if(gr.feature != null && !gr.feature.isSupported())
+					elem.tooltip = new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature." + gr.feature.name().toLowerCase())));
+			}
 		}
 
 		@Override

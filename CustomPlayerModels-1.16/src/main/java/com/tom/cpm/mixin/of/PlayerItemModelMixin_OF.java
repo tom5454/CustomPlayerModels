@@ -14,6 +14,7 @@ import net.optifine.player.PlayerItemModel;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(PlayerItemModel.class)
 public class PlayerItemModelMixin_OF {
@@ -27,7 +28,7 @@ public class PlayerItemModelMixin_OF {
 					+ "Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;II)V")
 	public ResourceLocation getPlayerSkin(AbstractClientPlayerEntity pe, BipedModel modelBiped, AbstractClientPlayerEntity player, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, int packedOverlayIn) {
 		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, player.getLocationSkin());
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(modelBiped, cbi);
+		ClientProxy.mc.getPlayerRenderManager().bindSkin(modelBiped, cbi, TextureSheetType.SKIN);
 		return cbi.getReturnValue();
 	}
 }

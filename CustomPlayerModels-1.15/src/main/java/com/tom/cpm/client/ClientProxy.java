@@ -3,20 +3,28 @@ package com.tom.cpm.client;
 import java.util.Map.Entry;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.CustomizeSkinScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.ElytraModel;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.Model;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -29,11 +37,14 @@ import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
@@ -45,7 +56,7 @@ public class ClientProxy extends CommonProxy {
 	public static ClientProxy INSTANCE = null;
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
-	private RenderManager<GameProfile, PlayerEntity, Model, IRenderTypeBuffer> manager;
+	public RenderManager<GameProfile, PlayerEntity, Model, IRenderTypeBuffer> manager;
 	public NetHandler<ResourceLocation, CompoundNBT, PlayerEntity, PacketBuffer, ClientPlayNetHandler> netHandler;
 
 	@Override
@@ -104,6 +115,16 @@ public class ClientProxy extends CommonProxy {
 		manager.bindSkull(profile, buffer, skullModel);
 	}
 
+	public void renderElytra(PlayerEntity player, IRenderTypeBuffer buffer, ElytraModel<LivingEntity> model) {
+		manager.bindElytra(player, buffer, model);
+	}
+
+	public void renderArmor(BipedModel<LivingEntity> modelArmor, BipedModel<LivingEntity> modelLeggings,
+			PlayerEntity player, IRenderTypeBuffer bufferIn) {
+		manager.bindArmor(player, bufferIn, modelArmor, 1);
+		manager.bindArmor(player, bufferIn, modelLeggings, 2);
+	}
+
 	@SubscribeEvent
 	public void renderTick(RenderTickEvent evt) {
 		if(evt.phase == Phase.START) {
@@ -160,5 +181,57 @@ public class ClientProxy extends CommonProxy {
 
 	public void unbind(Model model) {
 		manager.tryUnbind(model);
+	}
+
+	//Copy from CapeLayer
+	public static void renderCape(MatrixStack matrixStackIn, IVertexBuilder buffer, int packedLightIn,
+			AbstractClientPlayerEntity playerIn, float partialTicks, PlayerModel<AbstractClientPlayerEntity> model,
+			ModelDefinition modelDefinition) {
+		matrixStackIn.push();
+		matrixStackIn.translate(0.0D, 0.0D, 0.125D);
+
+		float f1, f2, f3;
+
+		if(playerIn != null) {
+			double d0 = MathHelper.lerp(partialTicks, playerIn.prevChasingPosX,
+					playerIn.chasingPosX)
+					- MathHelper.lerp(partialTicks, playerIn.prevPosX, playerIn.getPosX());
+			double d1 = MathHelper.lerp(partialTicks, playerIn.prevChasingPosY,
+					playerIn.chasingPosY)
+					- MathHelper.lerp(partialTicks, playerIn.prevPosY, playerIn.getPosY());
+			double d2 = MathHelper.lerp(partialTicks, playerIn.prevChasingPosZ,
+					playerIn.chasingPosZ)
+					- MathHelper.lerp(partialTicks, playerIn.prevPosZ, playerIn.getPosZ());
+			float f = playerIn.prevRenderYawOffset
+					+ (playerIn.renderYawOffset - playerIn.prevRenderYawOffset);
+			double d3 = MathHelper.sin(f * 0.017453292F);
+			double d4 = (-MathHelper.cos(f * 0.017453292F));
+			f1 = (float) d1 * 10.0F;
+			f1 = MathHelper.clamp(f1, -6.0F, 32.0F);
+			f2 = (float) (d0 * d3 + d2 * d4) * 100.0F;
+			f2 = MathHelper.clamp(f2, 0.0F, 150.0F);
+			f3 = (float) (d0 * d4 - d2 * d3) * 100.0F;
+			f3 = MathHelper.clamp(f3, -20.0F, 20.0F);
+			if (f2 < 0.0F) {
+				f2 = 0.0F;
+			}
+
+			float f4 = MathHelper.lerp(partialTicks, playerIn.prevCameraYaw, playerIn.cameraYaw);
+			f1 += MathHelper.sin(MathHelper.lerp(partialTicks, playerIn.prevDistanceWalkedModified,
+					playerIn.distanceWalkedModified) * 6.0F) * 32.0F * f4;
+			if (playerIn.isCrouching()) {
+				f1 += 25.0F;
+			}
+		} else {
+			f1 = 0;
+			f2 = 0;
+			f3 = 0;
+		}
+
+		matrixStackIn.rotate(Vector3f.XP.rotationDegrees(6.0F + f2 / 2.0F + f1));
+		matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(f3 / 2.0F));
+		matrixStackIn.rotate(Vector3f.YP.rotationDegrees(180.0F - f3 / 2.0F));
+		model.renderCape(matrixStackIn, buffer, packedLightIn, OverlayTexture.NO_OVERLAY);
+		matrixStackIn.pop();
 	}
 }

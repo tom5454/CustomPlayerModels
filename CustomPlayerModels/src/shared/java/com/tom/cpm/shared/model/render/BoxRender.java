@@ -1,5 +1,8 @@
 package com.tom.cpm.shared.model.render;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.tom.cpl.math.BoundingBox;
 import com.tom.cpl.math.Mat3f;
 import com.tom.cpl.math.Mat4f;
@@ -8,6 +11,8 @@ import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VertexBuffer;
+import com.tom.cpm.shared.model.render.PerFaceUV.Dir;
+import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 
 public class BoxRender {
 
@@ -76,14 +81,20 @@ public class BoxRender {
 		public final PositionTextureVertex[] vertexPositions;
 		public final Vec3f normal;
 
+		public TexturedQuad(PositionTextureVertex[] positionsIn, Face f, float texWidth, float texHeight, Vec3f directionIn) {
+			this.vertexPositions = positionsIn;
+			for (int i = 0; i < positionsIn.length; i++) {
+				positionsIn[i] = positionsIn[i].setTextureUV(f.getVertexU(i) / texWidth, f.getVertexV(i) /texHeight);
+			}
+			this.normal = new Vec3f(directionIn);
+		}
+
 		public TexturedQuad(PositionTextureVertex[] positionsIn, float u1, float v1, float u2, float v2, float texWidth, float texHeight, boolean mirrorIn, Vec3f directionIn) {
 			this.vertexPositions = positionsIn;
-			float f = 0.0F / texWidth;
-			float f1 = 0.0F / texHeight;
-			positionsIn[0] = positionsIn[0].setTextureUV(u2 / texWidth - f, v1 / texHeight + f1);
-			positionsIn[1] = positionsIn[1].setTextureUV(u1 / texWidth + f, v1 / texHeight + f1);
-			positionsIn[2] = positionsIn[2].setTextureUV(u1 / texWidth + f, v2 / texHeight - f1);
-			positionsIn[3] = positionsIn[3].setTextureUV(u2 / texWidth - f, v2 / texHeight - f1);
+			positionsIn[0] = positionsIn[0].setTextureUV(u2 / texWidth, v1 / texHeight);
+			positionsIn[1] = positionsIn[1].setTextureUV(u1 / texWidth, v1 / texHeight);
+			positionsIn[2] = positionsIn[2].setTextureUV(u1 / texWidth, v2 / texHeight);
+			positionsIn[3] = positionsIn[3].setTextureUV(u2 / texWidth, v2 / texHeight);
 			if (mirrorIn) {
 				int i = positionsIn.length;
 
@@ -98,8 +109,112 @@ public class BoxRender {
 			if (mirrorIn) {
 				this.normal.mul(-1.0F, 1.0F, 1.0F);
 			}
-
 		}
+	}
+
+	public static Mesh createTexturedSingle(Vec3f pos, Vec3f size, Vec3f sc, float delta, int texU, int texV, int texSize, int sheetSizeX, int sheetSizeY) {
+		float x = pos.x;
+		float y = pos.y;
+		float z = pos.z;
+		float w = size.x;
+		float h = size.y;
+		float d = size.z;
+
+		int ts = Math.abs(texSize);
+		int dx = MathHelper.ceil(w * ts);
+		int dy = MathHelper.ceil(h * ts);
+		int dz = MathHelper.ceil(d * ts);
+
+		float ex = x + w * sc.x;
+		float ey = y + h * sc.y;
+		float ez = z + d * sc.z;
+
+		x = x - delta;
+		y = y - delta;
+		z = z - delta;
+		ex = ex + delta;
+		ey = ey + delta;
+		ez = ez + delta;
+
+		texU *= ts;
+		texV *= ts;
+
+		if (texSize < 0) {
+			float f3 = ex;
+			ex = x;
+			x = f3;
+		}
+
+		if(ex == x || ey == y || ez == z) {
+			TexturedQuad[] quadList = new TexturedQuad[2];
+			if(ex == x) {
+				ex += 0.001f;
+				PositionTextureVertex modelrenderer$positiontexturevertex7 = new PositionTextureVertex(x, y, z, 0.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex = new PositionTextureVertex(ex, y, z, 0.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex1 = new PositionTextureVertex(ex, ey, z, 8.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex2 = new PositionTextureVertex(x, ey, z, 8.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex3 = new PositionTextureVertex(x, y, ez, 0.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex4 = new PositionTextureVertex(ex, y, ez, 0.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex5 = new PositionTextureVertex(ex, ey, ez, 8.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex6 = new PositionTextureVertex(x, ey, ez, 8.0F, 0.0F);
+				float tu = texU + dz;
+				float tv = texV + dy;
+				quadList[1] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex7, modelrenderer$positiontexturevertex3, modelrenderer$positiontexturevertex6, modelrenderer$positiontexturevertex2}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0, Vec3f.NEGATIVE_X);
+				quadList[0] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex4, modelrenderer$positiontexturevertex, modelrenderer$positiontexturevertex1, modelrenderer$positiontexturevertex5}, tu, texV, texU, tv, sheetSizeX, sheetSizeY, texSize < 0,  Vec3f.POSITIVE_X);
+			} else if(ey == y) {
+				ey += 0.001f;
+				PositionTextureVertex modelrenderer$positiontexturevertex7 = new PositionTextureVertex(x, y, z, 0.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex = new PositionTextureVertex(ex, y, z, 0.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex1 = new PositionTextureVertex(ex, ey, z, 8.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex2 = new PositionTextureVertex(x, ey, z, 8.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex3 = new PositionTextureVertex(x, y, ez, 0.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex4 = new PositionTextureVertex(ex, y, ez, 0.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex5 = new PositionTextureVertex(ex, ey, ez, 8.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex6 = new PositionTextureVertex(x, ey, ez, 8.0F, 0.0F);
+				float tu = texU + dx;
+				float tv = texV + dz;
+				quadList[0] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex4, modelrenderer$positiontexturevertex3, modelrenderer$positiontexturevertex7, modelrenderer$positiontexturevertex}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0,  Vec3f.NEGATIVE_Y);
+				quadList[1] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex1, modelrenderer$positiontexturevertex2, modelrenderer$positiontexturevertex6, modelrenderer$positiontexturevertex5}, tu, texV, texU, tv, sheetSizeX, sheetSizeY, texSize < 0, Vec3f.POSITIVE_Y);
+			} else if(ez == z) {
+				ez += 0.001f;
+				PositionTextureVertex modelrenderer$positiontexturevertex7 = new PositionTextureVertex(x, y, z, 0.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex = new PositionTextureVertex(ex, y, z, 0.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex1 = new PositionTextureVertex(ex, ey, z, 8.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex2 = new PositionTextureVertex(x, ey, z, 8.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex3 = new PositionTextureVertex(x, y, ez, 0.0F, 0.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex4 = new PositionTextureVertex(ex, y, ez, 0.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex5 = new PositionTextureVertex(ex, ey, ez, 8.0F, 8.0F);
+				PositionTextureVertex modelrenderer$positiontexturevertex6 = new PositionTextureVertex(x, ey, ez, 8.0F, 0.0F);
+				float tu = texU + dx;
+				float tv = texV + dy;
+				quadList[0] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex, modelrenderer$positiontexturevertex7, modelrenderer$positiontexturevertex2, modelrenderer$positiontexturevertex1}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0,  Vec3f.NEGATIVE_Z);
+				quadList[1] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex3, modelrenderer$positiontexturevertex4, modelrenderer$positiontexturevertex5, modelrenderer$positiontexturevertex6}, tu, texV, texU, tv, sheetSizeX, sheetSizeY, texSize < 0, Vec3f.POSITIVE_Z);
+			}
+			if(quadList[0] != null)
+				return new TexBox(quadList);
+		}
+
+		TexturedQuad[] quadList = new TexturedQuad[6];
+
+		PositionTextureVertex modelrenderer$positiontexturevertex7 = new PositionTextureVertex(x, y, z, 0.0F, 0.0F);
+		PositionTextureVertex modelrenderer$positiontexturevertex = new PositionTextureVertex(ex, y, z, 0.0F, 8.0F);
+		PositionTextureVertex modelrenderer$positiontexturevertex1 = new PositionTextureVertex(ex, ey, z, 8.0F, 8.0F);
+		PositionTextureVertex modelrenderer$positiontexturevertex2 = new PositionTextureVertex(x, ey, z, 8.0F, 0.0F);
+		PositionTextureVertex modelrenderer$positiontexturevertex3 = new PositionTextureVertex(x, y, ez, 0.0F, 0.0F);
+		PositionTextureVertex modelrenderer$positiontexturevertex4 = new PositionTextureVertex(ex, y, ez, 0.0F, 8.0F);
+		PositionTextureVertex modelrenderer$positiontexturevertex5 = new PositionTextureVertex(ex, ey, ez, 8.0F, 8.0F);
+		PositionTextureVertex modelrenderer$positiontexturevertex6 = new PositionTextureVertex(x, ey, ez, 8.0F, 0.0F);
+		int txS = Math.max(dx, Math.max(dy, dz));
+		float tu = texU + txS;
+		float tv = texV + txS;
+		quadList[2] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex4, modelrenderer$positiontexturevertex3, modelrenderer$positiontexturevertex7, modelrenderer$positiontexturevertex}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0,  Vec3f.NEGATIVE_Y);
+		quadList[3] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex1, modelrenderer$positiontexturevertex2, modelrenderer$positiontexturevertex6, modelrenderer$positiontexturevertex5}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0, Vec3f.POSITIVE_Y);
+		quadList[1] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex7, modelrenderer$positiontexturevertex3, modelrenderer$positiontexturevertex6, modelrenderer$positiontexturevertex2}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0, Vec3f.NEGATIVE_X);
+		quadList[4] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex, modelrenderer$positiontexturevertex7, modelrenderer$positiontexturevertex2, modelrenderer$positiontexturevertex1}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0,  Vec3f.NEGATIVE_Z);
+		quadList[0] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex4, modelrenderer$positiontexturevertex, modelrenderer$positiontexturevertex1, modelrenderer$positiontexturevertex5}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0,  Vec3f.POSITIVE_X);
+		quadList[5] = new TexturedQuad(new PositionTextureVertex[]{modelrenderer$positiontexturevertex3, modelrenderer$positiontexturevertex4, modelrenderer$positiontexturevertex5, modelrenderer$positiontexturevertex6}, texU, texV, tu, tv, sheetSizeX, sheetSizeY, texSize < 0, Vec3f.POSITIVE_Z);
+
+		return new TexBox(quadList);
 	}
 
 	public static Mesh createTextured(Vec3f pos, Vec3f size, Vec3f sc, float delta, int texU, int texV, int texSize, int sheetSizeX, int sheetSizeY) {
@@ -163,6 +278,46 @@ public class BoxRender {
 		}
 
 		return new TexBox(quadList);
+	}
+
+	public static Mesh createTextured(Vec3f pos, Vec3f size, Vec3f sc, float delta, PerFaceUV uv, int texSize, int sheetSizeX, int sheetSizeY) {
+		List<TexturedQuad> quadList = new ArrayList<>();
+		{
+			float x = pos.x;
+			float y = pos.y;
+			float z = pos.z;
+			float w = size.x;
+			float h = size.y;
+			float d = size.z;
+
+			float f = x + w * sc.x;
+			float f1 = y + h * sc.y;
+			float f2 = z + d * sc.z;
+
+			x = x - delta;
+			y = y - delta;
+			z = z - delta;
+			f = f + delta;
+			f1 = f1 + delta;
+			f2 = f2 + delta;
+
+			PositionTextureVertex ptv7 = new PositionTextureVertex(x, y, z, 0.0F, 0.0F);
+			PositionTextureVertex ptv = new PositionTextureVertex(f, y, z, 0.0F, 8.0F);
+			PositionTextureVertex ptv1 = new PositionTextureVertex(f, f1, z, 8.0F, 8.0F);
+			PositionTextureVertex ptv2 = new PositionTextureVertex(x, f1, z, 8.0F, 0.0F);
+			PositionTextureVertex ptv3 = new PositionTextureVertex(x, y, f2, 0.0F, 0.0F);
+			PositionTextureVertex ptv4 = new PositionTextureVertex(f, y, f2, 0.0F, 8.0F);
+			PositionTextureVertex ptv5 = new PositionTextureVertex(f, f1, f2, 8.0F, 8.0F);
+			PositionTextureVertex ptv6 = new PositionTextureVertex(x, f1, f2, 8.0F, 0.0F);
+			if(uv.contains(Dir.EAST ))quadList.add(new TexturedQuad(new PositionTextureVertex[]{ptv4, ptv, ptv1, ptv5},  uv.get(Dir.EAST ), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_X));
+			if(uv.contains(Dir.WEST ))quadList.add(new TexturedQuad(new PositionTextureVertex[]{ptv7, ptv3, ptv6, ptv2}, uv.get(Dir.WEST ), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_X));
+			if(uv.contains(Dir.UP   ))quadList.add(new TexturedQuad(new PositionTextureVertex[]{ptv4, ptv3, ptv7, ptv},  uv.get(Dir.UP   ), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_Y));
+			if(uv.contains(Dir.DOWN ))quadList.add(new TexturedQuad(new PositionTextureVertex[]{ptv1, ptv2, ptv6, ptv5}, uv.get(Dir.DOWN ), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_Y));
+			if(uv.contains(Dir.NORTH))quadList.add(new TexturedQuad(new PositionTextureVertex[]{ptv, ptv7, ptv2, ptv1},  uv.get(Dir.NORTH), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_Z));
+			if(uv.contains(Dir.SOUTH))quadList.add(new TexturedQuad(new PositionTextureVertex[]{ptv3, ptv4, ptv5, ptv6}, uv.get(Dir.SOUTH), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_Z));
+		}
+
+		return new TexBox(quadList.toArray(new TexturedQuad[0]));
 	}
 
 	public static Mesh createColored(float x, float y, float z, float w, float h, float d, float delta, int sheetSizeX, int sheetSizeY) {

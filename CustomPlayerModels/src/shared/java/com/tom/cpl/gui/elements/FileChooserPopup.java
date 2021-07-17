@@ -180,17 +180,16 @@ public class FileChooserPopup extends PopupPanel {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
+		public void draw(MouseEvent event, float partialTicks) {
 			gui.pushMatrix();
 			gui.setPosOffset(bounds);
-			mouseX -= bounds.x;
-			mouseY -= bounds.y;
+			event = event.offset(bounds);
 			int y = 0;
 			for (int i = 0; i < files.length; i++) {
 				String string = files[i];
 				int yp = y++;
 				int textColor = 0xffffffff;
-				if(mouseX > 0 && mouseY > yp * 10 && mouseY < (yp+1) * 10 && mouseX < bounds.w) {
+				if (event.isHovered(new Box(0, yp * 10, bounds.w, 10))) {
 					textColor = 0xffffff00;
 				}
 				if(selected != null && selected.getName().equals(string) && selected.getParentFile().equals(currDir)) {
@@ -203,7 +202,7 @@ public class FileChooserPopup extends PopupPanel {
 
 		@Override
 		public void mouseClick(MouseEvent event) {
-			if(event.isInBounds(bounds)) {
+			if(event.isInBounds(bounds) && !event.isConsumed()) {
 				int yp = (event.y - bounds.y) / 10;
 				if(yp >= 0 && yp < files.length) {
 					String string = files[yp];

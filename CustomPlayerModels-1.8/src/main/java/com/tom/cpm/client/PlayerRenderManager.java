@@ -7,10 +7,12 @@ import net.minecraft.client.model.ModelHumanoidHead;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
 import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -129,7 +131,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			renderTypes.put(RenderMode.COLOR, new NativeRenderType(RetroGL.color(), 0));
 		}
 
-		@Override protected void bindTexture(Void cbi) {}
+		@Override protected void bindTexture(Void cbi, TextureSheetType tex) {}
 		@Override public void swapOut0() {}
 		@Override public void swapIn0() {}
 	}
@@ -215,6 +217,11 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		@Override
 		public VBuffers getVBuffers() {
 			return buffers;
+		}
+
+		@Override
+		public Vec4f getColor() {
+			return RetroGL.getColor();
 		}
 	}
 }

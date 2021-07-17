@@ -219,9 +219,4 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		rImg.draw(img, 0, 0, size.x, size.y);
 		return rImg;
 	}
-
-	@Override
-	public boolean canRenderHeldItem() {
-		return false;
-	}
 }

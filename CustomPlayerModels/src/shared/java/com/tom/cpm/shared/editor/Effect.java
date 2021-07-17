@@ -5,5 +5,6 @@ public enum Effect {
 	HIDE,
 	MIRROR,
 	RECOLOR,
-
+	SINGLE_TEX,
+	PER_FACE_UV,
 }

@@ -2,6 +2,7 @@ package com.tom.cpm.shared.editor.gui;
 
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
+import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
@@ -57,7 +58,7 @@ public class DrawToolsPanel extends Panel {
 		}
 
 		{
-			ElementGroup<EditorTool> group = new ElementGroup<>();
+			ElementGroup<EditorTool, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
 			editor.setTool.add(group);
 
 			Slider sizeSlider = new Slider(gui, gui.i18nFormat("label.cpm.brushSize", editor.brushSize));

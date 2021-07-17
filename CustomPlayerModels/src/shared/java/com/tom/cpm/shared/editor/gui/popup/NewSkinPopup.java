@@ -1,7 +1,5 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
-import java.io.File;
-
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
@@ -13,8 +11,8 @@ import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Image;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.EditorTexture;
 
 public class NewSkinPopup extends PopupPanel {
 
@@ -69,19 +67,9 @@ public class NewSkinPopup extends PopupPanel {
 
 		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			close();
-			EditorTexture tex = editor.getTextureProvider();
+			ETextures tex = editor.getTextureProvider();
 			if(tex != null) {
 				Image oldImg = tex.getImage();
-				File oldSkin = tex.file;
-				boolean edited = tex.isEdited();
-				Vec2i oldSize = tex.size;
-				editor.addUndo(() -> {
-					tex.file = oldSkin;
-					tex.setImage(oldImg);
-					tex.markDirty();
-					tex.setEdited(edited);
-					tex.size = oldSize;
-				});
 				Image newImage = new Image((int) spinnerW.getValue(), (int) spinnerH.getValue());
 				if(keepOld.isSelected()) {
 					newImage.draw(oldImg);
@@ -89,14 +77,14 @@ public class NewSkinPopup extends PopupPanel {
 				Vec2i size = new Vec2i((int) spinnerTW.getValue(), (int) spinnerTH.getValue());
 				if(size.x == 0)size.x = (int) spinnerW.getValue();
 				if(size.y == 0)size.y = (int) spinnerH.getValue();
-				editor.runOp(() -> {
-					tex.file = null;
-					tex.setImage(newImage);
-					tex.markDirty();
-					tex.size = size;
-				});
-				editor.markDirty();
-				editor.restitchTexture();
+
+				editor.action("newTexture").
+				updateValueOp(tex, tex.file, null, (a, b) -> a.file = b).
+				updateValueOp(tex, tex.isEdited(), true, ETextures::setEdited).
+				updateValueOp(tex, tex.provider.size, size, (a, b) -> a.provider.size = b).
+				updateValueOp(tex, oldImg, newImage, ETextures::setImage).
+				onAction(tex::restitchTexture).
+				execute();
 				editor.updateGui();
 				if(editor.hasVanillaParts() && (size.x != 64 || size.y != 64)) {
 					editor.frame.openPopup(new MessagePopup(editor.frame, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));

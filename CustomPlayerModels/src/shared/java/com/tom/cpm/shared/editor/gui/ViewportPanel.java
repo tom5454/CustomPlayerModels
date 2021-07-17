@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.editor.gui;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
@@ -9,8 +11,11 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.HeldItem;
+import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.gui.ViewportPanelBase;
+import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class ViewportPanel extends ViewportPanelBase {
 	protected Editor editor;
@@ -80,5 +85,22 @@ public class ViewportPanel extends ViewportPanelBase {
 	@Override
 	public AnimationMode getAnimMode() {
 		return AnimationMode.PLAYER;
+	}
+
+	@Override
+	public Set<PlayerModelLayer> getArmorLayers() {
+		ModelElement el = editor.getSelectedElement();
+		if(el != null) {
+			ModelElement root = el.getRoot();
+			if(root != null && root.typeData instanceof RootModelType) {
+				PlayerModelLayer l = PlayerModelLayer.getLayer((RootModelType) root.typeData);
+				if(l != null) {
+					Set<PlayerModelLayer> set = new HashSet<>(editor.modelDisplayLayers);
+					set.add(l);
+					return set;
+				}
+			}
+		}
+		return editor.modelDisplayLayers;
 	}
 }

@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.gui;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpm.shared.editor.Editor;
 
 public class ViewportPanelAnim extends ViewportPanel {
@@ -10,9 +11,9 @@ public class ViewportPanelAnim extends ViewportPanel {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		editor.applyAnim = true;
-		super.draw(mouseX, mouseY, partialTicks);
+		super.draw(event, partialTicks);
 		editor.applyAnim = false;
 	}
 }

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ import com.tom.cpl.util.ILogger;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.MinecraftServerAccess;
+import com.tom.cpm.shared.PlatformFeature;
 
 public class CPMBukkitPlugin extends JavaPlugin {
 	public ModConfigFile config;
@@ -79,6 +81,11 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			@Override
 			public ILogger getLogger() {
 				return log;
+			}
+
+			@Override
+			public EnumSet<PlatformFeature> getSupportedFeatures() {
+				return EnumSet.noneOf(PlatformFeature.class);
 			}
 		});
 		MinecraftObjectHolder.setServerObject(new MinecraftServerAccess() {

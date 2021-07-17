@@ -28,7 +28,6 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 	private MatrixStack matrixStackIn;
 	private VertexConsumer bufferIn;
 	private int packedLightIn, packedOverlayIn;
-	private float red, green, blue, alpha;
 
 	@Override
 	public void render(MatrixStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {

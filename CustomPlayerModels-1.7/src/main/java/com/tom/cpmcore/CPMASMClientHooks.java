@@ -18,6 +18,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.PlayerProfile;
 import com.tom.cpm.client.PlayerRenderManager;
+import com.tom.cpm.client.RetroGL;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.network.NetH;
 
@@ -46,7 +47,8 @@ public class CPMASMClientHooks {
 		}
 	}
 
-	public static void renderPass(ModelBase model, Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_, RendererLivingEntity r) {
+	public static void renderPass(ModelBase model, Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_, RendererLivingEntity r, int callLoc) {
+		RetroGL.renderCallLoc = callLoc;
 		if(r instanceof RenderPlayer && model instanceof ModelBiped) {
 			RenderPlayer rp = (RenderPlayer) r;
 			if(model == rp.modelArmor || model == rp.modelArmorChestplate) {
@@ -79,5 +81,14 @@ public class CPMASMClientHooks {
 			return true;
 		}
 		return false;
+	}
+
+	public static void glColor4f(float r, float g, float b, float a) {
+		RetroGL.color4f(r, g, b, a);
+	}
+
+	public static void prePlayerRender() {
+		RetroGL.color4f(1, 1, 1, 1);
+		RetroGL.renderCallLoc = 0;
 	}
 }

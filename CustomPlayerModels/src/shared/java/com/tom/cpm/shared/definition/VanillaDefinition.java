@@ -12,6 +12,7 @@ import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
 
 public class VanillaDefinition extends ModelDefinition {
@@ -67,8 +68,9 @@ public class VanillaDefinition extends ModelDefinition {
 	}
 
 	@Override
-	public TextureProvider getSkinOverride() {
-		return texture.get();
+	public TextureProvider getTexture(TextureSheetType key) {
+		if(key == TextureSheetType.SKIN)return texture.get();
+		return null;
 	}
 
 	@Override

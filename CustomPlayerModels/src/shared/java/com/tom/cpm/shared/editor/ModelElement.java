@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupMenu;
+import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
@@ -16,10 +17,12 @@ import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
 import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.editor.util.ValueOp;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RootModelType;
+import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.PerFaceUV;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class ModelElement extends Cube implements IElem, TreeElement {
@@ -36,10 +39,13 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public int textureSize;
 	public boolean glow;
 	public boolean recolor;
+	public boolean singleTex;
 	public long storeID;
 	public boolean hidden;
 	public boolean templateElement, generated;
 	public boolean duplicated;
+	public PerFaceUV faceUV;
+	public Tooltip tooltip;
 
 	public ModelElement(ModelElement element, ModelElement parent) {
 		this(element.editor);
@@ -62,6 +68,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		glow = element.glow;
 		recolor = element.recolor;
 		hidden = element.hidden;
+		singleTex = element.singleTex;
+		if(element.faceUV != null)faceUV = new PerFaceUV(element.faceUV);
 	}
 
 	public ModelElement(Editor editor) {
@@ -145,7 +153,51 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			movePopupShown = true;
 			editor.frame.openPopup(new MessagePopup(editor.frame, editor.gui().i18nFormat("label.cpm.info"), editor.gui().i18nFormat("label.cpm.warnMoveGenPart")));
 		}
-		editor.setVec(this, v, object);
+		switch (object) {
+		case SIZE:
+			v.round(10);
+			editor.action("set", "label.cpm.size").
+			updateValueOp(this, this.size, v, 0, 25, false, (a, b) -> a.size = b, editor.setSize).
+			execute();
+			break;
+
+		case OFFSET:
+			editor.action("set", "label.cpm.offset").
+			updateValueOp(this, this.offset, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.offset = b, editor.setOffset).
+			execute();
+			break;
+
+		case ROTATION:
+			editor.action("set", "label.cpm.rotation").
+			updateValueOp(this, this.rotation, v, 0, 360, true, (a, b) -> a.rotation = b, editor.setRot).
+			execute();
+			break;
+
+		case POSITION:
+			editor.action("set", "label.cpm.position").
+			updateValueOp(this, this.pos, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.pos = b, editor.setPosition).
+			execute();
+			break;
+
+		case SCALE:
+			editor.action("set", "label.cpm.scale").
+			updateValueOp(this, this.pos, v, 0, 25, false, (a, b) -> a.scale = b, editor.setScale).
+			execute();
+			break;
+
+		case TEXTURE:
+		{
+			editor.action("set", "action.cpm.texUV").
+			updateValueOp(this, this.u, (int) v.x, 0, Integer.MAX_VALUE, (a, b) -> a.u = b, __ -> editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize))).
+			updateValueOp(this, this.v, (int) v.y, 0, Integer.MAX_VALUE, (a, b) -> a.v = b, __ -> editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize))).
+			updateValueOp(this, this.textureSize, (int) v.z, 0, 64, (a, b) -> a.textureSize = b, __ -> editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize))).
+			execute();
+		}
+		break;
+
+		default:
+			break;
+		}
 	}
 
 	@Override
@@ -165,15 +217,21 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	}
 
 	@Override
-	public EditorTexture getTexture() {
-		return editor.skinProvider;
+	public ETextures getTexture() {
+		if(type == ElementType.ROOT_PART && typeData instanceof RootModelType) {
+			RootGroups gr = RootGroups.getGroup((RootModelType) typeData);
+			if(gr != null) {
+				ETextures tex = editor.textures.get(gr.getTexSheet((RootModelType) typeData));
+				if(tex != null)return tex;
+			}
+		}
+		if(parent != null)return parent.getTexture();
+		return editor.textures.get(TextureSheetType.SKIN);
 	}
 
 	@Override
 	public void modeSwitch() {
-		editor.addUndo(new ValueOp<>(this, this.texture, (a, b) -> a.texture = b));
-		this.texture = !this.texture;
-		editor.currentOp = new ValueOp<>(this, this.texture, (a, b) -> a.texture = b);
+		editor.action("switch", "action.cpm.cubeMode").updateValueOp(this, this.texture, !this.texture, (a, b) -> a.texture = b).execute();
 		editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
 		editor.setModePanel.accept(texture ? ModeDisplType.TEX : ModeDisplType.COLOR);
 		editor.setTexturePanel.accept(this.texture ? new Vec3i(this.u, this.v, this.textureSize) : new Vec3i(this.rgb, 0, 0));
@@ -181,7 +239,6 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setPartColor.accept(this.rgb);
 		else
 			editor.setPartColor.accept(null);
-		editor.markDirty();
 	}
 
 	@Override
@@ -198,7 +255,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setMCScale.accept(this.mcScale);
 			editor.setMirror.accept(this.mirror);
 			editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
-			editor.setModePanel.accept(texture ? ModeDisplType.TEX : ModeDisplType.COLOR);
+			editor.setModePanel.accept(this.faceUV != null ? ModeDisplType.TEX_FACE : texture ? ModeDisplType.TEX : ModeDisplType.COLOR);
 			editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize));
 			if(!this.texture || this.recolor)
 				editor.setPartColor.accept(this.rgb);
@@ -206,6 +263,12 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setGlow.accept(this.glow);
 			editor.setReColor.accept(this.recolor);
 			editor.setHiddenEffect.accept(this.hidden);
+			if(faceUV == null)editor.setSingleTex.accept(this.singleTex);
+			else {
+				editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir));
+				editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir));
+			}
+			if(!singleTex)editor.setPerFaceUV.accept(this.faceUV != null);
 			editor.updateName.accept(this.name);
 			break;
 
@@ -213,7 +276,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setPosition.accept(this.pos);
 			editor.setRot.accept(this.rotation);
 			editor.setHiddenEffect.accept(!this.show);
-			editor.setDelEn.accept(this.duplicated);
+			editor.setDelEn.accept(this.duplicated || this.typeData instanceof RootModelType);
 			break;
 
 		default:
@@ -225,14 +288,9 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void addNew() {
 		if(templateElement)return;
 		ModelElement elem = new ModelElement(editor);
-		editor.addUndo(() -> {
-			children.remove(elem);
-			editor.selectedElement = null;
-		});
-		editor.runOp(() -> children.add(elem));
 		elem.parent = this;
 		editor.selectedElement = elem;
-		editor.markDirty();
+		editor.action("add", "action.cpm.cube").addToList(children, elem).execute();
 		editor.updateGui();
 	}
 
@@ -240,54 +298,27 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void delete() {
 		if(templateElement)return;
 		if(type == ElementType.NORMAL) {
-			editor.addUndo(() -> {
-				if(parent != null) {
-					parent.children.add(this);
-				}
-			});
-			editor.runOp(() -> {
-				if(parent != null) {
-					parent.children.remove(this);
-				}
-				editor.selectedElement = null;
-			});
-			editor.markDirty();
+			editor.action("remove", "action.cpm.cube").removeFromList(parent.children, this).onRun(() -> editor.selectedElement = null).execute();
 			editor.updateGui();
-		} else if(duplicated) {
-			editor.addUndo(() -> editor.elements.add(this));
-			editor.runOp(() -> {
-				editor.elements.remove(this);
-				editor.selectedElement = null;
-			});
-			editor.markDirty();
+		} else if(duplicated || typeData instanceof RootModelType) {
+			editor.action("remove", "action.cpm.root").removeFromList(editor.elements, this).onRun(() -> editor.selectedElement = null).execute();
 			editor.updateGui();
 		}
 	}
 
 	@Override
 	public void setElemColor(int color) {
-		editor.updateValueOp(this, rgb, color, (a, b) -> a.rgb = b, editor.setPartColor);
+		editor.action("set", "action.cpm.color").updateValueOp(this, rgb, color, (a, b) -> a.rgb = b, editor.setPartColor).execute();
 	}
 
 	@Override
 	public void setMCScale(float value) {
-		editor.addUndo(new ValueOp<>(this, this.mcScale, (a, b) -> a.mcScale = b));
-		this.mcScale = value;
-		if(this.mcScale > 7) {
-			this.mcScale = 7;
-			editor.setMCScale.accept(this.mcScale);
-		}
-		if(this.mcScale < -7) {
-			this.mcScale = -7;
-			editor.setMCScale.accept(this.mcScale);
-		}
-		editor.currentOp = new ValueOp<>(this, this.mcScale, (a, b) -> a.mcScale = b);
-		editor.markDirty();
+		editor.action("set", "label.cpm.mcScale").updateValueOp(this, mcScale, value, -7f, 7f, (a, b) -> a.mcScale = b, editor.setMCScale).execute();
 	}
 
 	@Override
 	public void switchVis() {
-		editor.updateValueOp(this, this.show, !this.show, (a, b) -> a.show = b, editor.setVis);
+		editor.action("toggleVis").updateValueOp(this, this.show, !this.show, (a, b) -> a.show = b, editor.setVis).execute();
 		if(type == ElementType.ROOT_PART) {
 			editor.setHiddenEffect.accept(!show);
 		}
@@ -297,7 +328,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void switchEffect(Effect effect) {
 		switch (effect) {
 		case GLOW:
-			editor.updateValueOp(this, this.glow, !this.glow, (a, b) -> a.glow = b, editor.setGlow);
+			editor.action("switch", "label.cpm.glow").updateValueOp(this, this.glow, !this.glow, (a, b) -> a.glow = b, editor.setGlow).execute();
 			break;
 
 		case HIDE:
@@ -305,25 +336,34 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 				switchVis();
 				editor.setHiddenEffect.accept(!show);
 			} else {
-				editor.updateValueOp(this, this.hidden, !this.hidden, (a, b) -> a.hidden = b, editor.setHiddenEffect);
+				editor.action("switch", "label.cpm.hidden_effect").updateValueOp(this, this.hidden, !this.hidden, (a, b) -> a.hidden = b, editor.setHiddenEffect).execute();
 				editor.updateGui.accept(null);
 			}
 			break;
 
 		case MIRROR:
-			editor.updateValueOp(this, this.mirror, !this.mirror, (a, b) -> a.mirror = b, editor.setMirror);
+			editor.action("switch", "label.cpm.mirror").updateValueOp(this, this.mirror, !this.mirror, (a, b) -> a.mirror = b, editor.setMirror).execute();
 			break;
 
 		case RECOLOR:
-			editor.addUndo(new ValueOp<>(this, this.recolor, (a, b) -> a.recolor = b));
-			this.recolor = !this.recolor;
-			editor.setReColor.accept(this.recolor);
+			editor.action("switch", "label.cpm.recolor").
+			updateValueOp(this, this.recolor, !this.recolor, (a, b) -> a.recolor = b, editor.setReColor).execute();
 			if(!this.texture || this.recolor)
 				editor.setPartColor.accept(this.rgb);
 			else
 				editor.setPartColor.accept(null);
-			editor.currentOp = new ValueOp<>(this, this.recolor, (a, b) -> a.recolor = b);
-			editor.markDirty();
+			break;
+
+		case SINGLE_TEX:
+			editor.action("switch", "label.cpm.singleTex").updateValueOp(this, this.singleTex, !this.singleTex, (a, b) -> a.singleTex = b, editor.setSingleTex).execute();;
+			break;
+
+		case PER_FACE_UV:
+			editor.action("switch", "label.cpm.perfaceUV").updateValueOp(this, this.texture, true, (a, b) -> a.texture = b).
+			update(editor.setModePanel, ModeDisplType.TEX_FACE).
+			updateValueOp(this, this.faceUV, faceUV == null ? new PerFaceUV(this) : null, (a, b) -> a.faceUV = b, v -> editor.setPerFaceUV.accept(v != null)).
+			execute();
+			editor.updateGui();
 			break;
 
 		default:
@@ -341,50 +381,63 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			int dx = MathHelper.ceil(size.x);
 			int dy = MathHelper.ceil(size.y);
 			int dz = MathHelper.ceil(size.z);
+			EditorTexture skin = getTexture().provider;
 			return new Box(
-					(int) (uv.x / 64f * editor.skinProvider.size.x),
-					(int) (uv.y / 64f * editor.skinProvider.size.y),
-					(int) (2 * (dx + dz) / 64f * editor.skinProvider.size.x),
-					(int) ((dz + dy) / 64f * editor.skinProvider.size.y));
+					(int) (uv.x / 64f * skin.size.x),
+					(int) (uv.y / 64f * skin.size.y),
+					(int) (2 * (dx + dz) / 64f * skin.size.x),
+					(int) ((dz + dy) / 64f * skin.size.y));
 		}
 		int dx = MathHelper.ceil(size.x);
 		int dy = MathHelper.ceil(size.y);
 		int dz = MathHelper.ceil(size.z);
+		if(singleTex) {
+			if(mcScale == 0 && (size.x == 0 || size.y == 0 || size.z == 0)) {
+				if(size.x == 0) {
+					return new Box(u * textureSize, v * textureSize, dz * textureSize, dy * textureSize);
+				} else if(size.y == 0) {
+					return new Box(u * textureSize, v * textureSize, dx * textureSize, dz * textureSize);
+				} else if(size.z == 0) {
+					return new Box(u * textureSize, v * textureSize, dx * textureSize, dy * textureSize);
+				}
+			}
+			int txS = Math.max(dx, Math.max(dy, dz));
+			return new Box(u * textureSize, v * textureSize, txS * textureSize, txS * textureSize);
+		}
 		return new Box(u * textureSize, v * textureSize, 2 * (dx + dz) * textureSize, (dz + dy) * textureSize);
 	}
 
 	@Override
 	public void populatePopup(PopupMenu popup) {
+		popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), this::duplicate);
+	}
+
+	private void duplicate() {
 		if(type == ElementType.NORMAL) {
-			popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), () -> {
-				ModelElement elem = new ModelElement(this, parent);
-				editor.addUndo(() -> {
-					parent.children.remove(elem);
-					editor.selectedElement = null;
-				});
-				editor.runOp(() -> parent.children.add(elem));
-				editor.selectedElement = elem;
-				editor.markDirty();
-				editor.updateGui();
-			});
+			ModelElement elem = new ModelElement(this, parent);
+			editor.action("duplicate").addToList(editor.elements, elem).onUndo(() -> editor.selectedElement = null).execute();
+			editor.selectedElement = elem;
+			editor.updateGui();
 		} else if(type == ElementType.ROOT_PART) {
-			popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), () -> {
-				ModelElement elem = new ModelElement(editor, ElementType.ROOT_PART, typeData, editor.gui());
-				elem.duplicated = true;
-				editor.addUndo(() -> {
-					editor.elements.remove(elem);
-					editor.selectedElement = null;
-				});
-				editor.runOp(() -> editor.elements.add(elem));
-				editor.selectedElement = elem;
-				editor.markDirty();
-				editor.updateGui();
-			});
+			ModelElement elem = new ModelElement(editor, ElementType.ROOT_PART, typeData, editor.gui());
+			elem.duplicated = true;
+			editor.action("duplicate").addToList(editor.elements, elem).onUndo(() -> editor.selectedElement = null).execute();
+			editor.selectedElement = elem;
+			editor.updateGui();
 		}
 	}
 
 	@Override
 	public int bgColor() {
 		return editor.selectedElement != this && editor.selectedAnim != null && editor.applyAnim && editor.selectedAnim.getComponentsFiltered().contains(this) ? editor.colors().anim_part_background : 0;
+	}
+
+	public ModelElement getRoot() {
+		return type == ElementType.ROOT_PART ? this : parent != null ? parent.getRoot() : null;
+	}
+
+	@Override
+	public Tooltip getTooltip() {
+		return tooltip;
 	}
 }

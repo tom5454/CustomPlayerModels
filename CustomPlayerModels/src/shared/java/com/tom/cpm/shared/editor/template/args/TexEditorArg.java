@@ -8,14 +8,15 @@ import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpl.util.Image;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.editor.util.ValueOp;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.template.args.TexArg;
 
 public class TexEditorArg implements TemplateArg<TexArg> {
@@ -63,35 +64,12 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 	}
 
 	private void setUV(Editor editor, Vec3f vec) {
-		editor.addUndo(
-				new ValueOp<>(TexEditorArg.this, u, (a, b) -> a.u = b),
-				new ValueOp<>(TexEditorArg.this, v, (a, b) -> a.v = b),
-				new ValueOp<>(TexEditorArg.this, texSize, (a, b) -> a.texSize = b)
-				);
-		u = (int) vec.x;
-		v = (int) vec.y;
-		texSize = (int) vec.z;
-		boolean refreshGui = false;
-		if(u < 0) {
-			u = 0;
-			refreshGui = true;
-		}
-		if(v < 0) {
-			v = 0;
-			refreshGui = true;
-		}
-		if(texSize < 0) {
-			texSize = 0;
-			refreshGui = true;
-		}
-		editor.setCurrentOp(
-				new ValueOp<>(TexEditorArg.this, u, (a, b) -> a.u = b),
-				new ValueOp<>(TexEditorArg.this, v, (a, b) -> a.v = b),
-				new ValueOp<>(TexEditorArg.this, texSize, (a, b) -> a.texSize = b)
-				);
-		if(refreshGui)editor.setTexturePanel.accept(new Vec3i(u, v, texSize));
+		editor.action("set", "action.cpm.texUV").
+		updateValueOp(this, u, (int) vec.x, 0, Integer.MAX_VALUE, (a, b) -> a.u = b, v -> editor.setTexturePanel.accept(new Vec3i(u, v, texSize))).
+		updateValueOp(this, v, (int) vec.y, 0, Integer.MAX_VALUE, (a, b) -> a.v = b, v -> editor.setTexturePanel.accept(new Vec3i(u, v, texSize))).
+		updateValueOp(this, texSize, (int) vec.z, 0, 64, (a, b) -> a.texSize = b, v -> editor.setTexturePanel.accept(new Vec3i(u, v, texSize))).
+		execute();
 		editor.templates.forEach(EditorTemplate::applyToModel);
-		editor.markDirty();
 	}
 
 	private void draw(Editor editor, IGui gui, int x, int y, float xs, float ys, int alpha) {
@@ -100,7 +78,7 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 			int by = (int) (ys * v * texSize);
 			Image img = et.getTemplateTexture().getImage();
 
-			gui.drawBox(x + bx, y + by, img.getWidth() * xs, img.getHeight() * ys, 0xffffff | (alpha << 24));
+			gui.drawBox(x + bx, y + by, img.getWidth() * xs * texSize, img.getHeight() * ys * texSize, 0xffffff | (alpha << 24));
 		}
 	}
 
@@ -127,9 +105,7 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 				if(texSize != 0) {
 					editor.frame.openPopup(new ConfirmPopup(editor.frame, editor.gui().i18nFormat("label.cpm.confirmDel"),
 							editor.gui().i18nFormat("label.cpm.template_remove_tex"), () -> {
-								editor.addUndo(new ValueOp<>(TexEditorArg.this, texSize, (a, b) -> a.texSize = b));
-								editor.runOp(new ValueOp<>(TexEditorArg.this, 0, (a, b) -> a.texSize = b));
-								editor.markDirty();
+								editor.action("i", "label.cpm.template_remove_tex").updateValueOp(TexEditorArg.this, texSize, 0, (a, b) -> a.texSize = b).execute();
 								editor.updateGui();
 							}, null));
 				}
@@ -143,8 +119,8 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 			}
 
 			@Override
-			public EditorTexture getTexture() {
-				return editor.skinProvider;
+			public ETextures getTexture() {
+				return editor.textures.get(TextureSheetType.SKIN);
 			}
 
 			@Override
@@ -166,19 +142,13 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 						editor.gui().i18nFormat("label.cpm.template_place_tex.title"),
 						editor.gui().i18nFormat("label.cpm.template_place_tex.desc"),
 						() -> {
-							Image bak = new Image(editor.skinProvider.getImage());
-							editor.addUndo(() -> {
-								editor.skinProvider.setImage(bak);
-								editor.restitchTexture();
-							});
-							editor.runOp(() -> {
-								editor.skinProvider.getImage().draw(et.getTemplateTexture().getImage(), u, v);
-								editor.restitchTexture();
-								editor.skinProvider.markDirty();
-								editor.renderTexture.markDirty();
-							});
+							ETextures tex = editor.textures.get(TextureSheetType.SKIN);
+							ActionBuilder ab = editor.action("placeTex").
+									updateValueOp(tex, new Image(tex.getImage()), tex.getImage(), ETextures::setImage).
+									onAction(editor::restitchTextures);
+							tex.getImage().draw(et.getTemplateTexture().getImage(), u, v);
+							ab.execute();
 							editor.updateGui();
-							editor.markDirty();
 						}, null));
 			}
 
@@ -197,8 +167,8 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 			}
 
 			@Override
-			public EditorTexture getTexture() {
-				return editor.skinProvider;
+			public ETextures getTexture() {
+				return editor.textures.get(TextureSheetType.SKIN);
 			}
 
 			@Override

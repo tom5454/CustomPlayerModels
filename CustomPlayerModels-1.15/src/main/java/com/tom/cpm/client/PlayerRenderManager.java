@@ -7,6 +7,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.ElytraModel;
 import net.minecraft.client.renderer.entity.model.HumanoidHeadModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.Model;
@@ -16,11 +18,14 @@ import net.minecraft.util.ResourceLocation;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.RootModelType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
 import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -34,14 +39,18 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public <M> RedirectHolder<M, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> create(
-					M model) {
+			public <M> RedirectHolder<?, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> create(
+					M model, String arg) {
 				if(model instanceof PlayerModel) {
-					return (RedirectHolder<M, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer>)
-							new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<AbstractClientPlayerEntity>) model);
+					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<AbstractClientPlayerEntity>) model);
 				} else if(model instanceof HumanoidHeadModel) {
-					return (RedirectHolder<M, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer>)
-							new RedirectHolderSkull(PlayerRenderManager.this, (HumanoidHeadModel) model);
+					return new RedirectHolderSkull(PlayerRenderManager.this, (HumanoidHeadModel) model);
+				} else if(model instanceof ElytraModel) {
+					return new RedirectHolderElytra(PlayerRenderManager.this, (ElytraModel<AbstractClientPlayerEntity>) model);
+				} else if(model instanceof BipedModel && "armor1".equals(arg)) {
+					return new RedirectHolderArmor1(PlayerRenderManager.this, (BipedModel<AbstractClientPlayerEntity>) model);
+				} else if(model instanceof BipedModel && "armor2".equals(arg)) {
+					return new RedirectHolderArmor2(PlayerRenderManager.this, (BipedModel<AbstractClientPlayerEntity>) model);
 				}
 				return null;
 			}
@@ -79,9 +88,9 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		}
 
 		@Override
-		public void bindTexture(CallbackInfoReturnable<ResourceLocation> cbi) {
+		public void bindTexture(CallbackInfoReturnable<ResourceLocation> cbi, TextureSheetType tex) {
 			if(def == null)return;
-			TextureProvider skin = def.getSkinOverride();
+			TextureProvider skin = def.getTexture(tex);
 			if(skin != null && skin.texture != null) {
 				skin.bind();
 				cbi.setReturnValue(DynTexture.getBoundLoc());
@@ -154,6 +163,44 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 
 			register(new Field<>(() -> model.field_217105_a, v -> model.field_217105_a = v, PlayerModelParts.HEAD));
 			hat = register(new Field<>(() -> model.head        , v -> model.head         = v, null));
+		}
+
+	}
+
+	private static class RedirectHolderElytra extends RDH {
+
+		public RedirectHolderElytra(PlayerRenderManager mngr, ElytraModel<AbstractClientPlayerEntity> model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.rightWing, v -> model.rightWing = v, RootModelType.ELYTRA_RIGHT));
+			register(new Field<>(() -> model.leftWing,  v -> model.leftWing  = v, RootModelType.ELYTRA_LEFT));
+		}
+
+	}
+
+	private static class RedirectHolderArmor1 extends RDH {
+
+		public RedirectHolderArmor1(PlayerRenderManager mngr, BipedModel<AbstractClientPlayerEntity> model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.bipedHead,     v -> model.bipedHead     = v, RootModelType.ARMOR_HELMET));
+			register(new Field<>(() -> model.bipedBody,     v -> model.bipedBody     = v, RootModelType.ARMOR_BODY));
+			register(new Field<>(() -> model.bipedRightArm, v -> model.bipedRightArm = v, RootModelType.ARMOR_RIGHT_ARM));
+			register(new Field<>(() -> model.bipedLeftArm,  v -> model.bipedLeftArm  = v, RootModelType.ARMOR_LEFT_ARM));
+			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, RootModelType.ARMOR_RIGHT_FOOT));
+			register(new Field<>(() -> model.bipedLeftLeg,  v -> model.bipedLeftLeg  = v, RootModelType.ARMOR_LEFT_FOOT));
+		}
+
+	}
+
+	private static class RedirectHolderArmor2 extends RDH {
+
+		public RedirectHolderArmor2(PlayerRenderManager mngr, BipedModel<AbstractClientPlayerEntity> model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.bipedBody,     v -> model.bipedBody     = v, RootModelType.ARMOR_LEGGINGS_BODY));
+			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, RootModelType.ARMOR_RIGHT_LEG));
+			register(new Field<>(() -> model.bipedLeftLeg,  v -> model.bipedLeftLeg  = v, RootModelType.ARMOR_LEFT_LEG));
 		}
 
 	}
@@ -236,6 +283,11 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		@Override
 		public VBuffers getVBuffers() {
 			return buffers;
+		}
+
+		@Override
+		public Vec4f getColor() {
+			return new Vec4f(red, green, blue, alpha);
 		}
 	}
 }

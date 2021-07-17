@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
@@ -137,6 +138,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			addElement(forceLinkFile);
 			forceLinkFile.setBounds(new Box(5, 80, 135, 20));
 			forceLinkFile.setAction(() -> forceLinkFile.setSelected(!forceLinkFile.isSelected()));
+			forceLinkFile.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.force_link_file")));
 
 			Label expOutLbl = new Label(gui, gui.i18nFormat("label.cpm.export_output"));
 			expOutLbl.setBounds(new Box(5, 160, 0, 0));
@@ -227,15 +229,15 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
-			super.draw(mouseX, mouseY, partialTicks);
+		public void draw(MouseEvent event, float partialTicks) {
+			super.draw(event, partialTicks);
 			gui.drawBox(bounds.x + bounds.w - 136, bounds.y + 14, 130, 130, gui.getColors().color_picker_border);
 			gui.drawBox(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0xffffffff);
 
 			vanillaSkin.bind();
 			gui.drawTexture(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0, 0, 1, 1);
 
-			if(new Box(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128).isInBounds(mouseX, mouseY))vanillaSkinTooltip.set();
+			if(event.isHovered(new Box(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128)))vanillaSkinTooltip.set();
 		}
 
 		@Override
@@ -353,8 +355,8 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
-			super.draw(mouseX, mouseY, partialTicks);
+		public void draw(MouseEvent event, float partialTicks) {
+			super.draw(event, partialTicks);
 
 			if(icon.getImage() != null) {
 				gui.drawBox(bounds.x + bounds.w - 136, bounds.y + 14, 130, 130, gui.getColors().color_picker_border);
@@ -549,8 +551,8 @@ public abstract class ExportSkinPopup extends PopupPanel {
 		}
 
 		@Override
-		public void draw(int mouseX, int mouseY, float partialTicks) {
-			super.draw(mouseX, mouseY, partialTicks);
+		public void draw(MouseEvent event, float partialTicks) {
+			super.draw(event, partialTicks);
 
 			if(icon.getImage() != null) {
 				gui.drawBox(bounds.x + bounds.w - 136, bounds.y + 14, 130, 130, gui.getColors().color_picker_border);

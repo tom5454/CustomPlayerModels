@@ -14,11 +14,11 @@ import com.tom.cpl.util.HTTPMultipart;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.model.SkinType;
 
-public class MojangSkinsAPI {
+public class MojangSkinUploadAPI {
 	private String auth;
 	private UUID uuid;
 
-	public MojangSkinsAPI(UUID uuid, String auth) {
+	public MojangSkinUploadAPI(UUID uuid, String auth) {
 		this.uuid = uuid;
 		this.auth = auth;
 	}
@@ -61,7 +61,7 @@ public class MojangSkinsAPI {
 
 	public boolean checkAuth() {
 		try {
-			if(auth == null || true)throw new NullPointerException("Missing auth info");
+			if(auth == null)throw new NullPointerException("Missing auth info");
 			URL url = new URL("https://api.mojang.com/user/security/location");
 			Log.info("[MojangSkinsAPI.checkAuth]: Authorizing mojang api");
 			InputStream web = null;

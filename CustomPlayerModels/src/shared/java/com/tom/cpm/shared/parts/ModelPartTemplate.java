@@ -50,7 +50,7 @@ public class ModelPartTemplate implements IModelPart {
 		@Override
 		public void stitch(TextureStitcher stitcher) {
 			if(!template.isTextureMerged()) {
-				stitcher.stitchImage(template.getTexture(), template::onStitch);
+				stitcher.stitchImage(template.getTemplateDefaultTexture(), template::onStitch);
 			}
 		}
 	}

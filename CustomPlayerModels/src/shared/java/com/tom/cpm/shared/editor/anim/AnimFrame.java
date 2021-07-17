@@ -12,9 +12,9 @@ import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.editor.util.ValueOp;
-import com.tom.cpm.shared.model.PlayerModelParts;
-import com.tom.cpm.shared.model.PlayerPartValues;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.model.PartValues;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class AnimFrame {
 	private final Map<ModelElement, Data> components = new HashMap<>();
@@ -39,7 +39,7 @@ public class AnimFrame {
 			this.comp = comp;
 			if(!anim.add) {
 				if(comp.type == ElementType.ROOT_PART) {
-					PlayerPartValues val = PlayerPartValues.getFor((PlayerModelParts) comp.typeData, anim.editor.skinType);
+					PartValues val = ((VanillaModelPart) comp.typeData).getDefaultSize(anim.editor.skinType);
 					pos = val.getPos();
 					rot = new Vec3f();
 				} else {
@@ -131,69 +131,49 @@ public class AnimFrame {
 
 	public void setPos(ModelElement elem, Vec3f v) {
 		Data dt = components.get(elem);
+		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.position");
 		if(dt == null) {
-			anim.editor.addUndo(() -> components.remove(elem));
-			dt = components.computeIfAbsent(elem, Data::new);
-			final Data d = dt;
-			anim.editor.currentOp = () -> components.put(elem, d);
-		} else {
-			anim.editor.addUndo(new ValueOp<>(dt, dt.pos, (a, b) -> a.pos = b));
-			anim.editor.currentOp = null;
+			dt = new Data(elem);
+			ab.addToMap(components, elem, dt);
 		}
-		dt.pos = v;
-		anim.editor.appendCurrentOp(new ValueOp<>(dt, dt.pos, (a, b) -> a.pos = b));
-		anim.editor.markDirty();
+		ab.updateValueOp(dt, dt.pos, v, (a, b) -> a.pos = b);
+		ab.execute();
 	}
 
 	public void setRot(ModelElement elem, Vec3f v) {
 		Data dt = components.get(elem);
+		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.rotation");
 		if(dt == null) {
-			anim.editor.addUndo(() -> components.remove(elem));
-			dt = components.computeIfAbsent(elem, Data::new);
-			final Data d = dt;
-			anim.editor.currentOp = () -> components.put(elem, d);
-		} else {
-			anim.editor.addUndo(new ValueOp<>(dt, dt.rot, (a, b) -> a.rot = b));
-			anim.editor.currentOp = null;
+			dt = new Data(elem);
+			ab.addToMap(components, elem, dt);
 		}
-		dt.rot = v;
-		anim.editor.appendCurrentOp(new ValueOp<>(dt, dt.rot, (a, b) -> a.rot = b));
-		anim.editor.markDirty();
+		ab.updateValueOp(dt, dt.rot, v, (a, b) -> a.rot = b);
+		ab.execute();
 	}
 
 	public void setColor(ModelElement elem, int rgb) {
 		Data dt = components.get(elem);
+		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.rotation");
 		if(dt == null) {
-			anim.editor.addUndo(() -> components.remove(elem));
-			dt = components.computeIfAbsent(elem, Data::new);
-			final Data d = dt;
-			anim.editor.currentOp = () -> components.put(elem, d);
-		} else {
-			anim.editor.addUndo(new ValueOp<>(dt, dt.color, (a, b) -> a.color = b));
-			anim.editor.currentOp = null;
+			dt = new Data(elem);
+			ab.addToMap(components, elem, dt);
 		}
-		int r = (rgb & 0xff0000) >> 16;
+		int r = ((rgb & 0xff0000) >> 16);
 		int g = (rgb & 0x00ff00) >> 8;
 		int b =  rgb & 0x0000ff;
-		dt.color = new Vec3f(r, g, b);
-		anim.editor.appendCurrentOp(new ValueOp<>(dt, dt.color, (a, c) -> a.color = c));
-		anim.editor.markDirty();
+		ab.updateValueOp(dt, dt.color, new Vec3f(r, g, b), (a, v) -> a.color = v);
+		ab.execute();
 	}
 
 	public void switchVis(ModelElement elem) {
 		Data dt = components.get(elem);
+		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.hidden_effect");
 		if(dt == null) {
-			anim.editor.addUndo(() -> components.remove(elem));
-			dt = components.computeIfAbsent(elem, Data::new);
-			final Data d = dt;
-			anim.editor.currentOp = () -> components.put(elem, d);
-		} else {
-			anim.editor.addUndo(new ValueOp<>(dt, dt.show, (a, b) -> a.show = b));
-			anim.editor.currentOp = null;
+			dt = new Data(elem);
+			ab.addToMap(components, elem, dt);
 		}
-		dt.show = !dt.show;
-		anim.editor.appendCurrentOp(new ValueOp<>(dt, dt.show, (a, c) -> a.show = c));
-		anim.editor.markDirty();
+		ab.updateValueOp(dt, dt.show, !dt.show, (a, b) -> a.show = b);
+		ab.execute();
 	}
 
 	public IElem getData(ModelElement modelElement) {

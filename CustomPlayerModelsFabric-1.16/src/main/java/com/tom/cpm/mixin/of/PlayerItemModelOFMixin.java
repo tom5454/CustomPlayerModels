@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import net.optifine.player.PlayerItemModel;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(PlayerItemModel.class)
 public class PlayerItemModelOFMixin {
@@ -30,7 +31,7 @@ public class PlayerItemModelOFMixin {
 		})
 	public Identifier getPlayerSkin(AbstractClientPlayerEntity pe, BipedEntityModel modelBiped, AbstractClientPlayerEntity player, MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn, int packedOverlayIn) {
 		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, player.getSkinTexture());
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(modelBiped, cbi);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(modelBiped, cbi, TextureSheetType.SKIN);
 		return cbi.getReturnValue();
 	}
 }

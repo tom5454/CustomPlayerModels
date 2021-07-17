@@ -13,47 +13,35 @@ public class Render {
 		RenderType rt = CustomRenderTypes.getTexCutout(new ResourceLocation("cpm", "textures/gui/base.png"));
 		IVertexBuilder t = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().getBuffer(rt);
 		Matrix4f m = mst.getLast().getMatrix();
-		//t.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		t.pos(m, x + w, y, z).tex(1, 1).endVertex();
 		t.pos(m, x, y, z).tex(0, 1).endVertex();
 		t.pos(m, x, y + h, z).tex(0, 0).endVertex();
 		t.pos(m, x + w, y + h, z).tex(1, 0).endVertex();
-		//tes.draw();
 
-		//t.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		t.pos(m, x, y, z + d).tex(1, 1).endVertex();
 		t.pos(m, x + w, y, z + d).tex(0, 1).endVertex();
 		t.pos(m, x + w, y + h, z + d).tex(0, 0).endVertex();
 		t.pos(m, x, y + h, z + d).tex(1, 0).endVertex();
-		//tes.draw();
 
-		//t.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		t.pos(m, x + w, y, z + d).tex(1, 1).endVertex();
 		t.pos(m, x + w, y, z).tex(0, 1).endVertex();
 		t.pos(m, x + w, y + h, z).tex(0, 0).endVertex();
 		t.pos(m, x + w, y + h, z + d).tex(1, 0).endVertex();
-		//tes.draw();
 
-		//t.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		t.pos(m, x, y, z).tex(1, 1).endVertex();
 		t.pos(m, x, y, z + d).tex(0, 1).endVertex();
 		t.pos(m, x, y + h, z + d).tex(0, 0).endVertex();
 		t.pos(m, x, y + h, z).tex(1, 0).endVertex();
-		//tes.draw();
 
-		//t.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		t.pos(m, x + w, y, z).tex(1, 1).endVertex();
 		t.pos(m, x + w, y, z + d).tex(0, 1).endVertex();
 		t.pos(m, x, y, z + d).tex(0, 0).endVertex();
 		t.pos(m, x, y, z).tex(1, 0).endVertex();
-		//tes.draw();
 
-		//t.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		t.pos(m, x + w, y + h, z + d).tex(1, 1).endVertex();
 		t.pos(m, x + w, y + h, z).tex(0, 1).endVertex();
 		t.pos(m, x, y + h, z).tex(0, 0).endVertex();
 		t.pos(m, x, y + h, z + d).tex(1, 0).endVertex();
-		//tes.draw();
 
 		Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().finish(rt);
 	}

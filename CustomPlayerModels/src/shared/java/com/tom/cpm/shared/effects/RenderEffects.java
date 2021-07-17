@@ -7,6 +7,9 @@ public enum RenderEffects {
 	SCALE(EffectScale::new),
 	HIDE(EffectHide::new),
 	COLOR(EffectColor::new),
+	SINGLE_TEX(EffectSingleTexture::new),
+	PER_FACE_UV(EffectPerFaceUV::new),
+	UV_OVERFLOW(EffectUV::new),
 	;
 	public static final RenderEffects[] VALUES = values();
 	private Supplier<IRenderEffect> factory;

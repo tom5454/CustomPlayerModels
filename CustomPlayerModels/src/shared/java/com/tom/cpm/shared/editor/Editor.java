@@ -5,6 +5,7 @@ import static com.tom.cpm.shared.MinecraftObjectHolder.gson;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -32,6 +33,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.Pair;
@@ -41,6 +43,9 @@ import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.editor.actions.Action;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.anim.AnimationType;
@@ -53,20 +58,27 @@ import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.template.TemplateArgType;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.ScalingElement;
+import com.tom.cpm.shared.editor.tree.TexturesElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
-import com.tom.cpm.shared.editor.util.ValueOp;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
 import com.tom.cpm.shared.io.ProjectFile;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
+import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.PerFaceUV;
+import com.tom.cpm.shared.model.render.PerFaceUV.Dir;
+import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
+import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
-import com.tom.cpm.shared.util.TextureStitcher;
+import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class Editor {
 	public static final int projectFileVersion = 1;
@@ -87,8 +99,8 @@ public class Editor {
 	public Updater<Boolean> setAddEn = updaterReg.create();
 	public Updater<String> setNameDisplay = updaterReg.create();
 	public Updater<Void> updateGui = updaterReg.create();
-	public Updater<Boolean> setUndoEn = updaterReg.create();
-	public Updater<Boolean> setRedoEn = updaterReg.create();
+	public Updater<String> setUndo = updaterReg.create();
+	public Updater<String> setRedo = updaterReg.create();
 	public Updater<Boolean> setGlow = updaterReg.create();
 	public Updater<Integer> setPenColor = updaterReg.create();
 	public Updater<Integer> setPartColor = updaterReg.create();
@@ -105,6 +117,8 @@ public class Editor {
 	public Updater<Boolean> setAnimPlayEn = updaterReg.create();
 	public Updater<EditorAnim> setSelAnim = updaterReg.create();
 	public Updater<Boolean> setHiddenEffect = updaterReg.create();
+	public Updater<Boolean> setSingleTex = updaterReg.create();
+	public Updater<Boolean> setPerFaceUV = updaterReg.create();
 	public Updater<Boolean> setSkinEdited = updaterReg.create();
 	public Updater<String> setReload = updaterReg.create();
 	public Updater<Boolean> setAnimPlay = updaterReg.create();
@@ -114,6 +128,8 @@ public class Editor {
 	public Updater<Boolean> heldRenderEnable = updaterReg.create();
 	public Updater<Float> setValue = updaterReg.create();
 	public Updater<EditorTool> setTool = updaterReg.create();
+	public Updater<Vec4f> setFaceUVs = updaterReg.create();
+	public Updater<Rot> setFaceRot = updaterReg.create();
 
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
@@ -122,12 +138,13 @@ public class Editor {
 	public boolean drawAllUVs = false;
 	public boolean onlyDrawOnSelected = true;
 	public EnumMap<Hand, HeldItem> handDisplay = new EnumMap<>(Hand.class);
+	public Set<PlayerModelLayer> modelDisplayLayers = new HashSet<>();
 	public ScalingElement scalingElem = new ScalingElement(this);
+	public Dir perfaceFaceDir = Dir.UP;
 
 	public ViewportCamera camera = new ViewportCamera();
-	public Stack<Runnable> undoQueue = new Stack<>();
-	public Stack<Runnable> redoQueue = new Stack<>();
-	public Runnable currentOp;
+	private Stack<Action> undoQueue = new Stack<>();
+	private Stack<Action> redoQueue = new Stack<>();
 	public boolean renderPaint;
 	public boolean renderBase = true;
 	public boolean applyAnim;
@@ -147,6 +164,7 @@ public class Editor {
 	public List<EditorAnim> animations = new ArrayList<>();
 	public List<EditorTemplate> templates = new ArrayList<>();
 	public TemplateSettings templateSettings;
+	public TexturesElement texElem = new TexturesElement(this);
 	public SkinType skinType;
 	public boolean customSkinType;
 	public ModelDescription description;
@@ -155,15 +173,13 @@ public class Editor {
 	public boolean dirty, autoSaveDirty;
 	public long lastEdit;
 	public ModelDefinition definition;
-	public EditorTexture skinProvider = new EditorTexture();
-	public EditorTexture renderTexture = new EditorTexture();
-	public EditorTexture listIconProvider;
-	public TextureStitcher stitcher = new TextureStitcher();
+	public Map<TextureSheetType, ETextures> textures = new HashMap<>();
 	public File file;
 	public ProjectFile project = new ProjectFile();
 
 	public Editor() {
 		this.definition = new EditorDefinition(this);
+		textures.put(TextureSheetType.SKIN, new ETextures(this, TextureSheetType.SKIN, stitcher -> templates.forEach(e -> e.stitch(stitcher))));
 	}
 
 	public void setGui(EditorGui gui) {
@@ -176,189 +192,19 @@ public class Editor {
 		}
 	}
 
-	public void setVec(ModelElement selectedElement, Vec3f v, VecType object) {
-		switch (object) {
-		case SIZE:
-		{
-			addUndo(new ValueOp<>(selectedElement, selectedElement.size, (a, b) -> a.size = b));
-			selectedElement.size = v;
-			boolean changed = false;
-			if(selectedElement.size.x < 0) {
-				selectedElement.size.x = 0;
-				changed = true;
-			}
-			if(selectedElement.size.y < 0) {
-				selectedElement.size.y = 0;
-				changed = true;
-			}
-			if(selectedElement.size.z < 0) {
-				selectedElement.size.z = 0;
-				changed = true;
-			}
-			if(selectedElement.size.x > 25) {
-				selectedElement.size.x = 25;
-				changed = true;
-			}
-			if(selectedElement.size.y > 25) {
-				selectedElement.size.y = 25;
-				changed = true;
-			}
-			if(selectedElement.size.z > 25) {
-				selectedElement.size.z = 25;
-				changed = true;
-			}
-			selectedElement.size.round(10);
-			currentOp = new ValueOp<>(selectedElement, selectedElement.size, (a, b) -> a.size = b);
-			if(changed)setSize.accept(selectedElement.size);
-		}
-		break;
-		case OFFSET:
-			addUndo(new ValueOp<>(selectedElement, selectedElement.offset, (a, b) -> a.offset = b));
-			selectedElement.offset = v;
-			posLimit(selectedElement.offset, setOffset);
-			currentOp = new ValueOp<>(selectedElement, selectedElement.offset, (a, b) -> a.offset = b);
-			break;
-		case ROTATION:
-			addUndo(new ValueOp<>(selectedElement, selectedElement.rotation, (a, b) -> a.rotation = b));
-			selectedElement.rotation = v;
-			if(v.x < 0 || v.x > 360 || v.y < 0 || v.y > 360 || v.z < 0 || v.z > 360) {
-				while(selectedElement.rotation.x < 0)selectedElement.rotation.x += 360;
-				while(selectedElement.rotation.x >= 360)selectedElement.rotation.x -= 360;
-				while(selectedElement.rotation.y < 0)selectedElement.rotation.y += 360;
-				while(selectedElement.rotation.y >= 360)selectedElement.rotation.y -= 360;
-				while(selectedElement.rotation.z < 0)selectedElement.rotation.z += 360;
-				while(selectedElement.rotation.z >= 360)selectedElement.rotation.z -= 360;
-				setRot.accept(selectedElement.rotation);
-			}
-			currentOp = new ValueOp<>(selectedElement, selectedElement.rotation, (a, b) -> a.rotation = b);
-			break;
-		case POSITION:
-			addUndo(new ValueOp<>(selectedElement, selectedElement.pos, (a, b) -> a.pos = b));
-			selectedElement.pos = v;
-			posLimit(selectedElement.pos, setPosition);
-			currentOp = new ValueOp<>(selectedElement, selectedElement.pos, (a, b) -> a.pos = b);
-			break;
-		case SCALE:
-			addUndo(new ValueOp<>(selectedElement, selectedElement.scale, (a, b) -> a.scale = b));
-			selectedElement.scale = v;
-			{
-				boolean changed = false;
-				if(selectedElement.scale.x < 0) {
-					selectedElement.scale.x = 0;
-					changed = true;
-				}
-				if(selectedElement.scale.y < 0) {
-					selectedElement.scale.y = 0;
-					changed = true;
-				}
-				if(selectedElement.scale.z < 0) {
-					selectedElement.scale.z = 0;
-					changed = true;
-				}
-				if(selectedElement.scale.x > 25) {
-					selectedElement.scale.x = 25;
-					changed = true;
-				}
-				if(selectedElement.scale.y > 25) {
-					selectedElement.scale.y = 25;
-					changed = true;
-				}
-				if(selectedElement.scale.z > 25) {
-					selectedElement.scale.z = 25;
-					changed = true;
-				}
-				if(changed)setScale.accept(selectedElement.scale);
-			}
-			currentOp = new ValueOp<>(selectedElement, selectedElement.scale, (a, b) -> a.scale = b);
-			break;
-
-		case TEXTURE:
-		{
-
-			addUndo(
-					new ValueOp<>(selectedElement, selectedElement.u, (a, b) -> a.u = b),
-					new ValueOp<>(selectedElement, selectedElement.v, (a, b) -> a.v = b),
-					new ValueOp<>(selectedElement, selectedElement.textureSize, (a, b) -> a.textureSize = b)
-					);
-			selectedElement.u = (int) v.x;
-			selectedElement.v = (int) v.y;
-			selectedElement.textureSize = (int) v.z;
-			boolean refreshGui = false;
-			if(selectedElement.u < 0) {
-				selectedElement.u = 0;
-				refreshGui = true;
-			}
-			if(selectedElement.v < 0) {
-				selectedElement.v = 0;
-				refreshGui = true;
-			}
-			if(selectedElement.u > 255) {
-				selectedElement.u = 255;
-				refreshGui = true;
-			}
-			if(selectedElement.v > 255) {
-				selectedElement.v = 255;
-				refreshGui = true;
-			}
-			if(selectedElement.textureSize < 1) {
-				selectedElement.textureSize = 1;
-				refreshGui = true;
-			}
-			if(selectedElement.textureSize > 127) {
-				selectedElement.textureSize = 127;
-				refreshGui = true;
-			}
-			currentOp = new OpList(
-					new ValueOp<>(selectedElement, selectedElement.u, (a, b) -> a.u = b),
-					new ValueOp<>(selectedElement, selectedElement.v, (a, b) -> a.v = b),
-					new ValueOp<>(selectedElement, selectedElement.textureSize, (a, b) -> a.textureSize = b)
-					);
-			if(selectedElement.texture && refreshGui)
-				setTexturePanel.accept(new Vec3i(selectedElement.u, selectedElement.v, selectedElement.textureSize));
-		}
-		break;
-		default:
-			break;
-		}
-		markDirty();
-	}
-
-	private void posLimit(Vec3f pos, Consumer<Vec3f> setter) {
-		boolean changed = false;
-		if(Math.abs(pos.x) > Vec3f.MAX_POS) {
-			if(pos.x < 0)pos.x = -Vec3f.MAX_POS;
-			else pos.x = Vec3f.MAX_POS;
-			changed = true;
-		}
-		if(Math.abs(pos.y) > Vec3f.MAX_POS) {
-			if(pos.y < 0)pos.y = -Vec3f.MAX_POS;
-			else pos.y = Vec3f.MAX_POS;
-			changed = true;
-		}
-		if(Math.abs(pos.z) > Vec3f.MAX_POS) {
-			if(pos.z < 0)pos.z = -Vec3f.MAX_POS;
-			else pos.z = Vec3f.MAX_POS;
-			changed = true;
-		}
-		if(changed)setter.accept(pos);
-	}
-
 	public void setValue(float value) {
 		if(selectedElement != null) {
-			addUndo(new ValueOp<>(selectedElement, selectedElement.getValue(), TreeElement::setValue));
-			selectedElement.setValue(value);
-			currentOp = new ValueOp<>(selectedElement, selectedElement.getValue(), TreeElement::setValue);
-			markDirty();
+			action("set", "action.cpm.value").
+			updateValueOp(selectedElement, selectedElement.getValue(), value, TreeElement::setValue).
+			execute();
 		}
 	}
 
 	public void setName(String name) {
 		if(selectedElement != null) {
-			addUndo(new ValueOp<>(selectedElement, selectedElement.getElemName(), TreeElement::setElemName));
-			selectedElement.setElemName(name);
-			currentOp = new ValueOp<>(selectedElement, selectedElement.getElemName(), TreeElement::setElemName);
-			updateGui.accept(null);
-			markDirty();
+			action("set", "label.cpm.name").
+			updateValueOp(selectedElement, selectedElement.getElemName(), name, TreeElement::setElemName).
+			execute();
 		}
 	}
 
@@ -400,24 +246,26 @@ public class Editor {
 		if(selectedElement != null)selectedElement.switchEffect(Effect.GLOW);
 	}
 
+	public void switchSingleTex() {
+		if(selectedElement != null)selectedElement.switchEffect(Effect.SINGLE_TEX);
+	}
+
+	public void switchPerfaceUV() {
+		if(selectedElement != null)selectedElement.switchEffect(Effect.PER_FACE_UV);
+	}
+
 	public void switchHide() {
 		if(selectedElement != null)selectedElement.switchEffect(Effect.HIDE);
 	}
 
 	public void setTexSize(int x, int y) {
-		EditorTexture tex = getTextureProvider();
-		if(tex != null) {
-			markDirty();
-			int sx = tex.size.x;
-			int sy = tex.size.y;
-			addUndo(() -> {
-				tex.size.x = sx;
-				tex.size.y = sy;
-			});
-			runOp(() -> {
-				tex.size.x = x;
-				tex.size.y = y;
-			});
+		ETextures texs = getTextureProvider();
+		if(texs != null) {
+			EditorTexture tex = texs.provider;
+			action("set", "action.cpm.texSize").
+			updateValueOp(tex, tex.size.x, x, (a, b) -> a.size.x = b).
+			updateValueOp(tex, tex.size.y, y, (a, b) -> a.size.y = b).
+			execute();
 		}
 	}
 
@@ -437,17 +285,17 @@ public class Editor {
 
 		case FILL:
 		{
-			EditorTexture tex = getTextureProvider();
-			if(tex != null) {
+			ETextures texs = getTextureProvider();
+			if(texs != null && texs.isEditable()) {
 				Box box = selectedElement != null ? selectedElement.getTextureBox() : null;
 				if(box != null && onlyDrawOnSelected) {
 					if(!box.isInBounds(x, y))return;
 				}
-				Image img = tex.getImage();
+				Image img = texs.getImage();
 				if(x < 0 || y < 0 || x >= img.getWidth() || y >= img.getHeight())return;
 				int old = img.getRGB(x, y);
 				if((old & 0xffffff) == penColor)return;
-				if(!tex.isEdited())setSkinEdited.accept(true);
+				if(!texs.isEdited())setSkinEdited.accept(true);
 				Set<Vec2i> pixels = new HashSet<>();
 				Stack<Vec2i> nextPixels = new Stack<>();
 				nextPixels.add(new Vec2i(x, y));
@@ -464,15 +312,11 @@ public class Editor {
 					}
 				}
 				int color = penColor | 0xff000000;
-				addUndo(() -> {
-					pixels.forEach(p -> tex.setRGB(p.x, p.y, old));
-					refreshTexture(tex);
-				});
-				runOp(() -> {
-					pixels.forEach(p -> tex.setRGB(p.x, p.y, color));
-					refreshTexture(tex);
-				});
-				markDirty();
+				action("action.cpm.bucketFill").
+				onRun(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, color))).
+				onUndo(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, old))).
+				onAction(texs::refreshTexture).
+				execute();
 			}
 		}
 		break;
@@ -483,26 +327,22 @@ public class Editor {
 	}
 
 	private void setPixel(int x, int y, int color) {
-		EditorTexture tex = getTextureProvider();
-		if(tex != null) {
+		ETextures texs = getTextureProvider();
+		if(texs != null && texs.isEditable()) {
 			Box box = selectedElement != null ? selectedElement.getTextureBox() : null;
 			if(box != null && onlyDrawOnSelected) {
 				if(!box.isInBounds(x, y))return;
 			}
-			Image img = tex.getImage();
+			Image img = texs.getImage();
 			if(x < 0 || y < 0 || x >= img.getWidth() || y >= img.getHeight())return;
 			int old = img.getRGB(x, y);
 			if(old == color)return;
-			if(!tex.isEdited())setSkinEdited.accept(true);
-			addUndo(() -> {
-				tex.setRGB(x, y, old);
-				refreshTexture(tex);
-			});
-			runOp(() -> {
-				tex.setRGB(x, y, color);
-				refreshTexture(tex);
-			});
-			markDirty();
+			if(!texs.isEdited())setSkinEdited.accept(true);
+			action("draw").
+			onUndo(() -> texs.setRGB(x, y, old)).
+			onRun(() -> texs.setRGB(x, y, color)).
+			onAction(texs::refreshTexture).
+			execute();
 		}
 	}
 
@@ -512,8 +352,8 @@ public class Editor {
 		if(!autoSaveDirty)lastEdit = System.currentTimeMillis();
 		autoSaveDirty = true;
 		redoQueue.clear();
-		setUndoEn.accept(true);
-		setRedoEn.accept(false);
+		setUndo.accept(undoQueue.empty() ? null : undoQueue.peek().getName());
+		setRedo.accept(null);
 	}
 
 	public void updateGui() {
@@ -545,6 +385,8 @@ public class Editor {
 		setAnimShow.accept(null);
 		setAnimPlayEn.accept(false);
 		setHiddenEffect.accept(null);
+		setSingleTex.accept(null);
+		setPerFaceUV.accept(null);
 		setVis.accept(false);
 		setAnimPriority.accept(null);
 		displayViewport.accept(true);
@@ -558,8 +400,8 @@ public class Editor {
 			selectedElement.updateGui();
 		}
 		setNameDisplay.accept((file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : file.getName()) + (dirty ? "*" : ""));
-		setUndoEn.accept(!undoQueue.empty());
-		setRedoEn.accept(!redoQueue.empty());
+		setUndo.accept(undoQueue.empty() ? null : undoQueue.peek().getName());
+		setRedo.accept(redoQueue.empty() ? null : redoQueue.peek().getName());
 		if(selectedAnim != null) {
 			AnimFrame selFrm = selectedAnim.getSelectedFrame();
 			if(selFrm != null) {
@@ -602,7 +444,7 @@ public class Editor {
 			setAnimPriority.accept(selectedAnim.priority);
 		}
 		setSelAnim.accept(selectedAnim);
-		EditorTexture tex = getTextureProvider();
+		ETextures tex = getTextureProvider();
 		setSkinEdited.accept(tex != null ? tex.isEdited() : false);
 		setReload.accept(tex != null && tex.file != null ? tex.file.getName() : null);
 		updateGui.accept(null);
@@ -614,44 +456,45 @@ public class Editor {
 		animations.clear();
 		templates.clear();
 		templateSettings = null;
-		skinProvider.free();
-		skinProvider.texture = null;
-		skinProvider.setEdited(false);
-		skinProvider.file = null;
-		if(listIconProvider != null)listIconProvider.free();
-		listIconProvider = null;
+		textures.values().forEach(ETextures::free);
+		ETextures skinTex = textures.get(TextureSheetType.SKIN);
+		textures.clear();
+		skinTex.clean();
+		textures.put(TextureSheetType.SKIN, skinTex);
 		undoQueue.clear();
 		redoQueue.clear();
 		skinType = MinecraftClientAccess.get().getSkinType();
 		Image skin = MinecraftClientAccess.get().getVanillaSkin(skinType);
 		this.vanillaSkin = skin;
+		skinTex.setDefaultImg(vanillaSkin);
 		customSkinType = false;
-		skinProvider.setImage(new Image(skin));
-		skinProvider.size = new Vec2i(skin.getWidth(), skin.getHeight());
+		skinTex.setImage(new Image(skin));
+		skinTex.provider.size = new Vec2i(skin.getWidth(), skin.getHeight());
 		dirty = false;
 		autoSaveDirty = false;
 		file = null;
 		selectedElement = null;
 		selectedAnim = null;
-		currentOp = null;
 		animEnc = null;
 		description = null;
 		scaling = 0;
 		storeIDgen = new StoreIDGen();
 		Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
-		profile.loadSkin().thenRun(() -> {
+		profile.getTextures().load().thenRun(() -> {
 			if(!customSkinType)skinType = profile.getSkinType();
-			CompletableFuture<Image> img = profile.getSkin();
+			CompletableFuture<Image> img = profile.getTextures().getTexture(TextureType.SKIN);
 			this.vanillaSkin = MinecraftClientAccess.get().getVanillaSkin(skinType);
+			skinTex.setDefaultImg(vanillaSkin);
 			img.thenAccept(s -> {
-				if(!skinProvider.isEdited()) {
+				if(!skinTex.isEdited()) {
 					if(s != null) {
 						this.vanillaSkin = s;
-						skinProvider.setImage(new Image(this.vanillaSkin));
+						skinTex.setDefaultImg(vanillaSkin);
+						skinTex.setImage(new Image(this.vanillaSkin));
 					} else {
-						skinProvider.setImage(new Image(this.vanillaSkin));
+						skinTex.setImage(new Image(this.vanillaSkin));
 					}
-					restitchTexture();
+					restitchTextures();
 				}
 			});
 		});
@@ -659,7 +502,7 @@ public class Editor {
 			if(type != PlayerModelParts.CUSTOM_PART)
 				elements.add(new ModelElement(this, ElementType.ROOT_PART, type, frame.getGui()));
 		}
-		restitchTexture();
+		restitchTextures();
 	}
 
 	public void preRender() {
@@ -700,7 +543,8 @@ public class Editor {
 		for (ModelElement elem : elements) {
 			Map<String, Object> map = new HashMap<>();
 			lst.add(map);
-			map.put("id", ((PlayerModelParts) elem.typeData).name().toLowerCase());
+			map.put("id", ((VanillaModelPart) elem.typeData).getName());
+			if(elem.typeData instanceof RootModelType)map.put("customPart", true);
 			map.put("show", elem.show);
 			if(!elem.children.isEmpty()) {
 				List<Map<String, Object>> list = new ArrayList<>();
@@ -716,19 +560,28 @@ public class Editor {
 			}
 		}
 		data.put("version", projectFileVersion);
-		Map<String, Object> skinSize = new HashMap<>();
-		data.put("skinSize", skinSize);
-		skinSize.put("x", skinProvider.size.x);
-		skinSize.put("y", skinProvider.size.y);
+		for(TextureSheetType tex : TextureSheetType.VALUES) {
+			String name = tex.name().toLowerCase();
+			ETextures eTex = textures.get(tex);
+			if(eTex != null) {
+				Map<String, Object> size = new HashMap<>();
+				data.put(name + "Size", size);
+				size.put("x", eTex.provider.size.x);
+				size.put("y", eTex.provider.size.y);
+				if(eTex.provider.texture != null && eTex.isEdited()) {
+					try(OutputStream os = project.setAsStream(name + ".png")) {
+						eTex.getImage().storeTo(os);
+					}
+				}
+			} else {
+				project.delete(name + ".png");
+			}
+		}
+
 		data.put("skinType", skinType.getName());
 		data.put("scaling", scaling);
 		try(OutputStreamWriter os = new OutputStreamWriter(project.setAsStream("config.json"))) {
 			gson.toJson(data, os);
-		}
-		if(skinProvider.texture != null && skinProvider.isEdited()) {
-			try(OutputStream os = project.setAsStream("skin.png")) {
-				skinProvider.texture.getImage().storeTo(os);
-			}
 		}
 		project.clearFolder("animations");
 		for (EditorAnim e : animations) {
@@ -815,13 +668,6 @@ public class Editor {
 				}
 			}
 		}
-		if(listIconProvider != null) {
-			try(OutputStream os = project.setAsStream("list_icon.png")) {
-				listIconProvider.getImage().storeTo(os);
-			}
-		} else {
-			project.delete("list_icon.png");
-		}
 		project.save(file);
 	}
 
@@ -854,6 +700,8 @@ public class Editor {
 			map.put("glow", elem.glow);
 			map.put("recolor", elem.recolor);
 			map.put("hidden", elem.hidden);
+			map.put("singleTex", elem.singleTex);
+			if(elem.faceUV != null)map.put("faceUV", elem.faceUV.toMap());
 			storeIDgen.setID(elem);
 			map.put("storeID", elem.storeID);
 
@@ -873,11 +721,7 @@ public class Editor {
 		try(InputStreamReader rd = new InputStreamReader(project.getAsStream("config.json"))) {
 			data = (Map<String, Object>) gson.fromJson(rd, Object.class);
 		}
-		byte[] ze = project.getEntry("skin.png");
-		if(ze != null) {
-			skinProvider.setImage(Image.loadFrom(new ByteArrayInputStream(ze)));
-			skinProvider.markDirty();
-		}
+		byte[] ze;
 		int fileVersion = ((Number) data.getOrDefault("version", 0)).intValue();
 		if(fileVersion != projectFileVersion)throw new IOException("Unsupported file version try a newer version of the mod");
 		List<Map<String, Object>> lst = (List<Map<String, Object>>) data.get("elements");
@@ -885,9 +729,18 @@ public class Editor {
 		for (Map<String, Object> map : lst) {
 			String key = (String) map.get("id");
 			ModelElement elem = null;
-			if((boolean) map.getOrDefault("dup", false)) {
+			if ((boolean) map.getOrDefault("customPart", false)) {
+				for (RootModelType rmt : RootModelType.VALUES) {
+					if(rmt.getName().equalsIgnoreCase(key)) {
+						elem = new ModelElement(this, ElementType.ROOT_PART, rmt, frame.getGui());
+						break;
+					}
+				}
+				elements.add(elem);
+				elem.storeID = ((Number) map.getOrDefault("storeID", 0)).longValue();
+			} else if ((boolean) map.getOrDefault("dup", false)) {
 				for (ModelElement e : elements) {
-					if(((PlayerModelParts) e.typeData).name().equalsIgnoreCase(key)) {
+					if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
 						elem = new ModelElement(this, ElementType.ROOT_PART, e.typeData, frame.getGui());
 						elem.duplicated = true;
 						elements.add(elem);
@@ -897,7 +750,7 @@ public class Editor {
 				elem.storeID = ((Number) map.getOrDefault("storeID", 0)).longValue();
 			} else {
 				for (ModelElement e : elements) {
-					if(((PlayerModelParts) e.typeData).name().equalsIgnoreCase(key)) {
+					if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
 						elem = e;
 						break;
 					}
@@ -917,8 +770,6 @@ public class Editor {
 			skinType = SkinType.get((String) data.get("skinType"));
 		}
 		List<String> anims = project.listEntires("animations");
-		Map<String, Object> skinTexSize = (Map<String, Object>) data.get("skinSize");
-		skinProvider.size = new Vec2i(((Number)skinTexSize.get("x")).intValue(), ((Number)skinTexSize.get("y")).intValue());
 		scaling = ((Number)data.getOrDefault("scaling", 0)).floatValue();
 		if(anims != null) {
 			for (String anim : anims) {
@@ -957,6 +808,24 @@ public class Editor {
 				for (Map<String,Object> map : frames) {
 					e.loadFrame(map);
 				}
+			}
+		}
+		for(TextureSheetType tex : TextureSheetType.VALUES) {
+			String name = tex.name().toLowerCase();
+			ze = project.getEntry(name + ".png");
+			if(ze != null) {
+				Image img = Image.loadFrom(new ByteArrayInputStream(ze));
+				if(img.getWidth() > tex.texLimit || img.getHeight() > tex.texLimit) {
+					Log.error("Illegal image size for texture: " + name);
+					continue;
+				}
+				ETextures eTex = textures.get(tex);
+				if(eTex == null)eTex = new ETextures(this, tex);
+				textures.put(tex, eTex);
+				eTex.setImage(img);
+				eTex.markDirty();
+				Map<String, Object> skinTexSize = (Map<String, Object>) data.get(name + "Size");
+				eTex.provider.size = new Vec2i(((Number)skinTexSize.get("x")).intValue(), ((Number)skinTexSize.get("y")).intValue());
 			}
 		}
 		ze = project.getEntry("anim_enc.json");
@@ -1033,17 +902,21 @@ public class Editor {
 		}
 		ze = project.getEntry("list_icon.png");
 		if(ze != null) {
-			if(listIconProvider == null)listIconProvider = new EditorTexture();
-			listIconProvider.size = new Vec2i(32, 32);
-			listIconProvider.setImage(Image.loadFrom(new ByteArrayInputStream(ze)));
-			if(listIconProvider.getImage().getWidth() > 32 || listIconProvider.getImage().getHeight() > 32 ||
-					listIconProvider.getImage().getWidth() != listIconProvider.getImage().getHeight()) {
-				listIconProvider.free();
-				listIconProvider = null;
+			ETextures tex = null;
+			if(textures.containsKey(TextureSheetType.LIST_ICON))tex = textures.get(TextureSheetType.LIST_ICON);
+			if(tex == null)tex = new ETextures(this, TextureSheetType.LIST_ICON);
+			tex.provider.size = new Vec2i(32, 32);
+			tex.setImage(Image.loadFrom(new ByteArrayInputStream(ze)));
+			if(tex.getImage().getWidth() > 32 || tex.getImage().getHeight() > 32 ||
+					tex.getImage().getWidth() != tex.getImage().getHeight()) {
+				tex.free();
+				tex = null;
 				Log.error("Illegal image size for list icon must be 32x32 or less and square");
 			}
+			if(tex == null)textures.remove(TextureSheetType.LIST_ICON);
+			else textures.put(TextureSheetType.LIST_ICON, tex);
 		}
-		restitchTexture();
+		restitchTextures();
 		updateGui();
 	}
 
@@ -1070,6 +943,8 @@ public class Editor {
 			elem.glow = (boolean) map.getOrDefault("glow", false);
 			elem.recolor = (boolean) map.getOrDefault("recolor", false);
 			elem.hidden = (boolean) map.getOrDefault("hidden", false);
+			elem.singleTex = (boolean) map.getOrDefault("singleTex", false);
+			if(map.containsKey("faceUV"))elem.faceUV = new PerFaceUV((Map<String, Map<String, Object>>) map.get("faceUV"));
 			elem.storeID = ((Number) map.getOrDefault("storeID", 0)).longValue();
 
 			if(map.containsKey("children")) {
@@ -1079,7 +954,7 @@ public class Editor {
 	}
 
 	public void reloadSkin() {
-		EditorTexture tex = getTextureProvider();
+		ETextures tex = getTextureProvider();
 		if(tex != null && tex.file != null) {
 			try {
 				Image img = Image.loadFrom(tex.file);
@@ -1088,7 +963,7 @@ public class Editor {
 				tex.setImage(img);
 				tex.setEdited(true);
 				setSkinEdited.accept(true);
-				restitchTexture();
+				tex.restitchTexture();
 			} catch (IOException e) {
 				Log.error("Failed to load image", e);
 				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
@@ -1097,7 +972,7 @@ public class Editor {
 	}
 
 	public void saveSkin(File f) {
-		EditorTexture tex = getTextureProvider();
+		ETextures tex = getTextureProvider();
 		if(tex != null) {
 			try {
 				tex.getImage().storeTo(f);
@@ -1109,130 +984,51 @@ public class Editor {
 		}
 	}
 
-	public void addUndo(Runnable r) {
-		undoQueue.push(r);
+	public ActionBuilder action(String name) {
+		return new ActionBuilder(this, gui().i18nFormat("action.cpm." + name));
 	}
 
-	public void addUndo(Runnable... r) {
-		if(r.length == 1)undoQueue.push(r[0]);
-		else undoQueue.push(new OpList(r));
+	public ActionBuilder action(String name, String arg) {
+		return new ActionBuilder(this, gui().i18nFormat("action.cpm." + name, gui().i18nFormat(arg)));
 	}
 
-	public void addUndo(List<Runnable> r) {
-		undoQueue.push(new OpList(r));
-	}
-
-	public void appendCurrentOp(Runnable r) {
-		if(currentOp == null)currentOp = r;
-		else if(currentOp instanceof OpList) {
-			((OpList)currentOp).rs.add(r);
-		} else {
-			currentOp = new OpList(currentOp, r);
-		}
-	}
-
-	public void runOp(Runnable r) {
-		currentOp = r;
-		r.run();
-	}
-
-	public void runOp(Runnable... r) {
-		if(r.length == 1) {
-			currentOp = r[0];
-		} else {
-			currentOp = new OpList(r);
-		}
-		currentOp.run();
-	}
-
-	public void runOp(List<Runnable> r) {
-		currentOp = new OpList(r);
-		currentOp.run();
-	}
-
-	public void setCurrentOp(Runnable... r) {
-		if(r.length == 1) {
-			currentOp = r[0];
-		} else {
-			currentOp = new OpList(r);
-		}
-	}
-
-	private static class OpList implements Runnable {
-		private List<Runnable> rs;
-
-		public OpList(Runnable... r) {
-			rs = new ArrayList<>(Arrays.asList(r));
-		}
-
-		public OpList(List<Runnable> r) {
-			rs = r;
-		}
-
-		@Override
-		public void run() {
-			rs.forEach(Runnable::run);
-		}
-	}
-
-	public <E, T> void updateValueOp(E elem, T currVal, T newVal, BiConsumer<E, T> setter, Updater<T> updater) {
-		addUndo(new ValueOp<>(elem, currVal, setter));
-		updater.accept(newVal);
-		runOp(new ValueOp<>(elem, newVal, setter));
-		markDirty();
-	}
-
-	public <E, T> void updateValueOp(E elem, T currVal, T newVal, BiConsumer<E, T> setter) {
-		addUndo(new ValueOp<>(elem, currVal, setter));
-		runOp(new ValueOp<>(elem, newVal, setter));
-		markDirty();
-	}
-
-	public <T> void updateValue(T value, BiConsumer<TreeElement, T> func) {
-		if(selectedElement != null)func.accept(selectedElement, value);
+	public void executeAction(Action a) {
+		undoQueue.add(a);
+		a.run();
 	}
 
 	public void undo() {
 		if(undoQueue.empty())return;
-		Runnable r = undoQueue.pop();
+		Action r = undoQueue.pop();
 		if(r != null) {
-			if(currentOp != null) {
-				redoQueue.add(currentOp);
-				currentOp = r;
-				r.run();
-			}
+			redoQueue.add(r);
+			r.undo();
 		}
 		updateGui();
 	}
 
 	public void redo() {
 		if(redoQueue.empty())return;
-		Runnable r = redoQueue.pop();
+		Action r = redoQueue.pop();
 		if(r != null) {
-			if(currentOp != null) {
-				undoQueue.add(currentOp);
-				currentOp = r;
-				r.run();
-			}
+			undoQueue.add(r);
+			r.run();
 		}
 		updateGui();
 	}
 
+	public <T> void updateValue(T value, BiConsumer<TreeElement, T> func) {
+		if(selectedElement != null)func.accept(selectedElement, value);
+	}
+
 	public void moveElement(ModelElement element, ModelElement to) {
 		if(checkChild(element.children, to))return;
-		ModelElement me = element.parent;
-		addUndo(() -> {
-			to.children.remove(element);
-			element.parent = me;
-			me.children.add(element);
-		});
-		runOp(() -> {
-			element.parent.children.remove(element);
-			element.parent = to;
-			to.children.add(element);
-		});
+		action("move", "action.cpm.cube").
+		addToList(to.children, element).
+		removeFromList(element.parent.children, element).
+		updateValueOp(element, element.parent, to, (a, b) -> a.parent = b).
+		execute();
 		selectedElement = null;
-		markDirty();
 		updateGui();
 	}
 
@@ -1290,11 +1086,7 @@ public class Editor {
 		anim.add = add;
 		anim.loop = loop;
 		anim.displayName = displayName;
-		addUndo(() -> {
-			animations.remove(anim);
-			selectedAnim = null;
-		});
-		runOp(() -> animations.add(anim));
+		action("add", "action.cpm.anim").addToList(animations, anim).onUndo(() -> selectedAnim = null).execute();
 		selectedAnim = anim;
 		markDirty();
 		updateGui();
@@ -1302,32 +1094,16 @@ public class Editor {
 
 	public void editAnim(IPose pose, String displayName, boolean add, boolean loop) {
 		if(selectedAnim != null) {
-			boolean addOld = selectedAnim.add;
-			boolean loopOld = selectedAnim.loop;
-			String dispName = selectedAnim.displayName;
-			IPose oldPose = selectedAnim.pose;
-			AnimationType oldType = selectedAnim.type;
-			String fname = selectedAnim.filename;
-			EditorAnim anim = selectedAnim;
-			addUndo(() -> {
-				anim.add = addOld;
-				anim.loop = loopOld;
-				anim.displayName = dispName;
-				anim.pose = oldPose;
-				anim.type = oldType;
-				anim.filename = fname;
-			});
-			runOp(() -> {
-				anim.pose = pose;
-				anim.add = add;
-				anim.loop = loop;
-				anim.displayName = displayName;
-				if(pose != null)anim.type = AnimationType.POSE;
-				else anim.type = AnimationType.GESTURE;
-				String[] sp = anim.filename.split("_", 2);
-				anim.filename = (pose instanceof VanillaPose ? "v" : (pose != null ? "c" : "g")) + "_" + sp[1];
-			});
-			markDirty();
+			String[] sp = selectedAnim.filename.split("_", 2);
+			String newFname = (pose instanceof VanillaPose ? "v" : (pose != null ? "c" : "g")) + "_" + sp[1];
+			action("edit", "action.cpm.anim").
+			updateValueOp(selectedAnim, selectedAnim.add, add, (a, b) -> a.add = b).
+			updateValueOp(selectedAnim, selectedAnim.loop, loop, (a, b) -> a.loop = b).
+			updateValueOp(selectedAnim, selectedAnim.displayName, displayName, (a, b) -> a.displayName = b).
+			updateValueOp(selectedAnim, selectedAnim.pose, pose, (a, b) -> a.pose = b).
+			updateValueOp(selectedAnim, selectedAnim.type, pose != null ? AnimationType.POSE : AnimationType.GESTURE, (a, b) -> a.type = b).
+			updateValueOp(selectedAnim, selectedAnim.filename, newFname, (a, b) -> a.filename = b).
+			execute();
 			updateGui();
 		}
 	}
@@ -1335,8 +1111,7 @@ public class Editor {
 	public void delSelectedAnim() {
 		if(selectedAnim != null) {
 			EditorAnim anim = selectedAnim;
-			addUndo(() -> animations.add(anim));
-			runOp(() -> animations.remove(anim));
+			action("remove", "action.cpm.anim").removeFromList(animations, anim).onRun(() -> selectedAnim = null).execute();
 			selectedAnim = null;
 			updateGui();
 		}
@@ -1358,12 +1133,16 @@ public class Editor {
 
 	public void setAnimDuration(int value) {
 		if(selectedAnim == null)return;
-		updateValueOp(selectedAnim, selectedAnim.duration, value, (a, b) -> a.duration = b);
+		action("setAnim", "label.cpm.duration").
+		updateValueOp(selectedAnim, selectedAnim.duration, value, (a, b) -> a.duration = b).
+		execute();
 	}
 
 	public void setAnimPriority(int value) {
 		if(selectedAnim == null)return;
-		updateValueOp(selectedAnim, selectedAnim.priority, value, (a, b) -> a.priority = b);
+		action("setAnim", "label.cpm.anim_priority").
+		updateValueOp(selectedAnim, selectedAnim.priority, value, (a, b) -> a.priority = b).
+		execute();
 	}
 
 	public void animPrevFrm() {
@@ -1429,8 +1208,8 @@ public class Editor {
 		return frame.getGui();
 	}
 
-	public EditorTexture getTextureProvider() {
-		return selectedElement != null ? selectedElement.getTexture() : skinProvider;
+	public ETextures getTextureProvider() {
+		return selectedElement != null ? selectedElement.getTexture() : textures.get(TextureSheetType.SKIN);
 	}
 
 	public ModelElement getSelectedElement() {
@@ -1438,24 +1217,13 @@ public class Editor {
 	}
 
 	public void free() {
-		skinProvider.free();
-		renderTexture.free();
-		if(listIconProvider != null)listIconProvider.free();
+		textures.values().forEach(ETextures::free);
 		definition.cleanup();
 	}
 
-	public void refreshTexture(EditorTexture tex) {
-		if(stitcher.refresh(tex.getImage()))
-			renderTexture.markDirty();
-	}
-
-	public void restitchTexture() {
-		stitcher = new TextureStitcher();
-		stitcher.setBase(skinProvider);
-		templates.forEach(e -> e.stitch(stitcher));
-		stitcher.finish(renderTexture);
-		renderTexture.markDirty();
-		if(stitcher.hasStitches() && hasVanillaParts()) {
+	public void restitchTextures() {
+		textures.values().forEach(ETextures::restitchTexture);
+		if(textures.get(TextureSheetType.SKIN).hasStitches() && hasVanillaParts()) {
 			Generators.convertModel(this);
 		}
 	}
@@ -1474,5 +1242,51 @@ public class Editor {
 			}
 			autoSaveDirty = false;
 		}
+	}
+
+	public void addRoot(RootGroups group) {
+		List<ModelElement> elems = new ArrayList<>();
+		for (int i = 0; i < group.types.length; i++) {
+			RootModelType type = group.types[i];
+			if(elements.stream().noneMatch(e -> e.type == ElementType.ROOT_PART && e.typeData == type)) {
+				ModelElement e = new ModelElement(this, ElementType.ROOT_PART, type, frame.getGui());
+				elems.add(e);
+			}
+		}
+		ActionBuilder ab = action("add", "action.cpm.root");
+		elems.forEach(e -> ab.addToList(elements, e));
+		ab.onUndo(() -> selectedElement = null);
+		Arrays.stream(group.types).map(group::getTexSheet).distinct().forEach(tx -> {
+			if(tx.editable && !textures.containsKey(tx)) {
+				ETextures tex = new ETextures(this, tx);
+				ab.addToMap(textures, tx, tex);
+				tex.provider.size = tx.getDefSize();
+				Image def = new Image(tex.provider.size.x, tex.provider.size.y);
+				try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tx.name().toLowerCase() + ".png")) {
+					def = Image.loadFrom(is);
+				} catch (IOException e) {
+				}
+				tex.setDefaultImg(def);
+				tex.setImage(new Image(def));
+				tex.markDirty();
+				if(tx.texType != null) {
+					Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
+					profile.getTextures().load().thenRun(() -> {
+						CompletableFuture<Image> img = profile.getTextures().getTexture(tx.texType);
+						img.thenAccept(s -> {
+							if(!tex.isEdited()) {
+								if(s != null) {
+									tex.setDefaultImg(s);
+									tex.setImage(new Image(s));
+									tex.restitchTexture();
+								}
+							}
+						});
+					});
+				}
+			}
+		});
+		ab.execute();
+		updateGui();
 	}
 }

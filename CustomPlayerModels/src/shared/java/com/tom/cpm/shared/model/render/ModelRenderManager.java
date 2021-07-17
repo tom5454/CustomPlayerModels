@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VertexBuffer;
@@ -26,6 +27,7 @@ import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.TextureSheetType;
 
 public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderManager {
 	public static final Predicate<Player<?, ?>> ALWAYS = p -> true;
@@ -73,12 +75,17 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.setVis = setVis;
 	}
 
-	public void bindModel(MB model, D addDt, ModelDefinition def, Player<?, MB> player, AnimationMode mode) {
-		holders.computeIfAbsent(model, this::create).swapIn(def, addDt, player, mode);
+	public void bindModel(MB model, String arg, D addDt, ModelDefinition def, Player<?, MB> player, AnimationMode mode) {
+		getHolder(model, arg).swapIn(def, addDt, player, mode);
 	}
 
-	private RedirectHolder<MB, D, S, P> create(MB model) {
-		RedirectHolder<MB, D, S, P> r = factory.create(model);
+	public void bindModel(MB model, D addDt, ModelDefinition def, Player<?, MB> player, AnimationMode mode) {
+		getHolder(model, null).swapIn(def, addDt, player, mode);
+	}
+
+	@SuppressWarnings("unchecked")
+	private RedirectHolder<MB, D, S, P> create(MB model, String arg) {
+		RedirectHolder<MB, D, S, P> r = (RedirectHolder<MB, D, S, P>) factory.create(model, arg);
 		if(r == null)throw new IllegalArgumentException("Tried to create RedirectHolder for unknown model type: " + model.getClass());
 		return r;
 	}
@@ -88,16 +95,28 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		if(h != null)h.swapOut();
 	}
 
-	public void bindSkin(MB model, S cbi) {
-		holders.computeIfAbsent(model, this::create).bindTexture(cbi);
+	public void bindSkin(MB model, String arg, S cbi, TextureSheetType tex) {
+		getHolder(model, arg).bindTexture(cbi, tex);
+	}
+
+	public void bindSkin(MB model,S cbi, TextureSheetType tex) {
+		getHolder(model, null).bindTexture(cbi, tex);
+	}
+
+	public boolean isBound(MB model, String arg) {
+		return getHolder(model, arg).swappedIn;
 	}
 
 	public boolean isBound(MB model) {
-		return holders.computeIfAbsent(model, this::create).swappedIn;
+		return getHolder(model, null).swappedIn;
+	}
+
+	public RedirectHolder<MB, D, S, P> getHolder(MB model, String arg) {
+		return holders.computeIfAbsent(model, m -> create(m, arg));
 	}
 
 	public RedirectHolder<MB, D, S, P> getHolder(MB model) {
-		return holders.computeIfAbsent(model, this::create);
+		return getHolder(model, null);
 	}
 
 	public void copyModelForArmor(P from, P to) {
@@ -105,9 +124,15 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.rotSet.set(to, this.rx.apply(from), this.ry.apply(from), this.rz.apply(from));
 	}
 
-	@FunctionalInterface
 	public static interface RedirectHolderFactory<D, S, P> {
-		<M> RedirectHolder<M, D, S, P> create(M model);
+
+		default <M> RedirectHolder<?, D, S, P> create(M model, String arg) {
+			return create(model);
+		}
+
+		default <M> RedirectHolder<?, D, S, P> create(M model) {
+			return null;
+		}
 	}
 
 	public static abstract class RedirectHolder<M, D, S, P> {
@@ -142,7 +167,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			swapIn0();
 			for (int i = 0; i < modelFields.size(); i++) {
 				Field<P> field = modelFields.get(i);
-				field.set.accept(redirectRenderers.get(i).swapIn());
+				RedirectRenderer<P> rd = redirectRenderers.get(i);
+				field.set.accept(rd.swapIn());
 			}
 			this.playerObj = playerObj;
 			swappedIn = true;
@@ -163,7 +189,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			swappedIn = false;
 		}
 
-		protected abstract void bindTexture(S cbi);
+		protected abstract void bindTexture(S cbi, TextureSheetType tex);
 		protected abstract void swapIn0();
 		protected abstract void swapOut0();
 		protected void bindSkin() {}
@@ -175,6 +201,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();
 				if(part == null)continue;
+				PartRoot elems = def.getModelElementFor(part);
+				if(elems == null)continue;
 				P tp = (P) re;
 				float px = mngr.px.apply(tp);
 				float py = mngr.py.apply(tp);
@@ -182,7 +210,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				float rx = mngr.rx.apply(tp);
 				float ry = mngr.ry.apply(tp);
 				float rz = mngr.rz.apply(tp);
-				PartRoot elems = def.getModelElementFor(part);
 				elems.setRootPosAndRot(px, py, pz, rx, ry, rz);
 			}
 			if(playerObj != null)
@@ -227,6 +254,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		VanillaModelPart getPart();
 		void renderParent();
 		VBuffers getVBuffers();
+		Vec4f getColor();
 
 		default RedirectRenderer<P> setCopyFrom(RedirectRenderer<P> from) {
 			getHolder().partData.get(this).copyFrom = from;
@@ -236,6 +264,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		default RedirectRenderer<P> setRenderPredicate(Predicate<Player<?, ?>> renderPredicate) {
 			getHolder().partData.get(this).renderPredicate = renderPredicate;
 			return this;
+		}
+
+		default boolean noReset() {
+			return false;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -259,35 +291,42 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						return;
 					}
 					PartRoot elems = holder.def.getModelElementFor(part);
-					if(elems.isEmpty())return;
-					boolean skipTransform = holder.mode == AnimationMode.SKULL || holder.mode == AnimationMode.HAND || holder.skipTransform(this);
-					float px = mngr.px.apply(tp);
-					float py = mngr.py.apply(tp);
-					float pz = mngr.pz.apply(tp);
-					float rx = mngr.rx.apply(tp);
-					float ry = mngr.ry.apply(tp);
-					float rz = mngr.rz.apply(tp);
-					if(holder.playerObj == null || dh.renderPredicate.test(holder.playerObj)) {
-						elems.forEach(elem -> {
-							if(!skipTransform) {
-								mngr.posSet.set(tp, elem.pos);
-								mngr.rotSet.set(tp, elem.rotation);
+					if(elems != null) {
+						if(elems.isEmpty())return;
+						boolean skipTransform = holder.mode == AnimationMode.SKULL || holder.mode == AnimationMode.HAND || holder.skipTransform(this);
+						float px = mngr.px.apply(tp);
+						float py = mngr.py.apply(tp);
+						float pz = mngr.pz.apply(tp);
+						float rx = mngr.rx.apply(tp);
+						float ry = mngr.ry.apply(tp);
+						float rz = mngr.rz.apply(tp);
+						if(holder.playerObj == null || dh.renderPredicate.test(holder.playerObj)) {
+							elems.forEach(elem -> {
+								if(!skipTransform) {
+									mngr.posSet.set(tp, elem.pos);
+									mngr.rotSet.set(tp, elem.rotation);
+								}
+								if(elem.doDisplay()) {
+									holder.copyModel(tp, parent);
+									renderParent();
+									doRender0(elem);
+								} else {
+									doRender0(elem);
+								}
+							});
+							if(!noReset()) {
+								mngr.posSet.set(parent, px, py, pz);
+								mngr.rotSet.set(parent, rx, ry, rz);
 							}
-							if(elem.doDisplay()) {
-								holder.copyModel(tp, parent);
-								renderParent();
-								doRender0(elem);
-							} else {
-								doRender0(elem);
-							}
-						});
-						mngr.posSet.set(parent, px, py, pz);
-						mngr.rotSet.set(parent, rx, ry, rz);
-					}
-					if(!skipTransform) {
-						RootModelElement elem = elems.getMainRoot();
-						mngr.posSet.set(tp, elem.pos);
-						mngr.rotSet.set(tp, elem.rotation);
+						}
+						if(!skipTransform) {
+							RootModelElement elem = elems.getMainRoot();
+							mngr.posSet.set(tp, elem.pos);
+							mngr.rotSet.set(tp, elem.rotation);
+						}
+					} else {
+						holder.copyModel(tp, parent);
+						renderParent();
 					}
 				} else {
 					holder.copyModel(tp, parent);
@@ -329,6 +368,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					b *= ( cube.color & 0x0000ff       ) / 255f;
 				}
 				if(cube.useDynamic || cube.renderObject == null) {
+					if(cube.renderObject != null)cube.renderObject.free();
 					cube.renderObject = createBox(cube, holder);
 				}
 				Mesh mesh = cube.renderObject;
@@ -373,7 +413,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			translateRotate(elem, stack);
 			VBuffers buf = getVBuffers().replay();
 			drawSelect(elem, stack, buf);
-			render(elem, stack, buf, 1, 1, 1, 1);
+			Vec4f color = getColor();
+			render(elem, stack, buf, color.x, color.y, color.z, color.w);
 			buf.finishAll();
 		}
 	}
@@ -387,11 +428,24 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					c.mcScale, holder.sheetX, holder.sheetY
 					);
 		} else {
-			return BoxRender.createTextured(
-					c.offset, c.size, c.scale,
-					c.mcScale,
-					c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
-					);
+			if(elem.singleTex)
+				return BoxRender.createTexturedSingle(
+						c.offset, c.size, c.scale,
+						c.mcScale,
+						c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
+						);
+			else if(elem.faceUVs != null)
+				return BoxRender.createTextured(
+						c.offset, c.size, c.scale,
+						c.mcScale,
+						elem.faceUVs, c.texSize, holder.sheetX, holder.sheetY
+						);
+			else
+				return BoxRender.createTextured(
+						c.offset, c.size, c.scale,
+						c.mcScale,
+						c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
+						);
 		}
 	}
 

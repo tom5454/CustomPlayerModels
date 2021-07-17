@@ -1,6 +1,7 @@
 package com.tom.cpm;
 
 import java.io.File;
+import java.util.EnumSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +23,7 @@ import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
 
 @Mod("cpm")
@@ -71,5 +73,17 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public ILogger getLogger() {
 		return log;
+	}
+
+	private static final EnumSet<PlatformFeature> features = EnumSet.of(
+			PlatformFeature.EDITOR_HELD_ITEM,
+			PlatformFeature.RENDER_ARMOR,
+			PlatformFeature.RENDER_ELYTRA,
+			PlatformFeature.RENDER_CAPE
+			);
+
+	@Override
+	public EnumSet<PlatformFeature> getSupportedFeatures() {
+		return features;
 	}
 }

@@ -1,7 +1,5 @@
 package com.tom.cpm.client;
 
-import static org.lwjgl.opengl.GL11.GL_QUADS;
-
 import java.nio.FloatBuffer;
 import java.util.function.Consumer;
 
@@ -12,15 +10,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.BipedEntityModel.ArmPose;
+import net.minecraft.client.render.entity.model.ElytraEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.DefaultSkinHelper;
@@ -42,10 +39,15 @@ import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.editor.RootGroups;
 import com.tom.cpm.shared.gui.ViewportPanelBase;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
 import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportPanelNative;
+import com.tom.cpm.shared.model.RootModelType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.RenderMode;
+import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class ViewportPanelImpl extends ViewportPanelNative {
 	private MinecraftClient mc;
@@ -89,19 +91,14 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 	@Override
 	public void renderBase() {
-		mc.getTextureManager().bindTexture(new Identifier("cpm", "textures/gui/area.png"));
-		RenderSystem.disableCull();
-		RenderSystem.enableAlphaTest();
-		Tessellator tes = Tessellator.getInstance();
-		BufferBuilder t = tes.getBuffer();
+		RenderLayer rt = CustomRenderTypes.getTexCutout(new Identifier("cpm", "textures/gui/area.png"));
+		VertexConsumer t = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rt);
 		Matrix4f m = matrixstack.peek().getModel();
-		t.begin(GL_QUADS, VertexFormats.POSITION_TEXTURE);
 		t.vertex(m, 4,  0,  4).texture(1, 1).next();
 		t.vertex(m, 4,  0, -3).texture(0, 1).next();
 		t.vertex(m, -3, 0, -3).texture(0, 0).next();
 		t.vertex(m, -3, 0,  4).texture(1, 0).next();
-		tes.draw();
-		RenderSystem.enableCull();
+		mc.getBufferBuilders().getEntityVertexConsumers().draw(rt);
 
 		mc.getTextureManager().bindTexture(new Identifier("cpm", "textures/gui/base.png"));
 		Render.drawTexturedCube(matrixstack, 0, -1.001f, 0, 1, 1, 1);
@@ -118,16 +115,18 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		PlayerEntityModel<AbstractClientPlayerEntity> p = rp.getModel();
 		panel.preRender();
 		try {
-			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(p, mc.getBufferBuilders().getEntityVertexConsumers(), panel.getDefinition(), null, panel.getAnimMode());
+			ModelDefinition def = panel.getDefinition();
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(p, mc.getBufferBuilders().getEntityVertexConsumers(), def, null, panel.getAnimMode());
 			CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true);
 			cbi.setReturnValue(DefaultSkinHelper.getTexture(mc.getSession().getProfile().getId()));
-			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(p, cbi);
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(p, cbi, TextureSheetType.SKIN);
 			setupModel(p);
 			int overlay = OverlayTexture.packUv(OverlayTexture.getU(0), OverlayTexture.getV(false));
 			int light = 15 << 4 | 15 << 20;
 			RenderLayer rt = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderLayer.getEntityTranslucent(cbi.getReturnValue());
 			VertexConsumer buffer = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rt);
-			((RDH)CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolder(p)).renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rt, 0));
+			RDH rdh = (RDH) CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolder(p);
+			rdh.renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rt, 0));
 			setHeldItem(Hand.RIGHT, ap -> p.rightArmPose = ap);
 			setHeldItem(Hand.LEFT, ap -> p.leftArmPose = ap);
 			PlayerModelSetup.setAngles(p, 0, 0, 0, 0, mc.options.mainArm, false);
@@ -194,6 +193,22 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			});
 
 			p.render(matrixstack, buffer, light, overlay, 1, 1, 1, 1);
+
+			if(def.hasRoot(RootModelType.CAPE) && panel.getArmorLayers().contains(PlayerModelLayer.CAPE)) {
+				CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(p, cbi, TextureSheetType.CAPE);
+				RenderLayer rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderLayer.getEntityTranslucent(cbi.getReturnValue());
+				rdh.renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rtc, 0));
+				buffer = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rtc);
+				CustomPlayerModelsClient.renderCape(matrixstack, buffer, light, null, partialTicks, p, def);
+			}
+
+			renderArmor(p, rdh, PlayerModelLayer.HELMET, light, def);
+			renderArmor(p, rdh, PlayerModelLayer.BODY, light, def);
+			renderArmor(p, rdh, PlayerModelLayer.LEGS, light, def);
+			renderArmor(p, rdh, PlayerModelLayer.BOOTS, light, def);
+
+			if(panel.getArmorLayers().contains(PlayerModelLayer.ELYTRA))renderElytra(p, rdh, light, def);
+
 			mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rt);
 			mc.getBufferBuilders().getEntityVertexConsumers().draw();
 
@@ -201,6 +216,79 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 			this.renderItem(p, getHandStack(Hand.LEFT), ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND, Arm.LEFT, matrixstack, mc.getBufferBuilders().getEntityVertexConsumers(), light);
 		} finally {
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().unbindModel(p);
+		}
+	}
+
+	private static final BipedEntityModel<AbstractClientPlayerEntity> ARMOR_LEGS = new BipedEntityModel<>(0.5F);
+	private static final BipedEntityModel<AbstractClientPlayerEntity> ARMOR_BODY = new BipedEntityModel<>(1);
+	private static final ElytraEntityModel<AbstractClientPlayerEntity> modelElytra = new ElytraEntityModel<>();
+	private void renderArmor(PlayerEntityModel<AbstractClientPlayerEntity> p, RDH rdh, PlayerModelLayer layer, int light, ModelDefinition def) {
+		if(panel.getArmorLayers().contains(layer)) {
+			BipedEntityModel<AbstractClientPlayerEntity> model = layer == PlayerModelLayer.LEGS ? ARMOR_LEGS : ARMOR_BODY;
+			String name = layer == PlayerModelLayer.LEGS ? "armor2" : "armor1";
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(model, name, mc.getBufferBuilders().getEntityVertexConsumers(), def, null, panel.getAnimMode());
+			p.setAttributes(model);
+			CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, new Identifier("cpm:textures/template/" + name + ".png"));
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, RootGroups.getGroup(layer.parts[0]).getTexSheet(layer.parts[0]));
+			RenderLayer rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderLayer.getEntityTranslucent(cbi.getReturnValue());
+			rdh.renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rtc, 0));
+			setModelSlotVisible(model, layer);
+			VertexConsumer buffer = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rtc);
+			model.render(matrixstack, buffer, light, OverlayTexture.DEFAULT_UV, 1, 1, 1, 1);
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().unbindModel(model);
+		}
+	}
+
+	private void renderElytra(PlayerEntityModel<AbstractClientPlayerEntity> p, RDH rdh, int light, ModelDefinition def) {
+		if(def.hasRoot(RootModelType.ELYTRA_LEFT) || def.hasRoot(RootModelType.ELYTRA_RIGHT)) {
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindModel(modelElytra, mc.getBufferBuilders().getEntityVertexConsumers(), def, null, panel.getAnimMode());
+			CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, new Identifier("cpm:textures/template/elytra.png"));
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(modelElytra, cbi, TextureSheetType.ELYTRA);
+			RenderLayer rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderLayer.getEntityTranslucent(cbi.getReturnValue());
+			rdh.renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rtc, 0));
+			matrixstack.push();
+			matrixstack.translate(0.0D, 0.0D, 0.125D);
+			p.copyStateTo(modelElytra);
+			modelElytra.field_3365.pivotX = 5.0F;
+			modelElytra.field_3365.pivotY = 0;
+			modelElytra.field_3365.pitch = 0.2617994F;
+			modelElytra.field_3365.roll = -0.2617994F;
+			modelElytra.field_3365.yaw = 0;
+			modelElytra.field_3364.pivotX = -modelElytra.field_3365.pivotX;
+			modelElytra.field_3364.yaw = -modelElytra.field_3365.yaw;
+			modelElytra.field_3364.pivotY = modelElytra.field_3365.pivotY;
+			modelElytra.field_3364.pitch = modelElytra.field_3365.pitch;
+			modelElytra.field_3364.roll = -modelElytra.field_3365.roll;
+			VertexConsumer buffer = mc.getBufferBuilders().getEntityVertexConsumers().getBuffer(rtc);
+			modelElytra.render(matrixstack, buffer, light, OverlayTexture.DEFAULT_UV, 1.0F, 1.0F, 1.0F, 1.0F);
+			matrixstack.pop();
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().unbindModel(modelElytra);
+		}
+	}
+
+	protected void setModelSlotVisible(BipedEntityModel<AbstractClientPlayerEntity> modelIn, PlayerModelLayer slotIn) {
+		modelIn.setVisible(false);
+		switch(slotIn) {
+		case HELMET:
+			modelIn.head.visible = true;
+			modelIn.helmet.visible = true;
+			break;
+		case BODY:
+			modelIn.torso.visible = true;
+			modelIn.rightArm.visible = true;
+			modelIn.leftArm.visible = true;
+			break;
+		case LEGS:
+			modelIn.torso.visible = true;
+			modelIn.rightLeg.visible = true;
+			modelIn.leftLeg.visible = true;
+			break;
+		case BOOTS:
+			modelIn.rightLeg.visible = true;
+			modelIn.leftLeg.visible = true;
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -293,10 +381,5 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		Image rImg = new Image(size.x, size.y);
 		rImg.draw(img, 0, 0, size.x, size.y);
 		return rImg;
-	}
-
-	@Override
-	public boolean canRenderHeldItem() {
-		return true;
 	}
 }

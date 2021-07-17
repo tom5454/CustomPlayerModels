@@ -36,7 +36,10 @@ import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.effects.EffectColor;
 import com.tom.cpm.shared.effects.EffectGlow;
 import com.tom.cpm.shared.effects.EffectHide;
+import com.tom.cpm.shared.effects.EffectPerFaceUV;
 import com.tom.cpm.shared.effects.EffectScale;
+import com.tom.cpm.shared.effects.EffectSingleTexture;
+import com.tom.cpm.shared.effects.EffectUV;
 import com.tom.cpm.shared.io.ChecksumOutputStream;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.ModelFile;
@@ -44,7 +47,9 @@ import com.tom.cpm.shared.io.SkinDataOutputStream;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartAnimation;
 import com.tom.cpm.shared.parts.ModelPartCloneable;
@@ -52,14 +57,15 @@ import com.tom.cpm.shared.parts.ModelPartDefinition;
 import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
 import com.tom.cpm.shared.parts.ModelPartDupRoot;
 import com.tom.cpm.shared.parts.ModelPartEnd;
-import com.tom.cpm.shared.parts.ModelPartListIcon;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
 import com.tom.cpm.shared.parts.ModelPartPlayerPos;
 import com.tom.cpm.shared.parts.ModelPartRenderEffect;
+import com.tom.cpm.shared.parts.ModelPartRoot;
 import com.tom.cpm.shared.parts.ModelPartScale;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartTemplate;
+import com.tom.cpm.shared.parts.ModelPartTexture;
 import com.tom.cpm.shared.parts.ModelPartUUIDLockout;
 import com.tom.cpm.shared.template.Template;
 import com.tom.cpm.shared.util.Log;
@@ -157,7 +163,7 @@ public class Exporter {
 	private static ModelPartDefinition prepareDefinition(Editor e) throws IOException {
 		List<Cube> flatList = new ArrayList<>();
 		walkElements(e.elements, new int[] {10}, flatList);
-		ModelPartDefinition def = new ModelPartDefinition(e.skinProvider.isEdited() ? new ModelPartSkin(e) : null, flatList);
+		ModelPartDefinition def = new ModelPartDefinition(e.textures.get(TextureSheetType.SKIN).isEdited() ? new ModelPartSkin(e) : null, flatList);
 		ModelPartPlayer player = new ModelPartPlayer(e);
 		def.setPlayer(player);
 		List<IModelPart> otherParts = new ArrayList<>();
@@ -185,20 +191,34 @@ public class Exporter {
 				if(el.recolor) {
 					otherParts.add(new ModelPartRenderEffect(new EffectColor(el.id, el.rgb)));
 				}
+				if(el.singleTex) {
+					otherParts.add(new ModelPartRenderEffect(new EffectSingleTexture(el.id)));
+				}
+				if(el.faceUV != null) {
+					otherParts.add(new ModelPartRenderEffect(new EffectPerFaceUV(el.id, el.faceUV)));
+				} else if(el.u > 255 || el.v > 255) {
+					otherParts.add(new ModelPartRenderEffect(new EffectUV(el.id, el.u, el.v)));
+				}
 			}
 		});
 		for (ModelElement el : e.elements) {
-			if(el.type == ElementType.ROOT_PART && el.duplicated) {
-				if(!el.show)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
-				otherParts.add(new ModelPartDupRoot(el.id, (PlayerModelParts) el.typeData));
+			if(el.type == ElementType.ROOT_PART) {
+				if(el.duplicated && el.typeData instanceof PlayerModelParts) {
+					if(!el.show)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
+					otherParts.add(new ModelPartDupRoot(el.id, (PlayerModelParts) el.typeData));
+				} else if(el.typeData instanceof RootModelType){
+					if(!el.show)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
+					otherParts.add(new ModelPartRoot(el.id, (RootModelType) el.typeData));
+				}
 			}
 		}
 		if(!e.animations.isEmpty()) {
 			otherParts.add(new ModelPartAnimation(e));
 		}
-		if(e.listIconProvider != null) {
-			otherParts.add(new ModelPartListIcon(e));
-		}
+		e.textures.forEach((type, tex) -> {
+			if(type == TextureSheetType.SKIN)return;
+			otherParts.add(new ModelPartTexture(e, type));
+		});
 		for (EditorTemplate et : e.templates) {
 			otherParts.add(new ModelPartTemplate(et));
 		}
@@ -246,6 +266,7 @@ public class Exporter {
 			result.close();
 			return true;
 		} catch (ExportException ex) {
+			Log.error("Export exception", ex);
 			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 			return false;
 		} catch (Exception ex) {
@@ -324,9 +345,9 @@ public class Exporter {
 				map.put("data", d);
 				a.handler.applyArgs(data, a.effectedElems);
 			}
-			if(e.skinProvider.isEdited()) {
+			if(e.textures.get(TextureSheetType.SKIN).isEdited()) {
 				IOHelper h = new IOHelper();
-				e.skinProvider.write(h);
+				e.textures.get(TextureSheetType.SKIN).write(h);
 				data.put("texture", h.toB64());
 			}
 			data.put("name", desc.name);
@@ -355,7 +376,7 @@ public class Exporter {
 				flatList.add(me);
 				break;
 			case ROOT_PART:
-				if(me.duplicated) {
+				if(me.duplicated || me.typeData instanceof RootModelType) {
 					Cube fake = Cube.newFakeCube();
 					me.id = id[0]++;
 					fake.id = me.id;

@@ -28,6 +28,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(SkullTileEntityRenderer.class)
 public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<SkullTileEntity> {
@@ -45,25 +46,28 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 			method = "getRenderType(Lnet/minecraft/block/SkullBlock$ISkullType;Lcom/mojang/authlib/GameProfile;)"
 					+ "Lnet/minecraft/client/renderer/RenderType;")
 	private static RenderType onGetRenderType(ResourceLocation resLoc, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn) {
-		GenericHeadModel model = MODELS.get(skullType);
-		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi);
-		return RenderType.getEntityTranslucent(cbi.getReturnValue());
+		if (skullType == SkullBlock.Types.PLAYER) {
+			GenericHeadModel model = MODELS.get(skullType);
+			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
+			ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
+			return RenderType.getEntityTranslucent(cbi.getReturnValue());
+		} else return RenderType.getEntityTranslucent(resLoc);
 	}
 
 	@Redirect(at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/RenderType;getEntityCutoutNoCull("
-					+ "Lnet/minecraft/util/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;",
-					ordinal = 0
+					+ "Lnet/minecraft/util/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
 			),
 			method = "getRenderType(Lnet/minecraft/block/SkullBlock$ISkullType;Lcom/mojang/authlib/GameProfile;)"
 					+ "Lnet/minecraft/client/renderer/RenderType;")
 	private static RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn) {
-		GenericHeadModel model = MODELS.get(skullType);
-		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi);
-		return RenderType.getEntityTranslucent(cbi.getReturnValue());
+		if (skullType == SkullBlock.Types.PLAYER) {
+			GenericHeadModel model = MODELS.get(skullType);
+			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
+			ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
+			return RenderType.getEntityTranslucent(cbi.getReturnValue());
+		} else return RenderType.getEntityTranslucent(resLoc);
 	}
 
 	@Inject(at = @At("HEAD"),

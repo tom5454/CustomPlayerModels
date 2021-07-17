@@ -6,8 +6,10 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
 
+@Deprecated
 public class ModelPartListIcon implements IModelPart, IResolvedModelPart {
 	private TextureProvider image;
 
@@ -16,7 +18,7 @@ public class ModelPartListIcon implements IModelPart, IResolvedModelPart {
 	}
 
 	public ModelPartListIcon(Editor editor) {
-		this.image = editor.listIconProvider;
+		this.image = editor.textures.get(TextureSheetType.LIST_ICON).provider;
 	}
 
 	@Override
@@ -26,7 +28,7 @@ public class ModelPartListIcon implements IModelPart, IResolvedModelPart {
 
 	@Override
 	public void apply(ModelDefinition def) {
-		def.setListIconOverride(image);
+		def.setTexture(TextureSheetType.LIST_ICON, image);
 	}
 
 	@Override

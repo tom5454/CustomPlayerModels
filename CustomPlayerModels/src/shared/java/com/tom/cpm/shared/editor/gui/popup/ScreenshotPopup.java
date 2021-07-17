@@ -8,6 +8,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.util.ModelDescription;
@@ -16,6 +17,7 @@ import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 
@@ -128,13 +130,19 @@ public class ScreenshotPopup extends PopupPanel {
 		}
 
 		@Override
-		public TextureProvider getSkinOverride() {
-			return editor.renderTexture;
+		public TextureProvider getTexture(TextureSheetType key) {
+			ETextures tex = editor.textures.get(key);
+			return tex != null ? tex.getRenderTexture() : null;
 		}
 
 		@Override
 		public SkinType getSkinType() {
 			return editor.skinType;
+		}
+
+		@Override
+		public boolean hasRoot(VanillaModelPart type) {
+			return editor.elements.stream().map(e -> ((RootModelElement) e.rc).getPart()).anyMatch(t -> t == type);
 		}
 	}
 }

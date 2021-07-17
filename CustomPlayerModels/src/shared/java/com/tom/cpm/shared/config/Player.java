@@ -1,20 +1,16 @@
 package com.tom.cpm.shared.config;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.EnumMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import com.tom.cpl.util.Image;
-import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.SkinType;
-import com.tom.cpm.shared.util.LegacySkinConverter;
+import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public abstract class Player<P, M> {
 	private static boolean enableRendering = true;
@@ -22,43 +18,18 @@ public abstract class Player<P, M> {
 
 	private CompletableFuture<ModelDefinition> definition;
 	private EnumMap<AnimationMode, AnimationHandler> animHandler = new EnumMap<>(AnimationMode.class);
-	private CompletableFuture<Image> skinFuture;
-	private CompletableFuture<Void> loadFuture;
+	private PlayerTextureLoader textures;
 	public VanillaPose prevPose;
 	public IPose currentPose;
-	public String url;
 	public boolean forcedSkin;
 
-	public CompletableFuture<Image> getSkin() {
-		if(skinFuture != null)return skinFuture;
-		skinFuture = getSkin0();
-		if(skinFuture == null)return CompletableFuture.completedFuture(null);
-		return skinFuture;
-	}
-
-	private CompletableFuture<Image> getSkin0() {
-		if(MinecraftObjectHolder.DEBUGGING && new File("skin_test.png").exists()) {
-			return CompletableFuture.supplyAsync(() -> {
-				try {
-					return Image.loadFrom(new File("skin_test.png"));
-				} catch (IOException e) {
-					return null;
-				}
-			});
-		}
-		if(url == null)return null;
-		return Image.download(url).thenApply(LegacySkinConverter::processLegacySkin).exceptionally(e -> null);
-	}
-
-	public CompletableFuture<Void> loadSkin() {
-		if(loadFuture == null) {
-			loadFuture = loadSkin0();
-		}
-		return loadFuture;
+	public PlayerTextureLoader getTextures() {
+		if(textures == null)textures = initTextures();
+		return textures;
 	}
 
 	public abstract SkinType getSkinType();
-	public abstract CompletableFuture<Void> loadSkin0();
+	protected abstract PlayerTextureLoader initTextures();
 	public abstract UUID getUUID();
 	public abstract VanillaPose getPose();
 	public abstract int getEncodedGestureId();

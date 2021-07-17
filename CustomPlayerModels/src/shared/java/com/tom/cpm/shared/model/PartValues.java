@@ -8,4 +8,6 @@ public interface PartValues {
 	Vec3f getOffset();
 	Vec3f getSize();
 	Vec2i getUV();
+	boolean isMirror();
+	float getMCScale();
 }

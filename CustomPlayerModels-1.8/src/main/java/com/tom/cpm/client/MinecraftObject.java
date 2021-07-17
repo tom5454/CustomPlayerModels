@@ -33,7 +33,7 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
-import com.tom.cpm.shared.util.MojangSkinsAPI;
+import com.tom.cpm.shared.util.MojangSkinUploadAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	/** The default skin for the Steve model. */
@@ -184,13 +184,13 @@ public class MinecraftObject implements MinecraftClientAccess {
 		return new AWTImageIO();
 	}
 	@Override
-	public MojangSkinsAPI getMojangAPI() {
-		return new MojangSkinsAPI(mc.getSession().getProfile().getId(), mc.getSession().getToken());
+	public MojangSkinUploadAPI getUploadAPI() {
+		return new MojangSkinUploadAPI(mc.getSession().getProfile().getId(), mc.getSession().getToken());
 	}
 
 	@Override
 	public void clearSkinCache() {
-		MojangSkinsAPI.clearYggdrasilCache(mc.getSessionService());
+		MojangSkinUploadAPI.clearYggdrasilCache(mc.getSessionService());
 		mc.func_181037_M().clear();
 		mc.func_181037_M();//refresh
 	}

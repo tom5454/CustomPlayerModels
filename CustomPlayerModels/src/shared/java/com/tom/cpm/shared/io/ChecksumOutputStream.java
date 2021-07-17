@@ -18,6 +18,14 @@ public class ChecksumOutputStream extends OutputStream {
 	}
 
 	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		for (int i = 0 ; i < len ; i++) {
+			sum += Byte.toUnsignedInt(b[off + i]);
+		}
+		os.write(b, off, len);
+	}
+
+	@Override
 	public void flush() throws IOException {
 		os.flush();
 	}

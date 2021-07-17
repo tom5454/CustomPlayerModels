@@ -43,4 +43,17 @@ public class MouseEvent extends GuiEvent {
 	public boolean isInBounds(Box bounds) {
 		return bounds.isInBounds(x, y);
 	}
+
+	public MouseEvent cancelled() {
+		return new MouseEvent(x, y, btn) {
+			@Override
+			public boolean isConsumed() {
+				return true;
+			}
+		};
+	}
+
+	public boolean isHovered(Box bounds) {
+		return !isConsumed() && isInBounds(bounds);
+	}
 }

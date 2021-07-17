@@ -5,6 +5,7 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.PaintImageCreator;
@@ -15,7 +16,9 @@ public class EditorDefinition extends ModelDefinition {
 
 		@Override
 		public Vec2i getSize() {
-			return editor.renderTexture.size;
+			ETextures tex = editor.getTextureProvider();
+			if(tex != null)return tex.provider.size;
+			return new Vec2i(64, 64);
 		}
 	};
 
@@ -42,8 +45,12 @@ public class EditorDefinition extends ModelDefinition {
 	}
 
 	@Override
-	public TextureProvider getSkinOverride() {
-		return editor.renderPaint ? paint : editor.renderTexture;
+	public TextureProvider getTexture(TextureSheetType key) {
+		if(editor.renderPaint)return paint;
+		else {
+			ETextures tex = editor.textures.get(key);
+			return tex != null ? tex.getRenderTexture() : null;
+		}
 	}
 
 	@Override
@@ -59,5 +66,10 @@ public class EditorDefinition extends ModelDefinition {
 
 	public void bindFirstSetup() {
 		editor.applyAnimations();
+	}
+
+	@Override
+	public boolean hasRoot(VanillaModelPart type) {
+		return editor.elements.stream().map(e -> ((RootModelElement) e.rc).getPart()).anyMatch(t -> t == type);
 	}
 }

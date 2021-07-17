@@ -16,10 +16,10 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, 0xff888888);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, enabled ? 0xffaaaaaa : 0xff444444);
-		field.draw(mouseX, mouseY, partialTicks, bounds);
+		field.draw(event.x, event.y, partialTicks, bounds);
 	}
 	@Override
 	public void keyPressed(KeyboardEvent evt) {

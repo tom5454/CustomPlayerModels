@@ -180,7 +180,7 @@ public class Template {
 		}
 	}
 
-	public TextureProvider getTexture() {
+	public TextureProvider getTemplateDefaultTexture() {
 		return texture;
 	}
 }

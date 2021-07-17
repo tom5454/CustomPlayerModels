@@ -22,7 +22,7 @@ public class ScrollPanel extends Panel {
 		display.mouseWheel(event.offset(bounds).offset(-xScroll, -yScroll));
 		if(!event.isConsumed() && event.isInBounds(bounds)) {
 			int newScroll = yScroll - event.btn * 5;
-			yScroll = MathHelper.clamp(newScroll, 0, display.getBounds().h - bounds.h - 1);
+			yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h - 1, 0));
 			event.consume();
 		}
 	}
@@ -32,7 +32,7 @@ public class ScrollPanel extends Panel {
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent evt, float partialTicks) {
 		gui.pushMatrix();
 		Box bounds = getBounds();
 		gui.setPosOffset(bounds);
@@ -41,7 +41,7 @@ public class ScrollPanel extends Panel {
 		gui.setupCut();
 		Box b = display.getBounds();
 		gui.setPosOffset(new Box(-xScroll, -yScroll, b.w, b.h));
-		display.draw(mouseX - bounds.x + xScroll, mouseY - bounds.y + yScroll, partialTicks);
+		display.draw(evt.offset(bounds.x - xScroll, bounds.y - yScroll), partialTicks);
 		gui.popMatrix();
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);
@@ -53,7 +53,7 @@ public class ScrollPanel extends Panel {
 			float scroll = yScroll / (float) (display.getBounds().h - bounds.h);
 			int y = (int) (scroll * (bounds.h - h));
 			Box bar = new Box(bounds.x + scx, bounds.y + y, 3, (int) h);
-			gui.drawBox(scx, y, 3, h, bar.isInBounds(mouseX, mouseY) ? gui.getColors().button_hover : gui.getColors().button_disabled);
+			gui.drawBox(scx, y, 3, h, evt.isHovered(bar) ? gui.getColors().button_hover : gui.getColors().button_disabled);
 		}
 		gui.popMatrix();
 		gui.setupCut();
@@ -61,7 +61,7 @@ public class ScrollPanel extends Panel {
 
 	@Override
 	public void mouseClick(MouseEvent event) {
-		if(event.offset(bounds).isInBounds(new Box(scrollBarSide ? 0 : bounds.w - 3, 0, 3, bounds.h))) {
+		if(event.offset(bounds).isHovered(new Box(scrollBarSide ? 0 : bounds.w - 3, 0, 3, bounds.h))) {
 			dragX = event.x;
 			dragY = event.y;
 			xScOld = xScroll;
@@ -69,7 +69,11 @@ public class ScrollPanel extends Panel {
 			enableDrag = 1;
 			event.consume();
 		}
-		display.mouseClick(event.offset(bounds).offset(-xScroll, -yScroll));
+		MouseEvent e = event.offset(bounds).offset(-xScroll, -yScroll);
+		if(!event.isInBounds(bounds)) {
+			e = e.cancelled();
+		}
+		display.mouseClick(e);
 	}
 
 	@Override
@@ -85,7 +89,7 @@ public class ScrollPanel extends Panel {
 			{
 				int drag = (int) ((event.y - dragY) / (float) bounds.h * display.getBounds().h);
 				int newScroll = yScOld + drag;
-				yScroll = MathHelper.clamp(newScroll, 0, display.getBounds().h - bounds.h - 1);
+				yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h - 1, 0));
 			}
 			break;
 

@@ -14,13 +14,16 @@ import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
 import com.tom.cpm.shared.definition.Link;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.template.args.TexEditorArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
+import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.template.Template;
 import com.tom.cpm.shared.util.TextureStitcher;
 
@@ -138,8 +141,14 @@ public class EditorTemplate extends Template implements TreeElement {
 	}
 
 	@Override
-	public EditorTexture getTexture() {
-		return texArg != null ? (texArg.isTextureMerged() ? editor.skinProvider : tex) : null;
+	public ETextures getTexture() {
+		return texArg != null ? (texArg.isTextureMerged() ? editor.textures.get(TextureSheetType.SKIN) : new ETextures(editor, tex)) : null;
+	}
+
+	@Override
+	public TextureProvider getTemplateDefaultTexture() {
+		ETextures tex = getTexture();
+		return tex != null ? tex.provider : null;
 	}
 
 	public EditorTexture getTemplateTexture() {
@@ -154,16 +163,11 @@ public class EditorTemplate extends Template implements TreeElement {
 
 	@Override
 	public void delete() {
-		editor.addUndo(() -> {
-			editor.templates.add(this);
-			editor.restitchTexture();
-		});
-		editor.runOp(() -> {
-			editor.templates.remove(this);
-			editor.restitchTexture();
-		});
-		editor.selectedElement = null;
-		editor.markDirty();
+		editor.action("remove", "action.cpm.template").
+		removeFromList(editor.templates, this).
+		onAction(editor::restitchTextures).
+		onRun(() -> editor.selectedElement = null).
+		execute();
 		editor.updateGui();
 	}
 
