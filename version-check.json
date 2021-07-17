@@ -4,10 +4,10 @@
   "promos": {
     "1.12.2-latest": "0.0.17a",
     "1.12.2-recommended": "0.0.17a",
-    "1.16.4-latest": "0.0.17a",
-    "1.16.4-recommended": "0.0.17a",
-    "1.16.5-latest": "0.0.17a",
-    "1.16.5-recommended": "0.0.17a",
+    "1.16.4-latest": "0.0.17b",
+    "1.16.4-recommended": "0.0.17b",
+    "1.16.5-latest": "0.0.17b",
+    "1.16.5-recommended": "0.0.17b",
     "1.8.9-latest": "0.0.17a",
     "1.8.9-recommended": "0.0.17a",
     "1.7.10-latest": "0.0.17a",
@@ -73,7 +73,8 @@
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
-    "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code"
+    "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
+    "0.0.17b": "Fixed mixin crash on 1.16 forge"
   },
   "1.16.5": {
     "0.0.5a": "First release",
@@ -101,7 +102,8 @@
     "0.0.15a": "Added: spinner textfields can calculate expressions\n\nFixed tools menu buttons not displaying correctly\nFixed crash with 1.17 when wearing a player head (Closes #96)\nFixed Open editor button not displaying in 1.17 (Closes #94)\nFixed gui scale not resetting correctly (#94)\nFixed animations breaking in certain cases\nFixed move UV not working with texture size larger then 1",
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
-    "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code"
+    "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
+    "0.0.17b": "Fixed mixin crash on 1.16 forge"
   },
   "1.16.4-fabric": {
     "0.0.5a": "First release",
