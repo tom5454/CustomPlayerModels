@@ -771,6 +771,24 @@ public class Editor {
 		}
 		List<String> anims = project.listEntires("animations");
 		scaling = ((Number)data.getOrDefault("scaling", 0)).floatValue();
+		for(TextureSheetType tex : TextureSheetType.VALUES) {
+			String name = tex.name().toLowerCase();
+			ze = project.getEntry(name + ".png");
+			if(ze != null) {
+				Image img = Image.loadFrom(new ByteArrayInputStream(ze));
+				if(img.getWidth() > tex.texLimit || img.getHeight() > tex.texLimit) {
+					Log.error("Illegal image size for texture: " + name);
+					continue;
+				}
+				ETextures eTex = textures.get(tex);
+				if(eTex == null)eTex = new ETextures(this, tex);
+				textures.put(tex, eTex);
+				eTex.setImage(img);
+				eTex.markDirty();
+				Map<String, Object> skinTexSize = (Map<String, Object>) data.get(name + "Size");
+				eTex.provider.size = new Vec2i(((Number)skinTexSize.get("x")).intValue(), ((Number)skinTexSize.get("y")).intValue());
+			}
+		}
 		if(anims != null) {
 			for (String anim : anims) {
 				try(InputStreamReader rd = new InputStreamReader(project.getAsStream("animations/" + anim))) {
@@ -808,24 +826,6 @@ public class Editor {
 				for (Map<String,Object> map : frames) {
 					e.loadFrame(map);
 				}
-			}
-		}
-		for(TextureSheetType tex : TextureSheetType.VALUES) {
-			String name = tex.name().toLowerCase();
-			ze = project.getEntry(name + ".png");
-			if(ze != null) {
-				Image img = Image.loadFrom(new ByteArrayInputStream(ze));
-				if(img.getWidth() > tex.texLimit || img.getHeight() > tex.texLimit) {
-					Log.error("Illegal image size for texture: " + name);
-					continue;
-				}
-				ETextures eTex = textures.get(tex);
-				if(eTex == null)eTex = new ETextures(this, tex);
-				textures.put(tex, eTex);
-				eTex.setImage(img);
-				eTex.markDirty();
-				Map<String, Object> skinTexSize = (Map<String, Object>) data.get(name + "Size");
-				eTex.provider.size = new Vec2i(((Number)skinTexSize.get("x")).intValue(), ((Number)skinTexSize.get("y")).intValue());
 			}
 		}
 		ze = project.getEntry("anim_enc.json");
