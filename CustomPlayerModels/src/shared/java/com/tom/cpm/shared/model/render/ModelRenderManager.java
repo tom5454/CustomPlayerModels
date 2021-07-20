@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.math.MatrixStack;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.RenderTypes;
@@ -28,6 +30,8 @@ import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.Log;
 
 public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderManager {
 	public static final Predicate<Player<?, ?>> ALWAYS = p -> true;
@@ -76,18 +80,11 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 	}
 
 	public void bindModel(MB model, String arg, D addDt, ModelDefinition def, Player<?, MB> player, AnimationMode mode) {
-		getHolder(model, arg).swapIn(def, addDt, player, mode);
+		getHolderSafe(model, arg, h -> h.swapIn(def, addDt, player, mode));
 	}
 
 	public void bindModel(MB model, D addDt, ModelDefinition def, Player<?, MB> player, AnimationMode mode) {
-		getHolder(model, null).swapIn(def, addDt, player, mode);
-	}
-
-	@SuppressWarnings("unchecked")
-	private RedirectHolder<MB, D, S, P> create(MB model, String arg) {
-		RedirectHolder<MB, D, S, P> r = (RedirectHolder<MB, D, S, P>) factory.create(model, arg);
-		if(r == null)throw new IllegalArgumentException("Tried to create RedirectHolder for unknown model type: " + model.getClass());
-		return r;
+		bindModel(model, null, addDt, def, player, mode);
 	}
 
 	public void unbindModel(MB model) {
@@ -96,27 +93,51 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 	}
 
 	public void bindSkin(MB model, String arg, S cbi, TextureSheetType tex) {
-		getHolder(model, arg).bindTexture(cbi, tex);
+		getHolderSafe(model, arg, h -> h.bindTexture0(cbi, tex));
 	}
 
-	public void bindSkin(MB model,S cbi, TextureSheetType tex) {
-		getHolder(model, null).bindTexture(cbi, tex);
+	public void bindSkin(MB model, S cbi, TextureSheetType tex) {
+		bindSkin(model, null, cbi, tex);
 	}
 
 	public boolean isBound(MB model, String arg) {
-		return getHolder(model, arg).swappedIn;
+		return getHolderSafe(model, arg, h -> h.swappedIn, false);
 	}
 
 	public boolean isBound(MB model) {
-		return getHolder(model, null).swappedIn;
+		return isBound(model, null);
 	}
 
-	public RedirectHolder<MB, D, S, P> getHolder(MB model, String arg) {
-		return holders.computeIfAbsent(model, m -> create(m, arg));
+	@SuppressWarnings("unchecked")
+	public <R> R getHolderSafe(MB model, String arg, Function<RedirectHolder<MB, D, S, P>, R> func, R def) {
+		RedirectHolder<MB, D, S, P> h = holders.get(model);
+		if(h == null) {
+			h = (RedirectHolder<MB, D, S, P>) factory.create(model, arg);
+			if(h != null)holders.put(model, h);
+		}
+		if(h == null)return def;
+		else return func.apply(h);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void getHolderSafe(MB model, String arg, Consumer<RedirectHolder<MB, D, S, P>> func) {
+		RedirectHolder<MB, D, S, P> h = holders.get(model);
+		if(h == null) {
+			h = (RedirectHolder<MB, D, S, P>) factory.create(model, arg);
+			if(h != null)holders.put(model, h);
+		}
+		if(h != null)func.accept(h);
+	}
+
+	@SuppressWarnings("unchecked")
+	private RedirectHolder<MB, D, S, P> create(MB model) {
+		RedirectHolder<MB, D, S, P> r = (RedirectHolder<MB, D, S, P>) factory.create(model, null);
+		if(r == null)throw new IllegalArgumentException("Tried to create RedirectHolder for unknown model type: " + model.getClass());
+		return r;
 	}
 
 	public RedirectHolder<MB, D, S, P> getHolder(MB model) {
-		return getHolder(model, null);
+		return holders.computeIfAbsent(model, this::create);
 	}
 
 	public void copyModelForArmor(P from, P to) {
@@ -125,14 +146,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 	}
 
 	public static interface RedirectHolderFactory<D, S, P> {
-
-		default <M> RedirectHolder<?, D, S, P> create(M model, String arg) {
-			return create(model);
-		}
-
-		default <M> RedirectHolder<?, D, S, P> create(M model) {
-			return null;
-		}
+		<M> RedirectHolder<?, D, S, P> create(M model, String arg);
 	}
 
 	public static abstract class RedirectHolder<M, D, S, P> {
@@ -144,11 +158,12 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public D addDt;
 		public List<Field<P>> modelFields;
 		public List<RedirectRenderer<P>> redirectRenderers;
-		public boolean skinBound;
+		public boolean preRenderSetup, skinBound;
 		public Map<RedirectRenderer<P>, RedirectDataHolder<P>> partData;
 		public Player<?, M> playerObj;
 		public AnimationMode mode;
 		public RenderTypes<RenderMode> renderTypes;
+		private boolean loggedWarning;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
 			this.model = model;
@@ -178,6 +193,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			this.def = null;
 			this.addDt = null;
 			skinBound = false;
+			preRenderSetup = false;
 			this.renderTypes.clear();
 			this.playerObj = null;
 			if(!swappedIn)return;
@@ -189,14 +205,29 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			swappedIn = false;
 		}
 
-		protected abstract void bindTexture(S cbi, TextureSheetType tex);
+		private void bindTexture0(S cbi, TextureSheetType tex) {
+			if(def == null)return;
+			TextureProvider skin = def.getTexture(tex);
+			if(skin != null && skin.texture != null) {
+				bindTexture(cbi, skin);
+				sheetX = skin.getSize().x;
+				sheetY = skin.getSize().y;
+			} else {
+				Vec2i s = tex.getDefSize();
+				sheetX = s.x;
+				sheetY = s.y;
+			}
+			setupRenderSystem(cbi, tex);
+		}
+
+		protected void setupRenderSystem(S cbi, TextureSheetType tex) {}
+		protected void bindTexture(S cbi, TextureProvider skin) {}
 		protected abstract void swapIn0();
 		protected abstract void swapOut0();
 		protected void bindSkin() {}
 
 		@SuppressWarnings("unchecked")
 		protected void bindFirstSetup() {
-			bindSkin();
 			for (int i = 0; i < redirectRenderers.size(); i++) {
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();
@@ -239,6 +270,13 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected boolean skipTransform(RedirectRenderer<P> part) {
 			return false;
 		}
+
+		public void logWarning() {
+			if(!loggedWarning) {
+				Log.warn("Failed to render element for model " + model.getClass() + " render system isn't initialized correctly, please report this to the mod author");
+				loggedWarning = true;
+			}
+		}
 	}
 
 	private static class RedirectDataHolder<P> {
@@ -280,9 +318,13 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				if(holder.def != null) {
 					RedirectDataHolder<P> dh = holder.partData.get(this);
 					VanillaModelPart part = getPart();
+					if(!holder.preRenderSetup) {
+						holder.preRenderSetup = true;
+						holder.bindFirstSetup();
+					}
 					if(!holder.skinBound) {
 						holder.skinBound = true;
-						holder.bindFirstSetup();
+						holder.bindSkin();
 					}
 					if(part == null) {
 						if(dh.copyFrom != null) {
@@ -336,18 +378,30 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		}
 
 		public static void translateRotate(RenderedCube rc, MatrixStack matrixStackIn) {
-			matrixStackIn.translate(rc.pos.x / 16.0F, rc.pos.y / 16.0F, rc.pos.z / 16.0F);
-			if (rc.rotation.z != 0.0F) {
-				matrixStackIn.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rc.rotation.z));
+			translateRotate(rc.pos.x, rc.pos.y, rc.pos.z, rc.rotation.x, rc.rotation.y, rc.rotation.z, matrixStackIn);
+		}
+
+		public static void translateRotate(float px, float py, float pz, float rx, float ry, float rz, MatrixStack matrixStackIn) {
+			matrixStackIn.translate(px / 16.0F, py / 16.0F, pz / 16.0F);
+			if (rz != 0.0F) {
+				matrixStackIn.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rz));
 			}
 
-			if (rc.rotation.y != 0.0F) {
-				matrixStackIn.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rc.rotation.y));
+			if (ry != 0.0F) {
+				matrixStackIn.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(ry));
 			}
 
-			if (rc.rotation.x != 0.0F) {
-				matrixStackIn.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rc.rotation.x));
+			if (rx != 0.0F) {
+				matrixStackIn.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rx));
 			}
+		}
+
+		@SuppressWarnings("unchecked")
+		public default void translateRotate(MatrixStack matrixStackIn) {
+			RedirectHolder<?, ?, ?, P> holder = getHolder();
+			ModelRenderManager<?, ?, P, ?> m = holder.mngr;
+			P tp = (P) this;
+			translateRotate(m.px.apply(tp), m.py.apply(tp), m.pz.apply(tp), m.rx.apply(tp), m.ry.apply(tp), m.rz.apply(tp), matrixStackIn);
 		}
 
 		public default void render(RenderedCube elem, MatrixStack matrixStackIn, VBuffers buf, float red, float green, float blue, float alpha) {
@@ -410,7 +464,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		public default void doRender0(RootModelElement elem) {
 			MatrixStack stack = new MatrixStack();
-			translateRotate(elem, stack);
+			translateRotate(stack);
 			VBuffers buf = getVBuffers().replay();
 			drawSelect(elem, stack, buf);
 			Vec4f color = getColor();

@@ -22,4 +22,8 @@ public class RenderTypes<E extends Enum<E>> {
 	public void clear() {
 		types.clear();
 	}
+
+	public boolean isInitialized() {
+		return !types.isEmpty();
+	}
 }

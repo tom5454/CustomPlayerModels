@@ -73,6 +73,7 @@ public class PerFaceUV {
 	public static class Face {
 		public int sx, sy, ex, ey;
 		public Rot rotation = Rot.ROT_0;
+		public boolean autoUV;
 
 		public Face() {}
 
@@ -82,6 +83,7 @@ public class PerFaceUV {
 			ex = f.ex;
 			ey = f.ey;
 			rotation = f.rotation;
+			autoUV = f.autoUV;
 		}
 
 		private Face(Map<String, Object> m) {
@@ -96,13 +98,15 @@ public class PerFaceUV {
 					break;
 				}
 			}
+			autoUV = (boolean) m.getOrDefault("autoUV", false);
 		}
 
-		public Face(int sx, int sy, int ex, int ey) {
+		private Face(int sx, int sy, int ex, int ey) {
 			this.sx = sx;
 			this.sy = sy;
 			this.ex = ex;
 			this.ey = ey;
+			autoUV = true;
 		}
 
 		public static Face load(Map<String, Object> m) {
@@ -117,6 +121,7 @@ public class PerFaceUV {
 			m.put("ex", ex);
 			m.put("ey", ey);
 			m.put("rot", rotation.name().toLowerCase().substring(4));
+			m.put("autoUV", autoUV);
 			return m;
 		}
 
@@ -217,5 +222,11 @@ public class PerFaceUV {
 		Face f = faces.get(key);
 		if(f == null)return Rot.ROT_0;
 		else return f.rotation;
+	}
+
+	public Boolean isAutoUV(Dir key) {
+		Face f = faces.get(key);
+		if(f == null)return false;
+		else return f.autoUV;
 	}
 }

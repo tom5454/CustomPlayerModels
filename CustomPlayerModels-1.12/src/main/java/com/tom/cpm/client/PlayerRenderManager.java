@@ -5,6 +5,8 @@ import static com.tom.cpm.client.PlayerModelSetup.scale;
 import java.util.function.Supplier;
 
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelBiped;
+import net.minecraft.client.model.ModelElytra;
 import net.minecraft.client.model.ModelHumanoidHead;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
@@ -14,7 +16,7 @@ import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.PlayerModelParts;
-import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
 import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -26,16 +28,19 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		super(loader);
 		setFactory(new RedirectHolderFactory<Void, Void, ModelRenderer>() {
 
-			@SuppressWarnings("unchecked")
 			@Override
-			public <M> RedirectHolder<M, Void, Void, ModelRenderer> create(
-					M model) {
+			public <M> RedirectHolder<?, Void, Void, ModelRenderer> create(
+					M model, String arg) {
 				if(model instanceof ModelPlayer) {
-					return (RedirectHolder<M, Void, Void, ModelRenderer>)
-							new RedirectHolderPlayer(PlayerRenderManager.this, (ModelPlayer) model);
+					return new RedirectHolderPlayer(PlayerRenderManager.this, (ModelPlayer) model);
 				} else if(model instanceof ModelHumanoidHead) {
-					return (RedirectHolder<M, Void, Void, ModelRenderer>)
-							new RedirectHolderSkull(PlayerRenderManager.this, (ModelHumanoidHead) model);
+					return new RedirectHolderSkull(PlayerRenderManager.this, (ModelHumanoidHead) model);
+				} else if(model instanceof ModelElytra) {
+					return new RedirectHolderElytra(PlayerRenderManager.this, (ModelElytra) model);
+				} else if(model instanceof ModelBiped && "armor1".equals(arg)) {
+					return new RedirectHolderArmor1(PlayerRenderManager.this, (ModelBiped) model);
+				} else if(model instanceof ModelBiped && "armor2".equals(arg)) {
+					return new RedirectHolderArmor2(PlayerRenderManager.this, (ModelBiped) model);
 				}
 				return null;
 			}
@@ -86,6 +91,8 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			register(new Field<>(() -> model.bipedLeftLegwear , v -> model.bipedLeftLegwear  = v, null));
 			register(new Field<>(() -> model.bipedRightLegwear, v -> model.bipedRightLegwear = v, null));
 			register(new Field<>(() -> model.bipedBodyWear    , v -> model.bipedBodyWear     = v, null));
+
+			register(new Field<>(() -> model.bipedCape        , v -> model.bipedCape     = v, RootModelType.CAPE));
 		}
 
 		@Override
@@ -113,7 +120,46 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 	}
 
+	private static class RedirectHolderElytra extends RDH {
+
+		public RedirectHolderElytra(PlayerRenderManager mngr, ModelElytra model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.rightWing, v -> model.rightWing = v, RootModelType.ELYTRA_RIGHT));
+			register(new Field<>(() -> model.leftWing,  v -> model.leftWing  = v, RootModelType.ELYTRA_LEFT));
+		}
+
+	}
+
+	private static class RedirectHolderArmor1 extends RDH {
+
+		public RedirectHolderArmor1(PlayerRenderManager mngr, ModelBiped model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.bipedHead,     v -> model.bipedHead     = v, RootModelType.ARMOR_HELMET));
+			register(new Field<>(() -> model.bipedBody,     v -> model.bipedBody     = v, RootModelType.ARMOR_BODY));
+			register(new Field<>(() -> model.bipedRightArm, v -> model.bipedRightArm = v, RootModelType.ARMOR_RIGHT_ARM));
+			register(new Field<>(() -> model.bipedLeftArm,  v -> model.bipedLeftArm  = v, RootModelType.ARMOR_LEFT_ARM));
+			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, RootModelType.ARMOR_RIGHT_FOOT));
+			register(new Field<>(() -> model.bipedLeftLeg,  v -> model.bipedLeftLeg  = v, RootModelType.ARMOR_LEFT_FOOT));
+		}
+
+	}
+
+	private static class RedirectHolderArmor2 extends RDH {
+
+		public RedirectHolderArmor2(PlayerRenderManager mngr, ModelBiped model) {
+			super(mngr, model);
+
+			register(new Field<>(() -> model.bipedBody,     v -> model.bipedBody     = v, RootModelType.ARMOR_LEGGINGS_BODY));
+			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, RootModelType.ARMOR_RIGHT_LEG));
+			register(new Field<>(() -> model.bipedLeftLeg,  v -> model.bipedLeftLeg  = v, RootModelType.ARMOR_LEFT_LEG));
+		}
+
+	}
+
 	private abstract static class RDH extends ModelRenderManager.RedirectHolder<ModelBase, Void, Void, ModelRenderer> {
+		private TextureProvider skin;
 
 		public RDH(ModelRenderManager<Void, Void, ModelRenderer, ModelBase> mngr, ModelBase model) {
 			super(mngr, model);
@@ -121,23 +167,24 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 		@Override
 		protected void bindSkin() {
-			TextureProvider skin = def.getSkinOverride();
-			if(skin != null) {
-				if(!def.isEditor())skin.bind();
-				sheetX = skin.getSize().x;
-				sheetY = skin.getSize().y;
-			} else {
-				sheetX = 64;
-				sheetY = 64;
-			}
+			if(skin != null && !def.isEditor())skin.bind();
 			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RetroGL.texture(), 0));
 			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RetroGL.eyes(), 1));
 			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RetroGL.linesNoDepth(), 2));
 			renderTypes.put(RenderMode.COLOR, new NativeRenderType(RetroGL.color(), 0));
 		}
 
-		@Override protected void bindTexture(Void cbi, TextureSheetType tex) {}
-		@Override public void swapOut0() {}
+		@Override
+		protected void bindTexture(Void cbi, TextureProvider skin) {
+			this.skin = skin;
+			skinBound = false;
+		}
+
+		@Override
+		public void swapOut0() {
+			skin = null;
+		}
+
 		@Override public void swapIn0() {}
 	}
 

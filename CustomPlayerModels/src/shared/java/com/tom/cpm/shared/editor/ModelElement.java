@@ -267,6 +267,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			else {
 				editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir));
 				editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir));
+				editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir));
 			}
 			if(!singleTex)editor.setPerFaceUV.accept(this.faceUV != null);
 			editor.updateName.accept(this.name);
@@ -415,7 +416,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	private void duplicate() {
 		if(type == ElementType.NORMAL) {
 			ModelElement elem = new ModelElement(this, parent);
-			editor.action("duplicate").addToList(editor.elements, elem).onUndo(() -> editor.selectedElement = null).execute();
+			editor.action("duplicate").addToList(children, elem).onUndo(() -> editor.selectedElement = null).execute();
 			editor.selectedElement = elem;
 			editor.updateGui();
 		} else if(type == ElementType.ROOT_PART) {

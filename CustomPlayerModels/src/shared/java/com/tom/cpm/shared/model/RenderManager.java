@@ -80,6 +80,16 @@ public class RenderManager<G, P, M, D> {
 		tryBindModel(null, player, buffer, model, "armor" + layer, AnimationMode.PLAYER);
 	}
 
+	public void bindSkin(M model, TextureSheetType tex) {
+		renderManager.bindSkin(model, null, tex);
+	}
+
+	public void bindSkin(TextureSheetType tex) {
+		if(profile != null) {
+			bindSkin(profile.getModel(), tex);
+		}
+	}
+
 	public Player<P, M> getBoundPlayer() {
 		return profile;
 	}

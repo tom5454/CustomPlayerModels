@@ -32,6 +32,12 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 
 	@Override
 	public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+		if(!holder.renderTypes.isInitialized()) {
+			holder.copyModel(this, parent);
+			parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+			holder.logWarning();
+			return;
+		}
 		RenderType lastRenderType = null;
 		IRenderTypeBuffer.Impl renderTypeBuffer = null;
 		if (this.cpm$textureLocation() != null) {

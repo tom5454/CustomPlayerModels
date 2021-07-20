@@ -137,11 +137,7 @@ public class AnimPanel extends Panel {
 		Checkbox boxShow = new Checkbox(gui, gui.i18nFormat("label.cpm.visible"));
 		boxShow.setBounds(new Box(5, 230, 60, 18));
 		boxShow.setAction(editor::switchAnimShow);
-		editor.setAnimShow.add(b -> {
-			boxShow.setEnabled(b != null);
-			if(b != null)boxShow.setSelected(b);
-			else boxShow.setSelected(false);
-		});
+		editor.setAnimShow.add(boxShow::updateState);
 		addElement(boxShow);
 
 		Button encSettings = new Button(gui, gui.i18nFormat("button.cpm.animEncSettings"), () -> e.openPopup(new AnimEncConfigPopup(gui, editor, null)));

@@ -1,10 +1,11 @@
 accessWidener	v1	named
-accessible field net/minecraft/client/render/entity/model/PlayerEntityModel parts Ljava/util/List; 
 mutable field net/minecraft/client/render/entity/model/PlayerEntityModel leftSleeve Lnet/minecraft/client/model/ModelPart;
 mutable field net/minecraft/client/render/entity/model/PlayerEntityModel rightSleeve Lnet/minecraft/client/model/ModelPart;
 mutable field net/minecraft/client/render/entity/model/PlayerEntityModel leftPantLeg Lnet/minecraft/client/model/ModelPart;
 mutable field net/minecraft/client/render/entity/model/PlayerEntityModel rightPantLeg Lnet/minecraft/client/model/ModelPart;
 mutable field net/minecraft/client/render/entity/model/PlayerEntityModel jacket Lnet/minecraft/client/model/ModelPart;
+mutable field net/minecraft/client/render/entity/model/PlayerEntityModel cape Lnet/minecraft/client/model/ModelPart;
+accessible field net/minecraft/client/render/entity/model/PlayerEntityModel cape Lnet/minecraft/client/model/ModelPart;
 
 accessible field net/minecraft/client/model/ModelPart cuboids Lit/unimi/dsi/fastutil/objects/ObjectList;
 accessible field net/minecraft/client/model/ModelPart children Lit/unimi/dsi/fastutil/objects/ObjectList;

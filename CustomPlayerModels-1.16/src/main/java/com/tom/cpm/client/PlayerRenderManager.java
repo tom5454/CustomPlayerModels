@@ -92,24 +92,19 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		}
 
 		@Override
-		public void bindTexture(CallbackInfoReturnable<ResourceLocation> cbi, TextureSheetType tex) {
-			if(def == null)return;
-			TextureProvider skin = def.getTexture(tex);
-			if(skin != null && skin.texture != null) {
-				skin.bind();
-				OptifineTexture.applyOptifineTexture(cbi.getReturnValue(), skin);
-				cbi.setReturnValue(DynTexture.getBoundLoc());
-				sheetX = skin.getSize().x;
-				sheetY = skin.getSize().y;
-			} else {
-				sheetX = 64;
-				sheetY = 64;
-			}
+		public void setupRenderSystem(CallbackInfoReturnable<ResourceLocation> cbi, TextureSheetType tex) {
 			boundSkin = cbi.getReturnValue();
 			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RenderType.getEntityTranslucent(boundSkin), 0));
 			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderType.getEyes(boundSkin), 1));
 			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(CustomRenderTypes.getLinesNoDepth(), 2));
 			renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
+		}
+
+		@Override
+		protected void bindTexture(CallbackInfoReturnable<ResourceLocation> cbi, TextureProvider skin) {
+			skin.bind();
+			OptifineTexture.applyOptifineTexture(cbi.getReturnValue(), skin);
+			cbi.setReturnValue(DynTexture.getBoundLoc());
 		}
 
 		@Override
@@ -282,6 +277,12 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 
 		@Override
 		public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+			if(!holder.renderTypes.isInitialized()) {
+				holder.copyModel(this, parent);
+				parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+				holder.logWarning();
+				return;
+			}
 			this.matrixStackIn   = matrixStackIn  ;
 			this.bufferIn        = bufferIn       ;
 			this.packedLightIn   = packedLightIn  ;

@@ -80,11 +80,7 @@ public class PosPanel extends Panel {
 			Checkbox box = new Checkbox(gui, gui.i18nFormat("label.cpm.mirror"));
 			box.setBounds(new Box(80, 10, 70, 18));
 			box.setAction(editor::switchMirror);
-			editor.setMirror.add(b -> {
-				box.setEnabled(b != null);
-				if(b != null)box.setSelected(b);
-				else box.setSelected(false);
-			});
+			editor.setMirror.add(box::updateState);
 			panel.addElement(box);
 		}
 		ElementGroup<ModeDisplType, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);

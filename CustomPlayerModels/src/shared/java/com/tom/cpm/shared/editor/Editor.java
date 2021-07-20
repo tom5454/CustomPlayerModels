@@ -130,6 +130,7 @@ public class Editor {
 	public Updater<EditorTool> setTool = updaterReg.create();
 	public Updater<Vec4f> setFaceUVs = updaterReg.create();
 	public Updater<Rot> setFaceRot = updaterReg.create();
+	public Updater<Boolean> setAutoUV = updaterReg.create();
 
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
@@ -1257,7 +1258,7 @@ public class Editor {
 		elems.forEach(e -> ab.addToList(elements, e));
 		ab.onUndo(() -> selectedElement = null);
 		Arrays.stream(group.types).map(group::getTexSheet).distinct().forEach(tx -> {
-			if(tx.editable && !textures.containsKey(tx)) {
+			if(!textures.containsKey(tx)) {
 				ETextures tex = new ETextures(this, tx);
 				ab.addToMap(textures, tx, tex);
 				tex.provider.size = tx.getDefSize();

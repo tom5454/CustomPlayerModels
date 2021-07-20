@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
+import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.DropDownBox;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Spinner;
@@ -16,6 +17,7 @@ import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpm.shared.editor.Editor;
@@ -62,14 +64,29 @@ public class PerfaceUVPanel extends Panel {
 				ActionBuilder ab = editor.action("set", "action.cpm.texUV");
 				Face f = getFace(editor, ab);
 				Vec4f v = new Vec4f(spinnerSU.getValue(), spinnerSV.getValue(), spinnerEU.getValue(), spinnerEV.getValue());
+				if(f.autoUV) {
+					autoUV(v, editor.perfaceFaceDir, el.size);
+					editor.setFaceUVs.accept(v);
+				}
 				ab.updateValueOp(f, f.getVec(), v, Face::set);
+				ab.execute();
+			}
+		};
+		Runnable r2 = () -> {
+			ModelElement el = editor.getSelectedElement();
+			if(el != null && el.faceUV != null) {
+				ActionBuilder ab = editor.action("set", "action.cpm.texUV");
+				Face f = getFace(editor, ab);
+				Vec4f v = new Vec4f(spinnerSU.getValue(), spinnerSV.getValue(), spinnerEU.getValue(), spinnerEV.getValue());
+				ab.updateValueOp(f, f.getVec(), v, Face::set);
+				ab.updateValueOp(f, f.autoUV, false, (a, b) -> a.autoUV = b);
 				ab.execute();
 			}
 		};
 		spinnerSU.addChangeListener(r);
 		spinnerSV.addChangeListener(r);
-		spinnerEU.addChangeListener(r);
-		spinnerEV.addChangeListener(r);
+		spinnerEU.addChangeListener(r2);
+		spinnerEV.addChangeListener(r2);
 
 		tabHandler.add(spinnerSU);
 		tabHandler.add(spinnerSV);
@@ -106,47 +123,25 @@ public class PerfaceUVPanel extends Panel {
 		editor.setFaceRot.add(rot -> rots.setSelected(rotMap.get(rot)));
 		addElement(rots);
 
-		Button autoUV = new Button(gui, gui.i18nFormat("button.cpm.auto_uv"), () -> {
+		Checkbox autoUV = new Checkbox(gui, gui.i18nFormat("label.cpm.auto_uv"));
+		autoUV.setAction(() -> {
+			autoUV.setSelected(!autoUV.isSelected());
 			ModelElement el = editor.getSelectedElement();
 			if(el != null && el.faceUV != null) {
 				ActionBuilder ab = editor.action("autoUV");
 				Face f = getFace(editor, ab);
-				int dx = MathHelper.ceil(el.size.x);
-				int dy = MathHelper.ceil(el.size.y);
-				int dz = MathHelper.ceil(el.size.z);
-				Vec4f v = f.getVec();
-				int tx = (int) v.x;
-				int ty = (int) v.y;
-				switch (editor.perfaceFaceDir) {
-				case NORTH:
-				case SOUTH:
-					tx += dx;
-					ty += dy;
-					break;
-
-				case UP:
-				case DOWN:
-					tx += dx;
-					ty += dz;
-					break;
-
-				case EAST:
-				case WEST:
-					tx += dz;
-					ty += dy;
-					break;
-
-				default:
-					break;
+				ab.updateValueOp(f, f.autoUV, autoUV.isSelected(), (a, b) -> a.autoUV = b);
+				if(!f.autoUV) {
+					Vec4f v = f.getVec();
+					autoUV(v, editor.perfaceFaceDir, el.size);
+					ab.updateValueOp(f, f.getVec(), v, Face::set);
+					editor.setFaceUVs.accept(v);
 				}
-				v.z = tx;
-				v.w = ty;
-				ab.updateValueOp(f, f.getVec(), v, Face::set);
 				ab.execute();
-				editor.updateGui();
 			}
 		});
 		autoUV.setBounds(new Box(5, 70, 60, 18));
+		editor.setAutoUV.add(autoUV::updateState);
 		addElement(autoUV);
 
 		ButtonIcon delBtn = new ButtonIcon(gui, "editor", 14, 16, () -> {
@@ -183,7 +178,7 @@ public class PerfaceUVPanel extends Panel {
 		addElement(toAllUVs);
 	}
 
-	private Face getFace(Editor editor, ActionBuilder ab) {
+	private static Face getFace(Editor editor, ActionBuilder ab) {
 		ModelElement el = editor.getSelectedElement();
 		Face f = el.faceUV.faces.get(editor.perfaceFaceDir);
 		if(f == null) {
@@ -191,5 +186,37 @@ public class PerfaceUVPanel extends Panel {
 			ab.addToMap(el.faceUV.faces, editor.perfaceFaceDir, f);
 		}
 		return f;
+	}
+
+	private static void autoUV(Vec4f v, Dir dir, Vec3f size) {
+		int dx = MathHelper.ceil(size.x);
+		int dy = MathHelper.ceil(size.y);
+		int dz = MathHelper.ceil(size.z);
+		int tx = (int) v.x;
+		int ty = (int) v.y;
+		switch (dir) {
+		case NORTH:
+		case SOUTH:
+			tx += dx;
+			ty += dy;
+			break;
+
+		case UP:
+		case DOWN:
+			tx += dx;
+			ty += dz;
+			break;
+
+		case EAST:
+		case WEST:
+			tx += dz;
+			ty += dy;
+			break;
+
+		default:
+			break;
+		}
+		v.z = tx;
+		v.w = ty;
 	}
 }

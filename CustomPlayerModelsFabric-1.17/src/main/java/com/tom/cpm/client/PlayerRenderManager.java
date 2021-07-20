@@ -89,23 +89,18 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		}
 
 		@Override
-		public void bindTexture(CallbackInfoReturnable<Identifier> cbi, TextureSheetType tex) {
-			if(def == null)return;
-			TextureProvider skin = def.getTexture(tex);
-			if(skin != null && skin.texture != null) {
-				skin.bind();
-				cbi.setReturnValue(DynTexture.getBoundLoc());
-				sheetX = skin.getSize().x;
-				sheetY = skin.getSize().y;
-			} else {
-				sheetX = 64;
-				sheetY = 64;
-			}
+		public void setupRenderSystem(CallbackInfoReturnable<Identifier> cbi, TextureSheetType tex) {
 			boundSkin = cbi.getReturnValue();
 			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RenderLayer.getEntityTranslucent(boundSkin), 0));
 			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderLayer.getEyes(boundSkin), 1));
 			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RenderLayer.getLines(), 2));
 			renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
+		}
+
+		@Override
+		protected void bindTexture(CallbackInfoReturnable<Identifier> cbi, TextureProvider skin) {
+			skin.bind();
+			cbi.setReturnValue(DynTexture.getBoundLoc());
 		}
 
 		@Override
@@ -139,6 +134,8 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			register(new Field<>(() -> model.leftPants , v -> model.leftPants  = v, null));
 			register(new Field<>(() -> model.rightPants, v -> model.rightPants = v, null));
 			register(new Field<>(() -> model.jacket      , v -> model.jacket       = v, null));
+
+			register(new Field<>(() -> model.cloak        , v -> model.cloak     = v, RootModelType.CAPE));
 		}
 
 		@SuppressWarnings("unchecked")
@@ -226,6 +223,12 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 		@Override
 		public void render(MatrixStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+			if(!holder.renderTypes.isInitialized()) {
+				holder.copyModel(this, parent);
+				parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+				holder.logWarning();
+				return;
+			}
 			this.matrixStackIn   = matrixStackIn  ;
 			this.bufferIn        = bufferIn       ;
 			this.packedLightIn   = packedLightIn  ;

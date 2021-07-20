@@ -61,14 +61,10 @@ public class CPMASMClientHooks {
 				m.copyModelForArmor(player.bipedLeftLeg, armor.bipedLeftLeg);
 				m.copyModelForArmor(player.bipedRightArm, armor.bipedRightArm);
 				m.copyModelForArmor(player.bipedRightLeg, armor.bipedRightLeg);
-				setNoSetup(armor, true);
+				CPMClientAccess.setNoSetup(armor, true);
 			}
 		}
 		model.render(p_78088_1_, p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, p_78088_7_);
-	}
-
-	public static void setNoSetup(ModelBiped model, boolean value) {
-		throw new AbstractMethodError();//model.cpm$noModelSetup = value;
 	}
 
 	public static void onLogout() {

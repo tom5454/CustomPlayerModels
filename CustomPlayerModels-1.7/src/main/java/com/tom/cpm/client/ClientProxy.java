@@ -37,6 +37,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.network.NetHandler;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -100,6 +101,7 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
 		manager.bindPlayer(event.entityPlayer, null);
+		manager.bindSkin(TextureSheetType.SKIN);
 	}
 
 	@SubscribeEvent
@@ -135,10 +137,12 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public void renderHand(RenderHandEvent evt) {
 		manager.bindHand(Minecraft.getMinecraft().thePlayer, null);
+		manager.bindSkin(TextureSheetType.SKIN);
 	}
 
 	public void renderSkull(ModelBase skullModel, GameProfile profile) {
 		manager.bindSkull(profile, null, skullModel);
+		manager.bindSkin(skullModel, TextureSheetType.SKIN);
 	}
 
 	@SubscribeEvent

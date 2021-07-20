@@ -24,7 +24,10 @@ public abstract class Player<P, M> {
 	public boolean forcedSkin;
 
 	public PlayerTextureLoader getTextures() {
-		if(textures == null)textures = initTextures();
+		if(textures == null) {
+			textures = initTextures();
+			textures.load();
+		}
 		return textures;
 	}
 

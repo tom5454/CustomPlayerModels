@@ -128,4 +128,9 @@ public class ETextures implements TreeElement {
 	public boolean isEditable() {
 		return type != null ? type.editable : false;
 	}
+
+	@Override
+	public int textColor() {
+		return isEdited() ? 0 : e.gui().getColors().button_text_disabled;
+	}
 }

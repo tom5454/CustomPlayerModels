@@ -65,4 +65,10 @@ public class Checkbox extends GuiElement {
 	public void setTooltip(Tooltip tooltip) {
 		this.tooltip = tooltip;
 	}
+
+	public void updateState(Boolean b) {
+		setEnabled(b != null);
+		if(b != null)setSelected(b);
+		else setSelected(false);
+	}
 }

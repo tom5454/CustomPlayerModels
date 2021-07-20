@@ -3,11 +3,17 @@ package com.tom.cpmcore;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
+import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
+import net.minecraft.client.renderer.entity.layers.LayerArmorBase;
+import net.minecraft.client.renderer.entity.layers.LayerCape;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 
@@ -16,6 +22,10 @@ import com.mojang.authlib.GameProfile;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.model.RootModelType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.network.NetH;
 
 public class CPMASMClientHooks {
@@ -46,13 +56,9 @@ public class CPMASMClientHooks {
 			m.copyModelForArmor(player.bipedLeftLeg, armor.bipedLeftLeg);
 			m.copyModelForArmor(player.bipedRightArm, armor.bipedRightArm);
 			m.copyModelForArmor(player.bipedRightLeg, armor.bipedRightLeg);
-			setNoSetup(armor, true);
+			CPMClientAccess.setNoSetup(armor, true);
 		}
 		in.render(entityIn, p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, scale);
-	}
-
-	public static void setNoSetup(ModelBiped model, boolean value) {
-		throw new AbstractMethodError();//model.cpm$noModelSetup = value;
 	}
 
 	public static void postRenderSkull(ModelRenderer r, float scale, RenderPlayer rpe) {
@@ -73,5 +79,38 @@ public class CPMASMClientHooks {
 			return true;
 		}
 		return false;
+	}
+
+	public static void onArmorPre(LayerArmorBase this0, EntityLivingBase entitylivingbaseIn) {
+		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
+			ClientProxy.INSTANCE.renderArmor(this0.field_177186_d, this0.field_177189_c, (EntityPlayer) entitylivingbaseIn);
+		}
+	}
+
+	public static void onArmorPost(LayerArmorBase this0, EntityLivingBase entitylivingbaseIn) {
+		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
+			ClientProxy.INSTANCE.unbind(this0.field_177186_d);
+			ClientProxy.INSTANCE.unbind(this0.field_177189_c);
+		}
+	}
+
+	public static boolean renderCape(LayerCape this0, AbstractClientPlayer player, float partialTicks) {
+		Player<?, ?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		if(pl != null) {
+			ModelDefinition def = pl.getModelDefinition();
+			if(def != null && def.hasRoot(RootModelType.CAPE)) {
+				if(!player.isInvisible() && player.isWearing(EnumPlayerModelParts.CAPE)) {
+					ModelPlayer model = this0.playerRenderer.getMainModel();
+					ClientProxy.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
+					ClientProxy.renderCape(player, partialTicks, model, def);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean renderCape(LayerCape this0, EntityLivingBase entitylivingbaseIn, float partialTicks) {
+		return renderCape(this0, (AbstractClientPlayer) entitylivingbaseIn, partialTicks);
 	}
 }

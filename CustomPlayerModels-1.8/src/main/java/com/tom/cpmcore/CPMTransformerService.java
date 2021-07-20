@@ -148,12 +148,38 @@ public class CPMTransformerService implements IClassTransformer {
 								}
 							}
 						}
+					} else if((method.name.equals("a") && method.desc.equals("(Lpr;FFFFFFF)V")) || method.name.equals("doRenderLayer")) {
+						LOG.info("CPM Armor Hook/Bind: Found doRenderLayer method");
+						Type[] argsD = Type.getArgumentTypes(method.desc);
+						Type[] args = new Type[2];
+						args[0] = Type.getObjectType(input.name);
+						args[1] = argsD[0];
+						{
+							InsnList lst = new InsnList();
+							lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
+							lst.add(new VarInsnNode(Opcodes.ALOAD, 1));
+							lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onArmorPre", Type.getMethodDescriptor(Type.VOID_TYPE, args), false));
+							method.instructions.insertBefore(method.instructions.getFirst(), lst);
+						}
+						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
+							AbstractInsnNode insnNode = it.next();
+							if(insnNode instanceof InsnNode){
+								if(insnNode.getOpcode() == Opcodes.RETURN) {
+									InsnList lst = new InsnList();
+									lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
+									lst.add(new VarInsnNode(Opcodes.ALOAD, 1));
+									lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onArmorPost", Type.getMethodDescriptor(Type.VOID_TYPE, args), false));
+									method.instructions.insertBefore(insnNode, lst);
+								}
+							}
+						}
+						LOG.info("CPM Armor Hook/Bind: injected");
 					}
 				}
 				return input;
 			}
 		});
-		transformers.put("com.tom.cpmcore.CPMASMClientHooks", new UnaryOperator<ClassNode>() {
+		transformers.put("com.tom.cpmcore.CPMClientAccess", new UnaryOperator<ClassNode>() {
 
 			@Override
 			public ClassNode apply(ClassNode input) {
@@ -361,6 +387,34 @@ public class CPMTransformerService implements IClassTransformer {
 						}
 					}
 				}
+				return input;
+			}
+		});
+		transformers.put("net.minecraft.client.renderer.entity.layers.LayerCape", new UnaryOperator<ClassNode>() {
+
+			@Override
+			public ClassNode apply(ClassNode input) {
+				for(MethodNode method : input.methods) {
+					if((method.name.equals("a") && method.desc.equals("(Lpr;FFFFFFF)V")) || method.name.equals("doRenderLayer")) {
+						LOG.info("CPM Cape Hook/Bind: Found doRenderLayer method");
+						Type[] argsD = Type.getArgumentTypes(method.desc);
+						Type[] args = new Type[3];
+						args[0] = Type.getObjectType(input.name);
+						args[1] = argsD[0];
+						args[2] = Type.FLOAT_TYPE;
+						InsnList lst = new InsnList();
+						lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
+						lst.add(new VarInsnNode(Opcodes.ALOAD, 1));
+						lst.add(new VarInsnNode(Opcodes.FLOAD, 4));
+						lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "renderCape", Type.getMethodDescriptor(Type.BOOLEAN_TYPE, args), false));
+						LabelNode lbln = new LabelNode();
+						lst.add(new JumpInsnNode(Opcodes.IFEQ, lbln));
+						lst.add(new InsnNode(Opcodes.RETURN));
+						lst.add(lbln);
+						method.instructions.insertBefore(method.instructions.getFirst(), lst);
+					}
+				}
+
 				return input;
 			}
 		});

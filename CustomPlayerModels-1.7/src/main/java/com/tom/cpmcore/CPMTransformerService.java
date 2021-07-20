@@ -111,7 +111,7 @@ public class CPMTransformerService implements IClassTransformer {
 			public ClassNode apply(ClassNode input) {
 				for(MethodNode m : input.methods) {
 					if((m.name.equals("a") && m.desc.equals("(Lsv;DDDFF)V")) || m.name.equals("doRender")) {
-						LOG.info("CPM Armor Hook: Found loadSkin method");
+						LOG.info("CPM Armor Hook: Found doRender method");
 						m.instructions.insertBefore(m.instructions.getFirst(), new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "prePlayerRender", "()V", false));
 						int callLoc = 0;
 						for (ListIterator<AbstractInsnNode> it = m.instructions.iterator(); it.hasNext(); ) {
@@ -146,7 +146,7 @@ public class CPMTransformerService implements IClassTransformer {
 				return input;
 			}
 		});
-		transformers.put("com.tom.cpmcore.CPMASMClientHooks", new UnaryOperator<ClassNode>() {
+		transformers.put("com.tom.cpmcore.CPMClientAccess", new UnaryOperator<ClassNode>() {
 
 			@Override
 			public ClassNode apply(ClassNode input) {

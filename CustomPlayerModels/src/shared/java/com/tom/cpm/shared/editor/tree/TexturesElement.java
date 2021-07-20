@@ -2,6 +2,7 @@ package com.tom.cpm.shared.editor.tree;
 
 import java.util.function.Consumer;
 
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 
 public class TexturesElement implements TreeElement {
@@ -18,6 +19,6 @@ public class TexturesElement implements TreeElement {
 
 	@Override
 	public void getTreeElements(Consumer<TreeElement> c) {
-		editor.textures.values().forEach(c);
+		editor.textures.values().stream().filter(ETextures::isEditable).forEach(c);
 	}
 }

@@ -72,7 +72,7 @@ public class TextureEditorPanel extends GuiElement {
 			{
 				Vec2i p2 = editor.cursorPos.get();
 				Vec2i p = p2 != null ? p2 : p1;
-				if(p != null && p.x >= 0 && p.y >= 0 && p.x < provider.getImage().getWidth() && p.y < provider.getImage().getHeight()) {
+				if(provider.isEditable() && p != null && p.x >= 0 && p.y >= 0 && p.x < provider.getImage().getWidth() && p.y < provider.getImage().getHeight()) {
 					int imgC = provider.getImage().getRGB(p.x, p.y);
 					int outlineColor = ((0xffffff - (imgC & 0xffffff)) & 0xffffff);
 					int a = (imgC >> 24) & 0xff;
@@ -194,8 +194,8 @@ public class TextureEditorPanel extends GuiElement {
 								int yoff = py - dragY;
 								if(Math.abs(xoff) >= me.textureSize)dragX = px;
 								if(Math.abs(yoff) >= me.textureSize)dragY = py;
-								me.u = MathHelper.clamp(me.u + xoff / me.textureSize, 0, 256);
-								me.v = MathHelper.clamp(me.v + yoff / me.textureSize, 0, 256);
+								me.u = MathHelper.clamp(me.u + xoff / me.textureSize, 0, provider.provider.size.x);
+								me.v = MathHelper.clamp(me.v + yoff / me.textureSize, 0, provider.provider.size.y);
 								if(xoff > 0 || yoff > 0) {
 									editor.updateGui();
 									editor.markDirty();

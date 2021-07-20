@@ -402,35 +402,19 @@ public class EditorGui extends Frame {
 		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.effect"), () -> pp.display(x, 20)));
 
 		Checkbox boxGlow = pp.addCheckbox(gui.i18nFormat("label.cpm.glow"), editor::switchGlow);
-		editor.setGlow.add(b -> {
-			boxGlow.setEnabled(b != null);
-			if(b != null)boxGlow.setSelected(b);
-			else boxGlow.setSelected(false);
-		});
+		editor.setGlow.add(boxGlow::updateState);
 		boxGlow.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.glow")));
 
 		Checkbox boxSingleTex = pp.addCheckbox(gui.i18nFormat("label.cpm.singleTex"), editor::switchSingleTex);
-		editor.setSingleTex.add(b -> {
-			boxSingleTex.setEnabled(b != null);
-			if(b != null)boxSingleTex.setSelected(b);
-			else boxSingleTex.setSelected(false);
-		});
+		editor.setSingleTex.add(boxSingleTex::updateState);
 		boxSingleTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.singleTex")));
 
 		Checkbox boxPfUV = pp.addCheckbox(gui.i18nFormat("label.cpm.perfaceUV"), editor::switchPerfaceUV);
-		editor.setPerFaceUV.add(b -> {
-			boxPfUV.setEnabled(b != null);
-			if(b != null)boxPfUV.setSelected(b);
-			else boxPfUV.setSelected(false);
-		});
+		editor.setPerFaceUV.add(boxPfUV::updateState);
 		boxPfUV.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.perfaceUV")));
 
 		Checkbox boxReColor = pp.addCheckbox(gui.i18nFormat("label.cpm.recolor"), editor::switchReColorEffect);
-		editor.setReColor.add(b -> {
-			boxReColor.setEnabled(b != null);
-			if(b != null)boxReColor.setSelected(b);
-			else boxReColor.setSelected(false);
-		});
+		editor.setReColor.add(boxReColor::updateState);
 		boxReColor.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.recolor")));
 
 		ColorButton colorBtn = new ColorButton(gui, editor.frame, editor::setColor);
@@ -443,11 +427,7 @@ public class EditorGui extends Frame {
 		pp.add(colorBtn);
 
 		Checkbox boxHidden = pp.addCheckbox(gui.i18nFormat("label.cpm.hidden_effect"), editor::switchHide);
-		editor.setHiddenEffect.add(b -> {
-			boxHidden.setEnabled(b != null);
-			if(b != null)boxHidden.setSelected(b);
-			else boxHidden.setSelected(false);
-		});
+		editor.setHiddenEffect.add(boxHidden::updateState);
 		boxHidden.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.hidden_effect")));
 
 		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), b -> {
@@ -512,8 +492,8 @@ public class EditorGui extends Frame {
 		for (PlayerModelLayer a : PlayerModelLayer.ARMOR) {
 			addLayerToggle(armor, a, PlatformFeature.RENDER_ARMOR);
 		}
-		armor.addButton(gui.i18nFormat("button.cpm.display.armor.toggle"), () -> {
-			if(Arrays.stream(PlayerModelLayer.ARMOR).anyMatch(r -> editor.modelDisplayLayers.stream().anyMatch(l -> l == r))) {
+		armor.addButton(gui.i18nFormat("button.cpm.display.toggleArmor"), () -> {
+			if(Arrays.stream(PlayerModelLayer.ARMOR).noneMatch(r -> editor.modelDisplayLayers.stream().anyMatch(l -> l == r))) {
 				for (PlayerModelLayer a : PlayerModelLayer.ARMOR)editor.modelDisplayLayers.add(a);
 			} else {
 				for (PlayerModelLayer a : PlayerModelLayer.ARMOR)editor.modelDisplayLayers.remove(a);

@@ -11,7 +11,10 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCustomizeSkin;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelElytra;
+import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -20,6 +23,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -38,9 +42,11 @@ import com.tom.cpm.CommonProxy;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
@@ -49,7 +55,7 @@ public class ClientProxy extends CommonProxy {
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public static ClientProxy INSTANCE;
-	private RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
+	public RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
 	public NetHandler<ResourceLocation, NBTTagCompound, EntityPlayer, PacketBuffer, NetHandlerPlayClient> netHandler;
 
 	@Override
@@ -92,6 +98,7 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
 		manager.bindPlayer(event.getEntityPlayer(), null);
+		manager.bindSkin(TextureSheetType.SKIN);
 	}
 
 	@SubscribeEvent
@@ -127,10 +134,25 @@ public class ClientProxy extends CommonProxy {
 	@SubscribeEvent
 	public void renderHand(RenderHandEvent evt) {
 		manager.bindHand(Minecraft.getMinecraft().player, null);
+		manager.bindSkin(TextureSheetType.SKIN);
 	}
 
 	public void renderSkull(ModelBase skullModel, GameProfile profile) {
 		manager.bindSkull(profile, null, skullModel);
+		manager.bindSkin(skullModel, TextureSheetType.SKIN);
+	}
+
+	public void renderElytra(EntityPlayer player, ModelElytra model) {
+		manager.bindElytra(player, null, model);
+		manager.bindSkin(model, TextureSheetType.ELYTRA);
+	}
+
+	public void renderArmor(ModelBase modelArmor, ModelBase modelLeggings,
+			EntityPlayer player) {
+		manager.bindArmor(player, null, modelArmor, 1);
+		manager.bindArmor(player, null, modelLeggings, 2);
+		manager.bindSkin(modelArmor, TextureSheetType.ARMOR1);
+		manager.bindSkin(modelLeggings, TextureSheetType.ARMOR2);
 	}
 
 	public void unbind(ModelBase model) {
@@ -190,5 +212,56 @@ public class ClientProxy extends CommonProxy {
 
 	public void onLogout() {
 		mc.getDefinitionLoader().clearServerData();
+	}
+
+	//Copy from LayerCape
+	public static void renderCape(AbstractClientPlayer playerIn, float partialTicks, ModelPlayer model, ModelDefinition modelDefinition) {
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(0.0F, 0.0F, 0.125F);
+		float f1, f2, f3;
+
+		if(playerIn != null) {
+			double lvt_10_1_ = playerIn.prevChasingPosX
+					+ (playerIn.chasingPosX - playerIn.prevChasingPosX) * partialTicks
+					- (playerIn.prevPosX + (playerIn.posX - playerIn.prevPosX) * partialTicks);
+			double lvt_12_1_ = playerIn.prevChasingPosY
+					+ (playerIn.chasingPosY - playerIn.prevChasingPosY) * partialTicks
+					- (playerIn.prevPosY + (playerIn.posY - playerIn.prevPosY) * partialTicks);
+			double lvt_14_1_ = playerIn.prevChasingPosZ
+					+ (playerIn.chasingPosZ - playerIn.prevChasingPosZ) * partialTicks
+					- (playerIn.prevPosZ + (playerIn.posZ - playerIn.prevPosZ) * partialTicks);
+			float lvt_16_1_ = playerIn.prevRenderYawOffset
+					+ (playerIn.renderYawOffset - playerIn.prevRenderYawOffset) * partialTicks;
+			double lvt_17_1_ = MathHelper.sin(lvt_16_1_ * 0.017453292F);
+			double lvt_19_1_ = (-MathHelper.cos(lvt_16_1_ * 0.017453292F));
+			f1 = (float) lvt_12_1_ * 10.0F;
+			f1 = MathHelper.clamp(f1, -6.0F, 32.0F);
+			f2 = (float) (lvt_10_1_ * lvt_17_1_ + lvt_14_1_ * lvt_19_1_) * 100.0F;
+			f3 = (float) (lvt_10_1_ * lvt_19_1_ - lvt_14_1_ * lvt_17_1_) * 100.0F;
+			if (f2 < 0.0F) {
+				f2 = 0.0F;
+			}
+
+			float lvt_24_1_ = playerIn.prevCameraYaw
+					+ (playerIn.cameraYaw - playerIn.prevCameraYaw) * partialTicks;
+			f1 += MathHelper.sin((playerIn.prevDistanceWalkedModified
+					+ (playerIn.distanceWalkedModified - playerIn.prevDistanceWalkedModified) * partialTicks)
+					* 6.0F) * 32.0F * lvt_24_1_;
+			if (playerIn.isSneaking()) {
+				f1 += 25.0F;
+			}
+		} else {
+			f1 = 0;
+			f2 = 0;
+			f3 = 0;
+		}
+
+		GlStateManager.rotate(6.0F + f2 / 2.0F + f1, 1.0F, 0.0F, 0.0F);
+		GlStateManager.rotate(f3 / 2.0F, 0.0F, 0.0F, 1.0F);
+		GlStateManager.rotate(-f3 / 2.0F, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+		model.renderCape(0.0625F);
+		GlStateManager.popMatrix();
 	}
 }

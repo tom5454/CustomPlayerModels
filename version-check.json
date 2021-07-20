@@ -2,23 +2,23 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "homepage-fabric": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
   "promos": {
-    "1.12.2-latest": "0.0.17b",
-    "1.12.2-recommended": "0.0.17b",
-    "1.16.4-latest": "0.0.17c",
-    "1.16.4-recommended": "0.0.17c",
-    "1.16.5-latest": "0.0.17c",
-    "1.16.5-recommended": "0.0.17c",
-    "1.8.9-latest": "0.0.17b",
-    "1.8.9-recommended": "0.0.17b",
-    "1.7.10-latest": "0.0.17b",
-    "1.7.10-recommended": "0.0.17b",
-    "1.15.2-latest": "0.0.17b",
-    "1.15.2-recommended": "0.0.17b",
-    "1.16.4-fabric-latest": "0.0.17b",
-    "1.16.5-fabric-latest": "0.0.17b",
-    "1.17-fabric-latest": "0.0.17b",
-    "bukkit-latest": "0.0.17b",
-    "1.17.1-fabric-latest": "0.0.17b"
+    "1.12.2-latest": "0.0.17c",
+    "1.12.2-recommended": "0.0.17c",
+    "1.16.4-latest": "0.0.17d",
+    "1.16.4-recommended": "0.0.17d",
+    "1.16.5-latest": "0.0.17d",
+    "1.16.5-recommended": "0.0.17d",
+    "1.8.9-latest": "0.0.17c",
+    "1.8.9-recommended": "0.0.17c",
+    "1.7.10-latest": "0.0.17c",
+    "1.7.10-recommended": "0.0.17c",
+    "1.15.2-latest": "0.0.17c",
+    "1.15.2-recommended": "0.0.17c",
+    "1.16.4-fabric-latest": "0.0.17c",
+    "1.16.5-fabric-latest": "0.0.17c",
+    "1.17-fabric-latest": "0.0.17c",
+    "bukkit-latest": "0.0.17c",
+    "1.17.1-fabric-latest": "0.0.17c"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -46,7 +46,8 @@
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.16.4": {
     "0.0.5a": "First release",
@@ -76,7 +77,8 @@
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
     "0.0.17b": "Fixed mixin crash on 1.16 forge",
-    "0.0.17c": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17c": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17d": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.16.5": {
     "0.0.5a": "First release",
@@ -106,7 +108,8 @@
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
     "0.0.17b": "Fixed mixin crash on 1.16 forge",
-    "0.0.17c": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17c": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17d": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.16.4-fabric": {
     "0.0.5a": "First release",
@@ -136,7 +139,8 @@
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.16.5-fabric": {
     "0.0.5a": "First release",
@@ -166,7 +170,8 @@
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.17-fabric": {
     "0.0.5a": "First release",
@@ -198,7 +203,8 @@
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.8.9": {
     "0.0.5a": "First release",
@@ -225,7 +231,8 @@
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.7.10": {
     "0.0.5a": "First release",
@@ -252,7 +259,8 @@
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.15.2": {
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
@@ -278,7 +286,8 @@
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "bukkit": {
     "0.0.12a": "Added: display held item in the editor.\nAdded: player model scaling with Pehkui mod on 1.16 versions\nAdded: change gui scale for the editor independently from game gui scale\nAdded: scroll bars now show on scrollable elements and can be dragged\nAdded: drag UVs in texture tab\n\nFixed skins not loading correctly on Fabric 1.16 (Closes #57)\nFixed checking incorrect vanilla skin size (#63)\nFixed flying animation not displaying correctly in editor\nFixed log spam with skin loading\nFixed vanilla skin not always loading in editor\nFixed Test Ingame not working correctly (Closes #65, ? #67)\nRewritten networking\nFixed models not rendering correctly\nFixed models gui not displaying correctly on certain resolutions\nFixed keybinds not working properly on fabric (Closes #68)\nFixed editing animation types not working (#67)\nFixed various editor gui bugs",
@@ -290,10 +299,12 @@
     "0.0.16a": "Added tooltips for Export menu\n\nFixed crash with optifabric on 1.17 (#95)\nFixed outlines not rendering in 1.17 (Closes #98)\nFixed test-ingame and export not working when using custom animations (#98)\n\nCleaned up rendering code",
     "0.0.16b": "Added open system file chooser option to file choosers.\nAdded better error messages to skin upload popup.\n\nFixed translucent textures not rendering correctly in the editor (Closes #92, Closes #84)\nFixed animations not showing up correctly in the editor preview (Closes #101)",
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   },
   "1.17.1-fabric": {
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
-    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)"
+    "0.0.17b": "Fixed projects failing to load in some cases (Closes #104)",
+    "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2"
   }
 }
