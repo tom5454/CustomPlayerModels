@@ -46,7 +46,7 @@ public abstract class SkullBlockEntityRendererMixin {
 	public void onRender(SkullBlockEntity skullBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider buffer, int i, int arg5, CallbackInfo ci, float g, BlockState blockState, boolean bl, Direction direction, float h, SkullBlock.SkullType skullType, SkullBlockEntityModel model) {
 		RefHolder.CPM_MODELS = MODELS;
 		GameProfile gameProfile = skullBlockEntity.getOwner();
-		if(skullType == SkullBlock.Type.PLAYER) {
+		if(skullType == SkullBlock.Type.PLAYER && gameProfile != null) {
 			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, buffer);
 		}
 	}
