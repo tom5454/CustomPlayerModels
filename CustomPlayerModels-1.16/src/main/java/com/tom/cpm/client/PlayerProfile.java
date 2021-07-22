@@ -42,7 +42,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 	private PlayerProfile(GameProfile profile) {
 		this.profile = profile;
 		if(profile.getId() != null)
-			this.skinType = DefaultPlayerSkin.getSkinType(profile.getId());
+			this.skinType = DefaultPlayerSkin.getSkinModelName(profile.getId());
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 
 	@Override
 	public PlayerModel<AbstractClientPlayerEntity> getModel() {
-		return Minecraft.getInstance().getRenderManager().getSkinMap().get(skinType == null ? "default" : skinType).getEntityModel();
+		return Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().get(skinType == null ? "default" : skinType).getModel();
 	}
 
 	@Override
@@ -92,22 +92,22 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 		else if(!player.isAlive())pose = VanillaPose.DYING;
 		else if(p == Pose.FALL_FLYING)pose = VanillaPose.FLYING;
 		else if(player.fallDistance > 4)pose = VanillaPose.FALLING;
-		else if(player.isPassenger() && (player.getRidingEntity() != null && player.getRidingEntity().shouldRiderSit()))pose = VanillaPose.RIDING;
+		else if(player.isPassenger() && (player.getVehicle() != null && player.getVehicle().shouldRiderSit()))pose = VanillaPose.RIDING;
 		else if(p == Pose.SWIMMING)pose = VanillaPose.SWIMMING;
 		else if(player.isSprinting())pose = VanillaPose.RUNNING;
 		else if(p == Pose.CROUCHING)pose = VanillaPose.SNEAKING;
-		else if(Math.abs(player.getPosX() - player.prevPosX) > 0 || Math.abs(player.getPosZ() - player.prevPosZ) > 0)pose = VanillaPose.WALKING;
+		else if(Math.abs(player.getX() - player.xo) > 0 || Math.abs(player.getZ() - player.zo) > 0)pose = VanillaPose.WALKING;
 		else pose = VanillaPose.STANDING;
 
 		encodedGesture = 0;
-		if(player.isWearing(PlayerModelPart.HAT))encodedGesture |= 1;
-		if(player.isWearing(PlayerModelPart.JACKET))encodedGesture |= 2;
-		if(player.isWearing(PlayerModelPart.LEFT_PANTS_LEG))encodedGesture |= 4;
-		if(player.isWearing(PlayerModelPart.RIGHT_PANTS_LEG))encodedGesture |= 8;
-		if(player.isWearing(PlayerModelPart.LEFT_SLEEVE))encodedGesture |= 16;
-		if(player.isWearing(PlayerModelPart.RIGHT_SLEEVE))encodedGesture |= 32;
+		if(player.isModelPartShown(PlayerModelPart.HAT))encodedGesture |= 1;
+		if(player.isModelPartShown(PlayerModelPart.JACKET))encodedGesture |= 2;
+		if(player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG))encodedGesture |= 4;
+		if(player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG))encodedGesture |= 8;
+		if(player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE))encodedGesture |= 16;
+		if(player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE))encodedGesture |= 32;
 
-		ItemStack is = player.getItemStackFromSlot(EquipmentSlotType.HEAD);
+		ItemStack is = player.getItemBySlot(EquipmentSlotType.HEAD);
 		hasPlayerHead = is.getItem() instanceof BlockItem && ((BlockItem)is.getItem()).getBlock() instanceof AbstractSkullBlock;
 	}
 
@@ -127,7 +127,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 
 			@Override
 			protected CompletableFuture<Void> load0() {
-				Map<Type, MinecraftProfileTexture> map = Minecraft.getInstance().getSkinManager().loadSkinFromCache(profile);
+				Map<Type, MinecraftProfileTexture> map = Minecraft.getInstance().getSkinManager().getInsecureSkinInformation(profile);
 				defineAll(map, MinecraftProfileTexture::getUrl);
 				if (map.containsKey(Type.SKIN)) {
 					MinecraftProfileTexture tex = map.get(Type.SKIN);
@@ -139,7 +139,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 					return CompletableFuture.completedFuture(null);
 				}
 				CompletableFuture<Void> cf = new CompletableFuture<>();
-				Minecraft.getInstance().getSkinManager().loadProfileTextures(profile, new ISkinAvailableCallback() {
+				Minecraft.getInstance().getSkinManager().registerSkins(profile, new ISkinAvailableCallback() {
 
 					@Override
 					public void onSkinTextureAvailable(Type typeIn, ResourceLocation location, MinecraftProfileTexture profileTexture) {

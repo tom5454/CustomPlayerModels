@@ -42,21 +42,21 @@ public class ServerHandler {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setNewNbt(CompoundNBT::new);
 		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
-		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUniqueID);
-		netHandler.setWriteCompound(PacketBuffer::writeCompoundTag, PacketBuffer::readCompoundTag);
-		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new SCustomPayloadPlayPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SCustomPayloadPlayPacket(rl, pb), ServerHandler::hasMod, null));
-		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getEntityId()));
+		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUUID);
+		netHandler.setWriteCompound(PacketBuffer::writeNbt, PacketBuffer::readNbt);
+		netHandler.setSendPacket((c, rl, pb) -> c.send(new SCustomPayloadPlayPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SCustomPayloadPlayPacket(rl, pb), ServerHandler::hasMod, null));
+		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getId()));
 		netHandler.setNBTSetters(CompoundNBT::putBoolean, CompoundNBT::putByteArray, CompoundNBT::putFloat);
 		netHandler.setNBTGetters(CompoundNBT::getBoolean, CompoundNBT::getByteArray, CompoundNBT::getFloat);
 		netHandler.setContains(CompoundNBT::contains);
 		netHandler.setFindTracking((p, f) -> {
-			for(EntityTracker tr : ((ServerWorld)p.world).getChunkProvider().chunkManager.entities.values()) {
-				if(tr.entity instanceof PlayerEntity && tr.trackingPlayers.contains(p)) {
+			for(EntityTracker tr : ((ServerWorld)p.level).getChunkSource().chunkMap.entityMap.values()) {
+				if(tr.entity instanceof PlayerEntity && tr.seenBy.contains(p)) {
 					f.accept((ServerPlayerEntity) tr.entity);
 				}
 			}
 		});
-		netHandler.setSendChat((p, m) -> p.connection.sendPacket(new SChatPacket(new TranslationTextComponent(m), ChatType.CHAT, Util.DUMMY_UUID)));
+		netHandler.setSendChat((p, m) -> p.connection.send(new SChatPacket(new TranslationTextComponent(m), ChatType.CHAT, Util.NIL_UUID)));
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
 		netHandler.setScaleSetter((spe, sc) -> {
 			if(ModList.get().isLoaded("pehkui")) {
@@ -113,12 +113,12 @@ public class ServerHandler {
 	}
 
 	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, IPacket<?> pckt, Predicate<ServerPlayerEntity> test, GenericFutureListener<? extends Future<? super Void>> future) {
-		EntityTracker tr = ((ServerWorld)ent.world).getChunkProvider().chunkManager.entities.get(ent.getEntityId());
-		for (ServerPlayerEntity p : tr.trackingPlayers) {
+		EntityTracker tr = ((ServerWorld)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
+		for (ServerPlayerEntity p : tr.seenBy) {
 			if(test.test(p)) {
-				p.connection.sendPacket(pckt, future);
+				p.connection.send(pckt, future);
 			}
 		}
-		ent.connection.sendPacket(pckt, future);
+		ent.connection.send(pckt, future);
 	}
 }

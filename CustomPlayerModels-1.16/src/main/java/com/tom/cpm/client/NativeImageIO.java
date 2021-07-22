@@ -48,19 +48,19 @@ public class NativeImageIO implements IImageIO {
 
 	@Override
 	public void write(Image img, File f) throws IOException {
-		createFromBufferedImage(img).write(f);
+		createFromBufferedImage(img).writeToFile(f);
 	}
 
 	@Override
 	public void write(Image img, OutputStream f) throws IOException {
-		f.write(createFromBufferedImage(img).getBytes());
+		f.write(createFromBufferedImage(img).asByteArray());
 	}
 
 	@Override
 	public Vec2i getSize(InputStream din) throws IOException {
 		ByteBuffer byteBufferIn = null;
 		try (MemoryStack memorystack = MemoryStack.stackPush()) {
-			byteBufferIn = TextureUtil.readToBuffer(din);
+			byteBufferIn = TextureUtil.readResource(din);
 			((Buffer)byteBufferIn).rewind();
 			IntBuffer intbuffer = memorystack.mallocInt(1);
 			IntBuffer intbuffer1 = memorystack.mallocInt(1);

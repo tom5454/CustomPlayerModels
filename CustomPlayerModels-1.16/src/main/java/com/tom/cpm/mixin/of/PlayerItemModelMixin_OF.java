@@ -27,7 +27,7 @@ public class PlayerItemModelMixin_OF {
 					+ "Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;"
 					+ "Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;II)V")
 	public ResourceLocation getPlayerSkin(AbstractClientPlayerEntity pe, BipedModel modelBiped, AbstractClientPlayerEntity player, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, int packedOverlayIn) {
-		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, player.getLocationSkin());
+		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, player.getSkinTextureLocation());
 		ClientProxy.mc.getPlayerRenderManager().bindSkin(modelBiped, cbi, TextureSheetType.SKIN);
 		return cbi.getReturnValue();
 	}

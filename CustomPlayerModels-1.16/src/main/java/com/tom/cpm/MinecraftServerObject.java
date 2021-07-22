@@ -13,7 +13,7 @@ public class MinecraftServerObject implements MinecraftServerAccess {
 
 	public MinecraftServerObject(MinecraftServer server) {
 		this.server = server;
-		cfg = new ModConfigFile(server.func_240776_a_(CONFIG).toFile());
+		cfg = new ModConfigFile(server.getWorldPath(CONFIG).toFile());
 	}
 
 	@Override

@@ -81,30 +81,31 @@ public class MinecraftObject implements MinecraftClientAccess {
 		return new DynTexture(mc);
 	}
 
-	public static class DynTexture extends DynamicTexture implements ITexture {
+	public static class DynTexture implements ITexture {
+		private final DynamicTexture dynTex;
 		private final ResourceLocation loc;
 		private final Minecraft mc;
 		private static ResourceLocation bound_loc;
 
 		public DynTexture(Minecraft mc) {
-			super(1, 1, true);
+			dynTex = new DynamicTexture(1, 1, true);
 			this.mc = mc;
-			loc = mc.getTextureManager().getDynamicTextureLocation("cpm", this);
+			loc = mc.getTextureManager().register("cpm", dynTex);
 		}
 
 		@Override
 		public void bind() {
 			bound_loc = loc;
 			if(mc.getTextureManager().getTexture(loc) == null)
-				mc.getTextureManager().loadTexture(loc, this);
+				mc.getTextureManager().register(loc, dynTex);
 		}
 
 		@Override
 		public void load(Image texture) {
 			NativeImage ni = NativeImageIO.createFromBufferedImage(texture);
-			setTextureData(ni);
-			TextureUtil.prepareImage(this.getGlTextureId(), ni.getWidth(), ni.getHeight());
-			updateDynamicTexture();
+			dynTex.setPixels(ni);
+			TextureUtil.prepareImage(dynTex.getId(), ni.getWidth(), ni.getHeight());
+			dynTex.upload();
 		}
 
 		public static ResourceLocation getBoundLoc() {
@@ -113,13 +114,13 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 		@Override
 		public void free() {
-			mc.getTextureManager().deleteTexture(loc);
+			mc.getTextureManager().release(loc);
 		}
 	}
 
 	@Override
 	public void executeLater(Runnable r) {
-		mc.enqueue(r);
+		mc.execute(r);
 	}
 
 	@Override
@@ -129,19 +130,19 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public SkinType getSkinType() {
-		return SkinType.get(DefaultPlayerSkin.getSkinType(mc.getSession().getProfile().getId()));
+		return SkinType.get(DefaultPlayerSkin.getSkinModelName(mc.getUser().getGameProfile().getId()));
 	}
 
 	@Override
 	public void setEncodedGesture(int value) {
-		Set<PlayerModelPart> s = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, mc.gameSettings, "field_178882_aU");
+		Set<PlayerModelPart> s = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, mc.options, "modelParts");
 		setEncPart(s, value, 0, PlayerModelPart.HAT);
 		setEncPart(s, value, 1, PlayerModelPart.JACKET);
 		setEncPart(s, value, 2, PlayerModelPart.LEFT_PANTS_LEG);
 		setEncPart(s, value, 3, PlayerModelPart.RIGHT_PANTS_LEG);
 		setEncPart(s, value, 4, PlayerModelPart.LEFT_SLEEVE);
 		setEncPart(s, value, 5, PlayerModelPart.RIGHT_SLEEVE);
-		mc.gameSettings.sendSettingsToServer();
+		mc.options.broadcastOptions();
 	}
 
 	private static void setEncPart(Set<PlayerModelPart> s, int value, int off, PlayerModelPart part) {
@@ -156,7 +157,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public Object getPlayerIDObject() {
-		return mc.getSession().getProfile();
+		return mc.getUser().getGameProfile();
 	}
 
 	@Override
@@ -175,22 +176,22 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	public static ResourceLocation getDefaultSkin(UUID playerUUID) {
-		return DefaultPlayerSkin.getSkinType(playerUUID).equals("slim") ? TEXTURE_ALEX : TEXTURE_STEVE;
+		return DefaultPlayerSkin.getSkinModelName(playerUUID).equals("slim") ? TEXTURE_ALEX : TEXTURE_STEVE;
 	}
 
 	@Override
 	public File getGameDir() {
-		return mc.gameDir;
+		return mc.gameDirectory;
 	}
 
 	@Override
 	public void openGui(Function<IGui, Frame> creator) {
-		mc.displayGuiScreen(new GuiImpl(creator, mc.currentScreen));
+		mc.setScreen(new GuiImpl(creator, mc.screen));
 	}
 
 	@Override
 	public Runnable openSingleplayer() {
-		return () -> mc.displayGuiScreen(new WorldSelectionScreen(mc.currentScreen));
+		return () -> mc.setScreen(new WorldSelectionScreen(mc.screen));
 	}
 
 	@Override
@@ -205,12 +206,12 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public MojangSkinUploadAPI getUploadAPI() {
-		return new MojangSkinUploadAPI(mc.getSession().getProfile().getId(), mc.getSession().getToken());
+		return new MojangSkinUploadAPI(mc.getUser().getGameProfile().getId(), mc.getUser().getAccessToken());
 	}
 
 	@Override
 	public void clearSkinCache() {
-		MojangSkinUploadAPI.clearYggdrasilCache(mc.getSessionService());
+		MojangSkinUploadAPI.clearYggdrasilCache(mc.getMinecraftSessionService());
 		mc.getProfileProperties().clear();
 		mc.getProfileProperties();//refresh
 	}

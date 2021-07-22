@@ -93,7 +93,7 @@ public class GuiImpl extends Screen implements IGui {
 		renderBackground(matrixStack, 0);
 		try {
 			this.matrixStack = matrixStack;
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 1000);
 			if(!noScissorTest)
 				GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -105,35 +105,38 @@ public class GuiImpl extends Screen implements IGui {
 			if(!noScissorTest)
 				GL11.glDisable(GL11.GL_SCISSOR_TEST);
 			String modVer = ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
-			String s = "Minecraft " + SharedConstants.getVersion().getName() + " (" + minecraft.getVersion() + "/" + ClientBrandRetriever.getClientModName() + ("release".equalsIgnoreCase(minecraft.getVersionType()) ? "" : "/" + minecraft.getVersionType()) + ") " + modVer;
-			font.drawString(matrixStack, s, width - font.getStringWidth(s) - 4, 2, 0xff000000);
-			s = minecraft.debug;
+			String s = "Minecraft " + SharedConstants.getCurrentVersion().getName() + " (" + minecraft.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ("release".equalsIgnoreCase(minecraft.getVersionType()) ? "" : "/" + minecraft.getVersionType()) + ") " + modVer;
+			font.draw(matrixStack, s, width - font.width(s) - 4, 2, 0xff000000);
+			s = minecraft.fpsString;
 			if(noScissorTest)s += " No Scissor";
-			font.drawString(matrixStack, s, width - font.getStringWidth(s) - 4, 11, 0xff000000);
+			font.draw(matrixStack, s, width - font.width(s) - 4, 11, 0xff000000);
 			this.matrixStack = null;
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 		if(minecraft.player != null) {
 			try {
 				Method m = ForgeIngameGui.class.getDeclaredMethod("renderChat", int.class, int.class, MatrixStack.class);
 				m.setAccessible(true);
-				m.invoke(minecraft.ingameGUI, minecraft.getMainWindow().getScaledWidth(), minecraft.getMainWindow().getScaledHeight(), matrixStack);
+				m.invoke(minecraft.gui, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight(), matrixStack);
 			} catch (Throwable e) {
 			}
 		}
 	}
 
 	@Override
+	public void removed() {
+		if(vanillaScale >= 0 && vanillaScale != minecraft.options.guiScale) {
+			minecraft.options.guiScale = vanillaScale;
+			vanillaScale = -999;
+			minecraft.resizeDisplay();
+		}
+	}
+
+	@Override
 	public void onClose() {
-		if(parent != null) {
-			Screen p = parent;
-			parent = null;
-			minecraft.displayGuiScreen(p);
-		}
-		if(vanillaScale != -1 && vanillaScale != minecraft.gameSettings.guiScale) {
-			minecraft.gameSettings.guiScale = vanillaScale;
-			minecraft.updateWindowSize();
-		}
+		Screen p = parent;
+		parent = null;
+		minecraft.setScreen(p);
 	}
 
 	@Override
@@ -164,22 +167,22 @@ public class GuiImpl extends Screen implements IGui {
 			minY = maxY;
 			maxY = j;
 		}
-		Matrix4f matrix = matrixStack.getLast().getMatrix();
+		Matrix4f matrix = matrixStack.last().pose();
 		float f3 = (color >> 24 & 255) / 255.0F;
 		float f = (color >> 16 & 255) / 255.0F;
 		float f1 = (color >> 8 & 255) / 255.0F;
 		float f2 = (color & 255) / 255.0F;
-		BufferBuilder bufferbuilder = Tessellator.getInstance().getBuffer();
+		BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();
 		RenderSystem.defaultBlendFunc();
 		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		bufferbuilder.pos(matrix, minX, maxY, 0.0F).color(f, f1, f2, f3).endVertex();
-		bufferbuilder.pos(matrix, maxX, maxY, 0.0F).color(f, f1, f2, f3).endVertex();
-		bufferbuilder.pos(matrix, maxX, minY, 0.0F).color(f, f1, f2, f3).endVertex();
-		bufferbuilder.pos(matrix, minX, minY, 0.0F).color(f, f1, f2, f3).endVertex();
-		bufferbuilder.finishDrawing();
-		WorldVertexBufferUploader.draw(bufferbuilder);
+		bufferbuilder.vertex(matrix, minX, maxY, 0.0F).color(f, f1, f2, f3).endVertex();
+		bufferbuilder.vertex(matrix, maxX, maxY, 0.0F).color(f, f1, f2, f3).endVertex();
+		bufferbuilder.vertex(matrix, maxX, minY, 0.0F).color(f, f1, f2, f3).endVertex();
+		bufferbuilder.vertex(matrix, minX, minY, 0.0F).color(f, f1, f2, f3).endVertex();
+		bufferbuilder.end();
+		WorldVertexBufferUploader.end(bufferbuilder);
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 	}
@@ -196,7 +199,7 @@ public class GuiImpl extends Screen implements IGui {
 	public void drawText(int x, int y, String text, int color) {
 		x += getOffset().x;
 		y += getOffset().y;
-		font.drawString(matrixStack, text, x, y, color);
+		font.draw(matrixStack, text, x, y, color);
 	}
 
 	@Override
@@ -206,8 +209,8 @@ public class GuiImpl extends Screen implements IGui {
 			KeyboardEvent evt = new KeyboardEvent(keyCode, scanCode, (char) -1, GLFW.glfwGetKeyName(keyCode, scanCode));
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
-				if(minecraft.player != null && minecraft.gameSettings.keyBindChat.matchesKey(keyCode, scanCode) && minecraft.gameSettings.chatVisibility != ChatVisibility.HIDDEN) {
-					minecraft.displayGuiScreen(new Overlay());
+				if(minecraft.player != null && minecraft.options.keyChat.matches(keyCode, scanCode) && minecraft.options.chatVisibility != ChatVisibility.HIDDEN) {
+					minecraft.setScreen(new Overlay());
 					return true;
 				}
 			}
@@ -286,7 +289,7 @@ public class GuiImpl extends Screen implements IGui {
 	public void displayError(String e) {
 		Screen p = parent;
 		parent = null;
-		Minecraft.getInstance().displayGuiScreen(new ErrorScreen(new StringTextComponent("Custom Player Models"), new TranslationTextComponent("error.cpm.crash", e)) {
+		Minecraft.getInstance().setScreen(new ErrorScreen(new StringTextComponent("Custom Player Models"), new TranslationTextComponent("error.cpm.crash", e)) {
 			private Screen parent = p;
 
 			@Override
@@ -294,7 +297,7 @@ public class GuiImpl extends Screen implements IGui {
 				if(parent != null) {
 					Screen p = parent;
 					parent = null;
-					minecraft.displayGuiScreen(p);
+					minecraft.setScreen(p);
 				}
 			}
 		});
@@ -303,15 +306,15 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public void close() {
 		if(closeListener != null) {
-			closeListener.accept(() -> this.minecraft.displayGuiScreen((Screen)null));
+			closeListener.accept(this::onClose);
 		} else
-			this.minecraft.displayGuiScreen((Screen)null);
+			onClose();
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture) {
-		minecraft.getTextureManager().bindTexture(new ResourceLocation("cpm", "textures/gui/" + texture + ".png"));
+		minecraft.getTextureManager().bind(new ResourceLocation("cpm", "textures/gui/" + texture + ".png"));
 		x += getOffset().x;
 		y += getOffset().y;
 		RenderSystem.color4f(1, 1, 1, 1);
@@ -324,30 +327,30 @@ public class GuiImpl extends Screen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		RenderSystem.color4f(1, 1, 1, 1);
-		minecraft.getTextureManager().bindTexture(DynTexture.getBoundLoc());
+		minecraft.getTextureManager().bind(DynTexture.getBoundLoc());
 		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferbuilder = tessellator.getBuffer();
+		BufferBuilder bufferbuilder = tessellator.getBuilder();
 		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
 		float bo = getBlitOffset();
-		Matrix4f matrix = matrixStack.getLast().getMatrix();
-		bufferbuilder.pos(matrix, x, y + height, bo).tex(u1, v2).endVertex();
-		bufferbuilder.pos(matrix, x + width, y + height, bo).tex(u2, v2).endVertex();
-		bufferbuilder.pos(matrix, x + width, y, bo).tex(u2, v1).endVertex();
-		bufferbuilder.pos(matrix, x, y, bo).tex(u1, v1).endVertex();
+		Matrix4f matrix = matrixStack.last().pose();
+		bufferbuilder.vertex(matrix, x, y + height, bo).uv(u1, v2).endVertex();
+		bufferbuilder.vertex(matrix, x + width, y + height, bo).uv(u2, v2).endVertex();
+		bufferbuilder.vertex(matrix, x + width, y, bo).uv(u2, v1).endVertex();
+		bufferbuilder.vertex(matrix, x, y, bo).uv(u1, v1).endVertex();
 		RenderSystem.enableAlphaTest();
-		tessellator.draw();
+		tessellator.end();
 	}
 
 	@Override
 	public String i18nFormat(String key, Object... obj) {
-		return I18n.format(key, obj);
+		return I18n.get(key, obj);
 	}
 
 	@Override
 	public void setupCut() {
 		if(!noScissorTest) {
-			int dw = minecraft.getMainWindow().getWidth();
-			int dh = minecraft.getMainWindow().getHeight();
+			int dw = minecraft.getWindow().getWidth();
+			int dh = minecraft.getWindow().getHeight();
 			float multiplierX = dw / (float)width;
 			float multiplierY = dh / (float)height;
 			Box box = getContext().cutBox;
@@ -358,7 +361,7 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public int textWidth(String text) {
-		return font.getStringWidth(text);
+		return font.width(text);
 	}
 
 	private ITextField createTextField() {
@@ -373,8 +376,8 @@ public class GuiImpl extends Screen implements IGui {
 		private boolean settingText, updateField, enabled;
 		public TxtField() {
 			this.field = new TextFieldWidget(font, 0, 0, 0, 0, new TranslationTextComponent("narrator.cpm.field"));
-			this.field.setMaxStringLength(1024*1024);
-			this.field.setEnableBackgroundDrawing(false);
+			this.field.setMaxLength(1024*1024);
+			this.field.setBordered(false);
 			this.field.setVisible(true);
 			this.field.setTextColor(16777215);
 			this.field.setResponder(this);
@@ -396,7 +399,7 @@ public class GuiImpl extends Screen implements IGui {
 			field.setHeight(bounds.h - 12);
 			if(updateField) {
 				settingText = true;
-				field.setCursorPositionEnd();
+				field.moveCursorToEnd();
 				settingText = false;
 				updateField = false;
 			}
@@ -431,13 +434,13 @@ public class GuiImpl extends Screen implements IGui {
 
 		@Override
 		public String getText() {
-			return field.getText();
+			return field.getValue();
 		}
 
 		@Override
 		public void setText(String txt) {
 			this.settingText = true;
-			field.setText(txt);
+			field.setValue(txt);
 			this.settingText = false;
 			this.updateField = true;
 		}
@@ -454,7 +457,7 @@ public class GuiImpl extends Screen implements IGui {
 
 		@Override
 		public void setEnabled(boolean enabled) {
-			field.setEnabled(enabled);
+			field.setEditable(enabled);
 			this.enabled = enabled;
 		}
 
@@ -465,7 +468,7 @@ public class GuiImpl extends Screen implements IGui {
 
 		@Override
 		public void setFocused(boolean focused) {
-			field.setFocused2(focused);
+			field.setFocus(focused);
 		}
 	}
 
@@ -548,14 +551,14 @@ public class GuiImpl extends Screen implements IGui {
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.shadeModel(7425);
 		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferbuilder = tessellator.getBuffer();
-		Matrix4f mat = matrixStack.getLast().getMatrix();
+		BufferBuilder bufferbuilder = tessellator.getBuilder();
+		Matrix4f mat = matrixStack.last().pose();
 		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		bufferbuilder.pos(mat, right, top, this.getBlitOffset()).color(rtr, gtr, btr, atr).endVertex();
-		bufferbuilder.pos(mat, left, top, this.getBlitOffset()).color(rtl, gtl, btl, atl).endVertex();
-		bufferbuilder.pos(mat, left, bottom, this.getBlitOffset()).color(rbl, gbl, bbl, abl).endVertex();
-		bufferbuilder.pos(mat, right, bottom, this.getBlitOffset()).color(rbr, gbr, bbr, abr).endVertex();
-		tessellator.draw();
+		bufferbuilder.vertex(mat, right, top, this.getBlitOffset()).color(rtr, gtr, btr, atr).endVertex();
+		bufferbuilder.vertex(mat, left, top, this.getBlitOffset()).color(rtl, gtl, btl, atl).endVertex();
+		bufferbuilder.vertex(mat, left, bottom, this.getBlitOffset()).color(rbl, gbl, bbl, abl).endVertex();
+		bufferbuilder.vertex(mat, right, bottom, this.getBlitOffset()).color(rbr, gbr, bbr, abr).endVertex();
+		tessellator.end();
 		RenderSystem.shadeModel(7424);
 		RenderSystem.disableBlend();
 		RenderSystem.enableAlphaTest();
@@ -569,7 +572,7 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void setClipboardText(String text) {
-		minecraft.keyboardListener.setClipboardString(text);
+		minecraft.keyboardHandler.setClipboard(text);
 	}
 
 	@Override
@@ -579,34 +582,35 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public String getClipboardText() {
-		return minecraft.keyboardListener.getClipboardString();
+		return minecraft.keyboardHandler.getClipboard();
 	}
 
 	@Override
 	public void setScale(int value) {
-		if(value != minecraft.gameSettings.guiScale) {
-			if(vanillaScale == -1)vanillaScale = minecraft.gameSettings.guiScale;
+		if(vanillaScale == -999)return;
+		if(value != minecraft.options.guiScale) {
+			if(vanillaScale == -1)vanillaScale = minecraft.options.guiScale;
 			if(value == -1) {
-				if(minecraft.gameSettings.guiScale != vanillaScale) {
-					minecraft.gameSettings.guiScale = vanillaScale;
+				if(minecraft.options.guiScale != vanillaScale) {
+					minecraft.options.guiScale = vanillaScale;
 					vanillaScale = -1;
-					minecraft.updateWindowSize();
+					minecraft.resizeDisplay();
 				}
 			} else {
-				minecraft.gameSettings.guiScale = value;
-				minecraft.updateWindowSize();
+				minecraft.options.guiScale = value;
+				minecraft.resizeDisplay();
 			}
 		}
 	}
 
 	@Override
 	public int getScale() {
-		return minecraft.gameSettings.guiScale;
+		return minecraft.options.guiScale;
 	}
 
 	@Override
 	public int getMaxScale() {
-		return minecraft.getMainWindow().calcGuiScale(0, minecraft.getForceUnicodeFont()) + 1;
+		return minecraft.getWindow().calculateScale(0, minecraft.isEnforceUnicode()) + 1;
 	}
 
 	@Override

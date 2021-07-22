@@ -36,55 +36,55 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 		super(p_i226006_1_);
 	}
 
-	@Shadow private static @Final Map<SkullBlock.ISkullType, GenericHeadModel> MODELS;
+	@Shadow private static @Final Map<SkullBlock.ISkullType, GenericHeadModel> MODEL_BY_TYPE;
 
 	@Redirect(at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/RenderType;getEntityTranslucent("
+			target = "Lnet/minecraft/client/renderer/RenderType;entityTranslucent("
 					+ "Lnet/minecraft/util/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
 			),
 			method = "getRenderType(Lnet/minecraft/block/SkullBlock$ISkullType;Lcom/mojang/authlib/GameProfile;)"
 					+ "Lnet/minecraft/client/renderer/RenderType;")
 	private static RenderType onGetRenderType(ResourceLocation resLoc, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn) {
-		GenericHeadModel model = MODELS.get(skullType);
+		GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
 		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
 		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
-		return RenderType.getEntityTranslucent(cbi.getReturnValue());
+		return RenderType.entityTranslucent(cbi.getReturnValue());
 	}
 
 	@Redirect(at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/RenderType;getEntityCutoutNoCull("
+			target = "Lnet/minecraft/client/renderer/RenderType;entityCutoutNoCull("
 					+ "Lnet/minecraft/util/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;",
 					ordinal = 0
 			),
 			method = "getRenderType(Lnet/minecraft/block/SkullBlock$ISkullType;Lcom/mojang/authlib/GameProfile;)"
 					+ "Lnet/minecraft/client/renderer/RenderType;")
 	private static RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn) {
-		GenericHeadModel model = MODELS.get(skullType);
+		GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
 		CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
 		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
-		return RenderType.getEntityTranslucent(cbi.getReturnValue());
+		return RenderType.entityTranslucent(cbi.getReturnValue());
 	}
 
 	@Inject(at = @At("HEAD"),
-			method = "render(Lnet/minecraft/util/Direction;FLnet/minecraft/block/SkullBlock$ISkullType;"
+			method = "renderSkull(Lnet/minecraft/util/Direction;FLnet/minecraft/block/SkullBlock$ISkullType;"
 					+ "Lcom/mojang/authlib/GameProfile;FLcom/mojang/blaze3d/matrix/MatrixStack;"
 					+ "Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
 	private static void onRenderPre(@Nullable Direction directionIn, float p_228879_1_, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, CallbackInfo cbi) {
 		if (skullType == SkullBlock.Types.PLAYER && gameProfileIn != null) {
-			GenericHeadModel model = MODELS.get(skullType);
+			GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
 			ClientProxy.INSTANCE.renderSkull(model, gameProfileIn, buffer);
 		}
 	}
 
 	@Inject(at = @At("RETURN"),
-			method = "render(Lnet/minecraft/util/Direction;FLnet/minecraft/block/SkullBlock$ISkullType;"
+			method = "renderSkull(Lnet/minecraft/util/Direction;FLnet/minecraft/block/SkullBlock$ISkullType;"
 					+ "Lcom/mojang/authlib/GameProfile;FLcom/mojang/blaze3d/matrix/MatrixStack;"
 					+ "Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
 	private static void onRenderPost(@Nullable Direction directionIn, float p_228879_1_, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, CallbackInfo cbi) {
 		if (skullType == SkullBlock.Types.PLAYER && gameProfileIn != null) {
-			GenericHeadModel model = MODELS.get(skullType);
+			GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
 			ClientProxy.INSTANCE.unbind(model);
 		}
 	}

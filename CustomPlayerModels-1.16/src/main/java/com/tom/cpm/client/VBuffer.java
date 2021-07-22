@@ -17,18 +17,18 @@ public class VBuffer extends DirectBuffer<IVertexBuilder> {
 		super(buffer);
 		this.light = light;
 		this.overlay = overlay;
-		mat4 = matrixStackIn.getLast().getMatrix();
-		mat3 = matrixStackIn.getLast().getNormal();
+		mat4 = matrixStackIn.last().pose();
+		mat3 = matrixStackIn.last().normal();
 	}
 
 	@Override
 	protected void pushVertex(float x, float y, float z, float red, float green,
 			float blue, float alpha, float u, float v, float nx, float ny, float nz) {
-		buffer.pos(mat4, x, y, z);
+		buffer.vertex(mat4, x, y, z);
 		buffer.color(red, green, blue, alpha);
-		buffer.tex(u, v);
-		buffer.overlay(overlay);
-		buffer.lightmap(light);
+		buffer.uv(u, v);
+		buffer.overlayCoords(overlay);
+		buffer.uv2(light);
 		buffer.normal(mat3, nx, ny, nz);
 		buffer.endVertex();
 	}

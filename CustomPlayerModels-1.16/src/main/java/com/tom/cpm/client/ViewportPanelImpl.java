@@ -75,10 +75,10 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		matrixstack.scale(size, size, size);
 		Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
 		Quaternion quaternion1 = Vector3f.XP.rotation(-pitch);
-		quaternion.multiply(quaternion1);
-		matrixstack.rotate(quaternion);
+		quaternion.mul(quaternion1);
+		matrixstack.mulPose(quaternion);
 
-		matrixstack.rotate(Vector3f.YP.rotation((float) (yaw + Math.PI)));
+		matrixstack.mulPose(Vector3f.YP.rotation((float) (yaw + Math.PI)));
 		matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
 		RenderSystem.enableDepthTest();
 	}
@@ -94,46 +94,46 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 	@Override
 	public void renderBase() {
 		RenderType rt = CustomRenderTypes.getTexCutout(new ResourceLocation("cpm", "textures/gui/area.png"));
-		IVertexBuilder t = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
-		Matrix4f m = matrixstack.getLast().getMatrix();
-		t.pos(m, 4,  0,  4).tex(1, 1).endVertex();
-		t.pos(m, 4,  0, -3).tex(0, 1).endVertex();
-		t.pos(m, -3, 0, -3).tex(0, 0).endVertex();
-		t.pos(m, -3, 0,  4).tex(1, 0).endVertex();
-		mc.getRenderTypeBuffers().getBufferSource().finish(rt);
+		IVertexBuilder t = mc.renderBuffers().bufferSource().getBuffer(rt);
+		Matrix4f m = matrixstack.last().pose();
+		t.vertex(m, 4,  0,  4).uv(1, 1).endVertex();
+		t.vertex(m, 4,  0, -3).uv(0, 1).endVertex();
+		t.vertex(m, -3, 0, -3).uv(0, 0).endVertex();
+		t.vertex(m, -3, 0,  4).uv(1, 0).endVertex();
+		mc.renderBuffers().bufferSource().endBatch(rt);
 
 		Render.drawTexturedCube(matrixstack, 0, -1.001f, 0, 1, 1, 1);
 	}
 
 	@Override
 	public void render(float partialTicks) {
-		PlayerRenderer rp = mc.getRenderManager().getSkinMap().get(panel.getSkinType().getName());
+		PlayerRenderer rp = mc.getEntityRenderDispatcher().getSkinMap().get(panel.getSkinType().getName());
 		float scale = panel.getScale();//0.0625F
 		matrixstack.translate(0.5f, 0, 0.5f);
-		matrixstack.rotate(Vector3f.YP.rotationDegrees(90));
+		matrixstack.mulPose(Vector3f.YP.rotationDegrees(90));
 		matrixstack.scale((-scale), -scale, scale);
 		matrixstack.translate(0, -1.5f, 0);
-		PlayerModel<AbstractClientPlayerEntity> p = rp.getEntityModel();
+		PlayerModel<AbstractClientPlayerEntity> p = rp.getModel();
 		panel.preRender();
 		try {
 			ModelDefinition def = panel.getDefinition();
-			ClientProxy.mc.getPlayerRenderManager().bindModel(p, mc.getRenderTypeBuffers().getBufferSource(), def, null, panel.getAnimMode());
+			ClientProxy.mc.getPlayerRenderManager().bindModel(p, mc.renderBuffers().bufferSource(), def, null, panel.getAnimMode());
 			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true);
-			cbi.setReturnValue(MinecraftObject.getDefaultSkin(mc.getSession().getProfile().getId()));
+			cbi.setReturnValue(MinecraftObject.getDefaultSkin(mc.getUser().getGameProfile().getId()));
 			ClientProxy.mc.getPlayerRenderManager().bindSkin(p, cbi, TextureSheetType.SKIN);
 			setupModel(p);
-			int light = LightTexture.packLight(15, 15);
-			RenderType rt = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.getEntityTranslucent(cbi.getReturnValue());
-			IVertexBuilder buffer = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
+			int light = LightTexture.pack(15, 15);
+			RenderType rt = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.entityTranslucent(cbi.getReturnValue());
+			IVertexBuilder buffer = mc.renderBuffers().bufferSource().getBuffer(rt);
 			RDH rdh = (RDH) ClientProxy.mc.getPlayerRenderManager().getHolder(p);
 			rdh.renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rt, 0));
 			setHeldItem(Hand.RIGHT, ap -> p.rightArmPose = ap);
 			setHeldItem(Hand.LEFT, ap -> p.leftArmPose = ap);
-			PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand, false);
+			PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.options.mainHand, false);
 
 			if(panel.isTpose()) {
-				p.bipedRightArm.rotateAngleZ = (float) Math.toRadians(90);
-				p.bipedLeftArm.rotateAngleZ = (float) Math.toRadians(-90);
+				p.rightArm.zRot = (float) Math.toRadians(90);
+				p.leftArm.zRot = (float) Math.toRadians(-90);
 			}
 
 			float lsa = 0.75f;
@@ -143,18 +143,18 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 				switch (pose) {
 				case SLEEPING:
 					matrixstack.translate(0.0D, 1.501F, 0.0D);
-					matrixstack.rotate(Vector3f.ZP.rotationDegrees(-90));
-					matrixstack.rotate(Vector3f.YP.rotationDegrees(270.0F));
+					matrixstack.mulPose(Vector3f.ZP.rotationDegrees(-90));
+					matrixstack.mulPose(Vector3f.YP.rotationDegrees(270.0F));
 					break;
 
 				case SNEAKING:
-					p.isSneak = true;
-					PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand, false);
+					p.crouching = true;
+					PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.options.mainHand, false);
 					break;
 
 				case RIDING:
-					p.isSitting = true;
-					PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.gameSettings.mainHand, false);
+					p.riding = true;
+					PlayerModelSetup.setRotationAngles(p, 0, 0, 0, 0, mc.options.mainHand, false);
 					break;
 				case CUSTOM:
 				case DYING:
@@ -164,27 +164,27 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 				case FLYING:
 					matrixstack.translate(0.0D, 1.0D, -0.5d);
-					matrixstack.rotate(Vector3f.XP.rotationDegrees(90));
-					p.bipedHead.rotateAngleX = -(float)Math.PI / 4F;
+					matrixstack.mulPose(Vector3f.XP.rotationDegrees(90));
+					p.head.xRot = -(float)Math.PI / 4F;
 					break;
 
 				case RUNNING:
-					PlayerModelSetup.setRotationAngles(p, ls, 1, 0, 0, mc.gameSettings.mainHand, false);
+					PlayerModelSetup.setRotationAngles(p, ls, 1, 0, 0, mc.options.mainHand, false);
 					break;
 
 				case SWIMMING:
-					PlayerModelSetup.setRotationAngles(p, ls, lsa, 0, 0, mc.gameSettings.mainHand, true);
+					PlayerModelSetup.setRotationAngles(p, ls, lsa, 0, 0, mc.options.mainHand, true);
 					matrixstack.translate(0.0D, 1.0D, -0.5d);
-					matrixstack.rotate(Vector3f.XP.rotationDegrees(90));
+					matrixstack.mulPose(Vector3f.XP.rotationDegrees(90));
 					break;
 
 				case WALKING:
-					PlayerModelSetup.setRotationAngles(p, ls, lsa, 0, 0, mc.gameSettings.mainHand, false);
+					PlayerModelSetup.setRotationAngles(p, ls, lsa, 0, 0, mc.options.mainHand, false);
 					break;
 
 				case SKULL_RENDER:
-					p.setVisible(false);
-					p.bipedHead.showModel = true;
+					p.setAllVisible(false);
+					p.head.visible = true;
 					matrixstack.translate(0.0D, 1.501F, 0.0D);
 					break;
 
@@ -193,13 +193,13 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 				}
 			});
 
-			p.render(matrixstack, buffer, light, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+			p.renderToBuffer(matrixstack, buffer, light, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
 
 			if(def.hasRoot(RootModelType.CAPE) && panel.getArmorLayers().contains(PlayerModelLayer.CAPE)) {
 				ClientProxy.mc.getPlayerRenderManager().bindSkin(p, cbi, TextureSheetType.CAPE);
-				RenderType rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.getEntityTranslucent(cbi.getReturnValue());
+				RenderType rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.entityTranslucent(cbi.getReturnValue());
 				rdh.renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rtc, 0));
-				buffer = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rtc);
+				buffer = mc.renderBuffers().bufferSource().getBuffer(rtc);
 				ClientProxy.renderCape(matrixstack, buffer, light, null, partialTicks, p, def);
 			}
 
@@ -210,12 +210,12 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 			if(panel.getArmorLayers().contains(PlayerModelLayer.ELYTRA))renderElytra(p, rdh, light, def);
 
-			mc.getRenderTypeBuffers().getBufferSource().getBuffer(rt);
-			mc.getRenderTypeBuffers().getBufferSource().finish(CustomRenderTypes.ENTITY_COLOR);
-			mc.getRenderTypeBuffers().getBufferSource().finish();
+			mc.renderBuffers().bufferSource().getBuffer(rt);
+			mc.renderBuffers().bufferSource().endBatch(CustomRenderTypes.ENTITY_COLOR);
+			mc.renderBuffers().bufferSource().endBatch();
 
-			this.renderItem(p, getHandStack(Hand.RIGHT), ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HandSide.RIGHT, matrixstack, mc.getRenderTypeBuffers().getBufferSource(), light);
-			this.renderItem(p, getHandStack(Hand.LEFT), ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HandSide.LEFT, matrixstack, mc.getRenderTypeBuffers().getBufferSource(), light);
+			this.renderItem(p, getHandStack(Hand.RIGHT), ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HandSide.RIGHT, matrixstack, mc.renderBuffers().bufferSource(), light);
+			this.renderItem(p, getHandStack(Hand.LEFT), ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HandSide.LEFT, matrixstack, mc.renderBuffers().bufferSource(), light);
 		} finally {
 			ClientProxy.mc.getPlayerRenderManager().unbindModel(p);
 		}
@@ -228,66 +228,66 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 		if(panel.getArmorLayers().contains(layer)) {
 			BipedModel<AbstractClientPlayerEntity> model = layer == PlayerModelLayer.LEGS ? ARMOR_LEGS : ARMOR_BODY;
 			String name = layer == PlayerModelLayer.LEGS ? "armor2" : "armor1";
-			ClientProxy.mc.getPlayerRenderManager().bindModel(model, name, mc.getRenderTypeBuffers().getBufferSource(), def, null, panel.getAnimMode());
-			p.setModelAttributes(model);
+			ClientProxy.mc.getPlayerRenderManager().bindModel(model, name, mc.renderBuffers().bufferSource(), def, null, panel.getAnimMode());
+			p.copyPropertiesTo(model);
 			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, new ResourceLocation("cpm:textures/template/" + name + ".png"));
 			ClientProxy.mc.getPlayerRenderManager().bindSkin(model, cbi, RootGroups.getGroup(layer.parts[0]).getTexSheet(layer.parts[0]));
-			RenderType rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.getEntityTranslucent(cbi.getReturnValue());
+			RenderType rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.entityTranslucent(cbi.getReturnValue());
 			rdh.renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rtc, 0));
 			setModelSlotVisible(model, layer);
-			IVertexBuilder buffer = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rtc);
-			model.render(matrixstack, buffer, light, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+			IVertexBuilder buffer = mc.renderBuffers().bufferSource().getBuffer(rtc);
+			model.renderToBuffer(matrixstack, buffer, light, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
 			ClientProxy.mc.getPlayerRenderManager().unbindModel(model);
 		}
 	}
 
 	private void renderElytra(PlayerModel<AbstractClientPlayerEntity> p, RDH rdh, int light, ModelDefinition def) {
 		if(def.hasRoot(RootModelType.ELYTRA_LEFT) || def.hasRoot(RootModelType.ELYTRA_RIGHT)) {
-			ClientProxy.mc.getPlayerRenderManager().bindModel(modelElytra, mc.getRenderTypeBuffers().getBufferSource(), def, null, panel.getAnimMode());
+			ClientProxy.mc.getPlayerRenderManager().bindModel(modelElytra, mc.renderBuffers().bufferSource(), def, null, panel.getAnimMode());
 			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, new ResourceLocation("cpm:textures/template/elytra.png"));
 			ClientProxy.mc.getPlayerRenderManager().bindSkin(modelElytra, cbi, TextureSheetType.ELYTRA);
-			RenderType rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.getEntityTranslucent(cbi.getReturnValue());
+			RenderType rtc = !panel.applyLighting() ? CustomRenderTypes.getEntityTranslucentCullNoLight(cbi.getReturnValue()) : RenderType.entityTranslucent(cbi.getReturnValue());
 			rdh.renderTypes.put(RenderMode.NORMAL, new NativeRenderType(rtc, 0));
-			matrixstack.push();
+			matrixstack.pushPose();
 			matrixstack.translate(0.0D, 0.0D, 0.125D);
-			p.copyModelAttributesTo(modelElytra);
-			modelElytra.leftWing.rotationPointX = 5.0F;
-			modelElytra.leftWing.rotationPointY = 0;
-			modelElytra.leftWing.rotateAngleX = 0.2617994F;
-			modelElytra.leftWing.rotateAngleZ = -0.2617994F;
-			modelElytra.leftWing.rotateAngleY = 0;
-			modelElytra.rightWing.rotationPointX = -modelElytra.leftWing.rotationPointX;
-			modelElytra.rightWing.rotateAngleY = -modelElytra.leftWing.rotateAngleY;
-			modelElytra.rightWing.rotationPointY = modelElytra.leftWing.rotationPointY;
-			modelElytra.rightWing.rotateAngleX = modelElytra.leftWing.rotateAngleX;
-			modelElytra.rightWing.rotateAngleZ = -modelElytra.leftWing.rotateAngleZ;
-			IVertexBuilder buffer = mc.getRenderTypeBuffers().getBufferSource().getBuffer(rtc);
-			modelElytra.render(matrixstack, buffer, light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-			matrixstack.pop();
+			p.copyPropertiesTo(modelElytra);
+			modelElytra.leftWing.x = 5.0F;
+			modelElytra.leftWing.y = 0;
+			modelElytra.leftWing.xRot = 0.2617994F;
+			modelElytra.leftWing.zRot = -0.2617994F;
+			modelElytra.leftWing.yRot = 0;
+			modelElytra.rightWing.x = -modelElytra.leftWing.x;
+			modelElytra.rightWing.yRot = -modelElytra.leftWing.yRot;
+			modelElytra.rightWing.y = modelElytra.leftWing.y;
+			modelElytra.rightWing.xRot = modelElytra.leftWing.xRot;
+			modelElytra.rightWing.zRot = -modelElytra.leftWing.zRot;
+			IVertexBuilder buffer = mc.renderBuffers().bufferSource().getBuffer(rtc);
+			modelElytra.renderToBuffer(matrixstack, buffer, light, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+			matrixstack.popPose();
 			ClientProxy.mc.getPlayerRenderManager().unbindModel(modelElytra);
 		}
 	}
 
 	protected void setModelSlotVisible(BipedModel<AbstractClientPlayerEntity> modelIn, PlayerModelLayer slotIn) {
-		modelIn.setVisible(false);
+		modelIn.setAllVisible(false);
 		switch(slotIn) {
 		case HELMET:
-			modelIn.bipedHead.showModel = true;
-			modelIn.bipedHeadwear.showModel = true;
+			modelIn.head.visible = true;
+			modelIn.hat.visible = true;
 			break;
 		case BODY:
-			modelIn.bipedBody.showModel = true;
-			modelIn.bipedRightArm.showModel = true;
-			modelIn.bipedLeftArm.showModel = true;
+			modelIn.body.visible = true;
+			modelIn.rightArm.visible = true;
+			modelIn.leftArm.visible = true;
 			break;
 		case LEGS:
-			modelIn.bipedBody.showModel = true;
-			modelIn.bipedRightLeg.showModel = true;
-			modelIn.bipedLeftLeg.showModel = true;
+			modelIn.body.visible = true;
+			modelIn.rightLeg.visible = true;
+			modelIn.leftLeg.visible = true;
 			break;
 		case BOOTS:
-			modelIn.bipedRightLeg.showModel = true;
-			modelIn.bipedLeftLeg.showModel = true;
+			modelIn.rightLeg.visible = true;
+			modelIn.leftLeg.visible = true;
 			break;
 		default:
 			break;
@@ -323,37 +323,37 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 
 	private void renderItem(PlayerModel<AbstractClientPlayerEntity> model, ItemStack p_229135_2_, ItemCameraTransforms.TransformType p_229135_3_, HandSide p_229135_4_, MatrixStack p_229135_5_, IRenderTypeBuffer p_229135_6_, int p_229135_7_) {
 		if (!p_229135_2_.isEmpty()) {
-			p_229135_5_.push();
-			model.translateHand(p_229135_4_, p_229135_5_);
-			p_229135_5_.rotate(Vector3f.XP.rotationDegrees(-90.0F));
-			p_229135_5_.rotate(Vector3f.YP.rotationDegrees(180.0F));
+			p_229135_5_.pushPose();
+			model.translateToHand(p_229135_4_, p_229135_5_);
+			p_229135_5_.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
+			p_229135_5_.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 			boolean flag = p_229135_4_ == HandSide.LEFT;
 			p_229135_5_.translate((flag ? -1 : 1) / 16.0F, 0.125D, -0.625D);
-			Minecraft.getInstance().getItemRenderer().renderItem(null, p_229135_2_, p_229135_3_, flag, p_229135_5_, p_229135_6_, null, p_229135_7_, OverlayTexture.NO_OVERLAY);
-			p_229135_5_.pop();
+			Minecraft.getInstance().getItemRenderer().renderStatic(null, p_229135_2_, p_229135_3_, flag, p_229135_5_, p_229135_6_, null, p_229135_7_, OverlayTexture.NO_OVERLAY);
+			p_229135_5_.popPose();
 		}
 	}
 
 	private void setupModel(PlayerModel<AbstractClientPlayerEntity> p) {
-		p.isChild = false;
+		p.young = false;
 		p.leftArmPose = ArmPose.EMPTY;
 		p.rightArmPose = ArmPose.EMPTY;
-		p.setVisible(true);
-		p.bipedHeadwear.showModel = false;
-		p.bipedBodyWear.showModel = false;
-		p.bipedLeftLegwear.showModel = false;
-		p.bipedRightLegwear.showModel = false;
-		p.bipedLeftArmwear.showModel = false;
-		p.bipedRightArmwear.showModel = false;
-		p.isSneak = false;
-		p.swingProgress = 0;
-		p.isSitting = false;
+		p.setAllVisible(true);
+		p.hat.visible = false;
+		p.jacket.visible = false;
+		p.leftPants.visible = false;
+		p.rightPants.visible = false;
+		p.leftSleeve.visible = false;
+		p.rightSleeve.visible = false;
+		p.crouching = false;
+		p.attackTime = 0;
+		p.riding = false;
 	}
 
 	@Override
 	public int getColorUnderMouse() {
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(3);
-		GL11.glReadPixels((int) mc.mouseHelper.getMouseX(), mc.getMainWindow().getFramebufferHeight() - (int) mc.mouseHelper.getMouseY(), 1, 1, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
+		GL11.glReadPixels((int) mc.mouseHandler.xpos(), mc.getWindow().getHeight() - (int) mc.mouseHandler.ypos(), 1, 1, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
 		int colorUnderMouse = (((int)(buffer.get(0) * 255)) << 16) | (((int)(buffer.get(1) * 255)) << 8) | ((int)(buffer.get(2) * 255));
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		return colorUnderMouse;
@@ -362,14 +362,14 @@ public class ViewportPanelImpl extends ViewportPanelNative {
 	@Override
 	public Image takeScreenshot(Vec2i size) {
 		GuiImpl gui = (GuiImpl) panel.getGui();
-		int dw = mc.getMainWindow().getWidth();
-		int dh = mc.getMainWindow().getHeight();
+		int dw = mc.getWindow().getWidth();
+		int dh = mc.getWindow().getHeight();
 		float multiplierX = dw / (float)gui.width;
 		float multiplierY = dh / (float)gui.height;
 		int width = (int) (multiplierX * size.x);
 		int height = (int) (multiplierY * size.y);
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(width * height * 3);
-		GL11.glReadPixels((int) (multiplierX * renderPos.x), mc.getMainWindow().getFramebufferHeight() - height - (int) (multiplierY * renderPos.y), width, height, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
+		GL11.glReadPixels((int) (multiplierX * renderPos.x), mc.getWindow().getHeight() - height - (int) (multiplierY * renderPos.y), width, height, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
 		Image img = new Image(width, height);
 		for(int y = 0;y<height;y++) {
 			for(int x = 0;x<width;x++) {

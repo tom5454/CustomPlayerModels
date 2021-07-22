@@ -46,13 +46,13 @@ public abstract class CapeLayerMixin extends LayerRenderer<AbstractClientPlayerE
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
-				ItemStack chestplate = entitylivingbaseIn.getItemStackFromSlot(EquipmentSlotType.CHEST);
-				if(!entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isWearing(PlayerModelPart.CAPE) && chestplate.getItem() != Items.ELYTRA) {
+				ItemStack chestplate = entitylivingbaseIn.getItemBySlot(EquipmentSlotType.CHEST);
+				if(!entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isModelPartShown(PlayerModelPart.CAPE) && chestplate.getItem() != Items.ELYTRA) {
 					CallbackInfoReturnable<ResourceLocation> rl = new CallbackInfoReturnable<>(null, true, null);
-					ClientProxy.mc.getPlayerRenderManager().bindSkin(getEntityModel(), rl, TextureSheetType.CAPE);
+					ClientProxy.mc.getPlayerRenderManager().bindSkin(getParentModel(), rl, TextureSheetType.CAPE);
 					if(rl.getReturnValue() != null) {
-						IVertexBuilder buffer = bufferIn.getBuffer(RenderType.getEntityTranslucent(rl.getReturnValue()));
-						ClientProxy.renderCape(matrixStackIn, buffer, packedLightIn, entitylivingbaseIn, partialTicks, getEntityModel(), def);
+						IVertexBuilder buffer = bufferIn.getBuffer(RenderType.entityTranslucent(rl.getReturnValue()));
+						ClientProxy.renderCape(matrixStackIn, buffer, packedLightIn, entitylivingbaseIn, partialTicks, getParentModel(), def);
 					}
 				}
 				cbi.cancel();

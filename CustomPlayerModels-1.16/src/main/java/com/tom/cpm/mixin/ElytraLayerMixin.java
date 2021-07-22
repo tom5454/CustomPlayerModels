@@ -25,29 +25,29 @@ import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(ElytraLayer.class)
 public class ElytraLayerMixin {
-	private @Shadow @Final ElytraModel<LivingEntity> modelElytra;
+	private @Shadow @Final ElytraModel<LivingEntity> elytraModel;
 
 	@Inject(at = @At(
 			value = "INVOKE",
-			target = "Lcom/mojang/blaze3d/matrix/MatrixStack;push()V"),
+			target = "Lcom/mojang/blaze3d/matrix/MatrixStack;pushPose()V"),
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void preRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity)ClientProxy.INSTANCE.renderElytra((PlayerEntity) entitylivingbaseIn, bufferIn, modelElytra);
+		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity)ClientProxy.INSTANCE.renderElytra((PlayerEntity) entitylivingbaseIn, bufferIn, elytraModel);
 	}
 
 	@Inject(at = @At(
 			value = "INVOKE",
-			target = "Lcom/mojang/blaze3d/matrix/MatrixStack;pop()V"),
+			target = "Lcom/mojang/blaze3d/matrix/MatrixStack;popPose()V"),
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void postRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity)ClientProxy.INSTANCE.unbind(modelElytra);
+		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity)ClientProxy.INSTANCE.unbind(elytraModel);
 	}
 
 	@Redirect(at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/RenderType;getArmorCutoutNoCull("
+			target = "Lnet/minecraft/client/renderer/RenderType;armorCutoutNoCull("
 					+ "Lnet/minecraft/util/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;",
 					ordinal = 0
 			),
@@ -56,9 +56,9 @@ public class ElytraLayerMixin {
 	private RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
 		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity) {
 			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-			ClientProxy.mc.getPlayerRenderManager().bindSkin(modelElytra, cbi, TextureSheetType.ELYTRA);
-			return RenderType.getArmorCutoutNoCull(cbi.getReturnValue());
+			ClientProxy.mc.getPlayerRenderManager().bindSkin(elytraModel, cbi, TextureSheetType.ELYTRA);
+			return RenderType.armorCutoutNoCull(cbi.getReturnValue());
 		}
-		return RenderType.getArmorCutoutNoCull(resLoc);
+		return RenderType.armorCutoutNoCull(resLoc);
 	}
 }

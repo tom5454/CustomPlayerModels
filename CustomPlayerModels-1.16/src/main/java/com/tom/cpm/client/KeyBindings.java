@@ -23,8 +23,8 @@ public class KeyBindings implements IKeybind {
 	public static KeyBinding gestureMenuBinding, renderToggleBinding;
 	public static Map<Integer, KeyBinding> quickAccess = new HashMap<>();
 	public static void init() {
-		gestureMenuBinding = new KeyBinding("key.cpm.gestureMenu", KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrMakeInput(GLFW.GLFW_KEY_G), "key.cpm.category");
-		renderToggleBinding = new KeyBinding("key.cpm.renderToggle", KeyConflictContext.IN_GAME, InputMappings.INPUT_INVALID, "key.cpm.category");
+		gestureMenuBinding = new KeyBinding("key.cpm.gestureMenu", KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_G), "key.cpm.category");
+		renderToggleBinding = new KeyBinding("key.cpm.renderToggle", KeyConflictContext.IN_GAME, InputMappings.UNKNOWN, "key.cpm.category");
 		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu"));
 		kbs.add(new KeyBindings(renderToggleBinding, "renderToggle"));
 
@@ -37,7 +37,7 @@ public class KeyBindings implements IKeybind {
 		@Override
 		public boolean isActive() {
 			Minecraft mc = Minecraft.getInstance();
-			return mc.currentScreen instanceof GuiImpl || (!KeyConflictContext.GUI.isActive() && mc.player != null);
+			return mc.screen instanceof GuiImpl || (!KeyConflictContext.GUI.isActive() && mc.player != null);
 		}
 
 		@Override
@@ -47,7 +47,7 @@ public class KeyBindings implements IKeybind {
 	}
 
 	private static void createQA(int id) {
-		KeyBinding kb = new KeyBinding("key.cpm.qa_" + id, conflictCtx, InputMappings.INPUT_INVALID, "key.cpm.category");
+		KeyBinding kb = new KeyBinding("key.cpm.qa_" + id, conflictCtx, InputMappings.UNKNOWN, "key.cpm.category");
 		kbs.add(new KeyBindings(kb, "qa_" + id));
 		quickAccess.put(id, kb);
 	}
@@ -64,13 +64,13 @@ public class KeyBindings implements IKeybind {
 
 	@Override
 	public boolean isPressed(KeyboardEvent evt) {
-		InputMappings.Input mouseKey = InputMappings.getInputByCode(evt.keyCode, evt.scancode);
+		InputMappings.Input mouseKey = InputMappings.getKey(evt.keyCode, evt.scancode);
 		return kb.isActiveAndMatches(mouseKey);
 	}
 
 	@Override
 	public String getBoundKey() {
-		return kb.func_238171_j_().getString();
+		return kb.getTranslatedKeyMessage().getString();
 	}
 
 	@Override

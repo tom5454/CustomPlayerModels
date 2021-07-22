@@ -15,7 +15,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 public class CommandCPM {
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		LiteralArgumentBuilder<CommandSource> cpm = Commands.literal("cpm").
-				requires(CommandSource -> CommandSource.hasPermissionLevel(2)).
+				requires(CommandSource -> CommandSource.hasPermission(2)).
 				then(Commands.literal("setskin").
 						then(Commands.literal("-f").
 								then(Commands.argument("target", EntityArgument.player()).
@@ -48,8 +48,8 @@ public class CommandCPM {
 	private static int execute(CommandContext<CommandSource> context, String skin, boolean force, boolean save) throws CommandSyntaxException {
 		ServerPlayerEntity player = EntityArgument.getPlayer(context, "target");
 		ServerHandler.netHandler.onCommand(player, skin, force, save);
-		if(force)context.getSource().sendFeedback(new TranslationTextComponent("commands.cpm.setskin.success.force", player.getDisplayName()), true);
-		else context.getSource().sendFeedback(new TranslationTextComponent("commands.cpm.setskin.success", player.getDisplayName()), true);
+		if(force)context.getSource().sendSuccess(new TranslationTextComponent("commands.cpm.setskin.success.force", player.getDisplayName()), true);
+		else context.getSource().sendSuccess(new TranslationTextComponent("commands.cpm.setskin.success", player.getDisplayName()), true);
 		return 1;
 	}
 }

@@ -76,15 +76,15 @@ public class ClientProxy extends CommonProxy {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setNewNbt(CompoundNBT::new);
 		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
-		netHandler.setWriteCompound(PacketBuffer::writeCompoundTag, PacketBuffer::readCompoundTag);
+		netHandler.setWriteCompound(PacketBuffer::writeNbt, PacketBuffer::readNbt);
 		netHandler.setNBTSetters(CompoundNBT::putBoolean, CompoundNBT::putByteArray, CompoundNBT::putFloat);
 		netHandler.setNBTGetters(CompoundNBT::getBoolean, CompoundNBT::getByteArray, CompoundNBT::getFloat);
 		netHandler.setContains(CompoundNBT::contains);
 		netHandler.setExecutor(() -> minecraft);
-		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CCustomPayloadPacket(rl, pb)), null);
+		netHandler.setSendPacket((c, rl, pb) -> c.send(new CCustomPayloadPacket(rl, pb)), null);
 		netHandler.setPlayerToLoader(PlayerEntity::getGameProfile);
 		netHandler.setReadPlayerId(PacketBuffer::readVarInt, id -> {
-			Entity ent = Minecraft.getInstance().world.getEntityByID(id);
+			Entity ent = Minecraft.getInstance().level.getEntity(id);
 			if(ent instanceof PlayerEntity) {
 				return (PlayerEntity) ent;
 			}
@@ -108,7 +108,7 @@ public class ClientProxy extends CommonProxy {
 	public void initGui(GuiScreenEvent.InitGuiEvent.Post evt) {
 		if((evt.getGui() instanceof MainMenuScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				evt.getGui() instanceof CustomizeSkinScreen) {
-			evt.addWidget(new Button(0, 0, () -> Minecraft.getInstance().displayGuiScreen(new GuiImpl(EditorGui::new, evt.getGui()))));
+			evt.addWidget(new Button(0, 0, () -> Minecraft.getInstance().setScreen(new GuiImpl(EditorGui::new, evt.getGui()))));
 		}
 	}
 
@@ -139,22 +139,22 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void clientTick(ClientTickEvent evt) {
-		if(evt.phase == Phase.START && !minecraft.isGamePaused()) {
+		if(evt.phase == Phase.START && !minecraft.isPaused()) {
 			mc.getPlayerRenderManager().getAnimationEngine().tick();
 		}
 		if (minecraft.player == null || evt.phase == Phase.START)
 			return;
 
-		if(KeyBindings.gestureMenuBinding.isPressed()) {
-			Minecraft.getInstance().displayGuiScreen(new GuiImpl(GestureGui::new, null));
+		if(KeyBindings.gestureMenuBinding.isDown()) {
+			Minecraft.getInstance().setScreen(new GuiImpl(GestureGui::new, null));
 		}
 
-		if(KeyBindings.renderToggleBinding.isPressed()) {
+		if(KeyBindings.renderToggleBinding.isDown()) {
 			Player.setEnableRendering(!Player.isEnableRendering());
 		}
 
 		for (Entry<Integer, KeyBinding> e : KeyBindings.quickAccess.entrySet()) {
-			if(e.getValue().isPressed()) {
+			if(e.getValue().isDown()) {
 				mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
 			}
 		}
@@ -162,8 +162,8 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void openGui(GuiOpenEvent openGui) {
-		if(openGui.getGui() == null && minecraft.currentScreen instanceof GuiImpl.Overlay) {
-			openGui.setGui(((GuiImpl.Overlay) minecraft.currentScreen).getGui());
+		if(openGui.getGui() == null && minecraft.screen instanceof GuiImpl.Overlay) {
+			openGui.setGui(((GuiImpl.Overlay) minecraft.screen).getGui());
 		}
 		if(openGui.getGui() instanceof MainMenuScreen && EditorGui.doOpenEditor()) {
 			openGui.setGui(new GuiImpl(EditorGui::new, openGui.getGui()));
@@ -191,23 +191,23 @@ public class ClientProxy extends CommonProxy {
 	public static void renderCape(MatrixStack matrixStackIn, IVertexBuilder buffer, int packedLightIn,
 			AbstractClientPlayerEntity playerIn, float partialTicks, PlayerModel<AbstractClientPlayerEntity> model,
 			ModelDefinition modelDefinition) {
-		matrixStackIn.push();
+		matrixStackIn.pushPose();
 		matrixStackIn.translate(0.0D, 0.0D, 0.125D);
 
 		float f1, f2, f3;
 
 		if(playerIn != null) {
-			double d0 = MathHelper.lerp(partialTicks, playerIn.prevChasingPosX,
-					playerIn.chasingPosX)
-					- MathHelper.lerp(partialTicks, playerIn.prevPosX, playerIn.getPosX());
-			double d1 = MathHelper.lerp(partialTicks, playerIn.prevChasingPosY,
-					playerIn.chasingPosY)
-					- MathHelper.lerp(partialTicks, playerIn.prevPosY, playerIn.getPosY());
-			double d2 = MathHelper.lerp(partialTicks, playerIn.prevChasingPosZ,
-					playerIn.chasingPosZ)
-					- MathHelper.lerp(partialTicks, playerIn.prevPosZ, playerIn.getPosZ());
-			float f = playerIn.prevRenderYawOffset
-					+ (playerIn.renderYawOffset - playerIn.prevRenderYawOffset);
+			double d0 = MathHelper.lerp(partialTicks, playerIn.xCloakO,
+					playerIn.xCloak)
+					- MathHelper.lerp(partialTicks, playerIn.xo, playerIn.getX());
+			double d1 = MathHelper.lerp(partialTicks, playerIn.yCloakO,
+					playerIn.yCloak)
+					- MathHelper.lerp(partialTicks, playerIn.yo, playerIn.getY());
+			double d2 = MathHelper.lerp(partialTicks, playerIn.zCloakO,
+					playerIn.zCloak)
+					- MathHelper.lerp(partialTicks, playerIn.zo, playerIn.getZ());
+			float f = playerIn.yBodyRotO
+					+ (playerIn.yBodyRot - playerIn.yBodyRotO);
 			double d3 = MathHelper.sin(f * 0.017453292F);
 			double d4 = (-MathHelper.cos(f * 0.017453292F));
 			f1 = (float) d1 * 10.0F;
@@ -220,9 +220,9 @@ public class ClientProxy extends CommonProxy {
 				f2 = 0.0F;
 			}
 
-			float f4 = MathHelper.lerp(partialTicks, playerIn.prevCameraYaw, playerIn.cameraYaw);
-			f1 += MathHelper.sin(MathHelper.lerp(partialTicks, playerIn.prevDistanceWalkedModified,
-					playerIn.distanceWalkedModified) * 6.0F) * 32.0F * f4;
+			float f4 = MathHelper.lerp(partialTicks, playerIn.oBob, playerIn.bob);
+			f1 += MathHelper.sin(MathHelper.lerp(partialTicks, playerIn.walkDistO,
+					playerIn.walkDist) * 6.0F) * 32.0F * f4;
 			if (playerIn.isCrouching()) {
 				f1 += 25.0F;
 			}
@@ -232,10 +232,10 @@ public class ClientProxy extends CommonProxy {
 			f3 = 0;
 		}
 
-		matrixStackIn.rotate(Vector3f.XP.rotationDegrees(6.0F + f2 / 2.0F + f1));
-		matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(f3 / 2.0F));
-		matrixStackIn.rotate(Vector3f.YP.rotationDegrees(180.0F - f3 / 2.0F));
-		model.renderCape(matrixStackIn, buffer, packedLightIn, OverlayTexture.NO_OVERLAY);
-		matrixStackIn.pop();
+		matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(6.0F + f2 / 2.0F + f1));
+		matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(f3 / 2.0F));
+		matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F - f3 / 2.0F));
+		model.renderCloak(matrixStackIn, buffer, packedLightIn, OverlayTexture.NO_OVERLAY);
+		matrixStackIn.popPose();
 	}
 }

@@ -35,49 +35,49 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 	@Inject(
 			at = @At("RETURN"),
 			method = {
-					"getEntityTexture(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)Lnet/minecraft/util/ResourceLocation;"
+					"getTextureLocation(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)Lnet/minecraft/util/ResourceLocation;"
 			},
 			cancellable = true)
 	public void onGetEntityTexture(AbstractClientPlayerEntity entity, CallbackInfoReturnable<ResourceLocation> cbi) {
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(getEntityModel(), cbi, TextureSheetType.SKIN);
+		ClientProxy.mc.getPlayerRenderManager().bindSkin(getModel(), cbi, TextureSheetType.SKIN);
 	}
 
 	@Redirect(at =
 			@At(
 					value = "INVOKE",
 					target = "Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;"
-							+ "getLocationSkin()Lnet/minecraft/util/ResourceLocation;"
+							+ "getSkinTextureLocation()Lnet/minecraft/util/ResourceLocation;"
 					),
-			method = "renderItem("
+			method = "renderHand("
 					+ "Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;"
 					+ "ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;"
 					+ "Lnet/minecraft/client/renderer/model/ModelRenderer;Lnet/minecraft/client/renderer/model/ModelRenderer;)V"
 			)
 	public ResourceLocation getSkinTex(AbstractClientPlayerEntity player) {
-		return getEntityTexture(player);
+		return getTextureLocation(player);
 	}
 
-	@Inject(at = @At("HEAD"), method = "renderRightArm(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)V")
+	@Inject(at = @At("HEAD"), method = "renderRightHand(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)V")
 	public void onRenderRightArmPre(MatrixStack matrices, IRenderTypeBuffer vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
 		ClientProxy.INSTANCE.renderHand(vertexConsumers);
 	}
 
-	@Inject(at = @At("HEAD"), method = "renderLeftArm(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)V")
+	@Inject(at = @At("HEAD"), method = "renderLeftHand(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)V")
 	public void onRenderLeftArmPre(MatrixStack matrices, IRenderTypeBuffer vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
 		ClientProxy.INSTANCE.renderHand(vertexConsumers);
 	}
 
-	@Inject(at = @At("RETURN"), method = "renderRightArm(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)V")
+	@Inject(at = @At("RETURN"), method = "renderRightHand(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)V")
 	public void onRenderRightArmPost(MatrixStack matrices, IRenderTypeBuffer vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.unbind(getEntityModel());
+		ClientProxy.INSTANCE.unbind(getModel());
 	}
 
-	@Inject(at = @At("RETURN"), method = "renderLeftArm(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)V")
+	@Inject(at = @At("RETURN"), method = "renderLeftHand(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;)V")
 	public void onRenderLeftArmPost(MatrixStack matrices, IRenderTypeBuffer vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.unbind(getEntityModel());
+		ClientProxy.INSTANCE.unbind(getModel());
 	}
 
-	@Inject(at = @At("HEAD"), method = "renderName(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Lnet/minecraft/util/text/ITextComponent;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "renderNameTag(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Lnet/minecraft/util/text/ITextComponent;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V", cancellable = true)
 	public void onRenderName(AbstractClientPlayerEntity entityIn, ITextComponent displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(!Player.isEnableNames())cbi.cancel();
 	}
@@ -85,16 +85,16 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 	@Redirect(at =
 			@At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/client/renderer/RenderType;getEntitySolid("
+					target = "Lnet/minecraft/client/renderer/RenderType;entitySolid("
 							+ "Lnet/minecraft/util/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
 					),
-			method = "renderItem("
+			method = "renderHand("
 					+ "Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;"
 					+ "ILnet/minecraft/client/entity/player/AbstractClientPlayerEntity;"
 					+ "Lnet/minecraft/client/renderer/model/ModelRenderer;Lnet/minecraft/client/renderer/model/ModelRenderer;)V",
 					require = 0
 			)
 	public RenderType getArmLayer(ResourceLocation loc, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, AbstractClientPlayerEntity playerIn, ModelRenderer rendererArmIn, ModelRenderer rendererArmwearIn) {
-		return ClientProxy.mc.getPlayerRenderManager().isBound(getEntityModel()) ? RenderType.getEntityTranslucent(getEntityTexture(playerIn)) : RenderType.getEntitySolid(getEntityTexture(playerIn));
+		return ClientProxy.mc.getPlayerRenderManager().isBound(getModel()) ? RenderType.entityTranslucent(getTextureLocation(playerIn)) : RenderType.entitySolid(getTextureLocation(playerIn));
 	}
 }

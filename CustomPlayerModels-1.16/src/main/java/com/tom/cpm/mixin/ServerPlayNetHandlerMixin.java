@@ -28,7 +28,7 @@ public class ServerPlayNetHandlerMixin implements ServerNetH {
 		this.cpm$hasMod = v;
 	}
 
-	@Inject(at = @At("HEAD"), method = "processCustomPayload(Lnet/minecraft/network/play/client/CCustomPayloadPacket;)V", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "handleCustomPayload(Lnet/minecraft/network/play/client/CCustomPayloadPacket;)V", cancellable = true)
 	public void onProcessCustomPayload(CCustomPayloadPacket packet, CallbackInfo cbi) {
 		if(packet.getName().getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
 			ServerHandler.netHandler.receiveServer(packet.getName(), packet.getInternalData(), this);
