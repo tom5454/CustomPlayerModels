@@ -23,6 +23,7 @@ public class PartRoot {
 	}
 
 	public boolean add(RootModelElement e) {
+		if(elements.contains(e))return true;
 		return elements.add(e);
 	}
 

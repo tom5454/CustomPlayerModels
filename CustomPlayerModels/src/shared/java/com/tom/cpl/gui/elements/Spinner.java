@@ -118,6 +118,8 @@ public class Spinner extends GuiElement implements Focusable {
 			txtfNeedsUpdate = true;
 		} catch (ExpressionException e) {
 			error = e.getMessage();
+		} catch (Exception e) {
+			error = gui.i18nFormat("error.cpm.unknownError");
 		}
 	}
 

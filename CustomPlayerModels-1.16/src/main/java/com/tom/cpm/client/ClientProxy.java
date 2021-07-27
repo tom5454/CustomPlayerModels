@@ -145,16 +145,16 @@ public class ClientProxy extends CommonProxy {
 		if (minecraft.player == null || evt.phase == Phase.START)
 			return;
 
-		if(KeyBindings.gestureMenuBinding.isDown()) {
+		if(KeyBindings.gestureMenuBinding.consumeClick()) {
 			Minecraft.getInstance().setScreen(new GuiImpl(GestureGui::new, null));
 		}
 
-		if(KeyBindings.renderToggleBinding.isDown()) {
+		if(KeyBindings.renderToggleBinding.consumeClick()) {
 			Player.setEnableRendering(!Player.isEnableRendering());
 		}
 
 		for (Entry<Integer, KeyBinding> e : KeyBindings.quickAccess.entrySet()) {
-			if(e.getValue().isDown()) {
+			if(e.getValue().consumeClick()) {
 				mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
 			}
 		}

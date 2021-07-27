@@ -64,10 +64,6 @@ public class EditorDefinition extends ModelDefinition {
 		return editor.skinType;
 	}
 
-	public void bindFirstSetup() {
-		editor.applyAnimations();
-	}
-
 	@Override
 	public boolean hasRoot(VanillaModelPart type) {
 		return editor.elements.stream().map(e -> ((RootModelElement) e.rc).getPart()).anyMatch(t -> t == type);

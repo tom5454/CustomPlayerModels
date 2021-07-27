@@ -1,5 +1,7 @@
 package com.tom.cpl.math;
 
+import java.util.Map;
+
 public class Vec2i {
 	public int x, y;
 
@@ -21,6 +23,13 @@ public class Vec2i {
 	public Vec2i() {
 		this.x = 0;
 		this.y = 0;
+	}
+
+	public Vec2i(Map<String, Object> m, Vec2i def) {
+		this(def);
+		if(m == null)return;
+		x = ((Number)m.get("x")).intValue();
+		y = ((Number)m.get("y")).intValue();
 	}
 
 	@Override

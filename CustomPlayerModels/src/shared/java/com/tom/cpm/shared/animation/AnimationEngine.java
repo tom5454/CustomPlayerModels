@@ -51,9 +51,9 @@ public class AnimationEngine {
 	}
 
 	public void handleAnimation(Player<?, ?> player, AnimationMode mode) {
+		AnimationHandler h = player.getAnimationHandler(mode);
 		try {
 			ModelDefinition def = player.getModelDefinition();
-			AnimationHandler h = player.getAnimationHandler(mode);
 			switch (mode) {
 			case HAND:
 				def.resetAnimationPos();
@@ -90,6 +90,7 @@ public class AnimationEngine {
 		} catch (Exception e) {
 			e.printStackTrace();
 			player.getModelDefinition().resetAnimationPos();
+			h.clear();
 		}
 	}
 

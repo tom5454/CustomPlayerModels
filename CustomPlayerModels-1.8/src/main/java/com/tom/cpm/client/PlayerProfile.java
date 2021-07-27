@@ -31,10 +31,6 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 	private int encodedGesture;
 	public boolean hasPlayerHead;
 
-	public static PlayerProfile create(Object object) {
-		return new PlayerProfile((GameProfile) object);
-	}
-
 	public PlayerProfile(GameProfile profile) {
 		this.profile = profile;
 		if(profile.getId() != null)

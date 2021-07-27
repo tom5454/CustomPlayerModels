@@ -43,4 +43,9 @@ public class ModelPartTexture implements IModelPart, IResolvedModelPart {
 	public ModelPartType getType() {
 		return ModelPartType.TEXTURE;
 	}
+
+	@Override
+	public String toString() {
+		return "Texture: " + texType;
+	}
 }

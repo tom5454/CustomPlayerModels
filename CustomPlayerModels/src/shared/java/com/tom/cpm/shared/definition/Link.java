@@ -1,6 +1,8 @@
 package com.tom.cpm.shared.definition;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.tom.cpm.shared.io.IOHelper;
 
@@ -61,5 +63,23 @@ public class Link {
 			if (other.path != null) return false;
 		} else if (!path.equals(other.path)) return false;
 		return true;
+	}
+
+	public static class ResolvedLink {
+		private byte[] data;
+		private IOException error;
+
+		public ResolvedLink(IOException error) {
+			this.error = error;
+		}
+
+		public ResolvedLink(byte[] data) {
+			this.data = data;
+		}
+
+		public InputStream getData() throws IOException {
+			if(error != null)throw error;
+			return new ByteArrayInputStream(data);
+		}
 	}
 }

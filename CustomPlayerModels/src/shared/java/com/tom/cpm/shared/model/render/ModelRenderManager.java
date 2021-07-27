@@ -23,7 +23,6 @@ import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.editor.EditorDefinition;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RenderedCube;
@@ -243,10 +242,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				float rz = mngr.rz.apply(tp);
 				elems.setRootPosAndRot(px, py, pz, rx, ry, rz);
 			}
-			if(playerObj != null)
-				mngr.animEngine.handleAnimation(playerObj, mode);
-			else if(def instanceof EditorDefinition)
-				((EditorDefinition)def).bindFirstSetup();
 		}
 
 		protected RedirectRenderer<P> register(Field<P> f) {
@@ -345,8 +340,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						if(holder.playerObj == null || dh.renderPredicate.test(holder.playerObj)) {
 							elems.forEach(elem -> {
 								if(!skipTransform) {
-									mngr.posSet.set(tp, elem.pos);
-									mngr.rotSet.set(tp, elem.rotation);
+									mngr.posSet.set(tp, elem.getPos());
+									mngr.rotSet.set(tp, elem.getRot());
 								}
 								if(elem.doDisplay()) {
 									holder.copyModel(tp, parent);
@@ -363,8 +358,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						}
 						if(!skipTransform) {
 							RootModelElement elem = elems.getMainRoot();
-							mngr.posSet.set(tp, elem.pos);
-							mngr.rotSet.set(tp, elem.rotation);
+							mngr.posSet.set(tp, elem.getPos());
+							mngr.rotSet.set(tp, elem.getRot());
 						}
 					} else {
 						holder.copyModel(tp, parent);
@@ -534,7 +529,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 	}
 
 	@Override
-	public ModelDefinitionLoader getLoader() {
+	public ModelDefinitionLoader<?> getLoader() {
 		return loader;
 	}
 

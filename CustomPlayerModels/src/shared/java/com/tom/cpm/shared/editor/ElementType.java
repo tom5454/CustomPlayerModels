@@ -102,8 +102,10 @@ public enum ElementType {
 
 		@Override
 		public void preRenderUpdate(ModelElement elem) {
-			((RootModelElement)elem.rc).posN = new Vec3f(elem.pos);
-			((RootModelElement)elem.rc).rotN = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
+			RootModelElement e = (RootModelElement) elem.rc;
+			e.posN = new Vec3f(elem.pos);
+			e.rotN = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
+			e.reset();
 		}
 	}),
 	;

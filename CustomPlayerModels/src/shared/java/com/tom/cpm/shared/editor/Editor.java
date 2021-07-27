@@ -508,6 +508,7 @@ public class Editor {
 
 	public void preRender() {
 		elements.forEach(ModelElement::preRender);
+		applyAnimations();
 	}
 
 	public void applyAnimations() {
@@ -555,7 +556,7 @@ public class Editor {
 			map.put("pos", elem.pos.toMap());
 			map.put("rotation", elem.rotation.toMap());
 			map.put("dup", elem.duplicated);
-			if(elem.duplicated) {
+			if(elem.duplicated || elem.typeData instanceof RootModelType) {
 				storeIDgen.setID(elem);
 				map.put("storeID", elem.storeID);
 			}
@@ -565,14 +566,18 @@ public class Editor {
 			String name = tex.name().toLowerCase();
 			ETextures eTex = textures.get(tex);
 			if(eTex != null) {
-				Map<String, Object> size = new HashMap<>();
-				data.put(name + "Size", size);
-				size.put("x", eTex.provider.size.x);
-				size.put("y", eTex.provider.size.y);
-				if(eTex.provider.texture != null && eTex.isEdited()) {
-					try(OutputStream os = project.setAsStream(name + ".png")) {
-						eTex.getImage().storeTo(os);
+				if(eTex.isEditable()) {
+					Map<String, Object> size = new HashMap<>();
+					data.put(name + "Size", size);
+					size.put("x", eTex.provider.size.x);
+					size.put("y", eTex.provider.size.y);
+					if(eTex.provider.texture != null && eTex.isEdited()) {
+						try(OutputStream os = project.setAsStream(name + ".png")) {
+							eTex.getImage().storeTo(os);
+						}
 					}
+				} else {
+					data.put(name + "Tex", true);
 				}
 			} else {
 				project.delete(name + ".png");
@@ -774,20 +779,37 @@ public class Editor {
 		scaling = ((Number)data.getOrDefault("scaling", 0)).floatValue();
 		for(TextureSheetType tex : TextureSheetType.VALUES) {
 			String name = tex.name().toLowerCase();
-			ze = project.getEntry(name + ".png");
-			if(ze != null) {
-				Image img = Image.loadFrom(new ByteArrayInputStream(ze));
-				if(img.getWidth() > tex.texLimit || img.getHeight() > tex.texLimit) {
-					Log.error("Illegal image size for texture: " + name);
-					continue;
+			if(!tex.editable) {
+				if((boolean) data.getOrDefault(name + "Tex", false) || project.getEntry(name + ".png") != null) {
+					ETextures eTex = textures.get(tex);
+					if(eTex == null)eTex = new ETextures(this, tex);
+					textures.put(tex, eTex);
+					eTex.provider.size = tex.getDefSize();
+					Image def = new Image(eTex.provider.size.x, eTex.provider.size.y);
+					try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tex.name().toLowerCase() + ".png")) {
+						def = Image.loadFrom(is);
+					} catch (IOException e) {
+					}
+					eTex.setDefaultImg(def);
+					eTex.setImage(new Image(def));
+					eTex.markDirty();
 				}
-				ETextures eTex = textures.get(tex);
-				if(eTex == null)eTex = new ETextures(this, tex);
-				textures.put(tex, eTex);
-				eTex.setImage(img);
-				eTex.markDirty();
-				Map<String, Object> skinTexSize = (Map<String, Object>) data.get(name + "Size");
-				eTex.provider.size = new Vec2i(((Number)skinTexSize.get("x")).intValue(), ((Number)skinTexSize.get("y")).intValue());
+			} else {
+				ze = project.getEntry(name + ".png");
+				if(ze != null) {
+					Image img = Image.loadFrom(new ByteArrayInputStream(ze));
+					if(img.getWidth() > tex.texLimit || img.getHeight() > tex.texLimit) {
+						Log.error("Illegal image size for texture: " + name);
+						continue;
+					}
+					ETextures eTex = textures.get(tex);
+					if(eTex == null)eTex = new ETextures(this, tex);
+					textures.put(tex, eTex);
+					eTex.setImage(img);
+					eTex.markDirty();
+					Map<String, Object> skinTexSize = (Map<String, Object>) data.get(name + "Size");
+					eTex.provider.size = new Vec2i(skinTexSize, tex.getDefSize());
+				}
 			}
 		}
 		if(anims != null) {
@@ -900,22 +922,6 @@ public class Editor {
 				description.icon = null;
 				Log.error("Illegal image size for model/template icon must be 256x256");
 			}
-		}
-		ze = project.getEntry("list_icon.png");
-		if(ze != null) {
-			ETextures tex = null;
-			if(textures.containsKey(TextureSheetType.LIST_ICON))tex = textures.get(TextureSheetType.LIST_ICON);
-			if(tex == null)tex = new ETextures(this, TextureSheetType.LIST_ICON);
-			tex.provider.size = new Vec2i(32, 32);
-			tex.setImage(Image.loadFrom(new ByteArrayInputStream(ze)));
-			if(tex.getImage().getWidth() > 32 || tex.getImage().getHeight() > 32 ||
-					tex.getImage().getWidth() != tex.getImage().getHeight()) {
-				tex.free();
-				tex = null;
-				Log.error("Illegal image size for list icon must be 32x32 or less and square");
-			}
-			if(tex == null)textures.remove(TextureSheetType.LIST_ICON);
-			else textures.put(TextureSheetType.LIST_ICON, tex);
 		}
 		restitchTextures();
 		updateGui();
@@ -1135,14 +1141,14 @@ public class Editor {
 	public void setAnimDuration(int value) {
 		if(selectedAnim == null)return;
 		action("setAnim", "label.cpm.duration").
-		updateValueOp(selectedAnim, selectedAnim.duration, value, (a, b) -> a.duration = b).
+		updateValueOp(selectedAnim, selectedAnim.duration, value, 1, (int) Short.MAX_VALUE, (a, b) -> a.duration = b, setAnimDuration).
 		execute();
 	}
 
 	public void setAnimPriority(int value) {
 		if(selectedAnim == null)return;
 		action("setAnim", "label.cpm.anim_priority").
-		updateValueOp(selectedAnim, selectedAnim.priority, value, (a, b) -> a.priority = b).
+		updateValueOp(selectedAnim, selectedAnim.priority, value, (int) Byte.MIN_VALUE, (int) Byte.MAX_VALUE, (a, b) -> a.priority = b, setAnimPriority).
 		execute();
 	}
 

@@ -416,7 +416,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	private void duplicate() {
 		if(type == ElementType.NORMAL) {
 			ModelElement elem = new ModelElement(this, parent);
-			editor.action("duplicate").addToList(children, elem).onUndo(() -> editor.selectedElement = null).execute();
+			editor.action("duplicate").addToList(parent.children, elem).onUndo(() -> editor.selectedElement = null).execute();
 			editor.selectedElement = elem;
 			editor.updateGui();
 		} else if(type == ElementType.ROOT_PART) {

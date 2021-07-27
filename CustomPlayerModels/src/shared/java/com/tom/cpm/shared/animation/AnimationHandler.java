@@ -65,6 +65,12 @@ public class AnimationHandler {
 		}
 	}
 
+	public void clear() {
+		currentGesture = null;
+		nextAnims.clear();
+		currentAnimations.clear();
+	}
+
 	private static class PlayingAnim {
 		private Animation currentAnimation;
 		private long currentStart;

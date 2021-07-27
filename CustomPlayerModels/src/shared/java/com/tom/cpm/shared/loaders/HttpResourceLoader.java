@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.loaders;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,11 +13,11 @@ import com.tom.cpm.shared.config.ResourceLoader;
 public abstract class HttpResourceLoader implements ResourceLoader {
 	private static int MAX_SIZE = 1024*1024;//1 MB
 
-	protected abstract URL createURL(String path, ResourceEncoding enc) throws IOException;
+	protected abstract URL createURL(String path) throws IOException;
 
 	@Override
-	public InputStream loadResource(String path, ResourceEncoding enc) throws IOException {
-		URL url = createURL(path, enc);
+	public byte[] loadResource(String path, ResourceEncoding enc) throws IOException {
+		URL url = createURL(path);
 		InputStream web = null;
 		URLConnection connection = null;
 		try {
@@ -35,19 +34,16 @@ public abstract class HttpResourceLoader implements ResourceLoader {
 				totalBytesDownloaded += bytesJustDownloaded;
 				if(totalBytesDownloaded > MAX_SIZE)throw new IOException("File too big");
 			}
-
 			switch (enc) {
 			case NO_ENCODING:
-				return new ByteArrayInputStream(out.toByteArray());
+				return out.toByteArray();
 
 			case BASE64:
-				String dl = new String(out.toByteArray());
-				return new ByteArrayInputStream(Base64.getDecoder().decode(dl));
+				return Base64.getDecoder().decode(new String(out.toByteArray()));
 
 			default:
 				throw new IOException("Unsupported file encoding");
 			}
-
 		} finally {
 			if(connection != null && connection instanceof HttpURLConnection)((HttpURLConnection)connection).disconnect();
 			if(web != null)

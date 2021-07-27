@@ -22,7 +22,7 @@ public class PlayerItemModelMixin_OF {
 	@Redirect(at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;"
-					+ "getLocationSkin()Lnet/minecraft/util/ResourceLocation;"
+					+ "getSkinTextureLocation()Lnet/minecraft/util/ResourceLocation;"
 			), method = "render(Lnet/minecraft/client/renderer/entity/model/BipedModel;"
 					+ "Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;"
 					+ "Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;II)V")

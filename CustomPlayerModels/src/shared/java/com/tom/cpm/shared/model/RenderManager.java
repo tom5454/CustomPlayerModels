@@ -11,11 +11,11 @@ import com.tom.cpm.shared.model.render.ModelRenderManager;
 public class RenderManager<G, P, M, D> {
 	private Player<P, M> profile;
 	private final ModelRenderManager<D, ?, ?, M> renderManager;
-	private final ModelDefinitionLoader loader;
+	private final ModelDefinitionLoader<G> loader;
 	private Function<P, G> getProfile;
 
 	public RenderManager(ModelRenderManager<D, ?, ?, M> renderManager,
-			ModelDefinitionLoader loader, Function<P, G> getProfile) {
+			ModelDefinitionLoader<G> loader, Function<P, G> getProfile) {
 		this.renderManager = renderManager;
 		this.loader = loader;
 		this.getProfile = getProfile;
@@ -33,6 +33,7 @@ public class RenderManager<G, P, M, D> {
 			if(player != null)
 				profile.updateFromPlayer(player);
 			renderManager.bindModel(toBind, arg, buffer, def, profile, mode);
+			renderManager.getAnimationEngine().handleAnimation(profile, mode);
 			return true;
 		}
 		renderManager.unbindModel(toBind);

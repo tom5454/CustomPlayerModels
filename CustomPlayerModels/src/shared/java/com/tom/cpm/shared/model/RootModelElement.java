@@ -7,8 +7,9 @@ import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class RootModelElement extends RenderedCube {
 	private VanillaModelPart part;
-	public Vec3f posN, rotN;
+	public Vec3f posN, rotN, defPos, defRot;
 	private ModelDefinition def;
+	private boolean rotAdd, posAdd;
 
 	public RootModelElement(VanillaModelPart part, ModelDefinition def) {
 		this.part = part;
@@ -16,6 +17,8 @@ public class RootModelElement extends RenderedCube {
 		this.rotN = new Vec3f();
 		this.pos = new Vec3f();
 		this.rotation = new Vec3f();
+		this.defPos = new Vec3f();
+		this.defRot = new Vec3f();
 		this.def = def;
 	}
 
@@ -25,7 +28,11 @@ public class RootModelElement extends RenderedCube {
 
 	@Override
 	public void reset() {
+		this.pos = new Vec3f();
+		this.rotation = new Vec3f();
 		display = !hidden;
+		posAdd = true;
+		rotAdd = true;
 	}
 
 	@Override
@@ -52,11 +59,39 @@ public class RootModelElement extends RenderedCube {
 	}
 
 	public void setPosAndRot(float px, float py, float pz, float rx, float ry, float rz) {
-		pos.x = px + posN.x;
-		pos.y = py + posN.y;
-		pos.z = pz + posN.z;
-		rotation.x = rx + rotN.x;
-		rotation.y = ry + rotN.y;
-		rotation.z = rz + rotN.z;
+		defPos.x = px + posN.x;
+		defPos.y = py + posN.y;
+		defPos.z = pz + posN.z;
+		defRot.x = rx + rotN.x;
+		defRot.y = ry + rotN.y;
+		defRot.z = rz + rotN.z;
+	}
+
+	@Override
+	public void setPosition(boolean add, float x, float y, float z) {
+		super.setPosition(add, x, y, z);
+		posAdd &= add;
+	}
+
+	@Override
+	public void setRotation(boolean add, float x, float y, float z) {
+		super.setRotation(add, x, y, z);
+		rotAdd &= add;
+	}
+
+	public Vec3f getPos() {
+		if(posAdd) {
+			return pos.add(defPos);
+		} else {
+			return pos;
+		}
+	}
+
+	public Vec3f getRot() {
+		if(rotAdd) {
+			return rotation.add(defRot);
+		} else {
+			return rotation;
+		}
 	}
 }

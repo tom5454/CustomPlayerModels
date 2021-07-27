@@ -19,6 +19,8 @@ import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import com.mojang.authlib.GameProfile;
+
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
@@ -40,12 +42,12 @@ public class MinecraftObject implements MinecraftClientAccess {
 	private static final ResourceLocation TEXTURE_ALEX = new ResourceLocation("textures/entity/alex.png");
 
 	private final Minecraft mc;
-	private final ModelDefinitionLoader loader;
+	private final ModelDefinitionLoader<GameProfile> loader;
 	private final PlayerRenderManager prm;
 	public MinecraftObject(Minecraft mc) {
 		this.mc = mc;
 		MinecraftObjectHolder.setClientObject(this);
-		loader = new ModelDefinitionLoader(PlayerProfile::create);
+		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId);
 		prm = new PlayerRenderManager(loader);
 	}
 
@@ -125,7 +127,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public ModelDefinitionLoader getDefinitionLoader() {
+	public ModelDefinitionLoader<GameProfile> getDefinitionLoader() {
 		return loader;
 	}
 
