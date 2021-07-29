@@ -4,10 +4,10 @@
   "promos": {
     "1.12.2-latest": "0.0.17d",
     "1.12.2-recommended": "0.0.17d",
-    "1.16.4-latest": "0.0.17f",
-    "1.16.4-recommended": "0.0.17f",
-    "1.16.5-latest": "0.0.17f",
-    "1.16.5-recommended": "0.0.17f",
+    "1.16.4-latest": "0.0.17g",
+    "1.16.4-recommended": "0.0.17g",
+    "1.16.5-latest": "0.0.17g",
+    "1.16.5-recommended": "0.0.17g",
     "1.8.9-latest": "0.0.17d",
     "1.8.9-recommended": "0.0.17d",
     "1.7.10-latest": "0.0.17d",
@@ -81,7 +81,8 @@
     "0.0.17c": "Fixed projects failing to load in some cases (Closes #104)",
     "0.0.17d": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2",
     "0.0.17e": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
-    "0.0.17f": "Fixed crash with optifine\nFixed gestures not working"
+    "0.0.17f": "Fixed crash with optifine\nFixed gestures not working",
+    "0.0.17g": "Fixed crash with older forge versions"
   },
   "1.16.5": {
     "0.0.5a": "First release",
@@ -114,7 +115,8 @@
     "0.0.17c": "Fixed projects failing to load in some cases (Closes #104)",
     "0.0.17d": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2",
     "0.0.17e": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
-    "0.0.17f": "Fixed crash with optifine\nFixed gestures not working"
+    "0.0.17f": "Fixed crash with optifine\nFixed gestures not working",
+    "0.0.17g": "Fixed crash with older forge versions"
   },
   "1.16.4-fabric": {
     "0.0.5a": "First release",
