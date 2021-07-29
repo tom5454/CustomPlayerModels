@@ -16,7 +16,7 @@ public class OptifineTexture {
 			Texture tex = Minecraft.getInstance().getTextureManager().getTexture(loc);
 			DynTexture dt = (DynTexture) skin.texture.getNative();
 			if(dt != null && tex != null)
-				((TextureOF)dt).cpm$copyMultiTex(((TextureOF) tex).cpm$multiTex());
+				((TextureOF)dt.getDynTex()).cpm$copyMultiTex(((TextureOF) tex).cpm$multiTex());
 		}
 	}
 }

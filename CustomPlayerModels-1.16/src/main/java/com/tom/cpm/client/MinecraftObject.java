@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
-import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.WorldSelectionScreen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -17,8 +16,6 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
-
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import com.mojang.authlib.GameProfile;
 
@@ -118,6 +115,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 		public void free() {
 			mc.getTextureManager().release(loc);
 		}
+
+		public DynamicTexture getDynTex() {
+			return dynTex;
+		}
 	}
 
 	@Override
@@ -137,7 +138,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public void setEncodedGesture(int value) {
-		Set<PlayerModelPart> s = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, mc.options, "modelParts");
+		Set<PlayerModelPart> s = mc.options.modelParts;
 		setEncPart(s, value, 0, PlayerModelPart.HAT);
 		setEncPart(s, value, 1, PlayerModelPart.JACKET);
 		setEncPart(s, value, 2, PlayerModelPart.LEFT_PANTS_LEG);
