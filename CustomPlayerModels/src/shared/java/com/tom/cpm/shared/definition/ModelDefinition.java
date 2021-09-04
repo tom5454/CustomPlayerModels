@@ -3,22 +3,29 @@ package com.tom.cpm.shared.definition;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Image;
-import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpl.util.ItemSlot;
+import com.tom.cpl.util.StringBuilderStream;
 import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.IModelComponent;
+import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
+import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.PlayerModelParts;
@@ -42,41 +49,55 @@ import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ModelDefinition {
-	public static final ModelDefinition NULL_DEF = new ModelDefinition(null, Collections.emptyList(), null);
 	private final ModelDefinitionLoader loader;
 	private final Player<?, ?> playerObj;
 	private List<IModelPart> parts;
 	private List<IResolvedModelPart> resolved;
 	private ModelPartPlayer player;
-	private List<RenderedCube> cubes;
+	protected List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
 	private Map<TextureSheetType, TextureProvider> textures;
+	private TextureProvider skinTexture;
+	private Map<ItemSlot, MatrixStack.Entry> slotTransforms = new EnumMap<>(ItemSlot.class);
 	protected Map<VanillaModelPart, PartRoot> rootRenderingCubes;
-	private int resolveState;
+	private ModelLoadingState resolveState = ModelLoadingState.NEW;
 	private AnimationRegistry animations = new AnimationRegistry();
 	private ModelPartScale scale;
 	private boolean stitchedTexture;
-	public boolean cloneable;
+	public boolean cloneable, hideHeadIfSkull = true, removeArmorOffset;
+	private Throwable error;
 
-	public ModelDefinition(ModelDefinitionLoader loader, List<IModelPart> parts, Player<?, ?> player) {
+	public ModelDefinition(ModelDefinitionLoader loader, Player<?, ?> player) {
 		this.loader = loader;
-		this.parts = parts;
 		this.playerObj = player;
+	}
+
+	public ModelDefinition(Throwable e, Player<?, ?> player) {
+		this.loader = null;
+		this.playerObj = player;
+		setError(e);
+	}
+
+	public ModelDefinition setParts(List<IModelPart> parts) {
+		this.parts = parts;
+		return this;
 	}
 
 	protected ModelDefinition() {
 		this.loader = null;
-		resolveState = 2;
+		resolveState = ModelLoadingState.LOADED;
 		this.playerObj = null;
 	}
 
 	public void startResolve() {
-		resolveState = 1;
+		resolveState = ModelLoadingState.RESOLVING;
 		ModelDefinitionLoader.THREAD_POOL.submit(() -> {
 			try {
 				resolveAll();
+			} catch (SafetyException e) {
+				setModelBlocked(e);
 			} catch (Throwable e) {
-				e.printStackTrace();
+				setError(e);
 			}
 		});
 	}
@@ -159,9 +180,11 @@ public class ModelDefinition {
 			}
 			cubes.addAll(cs);
 		}
-		TextureStitcher stitcher = new TextureStitcher();
+		ConfigKeys.MAX_CUBE_COUNT.checkFor(playerObj, cubes.size(), BlockReason.TOO_MANY_CUBES);
+		TextureStitcher stitcher = new TextureStitcher(playerObj.isClientPlayer() ? 8192 : ConfigKeys.MAX_TEX_SHEET_SIZE.getValueFor(playerObj));
 		if(textures.containsKey(TextureSheetType.SKIN)) {
 			stitcher.setBase(textures.get(TextureSheetType.SKIN));
+			skinTexture = textures.get(TextureSheetType.SKIN);
 		} else {
 			Image skin;
 			try {
@@ -169,8 +192,9 @@ public class ModelDefinition {
 			} catch (InterruptedException | ExecutionException | TimeoutException e1) {
 				throw new IOException(e1);
 			}
-			if(skin == null)skin = MinecraftClientAccess.get().getVanillaSkin(playerObj.getSkinType());
+			if(skin == null)skin = playerObj.getSkinType().getSkinTexture();
 			stitcher.setBase(skin);
+			skinTexture = new TextureProvider(skin, new Vec2i(64, 64));
 		}
 		Vec2i whiteBox = new Vec2i(0, 0);
 		List<RenderedCube> coloredCubes = new ArrayList<>();
@@ -195,7 +219,11 @@ public class ModelDefinition {
 			});
 		}
 		resolved.forEach(r -> r.stitch(stitcher));
-		textures.put(TextureSheetType.SKIN, stitcher.finish());
+		TextureProvider tx = stitcher.finish();
+		if(tx != null) {
+			textures.put(TextureSheetType.SKIN, tx);
+			skinTexture = tx;
+		}
 		stitchedTexture = stitcher.hasStitches();
 		if(stitchedTexture) {
 			for (PlayerModelParts part : PlayerModelParts.VALUES) {
@@ -210,7 +238,7 @@ public class ModelDefinition {
 		cubes.forEach(c -> cubeMap.put(c.getId(), c));
 		resolved.forEach(r -> r.apply(this));
 		resetAnimationPos();
-		resolveState = 2;
+		resolveState = ModelLoadingState.LOADED;
 		Log.debug(this);
 	}
 
@@ -236,19 +264,24 @@ public class ModelDefinition {
 	}
 
 	public void cleanup() {
+		resolveState = ModelLoadingState.CLEANED_UP;
 		if(loader == null)return;
-		cubes.forEach(c -> {
-			if(c.renderObject != null)c.renderObject.free();
-			c.renderObject = null;
-		});
-		textures.values().forEach(TextureProvider::free);
+		if(cubes != null)
+			cubes.forEach(c -> {
+				if(c.renderObject != null)c.renderObject.free();
+				c.renderObject = null;
+			});
+		if(textures != null)
+			textures.values().forEach(TextureProvider::free);
+		cubes = null;
+		textures = null;
 	}
 
 	public boolean doRender() {
-		return loader != null;
+		return loader != null && resolveState == ModelLoadingState.LOADED;
 	}
 
-	public int getResolveState() {
+	public ModelLoadingState getResolveState() {
 		return resolveState;
 	}
 
@@ -281,8 +314,8 @@ public class ModelDefinition {
 		StringBuilder bb = new StringBuilder("ModelDefinition\n\tResolved: ");
 		bb.append(resolveState);
 		switch (resolveState) {
-		case 0:
-		case 1:
+		case NEW:
+		case RESOLVING:
 			bb.append("\n\tParts:");
 			for (IModelPart iModelPart : parts) {
 				bb.append("\n\t\t");
@@ -290,7 +323,7 @@ public class ModelDefinition {
 			}
 			break;
 
-		case 2:
+		case LOADED:
 			bb.append("\n\tCubes: ");
 			bb.append(cubes.size());
 			bb.append("\n\tPlayer:\n\t\t");
@@ -301,6 +334,15 @@ public class ModelDefinition {
 				bb.append(iModelPart.toString().replace("\n", "\n\t\t"));
 			}
 			break;
+
+		case ERRORRED:
+		case SAFETY_BLOCKED:
+			bb.append("\n\t\t");
+			error.printStackTrace(new StringBuilderStream(bb, "\n\t\t"));
+			if(error instanceof SafetyException)bb.append(((SafetyException)error).getBlockReason());
+			else bb.append("Unexpected error");
+			break;
+
 		default:
 			break;
 		}
@@ -319,7 +361,8 @@ public class ModelDefinition {
 		return elem;
 	}
 
-	public TextureProvider getTexture(TextureSheetType key) {
+	public TextureProvider getTexture(TextureSheetType key, boolean inGui) {
+		if(key == TextureSheetType.SKIN && inGui)return skinTexture;
 		return key.editable ? textures == null ? null : textures.get(key) : null;
 	}
 
@@ -356,11 +399,82 @@ public class ModelDefinition {
 		return new VanillaDefinition(texture, type);
 	}
 
-	public TextureProvider getSkinOverride() {
-		return getTexture(TextureSheetType.SKIN);
-	}
-
 	public boolean hasRoot(VanillaModelPart type) {
 		return rootRenderingCubes.containsKey(type);
+	}
+
+	public ModelDefinitionLoader getLoader() {
+		return loader;
+	}
+
+	public <V> void check(PlayerSpecificConfigKey<V> key, Predicate<V> check, BlockReason err) throws SafetyException {
+		key.checkFor(playerObj, check, err);
+	}
+
+	public void setModelBlocked(SafetyException ex) {
+		cleanup();
+		resolveState = ModelLoadingState.SAFETY_BLOCKED;
+		error = ex;
+		clear();
+	}
+
+	public MatrixStack.Entry getTransform(ItemSlot slot) {
+		return slotTransforms.get(slot);
+	}
+
+	public void storeTransform(ItemSlot slot, MatrixStack stack) {
+		slotTransforms.put(slot, stack.storeLast());
+	}
+
+	private void clear() {
+		parts = Collections.emptyList();
+		resolved = null;
+		player = null;
+		cubes = null;
+		cubeMap = null;
+		textures = null;
+		rootRenderingCubes = null;
+		animations = null;
+		scale = null;
+		slotTransforms = null;
+	}
+
+	public void clearTransforms() {
+		slotTransforms.clear();
+	}
+
+	public static enum ModelLoadingState {
+		NEW,
+		RESOLVING,
+		LOADED,
+		SAFETY_BLOCKED,
+		ERRORRED,
+		CLEANED_UP
+	}
+
+	public SafetyException getSafetyEx() {
+		if(error instanceof SafetyException)
+			return (SafetyException) error;
+		return null;
+	}
+
+	public Throwable getError() {
+		return error;
+	}
+
+	public void setError(Throwable ex) {
+		cleanup();
+		resolveState = ModelLoadingState.ERRORRED;
+		error = ex;
+		Log.error("Failed to load model", ex);
+		clear();
+	}
+
+	public boolean isHideHeadIfSkull() {
+		return hideHeadIfSkull;
+	}
+
+	public boolean isRemoveArmorOffset() {
+		return removeArmorOffset;
 	}
 }

@@ -3,14 +3,20 @@ package com.tom.cpl.config;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class ConfigEntry {
 	protected Map<String, ConfigEntry> entries = new HashMap<>();
+	protected Map<String, ConfigEntryList> lists = new HashMap<>();
 	protected Map<String, Object> data;
 	protected Runnable changeListener;
 
@@ -50,6 +56,42 @@ public class ConfigEntry {
 					changed = false;
 				} catch (Exception e) {
 				}
+			}
+		}
+
+		public ConfigEntryTemp createTemp() {
+			return new ConfigEntryTemp(data);
+		}
+
+		public class ConfigEntryTemp extends ConfigEntry {
+			private ConfigEntry ent;
+
+			public ConfigEntryTemp(Map<String, Object> map) {
+				changeListener = () -> {};
+				this.data = new HashMap<>(map);
+			}
+
+			public void saveConfig() {
+				ModConfigFile.this.data = data;
+				changed = true;
+				ModConfigFile.this.entries.clear();
+				ModConfigFile.this.lists.clear();
+				save();
+			}
+
+			@Override
+			public ConfigEntry getEntry(String name) {
+				return entries.computeIfAbsent(name, k -> new ConfigEntry(this.<Map<String, Object>>mapGet(name, HashMap::new, HashMap::new), changeListener));
+			}
+
+			@Override
+			public ConfigEntryList getEntryList(String name) {
+				return lists.computeIfAbsent(name, k -> new ConfigEntryList(this.<List<Object>>mapGet(name, ArrayList::new, ArrayList::new), changeListener));
+			}
+
+			@SuppressWarnings("unchecked")
+			private <T> T mapGet(String name, Supplier<T> newV, UnaryOperator<T> copy) {
+				return (T) data.compute(name, (k, v) -> v == null ? newV.get() : copy.apply((T) v));
 			}
 		}
 	}
@@ -137,5 +179,48 @@ public class ConfigEntry {
 	@SuppressWarnings("unchecked")
 	public ConfigEntry getEntry(String name) {
 		return entries.computeIfAbsent(name, k -> new ConfigEntry((Map<String, Object>) data.computeIfAbsent(name, k2 -> new HashMap<>()), changeListener));
+	}
+
+	@SuppressWarnings("unchecked")
+	public ConfigEntryList getEntryList(String name) {
+		return lists.computeIfAbsent(name, k -> new ConfigEntryList((List<Object>) data.computeIfAbsent(name, k2 -> new ArrayList<>()), changeListener));
+	}
+
+	public boolean hasEntry(String name) {
+		return data.containsKey(name);
+	}
+
+	public Set<String> keySet() {
+		return data.keySet();
+	}
+
+	public static class ConfigEntryList {
+		protected List<Object> data;
+		protected Runnable changeListener;
+
+		public ConfigEntryList(List<Object> data, Runnable changeListener) {
+			this.data = data;
+			this.changeListener = changeListener;
+		}
+
+		public int size() {
+			return data.size();
+		}
+
+		public boolean add(Object e) {
+			return data.add(e);
+		}
+
+		public void clear() {
+			data.clear();
+		}
+
+		public Object get(int index) {
+			return data.get(index);
+		}
+
+		public boolean contains(Object o) {
+			return data.contains(o);
+		}
 	}
 }

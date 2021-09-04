@@ -3,7 +3,6 @@ package com.tom.cpm.shared.parts;
 import java.io.IOException;
 
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.effects.IRenderEffect;
 import com.tom.cpm.shared.effects.RenderEffects;
 import com.tom.cpm.shared.io.IOHelper;
@@ -11,7 +10,7 @@ import com.tom.cpm.shared.io.IOHelper;
 public class ModelPartRenderEffect implements IModelPart, IResolvedModelPart {
 	private IRenderEffect effect;
 
-	public ModelPartRenderEffect(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartRenderEffect(IOHelper in, ModelDefinition def) throws IOException {
 		RenderEffects ef = in.readEnum(RenderEffects.VALUES);
 		if(ef != null) {
 			effect = ef.create();

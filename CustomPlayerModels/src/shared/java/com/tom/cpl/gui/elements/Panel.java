@@ -120,4 +120,10 @@ public class Panel extends GuiElement {
 	public boolean remove(GuiElement o) {
 		return elements.remove(o);
 	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		for (GuiElement guiElement : elements)guiElement.setEnabled(enabled);
+	}
 }

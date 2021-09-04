@@ -10,4 +10,8 @@ public interface VanillaModelPart {
 	}
 	String getName();
 	PartValues getDefaultSize(SkinType skinType);
+
+	default VanillaModelPart getCopyFrom() {
+		return null;
+	}
 }

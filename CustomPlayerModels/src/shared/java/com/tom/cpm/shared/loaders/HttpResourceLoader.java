@@ -8,15 +8,17 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Base64;
 
+import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ResourceLoader;
+import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 
 public abstract class HttpResourceLoader implements ResourceLoader {
-	private static int MAX_SIZE = 1024*1024;//1 MB
 
 	protected abstract URL createURL(String path) throws IOException;
 
 	@Override
-	public byte[] loadResource(String path, ResourceEncoding enc) throws IOException {
+	public byte[] loadResource(String path, ResourceEncoding enc, ModelDefinition def) throws IOException {
 		URL url = createURL(path);
 		InputStream web = null;
 		URLConnection connection = null;
@@ -32,7 +34,8 @@ public abstract class HttpResourceLoader implements ResourceLoader {
 			while((bytesJustDownloaded = web.read(buffer)) > 0) {
 				out.write(buffer, 0, bytesJustDownloaded);
 				totalBytesDownloaded += bytesJustDownloaded;
-				if(totalBytesDownloaded > MAX_SIZE)throw new IOException("File too big");
+				if(def != null)
+					ConfigKeys.MAX_LINK_SIZE.checkFor(def.getPlayerObj(), totalBytesDownloaded / 1024, BlockReason.LINK_OVERFLOW);
 			}
 			switch (enc) {
 			case NO_ENCODING:

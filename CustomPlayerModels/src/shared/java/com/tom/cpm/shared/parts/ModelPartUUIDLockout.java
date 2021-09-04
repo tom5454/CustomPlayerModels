@@ -5,13 +5,12 @@ import java.util.UUID;
 
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class ModelPartUUIDLockout implements IModelPart, IResolvedModelPart {
 	private UUID lockID;
 
-	public ModelPartUUIDLockout(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartUUIDLockout(IOHelper in, ModelDefinition def) throws IOException {
 		lockID = in.readUUID();
 	}
 

@@ -4,11 +4,13 @@ import java.util.EnumMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
@@ -33,17 +35,19 @@ public abstract class Player<P, M> {
 
 	public abstract SkinType getSkinType();
 	protected abstract PlayerTextureLoader initTextures();
+	public abstract String getName();
 	public abstract UUID getUUID();
 	public abstract VanillaPose getPose();
 	public abstract int getEncodedGestureId();
 	public abstract M getModel();
 	public abstract void updateFromPlayer(P player);
+	public abstract Object getGameProfile();
 
 	public void setModelDefinition(CompletableFuture<ModelDefinition> definition) {
 		this.definition = definition;
 	}
 
-	public ModelDefinition getModelDefinition() {
+	public ModelDefinition getModelDefinition0() {
 		try {
 			return enableRendering && definition != null ? definition.getNow(null) : null;
 		} catch (Exception e) {
@@ -51,11 +55,11 @@ public abstract class Player<P, M> {
 		}
 	}
 
-	public ModelDefinition getAndResolveDefinition() {
-		ModelDefinition def = getModelDefinition();
+	public ModelDefinition getModelDefinition() {
+		ModelDefinition def = getModelDefinition0();
 		if(def != null) {
-			if(def.getResolveState() == 0)def.startResolve();
-			else if(def.getResolveState() == 2) {
+			if(def.getResolveState() == ModelLoadingState.NEW)def.startResolve();
+			else if(def.getResolveState() == ModelLoadingState.LOADED) {
 				if(def.doRender()) {
 					return def;
 				}
@@ -69,7 +73,7 @@ public abstract class Player<P, M> {
 	}
 
 	public AnimationHandler getAnimationHandler(AnimationMode mode) {
-		return animHandler.computeIfAbsent(mode, k -> new AnimationHandler(this));
+		return animHandler.computeIfAbsent(mode, k -> new AnimationHandler(this::getModelDefinition));
 	}
 
 	public static boolean isEnableRendering() {
@@ -86,5 +90,14 @@ public abstract class Player<P, M> {
 
 	public static void setEnableNames(boolean enableNames) {
 		Player.enableNames = enableNames;
+	}
+
+	public void cleanup() {
+		ModelDefinition def = getModelDefinition0();
+		if(def != null)def.cleanup();
+	}
+
+	public boolean isClientPlayer() {
+		return getUUID().equals(MinecraftClientAccess.get().getCurrentClientPlayer().getUUID());
 	}
 }

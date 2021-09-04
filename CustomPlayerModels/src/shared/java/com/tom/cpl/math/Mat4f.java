@@ -1,5 +1,7 @@
 package com.tom.cpl.math;
 
+import java.nio.FloatBuffer;
+
 public class Mat4f {
 	protected float m00;
 	protected float m01;
@@ -64,6 +66,25 @@ public class Mat4f {
 		this.m02 = 2.0F * (f9 + f11);
 		this.m21 = 2.0F * (f8 + f10);
 		this.m12 = 2.0F * (f8 - f10);
+	}
+
+	public Mat4f(Mat3f matrixIn) {
+		this.m00 = matrixIn.m00;
+		this.m01 = matrixIn.m01;
+		this.m02 = matrixIn.m02;
+		this.m03 = 0;
+		this.m10 = matrixIn.m10;
+		this.m11 = matrixIn.m11;
+		this.m12 = matrixIn.m12;
+		this.m13 = 0;
+		this.m20 = matrixIn.m20;
+		this.m21 = matrixIn.m21;
+		this.m22 = matrixIn.m22;
+		this.m23 = 0;
+		this.m30 = 0;
+		this.m31 = 0;
+		this.m32 = 0;
+		this.m33 = 0;
 	}
 
 	@Override
@@ -221,5 +242,49 @@ public class Mat4f {
 		matrix4f.m13 = p_226599_1_;
 		matrix4f.m23 = p_226599_2_;
 		return matrix4f;
+	}
+
+	private static int bufferIndex(int p_27642_, int p_27643_) {
+		return p_27643_ * 4 + p_27642_;
+	}
+
+	public void store(FloatBuffer p_27651_) {
+		p_27651_.put(bufferIndex(0, 0), this.m00);
+		p_27651_.put(bufferIndex(0, 1), this.m01);
+		p_27651_.put(bufferIndex(0, 2), this.m02);
+		p_27651_.put(bufferIndex(0, 3), this.m03);
+		p_27651_.put(bufferIndex(1, 0), this.m10);
+		p_27651_.put(bufferIndex(1, 1), this.m11);
+		p_27651_.put(bufferIndex(1, 2), this.m12);
+		p_27651_.put(bufferIndex(1, 3), this.m13);
+		p_27651_.put(bufferIndex(2, 0), this.m20);
+		p_27651_.put(bufferIndex(2, 1), this.m21);
+		p_27651_.put(bufferIndex(2, 2), this.m22);
+		p_27651_.put(bufferIndex(2, 3), this.m23);
+		p_27651_.put(bufferIndex(3, 0), this.m30);
+		p_27651_.put(bufferIndex(3, 1), this.m31);
+		p_27651_.put(bufferIndex(3, 2), this.m32);
+		p_27651_.put(bufferIndex(3, 3), this.m33);
+	}
+
+	public float[] toArray() {
+		float[] values = new float[16];
+		values[ 0] = m00;
+		values[ 1] = m01;
+		values[ 2] = m02;
+		values[ 3] = m03;
+		values[ 4] = m10;
+		values[ 5] = m11;
+		values[ 6] = m12;
+		values[ 7] = m13;
+		values[ 8] = m20;
+		values[ 9] = m21;
+		values[10] = m22;
+		values[11] = m23;
+		values[12] = m30;
+		values[13] = m31;
+		values[14] = m32;
+		values[15] = m33;
+		return values;
 	}
 }

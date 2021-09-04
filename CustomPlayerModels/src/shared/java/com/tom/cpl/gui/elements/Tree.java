@@ -5,18 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.IntConsumer;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
 
 public class Tree<T> extends GuiElement {
 	private TreeElement root;
 	private Map<Integer, TreeElement> map = new HashMap<>();
 	private TreeModel<T> model;
 	private Frame frame;
-	private IntConsumer sizeUpdate;
+	private Consumer<Vec2i> sizeUpdate;
 
 	public Tree(Frame gui, TreeModel<T> model) {
 		super(gui.getGui());
@@ -35,7 +35,7 @@ public class Tree<T> extends GuiElement {
 			if(elem != null) {
 				if(evt.btn == 0 && evt.x < 5 + elem.depth * 5 && elem != root && !elem.children.isEmpty()) {
 					elem.showChildren = !elem.showChildren;
-					if(sizeUpdate != null)sizeUpdate.accept(getHeight());
+					if(sizeUpdate != null)sizeUpdate.accept(getSize());
 				} else {
 					model.onClick(evt, elem.value);
 				}
@@ -48,17 +48,18 @@ public class Tree<T> extends GuiElement {
 	}
 
 
-	public int getHeight() {
-		int[] y = new int[1];
-		walk(y, root);
-		return y[0] * 10;
+	public Vec2i getSize() {
+		int[] s = new int[2];
+		walk(s, root, 0);
+		return new Vec2i(s[0], s[1] * 10);
 	}
 
-	private void walk(int[] y, TreeElement e) {
-		y[0]++;
+	private void walk(int[] s, TreeElement e, int layer) {
+		s[1]++;
+		s[0] = Math.max(s[0], layer * 5 + gui.textWidth(e.display) + 5);
 		if(e.showChildren) {
 			for (TreeElement i : e.children) {
-				walk(y, i);
+				walk(s, i, layer + 1);
 			}
 		}
 	}
@@ -112,7 +113,7 @@ public class Tree<T> extends GuiElement {
 			model.refresh(e);
 			walkChildren(t, oldTree != null ? oldTree.children : null);
 		});
-		if(sizeUpdate != null)sizeUpdate.accept(getHeight());
+		if(sizeUpdate != null)sizeUpdate.accept(getSize());
 	}
 
 	private TreeElement find(List<TreeElement> list, T elem) {
@@ -139,7 +140,7 @@ public class Tree<T> extends GuiElement {
 		});
 	}
 
-	public void setSizeUpdate(IntConsumer sizeUpdate) {
+	public void setSizeUpdate(Consumer<Vec2i> sizeUpdate) {
 		this.sizeUpdate = sizeUpdate;
 	}
 

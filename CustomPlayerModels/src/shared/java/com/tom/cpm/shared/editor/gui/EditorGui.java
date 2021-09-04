@@ -8,7 +8,6 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
-import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup;
@@ -21,42 +20,41 @@ import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
-import com.tom.cpl.gui.elements.Tree;
 import com.tom.cpl.gui.util.ButtonGroup;
 import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
+import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Generators;
-import com.tom.cpm.shared.editor.HeldItem;
 import com.tom.cpm.shared.editor.RootGroups;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.DescPopup;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
+import com.tom.cpm.shared.editor.gui.popup.ModelsPopup;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
-import com.tom.cpm.shared.editor.gui.popup.SkinsPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
-import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class EditorGui extends Frame {
+	public static boolean rescaleGui = true;
 	private static Editor toReopen;
 	private TabbedPanelManager tabs;
 	private HorizontalLayout topPanel;
 	private Editor editor;
 	private static boolean smallGuiWarning = true;
+	private static boolean notSupportedWarning = true;
 
 	public EditorGui(IGui gui) {
 		super(gui);
@@ -96,7 +94,7 @@ public class EditorGui extends Frame {
 	@Override
 	public void initFrame(int width, int height) {
 		int scale = ModConfig.getCommonConfig().getInt(ConfigKeys.EDITOR_SCALE, -1);
-		if(scale != -1) {
+		if(scale != -1 && rescaleGui) {
 			if(gui.getScale() != scale) {
 				gui.setScale(scale);
 				return;
@@ -136,6 +134,11 @@ public class EditorGui extends Frame {
 			openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.gui_scale_too_large")));
 		}
 		smallGuiWarning = false;
+
+		if(notSupportedWarning && !PlatformFeature.EDITOR_SUPPORTED.isSupported()) {
+			openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.editor_not_supported")));
+		}
+		notSupportedWarning = false;
 	}
 
 	private void initModelPanel(int width, int height) {
@@ -148,7 +151,7 @@ public class EditorGui extends Frame {
 		mainPanel.addElement(sp);
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.model"), mainPanel));
 
-		mainPanel.addElement(new TreePanel(gui, this, width, height - 20));
+		mainPanel.addElement(new TreePanel(gui, this, width, height - 20, true));
 
 		ViewportPanel view = new ViewportPanel(gui, editor);
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
@@ -172,43 +175,12 @@ public class EditorGui extends Frame {
 		tdp.setBounds(new Box(width - height / 2, 0, height / 2, height / 2));
 		textureEditor.addElement(tdp);
 
-		Panel p = new Panel(gui);
 		int treeW = Math.min(150, height / 2);
-		p.setBounds(new Box(width - treeW, height / 2, treeW, height / 2));
-		p.setBackgroundColor(gui.getColors().panel_background);
-
-		ScrollPanel treePanel = new ScrollPanel(gui);
-		treePanel.setBounds(new Box(0, 0, treeW, height / 2 - 45));
-		p.addElement(treePanel);
-
-		Tree<TreeElement> tree = new Tree<>(this, new ModelTree(editor));
-		editor.updateGui.add(tree::updateTree);
-
-		Panel tp = new Panel(gui);
-		treePanel.setDisplay(tp);
-		tp.addElement(tree);
-
-		tree.setSizeUpdate(h -> {
-			tp.setBounds(new Box(0, 0, treeW, h));
-			tree.setBounds(new Box(0, 0, treeW, h));
-		});
-
-		textureEditor.addElement(p);
+		TreePanel treePanel = new TreePanel(gui, this, treeW, height / 2 - 20, false);
+		treePanel.setBounds(new Box(width - treeW, height / 2, treeW, height / 2));
+		textureEditor.addElement(treePanel);
 
 		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - treeW, height / 2));
-
-		ButtonIcon visBtn = new ButtonIcon(gui, "editor", 42, 16, editor::switchVis);
-		visBtn.setBounds(new Box(5, height / 2 - 44, 18, 18));
-		p.addElement(visBtn);
-		editor.setVis.add(b -> {
-			if(b == null) {
-				visBtn.setEnabled(false);
-				visBtn.setU(42);
-			} else {
-				visBtn.setEnabled(true);
-				visBtn.setU(b ? 42 : 28);
-			}
-		});
 	}
 
 	private void initAnimPanel(int width, int height) {
@@ -241,7 +213,7 @@ public class EditorGui extends Frame {
 
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.animation"), mainPanel));
 
-		mainPanel.addElement(new TreePanel(gui, this, width, height - 20) {
+		mainPanel.addElement(new TreePanel(gui, this, width, height - 20, false) {
 
 			@Override
 			public void draw(MouseEvent event, float partialTicks) {
@@ -306,6 +278,20 @@ public class EditorGui extends Frame {
 		pp.addButton(gui.i18nFormat("button.cpm.file.save"), this::save);
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.saveAs"), this::saveAs);
+
+		PopupMenu importMenu = new PopupMenu(gui, this);
+
+		importMenu.addButton(gui.i18nFormat("button.cpm.file.import.project"), () -> {
+			FileChooserPopup fc = new FileChooserPopup(this);
+			fc.setTitle(gui.i18nFormat("button.cpm.file.import"));
+			fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
+			fc.setFilter(new FileFilter("cpmproject"));
+			fc.setAccept(f -> {});
+			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
+			openPopup(fc);
+		});
+
+		//pp.addMenuButton(gui.i18nFormat("button.cpm.file.import"), importMenu);
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> openPopup(ExportSkinPopup.createPopup(this)));
 
@@ -382,16 +368,16 @@ public class EditorGui extends Frame {
 		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.parts"), parts);
 
 		RootGroups.forEach(c -> {
-			Button btn = parts.addButton(gui.i18nFormat("button.cpm.root_group." + c.name().toLowerCase()), () -> editor.addRoot(c));
-			if(c.feature != null && !c.feature.isSupported())
-				btn.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature." + c.feature.name().toLowerCase()))));
+			parts.addButton(gui.i18nFormat("button.cpm.root_group." + c.name().toLowerCase()), () -> editor.addRoot(c));
 		});
+
+		parts.addButton(gui.i18nFormat("button.cpm.root_group.itemHoldPos"), () -> Generators.addItemHoldPos(editor));
 
 		pp.add(new Label(gui, "=========").setBounds(new Box(5, 5, 0, 0)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.settings"), () -> openPopup(new SettingsPopup(this)));
 
-		pp.addButton(gui.i18nFormat("button.cpm.models"), () -> openPopup(new SkinsPopup(this)));
+		pp.addButton(gui.i18nFormat("button.cpm.models"), () -> openPopup(new ModelsPopup(this)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(this, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
 	}
@@ -400,6 +386,8 @@ public class EditorGui extends Frame {
 		PopupMenu pp = new PopupMenu(gui, this);
 		int x = topPanel.getX();
 		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.effect"), () -> pp.display(x, 20)));
+
+		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.cubeEffects")).setBounds(new Box(5, 5, 0, 0)));
 
 		Checkbox boxGlow = pp.addCheckbox(gui.i18nFormat("label.cpm.glow"), editor::switchGlow);
 		editor.setGlow.add(boxGlow::updateState);
@@ -430,13 +418,32 @@ public class EditorGui extends Frame {
 		editor.setHiddenEffect.add(boxHidden::updateState);
 		boxHidden.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.hidden_effect")));
 
-		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), b -> {
-			if(editor.scaling != 0)editor.scaling = 0;
-			else editor.scaling = 1;
+		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.modelEffects")).setBounds(new Box(5, 5, 0, 0)));
+
+		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), () -> {
+			float nv = editor.scaling != 0 ? 0 : 1;
+			editor.action("switch", "label.cpm.display.scaling").
+			updateValueOp(editor, editor.scaling, nv, (a, b) -> a.scaling = b).execute();
 			editor.updateGui();
 		});
 		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scaling != 0));
 		chxbxScale.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.scaling")));
+
+		Checkbox hideHead = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.hideHeadIfSkull"), () -> {
+			editor.action("switch", "label.cpm.effect.hideHeadIfSkull").
+			updateValueOp(editor, editor.hideHeadIfSkull, !editor.hideHeadIfSkull, (a, b) -> a.hideHeadIfSkull = b).execute();
+			editor.updateGui();
+		});
+		editor.updateGui.add(() -> hideHead.setSelected(editor.hideHeadIfSkull));
+		hideHead.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.hideHeadIfSkull")));
+
+		Checkbox removeArmorOffset = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.removeArmorOffset"), () -> {
+			editor.action("switch", "label.cpm.effect.removeArmorOffset").
+			updateValueOp(editor, editor.removeArmorOffset, !editor.removeArmorOffset, (a, b) -> a.removeArmorOffset = b).execute();
+			editor.updateGui();
+		});
+		editor.updateGui.add(() -> removeArmorOffset.setSelected(editor.removeArmorOffset));
+		removeArmorOffset.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.removeArmorOffset")));
 	}
 
 	private void initDisplayMenu() {
@@ -469,9 +476,18 @@ public class EditorGui extends Frame {
 		chxbxFilterDraw.setSelected(editor.onlyDrawOnSelected);
 		chxbxFilterDraw.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.onlyDrawOnSelected")));
 
+		Checkbox chxbxVanillaAnims = pp.addCheckbox(gui.i18nFormat("label.cpm.display.playVanillaAnims"), b -> {
+			editor.playVanillaAnims = !b.isSelected();
+			b.setSelected(editor.playVanillaAnims);
+		});
+		chxbxVanillaAnims.setSelected(editor.playVanillaAnims);
+		chxbxVanillaAnims.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playVanillaAnims")));
+
+		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
+
 		PopupMenu heldItemRight = new PopupMenu(gui, this);
 		Button btnHeldRight = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.right"), heldItemRight);
-		initHeldItemPopup(heldItemRight, Hand.RIGHT);
+		initHeldItemPopup(heldItemRight, ItemSlot.RIGHT_HAND);
 		editor.heldRenderEnable.add(e -> {
 			if(!e)btnHeldRight.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.editor_held_item"))));
 			btnHeldRight.setEnabled(e);
@@ -479,18 +495,28 @@ public class EditorGui extends Frame {
 
 		PopupMenu heldItemLeft = new PopupMenu(gui, this);
 		Button btnHeldLeft = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
-		initHeldItemPopup(heldItemLeft, Hand.LEFT);
+		initHeldItemPopup(heldItemLeft, ItemSlot.LEFT_HAND);
 		editor.heldRenderEnable.add(e -> {
 			if(!e)btnHeldLeft.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.editor_held_item"))));
 			btnHeldLeft.setEnabled(e);
 		});
 
-		addLayerToggle(pp, PlayerModelLayer.CAPE, PlatformFeature.RENDER_CAPE);
+		PopupMenu heldItemHead = new PopupMenu(gui, this);
+		Button btnHeldHead = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.head"), heldItemHead);
+		initHeldItemPopup(heldItemHead, ItemSlot.HEAD);
+		editor.heldRenderEnable.add(e -> {
+			if(!e)btnHeldHead.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.editor_held_item"))));
+			btnHeldHead.setEnabled(e);
+		});
+
+		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.layers")).setBounds(new Box(5, 5, 0, 0)));
+
+		addLayerToggle(pp, PlayerModelLayer.CAPE);
 
 		PopupMenu armor = new PopupMenu(gui, this);
-		Button armorBtn = pp.addMenuButton(gui.i18nFormat("button.cpm.display.armor"), armor);
+		pp.addMenuButton(gui.i18nFormat("button.cpm.display.armor"), armor);
 		for (PlayerModelLayer a : PlayerModelLayer.ARMOR) {
-			addLayerToggle(armor, a, PlatformFeature.RENDER_ARMOR);
+			addLayerToggle(armor, a);
 		}
 		armor.addButton(gui.i18nFormat("button.cpm.display.toggleArmor"), () -> {
 			if(Arrays.stream(PlayerModelLayer.ARMOR).noneMatch(r -> editor.modelDisplayLayers.stream().anyMatch(l -> l == r))) {
@@ -500,33 +526,25 @@ public class EditorGui extends Frame {
 			}
 			editor.updateGui();
 		});
-		{
-			boolean sup = PlatformFeature.RENDER_ARMOR.isSupported();
-			armorBtn.setEnabled(sup);
-			if(!sup)armorBtn.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.render_armor"))));
-		}
 
-		addLayerToggle(pp, PlayerModelLayer.ELYTRA, PlatformFeature.RENDER_ELYTRA);
+		addLayerToggle(pp, PlayerModelLayer.ELYTRA);
 	}
 
-	private void addLayerToggle(PopupMenu pp, PlayerModelLayer layer, PlatformFeature feature) {
+	private void addLayerToggle(PopupMenu pp, PlayerModelLayer layer) {
 		Checkbox chbx = pp.addCheckbox(gui.i18nFormat("label.cpm.display." + layer.name().toLowerCase()), c -> {
 			if(!c.isSelected())editor.modelDisplayLayers.add(layer);
 			else editor.modelDisplayLayers.remove(layer);
 			editor.updateGui();
 		});
 		editor.updateGui.add(() -> chbx.setSelected(editor.modelDisplayLayers.contains(layer)));
-		boolean sup = feature.isSupported();
-		chbx.setEnabled(sup);
-		if(!sup)chbx.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature." + feature.name().toLowerCase()))));
 	}
 
-	private void initHeldItemPopup(PopupMenu pp, Hand hand) {
-		ButtonGroup<HeldItem, Checkbox> group = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> editor.handDisplay.put(hand, i));
-		for(HeldItem item : HeldItem.VALUES) {
+	private void initHeldItemPopup(PopupMenu pp, ItemSlot hand) {
+		ButtonGroup<DisplayItem, Checkbox> group = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> editor.handDisplay.put(hand, i));
+		for(DisplayItem item : DisplayItem.VALUES) {
 			group.addElement(item, r -> pp.addCheckbox(gui.i18nFormat("button.cpm.heldItem." + item.name().toLowerCase()), r));
 		}
-		group.accept(editor.handDisplay.getOrDefault(hand, HeldItem.NONE));
+		group.accept(editor.handDisplay.getOrDefault(hand, DisplayItem.NONE));
 	}
 
 	private void load(File file) {

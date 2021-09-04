@@ -2,18 +2,21 @@ package com.tom.cpm.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiSelectWorld;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.player.EnumPlayerModelParts;
@@ -38,43 +41,15 @@ import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.MojangSkinUploadAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
-	/** The default skin for the Steve model. */
-	private static final ResourceLocation TEXTURE_STEVE = new ResourceLocation("textures/entity/steve.png");
-	/** The default skin for the Alex model. */
-	private static final ResourceLocation TEXTURE_ALEX = new ResourceLocation("textures/entity/alex.png");
-
 	private final Minecraft mc;
 	private final PlayerRenderManager prm;
 	private final ModelDefinitionLoader<GameProfile> loader;
+
 	public MinecraftObject(Minecraft mc) {
 		this.mc = mc;
 		MinecraftObjectHolder.setClientObject(this);
-		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId);
-		prm = new PlayerRenderManager(loader);
-	}
-
-	@Override
-	public Image getVanillaSkin(SkinType skinType) {
-		ResourceLocation loc;
-		switch (skinType) {
-		case SLIM:
-			loc = TEXTURE_ALEX;
-			break;
-
-		case DEFAULT:
-		case UNKNOWN:
-		default:
-			loc = TEXTURE_STEVE;
-			break;
-		}
-		try {
-			IResource r = mc.getResourceManager().getResource(loc);
-			try (InputStream is = r.getInputStream()) {
-				return Image.loadFrom(is);
-			}
-		} catch (IOException e) {
-		}
-		return null;
+		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId, GameProfile::getName);
+		prm = new PlayerRenderManager();
 	}
 
 	@Override
@@ -84,14 +59,27 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ITexture createTexture() {
-		return new DynTexture();
+		return new DynTexture(mc);
 	}
 
-	private static class DynTexture extends AbstractTexture implements ITexture {
+	public static class DynTexture extends DynamicTexture implements ITexture {
+		private final ResourceLocation loc;
+		private final Minecraft mc;
+
+		public DynTexture(Minecraft mc) {
+			super(1, 1);
+			loc = mc.getTextureManager().getDynamicTextureLocation("cpm", this);
+			this.mc = mc;
+		}
+
+		private static ResourceLocation bound_loc;
 
 		@Override
 		public void bind() {
 			GlStateManager.bindTexture(getGlTextureId());
+			bound_loc = loc;
+			if(mc.getTextureManager().getTexture(loc) == null)
+				mc.getTextureManager().loadTexture(loc, this);
 		}
 
 		@Override
@@ -103,10 +91,15 @@ public class MinecraftObject implements MinecraftClientAccess {
 		@Override
 		public void free() {
 			this.deleteGlTexture();
+			mc.getTextureManager().deleteTexture(loc);
 		}
 
 		@Override
 		public void loadTexture(IResourceManager resourceManager) throws IOException {}
+
+		public static ResourceLocation getBoundLoc() {
+			return bound_loc;
+		}
 	}
 
 	@Override
@@ -195,5 +188,20 @@ public class MinecraftObject implements MinecraftClientAccess {
 		MojangSkinUploadAPI.clearYggdrasilCache(mc.getSessionService());
 		mc.func_181037_M().clear();
 		mc.func_181037_M();//refresh
+	}
+
+	@Override
+	public String getConnectedServer() {
+		if(mc.getNetHandler() == null)return null;
+		SocketAddress sa = mc.getNetHandler().getNetworkManager().channel().remoteAddress();
+		if(sa instanceof InetSocketAddress)
+			return ((InetSocketAddress)sa).getHostString();
+		return null;
+	}
+
+	@Override
+	public List<Object> getPlayers() {
+		if(mc.getNetHandler() == null)return Collections.emptyList();
+		return mc.getNetHandler().getPlayerInfoMap().stream().map(NetworkPlayerInfo::getGameProfile).collect(Collectors.toList());
 	}
 }

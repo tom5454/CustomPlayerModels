@@ -21,8 +21,23 @@ public class ScrollPanel extends Panel {
 	public void mouseWheel(MouseEvent event) {
 		display.mouseWheel(event.offset(bounds).offset(-xScroll, -yScroll));
 		if(!event.isConsumed() && event.isInBounds(bounds)) {
-			int newScroll = yScroll - event.btn * 5;
-			yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h - 1, 0));
+			float overflowX = bounds.w / (float) display.getBounds().w;
+			float overflowY = bounds.h / (float) display.getBounds().h;
+			int xe = -1;
+			int ye = -1;
+			if(overflowY < 1) {
+				xe = 3;
+			}
+			if(overflowX < 1) {
+				ye = 3;
+			}
+			if(gui.isShiftDown()) {
+				int newScroll = xScroll - event.btn * 5;
+				xScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().w - bounds.w + xe, 0));
+			} else {
+				int newScroll = yScroll - event.btn * 5;
+				yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h + ye, 0));
+			}
 			event.consume();
 		}
 	}
@@ -46,14 +61,25 @@ public class ScrollPanel extends Panel {
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);
 		gui.setupCut();
+		float overflowX = bounds.w / (float) display.getBounds().w;
 		float overflowY = bounds.h / (float) display.getBounds().h;
 		int scx = scrollBarSide ? 0 : bounds.w - 3;
+		int scy = bounds.h - 4;
 		if(overflowY < 1) {
-			float h = overflowY * bounds.h;
+			float h = Math.max(overflowY * bounds.h, 8);
 			float scroll = yScroll / (float) (display.getBounds().h - bounds.h);
 			int y = (int) (scroll * (bounds.h - h));
 			Box bar = new Box(bounds.x + scx, bounds.y + y, 3, (int) h);
-			gui.drawBox(scx, y, 3, h, evt.isHovered(bar) ? gui.getColors().button_hover : gui.getColors().button_disabled);
+			gui.drawBox(scx, 0, 3, bounds.h, gui.getColors().panel_background);
+			gui.drawBox(scx, y, 3, h, evt.isHovered(bar) || enableDrag == 1 ? gui.getColors().button_hover : gui.getColors().button_disabled);
+		}
+		if(overflowX < 1) {
+			float w = Math.max(overflowX * bounds.w, 8);
+			float scroll = xScroll / (float) (display.getBounds().w - bounds.w);
+			int x = (int) (scroll * (bounds.w - w));
+			Box bar = new Box(bounds.x + x, bounds.y + scy, (int) w, 3);
+			gui.drawBox(x, scy, w, 4, gui.getColors().panel_background);
+			gui.drawBox(x, scy, w, 4, evt.isHovered(bar) || enableDrag == 2 ? gui.getColors().button_hover : gui.getColors().button_disabled);
 		}
 		gui.popMatrix();
 		gui.setupCut();
@@ -67,6 +93,14 @@ public class ScrollPanel extends Panel {
 			xScOld = xScroll;
 			yScOld = yScroll;
 			enableDrag = 1;
+			event.consume();
+		}
+		if(event.offset(bounds).isHovered(new Box(0, bounds.h - 4, bounds.w, 3))) {
+			dragX = event.x;
+			dragY = event.y;
+			xScOld = xScroll;
+			yScOld = yScroll;
+			enableDrag = 2;
 			event.consume();
 		}
 		MouseEvent e = event.offset(bounds).offset(-xScroll, -yScroll);
@@ -84,12 +118,30 @@ public class ScrollPanel extends Panel {
 	@Override
 	public void mouseDrag(MouseEvent event) {
 		if(enableDrag != 0) {
+			float overflowX = bounds.w / (float) display.getBounds().w;
+			float overflowY = bounds.h / (float) display.getBounds().h;
+			int xe = -1;
+			int ye = -1;
+			if(overflowY < 1) {
+				xe = 3;
+			}
+			if(overflowX < 1) {
+				ye = 3;
+			}
 			switch (enableDrag) {
 			case 1:
 			{
 				int drag = (int) ((event.y - dragY) / (float) bounds.h * display.getBounds().h);
 				int newScroll = yScOld + drag;
-				yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h - 1, 0));
+				yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h + ye, 0));
+			}
+			break;
+
+			case 2:
+			{
+				int drag = (int) ((event.x - dragX) / (float) bounds.w * display.getBounds().w);
+				int newScroll = xScOld + drag;
+				xScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().w - bounds.w + xe, 0));
 			}
 			break;
 
@@ -113,7 +165,7 @@ public class ScrollPanel extends Panel {
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
-		display.setVisible(visible);
+		if(display != null)display.setVisible(visible);
 	}
 
 	public void setScrollBarSide(boolean scrollBarSide) {
@@ -126,5 +178,9 @@ public class ScrollPanel extends Panel {
 
 	public void setScrollY(int yScroll) {
 		this.yScroll = yScroll;
+	}
+
+	public Panel getDisplay() {
+		return display;
 	}
 }

@@ -3,7 +3,7 @@ package com.tom.cpm.shared.parts;
 import java.io.IOException;
 import java.util.Arrays;
 
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.PlayerModelParts;
@@ -12,7 +12,7 @@ import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class ModelPartPlayer implements IModelPart, IResolvedModelPart {
 	private boolean[] keep = new boolean[8];
-	public ModelPartPlayer(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartPlayer(IOHelper in, ModelDefinition def) throws IOException {
 		int keep = in.read();
 		for (int i = 0; i < this.keep.length; i++) {
 			this.keep[i] = (keep & (1 << i)) != 0;
@@ -28,7 +28,7 @@ public class ModelPartPlayer implements IModelPart, IResolvedModelPart {
 			if(e.rc instanceof RootModelElement && !e.duplicated) {
 				VanillaModelPart part = ((RootModelElement)e.rc).getPart();
 				if(part != null && part instanceof PlayerModelParts) {
-					keep[((PlayerModelParts)part).ordinal()] = e.show;
+					keep[((PlayerModelParts)part).ordinal()] = !e.hidden;
 				}
 			}
 		});

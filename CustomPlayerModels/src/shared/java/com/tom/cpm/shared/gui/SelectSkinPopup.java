@@ -25,8 +25,8 @@ import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Exporter;
-import com.tom.cpm.shared.gui.ModelDisplayPanel.IModelDisplayPanel;
-import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
+import com.tom.cpm.shared.gui.panel.ModelDisplayPanel;
+import com.tom.cpm.shared.gui.panel.ModelDisplayPanel.IModelDisplayPanel;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.LegacySkinConverter;
@@ -142,6 +142,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 		addElement(list);
 
 		display = new ModelDisplayPanel(gui, this);
+		display.setLoadingText(gui.i18nFormat("button.cpm.selectSkin"));
 		addElement(display);
 
 		set = new Button(gui, gui.i18nFormat("button.cpm.selectSkin"), () -> {
@@ -239,5 +240,10 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 	@Override
 	public boolean doRender() {
 		return true;
+	}
+
+	@Override
+	public String getTitle() {
+		return gui.i18nFormat("button.cpm.selectSkin");
 	}
 }

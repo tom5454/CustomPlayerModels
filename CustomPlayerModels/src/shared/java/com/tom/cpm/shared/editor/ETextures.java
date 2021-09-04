@@ -11,6 +11,7 @@ import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ETextures implements TreeElement {
+	public static final int MAX_TEX_SIZE = 8192;
 	private final Editor e;
 	private TextureSheetType type;
 	public EditorTexture provider;
@@ -30,7 +31,7 @@ public class ETextures implements TreeElement {
 		this.textureLoader = textureLoader;
 		if(textureLoader != null) {
 			renderTexture = new EditorTexture();
-			stitcher = new TextureStitcher();
+			stitcher = new TextureStitcher(MAX_TEX_SIZE);
 		}
 	}
 
@@ -71,7 +72,7 @@ public class ETextures implements TreeElement {
 
 	public void restitchTexture() {
 		if(textureLoader == null)return;
-		stitcher = new TextureStitcher();
+		stitcher = new TextureStitcher(MAX_TEX_SIZE);
 		stitcher.setBase(provider);
 		textureLoader.accept(stitcher);
 		stitcher.finish(renderTexture);

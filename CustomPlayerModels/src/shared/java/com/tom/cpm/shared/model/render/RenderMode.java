@@ -5,4 +5,6 @@ public enum RenderMode {
 	GLOW,
 	OUTLINE,
 	COLOR,
+	DEFAULT,
+	PAINT,
 }

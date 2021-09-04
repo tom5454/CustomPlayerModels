@@ -4,10 +4,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerModelPart;
@@ -19,9 +17,9 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.RootModelType;
@@ -47,10 +45,10 @@ public abstract class CapeFeatureRendererMixin extends FeatureRenderer<AbstractC
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
 				ItemStack chestplate = entitylivingbaseIn.getEquippedStack(EquipmentSlot.CHEST);
 				if(!entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isPartVisible(PlayerModelPart.CAPE) && chestplate.getItem() != Items.ELYTRA) {
-					CallbackInfoReturnable<Identifier> rl = new CallbackInfoReturnable<>(null, true, null);
-					CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getContextModel(), rl, TextureSheetType.CAPE);
-					if(rl.getReturnValue() != null) {
-						VertexConsumer buffer = bufferIn.getBuffer(RenderLayer.getEntityTranslucent(rl.getReturnValue()));
+					ModelTexture mt = new ModelTexture();
+					CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getContextModel(), mt, TextureSheetType.CAPE);
+					if(mt.getTexture() != null) {
+						VertexConsumer buffer = bufferIn.getBuffer(mt.getRenderLayer());
 						CustomPlayerModelsClient.renderCape(matrixStackIn, buffer, packedLightIn, entitylivingbaseIn, partialTicks, getContextModel(), def);
 					}
 				}

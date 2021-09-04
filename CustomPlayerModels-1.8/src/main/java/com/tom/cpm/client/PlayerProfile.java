@@ -156,4 +156,14 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 		this.pose = pose;
 		encodedGesture = 0;
 	}
+
+	@Override
+	public String getName() {
+		return profile.getName();
+	}
+
+	@Override
+	public Object getGameProfile() {
+		return profile;
+	}
 }

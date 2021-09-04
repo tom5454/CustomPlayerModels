@@ -3,7 +3,6 @@ package com.tom.cpm.mixin.of;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -13,6 +12,7 @@ import net.minecraft.util.Identifier;
 import net.optifine.player.PlayerItemModel;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(PlayerItemModel.class)
@@ -30,8 +30,8 @@ public class PlayerItemModelOFMixin {
 						"render(Lnet/minecraft/class_572;Lnet/minecraft/class_742;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V"
 		})
 	public Identifier getPlayerSkin(AbstractClientPlayerEntity pe, BipedEntityModel modelBiped, AbstractClientPlayerEntity player, MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn, int packedOverlayIn) {
-		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, player.getSkinTexture());
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(modelBiped, cbi, TextureSheetType.SKIN);
-		return cbi.getReturnValue();
+		ModelTexture mt = new ModelTexture(player.getSkinTexture());
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(modelBiped, mt, TextureSheetType.SKIN);
+		return mt.getTexture();
 	}
 }

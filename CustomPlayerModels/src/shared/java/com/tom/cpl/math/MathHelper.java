@@ -1,6 +1,8 @@
 package com.tom.cpl.math;
 
 public class MathHelper {
+	public static final double LOG2 = Math.log(2);
+
 	public static double clamp(double num, double min, double max) {
 		if (num < min) {
 			return min;
@@ -45,5 +47,25 @@ public class MathHelper {
 		float f = Float.intBitsToFloat(i);
 		f = 0.6666667F * f + 1.0F / (3.0F * f * f * number);
 		return 0.6666667F * f + 1.0F / (3.0F * f * f * number);
+	}
+
+	public static double log2(double v) {
+		return Math.log(v) / LOG2;
+	}
+
+	public static float lerp(float partial, float prev, float current) {
+		return prev + partial * (current - prev);
+	}
+
+	public static float cos(float f) {
+		return (float) Math.cos(f);
+	}
+
+	public static float sin(float f) {
+		return (float) Math.sin(f);
+	}
+
+	public static float sqrt(float f) {
+		return (float) Math.sqrt(f);
 	}
 }

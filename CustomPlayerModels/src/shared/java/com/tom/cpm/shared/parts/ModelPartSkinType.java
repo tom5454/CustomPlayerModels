@@ -2,13 +2,13 @@ package com.tom.cpm.shared.parts;
 
 import java.io.IOException;
 
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.SkinType;
 
 public class ModelPartSkinType implements IModelPart, IResolvedModelPart {
 	private SkinType type;
-	public ModelPartSkinType(IOHelper din, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartSkinType(IOHelper din, ModelDefinition def) throws IOException {
 		int t = din.read();
 		this.type = t >= SkinType.VALUES.length ? SkinType.UNKNOWN : SkinType.VALUES[t];
 	}

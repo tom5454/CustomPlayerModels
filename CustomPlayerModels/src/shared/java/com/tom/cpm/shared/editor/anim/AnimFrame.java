@@ -13,6 +13,8 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.project.JsonList;
+import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
@@ -54,7 +56,7 @@ public class AnimFrame {
 			int g = (comp.rgb & 0x00ff00) >> 8;
 			int b =  comp.rgb & 0x0000ff;
 			color = new Vec3f(r, g, b);
-			show = comp.show;
+			show = !comp.hidden;
 		}
 
 		public Data(Data cpy) {
@@ -125,7 +127,7 @@ public class AnimFrame {
 		}
 
 		public boolean hasVisChanges() {
-			return comp.show != show;
+			return comp.hidden == show;
 		}
 	}
 
@@ -185,7 +187,7 @@ public class AnimFrame {
 	}
 
 	public boolean getVisible(ModelElement component) {
-		if(!components.containsKey(component))return component.show;
+		if(!components.containsKey(component))return !component.hidden && component.rc.doDisplay();
 		return components.get(component).show;
 	}
 
@@ -197,26 +199,25 @@ public class AnimFrame {
 		return components.entrySet().stream().filter(e -> e.getValue().hasChanges()).map(Entry::getKey);
 	}
 
-	@SuppressWarnings("unchecked")
-	public void loadFrom(Map<String, Object> data) {
-		List<Map<String, Object>> c = (List<Map<String, Object>>) data.get("components");
-		for (Map<String, Object> map : c) {
-			long sid = ((Number)map.get("storeID")).longValue();
+	public void loadFrom(JsonMap data) {
+		JsonList c = data.getList("components");
+		c.forEachMap(map -> {
+			long sid = map.getLong("storeID");
 			Editor.walkElements(anim.editor.elements, elem -> {
 				if(elem.storeID == sid) {
 					Data dt = new Data(elem);
 					components.put(elem, dt);
-					dt.pos = new Vec3f((Map<String, Object>) map.get("pos"), new Vec3f());
-					dt.rot = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f());
-					int rgb = Integer.parseUnsignedInt((String) map.get("color"), 16);
+					dt.pos = new Vec3f(map.getMap("pos"), new Vec3f());
+					dt.rot = new Vec3f(map.getMap("rotation"), new Vec3f());
+					int rgb = Integer.parseUnsignedInt(map.getString("color"), 16);
 					int r = (rgb & 0xff0000) >> 16;
 					int g = (rgb & 0x00ff00) >> 8;
 					int b =  rgb & 0x0000ff;
 					dt.color = new Vec3f(r, g, b);
-					dt.show = (boolean) map.get("show");
+					dt.show = map.getBoolean("show");
 				}
 			});
-		}
+		});
 	}
 
 	public Map<String, Object> store() {

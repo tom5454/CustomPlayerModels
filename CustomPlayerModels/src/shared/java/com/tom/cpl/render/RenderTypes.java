@@ -26,4 +26,8 @@ public class RenderTypes<E extends Enum<E>> {
 	public boolean isInitialized() {
 		return !types.isEmpty();
 	}
+
+	public void putAll(RenderTypes<E> cbi) {
+		types.putAll(cbi.types);
+	}
 }

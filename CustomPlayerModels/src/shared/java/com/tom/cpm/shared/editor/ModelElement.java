@@ -22,6 +22,7 @@ import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.PerFaceUV;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
@@ -34,7 +35,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public ElementType type;
 	public Object typeData;
 	public RenderedCube rc;
-	public boolean show = true;
+	public boolean showInEditor = true;
 	public boolean texture, mirror;
 	public int textureSize;
 	public boolean glow;
@@ -45,6 +46,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public boolean templateElement, generated;
 	public boolean duplicated;
 	public PerFaceUV faceUV;
+	public ItemRenderer itemRenderer;
 	public Tooltip tooltip;
 
 	public ModelElement(ModelElement element, ModelElement parent) {
@@ -52,7 +54,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		this.parent = parent;
 		element.children.forEach(c -> children.add(new ModelElement(c, this)));
 		name = editor.gui().i18nFormat("label.cpm.dup", element.name);
-		show = element.show;
+		showInEditor = element.showInEditor;
 		texture = element.texture;
 		textureSize = element.textureSize;
 		offset = new Vec3f(element.offset);
@@ -108,7 +110,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public boolean isVisible() {
-		return show;
+		return !hidden;
 	}
 
 	@Override
@@ -129,7 +131,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public int textColor() {
-		return !show ? editor.colors().button_text_disabled : 0;
+		return !showInEditor ? editor.colors().button_text_disabled : 0;
 	}
 
 	@Override
@@ -212,7 +214,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
-		if(show || editor.selectedElement == this)
+		if(showInEditor || editor.selectedElement == this)
 			TextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys, editor.selectedElement == this ? 0xcc : 0x55);
 	}
 
@@ -243,40 +245,45 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void updateGui() {
-		editor.setVis.accept(this.show);
-		editor.setAddEn.accept(!templateElement);
+		editor.setVis.accept(this.showInEditor);
+		editor.setAddEn.accept(!templateElement && itemRenderer == null);
 		switch(this.type) {
 		case NORMAL:
 			editor.setOffset.accept(this.offset);
 			editor.setRot.accept(this.rotation);
 			editor.setPosition.accept(this.pos);
-			editor.setSize.accept(this.size);
+			if(itemRenderer == null)
+				editor.setSize.accept(this.size);
 			editor.setScale.accept(this.scale);
-			editor.setMCScale.accept(this.mcScale);
-			editor.setMirror.accept(this.mirror);
-			editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
-			editor.setModePanel.accept(this.faceUV != null ? ModeDisplType.TEX_FACE : texture ? ModeDisplType.TEX : ModeDisplType.COLOR);
-			editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize));
-			if(!this.texture || this.recolor)
-				editor.setPartColor.accept(this.rgb);
-			editor.setDelEn.accept(!templateElement);
-			editor.setGlow.accept(this.glow);
-			editor.setReColor.accept(this.recolor);
-			editor.setHiddenEffect.accept(this.hidden);
-			if(faceUV == null)editor.setSingleTex.accept(this.singleTex);
-			else {
-				editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir));
-				editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir));
-				editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir));
+			if(itemRenderer == null) {
+				editor.setMCScale.accept(this.mcScale);
+				editor.setMirror.accept(this.mirror);
+				editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
+				editor.setModePanel.accept(this.faceUV != null ? ModeDisplType.TEX_FACE : texture ? ModeDisplType.TEX : ModeDisplType.COLOR);
+				editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize));
+				if(!this.texture || this.recolor)
+					editor.setPartColor.accept(this.rgb);
 			}
-			if(!singleTex)editor.setPerFaceUV.accept(this.faceUV != null);
-			editor.updateName.accept(this.name);
+			editor.setDelEn.accept(!templateElement);
+			if(itemRenderer == null) {
+				editor.setGlow.accept(this.glow);
+				editor.setReColor.accept(this.recolor);
+				editor.setHiddenEffect.accept(this.hidden);
+				if(faceUV == null)editor.setSingleTex.accept(this.singleTex);
+				else {
+					editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir));
+					editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir));
+					editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir));
+				}
+				if(!singleTex)editor.setPerFaceUV.accept(this.faceUV != null);
+				editor.updateName.accept(this.name);
+			}
 			break;
 
 		case ROOT_PART:
 			editor.setPosition.accept(this.pos);
 			editor.setRot.accept(this.rotation);
-			editor.setHiddenEffect.accept(!this.show);
+			editor.setHiddenEffect.accept(this.hidden);
 			editor.setDelEn.accept(this.duplicated || this.typeData instanceof RootModelType);
 			break;
 
@@ -319,10 +326,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void switchVis() {
-		editor.action("toggleVis").updateValueOp(this, this.show, !this.show, (a, b) -> a.show = b, editor.setVis).execute();
-		if(type == ElementType.ROOT_PART) {
-			editor.setHiddenEffect.accept(!show);
-		}
+		showInEditor = !showInEditor;
 	}
 
 	@Override
@@ -333,13 +337,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			break;
 
 		case HIDE:
-			if(type == ElementType.ROOT_PART) {
-				switchVis();
-				editor.setHiddenEffect.accept(!show);
-			} else {
-				editor.action("switch", "label.cpm.hidden_effect").updateValueOp(this, this.hidden, !this.hidden, (a, b) -> a.hidden = b, editor.setHiddenEffect).execute();
-				editor.updateGui.accept(null);
-			}
+			editor.action("switch", "label.cpm.hidden_effect").updateValueOp(this, this.hidden, !this.hidden, (a, b) -> a.hidden = b, editor.setHiddenEffect).execute();
+			editor.updateGui.accept(null);
 			break;
 
 		case MIRROR:
@@ -410,7 +409,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void populatePopup(PopupMenu popup) {
-		popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), this::duplicate);
+		if(itemRenderer == null)
+			popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), this::duplicate);
 	}
 
 	private void duplicate() {

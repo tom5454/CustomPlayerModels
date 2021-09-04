@@ -174,4 +174,18 @@ public class Mat3f {
 	public Mat3f copy() {
 		return new Mat3f(this);
 	}
+
+	public float[] toArray() {
+		float[] values = new float[9];
+		values[0] = m00;
+		values[1] = m01;
+		values[2] = m02;
+		values[3] = m10;
+		values[4] = m11;
+		values[5] = m12;
+		values[6] = m20;
+		values[7] = m21;
+		values[8] = m22;
+		return values;
+	}
 }

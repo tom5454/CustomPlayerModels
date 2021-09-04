@@ -21,6 +21,7 @@ import net.minecraft.util.text.ITextComponent;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.TextureSheetType;
 
@@ -39,7 +40,7 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 			},
 			cancellable = true)
 	public void onGetEntityTexture(AbstractClientPlayerEntity entity, CallbackInfoReturnable<ResourceLocation> cbi) {
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(getModel(), cbi, TextureSheetType.SKIN);
+		ClientProxy.mc.getPlayerRenderManager().bindSkin(getModel(), new ModelTexture(cbi), TextureSheetType.SKIN);
 	}
 
 	@Redirect(at =

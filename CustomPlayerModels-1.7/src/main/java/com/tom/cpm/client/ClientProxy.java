@@ -51,7 +51,7 @@ public class ClientProxy extends CommonProxy {
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public static ClientProxy INSTANCE;
-	private RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
+	public RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
 	public NetH netHandler;
 
 	@Override

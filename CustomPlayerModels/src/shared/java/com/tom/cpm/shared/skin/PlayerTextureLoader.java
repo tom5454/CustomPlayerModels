@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -18,9 +19,10 @@ public abstract class PlayerTextureLoader {
 	private static class Texture {
 		private CompletableFuture<Image> skinFuture;
 		private String url;
+		private UnaryOperator<Image> postProcessor;
 
-		public Texture(String url) {
-			this.url = url;
+		public Texture(TextureType type) {
+			this.postProcessor = type == TextureType.SKIN ? LegacySkinConverter::processLegacySkin : UnaryOperator.identity();
 		}
 
 		public CompletableFuture<Image> get() {
@@ -41,7 +43,7 @@ public abstract class PlayerTextureLoader {
 				});
 			}
 			if(url == null)return null;
-			return Image.download(url).thenApply(LegacySkinConverter::processLegacySkin).exceptionally(e -> null);
+			return Image.download(url).thenApply(postProcessor).exceptionally(e -> null);
 		}
 	}
 
@@ -51,6 +53,8 @@ public abstract class PlayerTextureLoader {
 	public CompletableFuture<Void> load() {
 		if(loadFuture == null) {
 			loadFuture = load0();
+			if(MinecraftObjectHolder.DEBUGGING)
+				loadFuture.complete(null);
 		}
 		return loadFuture;
 	}
@@ -58,7 +62,7 @@ public abstract class PlayerTextureLoader {
 	protected abstract CompletableFuture<Void> load0();
 
 	protected void defineTexture(TextureType type, String url) {
-		textures.computeIfAbsent(type, t -> new Texture(null)).url = url;
+		textures.computeIfAbsent(type, Texture::new).url = url;
 	}
 
 	protected <Ty extends Enum<Ty>> void defineTexture(Ty type, String url) {
@@ -72,6 +76,6 @@ public abstract class PlayerTextureLoader {
 	}
 
 	public CompletableFuture<Image> getTexture(TextureType type) {
-		return textures.computeIfAbsent(type, t -> new Texture(null)).get();
+		return textures.computeIfAbsent(type, Texture::new).get();
 	}
 }

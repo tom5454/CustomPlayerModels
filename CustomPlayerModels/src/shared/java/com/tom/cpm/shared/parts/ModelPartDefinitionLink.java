@@ -3,13 +3,13 @@ package com.tom.cpm.shared.parts;
 import java.io.IOException;
 
 import com.tom.cpm.shared.definition.Link;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class ModelPartDefinitionLink extends ModelPartLink {
 
-	public ModelPartDefinitionLink(IOHelper in, ModelDefinitionLoader loader) throws IOException {
-		super(in, loader);
+	public ModelPartDefinitionLink(IOHelper in, ModelDefinition def) throws IOException {
+		super(in, def);
 	}
 
 	public ModelPartDefinitionLink(Link link) {
@@ -22,7 +22,7 @@ public class ModelPartDefinitionLink extends ModelPartLink {
 	}
 
 	@Override
-	protected IModelPart load(IOHelper din, ModelDefinitionLoader loader) throws IOException {
-		return new ModelPartDefinition(din, loader);
+	protected IModelPart load(IOHelper din, ModelDefinition def) throws IOException {
+		return new ModelPartDefinition(din, def);
 	}
 }

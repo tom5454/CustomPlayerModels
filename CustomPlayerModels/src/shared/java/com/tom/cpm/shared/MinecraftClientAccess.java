@@ -8,7 +8,6 @@ import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.util.DynamicTexture.ITexture;
-import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -38,8 +37,8 @@ public interface MinecraftClientAccess {
 
 	Object getPlayerIDObject();
 	Object getCurrentPlayerIDObject();
+
 	SkinType getSkinType();
-	Image getVanillaSkin(SkinType skinType);
 	void setEncodedGesture(int value);
 	boolean isInGame();
 	List<IKeybind> getKeybinds();
@@ -49,6 +48,8 @@ public interface MinecraftClientAccess {
 	IImageIO getImageIO();
 	MojangSkinUploadAPI getUploadAPI();
 	void clearSkinCache();
+	String getConnectedServer();
+	List<Object> getPlayers();
 
 	default Runnable openSingleplayer() {
 		throw new UnsupportedOperationException();

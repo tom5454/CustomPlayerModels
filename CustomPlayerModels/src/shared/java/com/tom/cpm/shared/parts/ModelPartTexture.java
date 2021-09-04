@@ -3,7 +3,6 @@ package com.tom.cpm.shared.parts;
 import java.io.IOException;
 
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -13,9 +12,9 @@ public class ModelPartTexture implements IModelPart, IResolvedModelPart {
 	private TextureProvider image;
 	private TextureSheetType texType;
 
-	public ModelPartTexture(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartTexture(IOHelper in, ModelDefinition def) throws IOException {
 		texType = in.readEnum(TextureSheetType.VALUES);
-		image = new TextureProvider(in, texType.texLimit);
+		image = new TextureProvider(in, def);
 	}
 
 	public ModelPartTexture(Editor editor, TextureSheetType tex) {

@@ -10,10 +10,11 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.ErrorScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
@@ -46,7 +47,7 @@ import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.shared.gui.ViewportPanelBase;
+import com.tom.cpm.shared.gui.panel.Panel3d;
 
 public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new GLFWKeyCodes();
@@ -62,9 +63,9 @@ public class GuiImpl extends Screen implements IGui {
 	private int vanillaScale = -1;
 
 	static {
-		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
 		nativeComponents.register(FileChooserPopup.class, TinyFDChooser::new);
+		nativeComponents.register(Panel3d.class, Panel3dImpl::new);
 	}
 
 	public GuiImpl(Function<IGui, Frame> creator, Screen parent) {
@@ -289,18 +290,45 @@ public class GuiImpl extends Screen implements IGui {
 	public void displayError(String e) {
 		Screen p = parent;
 		parent = null;
-		Minecraft.getInstance().setScreen(new ErrorScreen(new StringTextComponent("Custom Player Models"), new TranslationTextComponent("error.cpm.crash", e)) {
-			private Screen parent = p;
+		Minecraft.getInstance().setScreen(new CrashScreen(e, p));
+	}
 
-			@Override
-			public void onClose() {
-				if(parent != null) {
-					Screen p = parent;
-					parent = null;
-					minecraft.setScreen(p);
-				}
+	private static class CrashScreen extends Screen {
+		private String error;
+		private Screen parent;
+
+		public CrashScreen(String error, Screen p) {
+			super(new StringTextComponent("Error"));
+			this.error = error;
+			parent = p;
+		}
+
+		@Override
+		public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+			this.renderBackground(matrixStack);
+			String[] txt = I18n.get("error.cpm.crash", error).split("\\\\");
+			for (int i = 0; i < txt.length; i++) {
+				drawCenteredString(matrixStack, this.font, txt[i], this.width / 2, 15 + i * 10, 16777215);
 			}
-		});
+			super.render(matrixStack, mouseX, mouseY, partialTicks);
+		}
+
+		@Override
+		protected void init() {
+			super.init();
+			this.addButton(new Button(this.width / 2 - 100, 140, 200, 20, DialogTexts.GUI_BACK, (p_213034_1_) -> {
+				this.minecraft.setScreen((Screen)null);
+			}));
+		}
+
+		@Override
+		public void onClose() {
+			if(parent != null) {
+				Screen p = parent;
+				parent = null;
+				minecraft.setScreen(p);
+			}
+		}
 	}
 
 	@Override

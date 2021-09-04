@@ -67,6 +67,16 @@ public class RootModelElement extends RenderedCube {
 		defRot.z = rz + rotN.z;
 	}
 
+	public void setPosAndRot(PartRoot cpy) {
+		RootModelElement e = cpy.getMainRoot();
+		defPos.x = e.defPos.x - e.posN.x + posN.x;
+		defPos.y = e.defPos.y - e.posN.y + posN.y;
+		defPos.z = e.defPos.z - e.posN.z + posN.z;
+		defRot.x = e.defRot.x - e.rotN.x + rotN.x;
+		defRot.y = e.defRot.y - e.rotN.y + rotN.y;
+		defRot.z = e.defRot.z - e.rotN.z + rotN.z;
+	}
+
 	@Override
 	public void setPosition(boolean add, float x, float y, float z) {
 		super.setPosition(add, x, y, z);
@@ -93,5 +103,9 @@ public class RootModelElement extends RenderedCube {
 		} else {
 			return rotation;
 		}
+	}
+
+	public boolean renderPart() {
+		return true;
 	}
 }

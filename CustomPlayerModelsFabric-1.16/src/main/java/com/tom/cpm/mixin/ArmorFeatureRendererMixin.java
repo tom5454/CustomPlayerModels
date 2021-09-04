@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -19,6 +18,8 @@ import net.minecraft.item.ArmorItem;
 import net.minecraft.util.Identifier;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.ModelTexture;
+import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(ArmorFeatureRenderer.class)
@@ -54,6 +55,6 @@ public abstract class ArmorFeatureRendererMixin {
 	private void preRender(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i,
 			ArmorItem armorItem, boolean bl, BipedEntityModel<LivingEntity> model, boolean bl2, float f, float g, float h,
 			String string, CallbackInfo cbi) {
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new CallbackInfoReturnable<>(null, true, this.getArmorTexture(armorItem, bl2, string)), model == leggingsModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(this.getArmorTexture(armorItem, bl2, string), PlayerRenderManager.armor), model == leggingsModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
 }

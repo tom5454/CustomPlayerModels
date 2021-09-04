@@ -2,18 +2,23 @@ package com.tom.cpm.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiPlayerInfo;
 import net.minecraft.client.gui.GuiSelectWorld;
-import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
@@ -25,7 +30,6 @@ import com.tom.cpl.util.AWTImageIO;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
-import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -34,43 +38,15 @@ import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.MojangSkinUploadAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
-	/** The default skin for the Steve model. */
-	private static final ResourceLocation TEXTURE_STEVE = new ResourceLocation("textures/entity/steve.png");
-	/** The default skin for the Alex model. */
-	private static final ResourceLocation TEXTURE_ALEX = new ResourceLocation(CustomPlayerModels.ID, "textures/entity/alex.png");
-
 	private final Minecraft mc;
 	private final PlayerRenderManager prm;
 	private final ModelDefinitionLoader<GameProfile> loader;
+
 	public MinecraftObject(Minecraft mc) {
 		this.mc = mc;
 		MinecraftObjectHolder.setClientObject(this);
-		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId);
-		prm = new PlayerRenderManager(loader);
-	}
-
-	@Override
-	public Image getVanillaSkin(SkinType skinType) {
-		ResourceLocation loc;
-		switch (skinType) {
-		case SLIM:
-			loc = TEXTURE_ALEX;
-			break;
-
-		case DEFAULT:
-		case UNKNOWN:
-		default:
-			loc = TEXTURE_STEVE;
-			break;
-		}
-		try {
-			IResource r = mc.getResourceManager().getResource(loc);
-			try (InputStream is = r.getInputStream()) {
-				return Image.loadFrom(is);
-			}
-		} catch (IOException e) {
-		}
-		return null;
+		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId, GameProfile::getName);
+		prm = new PlayerRenderManager();
 	}
 
 	@Override
@@ -80,14 +56,27 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ITexture createTexture() {
-		return new DynTexture();
+		return new DynTexture(mc);
 	}
 
-	private static class DynTexture extends AbstractTexture implements ITexture {
+	public static class DynTexture extends DynamicTexture implements ITexture {
+		private final ResourceLocation loc;
+		private final Minecraft mc;
+
+		public DynTexture(Minecraft mc) {
+			super(1, 1);
+			loc = mc.getTextureManager().getDynamicTextureLocation("cpm", this);
+			this.mc = mc;
+		}
+
+		private static ResourceLocation bound_loc;
 
 		@Override
 		public void bind() {
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, getGlTextureId());
+			bound_loc = loc;
+			if(mc.getTextureManager().getTexture(loc) == null)
+				mc.getTextureManager().loadTexture(loc, this);
 		}
 
 		@Override
@@ -99,10 +88,15 @@ public class MinecraftObject implements MinecraftClientAccess {
 		@Override
 		public void free() {
 			this.deleteGlTexture();
+			mc.getTextureManager().deleteTexture(loc);
 		}
 
 		@Override
 		public void loadTexture(IResourceManager resourceManager) throws IOException {}
+
+		public static ResourceLocation getBoundLoc() {
+			return bound_loc;
+		}
 	}
 
 	@Override
@@ -183,5 +177,25 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public void clearSkinCache() {
 		MojangSkinUploadAPI.clearYggdrasilCache(mc.func_152347_ac());
+	}
+
+	@Override
+	public String getConnectedServer() {
+		if(mc.getNetHandler() == null)return null;
+		SocketAddress sa = mc.getNetHandler().getNetworkManager().channel().remoteAddress();
+		if(sa instanceof InetSocketAddress)
+			return ((InetSocketAddress)sa).getHostString();
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Object> getPlayers() {
+		if(mc.thePlayer == null)return Collections.emptyList();
+		NetHandlerPlayClient net = this.mc.thePlayer.sendQueue;
+		List<GuiPlayerInfo> plInfo = net.playerInfoList;
+		List<EntityPlayer> players = mc.theWorld.playerEntities;
+		return plInfo.stream().map(i -> players.stream().filter(e -> e.getCommandSenderName().equalsIgnoreCase(i.name)).
+				findFirst().orElse(null)).filter(e -> e != null).map(EntityPlayer::getGameProfile).collect(Collectors.toList());
 	}
 }

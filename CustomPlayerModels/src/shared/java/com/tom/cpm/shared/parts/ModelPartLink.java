@@ -5,17 +5,18 @@ import java.io.InputStream;
 
 import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
 import com.tom.cpm.shared.definition.Link;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.ChecksumInputStream;
 import com.tom.cpm.shared.io.IOHelper;
 
 public abstract class ModelPartLink implements IModelPart {
 	private Link link;
-	private ModelDefinitionLoader loader;
+	private ModelDefinition def;
 
-	public ModelPartLink(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartLink(IOHelper in, ModelDefinition def) throws IOException {
 		link = new Link(in);
-		this.loader = loader;
+		this.def = def;
 	}
 
 	public ModelPartLink(Link link) {
@@ -24,21 +25,16 @@ public abstract class ModelPartLink implements IModelPart {
 
 	@Override
 	public IResolvedModelPart resolve() throws IOException {
-		try(InputStream in = loader.load(link, ResourceEncoding.BASE64)) {
+		try(InputStream in = def.getLoader().load(link, ResourceEncoding.BASE64, def)) {
 			if(in.read() != ModelDefinitionLoader.HEADER)throw new IOException();
 			ChecksumInputStream cis = new ChecksumInputStream(in);
-			try {
-				return load(new IOHelper(cis), loader).resolve();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new IOException(e);
-			} finally {
-				cis.checkSum();
-			}
+			IModelPart part = load(new IOHelper(cis), def);
+			cis.checkSum();
+			return part.resolve();
 		}
 	}
 
-	protected abstract IModelPart load(IOHelper din, ModelDefinitionLoader loader) throws IOException;
+	protected abstract IModelPart load(IOHelper din, ModelDefinition def) throws IOException;
 
 	@Override
 	public void write(IOHelper dout) throws IOException {

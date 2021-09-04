@@ -17,6 +17,8 @@ import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
+import com.tom.cpm.shared.editor.project.JsonMap;
+import com.tom.cpm.shared.editor.project.JsonMapImpl;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.template.args.TexEditorArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
@@ -37,8 +39,8 @@ public class EditorTemplate extends Template implements TreeElement {
 	private Tooltip tooltip;
 
 	@SuppressWarnings("unchecked")
-	private EditorTemplate(Editor editor, Link link, InputStreamReader rd, Map<String, Object> data) throws IOException {
-		super(link, rd, data, null);
+	private EditorTemplate(Editor editor, Link link, InputStreamReader rd, JsonMap data) throws IOException {
+		super(link, rd, data, null, null);
 		this.editor = editor;
 		loadPartToCubes();
 		name = (String) this.data.get("name");
@@ -87,18 +89,17 @@ public class EditorTemplate extends Template implements TreeElement {
 		arg.loadTemplate((T) value);
 	}
 
-	@SuppressWarnings("unchecked")
-	public static EditorTemplate load(Editor editor, Map<String, Object> data) throws IOException {
-		Link link = new Link((String) data.get("link"));
-		try (InputStreamReader rd = new InputStreamReader(MinecraftClientAccess.get().getDefinitionLoader().load(link, ResourceEncoding.NO_ENCODING))) {
-			return new EditorTemplate(editor, link, rd, (Map<String, Object>) data.get("data"));
+	public static EditorTemplate load(Editor editor, JsonMap data) throws IOException {
+		Link link = new Link(data.getString("link"));
+		try (InputStreamReader rd = new InputStreamReader(MinecraftClientAccess.get().getDefinitionLoader().load(link, ResourceEncoding.NO_ENCODING, null))) {
+			return new EditorTemplate(editor, link, rd, data.getMap("data"));
 		}
 	}
 
 	public static EditorTemplate create(Editor editor, String linkIn) throws IOException {
 		Link link = new Link(linkIn);
-		try (InputStreamReader rd = new InputStreamReader(MinecraftClientAccess.get().getDefinitionLoader().load(link, ResourceEncoding.NO_ENCODING))) {
-			return new EditorTemplate(editor, link, rd, new HashMap<>());
+		try (InputStreamReader rd = new InputStreamReader(MinecraftClientAccess.get().getDefinitionLoader().load(link, ResourceEncoding.NO_ENCODING, null))) {
+			return new EditorTemplate(editor, link, rd, new JsonMapImpl());
 		}
 	}
 

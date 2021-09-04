@@ -3,7 +3,6 @@ package com.tom.cpm.shared.parts;
 import java.io.IOException;
 
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
@@ -13,7 +12,7 @@ import com.tom.cpm.shared.model.RootModelType;
 public class ModelPartRoot implements IModelPart, IResolvedModelPart {
 	private int id;
 	private RootModelType type;
-	public ModelPartRoot(IOHelper din, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartRoot(IOHelper din, ModelDefinition def) throws IOException {
 		id = din.readVarInt();
 		type = din.readEnum(RootModelType.VALUES);
 	}

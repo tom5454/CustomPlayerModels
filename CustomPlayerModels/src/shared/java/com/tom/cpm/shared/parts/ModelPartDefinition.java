@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.RenderedCube;
@@ -23,8 +22,8 @@ public class ModelPartDefinition implements IModelPart, IResolvedModelPart {
 	private ModelPartPlayer player;
 	private IResolvedModelPart skinImage;
 
-	public ModelPartDefinition(IOHelper is, ModelDefinitionLoader loader) throws IOException {
-		int count = is.read();
+	public ModelPartDefinition(IOHelper is, ModelDefinition def) throws IOException {
+		int count = is.readVarInt();
 		cubes = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
 			Cube c = Cube.loadDefinitionCube(is);
@@ -35,7 +34,7 @@ public class ModelPartDefinition implements IModelPart, IResolvedModelPart {
 		templates = new ArrayList<>();
 		otherParts = new ArrayList<>();
 		while(true) {
-			IModelPart part = is.readObjectBlock(ModelPartType.VALUES, (t, d) -> t.getFactory().create(d, loader));
+			IModelPart part = is.readObjectBlock(ModelPartType.VALUES, (t, d) -> t.getFactory().create(d, def));
 			if(part == null)continue;
 			if(part instanceof ModelPartEnd)break;
 			switch (part.getType()) {
@@ -101,7 +100,7 @@ public class ModelPartDefinition implements IModelPart, IResolvedModelPart {
 
 	@Override
 	public void write(IOHelper dout) throws IOException {
-		dout.write(cubes.size());
+		dout.writeVarInt(cubes.size());
 		List<Cube> lst = new ArrayList<>(cubes);
 		lst.sort((a, b) -> Integer.compare(a.id, b.id));
 		for (Cube cube : lst) {

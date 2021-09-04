@@ -1,7 +1,14 @@
 package com.tom.cpm.shared.editor;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
@@ -10,6 +17,12 @@ import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ItemSlot;
+import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.actions.ImageAction;
 import com.tom.cpm.shared.editor.gui.EditorGui;
@@ -17,7 +30,10 @@ import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
+import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
+import com.tom.cpm.shared.skin.TextureType;
 
 public class Generators {
 	public static List<Generators> generators = new ArrayList<>();
@@ -68,7 +84,7 @@ public class Generators {
 		ab.onUndo(() -> e.selectedElement = null);
 		for (ModelElement el : e.elements) {
 			if(el.type == ElementType.ROOT_PART) {
-				if(el.show) {
+				if(!el.hidden) {
 					ModelElement elem = new ModelElement(e);
 					ab.addToList(el.children, elem);
 					elem.parent = el;
@@ -83,7 +99,7 @@ public class Generators {
 					elem.v = uv.y;
 					elem.name = el.name;
 					elem.generated = true;
-					ab.updateValueOp(el, true, false, (a, b) -> a.show = b);
+					ab.updateValueOp(el, false, true, (a, b) -> a.hidden = b);
 				}
 			}
 		}
@@ -97,7 +113,7 @@ public class Generators {
 		for(PlayerModelParts p : PlayerModelParts.VALUES) {
 			for (ModelElement el : e.elements) {
 				if(el.type == ElementType.ROOT_PART && el.typeData == p) {
-					if(el.show) {
+					if(!el.hidden) {
 						ModelElement elem = new ModelElement(e);
 						ab.addToList(el.children, elem);
 						elem.parent = el;
@@ -108,7 +124,7 @@ public class Generators {
 						elem.rgb = 0xffffff;
 						elem.name = el.name;
 						elem.templateElement = true;
-						ab.updateValueOp(el, true, false, (a, b) -> a.show = b);
+						ab.updateValueOp(el, false, true, (a, b) -> a.hidden = b);
 					}
 					break;
 				}
@@ -161,5 +177,86 @@ public class Generators {
 			})).onAction(me.getTexture()::markDirty).
 			execute();
 		}
+	}
+
+	public static void addItemHoldPos(Editor editor) {
+		ActionBuilder ab = editor.action("add", "action.cpm.itemHold");
+		Set<ItemSlot> added = new HashSet<>();
+		Editor.walkElements(editor.elements, e -> {
+			if(e.itemRenderer != null)added.add(e.itemRenderer.slot);
+		});
+		for (ItemSlot itemSlot : ItemSlot.SLOTS) {
+			if(!added.contains(itemSlot)) {
+				ModelElement elem = new ModelElement(editor);
+				elem.itemRenderer = new ItemRenderer(itemSlot, 0);
+				elem.name = editor.gui().i18nFormat("label.cpm.elem.item." + itemSlot.name().toLowerCase());
+				elem.size = new Vec3f(0, 0, 0);
+				switch (itemSlot) {
+				case HEAD:
+					elem.parent = findPart(editor, PlayerModelParts.HEAD);
+					break;
+				case LEFT_HAND:
+					elem.parent = findPart(editor, PlayerModelParts.LEFT_ARM);
+					break;
+				case RIGHT_HAND:
+					elem.parent = findPart(editor, PlayerModelParts.RIGHT_ARM);
+					break;
+				default:
+					break;
+				}
+				if(elem.parent != null) {
+					ab.addToList(elem.parent.children, elem);
+				}
+			}
+		}
+		ab.execute();
+		editor.updateGui();
+	}
+
+	private static ModelElement findPart(Editor editor, VanillaModelPart part) {
+		for(ModelElement e : editor.elements) {
+			if(e.typeData == part) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	public static void loadTextures(Editor editor, RootGroups group, BiConsumer<TextureSheetType, ETextures> texs) {
+		Arrays.stream(group.types).map(group::getTexSheet).distinct().forEach(tx -> {
+			if(!editor.textures.containsKey(tx)) {
+				ETextures tex = new ETextures(editor, tx);
+				texs.accept(tx, tex);
+				tex.provider.size = tx.getDefSize();
+				Image def = new Image(tex.provider.size.x, tex.provider.size.y);
+				try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tx.name().toLowerCase() + ".png")) {
+					def = Image.loadFrom(is);
+				} catch (IOException e) {
+				}
+				tex.setDefaultImg(def);
+				tex.setImage(new Image(def));
+				tex.markDirty();
+				tex.setEdited(tx.texType == null && tx.editable);
+				if(tx.texType != null) {
+					Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
+					profile.getTextures().load().thenRun(() -> loadTexture(tex, profile, tx.texType));
+				}
+			}
+		});
+	}
+
+	private static void loadTexture(ETextures tex, Player<?, ?> profile, TextureType type) {
+		CompletableFuture<Image> img = profile.getTextures().getTexture(type);
+		img.thenAccept(s -> {
+			if(!tex.isEdited()) {
+				if(s != null) {
+					tex.setDefaultImg(s);
+					tex.setImage(new Image(s));
+					tex.restitchTexture();
+				} else if(type == TextureType.ELYTRA) {
+					loadTexture(tex, profile, TextureType.CAPE);
+				}
+			}
+		});
 	}
 }

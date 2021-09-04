@@ -7,6 +7,7 @@ import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.ElementGroup;
+import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTool;
@@ -26,13 +27,18 @@ public class DrawToolsPanel extends Panel {
 		setBounds(new Box(x, y, w, h));
 		setBackgroundColor(gui.getColors().panel_background);
 
+		Panel panel = new Panel(gui);
+		panel.setBounds(new Box(0, 5, w, h));
+		addElement(panel);
+		FlowLayout layout = new FlowLayout(panel, 5, 1);
+
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.skinSettings"), () -> SkinSettingsPopup.showPopup(e));
-		openSkinBtn.setBounds(new Box(5, 30, w - 10, 20));
-		addElement(openSkinBtn);
+		openSkinBtn.setBounds(new Box(5, 0, w - 10, 20));
+		panel.addElement(openSkinBtn);
 
 		Button refreshSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.reloadSkin"), editor::reloadSkin);
-		refreshSkinBtn.setBounds(new Box(5, 5, w - 10, 20));
-		addElement(refreshSkinBtn);
+		refreshSkinBtn.setBounds(new Box(5, 0, w - 10, 20));
+		panel.addElement(refreshSkinBtn);
 		editor.setReload.add(f -> {
 			refreshSkinBtn.setEnabled(f != null);
 			refreshSkinBtn.setTooltip(new Tooltip(e, f != null ? gui.i18nFormat("tooltip.cpm.reloadSkin.file", f) : gui.i18nFormat("tooltip.cpm.reloadSkin.no_file")));
@@ -44,18 +50,29 @@ public class DrawToolsPanel extends Panel {
 		});
 		editor.setPenColor.add(colorBtn::setColor);
 		colorBtn.setColor(editor.penColor);
-		colorBtn.setBounds(new Box(5, 55, w - 10, 20));
-		addElement(colorBtn);
+		colorBtn.setBounds(new Box(5, 0, w - 10, 20));
+		panel.addElement(colorBtn);
 
+		Panel toolsPanel = new Panel(gui);
+
+		int tx = 0;
+		int ty = 0;
 		for(EditorTool tool : EditorTool.VALUES) {
 			ButtonIcon button = new ButtonIcon(gui, "editor", tool.ordinal() * 16, 32, () -> {
 				editor.drawMode = tool;
 				editor.setTool.accept(tool);
 			});
-			button.setBounds(new Box(5 + 25 * tool.ordinal(), 80, 20, 20));
+			if(25 * (tx + 1) > w) {
+				tx = 0;
+				ty++;
+			}
+			button.setBounds(new Box(5 + 25 * (tx++), ty * 25, 20, 20));
 			editor.setTool.add(tool.setEnabled(button));
-			addElement(button);
+			toolsPanel.addElement(button);
 		}
+
+		toolsPanel.setBounds(new Box(0, 0, w, ty * 25 + 20));
+		panel.addElement(toolsPanel);
 
 		{
 			ElementGroup<EditorTool, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
@@ -68,10 +85,12 @@ public class DrawToolsPanel extends Panel {
 				editor.brushSize = Math.max(1, (int) (sizeSlider.getValue() * 10));
 				sizeSlider.setText(gui.i18nFormat("label.cpm.brushSize", editor.brushSize));
 			});
-			sizeSlider.setBounds(new Box(5, 105, w - 10, 20));
-			//addElement(sizeSlider);//TODO
+			sizeSlider.setBounds(new Box(5, 0, w - 10, 20));
+			//panel.addElement(sizeSlider);//TODO
 		}
 
 		editor.setTool.accept(editor.drawMode);
+
+		layout.reflow();
 	}
 }

@@ -65,15 +65,13 @@ public class ServerHandler {
 				} else {
 					PehkuiInterface.setScale(spe, sc);
 				}
-			}
-			//TODO: Shrink compat once shrink version 1.1.0 releases
-			/*else if(ModList.get().isLoaded("shrink")) {
+			}else if(ModList.get().isLoaded("shrink")) {
 				if(sc == 0) {
 					ShrinkInterface.setScale(spe, 1);
 				} else  {
 					ShrinkInterface.setScale(spe, sc);
 				}
-			}*/
+			}
 		});
 		netHandler.setGetNet(spe -> spe.connection);
 		netHandler.setGetPlayer(net -> net.player);

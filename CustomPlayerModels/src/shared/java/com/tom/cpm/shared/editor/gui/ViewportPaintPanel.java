@@ -1,60 +1,44 @@
 package com.tom.cpm.shared.editor.gui;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.gui.ViewportPanelBase;
-import com.tom.cpm.shared.model.RootModelType;
-import com.tom.cpm.shared.model.SkinType;
-import com.tom.cpm.shared.util.PlayerModelLayer;
 import com.tom.cpm.shared.util.PaintImageCreator;
 
-public class ViewportPaintPanel extends ViewportPanelBase {
+public class ViewportPaintPanel extends ViewportPanel {
 	private int color;
 	private int dragging;
-	protected Editor editor;
 
 	public ViewportPaintPanel(IGui gui, Editor editor) {
-		super(gui);
-		this.editor = editor;
+		super(gui, editor);
 	}
 
 	@Override
-	public void draw0(float partialTicks) {
-		gui.drawBox(0, 0, bounds.w, bounds.h, 0xff333333);
+	public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
+		if(editor.renderBase && !editor.renderPaint)renderBase(stack, buf);
+		renderModel(stack, buf, partialTicks);
+	}
 
-		TreeElement e = editor.selectedElement;
-		editor.selectedElement = null;
+	@Override
+	public void draw(MouseEvent event, float partialTicks) {
 		editor.renderPaint = true;
-		nat.renderSetup();
-		nat.render(partialTicks);
-		nat.renderFinish();
+		super.draw(event, partialTicks);
 		editor.renderPaint = false;
-		int colorUnderMouse = nat.getColorUnderMouse();
+		int colorUnderMouse = getColorUnderMouse();
 
 		if(bounds.isInBounds(mouseCursorPos.x - bounds.x, mouseCursorPos.y - bounds.y)) {
 			color = colorUnderMouse;
 		} else
 			color = 0;
 
-		editor.selectedElement = e;
-
-		gui.drawText(0, 0, "", 0);
-
 		if(!MinecraftObjectHolder.DEBUGGING ||!gui.isAltDown()) {
 			gui.drawBox(0, 0, bounds.w, bounds.h, 0xff333333);
-			nat.renderSetup();
-			if(editor.renderBase)nat.renderBase();
-			nat.render(partialTicks);
-			nat.renderFinish();
+			super.draw(event, partialTicks);
 		}
 
 		if(MinecraftObjectHolder.DEBUGGING) {
@@ -132,49 +116,7 @@ public class ViewportPaintPanel extends ViewportPanelBase {
 	}
 
 	@Override
-	public ViewportCamera getCamera() {
-		return editor.camera;
-	}
-
-	@Override
-	public void preRender() {
-		editor.preRender();
-	}
-
-	@Override
-	public SkinType getSkinType() {
-		return editor.skinType;
-	}
-
-	@Override
-	public ModelDefinition getDefinition() {
-		return editor.definition;
-	}
-
-	@Override
-	public boolean isTpose() {
-		return editor.playerTpose;
-	}
-
-	@Override
 	public boolean applyLighting() {
 		return !editor.renderPaint;
-	}
-
-	@Override
-	public Set<PlayerModelLayer> getArmorLayers() {
-		ModelElement el = editor.getSelectedElement();
-		if(el != null) {
-			ModelElement root = el.getRoot();
-			if(root != null && root.typeData instanceof RootModelType) {
-				PlayerModelLayer l = PlayerModelLayer.getLayer((RootModelType) root.typeData);
-				if(l != null) {
-					Set<PlayerModelLayer> set = new HashSet<>(editor.modelDisplayLayers);
-					set.add(l);
-					return set;
-				}
-			}
-		}
-		return editor.modelDisplayLayers;
 	}
 }

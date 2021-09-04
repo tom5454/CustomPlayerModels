@@ -42,7 +42,7 @@ import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.shared.gui.ViewportPanelBase;
+import com.tom.cpm.shared.gui.panel.Panel3d;
 
 public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new GLFWKeyCodes();
@@ -57,9 +57,9 @@ public class GuiImpl extends Screen implements IGui {
 	private int vanillaScale = -1;
 
 	static {
-		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
 		nativeComponents.register(FileChooserPopup.class, TinyFDChooser::new);
+		nativeComponents.register(Panel3d.class, Panel3dImpl::new);
 	}
 
 	public GuiImpl(Function<IGui, Frame> creator, Screen parent) {

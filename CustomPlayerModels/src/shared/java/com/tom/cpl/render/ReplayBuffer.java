@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ReplayBuffer<B> implements VertexBuffer {
+public class ReplayBuffer implements VertexBuffer {
 	private Supplier<VertexBuffer> parent;
 	private List<Entry> toReplay;
 	private Entry entry;

@@ -36,3 +36,5 @@ accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket ch
 accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket data Lnet/minecraft/network/PacketByteBuf;
 
 accessible method net/minecraft/util/WorldSavePath <init> (Ljava/lang/String;)V
+
+accessible field net/minecraft/network/ClientConnection channel Lio/netty/channel/Channel;

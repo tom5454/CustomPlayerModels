@@ -5,15 +5,17 @@ import java.util.function.Consumer;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.util.ModelDescription;
-import com.tom.cpm.shared.gui.ViewportPanelBase;
-import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
+import com.tom.cpm.shared.gui.ViewportCamera;
+import com.tom.cpm.shared.gui.panel.ViewportPanelBase3d;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
@@ -55,7 +57,7 @@ public class ScreenshotPopup extends PopupPanel {
 		return gui.i18nFormat("label.cpm.screenshotPopup");
 	}
 
-	private static class DisplayPanel extends ViewportPanelBase {
+	private static class DisplayPanel extends ViewportPanelBase3d {
 		private Def def;
 		private ViewportCamera cam;
 		private EditorGui e;
@@ -68,14 +70,8 @@ public class ScreenshotPopup extends PopupPanel {
 		}
 
 		@Override
-		public void draw0(float partialTicks) {
-			gui.drawBox(0, 0, bounds.w, bounds.h, 0xff333333);
-
-			if(enabled) {
-				nat.renderSetup();
-				nat.render(partialTicks);
-				nat.renderFinish();
-			}
+		public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
+			renderModel(stack, buf, partialTicks);
 		}
 
 		@Override
@@ -89,18 +85,8 @@ public class ScreenshotPopup extends PopupPanel {
 		}
 
 		@Override
-		public SkinType getSkinType() {
-			return e.getEditor().skinType;
-		}
-
-		@Override
 		public ModelDefinition getDefinition() {
 			return def;
-		}
-
-		@Override
-		public boolean isTpose() {
-			return false;
 		}
 
 		@Override
@@ -130,7 +116,7 @@ public class ScreenshotPopup extends PopupPanel {
 		}
 
 		@Override
-		public TextureProvider getTexture(TextureSheetType key) {
+		public TextureProvider getTexture(TextureSheetType key, boolean inGui) {
 			ETextures tex = editor.textures.get(key);
 			return tex != null ? tex.getRenderTexture() : null;
 		}

@@ -2,15 +2,12 @@ package com.tom.cpm.shared.editor;
 
 import static com.tom.cpm.shared.MinecraftObjectHolder.gson;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,18 +21,21 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.UIColors;
 import com.tom.cpl.gui.UpdaterRegistry;
 import com.tom.cpl.gui.UpdaterRegistry.Updater;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpl.math.Vec4f;
-import com.tom.cpl.util.Hand;
+import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.CustomPose;
@@ -53,6 +53,10 @@ import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
+import com.tom.cpm.shared.editor.project.IProject;
+import com.tom.cpm.shared.editor.project.JsonList;
+import com.tom.cpm.shared.editor.project.JsonMap;
+import com.tom.cpm.shared.editor.project.ProjectFile;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.template.TemplateArgType;
@@ -65,13 +69,13 @@ import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
-import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
-import com.tom.cpm.shared.io.ProjectFile;
+import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.PerFaceUV;
 import com.tom.cpm.shared.model.render.PerFaceUV.Dir;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
@@ -138,7 +142,8 @@ public class Editor {
 	public int brushSize = 1;
 	public boolean drawAllUVs = false;
 	public boolean onlyDrawOnSelected = true;
-	public EnumMap<Hand, HeldItem> handDisplay = new EnumMap<>(Hand.class);
+	public boolean playVanillaAnims = true;
+	public EnumMap<ItemSlot, DisplayItem> handDisplay = new EnumMap<>(ItemSlot.class);
 	public Set<PlayerModelLayer> modelDisplayLayers = new HashSet<>();
 	public ScalingElement scalingElem = new ScalingElement(this);
 	public Dir perfaceFaceDir = Dir.UP;
@@ -156,7 +161,7 @@ public class Editor {
 	private StoreIDGen storeIDgen;
 	public AnimationEncodingData animEnc;
 
-	public EditorGui frame;
+	public Frame frame;
 	public TreeElement selectedElement;
 	public List<ModelElement> elements = new ArrayList<>();
 	public EditorAnim selectedAnim;
@@ -170,6 +175,7 @@ public class Editor {
 	public boolean customSkinType;
 	public ModelDescription description;
 	public float scaling;
+	public boolean hideHeadIfSkull, removeArmorOffset;
 	public Image vanillaSkin;
 	public boolean dirty, autoSaveDirty;
 	public long lastEdit;
@@ -266,6 +272,7 @@ public class Editor {
 			action("set", "action.cpm.texSize").
 			updateValueOp(tex, tex.size.x, x, (a, b) -> a.size.x = b).
 			updateValueOp(tex, tex.size.y, y, (a, b) -> a.size.y = b).
+			onRun(texs::restitchTexture).
 			execute();
 		}
 	}
@@ -313,7 +320,7 @@ public class Editor {
 					}
 				}
 				int color = penColor | 0xff000000;
-				action("action.cpm.bucketFill").
+				action("bucketFill").
 				onRun(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, color))).
 				onUndo(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, old))).
 				onAction(texs::refreshTexture).
@@ -425,7 +432,8 @@ public class Editor {
 						if(!selectedElement.texture || selectedElement.recolor) {
 							setAnimColor.accept(selectedElement.rgb);
 						}
-						setAnimShow.accept(selectedElement.show);
+						if(selectedElement.type != ElementType.ROOT_PART && selectedElement.itemRenderer == null)
+							setAnimShow.accept(!selectedElement.hidden);
 					} else {
 						if(!selectedElement.texture || selectedElement.recolor) {
 							Vec3f c = dt.getColor();
@@ -433,7 +441,8 @@ public class Editor {
 						}
 						setAnimPos.accept(dt.getPosition());
 						setAnimRot.accept(dt.getRotation());
-						setAnimShow.accept(dt.isVisible());
+						if(selectedElement.type != ElementType.ROOT_PART && selectedElement.itemRenderer == null)
+							setAnimShow.accept(dt.isVisible());
 					}
 				}
 				setFrameDelEn.accept(true);
@@ -465,7 +474,7 @@ public class Editor {
 		undoQueue.clear();
 		redoQueue.clear();
 		skinType = MinecraftClientAccess.get().getSkinType();
-		Image skin = MinecraftClientAccess.get().getVanillaSkin(skinType);
+		Image skin = skinType.getSkinTexture();
 		this.vanillaSkin = skin;
 		skinTex.setDefaultImg(vanillaSkin);
 		customSkinType = false;
@@ -479,17 +488,20 @@ public class Editor {
 		animEnc = null;
 		description = null;
 		scaling = 0;
+		removeArmorOffset = true;
+		hideHeadIfSkull = true;
 		storeIDgen = new StoreIDGen();
 		Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.getTextures().load().thenRun(() -> {
 			if(!customSkinType)skinType = profile.getSkinType();
 			CompletableFuture<Image> img = profile.getTextures().getTexture(TextureType.SKIN);
-			this.vanillaSkin = MinecraftClientAccess.get().getVanillaSkin(skinType);
+			this.vanillaSkin = skinType.getSkinTexture();
 			skinTex.setDefaultImg(vanillaSkin);
 			img.thenAccept(s -> {
 				if(!skinTex.isEdited()) {
 					if(s != null) {
 						this.vanillaSkin = s;
+						skinTex.provider.size = new Vec2i(s.getWidth(), s.getHeight());
 						skinTex.setDefaultImg(vanillaSkin);
 						skinTex.setImage(new Image(this.vanillaSkin));
 					} else {
@@ -507,6 +519,7 @@ public class Editor {
 	}
 
 	public void preRender() {
+		definition.clearTransforms();
 		elements.forEach(ModelElement::preRender);
 		applyAnimations();
 	}
@@ -547,7 +560,7 @@ public class Editor {
 			lst.add(map);
 			map.put("id", ((VanillaModelPart) elem.typeData).getName());
 			if(elem.typeData instanceof RootModelType)map.put("customPart", true);
-			map.put("show", elem.show);
+			map.put("show", elem.showInEditor);
 			if(!elem.children.isEmpty()) {
 				List<Map<String, Object>> list = new ArrayList<>();
 				map.put("children", list);
@@ -586,6 +599,8 @@ public class Editor {
 
 		data.put("skinType", skinType.getName());
 		data.put("scaling", scaling);
+		data.put("hideHeadIfSkull", hideHeadIfSkull);
+		data.put("removeArmorOffset", removeArmorOffset);
 		try(OutputStreamWriter os = new OutputStreamWriter(project.setAsStream("config.json"))) {
 			gson.toJson(data, os);
 		}
@@ -690,7 +705,7 @@ public class Editor {
 			Map<String, Object> map = new HashMap<>();
 			lst.add(map);
 			map.put("name", elem.name);
-			map.put("show", elem.show);
+			map.put("show", elem.showInEditor);
 			map.put("texture", elem.texture);
 			map.put("textureSize", elem.textureSize);
 			map.put("offset", elem.offset.toMap());
@@ -708,6 +723,7 @@ public class Editor {
 			map.put("hidden", elem.hidden);
 			map.put("singleTex", elem.singleTex);
 			if(elem.faceUV != null)map.put("faceUV", elem.faceUV.toMap());
+			if(elem.itemRenderer != null)map.put("itemRenderer", elem.itemRenderer.slot.name().toLowerCase());
 			storeIDgen.setID(elem);
 			map.put("storeID", elem.storeID);
 
@@ -719,106 +735,107 @@ public class Editor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void load(File file) throws IOException {
 		loadDefaultPlayerModel();
 		project.load(file);
-		Map<String, Object> data;
-		try(InputStreamReader rd = new InputStreamReader(project.getAsStream("config.json"))) {
-			data = (Map<String, Object>) gson.fromJson(rd, Object.class);
-		}
-		byte[] ze;
-		int fileVersion = ((Number) data.getOrDefault("version", 0)).intValue();
-		if(fileVersion != projectFileVersion)throw new IOException("Unsupported file version try a newer version of the mod");
-		List<Map<String, Object>> lst = (List<Map<String, Object>>) data.get("elements");
+		IProject pr = project;
 		this.file = file;
-		for (Map<String, Object> map : lst) {
-			String key = (String) map.get("id");
-			ModelElement elem = null;
-			if ((boolean) map.getOrDefault("customPart", false)) {
-				for (RootModelType rmt : RootModelType.VALUES) {
-					if(rmt.getName().equalsIgnoreCase(key)) {
-						elem = new ModelElement(this, ElementType.ROOT_PART, rmt, frame.getGui());
-						break;
+		Set<RootGroups> groups = new HashSet<>();
+		{
+			JsonMap data = pr.getJson("config.json");
+			int version = data.getInt("version");
+			if(version != projectFileVersion)throw new IOException("Unsupported file version try a newer version of the mod");
+			JsonList lst = data.getList("elements");
+			lst.forEachMap(map -> {
+				String key = map.getString("id");
+				ModelElement elem = null;
+				if (map.getBoolean("customPart", false)) {
+					for (RootModelType rmt : RootModelType.VALUES) {
+						if(rmt.getName().equalsIgnoreCase(key)) {
+							elem = new ModelElement(this, ElementType.ROOT_PART, rmt, frame.getGui());
+							groups.add(RootGroups.getGroup(rmt));
+							break;
+						}
+					}
+					elements.add(elem);
+					elem.storeID = map.getLong("storeID", 0);
+				} else if (map.getBoolean("dup", false)) {
+					for (ModelElement e : elements) {
+						if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
+							elem = new ModelElement(this, ElementType.ROOT_PART, e.typeData, frame.getGui());
+							elem.duplicated = true;
+							elements.add(elem);
+							break;
+						}
+					}
+					elem.storeID = map.getLong("storeID", 0);
+				} else {
+					for (ModelElement e : elements) {
+						if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
+							elem = e;
+							break;
+						}
 					}
 				}
-				elements.add(elem);
-				elem.storeID = ((Number) map.getOrDefault("storeID", 0)).longValue();
-			} else if ((boolean) map.getOrDefault("dup", false)) {
-				for (ModelElement e : elements) {
-					if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
-						elem = new ModelElement(this, ElementType.ROOT_PART, e.typeData, frame.getGui());
-						elem.duplicated = true;
-						elements.add(elem);
-						break;
+				if(elem != null) {
+					elem.hidden = !map.getBoolean("show");
+					elem.showInEditor = map.getBoolean("showInEditor", true);
+					if(map.containsKey("children")) {
+						loadChildren(map.getList("children"), elem);
 					}
+					elem.pos = new Vec3f(map.getMap("pos"), new Vec3f(0, 0, 0));
+					elem.rotation = new Vec3f(map.getMap("rotation"), new Vec3f(0, 0, 0));
 				}
-				elem.storeID = ((Number) map.getOrDefault("storeID", 0)).longValue();
-			} else {
-				for (ModelElement e : elements) {
-					if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
-						elem = e;
-						break;
+			});
+			if(data.containsKey("skinType")) {
+				customSkinType = true;
+				skinType = SkinType.get(data.getString("skinType"));
+			}
+			scaling = data.getFloat("scaling", 0);
+			hideHeadIfSkull = data.getBoolean("hideHeadIfSkull", true);
+			removeArmorOffset = data.getBoolean("removeArmorOffset", !elements.stream().anyMatch(e -> e.duplicated));
+			for(TextureSheetType tex : TextureSheetType.VALUES) {
+				String name = tex.name().toLowerCase();
+				if(!tex.editable) {
+					if(data.getBoolean(name + "Tex", false) || pr.getEntry(name + ".png") != null) {
+						ETextures eTex = textures.get(tex);
+						if(eTex == null)eTex = new ETextures(this, tex);
+						textures.put(tex, eTex);
+						eTex.provider.size = tex.getDefSize();
+						Image def = new Image(eTex.provider.size.x, eTex.provider.size.y);
+						try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tex.name().toLowerCase() + ".png")) {
+							def = Image.loadFrom(is);
+						} catch (IOException e) {
+						}
+						eTex.setDefaultImg(def);
+						eTex.setImage(new Image(def));
+						eTex.markDirty();
+					}
+				} else {
+					Image img = pr.getIfExists(name + ".png", Image::loadFrom);
+					if(img != null) {
+						if(img.getWidth() > ETextures.MAX_TEX_SIZE || img.getHeight() > ETextures.MAX_TEX_SIZE) {
+							Log.error("Illegal image size for texture: " + name);
+							continue;
+						}
+						ETextures eTex = textures.get(tex);
+						if(eTex == null)eTex = new ETextures(this, tex);
+						textures.put(tex, eTex);
+						eTex.setImage(img);
+						eTex.markDirty();
+						JsonMap skinTexSize = data.getMap(name + "Size");
+						eTex.provider.size = new Vec2i(skinTexSize, tex.getDefSize());
 					}
 				}
 			}
-			if(elem != null) {
-				elem.show = (boolean) map.get("show");
-				if(map.containsKey("children")) {
-					loadChildren((List<Map<String, Object>>) map.get("children"), elem, fileVersion);
-				}
-				elem.pos = new Vec3f((Map<String, Object>) map.get("pos"), new Vec3f(0, 0, 0));
-				elem.rotation = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f(0, 0, 0));
-			}
 		}
-		if(data.containsKey("skinType")) {
-			customSkinType = true;
-			skinType = SkinType.get((String) data.get("skinType"));
-		}
-		List<String> anims = project.listEntires("animations");
-		scaling = ((Number)data.getOrDefault("scaling", 0)).floatValue();
-		for(TextureSheetType tex : TextureSheetType.VALUES) {
-			String name = tex.name().toLowerCase();
-			if(!tex.editable) {
-				if((boolean) data.getOrDefault(name + "Tex", false) || project.getEntry(name + ".png") != null) {
-					ETextures eTex = textures.get(tex);
-					if(eTex == null)eTex = new ETextures(this, tex);
-					textures.put(tex, eTex);
-					eTex.provider.size = tex.getDefSize();
-					Image def = new Image(eTex.provider.size.x, eTex.provider.size.y);
-					try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tex.name().toLowerCase() + ".png")) {
-						def = Image.loadFrom(is);
-					} catch (IOException e) {
-					}
-					eTex.setDefaultImg(def);
-					eTex.setImage(new Image(def));
-					eTex.markDirty();
-				}
-			} else {
-				ze = project.getEntry(name + ".png");
-				if(ze != null) {
-					Image img = Image.loadFrom(new ByteArrayInputStream(ze));
-					if(img.getWidth() > tex.texLimit || img.getHeight() > tex.texLimit) {
-						Log.error("Illegal image size for texture: " + name);
-						continue;
-					}
-					ETextures eTex = textures.get(tex);
-					if(eTex == null)eTex = new ETextures(this, tex);
-					textures.put(tex, eTex);
-					eTex.setImage(img);
-					eTex.markDirty();
-					Map<String, Object> skinTexSize = (Map<String, Object>) data.get(name + "Size");
-					eTex.provider.size = new Vec2i(skinTexSize, tex.getDefSize());
-				}
-			}
-		}
+		groups.forEach(g -> Generators.loadTextures(this, g, textures::put));
+		List<String> anims = pr.listEntires("animations");
 		if(anims != null) {
 			for (String anim : anims) {
-				try(InputStreamReader rd = new InputStreamReader(project.getAsStream("animations/" + anim))) {
-					data = (Map<String, Object>) gson.fromJson(rd, Object.class);
-				}
+				JsonMap data = pr.getJson("animations/" + anim);
 				IPose pose = null;
-				String displayName = (String) data.getOrDefault("name", "Unnamed");
+				String displayName = data.getString("name", "Unnamed");
 				AnimationType type = null;
 				String[] sp = anim.split("_", 2);
 				if(sp[0].equals("v")) {
@@ -840,124 +857,111 @@ public class Editor {
 				EditorAnim e = new EditorAnim(this, anim, type, false);
 				e.displayName = displayName;
 				e.pose = pose;
-				e.add = (boolean) data.get("additive");
+				e.add = data.getBoolean("additive");
 				animations.add(e);
-				e.duration = ((Number)data.get("duration")).intValue();
-				e.priority = ((Number)data.getOrDefault("priority", 0)).intValue();
-				e.loop = ((boolean)data.getOrDefault("loop", false));
-				List<Map<String, Object>> frames = (List<Map<String, Object>>) data.get("frames");
-				for (Map<String,Object> map : frames) {
-					e.loadFrame(map);
-				}
+				e.duration = data.getInt("duration");
+				e.priority = data.getInt("priority", 0);
+				e.loop = (data.getBoolean("loop", false));
+				JsonList frames = data.getList("frames");
+				frames.forEachMap(e::loadFrame);
 			}
 		}
-		ze = project.getEntry("anim_enc.json");
-		if(ze != null) {
-			try(InputStreamReader rd = new InputStreamReader(new ByteArrayInputStream(ze))) {
-				data = (Map<String, Object>) gson.fromJson(rd, Object.class);
-			}
+		pr.jsonIfExists("anim_enc.json", data -> {
 			animEnc = new AnimationEncodingData();
-			((List<String>) data.get("freeLayers")).forEach(v -> animEnc.freeLayers.add(PlayerSkinLayer.getLayer(v)));
-			((Map<String, Boolean>) data.get("defaultValues")).forEach((k, v) -> animEnc.defaultLayerValue.put(PlayerSkinLayer.getLayer(k), v));
-		}
-		ze = project.getEntry("templates.json");
-		if(ze != null) {
-			try(InputStreamReader rd = new InputStreamReader(new ByteArrayInputStream(ze))) {
-				data = (Map<String, Object>) gson.fromJson(rd, Object.class);
-			}
-			lst = (List<Map<String, Object>>) data.get("templates");
-			for (Map<String,Object> map : lst) {
-				EditorTemplate templ = EditorTemplate.load(this, map);
-				templates.add(templ);
-			}
-		}
-		ze = project.getEntry("template_settings.json");
-		if(ze != null) {
-			templateSettings = new TemplateSettings(this);
-			try(InputStreamReader rd = new InputStreamReader(new ByteArrayInputStream(ze))) {
-				data = (Map<String, Object>) gson.fromJson(rd, Object.class);
-			}
-			templateSettings.hasTex = (boolean) data.get("texture");
-			lst = (List<Map<String, Object>>) data.get("args");
-			for (Map<String, Object> map : lst) {
-				TemplateArgType type = TemplateArgType.lookup((String) map.get("type"));
-				TemplateArgHandler arg = new TemplateArgHandler(this, (String) map.get("name"), (String) map.get("desc"), type);
+			data.getList("freeLayers").forEach(v -> animEnc.freeLayers.add(PlayerSkinLayer.getLayer((String) v)));
+			data.getMap("defaultValues").forEach((k, v) -> animEnc.defaultLayerValue.put(PlayerSkinLayer.getLayer(k), (Boolean) v));
+		});
+		pr.jsonIfExists("templates.json", data -> {
+			JsonList lst = data.getList("templates");
+			lst.forEachMap(map -> {
+				templates.add(EditorTemplate.load(this, map));
+			});
+		});
+		pr.jsonIfExists("template_settings.json", data -> {
+			templateSettings.hasTex = data.getBoolean("texture");
+			JsonList lst = data.getList("args");
+			lst.forEachMap(map -> {
+				TemplateArgType type = TemplateArgType.lookup(map.getString("type"));
+				TemplateArgHandler arg = new TemplateArgHandler(this, map.getString("name"), map.getString("desc"), type);
 				templateSettings.templateArgs.add(arg);
-				arg.handler.loadProject((Map<String, Object>) map.get("data"));
+				arg.handler.loadProject(map.getMap("data").asMap());
 				if(arg.handler.requiresParts() && arg.effectedElems != null) {
-					List<Number> partList = (List<Number>) map.get("parts");
-					partList.forEach(e -> walkElements(elements, elem -> {
+					JsonList partList = map.getList("parts");
+					partList.<Number>forEach(e -> walkElements(elements, elem -> {
 						if(elem.storeID == e.longValue()) {
 							arg.effectedElems.add(elem);
 						}
 					}));
 				}
-			}
-			List<Long> templElems = ((List<Number>) data.get("displayElems")).stream().map(Number::longValue).collect(Collectors.toList());
+			});
+			List<Long> templElems = data.getList("displayElems").<Number>stream().map(Number::longValue).collect(Collectors.toList());
 			walkElements(elements, e -> {
 				if(templElems.contains(e.storeID)) {
 					e.templateElement = true;
 				}
 			});
-		}
-		ze = project.getEntry("description.json");
-		if(ze != null) {
-			try(InputStreamReader rd = new InputStreamReader(new ByteArrayInputStream(ze))) {
-				data = (Map<String, Object>) gson.fromJson(rd, Object.class);
-			}
+		});
+		pr.jsonIfExists("description.json", data -> {
 			description = new ModelDescription();
-			description.name = (String) data.get("name");
-			description.desc = (String) data.get("desc");
-			Map<String, Object> map = (Map<String, Object>) data.get("cam");
-			description.camera.camDist = ((Number)map.get("zoom")).floatValue();
-			description.camera.look = new Vec3f((Map<String, Object>) map.get("look"), description.camera.look);
-			description.camera.position = new Vec3f((Map<String, Object>) map.get("pos"), description.camera.position);
-			description.copyProtection = CopyProtection.lookup((String) map.getOrDefault("copyProt", "normal"));
-		}
-		ze = project.getEntry("desc_icon.png");
-		if(ze != null) {
+			description.name = data.getString("name");
+			description.desc = data.getString("desc");
+			JsonMap map = data.getMap("cam");
+			description.camera.camDist = map.getFloat("zoom");
+			description.camera.look = new Vec3f(map.getMap("look"), description.camera.look);
+			description.camera.position = new Vec3f(map.getMap("pos"), description.camera.position);
+			description.copyProtection = CopyProtection.lookup(map.getString("copyProt", "normal"));
+		});
+		pr.ifExists("desc_icon.png", Image::loadFrom, img -> {
 			if(description == null)description = new ModelDescription();
-			description.icon = Image.loadFrom(new ByteArrayInputStream(ze));
+			description.icon = img;
 			if(description.icon.getWidth() != 256 || description.icon.getHeight() != 256) {
 				description.icon = null;
 				Log.error("Illegal image size for model/template icon must be 256x256");
 			}
-		}
+		});
 		restitchTextures();
 		updateGui();
 	}
 
-	@SuppressWarnings("unchecked")
-	private void loadChildren(List<Map<String, Object>> list, ModelElement parent, int fileVer) {
-		for (Map<String, Object> map : list) {
+	private void loadChildren(JsonList list, ModelElement parent) {
+		list.forEachMap(map -> {
 			ModelElement elem = new ModelElement(this);
 			elem.parent = parent;
 			parent.children.add(elem);
-			elem.name = (String) map.get("name");
-			elem.show = (boolean) map.get("show");
-			elem.texture = (boolean) map.get("texture");
-			elem.textureSize = ((Number)map.get("textureSize")).intValue();
-			elem.offset = new Vec3f((Map<String, Object>) map.get("offset"), new Vec3f());
-			elem.pos = new Vec3f((Map<String, Object>) map.get("pos"), new Vec3f());
-			elem.rotation = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f());
-			elem.size = new Vec3f((Map<String, Object>) map.get("size"), new Vec3f(1, 1, 1));
-			elem.scale = new Vec3f((Map<String, Object>) map.get("scale"), new Vec3f(1, 1, 1));
-			elem.u = ((Number)map.get("u")).intValue();
-			elem.v = ((Number)map.get("v")).intValue();
-			elem.rgb = Integer.parseUnsignedInt((String) map.get("color"), 16);
-			elem.mirror = (boolean) map.get("mirror");
-			elem.mcScale = ((Number) map.get("mcScale")).floatValue();
-			elem.glow = (boolean) map.getOrDefault("glow", false);
-			elem.recolor = (boolean) map.getOrDefault("recolor", false);
-			elem.hidden = (boolean) map.getOrDefault("hidden", false);
-			elem.singleTex = (boolean) map.getOrDefault("singleTex", false);
-			if(map.containsKey("faceUV"))elem.faceUV = new PerFaceUV((Map<String, Map<String, Object>>) map.get("faceUV"));
-			elem.storeID = ((Number) map.getOrDefault("storeID", 0)).longValue();
+			elem.name = map.getString("name");
+			elem.showInEditor = map.getBoolean("show");
+			elem.texture = map.getBoolean("texture");
+			elem.textureSize = map.getInt("textureSize");
+			elem.offset = new Vec3f(map.getMap("offset"), new Vec3f());
+			elem.pos = new Vec3f(map.getMap("pos"), new Vec3f());
+			elem.rotation = new Vec3f(map.getMap("rotation"), new Vec3f());
+			elem.size = new Vec3f(map.getMap("size"), new Vec3f(1, 1, 1));
+			elem.scale = new Vec3f(map.getMap("scale"), new Vec3f(1, 1, 1));
+			elem.u = map.getInt("u");
+			elem.v = map.getInt("v");
+			elem.rgb = Integer.parseUnsignedInt(map.getString("color"), 16);
+			elem.mirror = map.getBoolean("mirror");
+			elem.mcScale = map.getFloat("mcScale");
+			elem.glow = map.getBoolean("glow", false);
+			elem.recolor = map.getBoolean("recolor", false);
+			elem.hidden = map.getBoolean("hidden", false);
+			elem.singleTex = map.getBoolean("singleTex", false);
+			if(map.containsKey("faceUV"))elem.faceUV = new PerFaceUV(map.getMap("faceUV"));
+			if(map.containsKey("itemRenderer")) {
+				String name = map.getString("itemRenderer");
+				for(ItemSlot slot : ItemSlot.VALUES) {
+					if(name.equalsIgnoreCase(slot.name())) {
+						elem.itemRenderer = new ItemRenderer(slot, 0);
+						break;
+					}
+				}
+			}
+			elem.storeID = map.getLong("storeID", 0);
 
 			if(map.containsKey("children")) {
-				loadChildren((List<Map<String, Object>>) map.get("children"), elem, fileVer);
+				loadChildren(map.getList("children"), elem);
 			}
-		}
+		});
 	}
 
 	public void reloadSkin() {
@@ -1204,7 +1208,7 @@ public class Editor {
 		for(PlayerModelParts p : PlayerModelParts.VALUES) {
 			for (ModelElement el : elements) {
 				if(el.type == ElementType.ROOT_PART && el.typeData == p) {
-					if(el.show)return true;
+					if(!el.hidden)return true;
 				}
 			}
 		}
@@ -1263,37 +1267,19 @@ public class Editor {
 		ActionBuilder ab = action("add", "action.cpm.root");
 		elems.forEach(e -> ab.addToList(elements, e));
 		ab.onUndo(() -> selectedElement = null);
-		Arrays.stream(group.types).map(group::getTexSheet).distinct().forEach(tx -> {
-			if(!textures.containsKey(tx)) {
-				ETextures tex = new ETextures(this, tx);
-				ab.addToMap(textures, tx, tex);
-				tex.provider.size = tx.getDefSize();
-				Image def = new Image(tex.provider.size.x, tex.provider.size.y);
-				try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tx.name().toLowerCase() + ".png")) {
-					def = Image.loadFrom(is);
-				} catch (IOException e) {
-				}
-				tex.setDefaultImg(def);
-				tex.setImage(new Image(def));
-				tex.markDirty();
-				if(tx.texType != null) {
-					Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
-					profile.getTextures().load().thenRun(() -> {
-						CompletableFuture<Image> img = profile.getTextures().getTexture(tx.texType);
-						img.thenAccept(s -> {
-							if(!tex.isEdited()) {
-								if(s != null) {
-									tex.setDefaultImg(s);
-									tex.setImage(new Image(s));
-									tex.restitchTexture();
-								}
-							}
-						});
-					});
-				}
-			}
-		});
+		Generators.loadTextures(this, group, (a, b) -> ab.addToMap(textures, a, b));
 		ab.execute();
 		updateGui();
+	}
+
+	public void render(MatrixStack stack, VBuffers buf) {
+		if(selectedElement != null)selectedElement.render3d(stack, buf);
+	}
+
+	public void animMoveFrame(int i) {
+		if(selectedAnim != null) {
+			selectedAnim.moveFrame(i);
+			updateGui();
+		}
 	}
 }

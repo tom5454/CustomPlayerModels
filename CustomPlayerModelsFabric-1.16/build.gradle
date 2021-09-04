@@ -34,8 +34,8 @@ dependencies {
     modRuntime("me.shedaniel:RoughlyEnoughItems:5.8.7"){
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modImplementation ('com.github.Virtuoel:Pehkui:1.17-SNAPSHOT') {
-    	transitive = false
+    modImplementation ('com.github.Virtuoel:Pehkui:2.3.0'){
+        exclude(group: "net.fabricmc.fabric-api")
     }
     
     compileOnly files("of.jar")
@@ -46,7 +46,7 @@ minecraft {
 }
 
 sourceSets {
-	shared {
+	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
 		}
@@ -54,10 +54,6 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 		}
 	}
-	main {
-        java.srcDirs += shared.java.srcDirs
-        resources.srcDirs += shared.resources.srcDirs
-    }
 }
 
 processResources {

@@ -27,7 +27,7 @@ public class RenderManager<G, P, M, D> {
 		Player<P, M> profile = (Player<P, M>) loader.loadPlayer(gprofile);
 		if(profile == null)return false;
 		if(toBind == null)toBind = profile.getModel();
-		ModelDefinition def = profile.getAndResolveDefinition();
+		ModelDefinition def = profile.getModelDefinition();
 		if(def != null) {
 			this.profile = profile;
 			if(player != null)

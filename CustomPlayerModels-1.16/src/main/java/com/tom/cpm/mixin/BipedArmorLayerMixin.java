@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -19,6 +18,8 @@ import net.minecraft.util.ResourceLocation;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.ModelTexture;
+import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(BipedArmorLayer.class)
@@ -52,6 +53,6 @@ public class BipedArmorLayerMixin {
 					"func_241738_a_(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 							+ "ZLnet/minecraft/client/renderer/entity/model/BipedModel;FFFLnet/minecraft/util/ResourceLocation;)V"}, remap = false)
 	private void preRender(MatrixStack p_241738_1_, IRenderTypeBuffer p_241738_2_, int p_241738_3_, boolean p_241738_5_, BipedModel<LivingEntity> model, float p_241738_8_, float p_241738_9_, float p_241738_10_, ResourceLocation resLoc, CallbackInfo cbi) {
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, new CallbackInfoReturnable<>(null, true, resLoc), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
+		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
 import com.tom.cpm.shared.definition.Link;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.template.Template;
@@ -15,11 +15,12 @@ import com.tom.cpm.shared.util.TextureStitcher;
 public class ModelPartTemplate implements IModelPart {
 	private Link link;
 	private IOHelper args;
-	private ModelDefinitionLoader loader;
-	public ModelPartTemplate(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+	private ModelDefinition def;
+
+	public ModelPartTemplate(IOHelper in, ModelDefinition def) throws IOException {
 		link = new Link(in);
 		args = in.readNextBlock();
-		this.loader = loader;
+		this.def = def;
 	}
 
 	public ModelPartTemplate(Template template) throws IOException {
@@ -29,8 +30,8 @@ public class ModelPartTemplate implements IModelPart {
 
 	@Override
 	public IResolvedModelPart resolve() throws IOException {
-		try (InputStreamReader rd = new InputStreamReader(loader.load(link, ResourceEncoding.NO_ENCODING))) {
-			Template template = new Template(link, rd, null, args);
+		try (InputStreamReader rd = new InputStreamReader(def.getLoader().load(link, ResourceEncoding.NO_ENCODING, def))) {
+			Template template = new Template(link, rd, null, args, def);
 			return new ModelPartResolvedTemplate(template);
 		}
 	}

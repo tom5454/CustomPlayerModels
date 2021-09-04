@@ -39,7 +39,7 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.AWTChooser;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.client.RetroGL.RetroTessellator;
-import com.tom.cpm.shared.gui.ViewportPanelBase;
+import com.tom.cpm.shared.gui.panel.Panel3d;
 
 import cpw.mods.fml.common.Loader;
 
@@ -54,9 +54,9 @@ public class GuiImpl extends GuiScreen implements IGui {
 	private int vanillaScale = -1;
 
 	static {
-		nativeComponents.register(ViewportPanelBase.class, ViewportPanelImpl::new);
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
 		nativeComponents.register(FileChooserPopup.class, AWTChooser::new);
+		nativeComponents.register(Panel3d.class, Panel3dImpl::new);
 	}
 
 	public GuiImpl(Function<IGui, Frame> creator, GuiScreen parent) {

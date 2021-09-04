@@ -52,6 +52,14 @@ minecraft {
                     source sourceSets.main
                 }
             }
+            
+            property 'mixin.env.remapRefMap', 'true'
+			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+			
+			args '--mixin', 'assets/cpm/cpm.mixins.json', '--mixin assets/cpm/cpm.mixins.of.json'
+			
+			property 'cpm.debug', 'true'
+			property 'mixin.debug', 'true'
         }
 
         server {
@@ -68,6 +76,11 @@ minecraft {
                     source sourceSets.main
                 }
             }
+            
+            property 'mixin.env.remapRefMap', 'true'
+			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+			
+			args '--mixin', 'assets/cpm/cpm.mixins.json', '--mixin assets/cpm/cpm.mixins.of.json'
         }
 
         data {
@@ -116,7 +129,7 @@ repositories {
 	maven {
 		url "http://chickenbones.net/maven/"
 	}
-	
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -159,7 +172,7 @@ dependencies {
 }
 
 sourceSets {
-	shared {
+	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
 		}
@@ -167,10 +180,6 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 		}
 	}
-	main {
-        java.srcDirs += shared.java.srcDirs
-        resources.srcDirs += shared.resources.srcDirs
-    }
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

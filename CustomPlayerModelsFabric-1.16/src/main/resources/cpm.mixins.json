@@ -17,7 +17,8 @@
     "ClientPlayNetHandlerMixin",
 	"ArmorFeatureRendererMixin",
 	"ElytraFeatureRendererMixin",
-	"CapeFeatureRendererMixin"
+	"CapeFeatureRendererMixin",
+	"Matrix4fMixin"
   ],
   "injectors": {
     "defaultRequire": 1

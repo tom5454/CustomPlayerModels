@@ -6,7 +6,7 @@ import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.gui.EditorGui;
-import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
+import com.tom.cpm.shared.gui.panel.ModelsPanel;
 
 public class ModelsGui extends Frame {
 	public ViewportCamera camera = new ViewportCamera();

@@ -9,6 +9,7 @@ public class Slider extends GuiElement {
 	private Runnable action;
 	private boolean enableDrag;
 	protected float v;
+	protected float steps;
 	public Slider(IGui gui, String name) {
 		super(gui);
 		this.name = name;
@@ -50,7 +51,9 @@ public class Slider extends GuiElement {
 	@Override
 	public boolean mouseDrag(int x, int y, int btn) {
 		if(enableDrag) {
-			v = (float) MathHelper.clamp((x - bounds.x) / (float) bounds.w, 0, 1);
+			v = (x - bounds.x) / (float) bounds.w;
+			if(steps != 0)v = Math.round(v / steps) * steps;
+			v = (float) MathHelper.clamp(v, 0, 1);
 			if(action != null)action.run();
 			return true;
 		}
@@ -71,5 +74,9 @@ public class Slider extends GuiElement {
 
 	public void setText(String name) {
 		this.name = name;
+	}
+
+	public void setSteps(float steps) {
+		this.steps = steps;
 	}
 }

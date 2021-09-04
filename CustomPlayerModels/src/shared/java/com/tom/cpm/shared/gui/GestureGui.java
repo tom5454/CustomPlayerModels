@@ -14,6 +14,7 @@ import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
@@ -24,6 +25,7 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.Log;
@@ -72,7 +74,7 @@ public class GestureGui extends Frame {
 
 	@Override
 	public void initFrame(int width, int height) {
-		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
+		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition0();
 		Log.debug(def);
 		ServerStatus status = MinecraftClientAccess.get().getServerSideStatus();
 		if(status == ServerStatus.OFFLINE) {
@@ -83,7 +85,7 @@ public class GestureGui extends Frame {
 			return;
 		}
 		int h;
-		if(def != null && status != ServerStatus.UNAVAILABLE) {
+		if(def != null && def.getResolveState() == ModelLoadingState.LOADED && status != ServerStatus.UNAVAILABLE) {
 			int[] id = new int[] {0};
 			panel = new Panel(gui);
 			def.getAnimations().getGestures().forEach((nm, g) -> panel.addElement(new GestureButton(g, id[0]++)));
@@ -99,6 +101,26 @@ public class GestureGui extends Frame {
 				panel.setBounds(new Box(width / 2 - 180, height / 2 - h / 2, 360, h));
 				addElement(panel);
 			}
+		} else if(def != null && (def.getResolveState() == ModelLoadingState.ERRORRED || def.getResolveState() == ModelLoadingState.SAFETY_BLOCKED)) {
+			String txt = "";
+			switch (def.getResolveState()) {
+			case ERRORRED:
+				txt = gui.i18nFormat("label.cpm.errorLoadingModel", def.getError().toString());
+				break;
+
+			case SAFETY_BLOCKED:
+				txt = gui.i18nFormat("label.cpm.safetyBlocked");
+				break;
+
+			default:
+				break;
+			}
+			if(!txt.isEmpty()) {
+				Label lbl = new Label(gui, txt);
+				lbl.setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4, 0, 0));
+				addElement(lbl);
+			}
+			h = 10;
 		} else if(status == ServerStatus.UNAVAILABLE) {
 			String str = gui.i18nFormat("label.cpm.feature_unavailable");
 			Label lbl = new Label(gui, str);
@@ -138,11 +160,17 @@ public class GestureGui extends Frame {
 		btnPanel.addElement(chbxNames);
 
 		Panel btnPanel2 = new Panel(gui);
-		btnPanel2.setBounds(new Box(width - 162, height - 52, 160, 50));
+		btnPanel2.setBounds(new Box(width - 162, 0, 160, 0));
 		addElement(btnPanel2);
 
+		FlowLayout fl = new FlowLayout(btnPanel2, 0, 1);
+
+		Button btnSocial = new Button(gui, gui.i18nFormat("button.cpm.socialMenu"), () -> MinecraftClientAccess.get().openGui(SocialGui::new));
+		btnSocial.setBounds(new Box(0, 0, 160, 20));
+		btnPanel2.addElement(btnSocial);
+
 		Button btnCleanCache = new Button(gui, gui.i18nFormat("button.cpm.reload_models"), MinecraftClientAccess.get().getDefinitionLoader()::clearCache);
-		btnCleanCache.setBounds(new Box(0, 30, 160, 20));
+		btnCleanCache.setBounds(new Box(0, 0, 160, 20));
 		btnPanel2.addElement(btnCleanCache);
 
 		IKeybind rtkb = null;
@@ -164,6 +192,10 @@ public class GestureGui extends Frame {
 			Player.setEnableRendering(v);
 		});
 		btnPanel2.addElement(chbxRender);
+
+		fl.reflow();
+		Box bp2 = btnPanel2.getBounds();
+		btnPanel2.setBounds(new Box(bp2.x, height - bp2.h - 2, bp2.w, bp2.h));
 
 		Panel btnPanel3 = new Panel(gui);
 		btnPanel3.setBounds(new Box(0, height - 20, 160, 50));
@@ -194,7 +226,7 @@ public class GestureGui extends Frame {
 
 		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		if(MinecraftObjectHolder.DEBUGGING && gui.isAltDown() && def != null) {
-			TextureProvider skin = def.getTexture(TextureSheetType.CAPE);
+			TextureProvider skin = def.getTexture(TextureSheetType.SKIN, true);
 			if(skin != null && skin.texture != null) {
 				skin.bind();
 				int size = Math.min(bounds.w, bounds.h);

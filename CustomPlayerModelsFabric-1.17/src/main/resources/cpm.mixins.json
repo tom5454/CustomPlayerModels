@@ -16,10 +16,10 @@
     "MixinGameRenderer",
     "ClientPlayNetHandlerMixin",
 	"HeadFeatureRendererMixin",
-	"EntityRenderDispatcherMixin",
 	"ArmorFeatureRendererMixin",
 	"ElytraFeatureRendererMixin",
-	"CapeFeatureRendererMixin"
+	"CapeFeatureRendererMixin",
+	"Matrix4fMixin"
   ],
   "injectors": {
     "defaultRequire": 1

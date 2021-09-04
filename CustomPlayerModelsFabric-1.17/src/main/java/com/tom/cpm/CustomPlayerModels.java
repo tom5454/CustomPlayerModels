@@ -58,9 +58,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 
 	private static final EnumSet<PlatformFeature> features = EnumSet.of(
 			PlatformFeature.EDITOR_HELD_ITEM,
-			PlatformFeature.RENDER_ARMOR,
-			PlatformFeature.RENDER_ELYTRA,
-			PlatformFeature.RENDER_CAPE
+			PlatformFeature.EDITOR_SUPPORTED
 			);
 
 	@Override

@@ -12,6 +12,8 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Util;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.Link;
+import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.template.args.TexEditorArg;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.Cube;
@@ -36,7 +38,7 @@ public class Template {
 	protected TexArg texArg;
 
 	@SuppressWarnings("unchecked")
-	public Template(Link link, InputStreamReader rd, Map<String, Object> editorData, IOHelper args) throws IOException {
+	public Template(Link link, InputStreamReader rd, JsonMap editorData, IOHelper args, ModelDefinition def) throws IOException {
 		this.link = link;
 		data = (Map<String, Object>) MinecraftObjectHolder.gson.fromJson(rd, Object.class);
 		List<Map<String, Object>> argsList = (List<Map<String, Object>>) data.get("args");
@@ -54,17 +56,17 @@ public class Template {
 				IArg iarg = TemplateArgumentType.create((String) arg.get("type"));
 				iarg.init((Map<String, Object>) arg.get("data"));
 				if(editorData.containsKey(name))
-					iarg.load((Map<String, Object>) editorData.get(name));
+					iarg.load(editorData.getMap(name).asMap());
 				templateArgs.put(name, iarg);
 			}
 		}
 		if(data.containsKey("texture")) {
-			texture = new TextureProvider(new IOHelper((String) data.get("texture")), 128);
+			texture = new TextureProvider(new IOHelper((String) data.get("texture")), def);
 			texArg = new TexArg();
 			if(args != null)texArg.load(args);
 			else {
 				if(editorData.containsKey(TexEditorArg.NAME))
-					texArg.load((Map<String, Object>) editorData.get(TexEditorArg.NAME));
+					texArg.load(editorData.getMap(TexEditorArg.NAME).asMap());
 			}
 			templateArgs.put(TexEditorArg.NAME, texArg);
 		}

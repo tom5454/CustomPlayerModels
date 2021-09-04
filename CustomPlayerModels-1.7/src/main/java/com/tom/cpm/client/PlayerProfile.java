@@ -142,4 +142,14 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 	public void setRenderPose(VanillaPose pose) {
 		this.pose = pose;
 	}
+
+	@Override
+	public String getName() {
+		return profile.getName();
+	}
+
+	@Override
+	public Object getGameProfile() {
+		return profile;
+	}
 }

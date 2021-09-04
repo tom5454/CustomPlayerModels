@@ -4,13 +4,12 @@ import java.io.IOException;
 
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class ModelPartScale implements IModelPart, IResolvedModelPart {
 	private float scale;
 
-	public ModelPartScale(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartScale(IOHelper in, ModelDefinition def) throws IOException {
 		this(in);
 	}
 

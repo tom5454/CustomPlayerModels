@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -21,6 +20,8 @@ import net.minecraft.util.ResourceLocation;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.ModelTexture;
+import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(ElytraLayer.class)
@@ -55,9 +56,9 @@ public class ElytraLayerMixin {
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	private RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
 		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity) {
-			CallbackInfoReturnable<ResourceLocation> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-			ClientProxy.mc.getPlayerRenderManager().bindSkin(elytraModel, cbi, TextureSheetType.ELYTRA);
-			return RenderType.armorCutoutNoCull(cbi.getReturnValue());
+			ModelTexture mt = new ModelTexture(resLoc, PlayerRenderManager.armor);
+			ClientProxy.mc.getPlayerRenderManager().bindSkin(elytraModel, mt, TextureSheetType.ELYTRA);
+			return mt.getRenderType();
 		}
 		return RenderType.armorCutoutNoCull(resLoc);
 	}

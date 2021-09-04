@@ -7,6 +7,7 @@ import java.util.Map;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class PerFaceUV {
@@ -50,10 +51,10 @@ public class PerFaceUV {
 		pfUV.faces.forEach((d, f) -> faces.put(d, new Face(f)));
 	}
 
-	public PerFaceUV(Map<String, Map<String, Object>> map) {
+	public PerFaceUV(JsonMap map) {
 		for (Dir d : Dir.VALUES) {
 			if(map.containsKey(d.name().toLowerCase()))
-				faces.put(d, Face.load(map.get(d.name().toLowerCase())));
+				faces.put(d, Face.load(map.getMap(d.name().toLowerCase())));
 		}
 	}
 
@@ -86,19 +87,19 @@ public class PerFaceUV {
 			autoUV = f.autoUV;
 		}
 
-		private Face(Map<String, Object> m) {
-			sx = ((Number)m.get("sx")).intValue();
-			sy = ((Number)m.get("sy")).intValue();
-			ex = ((Number)m.get("ex")).intValue();
-			ey = ((Number)m.get("ey")).intValue();
-			String rot = "ROT_" + m.get("rot");
+		private Face(JsonMap m) {
+			sx = m.getInt("sx");
+			sy = m.getInt("sy");
+			ex = m.getInt("ex");
+			ey = m.getInt("ey");
+			String rot = "ROT_" + m.getString("rot");
 			for (Rot r : Rot.VALUES) {
 				if(r.name().equals(rot)) {
 					rotation = r;
 					break;
 				}
 			}
-			autoUV = (boolean) m.getOrDefault("autoUV", false);
+			autoUV = m.getBoolean("autoUV", false);
 		}
 
 		private Face(int sx, int sy, int ex, int ey) {
@@ -109,7 +110,7 @@ public class PerFaceUV {
 			autoUV = true;
 		}
 
-		public static Face load(Map<String, Object> m) {
+		public static Face load(JsonMap m) {
 			if(m == null)return null;
 			return new Face(m);
 		}

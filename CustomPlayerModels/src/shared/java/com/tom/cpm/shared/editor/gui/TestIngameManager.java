@@ -23,7 +23,7 @@ public class TestIngameManager {
 	}
 
 	public static boolean openTestIngame(EditorGui e) {
-		if(e.getEditor().dirty) {
+		if(e.getEditor().dirty || e.getEditor().file == null) {
 			e.openPopup(new MessagePopup(e, e.getGui().i18nFormat("label.cpm.error"), e.getGui().i18nFormat("label.cpm.must_save.test")));
 			return false;
 		}

@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.definition;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -27,11 +28,14 @@ public class VanillaDefinition extends ModelDefinition {
 		for(int i = 0;i<PlayerModelParts.VALUES.length;i++) {
 			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i], this);
 			playerModelParts.put(i, elem);
+			elem.reset();
 		}
+		cubes = new ArrayList<>();
 
 		for (PlayerModelParts part : PlayerModelParts.VALUES) {
 			if(part == PlayerModelParts.CUSTOM_PART)continue;
 			RootModelElement elem = playerModelParts.get(part.ordinal());
+			cubes.add(elem);
 			elem.hidden = true;
 			Cube cube = new Cube();
 			PlayerPartValues val = PlayerPartValues.getFor(part, type);
@@ -47,6 +51,7 @@ public class VanillaDefinition extends ModelDefinition {
 			RenderedCube rc = new RenderedCube(cube);
 			rc.setParent(elem);
 			elem.addChild(rc);
+			cubes.add(rc);
 
 			cube = new Cube();
 			cube.offset = val.getOffset();
@@ -62,13 +67,14 @@ public class VanillaDefinition extends ModelDefinition {
 			rc = new RenderedCube(cube);
 			rc.setParent(elem);
 			elem.addChild(rc);
+			cubes.add(rc);
 		}
 		rootRenderingCubes = new HashMap<>();
 		playerModelParts.forEach((i, e) -> rootRenderingCubes.put(PlayerModelParts.VALUES[i], new PartRoot(e)));
 	}
 
 	@Override
-	public TextureProvider getTexture(TextureSheetType key) {
+	public TextureProvider getTexture(TextureSheetType key, boolean inGui) {
 		if(key == TextureSheetType.SKIN)return texture.get();
 		return null;
 	}

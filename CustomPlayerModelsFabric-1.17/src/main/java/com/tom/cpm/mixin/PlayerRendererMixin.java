@@ -20,6 +20,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.TextureSheetType;
 
@@ -32,7 +33,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 
 	@Inject(at = @At("RETURN"), method = "getTexture(Lnet/minecraft/client/network/AbstractClientPlayerEntity;)Lnet/minecraft/util/Identifier;", cancellable = true)
 	public void onGetEntityTexture(AbstractClientPlayerEntity entity, CallbackInfoReturnable<Identifier> cbi) {
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getModel(), cbi, TextureSheetType.SKIN);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getModel(), new ModelTexture(cbi), TextureSheetType.SKIN);
 	}
 
 	@Inject(at = @At("HEAD"), method = "render(Lnet/minecraft/client/network/AbstractClientPlayerEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V")

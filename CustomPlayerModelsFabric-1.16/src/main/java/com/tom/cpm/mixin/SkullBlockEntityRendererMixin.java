@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.SkullBlock;
 import net.minecraft.block.entity.BlockEntity;
@@ -26,6 +25,7 @@ import net.minecraft.util.math.Direction;
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(SkullBlockEntityRenderer.class)
@@ -46,9 +46,9 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 					+ "Lnet/minecraft/client/render/RenderLayer;")
 	private static RenderLayer onGetRenderType(Identifier resLoc, SkullBlock.SkullType skullType, GameProfile gameProfileIn) {
 		SkullEntityModel model = MODELS.get(skullType);
-		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
-		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
+		ModelTexture mt = new ModelTexture(resLoc);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
+		return mt.getRenderLayer();
 	}
 
 	@Redirect(at = @At(
@@ -61,9 +61,9 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 					+ "Lnet/minecraft/client/render/RenderLayer;")
 	private static RenderLayer onGetRenderTypeNoSkin(Identifier resLoc, SkullBlock.SkullType skullType, GameProfile gameProfileIn) {
 		SkullEntityModel model = MODELS.get(skullType);
-		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
-		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
+		ModelTexture mt = new ModelTexture(resLoc);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
+		return mt.getRenderLayer();
 	}
 
 	@Inject(at = @At("HEAD"),

@@ -25,9 +25,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:2.2.1') {
-    	transitive = false
-    }
+	modImplementation ('com.github.Virtuoel:Pehkui:2.3.0') 
 }
 
 minecraft {
@@ -35,7 +33,7 @@ minecraft {
 }
 
 sourceSets {
-	shared {
+	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
 		}
@@ -43,10 +41,6 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 		}
 	}
-	main {
-        java.srcDirs += shared.java.srcDirs
-        resources.srcDirs += shared.resources.srcDirs
-    }
 }
 
 

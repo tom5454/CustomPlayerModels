@@ -3,12 +3,11 @@ package com.tom.cpm.shared.parts;
 import java.io.IOException;
 
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class ModelPartCloneable implements IModelPart, IResolvedModelPart {
 
-	public ModelPartCloneable(IOHelper is, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartCloneable(IOHelper is, ModelDefinition def) throws IOException {
 	}
 
 	public ModelPartCloneable() {

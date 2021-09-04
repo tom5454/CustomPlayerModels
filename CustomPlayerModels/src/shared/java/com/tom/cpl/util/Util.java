@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -73,5 +74,12 @@ public class Util {
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static UUID uuidFromString(final String input) {
+		if(input.indexOf('-') != -1)
+			return UUID.fromString(input);
+		else
+			return UUID.fromString(input.replaceFirst("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
 	}
 }

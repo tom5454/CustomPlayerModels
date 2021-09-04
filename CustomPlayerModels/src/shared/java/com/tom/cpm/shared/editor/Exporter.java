@@ -36,7 +36,10 @@ import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.effects.EffectColor;
 import com.tom.cpm.shared.effects.EffectGlow;
 import com.tom.cpm.shared.effects.EffectHide;
+import com.tom.cpm.shared.effects.EffectHideSkull;
 import com.tom.cpm.shared.effects.EffectPerFaceUV;
+import com.tom.cpm.shared.effects.EffectRemoveArmorOffset;
+import com.tom.cpm.shared.effects.EffectRenderItem;
 import com.tom.cpm.shared.effects.EffectScale;
 import com.tom.cpm.shared.effects.EffectSingleTexture;
 import com.tom.cpm.shared.effects.EffectUV;
@@ -84,7 +87,7 @@ public class Exporter {
 			return;
 		}
 		Image img = new Image(e.vanillaSkin);
-		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType.getChannel()), () -> {
+		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getDefinitionLoader().getTemplate(), e.skinType.getChannel()), () -> {
 			img.storeTo(f);
 			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
 		}, (d, c) -> handleGistOverflow(d, c, gui)), forceOut);
@@ -101,7 +104,7 @@ public class Exporter {
 		}
 		Image img = new Image(e.vanillaSkin);
 		exportSkin0(e, gui,
-				new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), e.skinType.getChannel()),
+				new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getDefinitionLoader().getTemplate(), e.skinType.getChannel()),
 						() -> out.accept(img), (d, c) -> handleGistOverflow(d, c, gui)), forceOut);
 	}
 
@@ -199,15 +202,18 @@ public class Exporter {
 				} else if(el.u > 255 || el.v > 255) {
 					otherParts.add(new ModelPartRenderEffect(new EffectUV(el.id, el.u, el.v)));
 				}
+				if(el.itemRenderer != null) {
+					otherParts.add(new ModelPartRenderEffect(new EffectRenderItem(el.id, el.itemRenderer.slot, el.itemRenderer.slotID)));
+				}
 			}
 		});
 		for (ModelElement el : e.elements) {
 			if(el.type == ElementType.ROOT_PART) {
 				if(el.duplicated && el.typeData instanceof PlayerModelParts) {
-					if(!el.show)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
+					if(el.hidden)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
 					otherParts.add(new ModelPartDupRoot(el.id, (PlayerModelParts) el.typeData));
 				} else if(el.typeData instanceof RootModelType){
-					if(!el.show)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
+					if(el.hidden)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
 					otherParts.add(new ModelPartRoot(el.id, (RootModelType) el.typeData));
 				}
 			}
@@ -223,6 +229,9 @@ public class Exporter {
 			otherParts.add(new ModelPartTemplate(et));
 		}
 		if(e.scaling != 0 && e.scaling != 1)otherParts.add(new ModelPartScale(e.scaling));
+		if(!e.hideHeadIfSkull)otherParts.add(new ModelPartRenderEffect(new EffectHideSkull(e.hideHeadIfSkull)));
+		if(e.removeArmorOffset)otherParts.add(new ModelPartRenderEffect(new EffectRemoveArmorOffset(e.removeArmorOffset)));
+
 		if(e.description != null) {
 			switch (e.description.copyProtection) {
 			case CLONEABLE:
@@ -231,7 +240,7 @@ public class Exporter {
 			case NORMAL:
 				break;
 			case UUID_LOCK:
-				otherParts.add(new ModelPartUUIDLockout(MinecraftClientAccess.get().getClientPlayer().getUUID()));
+				otherParts.add(new ModelPartUUIDLockout(e.description.uuid != null ? e.description.uuid : MinecraftClientAccess.get().getClientPlayer().getUUID()));
 				break;
 			default:
 				break;
@@ -531,7 +540,7 @@ public class Exporter {
 
 	public static void convert(ModelFile file, Image imgIn, SkinType type, Consumer<Image> outCons, Runnable error) {
 		Image img = new Image(imgIn);
-		try(SkinDataOutputStream out = new SkinDataOutputStream(img, MinecraftClientAccess.get().getPlayerRenderManager().getLoader().getTemplate(), type.getChannel())) {
+		try(SkinDataOutputStream out = new SkinDataOutputStream(img, MinecraftClientAccess.get().getDefinitionLoader().getTemplate(), type.getChannel())) {
 			out.write(file.getDataBlock());
 		} catch (IOException e) {
 			Log.error("Failed to convert model file to skin", e);

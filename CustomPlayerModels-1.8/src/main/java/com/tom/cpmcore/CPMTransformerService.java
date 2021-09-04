@@ -378,13 +378,16 @@ public class CPMTransformerService implements IClassTransformer {
 					}
 				}
 
+				boolean skippedOF = false;
 				for (ListIterator<AbstractInsnNode> it = m.instructions.iterator(); it.hasNext(); ) {
 					AbstractInsnNode insnNode = it.next();
-					if(insnNode instanceof InsnNode){
+					if(insnNode instanceof InsnNode && skippedOF){
 						if(insnNode.getOpcode() == Opcodes.RETURN) {
 							m.instructions.insertBefore(insnNode, lst);
 							LOG.info("CPM Render Hand Hook: injected");
 						}
+					} else if (insnNode instanceof VarInsnNode && ((VarInsnNode)insnNode).var == 0) {
+						skippedOF = true;
 					}
 				}
 				return input;

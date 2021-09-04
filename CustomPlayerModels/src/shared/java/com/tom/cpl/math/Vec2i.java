@@ -2,6 +2,8 @@ package com.tom.cpl.math;
 
 import java.util.Map;
 
+import com.tom.cpm.shared.editor.project.JsonMap;
+
 public class Vec2i {
 	public int x, y;
 
@@ -23,6 +25,13 @@ public class Vec2i {
 	public Vec2i() {
 		this.x = 0;
 		this.y = 0;
+	}
+
+	public Vec2i(JsonMap m, Vec2i def) {
+		this(def);
+		if(m == null)return;
+		x = m.getInt("x");
+		y = m.getInt("y");
 	}
 
 	public Vec2i(Map<String, Object> m, Vec2i def) {

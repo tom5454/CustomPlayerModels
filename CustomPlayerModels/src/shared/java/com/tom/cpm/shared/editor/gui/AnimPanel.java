@@ -3,6 +3,7 @@ package com.tom.cpm.shared.editor.gui;
 import java.util.Collections;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
@@ -27,6 +28,7 @@ public class AnimPanel extends Panel {
 	private Editor editor;
 	private DropDownBox<IAnim> animSel;
 	private TabFocusHandler tabHandler;
+	private Button prevFrm, nextFrm;
 
 	public AnimPanel(IGui gui, EditorGui e) {
 		super(gui);
@@ -68,11 +70,17 @@ public class AnimPanel extends Panel {
 		currFrame.setBounds(new Box(30, 65, 110, 10));
 		addElement(currFrame);
 
-		Button prevFrm = new Button(gui, "<", editor::animPrevFrm);
+		prevFrm = new Button(gui, "<", () -> {
+			if(gui.isCtrlDown())editor.animMoveFrame(-1);
+			else editor.animPrevFrm();
+		});
 		prevFrm.setBounds(new Box(5, 60, 18, 18));
 		addElement(prevFrm);
 
-		Button nextFrm = new Button(gui, ">", editor::animNextFrm);
+		nextFrm = new Button(gui, ">", () -> {
+			if(gui.isCtrlDown())editor.animMoveFrame(1);
+			else editor.animNextFrm();
+		});
 		nextFrm.setBounds(new Box(145, 60, 18, 18));
 		addElement(nextFrm);
 
@@ -179,5 +187,17 @@ public class AnimPanel extends Panel {
 			editor.setAnimPlay.accept(false);
 			editor.updateGui();
 		}
+	}
+
+	@Override
+	public void draw(MouseEvent event, float partialTicks) {
+		if(gui.isCtrlDown()) {
+			prevFrm.setText("<<");
+			nextFrm.setText(">>");
+		} else {
+			prevFrm.setText("<");
+			nextFrm.setText(">");
+		}
+		super.draw(event, partialTicks);
 	}
 }

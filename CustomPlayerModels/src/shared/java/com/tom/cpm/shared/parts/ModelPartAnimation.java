@@ -21,7 +21,6 @@ import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Exporter;
 import com.tom.cpm.shared.editor.ModelElement;
@@ -35,7 +34,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 	private Map<Integer, ResolvedData> parsedData = new HashMap<>();
 	private int blankId, resetId;
 
-	public ModelPartAnimation(IOHelper din, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartAnimation(IOHelper din, ModelDefinition def) throws IOException {
 		boolean done = false;
 		while(!done) {
 			Type type = din.readEnum(Type.VALUES);

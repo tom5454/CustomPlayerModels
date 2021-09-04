@@ -1,6 +1,8 @@
 package com.tom.cpm.shared.editor.anim;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleUnaryOperator;
@@ -13,7 +15,9 @@ import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.animation.PolynomialSplineInterpolator;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.gui.AnimPanel.IAnim;
+import com.tom.cpm.shared.editor.project.JsonMap;
 
 public class EditorAnim implements IAnim {
 	private List<ModelElement> components;
@@ -136,7 +140,7 @@ public class EditorAnim implements IAnim {
 		}
 	}
 
-	public void loadFrame(Map<String, Object> data) {
+	public void loadFrame(JsonMap data) {
 		AnimFrame frm = new AnimFrame(this);
 		frm.loadFrom(data);
 		frames.add(frm);
@@ -188,5 +192,22 @@ public class EditorAnim implements IAnim {
 	public void clearCache() {
 		components = null;
 		psfs = null;
+	}
+
+	public void moveFrame(int i) {
+		if(currentFrame == null || frames.size() < 2)return;
+		int ind = frames.indexOf(currentFrame);
+		if(ind == -1)return;
+		int newInd = ind + i;
+		if(newInd < 0 || newInd > frames.size())return;
+		ActionBuilder ab = editor.action("move", "action.cpm.animFrame");
+		Map<AnimFrame, Float> map = new HashMap<>();
+		for (int j = 0; j < frames.size(); j++) {
+			map.put(frames.get(j), (float) j);
+		}
+		ab.addToMap(map, currentFrame, newInd + 0.1f * i);
+		ab.onAction(() -> frames.sort(Comparator.comparing(map::get)));
+		ab.onAction(this::clearCache);
+		ab.execute();
 	}
 }

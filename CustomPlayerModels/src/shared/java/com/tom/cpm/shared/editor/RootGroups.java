@@ -2,14 +2,13 @@ package com.tom.cpm.shared.editor;
 
 import java.util.function.Consumer;
 
-import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 public enum RootGroups {
-	CAPE(TextureSheetType.CAPE, PlatformFeature.RENDER_CAPE, RootModelType.CAPE),
-	ELYTRA(TextureSheetType.ELYTRA, PlatformFeature.RENDER_ELYTRA, RootModelType.ELYTRA_LEFT, RootModelType.ELYTRA_RIGHT),
-	ARMOR(null, PlatformFeature.RENDER_ARMOR, RootModelType.ARMOR_HELMET,
+	CAPE(TextureSheetType.CAPE, RootModelType.CAPE),
+	ELYTRA(TextureSheetType.ELYTRA, RootModelType.ELYTRA_LEFT, RootModelType.ELYTRA_RIGHT),
+	ARMOR(null, RootModelType.ARMOR_HELMET,
 			RootModelType.ARMOR_BODY,
 			RootModelType.ARMOR_LEFT_ARM,
 			RootModelType.ARMOR_RIGHT_ARM,
@@ -28,11 +27,9 @@ public enum RootGroups {
 	public static final RootGroups[] VALUES = values();
 
 	public final RootModelType[] types;
-	public final PlatformFeature feature;
 	private final TextureSheetType texSheet;
-	private RootGroups(TextureSheetType tex, PlatformFeature feature, RootModelType... modelTypes) {
+	private RootGroups(TextureSheetType tex, RootModelType... modelTypes) {
 		types = modelTypes;
-		this.feature = feature;
 		this.texSheet = tex;
 	}
 

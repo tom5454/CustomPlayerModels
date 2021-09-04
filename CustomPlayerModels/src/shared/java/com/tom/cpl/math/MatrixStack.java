@@ -17,37 +17,37 @@ public class MatrixStack {
 	}
 
 	public void translate(double x, double y, double z) {
-		MatrixStack.Entry matrixstack$entry = this.stack.getLast();
-		matrixstack$entry.matrix.mul(Mat4f.makeTranslate((float)x, (float)y, (float)z));
+		MatrixStack.Entry e = this.stack.getLast();
+		e.matrix.mul(Mat4f.makeTranslate((float)x, (float)y, (float)z));
 	}
 
 	public void scale(float x, float y, float z) {
-		MatrixStack.Entry matrixstack$entry = this.stack.getLast();
-		matrixstack$entry.matrix.mul(Mat4f.makeScale(x, y, z));
+		MatrixStack.Entry e = this.stack.getLast();
+		e.matrix.mul(Mat4f.makeScale(x, y, z));
 		if (x == y && y == z) {
 			if (x > 0.0F) {
 				return;
 			}
 
-			matrixstack$entry.normal.mul(-1.0F);
+			e.normal.mul(-1.0F);
 		}
 
 		float f = 1.0F / x;
 		float f1 = 1.0F / y;
 		float f2 = 1.0F / z;
 		float f3 = MathHelper.fastInvCubeRoot(f * f1 * f2);
-		matrixstack$entry.normal.mul(Mat3f.makeScaleMatrix(f3 * f, f3 * f1, f3 * f2));
+		e.normal.mul(Mat3f.makeScaleMatrix(f3 * f, f3 * f1, f3 * f2));
 	}
 
 	public void rotate(Quaternion quaternion) {
-		MatrixStack.Entry matrixstack$entry = this.stack.getLast();
-		matrixstack$entry.matrix.mul(quaternion);
-		matrixstack$entry.normal.mul(quaternion);
+		MatrixStack.Entry e = this.stack.getLast();
+		e.matrix.mul(quaternion);
+		e.normal.mul(quaternion);
 	}
 
 	public void push() {
-		MatrixStack.Entry matrixstack$entry = this.stack.getLast();
-		this.stack.addLast(new MatrixStack.Entry(matrixstack$entry.matrix.copy(), matrixstack$entry.normal.copy()));
+		MatrixStack.Entry e = this.stack.getLast();
+		this.stack.addLast(new MatrixStack.Entry(e.matrix.copy(), e.normal.copy()));
 	}
 
 	public void pop() {
@@ -78,5 +78,23 @@ public class MatrixStack {
 		public Mat3f getNormal() {
 			return this.normal;
 		}
+
+		public float[] getMatrixArray() {
+			return matrix.toArray();
+		}
+
+		public float[] getNormalArray() {
+			return new Mat4f(normal).toArray();
+		}
+	}
+
+	public Entry storeLast() {
+		MatrixStack.Entry e = this.stack.getLast();
+		return new MatrixStack.Entry(e.matrix.copy(), e.normal.copy());
+	}
+
+	public void setLast(Entry in) {
+		pop();
+		this.stack.addLast(new MatrixStack.Entry(in.matrix.copy(), in.normal.copy()));
 	}
 }

@@ -8,8 +8,10 @@ import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.elements.Tree.TreeModel;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Effect;
@@ -132,4 +134,5 @@ public abstract interface TreeElement {
 	public default void switchEffect(Effect effect) {}
 	public default float getValue() { return 0; }
 	public default void setValue(float value) {}
+	public default void render3d(MatrixStack stack, VBuffers buf) {}
 }

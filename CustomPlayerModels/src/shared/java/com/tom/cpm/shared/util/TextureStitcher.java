@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Image;
+import com.tom.cpm.shared.definition.SafetyException;
+import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.skin.TextureProvider;
 
@@ -20,8 +22,11 @@ public class TextureStitcher {
 	private boolean hasStitches = false;
 	private TextureProvider provider;
 	private float xs, ys;
+	private int maxSize;
+	private boolean overflow;
 
-	public TextureStitcher() {
+	public TextureStitcher(int maxSize) {
+		this.maxSize = maxSize;
 	}
 
 	public void setBase(Image base) {
@@ -61,9 +66,10 @@ public class TextureStitcher {
 	}
 
 	public void stitchImage(Image img, Consumer<Vec2i> uvUpdater) {
+		if(overflow)return;
 		Box b = new Box(0, 0, img.getWidth(), img.getHeight());
 		hasStitches = true;
-		for(int i = 0;i<512;i+=16*xs) {
+		for(int i = 0;i<maxSize;i+=16*xs) {
 			b.x = i;
 			for(int y = 0;y<i;y+=16*ys) {
 				b.y = y;
@@ -89,6 +95,7 @@ public class TextureStitcher {
 				}
 			}
 		}
+		overflow = true;
 	}
 
 	public void allocSingleColor(Vec2i size, int color, Consumer<Vec2i> uvUpdater) {
@@ -116,7 +123,8 @@ public class TextureStitcher {
 		return i + 1;
 	}
 
-	public TextureProvider finish() {
+	public TextureProvider finish() throws SafetyException {
+		if(overflow)throw new SafetyException(BlockReason.TEXTURE_OVERFLOW);
 		if(hasStitches)return new TextureProvider(image, new Vec2i(image.getWidth() / xs, image.getHeight() / ys));
 		else return provider;
 	}

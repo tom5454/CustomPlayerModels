@@ -12,12 +12,14 @@ import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
+import com.tom.cpl.gui.elements.InputPopup;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.Util;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.definition.Link;
@@ -179,16 +181,34 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			chbxUUIDLock.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
 			addElement(chbxUUIDLock);
 
+			Button changeUUID = new Button(gui, gui.i18nFormat("button.cpm.changeUUID"), new InputPopup(e, gui.i18nFormat("button.cpm.changeUUID"), gui.i18nFormat("label.cpm.enterNewUUID"), n -> {
+				if(editor.description == null)editor.description = new ModelDescription();
+				try {
+					editor.description.uuid = Util.uuidFromString(n);
+					chbxUUIDLock.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.uuidlockOw", editor.description.uuid.toString())));
+				} catch (IllegalArgumentException ex) {
+					e.openPopup(new MessagePopup(e, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.invalidUUID")));
+				}
+			}, null));
+			changeUUID.setBounds(new Box(90, 130, 80, 20));
+			changeUUID.setEnabled(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
+			addElement(changeUUID);
+
+			if(editor.description != null && editor.description.uuid != null)
+				chbxUUIDLock.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.uuidlockOw", editor.description.uuid.toString())));
+
 			chbxClone.setAction(() -> {
 				if(!chbxClone.isSelected()) {
 					chbxUUIDLock.setSelected(false);
 					chbxClone.setSelected(true);
+					changeUUID.setEnabled(false);
 				} else {
 					chbxClone.setSelected(false);
 				}
 			});
 
 			chbxUUIDLock.setAction(() -> {
+				changeUUID.setEnabled(!chbxUUIDLock.isSelected());
 				if(!chbxUUIDLock.isSelected()) {
 					chbxUUIDLock.setSelected(true);
 					chbxClone.setSelected(false);
@@ -434,7 +454,6 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			addElement(setIcon);
 
 			skinCompat = new Checkbox(gui, gui.i18nFormat("label.cpm.export.skinCompat"));
-			skinCompat.setSelected(true);
 			skinCompat.setBounds(new Box(5, 130, 100, 20));
 			skinCompat.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skinCompat")));
 			addElement(skinCompat);
@@ -452,16 +471,34 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			chbxUUIDLock.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
 			addElement(chbxUUIDLock);
 
+			Button changeUUID = new Button(gui, gui.i18nFormat("button.cpm.changeUUID"), new InputPopup(e, gui.i18nFormat("button.cpm.changeUUID"), gui.i18nFormat("label.cpm.enterNewUUID"), n -> {
+				if(editor.description == null)editor.description = new ModelDescription();
+				try {
+					editor.description.uuid = Util.uuidFromString(n);
+					chbxUUIDLock.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.uuidlockOw", editor.description.uuid.toString())));
+				} catch (IllegalArgumentException ex) {
+					e.openPopup(new MessagePopup(e, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.invalidUUID")));
+				}
+			}, null));
+			changeUUID.setEnabled(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
+			changeUUID.setBounds(new Box(90, 180, 80, 20));
+			addElement(changeUUID);
+
+			if(editor.description != null && editor.description.uuid != null)
+				chbxUUIDLock.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.uuidlockOw", editor.description.uuid.toString())));
+
 			chbxClone.setAction(() -> {
 				if(!chbxClone.isSelected()) {
 					chbxUUIDLock.setSelected(false);
 					chbxClone.setSelected(true);
+					changeUUID.setEnabled(false);
 				} else {
 					chbxClone.setSelected(false);
 				}
 			});
 
 			chbxUUIDLock.setAction(() -> {
+				changeUUID.setEnabled(!chbxUUIDLock.isSelected());
 				if(!chbxUUIDLock.isSelected()) {
 					chbxUUIDLock.setSelected(true);
 					chbxClone.setSelected(false);

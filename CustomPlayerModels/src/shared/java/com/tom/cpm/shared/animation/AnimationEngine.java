@@ -58,6 +58,7 @@ public class AnimationEngine {
 			case HAND:
 				def.resetAnimationPos();
 				return;
+
 			case PLAYER:
 			{
 				VanillaPose pose = player.getPose();
@@ -75,6 +76,7 @@ public class AnimationEngine {
 				h.setGesture(def.getAnimations().getGesture(gesture));
 			}
 			break;
+
 			case SKULL:
 			{
 				List<Animation> anim = def.getAnimations().getPoseAnimations(VanillaPose.SKULL_RENDER);
@@ -83,6 +85,7 @@ public class AnimationEngine {
 				h.addAnimations(global);
 			}
 			break;
+
 			default:
 				break;
 			}
@@ -90,6 +93,20 @@ public class AnimationEngine {
 		} catch (Exception e) {
 			e.printStackTrace();
 			player.getModelDefinition().resetAnimationPos();
+			h.clear();
+		}
+	}
+
+	public void handleGuiAnimation(AnimationHandler h, ModelDefinition def) {
+		try {
+			List<Animation> anim = def.getAnimations().getPoseAnimations(VanillaPose.STANDING);
+			List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
+			h.addAnimations(anim);
+			h.addAnimations(global);
+			h.animate(getTime());
+		} catch (Exception e) {
+			e.printStackTrace();
+			def.resetAnimationPos();
 			h.clear();
 		}
 	}
@@ -146,6 +163,6 @@ public class AnimationEngine {
 	public static enum AnimationMode {
 		PLAYER,
 		SKULL,
-		HAND,
+		HAND
 	}
 }

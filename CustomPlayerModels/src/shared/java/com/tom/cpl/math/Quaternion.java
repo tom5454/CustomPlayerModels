@@ -1,18 +1,12 @@
 package com.tom.cpl.math;
 
 public class Quaternion {
-	public static final Quaternion ONE = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
 	private float x;
 	private float y;
 	private float z;
 	private float w;
-
-	public Quaternion(float x, float y, float z, float w) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.w = w;
-	}
+	private Vec3f axis;
+	private float angle;
 
 	public Quaternion(Vec3f axis, float angle, boolean degrees) {
 		if (degrees) {
@@ -24,6 +18,8 @@ public class Quaternion {
 		this.y = axis.y * f;
 		this.z = axis.z * f;
 		this.w = cos(angle / 2.0F);
+		this.axis = axis;
+		this.angle = angle;
 	}
 
 	@Override
@@ -86,5 +82,22 @@ public class Quaternion {
 
 	private static float sin(float p_214903_0_) {
 		return (float)Math.sin(p_214903_0_);
+	}
+
+	public float getAngle() {
+		return angle;
+	}
+
+	public Vec3f getAxis() {
+		return axis;
+	}
+
+	@FunctionalInterface
+	public static interface Qmap<T> {
+		T apply(float x, float y, float z, float w);
+	}
+
+	public <T> T map(Qmap<T> map) {
+		return map.apply(x, y, z, w);
 	}
 }

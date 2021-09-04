@@ -2,19 +2,20 @@ package com.tom.cpm.shared.animation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
-import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinition;
 
 public class AnimationHandler {
-	private final Player<?, ?> player;
+	private final Supplier<ModelDefinition> player;
 
 	private List<PlayingAnim> currentAnimations = new ArrayList<>();
 	private List<Animation> nextAnims = new ArrayList<>();
 
 	private Gesture currentGesture;
 
-	public AnimationHandler(Player<?, ?> player) {
+	public AnimationHandler(Supplier<ModelDefinition> player) {
 		this.player = player;
 	}
 
@@ -38,12 +39,12 @@ public class AnimationHandler {
 		if(needsSort)
 			currentAnimations.sort((a, b) -> Integer.compare(a.currentAnimation.priority, b.currentAnimation.priority));
 
-		player.getModelDefinition().resetAnimationPos();
+		player.get().resetAnimationPos();
 
 		for (PlayingAnim a : currentAnimations) {
 			if(!a.finished) {
 				long currentStep = (currentTime - a.currentStart);
-				a.currentAnimation.animate(currentStep, player.getModelDefinition());
+				a.currentAnimation.animate(currentStep, player.get());
 
 				if(!a.loop && currentStep > a.currentAnimation.duration) {
 					a.finished = true;

@@ -1,11 +1,19 @@
 package com.tom.cpm.shared.editor;
 
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.render.RenderTypes;
+import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartRoot;
+import com.tom.cpm.shared.model.RenderedCube;
+import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.BoxRender;
+import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.PaintImageCreator;
@@ -45,7 +53,7 @@ public class EditorDefinition extends ModelDefinition {
 	}
 
 	@Override
-	public TextureProvider getTexture(TextureSheetType key) {
+	public TextureProvider getTexture(TextureSheetType key, boolean inGui) {
 		if(editor.renderPaint)return paint;
 		else {
 			ETextures tex = editor.textures.get(key);
@@ -67,5 +75,36 @@ public class EditorDefinition extends ModelDefinition {
 	@Override
 	public boolean hasRoot(VanillaModelPart type) {
 		return editor.elements.stream().map(e -> ((RootModelElement) e.rc).getPart()).anyMatch(t -> t == type);
+	}
+
+	public void render(MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube) {
+		if(editor.renderPaint)return;
+		editor.render(stack, buf);
+		drawSelect(cube, stack, buf, renderTypes);
+	}
+
+	public void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, VBuffers bufferIn, RenderTypes<RenderMode> renderTypes) {
+		ElementSelectMode sel = cube.getSelected();
+		if(sel.isRenderOutline()) {
+			boolean s = sel == ElementSelectMode.SELECTED;
+			if(s)BoxRender.drawOrigin(matrixStackIn, bufferIn.getBuffer(renderTypes, RenderMode.OUTLINE), 1);
+			Cube c = cube.getCube();
+			if(c.size == null || c.size.x != 0 || c.size.y != 0 || c.size.z != 0 || c.mcScale != 0)
+				BoxRender.drawBoundingBox(
+						matrixStackIn, bufferIn.getBuffer(renderTypes, RenderMode.OUTLINE),
+						cube.getBounds(),
+						s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
+						);
+		}
+	}
+
+	@Override
+	public boolean isHideHeadIfSkull() {
+		return editor.hideHeadIfSkull;
+	}
+
+	@Override
+	public boolean isRemoveArmorOffset() {
+		return editor.removeArmorOffset;
 	}
 }

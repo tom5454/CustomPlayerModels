@@ -7,6 +7,7 @@ import com.tom.cpl.math.BoundingBox;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.IModelComponent;
+import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.Mesh;
 import com.tom.cpm.shared.model.render.PerFaceUV;
 
@@ -32,6 +33,8 @@ public class RenderedCube implements IModelComponent {
 	public boolean singleTex = false;
 	//Render Effect PerFaceUV
 	public PerFaceUV faceUVs;
+	//Render Effect Item
+	public ItemRenderer itemRenderer;
 
 	protected RenderedCube() {
 	}

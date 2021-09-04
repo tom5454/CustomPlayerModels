@@ -115,7 +115,7 @@ dependencies {
 }
 
 sourceSets {
-	shared {
+	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
 		}
@@ -123,10 +123,6 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 		}
 	}
-	main {
-        java.srcDirs += shared.java.srcDirs
-        resources.srcDirs += shared.resources.srcDirs
-    }
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

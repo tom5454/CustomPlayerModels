@@ -8,6 +8,7 @@ public abstract class MapAction<K, V> extends Action {
 	private Map<K, V> map;
 	private K key;
 	private V value;
+	private V oldValue;
 
 	public MapAction(Map<K, V> map, K key, V value) {
 		this.map = map;
@@ -23,11 +24,14 @@ public abstract class MapAction<K, V> extends Action {
 	}
 
 	protected void add() {
-		map.put(key, value);
+		oldValue = map.put(key, value);
 	}
 
 	protected void remove() {
-		map.remove(key);
+		if(oldValue != null) {
+			map.put(key, oldValue);
+			oldValue = null;
+		} else map.remove(key);
 	}
 
 	private static class Add<K, V> extends MapAction<K, V> {

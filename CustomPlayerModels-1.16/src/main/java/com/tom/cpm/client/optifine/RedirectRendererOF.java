@@ -60,7 +60,7 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 		this.green           = green          ;
 		this.blue            = blue           ;
 		this.alpha           = alpha          ;
-		this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn));
+		this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn), new VBuffer(bufferIn, packedLightIn, packedOverlayIn, matrixStackIn));
 		render();
 		/*matrixStackIn.push();
 		translateRotate(matrixStackIn);

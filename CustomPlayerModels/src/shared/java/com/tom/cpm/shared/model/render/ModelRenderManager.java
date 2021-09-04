@@ -17,14 +17,16 @@ import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VertexBuffer;
+import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.IPlayerRenderManager;
 import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.editor.EditorDefinition;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartRoot;
+import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
@@ -34,19 +36,14 @@ import com.tom.cpm.shared.util.Log;
 
 public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderManager {
 	public static final Predicate<Player<?, ?>> ALWAYS = p -> true;
-	private Map<MB, RedirectHolder<MB, D, S, P>> holders = new HashMap<>();
+	protected Map<MB, RedirectHolder<MB, D, S, P>> holders = new HashMap<>();
 	private RedirectHolderFactory<D, S, P> factory;
 	private RedirectRendererFactory<MB, S, P> redirectFactory;
-	private final ModelDefinitionLoader loader;
 	private AnimationEngine animEngine = new AnimationEngine();
 	private ModelPartVec3fSetter<P> posSet, rotSet;
 	private ToFloatFunction<P> px, py, pz, rx, ry, rz;
 	private Predicate<P> getVis;
 	private BoolSetter<P> setVis;
-
-	public ModelRenderManager(ModelDefinitionLoader loader) {
-		this.loader = loader;
-	}
 
 	public void setFactory(RedirectHolderFactory<D, S, P> factory) {
 		this.factory = factory;
@@ -139,6 +136,11 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		return holders.computeIfAbsent(model, this::create);
 	}
 
+	@Override
+	public RedirectHolder<?, ?, ?, ?> getHolderFor(Object model) {
+		return holders.get(model);
+	}
+
 	public void copyModelForArmor(P from, P to) {
 		this.posSet.set(to, this.px.apply(from), this.py.apply(from), this.pz.apply(from));
 		this.rotSet.set(to, this.rx.apply(from), this.ry.apply(from), this.rz.apply(from));
@@ -206,7 +208,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		private void bindTexture0(S cbi, TextureSheetType tex) {
 			if(def == null)return;
-			TextureProvider skin = def.getTexture(tex);
+			TextureProvider skin = def.getTexture(tex, isInGui());
 			if(skin != null && skin.texture != null) {
 				bindTexture(cbi, skin);
 				sheetX = skin.getSize().x;
@@ -272,6 +274,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				loggedWarning = true;
 			}
 		}
+
+		protected boolean isInGui() {return false;}
 	}
 
 	private static class RedirectDataHolder<P> {
@@ -337,24 +341,25 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						float rx = mngr.rx.apply(tp);
 						float ry = mngr.ry.apply(tp);
 						float rz = mngr.rz.apply(tp);
-						if(holder.playerObj == null || dh.renderPredicate.test(holder.playerObj)) {
-							elems.forEach(elem -> {
-								if(!skipTransform) {
-									mngr.posSet.set(tp, elem.getPos());
-									mngr.rotSet.set(tp, elem.getRot());
-								}
-								if(elem.doDisplay()) {
-									holder.copyModel(tp, parent);
-									renderParent();
-									doRender0(elem);
-								} else {
-									doRender0(elem);
-								}
-							});
-							if(!noReset()) {
-								mngr.posSet.set(parent, px, py, pz);
-								mngr.rotSet.set(parent, rx, ry, rz);
+						boolean doRender = holder.playerObj == null || dh.renderPredicate.test(holder.playerObj) || !holder.def.isHideHeadIfSkull();
+						elems.forEach(elem -> {
+							if(!elem.renderPart())return;
+							if(holder.def.isRemoveArmorOffset() && elems.getMainRoot() != elem && part.getCopyFrom() != null) {
+								elem.setPosAndRot(holder.def.getModelElementFor(part.getCopyFrom()));
 							}
+							if(!skipTransform) {
+								mngr.posSet.set(tp, elem.getPos());
+								mngr.rotSet.set(tp, elem.getRot());
+							}
+							if(elem.doDisplay() && doRender) {
+								holder.copyModel(tp, parent);
+								renderParent();
+							}
+							doRender0(elem, doRender);
+						});
+						if(!noReset()) {
+							mngr.posSet.set(parent, px, py, pz);
+							mngr.rotSet.set(parent, rx, ry, rz);
 						}
 						if(!skipTransform) {
 							RootModelElement elem = elems.getMainRoot();
@@ -401,6 +406,9 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		public default void render(RenderedCube elem, MatrixStack matrixStackIn, VBuffers buf, float red, float green, float blue, float alpha) {
 			RedirectHolder<?, ?, ?, P> holder = getHolder();
+			if(holder.def instanceof EditorDefinition && buf != null) {
+				((EditorDefinition)holder.def).render(matrixStackIn, buf, holder.renderTypes, elem);
+			}
 			if(elem.children == null)return;
 			for(RenderedCube cube : elem.children) {
 				if(!cube.display) {
@@ -408,63 +416,79 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				}
 				matrixStackIn.push();
 				translateRotate(cube, matrixStackIn);
-				float r = red;
-				float g = green;
-				float b = blue;
-				if(cube.color != 0xffffff) {
-					r *= ((cube.color & 0xff0000) >> 16) / 255f;
-					g *= ((cube.color & 0x00ff00) >> 8 ) / 255f;
-					b *= ( cube.color & 0x0000ff       ) / 255f;
+				if(cube.itemRenderer != null) {
+					Cube c = cube.getCube();
+					if(holder.def instanceof EditorDefinition && buf != null) {
+						((EditorDefinition)holder.def).render(matrixStackIn, buf, holder.renderTypes, cube);
+					}
+					matrixStackIn.translate(c.offset.x / 16f, c.offset.y / 16f, c.offset.z / 16f);
+					matrixStackIn.scale(c.scale.x, c.scale.y, c.scale.z);
+					if(cube.itemRenderer.slot == ItemSlot.ANY_SLOT) {
+						//TODO render item here
+					} else {
+						holder.def.storeTransform(cube.itemRenderer.slot, matrixStackIn);
+					}
+					matrixStackIn.pop();
+					continue;
 				}
-				if(cube.useDynamic || cube.renderObject == null) {
-					if(cube.renderObject != null)cube.renderObject.free();
-					cube.renderObject = createBox(cube, holder);
-				}
-				Mesh mesh = cube.renderObject;
-				VertexBuffer buffer = buf.getBuffer(holder.renderTypes, mesh.getLayer());
-				if(holder.def.isEditor()) {
-					ElementSelectMode sel = cube.getSelected();
-					if(!sel.applyColor()) {
-						r = 1;
-						g = 1;
-						b = 1;
-					}else if(cube.glow) {
+				if(buf != null) {
+					float r = red;
+					float g = green;
+					float b = blue;
+					if(cube.color != 0xffffff) {
+						r *= ((cube.color & 0xff0000) >> 16) / 255f;
+						g *= ((cube.color & 0x00ff00) >> 8 ) / 255f;
+						b *= ( cube.color & 0x0000ff       ) / 255f;
+					}
+					if(cube.useDynamic || cube.renderObject == null) {
+						if(cube.renderObject != null)cube.renderObject.free();
+						cube.renderObject = createBox(cube, holder);
+					}
+					Mesh mesh = cube.renderObject;
+					VertexBuffer buffer = buf.getBuffer(holder.renderTypes, mesh.getLayer());
+					if(holder.def.isEditor()) {
+						ElementSelectMode sel = cube.getSelected();
+						if(!sel.applyColor()) {
+							r = 1;
+							g = 1;
+							b = 1;
+						}else if(cube.glow) {
+							buffer = buf.getBuffer(holder.renderTypes, RenderMode.GLOW);
+						}
+					} else if(cube.glow) {
 						buffer = buf.getBuffer(holder.renderTypes, RenderMode.GLOW);
 					}
-				} else if(cube.glow) {
-					buffer = buf.getBuffer(holder.renderTypes, RenderMode.GLOW);
+					mesh.draw(matrixStackIn, buffer, r, g, b, alpha);
 				}
-				mesh.draw(matrixStackIn, buffer, r, g, b, alpha);
-				drawSelect(cube, matrixStackIn, buf);
 				render(cube, matrixStackIn, buf, red, green, blue, alpha);
 				matrixStackIn.pop();
 			}
 		}
 
-		public default void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, VBuffers bufferIn) {
-			RedirectHolder<?, ?, ?, P> holder = getHolder();
-			if(holder.def.isEditor()) {
-				ElementSelectMode sel = cube.getSelected();
-				if(sel.isRenderOutline()) {
-					boolean s = sel == ElementSelectMode.SELECTED;
-					if(s)BoxRender.drawOrigin(matrixStackIn, bufferIn.getBuffer(holder.renderTypes, RenderMode.OUTLINE), 1);
-					BoxRender.drawBoundingBox(
-							matrixStackIn, bufferIn.getBuffer(holder.renderTypes, RenderMode.OUTLINE),
-							cube.getBounds(),
-							s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
-							);
-				}
+		public default void doRender0(RootModelElement elem, boolean doRender) {
+			MatrixStack stack = new MatrixStack();
+			translateRotate(stack);
+			if(doRender) {
+				Vec4f color = getColor();
+				VBuffers buf = getVBuffers().replay();
+				render(elem, stack, buf, color.x, color.y, color.z, color.w);
+				buf.finishAll();
+			} else {
+				render(elem, stack, null, 1, 1, 1, 1);
 			}
 		}
 
-		public default void doRender0(RootModelElement elem) {
-			MatrixStack stack = new MatrixStack();
-			translateRotate(stack);
-			VBuffers buf = getVBuffers().replay();
-			drawSelect(elem, stack, buf);
-			Vec4f color = getColor();
-			render(elem, stack, buf, color.x, color.y, color.z, color.w);
-			buf.finishAll();
+		public default MatrixStack.Entry getPartTransform() {
+			RedirectHolder<?, ?, ?, P> holder = getHolder();
+			VanillaModelPart part = getPart();
+			if(part == PlayerModelParts.LEFT_ARM) {
+				return holder.def.getTransform(ItemSlot.LEFT_HAND);
+			} else if(part == PlayerModelParts.RIGHT_ARM) {
+				return holder.def.getTransform(ItemSlot.RIGHT_HAND);
+			} else if(part == PlayerModelParts.HEAD) {
+				return holder.def.getTransform(ItemSlot.HEAD);
+			}
+			return null;
 		}
 	}
 
@@ -526,11 +550,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 	@FunctionalInterface
 	public static interface BoolSetter<P> {
 		void set(P p, boolean v);
-	}
-
-	@Override
-	public ModelDefinitionLoader<?> getLoader() {
-		return loader;
 	}
 
 	@Override

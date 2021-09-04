@@ -441,6 +441,12 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		return new IOHelper(toBytes());
 	}
 
+	public int size() throws IOException {
+		if(dataIn != null)return dataIn.length;
+		if(baos != null)return baos.size();
+		throw new IOException("Not a byte array backed io handler");
+	}
+
 	@FunctionalInterface
 	public static interface ObjectReader<T, R> {
 		R read(T type, IOHelper block) throws IOException;

@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.block.BlockState;
@@ -26,6 +25,7 @@ import net.minecraft.util.math.Direction;
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.client.RefHolder;
 import com.tom.cpm.shared.model.TextureSheetType;
 
@@ -62,9 +62,9 @@ public abstract class SkullBlockEntityRendererMixin {
 		if(RefHolder.CPM_MODELS == null)return RenderLayer.getEntityTranslucent(resLoc);
 		SkullBlockEntityModel model = RefHolder.CPM_MODELS.get(skullType);
 		RefHolder.CPM_MODELS = null;
-		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
-		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
+		ModelTexture mt = new ModelTexture(resLoc);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
+		return mt.getRenderLayer();
 	}
 
 	@Redirect(at = @At(
@@ -78,9 +78,9 @@ public abstract class SkullBlockEntityRendererMixin {
 		if(RefHolder.CPM_MODELS == null)return RenderLayer.getEntityCutoutNoCull(resLoc);
 		SkullBlockEntityModel model = RefHolder.CPM_MODELS.get(skullType);
 		RefHolder.CPM_MODELS = null;
-		CallbackInfoReturnable<Identifier> cbi = new CallbackInfoReturnable<>(null, true, resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, cbi, TextureSheetType.SKIN);
-		return RenderLayer.getEntityTranslucent(cbi.getReturnValue());
+		ModelTexture mt = new ModelTexture(resLoc);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
+		return mt.getRenderLayer();
 	}
 
 	@Inject(at = @At("RETURN"),

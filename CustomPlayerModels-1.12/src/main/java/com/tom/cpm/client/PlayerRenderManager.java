@@ -1,8 +1,9 @@
 package com.tom.cpm.client;
 
-import static com.tom.cpm.client.PlayerModelSetup.scale;
-
+import java.nio.FloatBuffer;
 import java.util.function.Supplier;
+
+import org.lwjgl.BufferUtils;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
@@ -10,11 +11,14 @@ import net.minecraft.client.model.ModelElytra;
 import net.minecraft.client.model.ModelHumanoidHead;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
 
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
@@ -23,9 +27,9 @@ import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 
 public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRenderer, ModelBase> {
+	public static final float scale = 0.0625F;
 
-	public PlayerRenderManager(ModelDefinitionLoader loader) {
-		super(loader);
+	public PlayerRenderManager() {
 		setFactory(new RedirectHolderFactory<Void, Void, ModelRenderer>() {
 
 			@Override
@@ -167,9 +171,13 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 		@Override
 		protected void bindSkin() {
-			if(skin != null && !def.isEditor())skin.bind();
-			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RetroGL.texture(), 0));
-			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RetroGL.eyes(), 1));
+			ResourceLocation texID = null;
+			if(skin != null) {
+				skin.bind();
+				texID = DynTexture.getBoundLoc();
+			}
+			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RetroGL.texture(texID), 0));
+			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RetroGL.eyes(texID), 1));
 			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RetroGL.linesNoDepth(), 2));
 			renderTypes.put(RenderMode.COLOR, new NativeRenderType(RetroGL.color(), 0));
 		}
@@ -213,7 +221,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		@Override
 		public ModelRenderer swapIn() {
 			if(parent != null) {
-				//new Exception("Double swapping?").printStackTrace();
 				return this;
 			}
 			parent = parentProvider.get();
@@ -224,7 +231,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		@Override
 		public ModelRenderer swapOut() {
 			if(parent == null) {
-				//new Exception("Double swapping?").printStackTrace();
 				return parentProvider.get();
 			}
 			ModelRenderer p = parent;
@@ -275,5 +281,22 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		public Vec4f getColor() {
 			return RetroGL.getColor();
 		}
+
+		@Override
+		public void postRender(float scale) {
+			MatrixStack.Entry e = getPartTransform();
+			if(e != null) {
+				multiplyStacks(e);
+			} else
+				super.postRender(scale);
+		}
+	}
+
+	private static final FloatBuffer BUF_FLOAT_16 = BufferUtils.createFloatBuffer(16);
+	public static void multiplyStacks(MatrixStack.Entry e) {
+		BUF_FLOAT_16.clear();
+		e.getMatrix().store(BUF_FLOAT_16);
+		BUF_FLOAT_16.rewind();
+		GlStateManager.multMatrix(BUF_FLOAT_16);
 	}
 }

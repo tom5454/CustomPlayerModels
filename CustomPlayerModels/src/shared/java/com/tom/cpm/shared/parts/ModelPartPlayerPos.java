@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
@@ -13,7 +12,7 @@ public class ModelPartPlayerPos implements IModelPart, IResolvedModelPart {
 	public int id;
 	public Vec3f pos, rot;
 
-	public ModelPartPlayerPos(IOHelper in, ModelDefinitionLoader loader) throws IOException {
+	public ModelPartPlayerPos(IOHelper in, ModelDefinition def) throws IOException {
 		id = in.readVarInt();
 		pos = in.readVec6b();
 		rot = in.readAngle();

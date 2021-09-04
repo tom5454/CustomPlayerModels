@@ -153,4 +153,14 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 			}
 		};
 	}
+
+	@Override
+	public String getName() {
+		return profile.getName();
+	}
+
+	@Override
+	public Object getGameProfile() {
+		return profile;
+	}
 }

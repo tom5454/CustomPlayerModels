@@ -1,7 +1,9 @@
 package com.tom.cpm.shared.editor.util;
 
+import java.util.UUID;
+
 import com.tom.cpl.util.Image;
-import com.tom.cpm.shared.gui.ViewportPanelBase.ViewportCamera;
+import com.tom.cpm.shared.gui.ViewportCamera;
 
 public class ModelDescription {
 	public String name = "";
@@ -9,6 +11,7 @@ public class ModelDescription {
 	public Image icon;
 	public ViewportCamera camera = new ViewportCamera();
 	public CopyProtection copyProtection = CopyProtection.NORMAL;
+	public UUID uuid;
 
 	public static enum CopyProtection {
 		NORMAL,

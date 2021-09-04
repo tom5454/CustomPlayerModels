@@ -232,7 +232,8 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 	}
 
 	public boolean hasModClient() {
-		return ((NetH) getClientNet()).cpm$hasMod();
+		NET n = getClientNet();
+		return n instanceof NetH && ((NetH) n).cpm$hasMod();
 	}
 
 	public P getClient() {

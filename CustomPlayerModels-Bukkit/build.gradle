@@ -22,7 +22,7 @@ dependencies {
 }
 
 sourceSets {
-	shared {
+	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
 		}
@@ -30,10 +30,6 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 		}
 	}
-	main {
-        java.srcDirs += shared.java.srcDirs
-        resources.srcDirs += shared.resources.srcDirs
-    }
 }
 
 spigot {

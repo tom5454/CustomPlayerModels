@@ -1,8 +1,7 @@
 package com.tom.cpm.client;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
-
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -14,6 +13,8 @@ import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix3f;
+import net.minecraft.util.math.vector.Matrix4f;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -24,7 +25,6 @@ import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.RedirectRendererOF;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -33,15 +33,16 @@ import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 
-public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer, Model> {
+public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, ModelTexture, ModelRenderer, Model> {
+	public static final Function<ResourceLocation, RenderType> armor = RenderType::armorCutoutNoCull;
+	public static final Function<ResourceLocation, RenderType> entity = RenderType::entityTranslucent;
 
-	public PlayerRenderManager(ModelDefinitionLoader loader) {
-		super(loader);
-		setFactory(new RedirectHolderFactory<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer>() {
+	public PlayerRenderManager() {
+		setFactory(new RedirectHolderFactory<IRenderTypeBuffer, ModelTexture, ModelRenderer>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public <M> RedirectHolder<?, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> create(
+			public <M> RedirectHolder<?, IRenderTypeBuffer, ModelTexture, ModelRenderer> create(
 					M model, String arg) {
 				if(model instanceof PlayerModel) {
 					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<AbstractClientPlayerEntity>) model);
@@ -57,11 +58,11 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 				return null;
 			}
 		});
-		setRedirectFactory(new RedirectRendererFactory<Model, CallbackInfoReturnable<ResourceLocation>, ModelRenderer>() {
+		setRedirectFactory(new RedirectRendererFactory<Model, ModelTexture, ModelRenderer>() {
 
 			@Override
 			public RedirectRenderer<ModelRenderer> create(Model model,
-					RedirectHolder<Model, ?, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> access,
+					RedirectHolder<Model, ?, ModelTexture, ModelRenderer> access,
 					Supplier<ModelRenderer> modelPart, VanillaModelPart part) {
 				return ClientProxy.optifineLoaded ?
 						new RedirectRendererOF((RDH) access, modelPart, part) :
@@ -82,34 +83,32 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		});
 	}
 
-	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer> {
-		public ResourceLocation boundSkin;
+	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, IRenderTypeBuffer, ModelTexture, ModelRenderer> {
 
 		public RDH(
-				ModelRenderManager<IRenderTypeBuffer, CallbackInfoReturnable<ResourceLocation>, ModelRenderer, Model> mngr,
+				ModelRenderManager<IRenderTypeBuffer, ModelTexture, ModelRenderer, Model> mngr,
 				Model model) {
 			super(mngr, model);
 		}
 
 		@Override
-		public void setupRenderSystem(CallbackInfoReturnable<ResourceLocation> cbi, TextureSheetType tex) {
-			boundSkin = cbi.getReturnValue();
-			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RenderType.entityTranslucent(boundSkin), 0));
-			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderType.eyes(boundSkin), 1));
+		public void setupRenderSystem(ModelTexture cbi, TextureSheetType tex) {
+			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(0));
+			renderTypes.put(RenderMode.DEFAULT, new NativeRenderType(cbi.getRenderType(), 0));
+			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderType.eyes(cbi.getTexture()), 1));
 			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(CustomRenderTypes.getLinesNoDepth(), 2));
 			renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
 		}
 
 		@Override
-		protected void bindTexture(CallbackInfoReturnable<ResourceLocation> cbi, TextureProvider skin) {
+		protected void bindTexture(ModelTexture cbi, TextureProvider skin) {
 			skin.bind();
-			OptifineTexture.applyOptifineTexture(cbi.getReturnValue(), skin);
-			cbi.setReturnValue(DynTexture.getBoundLoc());
+			OptifineTexture.applyOptifineTexture(cbi.getTexture(), skin);
+			cbi.setTexture(DynTexture.getBoundLoc());
 		}
 
 		@Override
 		public void swapOut0() {
-			this.boundSkin = null;
 		}
 
 		@Override
@@ -263,6 +262,15 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		public Vec4f getColor() {
 			return new Vec4f(red, green, blue, alpha);
 		}
+
+		@Override
+		public void translateAndRotate(MatrixStack stack) {
+			com.tom.cpl.math.MatrixStack.Entry e = getPartTransform();
+			if(e != null) {
+				multiplyStacks(e, stack);
+			} else
+				super.translateAndRotate(stack);
+		}
 	}
 
 	private static class RedirectModelRendererVanilla extends RedirectModelRendererBase {
@@ -291,9 +299,9 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 			this.green           = green          ;
 			this.blue            = blue           ;
 			this.alpha           = alpha          ;
-			this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn));
+			this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn), new VBuffer(bufferIn, packedLightIn, packedOverlayIn, matrixStackIn));
 			render();
-			holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.NORMAL).getNativeType());
+			holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.DEFAULT).getNativeType());
 			this.matrixStackIn = null;
 			this.bufferIn = null;
 		}
@@ -302,5 +310,10 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, C
 		public void renderParent() {
 			parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 		}
+	}
+
+	public static void multiplyStacks(com.tom.cpl.math.MatrixStack.Entry e, MatrixStack stack) {
+		stack.last().pose().multiply(new Matrix4f(e.getMatrixArray()));
+		stack.last().normal().mul(new Matrix3f(new Matrix4f(e.getNormalArray())));
 	}
 }

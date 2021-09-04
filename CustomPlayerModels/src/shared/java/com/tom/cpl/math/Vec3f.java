@@ -3,6 +3,8 @@ package com.tom.cpl.math;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.tom.cpm.shared.editor.project.JsonMap;
+
 public class Vec3f {
 	public static final Vec3f NEGATIVE_X = new Vec3f(-1.0F, 0.0F, 0.0F);
 	public static final Vec3f POSITIVE_X = new Vec3f(1.0F, 0.0F, 0.0F);
@@ -26,6 +28,14 @@ public class Vec3f {
 		x = v.x;
 		y = v.y;
 		z = v.z;
+	}
+
+	public Vec3f(JsonMap m, Vec3f def) {
+		this(def);
+		if(m == null)return;
+		x = m.getFloat("x");
+		y = m.getFloat("y");
+		z = m.getFloat("z");
 	}
 
 	public Vec3f(Map<String, Object> m, Vec3f def) {
@@ -97,6 +107,10 @@ public class Vec3f {
 		x = Math.round(x * i) / (float) i;
 		y = Math.round(y * i) / (float) i;
 		z = Math.round(z * i) / (float) i;
+	}
+
+	public Quaternion getDegreesQuaternion(float angle) {
+		return new Quaternion(this, angle, true);
 	}
 
 	public Quaternion getRadialQuaternion(float angle) {

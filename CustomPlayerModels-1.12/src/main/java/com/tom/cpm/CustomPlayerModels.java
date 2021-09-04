@@ -71,7 +71,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		return log;
 	}
 
-	private static final EnumSet<PlatformFeature> features = EnumSet.noneOf(PlatformFeature.class);
+	private static final EnumSet<PlatformFeature> features = EnumSet.of(PlatformFeature.EDITOR_HELD_ITEM);
 
 	@Override
 	public EnumSet<PlatformFeature> getSupportedFeatures() {

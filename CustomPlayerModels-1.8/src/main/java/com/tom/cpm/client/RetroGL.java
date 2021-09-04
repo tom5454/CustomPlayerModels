@@ -2,12 +2,14 @@ package com.tom.cpm.client;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.util.ResourceLocation;
 
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.DirectBuffer;
@@ -29,34 +31,32 @@ public class RetroGL {
 		GlStateManager.enableTexture2D();
 	}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
-	private static final RenderStage texture = new RenderStage(true, true, true, () -> {
-	}, () -> {
-	}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
-
-	private static float lx, ly;
-	private static final RenderStage eyes = new RenderStage(true, true, true, () -> {
-		lx = OpenGlHelper.lastBrightnessX;
-		ly = OpenGlHelper.lastBrightnessY;
-		GlStateManager.enableBlend();
-		GlStateManager.disableAlpha();
-		GlStateManager.blendFunc(1, 1);
-		GlStateManager.depthMask(true);
-		int i = 0xF0;
-		int j = i % 65536;
-		int k = i / 65536;
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
-	}, () -> {
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lx, ly);
-		GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-		GlStateManager.enableAlpha();
-	}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
-
-	public static RenderStage texture() {
-		return texture;
+	public static RenderStage texture(ResourceLocation tex) {
+		return new RenderStage(true, true, true, () -> {
+			bindTex(tex);
+		}, () -> {
+		}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
 	}
 
-	public static RenderStage eyes() {
-		return eyes;
+	private static float lx, ly;
+	public static RenderStage eyes(ResourceLocation tex) {
+		return new RenderStage(true, true, true, () -> {
+			lx = OpenGlHelper.lastBrightnessX;
+			ly = OpenGlHelper.lastBrightnessY;
+			GlStateManager.enableBlend();
+			GlStateManager.disableAlpha();
+			GlStateManager.blendFunc(1, 1);
+			GlStateManager.depthMask(true);
+			int i = 0xF0;
+			int j = i % 65536;
+			int k = i / 65536;
+			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
+			bindTex(tex);
+		}, () -> {
+			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, lx, ly);
+			GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+			GlStateManager.enableAlpha();
+		}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
 	}
 
 	public static RenderStage linesNoDepth() {
@@ -65,6 +65,20 @@ public class RetroGL {
 
 	public static RenderStage color() {
 		return color;
+	}
+
+	public static RenderStage paint(ResourceLocation tex) {
+		return new RenderStage(true, true, true, () -> {
+			GlStateManager.disableLighting();
+			bindTex(tex);
+		}, () -> {
+			GlStateManager.enableLighting();
+		}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
+	}
+
+	private static void bindTex(ResourceLocation tex) {
+		if(tex != null)
+			Minecraft.getMinecraft().getTextureManager().bindTexture(tex);
 	}
 
 	public static VertexBuffer buffer(NativeRenderType type) {

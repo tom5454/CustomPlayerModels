@@ -22,6 +22,7 @@ public enum ModelPartType {
 	;
 	public static final ModelPartType[] VALUES = values();
 	private final IModelPart.Factory factory;
+
 	private ModelPartType(IModelPart.Factory factory) {
 		this.factory = factory;
 	}

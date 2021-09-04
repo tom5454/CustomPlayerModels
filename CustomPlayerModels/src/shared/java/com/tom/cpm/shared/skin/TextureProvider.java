@@ -7,6 +7,9 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.DynamicTexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.IOHelper.ImageBlock;
 
@@ -18,11 +21,13 @@ public class TextureProvider {
 		size = new Vec2i(64, 64);
 	}
 
-	public TextureProvider(IOHelper in, int sizeLimit) throws IOException {
+	public TextureProvider(IOHelper in, ModelDefinition def) throws IOException {
 		size = in.read2s();
 		ImageBlock block = in.readImage();
-		if(block.getWidth() > sizeLimit || block.getHeight() > sizeLimit)
-			throw new IOException("Texture size too large");
+		if(def != null) {
+			ConfigKeys.MAX_TEX_SHEET_SIZE.checkFor(def.getPlayerObj(), block.getWidth(), BlockReason.TEXTURE_OVERFLOW);
+			ConfigKeys.MAX_TEX_SHEET_SIZE.checkFor(def.getPlayerObj(), block.getHeight(), BlockReason.TEXTURE_OVERFLOW);
+		}
 		block.doReadImage();
 		texture = new DynamicTexture(block.getImage());
 	}
