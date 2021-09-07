@@ -55,4 +55,7 @@ public class SkinDataInputStream extends InputStream {
 	public int getChannel() {
 		return channel;
 	}
+
+	@Override
+	public void close() {}
 }

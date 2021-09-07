@@ -17,6 +17,7 @@ import com.tom.cpm.client.optifine.proxy.ModelPartOF;
 import com.tom.cpm.client.optifine.proxy.VertexConsumerOF;
 import com.tom.cpm.client.optifine.proxy.VertexConsumerProviderOF;
 import com.tom.cpm.client.optifine.proxy.WorldRendererOF;
+import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class RedirectRendererOF extends RedirectModelRendererBase implements ModelPartOF {
@@ -61,6 +62,7 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 		this.alpha           = alpha          ;
 		this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn), new VBuffer(bufferIn, packedLightIn, packedOverlayIn, matrixStackIn));
 		render();
+		holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.DEFAULT).getNativeType());
 		if (lastRenderType != null)
 			renderTypeBuffer.getBuffer(lastRenderType);
 		this.matrixStackIn = null;

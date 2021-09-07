@@ -8,7 +8,9 @@ import com.tom.cpl.config.ConfigEntry.ModConfigFile.ConfigEntryTemp;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.InputPopup;
 import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.ScrollPanel;
@@ -29,6 +31,7 @@ import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.skin.TextureType;
 
 public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
+	private Frame frm;
 	private ViewportCamera cam;
 	private Player<?, ?> player;
 	private CompletableFuture<ModelDefinition> def;
@@ -36,9 +39,12 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 	private TextureProvider vanillaSkin;
 	private FlowLayout layout;
 	private Panel buttonsPanel;
+	private Button cloneBtn;
+	private boolean cloneLoaded;
 
 	public SocialPlayerPanel(Frame frm, Player<?, ?> player, ViewportCamera cam, int w, int h, Runnable reload) {
 		super(frm.getGui());
+		this.frm = frm;
 		Box parentBox = new Box(0, 0, w, h);
 		setBounds(parentBox);
 		this.player = player;
@@ -96,7 +102,8 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 			}
 		}
 
-		addElement(new Label(gui, player.getName()).setBounds(new Box(5, 5, 100, 10)));
+		String plname = player.getName();
+		addElement(new Label(gui, plname != null ? plname : gui.i18nFormat("label.cpm.unknown")).setBounds(new Box(5, 5, 100, 10)));
 
 		int bpw = w - s - 10;
 		buttonsPanel = new Panel(gui);
@@ -132,13 +139,46 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 		playerSettings.setBounds(new Box(5, 0, bpw - 5, 20));
 		buttonsPanel.addElement(playerSettings);
 
+		cloneBtn = new Button(gui, gui.i18nFormat("button.cpm.clone"), () -> {
+			ModelDefinition d = player.getModelDefinition();
+			if(d != null && d.cloneable != null) {
+				String name = d.cloneable.name;
+				if(name == null) {
+					frm.openPopup(new InputPopup(frm, gui.i18nFormat("label.cpm.modelName"), this::clone, null));
+				} else {
+					clone(name);
+				}
+			}
+		});
+		cloneBtn.setBounds(new Box(5, 0, bpw - 5, 20));
+		buttonsPanel.addElement(cloneBtn);
+		cloneBtn.setVisible(false);
+
 		layout.reflow();
+	}
+
+	@SuppressWarnings("unchecked")
+	private void clone(String name) {
+		MinecraftClientAccess.get().getDefinitionLoader().cloneModel(player, name).thenAcceptAsync(_b -> {
+			if((boolean) _b) {
+				frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.success"), gui.i18nFormat("label.cpm.cloningSuccess", name)));
+			} else {
+				frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.cloningFailed")));
+			}
+		}, gui::executeLater);
 	}
 
 	@Override
 	public ModelDefinition getSelectedDefinition() {
 		ModelDefinition d = player.getModelDefinition();
-		if(d != null)return d;
+		if(d != null) {
+			if(!cloneLoaded) {
+				cloneLoaded = true;
+				cloneBtn.setVisible(d.cloneable != null);
+				layout.reflow();
+			}
+			return d;
+		}
 		if(def != null)return def.getNow(null);
 		return null;
 	}
@@ -172,7 +212,7 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 
 			ConfigEntryTemp config = ModConfig.getCommonConfig().createTemp();
 			ConfigEntry ce = config.getEntry(ConfigKeys.PLAYER_SETTINGS).getEntry(uuid);
-			if(ce.keySet().isEmpty())ce.setString(ConfigKeys.NAME, name);
+			if(ce.keySet().isEmpty() && name != null)ce.setString(ConfigKeys.NAME, name);
 
 			ScrollPanel scpS = new ScrollPanel(gui);
 			scpS.setBounds(new Box(5, 5, bounds.w - 10, bounds.h - 30));
@@ -197,7 +237,7 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 
 		@Override
 		public String getTitle() {
-			return gui.i18nFormat("label.cpm.sSettingsFor", name);
+			return gui.i18nFormat("label.cpm.sSettingsFor", name == null ? gui.i18nFormat("label.cpm.unknown") : name);
 		}
 	}
 

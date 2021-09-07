@@ -178,7 +178,7 @@ public class SettingsPanel extends Panel {
 		addSafetyTab("player", player, 5);
 		buildListPanel(player, ce.getEntry(ConfigKeys.PLAYER_SETTINGS),
 				null,
-				(k, v) -> new Pl(UUID.fromString(k), v.getString(ConfigKeys.NAME, "?")),
+				(k, v) -> new Pl(UUID.fromString(k), v.getString(ConfigKeys.NAME, gui.i18nFormat("label.cpm.unknown"))),
 				k -> k.uuid.toString(),
 				e -> new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerInfo", e.name, e.uuid.toString())),
 				Collections.emptyMap(), Pl::getKeyGroup, false);
@@ -266,13 +266,8 @@ public class SettingsPanel extends Panel {
 		List<E> entries = ce.keySet().stream().map(k -> func.apply(k, ce.getEntry(k))).collect(Collectors.toList());
 		if(current != null && !ce.hasEntry(getKey.apply(current)))entries.add(current);
 
-		ListPanel<E> playerList = new ListPanel<E>(gui, entries, w, panel.getBounds().h - 30) {
-
-			@Override
-			public Tooltip getTooltip(E el) {
-				return tooltip.apply(el);
-			}
-		};
+		ListPanel<E> playerList = new ListPanel<>(gui, entries, w, panel.getBounds().h - 30);
+		playerList.setGetTooltip(tooltip);
 		Consumer<E> selEvt = s -> {
 			if(s != null) {
 				playerList.setWidth(lw);

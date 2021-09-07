@@ -18,7 +18,7 @@ import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
 public class DescPopup extends PopupPanel {
 	private EditorTexture icon;
 
-	public DescPopup(EditorGui g) {
+	public DescPopup(EditorGui g, Runnable onOk) {
 		super(g.getGui());
 		Editor editor = g.getEditor();
 
@@ -87,6 +87,9 @@ public class DescPopup extends PopupPanel {
 			editor.description.desc = descField.getText();
 			editor.description.copyProtection = chbxUUIDLock.isSelected() ? CopyProtection.UUID_LOCK : chbxClone.isSelected() ? CopyProtection.CLONEABLE : CopyProtection.NORMAL;
 			editor.markDirty();
+			close();
+			if(onOk != null)
+				onOk.run();
 		});
 		ok.setBounds(new Box(5, 170, 60, 20));
 		addElement(ok);

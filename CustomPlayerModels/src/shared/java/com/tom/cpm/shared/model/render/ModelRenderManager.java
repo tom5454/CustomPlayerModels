@@ -136,11 +136,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		return holders.computeIfAbsent(model, this::create);
 	}
 
-	@Override
-	public RedirectHolder<?, ?, ?, ?> getHolderFor(Object model) {
-		return holders.get(model);
-	}
-
 	public void copyModelForArmor(P from, P to) {
 		this.posSet.set(to, this.px.apply(from), this.py.apply(from), this.pz.apply(from));
 		this.rotSet.set(to, this.rx.apply(from), this.ry.apply(from), this.rz.apply(from));

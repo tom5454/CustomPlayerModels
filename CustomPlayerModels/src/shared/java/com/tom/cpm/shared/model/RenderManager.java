@@ -94,4 +94,8 @@ public class RenderManager<G, P, M, D> {
 	public Player<P, M> getBoundPlayer() {
 		return profile;
 	}
+
+	public void clearBoundPlayer() {
+		profile = null;
+	}
 }

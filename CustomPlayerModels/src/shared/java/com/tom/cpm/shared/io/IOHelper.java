@@ -496,4 +496,12 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 			return image;
 		}
 	}
+
+	public static void copy(InputStream is, OutputStream os) throws IOException {
+		byte[] d = new byte[1024];
+		int len = 0;
+		while((len = is.read(d, 0, d.length)) > 0){
+			os.write(d, 0, len);
+		}
+	}
 }

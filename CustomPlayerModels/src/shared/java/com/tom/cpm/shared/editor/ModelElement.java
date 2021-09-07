@@ -52,7 +52,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public ModelElement(ModelElement element, ModelElement parent) {
 		this(element.editor);
 		this.parent = parent;
-		element.children.forEach(c -> children.add(new ModelElement(c, this)));
+		element.children.stream().filter(ModelElement::canDup).forEach(c -> children.add(new ModelElement(c, this)));
 		name = editor.gui().i18nFormat("label.cpm.dup", element.name);
 		showInEditor = element.showInEditor;
 		texture = element.texture;
@@ -409,11 +409,13 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void populatePopup(PopupMenu popup) {
-		if(itemRenderer == null)
+		if(canDup()) {
 			popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), this::duplicate);
+		}
 	}
 
 	private void duplicate() {
+		if(!canDup())return;
 		if(type == ElementType.NORMAL) {
 			ModelElement elem = new ModelElement(this, parent);
 			editor.action("duplicate").addToList(parent.children, elem).onUndo(() -> editor.selectedElement = null).execute();
@@ -440,5 +442,9 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public Tooltip getTooltip() {
 		return tooltip;
+	}
+
+	private boolean canDup() {
+		return itemRenderer == null;
 	}
 }

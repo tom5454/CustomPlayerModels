@@ -560,7 +560,8 @@ public class Editor {
 			lst.add(map);
 			map.put("id", ((VanillaModelPart) elem.typeData).getName());
 			if(elem.typeData instanceof RootModelType)map.put("customPart", true);
-			map.put("show", elem.showInEditor);
+			map.put("show", !elem.hidden);
+			map.put("showInEditor", elem.showInEditor);
 			if(!elem.children.isEmpty()) {
 				List<Map<String, Object>> list = new ArrayList<>();
 				map.put("children", list);
@@ -1105,15 +1106,25 @@ public class Editor {
 
 	public void editAnim(IPose pose, String displayName, boolean add, boolean loop) {
 		if(selectedAnim != null) {
-			String[] sp = selectedAnim.filename.split("_", 2);
-			String newFname = (pose instanceof VanillaPose ? "v" : (pose != null ? "c" : "g")) + "_" + sp[1];
+			String fname = null;
+			AnimationType type;
+			if(pose instanceof VanillaPose) {
+				fname = "v_" + ((VanillaPose)pose).name().toLowerCase() + "_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+				type = AnimationType.POSE;
+			} else if(pose != null) {
+				fname = "c_" + ((CustomPose) pose).getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+				type = AnimationType.POSE;
+			} else {
+				fname = "g_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+				type = AnimationType.GESTURE;
+			}
 			action("edit", "action.cpm.anim").
 			updateValueOp(selectedAnim, selectedAnim.add, add, (a, b) -> a.add = b).
 			updateValueOp(selectedAnim, selectedAnim.loop, loop, (a, b) -> a.loop = b).
 			updateValueOp(selectedAnim, selectedAnim.displayName, displayName, (a, b) -> a.displayName = b).
 			updateValueOp(selectedAnim, selectedAnim.pose, pose, (a, b) -> a.pose = b).
-			updateValueOp(selectedAnim, selectedAnim.type, pose != null ? AnimationType.POSE : AnimationType.GESTURE, (a, b) -> a.type = b).
-			updateValueOp(selectedAnim, selectedAnim.filename, newFname, (a, b) -> a.filename = b).
+			updateValueOp(selectedAnim, selectedAnim.type, type, (a, b) -> a.type = b).
+			updateValueOp(selectedAnim, selectedAnim.filename, fname, (a, b) -> a.filename = b).
 			execute();
 			updateGui();
 		}

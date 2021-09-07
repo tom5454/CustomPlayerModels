@@ -37,6 +37,7 @@ import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.IResolvedModelPart;
+import com.tom.cpm.shared.parts.ModelPartCloneable;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
 import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
@@ -64,7 +65,8 @@ public class ModelDefinition {
 	private AnimationRegistry animations = new AnimationRegistry();
 	private ModelPartScale scale;
 	private boolean stitchedTexture;
-	public boolean cloneable, hideHeadIfSkull = true, removeArmorOffset;
+	public boolean hideHeadIfSkull = true, removeArmorOffset;
+	public ModelPartCloneable cloneable;
 	private Throwable error;
 
 	public ModelDefinition(ModelDefinitionLoader loader, Player<?, ?> player) {

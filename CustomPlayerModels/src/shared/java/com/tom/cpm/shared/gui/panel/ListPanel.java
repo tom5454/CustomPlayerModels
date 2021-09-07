@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import com.tom.cpl.gui.IGui;
@@ -20,6 +21,7 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 	private List<E> list;
 	private List<E> listIn;
 	private TextField search;
+	private Function<E, Tooltip> getTooltip = e -> null;
 	private ListElement2d<E> listElement;
 	private Consumer<E> onSelect;
 	private Panel listPanel;
@@ -82,7 +84,7 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 
 	@Override
 	public Tooltip getTooltip(E el) {
-		return null;
+		return getTooltip.apply(el);
 	}
 
 	@Override
@@ -126,5 +128,9 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 
 	public E getSelected() {
 		return selected;
+	}
+
+	public void setGetTooltip(Function<E, Tooltip> getTooltip) {
+		this.getTooltip = getTooltip;
 	}
 }

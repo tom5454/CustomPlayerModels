@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
-
-import com.tom.cpl.math.MatrixStack;
 
 public class VBuffers {
 	private Function<NativeRenderType, VertexBuffer> bufferFactory;
@@ -74,34 +70,8 @@ public class VBuffers {
 		return new VBuffers(rt -> new ReplayBuffer(() -> getBuffer(rt)), normalBuffer);
 	}
 
-	public VBuffers transform(MatrixStack stack) {
-		return wrapped(b -> new TransformedBuffer(b, stack));
-	}
-
-	public VBuffers wrapped(UnaryOperator<VertexBuffer> func) {
-		return new VBuffers(rt -> func.apply(getBuffer(rt)), normalBuffer != null ? func.apply(normalBuffer) : null);
-	}
-
-	public VBuffers finish(Consumer<VertexBuffer> finisher) {
-		return wrapped(b -> new FinishBuffer(b, finisher));
-	}
-
 	public VBuffers normal(VertexBuffer normal) {
 		return new VBuffers(this::getBuffer, normal);
-	}
-
-	private static class FinishBuffer extends WrappedBuffer {
-		private final Consumer<VertexBuffer> finisher;
-
-		public FinishBuffer(VertexBuffer buffer, Consumer<VertexBuffer> finisher) {
-			super(buffer);
-			this.finisher = finisher;
-		}
-
-		@Override
-		public void finish() {
-			finisher.accept(buffer);
-		}
 	}
 
 	private static class VBuf extends WrappedBuffer {

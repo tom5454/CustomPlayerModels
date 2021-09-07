@@ -18,6 +18,7 @@ import com.tom.cpm.client.optifine.proxy.IRenderTypeBufferOF;
 import com.tom.cpm.client.optifine.proxy.IVertexBuilderOF;
 import com.tom.cpm.client.optifine.proxy.ModelRendererOF;
 import com.tom.cpm.client.optifine.proxy.WorldRendererOF;
+import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class RedirectRendererOF extends RedirectModelRendererBase implements ModelRendererOF {
@@ -62,15 +63,7 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 		this.alpha           = alpha          ;
 		this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn), new VBuffer(bufferIn, packedLightIn, packedOverlayIn, matrixStackIn));
 		render();
-		/*matrixStackIn.push();
-		translateRotate(matrixStackIn);
-		List<ModelSprite> spriteList = cpm$spriteList();
-		int spriteListSize = spriteList.size();
-		for (int ix = 0; ix < spriteListSize; ix++) {
-			ModelSprite sprite = spriteList.get(ix);
-			sprite.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-		}
-		matrixStackIn.pop();*/
+		holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.DEFAULT).getNativeType());
 		if (lastRenderType != null)
 			renderTypeBuffer.getBuffer(lastRenderType);
 		this.matrixStackIn = null;

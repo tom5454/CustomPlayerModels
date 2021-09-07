@@ -12,6 +12,7 @@ import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.ScrollPanel;
+import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
@@ -71,6 +72,7 @@ public class SocialPanel extends Panel {
 
 			playerList = new ListPanel<>(gui, players, width, height - 20);
 			playerList.setSelect(this::setPlayerPanel);
+			playerList.setGetTooltip(PlayerInServer::getTooltip);
 			playerList.setBounds(new Box(0, 0, width, height - 20));
 			playerList.setWidth(width);
 			playerList.setBackgroundColor(gui.getColors().popup_background & 0x80FFFFFF);
@@ -132,7 +134,13 @@ public class SocialPanel extends Panel {
 
 		@Override
 		public String toString() {
-			return MinecraftClientAccess.get().getDefinitionLoader().getGP_Name(gp);
+			String name = MinecraftClientAccess.get().getDefinitionLoader().getGP_Name(gp);
+			if(name == null)return gui.i18nFormat("label.cpm.unknown");
+			return name;
+		}
+
+		private Tooltip getTooltip() {
+			return new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerUUID", getUUID().toString()));
 		}
 	}
 

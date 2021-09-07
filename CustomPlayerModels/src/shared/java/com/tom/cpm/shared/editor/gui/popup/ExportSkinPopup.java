@@ -101,7 +101,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 
 	private static class Skin extends ExportSkinPopup {
 		private EditorTexture vanillaSkin;
-		private Button okDef, okUpload;
+		private Button okDef, okUpload, changeUUID;
 		private File selFile;
 		private Checkbox forceLinkFile, chbxClone, chbxUUIDLock;
 		private Link defLink;
@@ -172,16 +172,18 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			chbxClone = new Checkbox(gui, gui.i18nFormat("label.cpm.cloneable"));
 			chbxClone.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.cloneable")));
 			chbxClone.setBounds(new Box(5, 105, 60, 20));
-			chbxClone.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.CLONEABLE);
 			addElement(chbxClone);
+
+			Button btnEditDesc = new Button(gui, gui.i18nFormat("label.cpm.desc"), () -> e.openPopup(new DescPopup(e, this::updateDesc)));
+			btnEditDesc.setBounds(new Box(90, 105, 80, 20));
+			addElement(btnEditDesc);
 
 			chbxUUIDLock = new Checkbox(gui, gui.i18nFormat("label.cpm.uuidlock"));
 			chbxUUIDLock.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.uuidlock", MinecraftClientAccess.get().getClientPlayer().getUUID().toString())));
 			chbxUUIDLock.setBounds(new Box(5, 130, 60, 20));
-			chbxUUIDLock.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
 			addElement(chbxUUIDLock);
 
-			Button changeUUID = new Button(gui, gui.i18nFormat("button.cpm.changeUUID"), new InputPopup(e, gui.i18nFormat("button.cpm.changeUUID"), gui.i18nFormat("label.cpm.enterNewUUID"), n -> {
+			changeUUID = new Button(gui, gui.i18nFormat("button.cpm.changeUUID"), new InputPopup(e, gui.i18nFormat("button.cpm.changeUUID"), gui.i18nFormat("label.cpm.enterNewUUID"), n -> {
 				if(editor.description == null)editor.description = new ModelDescription();
 				try {
 					editor.description.uuid = Util.uuidFromString(n);
@@ -191,11 +193,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 				}
 			}, null));
 			changeUUID.setBounds(new Box(90, 130, 80, 20));
-			changeUUID.setEnabled(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
 			addElement(changeUUID);
-
-			if(editor.description != null && editor.description.uuid != null)
-				chbxUUIDLock.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.uuidlockOw", editor.description.uuid.toString())));
 
 			chbxClone.setAction(() -> {
 				if(!chbxClone.isSelected()) {
@@ -244,6 +242,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			ok.setEnabled(false);
 			ok.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skin.noFile")));
 			detectDef();
+			updateDesc();
 
 			vanillaSkinTooltip = new Tooltip(e,  gui.i18nFormat("tooltip.cpm.export.skin.vanillaSkinInfo"));
 		}
@@ -258,6 +257,16 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			gui.drawTexture(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0, 0, 1, 1);
 
 			if(event.isHovered(new Box(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128)))vanillaSkinTooltip.set();
+		}
+
+		private void updateDesc() {
+			Editor editor = editorGui.getEditor();
+			chbxClone.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.CLONEABLE);
+			chbxUUIDLock.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
+			changeUUID.setEnabled(editor.description != null && editor.description.copyProtection == CopyProtection.UUID_LOCK);
+
+			if(editor.description != null && editor.description.uuid != null)
+				chbxUUIDLock.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.uuidlockOw", editor.description.uuid.toString())));
 		}
 
 		@Override
@@ -389,7 +398,7 @@ public abstract class ExportSkinPopup extends PopupPanel {
 	}
 
 	private static class B64 extends ExportSkinPopup {
-		private Checkbox forceLinkFile;
+		private Checkbox forceLinkFile, chbxClone;
 
 		protected B64(EditorGui e) {
 			super(e, 160, 150, ExportMode.B64);
@@ -398,6 +407,24 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			addElement(forceLinkFile);
 			forceLinkFile.setAction(() -> forceLinkFile.setSelected(!forceLinkFile.isSelected()));
 			forceLinkFile.setBounds(new Box(5, 55, 135, 20));
+
+			chbxClone = new Checkbox(gui, gui.i18nFormat("label.cpm.cloneable"));
+			chbxClone.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.cloneable")));
+			chbxClone.setBounds(new Box(5, 80, 60, 20));
+			addElement(chbxClone);
+
+			chbxClone.setAction(() -> chbxClone.setSelected(!chbxClone.isSelected()));
+
+			Button btnEditDesc = new Button(gui, gui.i18nFormat("label.cpm.desc"), () -> e.openPopup(new DescPopup(e, this::updateDesc)));
+			btnEditDesc.setBounds(new Box(90, 80, 60, 20));
+			addElement(btnEditDesc);
+
+			updateDesc();
+		}
+
+		private void updateDesc() {
+			Editor editor = editorGui.getEditor();
+			chbxClone.setSelected(editor.description != null && editor.description.copyProtection == CopyProtection.CLONEABLE);
 		}
 
 		@Override
@@ -405,6 +432,18 @@ public abstract class ExportSkinPopup extends PopupPanel {
 			if(editorGui.getEditor().templateSettings != null) {
 				editorGui.openPopup(new MessagePopup(editorGui, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.templateExportAsSkin")));
 				return;
+			}
+			Editor e = editorGui.getEditor();
+			if(e.description == null && chbxClone.isSelected()) {
+				e.description = new ModelDescription();
+				e.markDirty();
+			}
+			if(e.description != null) {
+				CopyProtection cp = chbxClone.isSelected() ? CopyProtection.CLONEABLE : e.description.copyProtection;
+				if(e.description.copyProtection != cp) {
+					e.description.copyProtection = cp;
+					e.markDirty();
+				}
 			}
 			Exporter.exportB64(editorGui.getEditor(), editorGui, b64 -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "base64_model", b64)), forceLinkFile.isSelected());
 		}

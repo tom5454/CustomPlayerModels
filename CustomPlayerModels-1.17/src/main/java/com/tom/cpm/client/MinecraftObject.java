@@ -44,7 +44,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 	public MinecraftObject(Minecraft mc) {
 		this.mc = mc;
 		MinecraftObjectHolder.setClientObject(this);
-		loader = new ModelDefinitionLoader<>(PlayerProfile::create, GameProfile::getId, GameProfile::getName);
+		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId, GameProfile::getName);
 		prm = new PlayerRenderManager();
 	}
 

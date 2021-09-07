@@ -235,7 +235,7 @@ public class Exporter {
 		if(e.description != null) {
 			switch (e.description.copyProtection) {
 			case CLONEABLE:
-				otherParts.add(new ModelPartCloneable());
+				otherParts.add(new ModelPartCloneable(e.description.name, e.description.desc, e.description.icon));
 				break;
 			case NORMAL:
 				break;

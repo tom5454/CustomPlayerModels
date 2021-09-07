@@ -107,6 +107,7 @@ button.cpm.addBlock=Block
 button.cpm.removeBlock=Unblock
 button.cpm.playerSettings=Player Settings
 button.cpm.changeUUID=Change UUID
+button.cpm.clone=Clone Model
 
 button.cpm.root_group.cape=Cape
 button.cpm.root_group.elytra=Elytra
@@ -127,7 +128,7 @@ tooltip.cpm.config.titleScreenButton=Show Open Editor button on the Title Screen
 tooltip.cpm.glow=Previously Glowing.\Applies the vanilla glowing eyes effect, used by Enderman and Spider eyes,\to the selected part.
 tooltip.cpm.display.onlyDrawOnSelected=Only allow drawing on selected parts.
 tooltip.cpm.display.scaling=Enable model scaling using the Pehkui or Shrink mods.\Customizable Player Models and Pehkui or Shrink is required on both the client and server.\Without these mods the model scale won't be affected.\When enabled select the 'Scaling' on the right to see the effect.
-tooltip.cpm.cloneable=This model can be cloned and used by anyone.\Clone a model in the player settings menu.\!! This option is here for future versions. !!\!! Cloning is not implemented yet. !!
+tooltip.cpm.cloneable=This model can be cloned and used by anyone.\Clone a model in the player settings menu.
 tooltip.cpm.uuidlock=Locks model definition to the current players UUID.\Current lock UUID: %s.\This can prevent model stealing with simple skin stealers.
 tooltip.cpm.uuidlockOw=Locks model definition to the defined UUID.\Current lock UUID: %s.\This can prevent model stealing with simple skin stealers.
 tooltip.cpm.export.skinCompat=Exports a skin type compatible model.\! The export size limit is much lower before needing a gist !\You can apply skin compatible models in-game without restarting the game,\with the built-in skin changer in the models menu,\accessible from the Editor under Edit/Models.\You must open the editor from the Title Screen for this to work.
@@ -162,6 +163,7 @@ tooltip.cpm.safetyProfile.high=Disables model loading for normal players.
 tooltip.cpm.effect.hideHeadIfSkull=Hides the head model if wearing a skull\(On by default)
 tooltip.cpm.effect.removeArmorOffset=Removes the offset from duplicated armor parts.\Makes animating duplicated armor parts easier.\(On by default, recommended)
 tooltip.cpm.display.playVanillaAnims=Play vanilla animations while in the Animations/Setup tab.
+tooltip.cpm.playerUUID=Player's UUID: %s
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -380,6 +382,11 @@ label.cpm.invalidUUID=Invalid UUID
 label.cpm.display.layers=- Layers ---
 label.cpm.display.items=- Items ---
 label.cpm.display.playVanillaAnims=Play vanilla animations
+label.cpm.modelName=Enter Model Name:
+label.cpm.cloningSuccess=Model saved as: %s
+label.cpm.success=Success
+label.cpm.cloningFailed=Cloning failed
+label.cpm.unknown=Unknown
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body

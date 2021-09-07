@@ -362,7 +362,7 @@ public class EditorGui extends Frame {
 			}).start();
 		}, null));
 
-		pp.addButton(gui.i18nFormat("label.cpm.desc"), () -> openPopup(new DescPopup(this)));
+		pp.addButton(gui.i18nFormat("label.cpm.desc"), () -> openPopup(new DescPopup(this, null)));
 
 		PopupMenu parts = new PopupMenu(gui, this);
 		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.parts"), parts);
