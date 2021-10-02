@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "package": "com.tom.cpm.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  	"common.ServerPlayNetHandlerMixin",
+  	"common.PlayerManagerMixin"
+  ],
+  "client": [
+    "PlayerRendererMixin",
+    "ScreenMixin",
+    "BufferBuilderStorageMixin",
+    "MinecraftClientMixin",
+    "SkullBlockEntityRendererMixin",
+    "BuiltinModelItemRendererMixin",
+    "MixinGameRenderer",
+    "ClientPlayNetHandlerMixin",
+	"HeadFeatureRendererMixin",
+	"ArmorFeatureRendererMixin",
+	"ElytraFeatureRendererMixin",
+	"CapeFeatureRendererMixin",
+	"Matrix4fMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

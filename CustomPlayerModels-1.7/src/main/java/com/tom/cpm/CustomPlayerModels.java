@@ -18,6 +18,7 @@ import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.SidedProxy;
@@ -80,5 +81,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public EnumSet<PlatformFeature> getSupportedFeatures() {
 		return features;
+	}
+
+	@Override
+	public String getPlatformVersionString() {
+		return "Minecraft 1.7.10 (" + FMLCommonHandler.instance().getModName() + ") " + Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
 	}
 }

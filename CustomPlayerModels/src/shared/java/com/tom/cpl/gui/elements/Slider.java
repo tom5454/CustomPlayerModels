@@ -23,7 +23,7 @@ public class Slider extends GuiElement {
 		if(!enabled) {
 			color = gui.getColors().button_text_disabled;
 			bgColor = gui.getColors().button_disabled;
-		} else if(event.isInBounds(bounds)) {
+		} else if(event.isHovered(bounds)) {
 			color = gui.getColors().button_text_hover;
 			bgColor = gui.getColors().button_hover;
 		}

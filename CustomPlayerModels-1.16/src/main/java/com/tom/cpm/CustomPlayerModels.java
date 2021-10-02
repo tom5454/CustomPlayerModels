@@ -6,9 +6,12 @@ import java.util.EnumSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.util.SharedConstants;
+
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -16,6 +19,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.versions.forge.ForgeVersion;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 import com.tom.cpl.util.ILogger;
@@ -83,5 +87,11 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public EnumSet<PlatformFeature> getSupportedFeatures() {
 		return features;
+	}
+
+	@Override
+	public String getPlatformVersionString() {
+		String modVer = ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
+		return "Minecraft " + SharedConstants.getCurrentVersion().getName() + " (forge/" + ForgeVersion.getVersion() + ") " + modVer;
 	}
 }

@@ -87,6 +87,11 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			public EnumSet<PlatformFeature> getSupportedFeatures() {
 				return EnumSet.noneOf(PlatformFeature.class);
 			}
+
+			@Override
+			public String getPlatformVersionString() {
+				return "Bukkit (" + getServer().getVersion() + "/" + getServer().getBukkitVersion() + ") " + getDescription().getVersion();
+			}
 		});
 		MinecraftObjectHolder.setServerObject(new MinecraftServerAccess() {
 

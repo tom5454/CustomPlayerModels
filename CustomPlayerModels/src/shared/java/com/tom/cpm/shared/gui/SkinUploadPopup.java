@@ -38,11 +38,11 @@ public class SkinUploadPopup extends ProcessPopup<Void> {
 	private Void process() {
 		setupLabelsExec(gui.i18nFormat("label.cpm.uploading.connecting"));
 		MojangSkinUploadAPI api = MinecraftClientAccess.get().getUploadAPI();
-		if(!api.checkAuth()) {
+		/*if(!api.checkAuth()) {
 			if(cancelled.get())return null;
 			gui.executeLater(new ConfirmPopup(frame, title, gui.i18nFormat("label.cpm.uploading.authFail"), this::save, null, gui.i18nFormat("button.cpm.saveSkinFile")));
 			return null;
-		}
+		}*/
 		if(cancelled.get())return null;
 		setupLabelsExec(gui.i18nFormat("label.cpm.uploading.skin"));
 		try {

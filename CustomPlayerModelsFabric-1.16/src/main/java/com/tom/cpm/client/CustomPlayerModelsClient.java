@@ -24,8 +24,8 @@ import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.ElytraEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -51,6 +51,7 @@ import com.tom.cpm.shared.network.NetHandler;
 import io.netty.buffer.Unpooled;
 
 public class CustomPlayerModelsClient implements ClientModInitializer {
+	public static final Identifier DEFAULT_CAPE = new Identifier("cpm:textures/template/cape.png");
 	public static MinecraftObject mc;
 	public static CustomPlayerModelsClient INSTANCE;
 	public static boolean optifineLoaded;
@@ -166,7 +167,6 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 			AbstractClientPlayerEntity abstractClientPlayerEntity, float partialTicks, PlayerEntityModel<AbstractClientPlayerEntity> model,
 			ModelDefinition modelDefinition) {
 		matrixStack.push();
-		matrixStack.translate(0.0D, 0.0D, 0.125D);
 
 		float r, q, s;
 
@@ -204,15 +204,30 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 			if (abstractClientPlayerEntity.isInSneakingPose()) {
 				q += 25.0F;
 			}
+			if (abstractClientPlayerEntity.getEquippedStack(EquipmentSlot.CHEST).isEmpty()) {
+				if (abstractClientPlayerEntity.isSneaking()) {
+					model.cape.pivotZ = 1.4F + 0.125F * 3;
+					model.cape.pivotY = 1.85F + 1 - 0.125F * 4;
+				} else {
+					model.cape.pivotZ = 0.0F + 0.125F * 16f;
+					model.cape.pivotY = 0.0F;
+				}
+			} else if (abstractClientPlayerEntity.isSneaking()) {
+				model.cape.pivotZ = 0.3F + 0.125F * 16f;
+				model.cape.pivotY = 0.8F + 0.3f;
+			} else {
+				model.cape.pivotZ = -1.1F + 0.125F * 32f;
+				model.cape.pivotY = -0.85F + 1;
+			}
 		} else {
 			r = 0;
 			q = 0;
 			s = 0;
 		}
 
-		matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(6.0F + r / 2.0F + q));
-		matrixStack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(s / 2.0F));
-		matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180.0F - s / 2.0F));
+		model.cape.pitch = (float) -Math.toRadians(6.0F + q / 2.0F + r);
+		model.cape.yaw = (float) Math.toRadians(180.0F - s / 2.0F);
+		model.cape.roll = (float) Math.toRadians(s / 2.0F);
 		model.renderCape(matrixStack, buffer, packedLightIn, OverlayTexture.DEFAULT_UV);
 		matrixStack.pop();
 	}

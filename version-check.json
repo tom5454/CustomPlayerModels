@@ -2,25 +2,26 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "homepage-fabric": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
   "promos": {
-    "1.12.2-latest": "0.1.0b",
-    "1.12.2-recommended": "0.1.0b",
-    "1.16.4-latest": "0.1.0b",
-    "1.16.4-recommended": "0.1.0b",
-    "1.16.5-latest": "0.1.0b",
-    "1.16.5-recommended": "0.1.0b",
-    "1.8.9-latest": "0.1.0b",
-    "1.8.9-recommended": "0.1.0b",
-    "1.7.10-latest": "0.1.0b",
-    "1.7.10-recommended": "0.1.0b",
+    "1.12.2-latest": "0.1.1a",
+    "1.12.2-recommended": "0.1.1a",
+    "1.16.4-latest": "0.1.1a",
+    "1.16.4-recommended": "0.1.1a",
+    "1.16.5-latest": "0.1.1a",
+    "1.16.5-recommended": "0.1.1a",
+    "1.8.9-latest": "0.1.1a",
+    "1.8.9-recommended": "0.1.1a",
+    "1.7.10-latest": "0.1.1a",
+    "1.7.10-recommended": "0.1.1a",
     "1.15.2-latest": "0.0.17d",
     "1.15.2-recommended": "0.0.17d",
-    "1.16.4-fabric-latest": "0.1.0b",
-    "1.16.5-fabric-latest": "0.1.0b",
-    "1.17-fabric-latest": "0.1.0b",
-    "bukkit-latest": "0.1.0b",
-    "1.17.1-fabric-latest": "0.1.0b",
-    "1.17.1-latest": "0.1.0b",
-    "1.17.1-recommended": "0.1.0b"
+    "1.16.4-fabric-latest": "0.1.1a",
+    "1.16.5-fabric-latest": "0.1.1a",
+    "1.17-fabric-latest": "0.1.1a",
+    "bukkit-latest": "0.1.1a",
+    "1.17.1-fabric-latest": "0.1.1a",
+    "1.17.1-latest": "0.1.1a",
+    "1.17.1-recommended": "0.1.1a",
+    "1.18-Snapshot-fabric-latest": "0.1.1a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -52,7 +53,8 @@
     "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2",
     "0.0.17d": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.16.4": {
     "0.0.5a": "First release",
@@ -88,7 +90,8 @@
     "0.0.17f": "Fixed crash with optifine\nFixed gestures not working",
     "0.0.17g": "Fixed crash with older forge versions",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.16.5": {
     "0.0.5a": "First release",
@@ -124,7 +127,8 @@
     "0.0.17f": "Fixed crash with optifine\nFixed gestures not working",
     "0.0.17g": "Fixed crash with older forge versions",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.16.4-fabric": {
     "0.0.5a": "First release",
@@ -158,7 +162,8 @@
     "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2",
     "0.0.17d": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.16.5-fabric": {
     "0.0.5a": "First release",
@@ -192,7 +197,8 @@
     "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2",
     "0.0.17d": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.17-fabric": {
     "0.0.5a": "First release",
@@ -229,7 +235,8 @@
     "0.0.17d": "Fixed crash with skulls on 1.17",
     "0.0.17e": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.8.9": {
     "0.0.5a": "First release",
@@ -260,7 +267,8 @@
     "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2",
     "0.0.17d": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.7.10": {
     "0.0.5a": "First release",
@@ -291,7 +299,8 @@
     "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2",
     "0.0.17d": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.15.2": {
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
@@ -335,7 +344,8 @@
     "0.0.17c": "Improved the per-face uv editor auto uv feature\nFixed crash with armor (Closes #105, Closes #107, Closes #110)\nFixed duplicate crashing the editor (Closes #109)\nFixed custom parts not rendering in the correct place in some cases\nFixed armor texture size not correct while rendering in game\nPorted armor renderer to 1.8.9 and 1.12.2",
     "0.0.17d": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.17.1-fabric": {
     "0.0.17a": "Added editable capes/armor/elytra (1.15+) (Closes #49)\nAdded more tooltips\nAdded single texture cubes\nAdded Per-Face UV option for cubes\nAdded Undo/Redo shows the name of the action\n\nFixed tooltips showing through popups\nFixed file chooser not registering clicks properly (Closes #103)\nFixed model tint not working\nFixed spinner values changing after clicking into the textfield\nFixed 1.7 render breaking when taking damage\nFixed crash on 1.15 with skulls\n\nCleaned up parts of the editor gui code",
@@ -344,10 +354,15 @@
     "0.0.17d": "Fixed crash with skulls on 1.17",
     "0.0.17e": "Fixed duplicate not working correctly (Closes #114)\nFixed some projects couldn\u0027t be opened in the editor (Closes #115)\nFixed models not loading in certain cases (#113)\nFixed armor animations not playing in-game (Closes #116)\nFixed armor animations not saving correctly",
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   },
   "1.17.1": {
     "0.1.0a": "Added safety settings\nAdded social menu\nAdded held item locations elements\nAdded move animation frame with ctrl (Closes #126)\nPorted to 1.17 forge\nEditor rendering rewrite (? #129, ? #130, ? #131)\nRewritten settings menu\n\nFixed editor not rendering on older minecraft versions (Closes #122)\nFixed models with more than 255 elements not exporting and loading correctly (? #120)\nFixed visibility not working in animations in some cases (Closes #99)\nFixed enchanted armor not rendering glint (Closes #128)\nFixed elytra texture not loading correctly\nFixed 1.8 crashing with optifine\nFixed bucket fill button off screen in the editor",
-    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)"
+    "0.1.0b": "Added player model cloning\n\nFixed glowing effect breaking with optifine (Closes #134)\nFixed hidden effect not saving correctly (Closes #135)\nFixed editing animations not working (Closes #138)",
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
+  },
+  "1.18-Snapshot-fabric": {
+    "0.1.1a": "Added animated textures\nAdded error log\nUpdated to forge 1.17.1\nUpdated to 21w39a\nRewritten project saving/loading system\n\nFixed game crashing with custom capes in certain cases\nFixed cape not rendering in the correct place (Closes #141)\nFixed crashes with settings gui\nFixed skulls breaking with optifine on 1.17\nFixed armor not rendering on OptiFabric"
   }
 }

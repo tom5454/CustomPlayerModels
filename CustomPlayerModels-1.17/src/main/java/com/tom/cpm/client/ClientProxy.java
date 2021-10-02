@@ -25,6 +25,7 @@ import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -37,27 +38,32 @@ import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fmlclient.ConfigGuiHandler;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
 
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
+import com.tom.cpm.shared.gui.SettingsGui;
 import com.tom.cpm.shared.model.RenderManager;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.util.Log;
 
 import io.netty.buffer.Unpooled;
 
 public class ClientProxy extends CommonProxy {
-	//public static boolean optifineLoaded;
+	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
+	public static boolean optifineLoaded;
 	public static ClientProxy INSTANCE = null;
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
@@ -70,8 +76,8 @@ public class ClientProxy extends CommonProxy {
 		INSTANCE = this;
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);
-		//optifineLoaded = OFDetector.doApply();
-		//if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
+		optifineLoaded = OFDetector.doApply();
+		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), net.minecraft.world.entity.player.Player::getGameProfile);
@@ -94,6 +100,7 @@ public class ClientProxy extends CommonProxy {
 		});
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
+		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
 	@SubscribeEvent
@@ -205,7 +212,6 @@ public class ClientProxy extends CommonProxy {
 			AbstractClientPlayer playerIn, float partialTicks, PlayerModel<AbstractClientPlayer> model,
 			ModelDefinition modelDefinition) {
 		matrixStackIn.pushPose();
-		matrixStackIn.translate(0.0D, 0.0D, 0.125D);
 
 		float f1, f2, f3;
 
@@ -239,15 +245,30 @@ public class ClientProxy extends CommonProxy {
 			if (playerIn.isCrouching()) {
 				f1 += 25.0F;
 			}
+			if (playerIn.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
+				if (playerIn.isCrouching()) {
+					model.cloak.z = 1.4F + 0.125F * 3;
+					model.cloak.y = 1.85F + 1 - 0.125F * 4;
+				} else {
+					model.cloak.z = 0.0F + 0.125F * 16f;
+					model.cloak.y = 0.0F;
+				}
+			} else if (playerIn.isCrouching()) {
+				model.cloak.z = 0.3F + 0.125F * 16f;
+				model.cloak.y = 0.8F + 0.3f;
+			} else {
+				model.cloak.z = -1.1F + 0.125F * 32f;
+				model.cloak.y = -0.85F + 1;
+			}
 		} else {
 			f1 = 0;
 			f2 = 0;
 			f3 = 0;
 		}
 
-		matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(6.0F + f2 / 2.0F + f1));
-		matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(f3 / 2.0F));
-		matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F - f3 / 2.0F));
+		model.cloak.xRot = (float) -Math.toRadians(6.0F + f2 / 2.0F + f1);
+		model.cloak.yRot = (float) Math.toRadians(180.0F - f3 / 2.0F);
+		model.cloak.zRot = (float) Math.toRadians(f3 / 2.0F);
 		model.renderCloak(matrixStackIn, buffer, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}

@@ -59,28 +59,30 @@ public class Panel3dImpl extends Panel3dNative {
 		float size = cam.camDist;
 
 		RenderSystem.pushMatrix();
-		RenderSystem.translatef(off.x + bounds.w / 2, off.y + bounds.h / 2, 600);
-		RenderSystem.scalef(1.0F, 1.0F, -0.1F);
-		matrixstack = new MatrixStack();
-		matrixstack.translate(0.0D, 0.0D, 1000.0D);
-		matrixstack.scale(size, size, size);
-		Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-		Quaternion quaternion1 = Vector3f.XP.rotation(-pitch);
-		quaternion.mul(quaternion1);
-		matrixstack.mulPose(quaternion);
+		try {
+			RenderSystem.translatef(off.x + bounds.w / 2, off.y + bounds.h / 2, 600);
+			RenderSystem.scalef(1.0F, 1.0F, -0.1F);
+			matrixstack = new MatrixStack();
+			matrixstack.translate(0.0D, 0.0D, 1000.0D);
+			matrixstack.scale(size, size, size);
+			Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+			Quaternion quaternion1 = Vector3f.XP.rotation(-pitch);
+			quaternion.mul(quaternion1);
+			matrixstack.mulPose(quaternion);
 
-		matrixstack.mulPose(Vector3f.YP.rotation((float) (yaw + Math.PI)));
-		matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
-		RenderSystem.enableDepthTest();
+			matrixstack.mulPose(Vector3f.YP.rotation((float) (yaw + Math.PI)));
+			matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
+			RenderSystem.enableDepthTest();
 
-		IRenderTypeBuffer bufs = mc.renderBuffers().bufferSource();
-		int light = LightTexture.pack(15, 15);
-		panel.render(new com.tom.cpl.math.MatrixStack(), new VBuffers(rt -> new VBuffer(bufs.getBuffer(rt.getNativeType()), light, OverlayTexture.NO_OVERLAY, matrixstack)), partialTicks);
-		mc.renderBuffers().bufferSource().endBatch();
-
-		RenderSystem.disableDepthTest();
-		RenderSystem.popMatrix();
-		matrixstack = null;
+			IRenderTypeBuffer bufs = mc.renderBuffers().bufferSource();
+			int light = LightTexture.pack(15, 15);
+			panel.render(new com.tom.cpl.math.MatrixStack(), new VBuffers(rt -> new VBuffer(bufs.getBuffer(rt.getNativeType()), light, OverlayTexture.NO_OVERLAY, matrixstack)), partialTicks);
+			mc.renderBuffers().bufferSource().endBatch();
+		} finally {
+			RenderSystem.disableDepthTest();
+			RenderSystem.popMatrix();
+			matrixstack = null;
+		}
 	}
 
 	@Override

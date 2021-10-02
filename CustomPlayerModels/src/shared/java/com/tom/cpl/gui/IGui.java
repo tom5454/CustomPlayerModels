@@ -6,6 +6,8 @@ import java.util.function.Consumer;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.util.ErrorLog;
+import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.Log;
 
 public interface IGui {
@@ -43,7 +45,7 @@ public interface IGui {
 				r.run();
 			} catch (Throwable e) {
 				Log.error("Exception while executing task", e);
-				getFrame().logMessage(e.getMessage());
+				ErrorLog.addLog(LogLevel.ERROR, "Exception while executing task", e);
 			}
 		});
 	}
@@ -124,6 +126,7 @@ public interface IGui {
 
 	default void onGuiException(String msg, Throwable e, boolean fatal) {
 		Log.error(msg, e);
+		ErrorLog.addLog(LogLevel.ERROR, msg, e);
 		if(fatal) {
 			displayError(msg + ": " + e.toString());
 		} else {

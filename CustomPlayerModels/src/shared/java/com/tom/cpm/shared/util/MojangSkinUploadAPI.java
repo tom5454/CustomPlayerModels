@@ -59,7 +59,7 @@ public class MojangSkinUploadAPI {
 		}
 	}
 
-	public boolean checkAuth() {
+	/*public boolean checkAuth() {
 		try {
 			if(auth == null)throw new NullPointerException("Missing auth info");
 			URL url = new URL("https://api.mojang.com/user/security/location");
@@ -86,7 +86,7 @@ public class MojangSkinUploadAPI {
 			Log.warn("[MojangSkinsAPI.checkAuth]: Failed to begin auth", e);
 		}
 		return false;
-	}
+	}*/
 
 	public static void clearYggdrasilCache(Object yss) {
 		try {

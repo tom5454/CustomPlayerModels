@@ -2,16 +2,17 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.tom.cpm.mixin.of",
+  "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
   ],
   "client": [
-    "ModelPartOFMixin",
-    "WorldRendererOFMixin",
-    "VertexConsumerProviderImmediateOFMixin",
-    "VertexConsumerOFMixin",
-    "PlayerItemModelOFMixin",
-    "AbstractTextureOFMixin"
+    "AbstractTextureMixin_OF",
+	"ModelPartMixin_OF",
+	"PlayerItemModelMixin_OF",
+	"VertexConsumerMixin_OF",
+	"VertexConsumerProviderImmediateMixin_OF",
+	"WorldRendererMixin_OF"
   ],
   "injectors": {
     "defaultRequire": 1

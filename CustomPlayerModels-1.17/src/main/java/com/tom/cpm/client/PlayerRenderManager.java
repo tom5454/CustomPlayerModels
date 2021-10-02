@@ -25,6 +25,8 @@ import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.client.optifine.OptifineTexture;
+import com.tom.cpm.client.optifine.proxy.ModelPartOF;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -103,7 +105,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 		@Override
 		protected void bindTexture(ModelTexture cbi, TextureProvider skin) {
 			skin.bind();
-			//OptifineTexture.applyOptifineTexture(cbi.getReturnValue(), skin);
+			OptifineTexture.applyOptifineTexture(cbi.getTexture(), skin);
 			cbi.setTexture(DynTexture.getBoundLoc());
 		}
 
@@ -157,13 +159,16 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 	}
 
 	private static class RedirectHolderSkull extends RDH {
-		private RedirectRenderer<ModelPart> hat;
 
 		public RedirectHolderSkull(PlayerRenderManager mngr, SkullModel model) {
 			super(mngr, model);
 
-			register(new Field<>(      () -> model.head, v -> {model.root.children.put("head", v);model.head = v;}, PlayerModelParts.HEAD));
-			//hat = register(new Field<>(() -> model.hat , v -> model.hat  = v, null));
+			register(new Field<>(      () -> model.head, v -> {
+				model.root.children.put("head", v);
+				model.head = v;
+				if(model.root instanceof ModelPartOF)
+					((ModelPartOF)model.root).cpm$updateChildModelsList();
+			}, PlayerModelParts.HEAD));
 		}
 
 	}

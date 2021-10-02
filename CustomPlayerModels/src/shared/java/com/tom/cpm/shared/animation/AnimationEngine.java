@@ -89,7 +89,9 @@ public class AnimationEngine {
 			default:
 				break;
 			}
-			h.animate(getTime());
+			long time = getTime();
+			h.animate(time);
+			def.getAnimations().tickAnimated(time);
 		} catch (Exception e) {
 			e.printStackTrace();
 			player.getModelDefinition().resetAnimationPos();

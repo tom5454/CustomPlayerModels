@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AnimationRegistry {
+	private List<AnimatedTexture> animatedTextures = new ArrayList<>();
 	private Map<IPose, List<Animation>> animations = new HashMap<>();
 	private Map<Integer, IPose> encodedToPose = new HashMap<>();
 	private Map<Integer, Gesture> encodedToGesture = new HashMap<>();
@@ -93,5 +94,15 @@ public class AnimationRegistry {
 
 	public int getPoseResetId() {
 		return poseResetId;
+	}
+
+	public void addAnimatedTexture(AnimatedTexture tex) {
+		animatedTextures.add(tex);
+	}
+
+	public void tickAnimated(long time) {
+		for (int i = 0; i < animatedTextures.size(); i++) {
+			animatedTextures.get(i).update(time);
+		}
 	}
 }

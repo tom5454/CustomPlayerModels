@@ -6,14 +6,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.util.LegacySkinConverter;
 
 public abstract class PlayerTextureLoader {
+	private static final LoadingCache<String, CompletableFuture<Image>> cache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).build(CacheLoader.from(Image::download));
 	private Map<TextureType, Texture> textures = new HashMap<>();
 
 	private static class Texture {
@@ -43,7 +49,7 @@ public abstract class PlayerTextureLoader {
 				});
 			}
 			if(url == null)return null;
-			return Image.download(url).thenApply(postProcessor).exceptionally(e -> null);
+			return cache.getUnchecked(url).thenApply(postProcessor).exceptionally(e -> null);
 		}
 	}
 

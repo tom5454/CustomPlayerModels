@@ -26,4 +26,8 @@ public class JsonListImpl implements JsonList {
 		return new JsonMapImpl((Map<String, Object>) get(i));
 	}
 
+	@Override
+	public void add(Object data) {
+		list.add(data);
+	}
 }

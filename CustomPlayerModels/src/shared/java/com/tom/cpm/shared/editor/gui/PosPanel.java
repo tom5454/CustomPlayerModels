@@ -83,7 +83,7 @@ public class PosPanel extends Panel {
 			editor.setMirror.add(box::updateState);
 			panel.addElement(box);
 		}
-		ElementGroup<ModeDisplType, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
+		ElementGroup<ModeDisplayType, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
 		editor.setModePanel.add(group);
 		editor.setModePanel.add(layout);
 		{
@@ -99,9 +99,9 @@ public class PosPanel extends Panel {
 				}
 			});
 			addElement(modeBtn);
-			group.addElement(ModeDisplType.NULL, modeBtn);
-			group.addElement(ModeDisplType.COLOR, modeBtn);
-			group.addElement(ModeDisplType.TEX, modeBtn);
+			group.addElement(ModeDisplayType.NULL, modeBtn);
+			group.addElement(ModeDisplayType.COLOR, modeBtn);
+			group.addElement(ModeDisplayType.TEX, modeBtn);
 		}
 		{
 			Panel panel = new Panel(gui);
@@ -124,7 +124,7 @@ public class PosPanel extends Panel {
 			spinnerU.setDp(0);
 			spinnerV.setDp(0);
 			spinnerT.setDp(0);
-			group.addElement(ModeDisplType.TEX, panel);
+			group.addElement(ModeDisplayType.TEX, panel);
 
 			Runnable r = () -> editor.setVec(new Vec3f(spinnerU.getValue(), spinnerV.getValue(), spinnerT.getValue()), VecType.TEXTURE);
 			spinnerU.addChangeListener(r);
@@ -156,13 +156,13 @@ public class PosPanel extends Panel {
 				if(c != null)colorBtn.setColor(c);
 			});
 			colorBtn.setBounds(new Box(5, 20, 160, 16));
-			group.addElement(ModeDisplType.COLOR, colorBtn);
+			group.addElement(ModeDisplayType.COLOR, colorBtn);
 		}
 		{
 			Spinner spinnerS = new Spinner(gui);
 			spinnerS.setBounds(new Box(5, 30, 150, 18));
 			spinnerS.setDp(2);
-			group.addElement(ModeDisplType.VALUE, spinnerS);
+			group.addElement(ModeDisplayType.VALUE, spinnerS);
 			spinnerS.addChangeListener(() -> editor.setValue(spinnerS.getValue()));
 			editor.setValue.add(spinnerS::setValue);
 			addElement(spinnerS);
@@ -170,7 +170,7 @@ public class PosPanel extends Panel {
 		}
 		{
 			PerfaceUVPanel panel = new PerfaceUVPanel(gui, e, tabHandler);
-			group.addElement(ModeDisplType.TEX_FACE, panel);
+			group.addElement(ModeDisplayType.TEX_FACE, panel);
 			addElement(panel);
 		}
 		{
@@ -256,7 +256,7 @@ public class PosPanel extends Panel {
 		});
 	}
 
-	public static enum ModeDisplType {
+	public static enum ModeDisplayType {
 		NULL, COLOR, TEX, VALUE, TEX_FACE
 	}
 }

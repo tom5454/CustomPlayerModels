@@ -26,6 +26,7 @@ import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
+import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -37,6 +38,7 @@ import com.tom.cpm.shared.editor.RootGroups;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.DescPopup;
+import com.tom.cpm.shared.editor.gui.popup.ErrorLogPopup;
 import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
 import com.tom.cpm.shared.editor.gui.popup.ModelsPopup;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
@@ -44,6 +46,8 @@ import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.util.ErrorLog;
+import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
@@ -55,6 +59,8 @@ public class EditorGui extends Frame {
 	private Editor editor;
 	private static boolean smallGuiWarning = true;
 	private static boolean notSupportedWarning = true;
+	private Tooltip msgTooltip;
+	private long tooltipTime;
 
 	public EditorGui(IGui gui) {
 		super(gui);
@@ -139,6 +145,11 @@ public class EditorGui extends Frame {
 			openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.editor_not_supported")));
 		}
 		notSupportedWarning = false;
+
+		editor.setInfoMsg.add(p -> {
+			msgTooltip = new Tooltip(this, p.getValue());
+			tooltipTime = System.currentTimeMillis() + p.getKey();
+		});
 	}
 
 	private void initModelPanel(int width, int height) {
@@ -380,6 +391,8 @@ public class EditorGui extends Frame {
 		pp.addButton(gui.i18nFormat("button.cpm.models"), () -> openPopup(new ModelsPopup(this)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(this, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
+
+		pp.addButton(gui.i18nFormat("tab.cpm.social.errorLog"), () -> openPopup(new ErrorLogPopup(this)));
 	}
 
 	private void initEffectMenu() {
@@ -444,6 +457,12 @@ public class EditorGui extends Frame {
 		});
 		editor.updateGui.add(() -> removeArmorOffset.setSelected(editor.removeArmorOffset));
 		removeArmorOffset.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.removeArmorOffset")));
+
+		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.textureEffects")).setBounds(new Box(5, 5, 0, 0)));
+
+		Button btnAddAnimTex = pp.addButton(gui.i18nFormat("button.cpm.addAnimatedTex"), editor::addAnimTex);
+		btnAddAnimTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.addAnimatedTex")));
+		editor.setEnAddAnimTex.add(btnAddAnimTex::setEnabled);
 	}
 
 	private void initDisplayMenu() {
@@ -482,6 +501,15 @@ public class EditorGui extends Frame {
 		});
 		chxbxVanillaAnims.setSelected(editor.playVanillaAnims);
 		chxbxVanillaAnims.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playVanillaAnims")));
+
+		Checkbox chxbxAnimatedTex = pp.addCheckbox(gui.i18nFormat("label.cpm.display.playAnimatedTex"), b -> {
+			editor.playAnimatedTex = !b.isSelected();
+			b.setSelected(editor.playAnimatedTex);
+			if(!editor.playAnimatedTex)
+				editor.textures.values().forEach(ETextures::refreshTexture);
+		});
+		chxbxAnimatedTex.setSelected(editor.playAnimatedTex);
+		chxbxAnimatedTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playAnimatedTex")));
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
 
@@ -552,8 +580,10 @@ public class EditorGui extends Frame {
 			editor.load(file);
 		} catch (Exception e) {
 			Log.warn("Error loading project file", e);
+			ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.load", e);
 			showError("load", e.toString());
 			editor.loadDefaultPlayerModel();
+			editor.updateGui();
 		}
 	}
 
@@ -562,7 +592,9 @@ public class EditorGui extends Frame {
 			editor.save(file);
 		} catch (Exception e) {
 			Log.warn("Error saving project file", e);
+			ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.save", e);
 			showError("save", e.toString());
+			editor.setInfoMsg.accept(Pair.of(0, ""));
 		}
 	}
 
@@ -620,10 +652,20 @@ public class EditorGui extends Frame {
 	}
 
 	@Override
-	public void logMessage(String msg) {}
-
-	@Override
 	public void tick() {
 		editor.tick();
+	}
+
+	@Override
+	public void draw(MouseEvent event, float partialTicks) {
+		if(tooltipTime > System.currentTimeMillis() && msgTooltip != null) {
+			msgTooltip.set();
+		}
+		super.draw(event, partialTicks);
+	}
+
+	@Override
+	public void logMessage(String msg) {
+		editor.setInfoMsg.accept(Pair.of(3000, gui.i18nFormat("tooltip.cpm.errorTooltip", msg)));
 	}
 }

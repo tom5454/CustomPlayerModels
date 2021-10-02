@@ -58,28 +58,30 @@ public class Panel3dImpl extends Panel3dNative {
 		float size = cam.camDist;
 
 		RenderSystem.pushMatrix();
-		RenderSystem.translatef(off.x + bounds.w / 2, off.y + bounds.h / 2, 600);
-		RenderSystem.scalef(1.0F, 1.0F, -0.1F);
-		matrixstack = new MatrixStack();
-		matrixstack.translate(0.0D, 0.0D, 1000.0D);
-		matrixstack.scale(size, size, size);
-		Quaternion quaternion = Vector3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
-		Quaternion quaternion1 = Vector3f.POSITIVE_X.getRadialQuaternion(-pitch);
-		quaternion.hamiltonProduct(quaternion1);
-		matrixstack.multiply(quaternion);
+		try {
+			RenderSystem.translatef(off.x + bounds.w / 2, off.y + bounds.h / 2, 600);
+			RenderSystem.scalef(1.0F, 1.0F, -0.1F);
+			matrixstack = new MatrixStack();
+			matrixstack.translate(0.0D, 0.0D, 1000.0D);
+			matrixstack.scale(size, size, size);
+			Quaternion quaternion = Vector3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
+			Quaternion quaternion1 = Vector3f.POSITIVE_X.getRadialQuaternion(-pitch);
+			quaternion.hamiltonProduct(quaternion1);
+			matrixstack.multiply(quaternion);
 
-		matrixstack.multiply(Vector3f.POSITIVE_Y.getRadialQuaternion((float) (yaw + Math.PI)));
-		matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
-		RenderSystem.enableDepthTest();
+			matrixstack.multiply(Vector3f.POSITIVE_Y.getRadialQuaternion((float) (yaw + Math.PI)));
+			matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
+			RenderSystem.enableDepthTest();
 
-		VertexConsumerProvider bufs = mc.getBufferBuilders().getEntityVertexConsumers();
-		int light = LightmapTextureManager.pack(15, 15);
-		panel.render(new com.tom.cpl.math.MatrixStack(), new VBuffers(rt -> new VBuffer(bufs.getBuffer(rt.getNativeType()), light, OverlayTexture.DEFAULT_UV, matrixstack)), partialTicks);
-		mc.getBufferBuilders().getEntityVertexConsumers().draw();
-
-		RenderSystem.disableDepthTest();
-		RenderSystem.popMatrix();
-		matrixstack = null;
+			VertexConsumerProvider bufs = mc.getBufferBuilders().getEntityVertexConsumers();
+			int light = LightmapTextureManager.pack(15, 15);
+			panel.render(new com.tom.cpl.math.MatrixStack(), new VBuffers(rt -> new VBuffer(bufs.getBuffer(rt.getNativeType()), light, OverlayTexture.DEFAULT_UV, matrixstack)), partialTicks);
+			mc.getBufferBuilders().getEntityVertexConsumers().draw();
+		} finally {
+			RenderSystem.disableDepthTest();
+			RenderSystem.popMatrix();
+			matrixstack = null;
+		}
 	}
 
 	@Override

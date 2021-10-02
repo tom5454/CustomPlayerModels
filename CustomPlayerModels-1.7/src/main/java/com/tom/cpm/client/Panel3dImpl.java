@@ -40,28 +40,30 @@ public class Panel3dImpl extends Panel3dNative {
 		float yaw = cam.look.getYaw();
 
 		GL11.glPushMatrix();
-		Box bounds = getBounds();
-		Vec2i off = panel.getGui().getOffset();
-		GL11.glTranslatef(off.x + bounds.w / 2, off.y + bounds.h / 2, 50);
-		float scale = cam.camDist;
-		GL11.glScalef((-scale), scale, 0.1f);
-		GL11.glRotatef(180.0F, 0.0F, 0.0F, 1.0F);
-		GL11.glRotatef((float) Math.toDegrees(pitch), 1, 0, 0);
-		GL11.glRotatef((float) Math.toDegrees(yaw), 0, 1, 0);
-		GL11.glTranslatef(-cam.position.x, -cam.position.y, -cam.position.z);
-		float f = 1.0f;
-		RetroGL.color4f(f, f, f, 1);
+		try {
+			Box bounds = getBounds();
+			Vec2i off = panel.getGui().getOffset();
+			GL11.glTranslatef(off.x + bounds.w / 2, off.y + bounds.h / 2, 50);
+			float scale = cam.camDist;
+			GL11.glScalef((-scale), scale, 0.1f);
+			GL11.glRotatef(180.0F, 0.0F, 0.0F, 1.0F);
+			GL11.glRotatef((float) Math.toDegrees(pitch), 1, 0, 0);
+			GL11.glRotatef((float) Math.toDegrees(yaw), 0, 1, 0);
+			GL11.glTranslatef(-cam.position.x, -cam.position.y, -cam.position.z);
+			float f = 1.0f;
+			RetroGL.color4f(f, f, f, 1);
 
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(770, 771);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glDisable(GL11.GL_CULL_FACE);
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glBlendFunc(770, 771);
+			GL11.glEnable(GL11.GL_DEPTH_TEST);
+			GL11.glDisable(GL11.GL_CULL_FACE);
 
-		panel.render(new MatrixStack(), new VBuffers(RetroGL::buffer), partialTicks);
-
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glPopMatrix();
-		RenderHelper.disableStandardItemLighting();
+			panel.render(new MatrixStack(), new VBuffers(RetroGL::buffer), partialTicks);
+		} finally {
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			GL11.glPopMatrix();
+			RenderHelper.disableStandardItemLighting();
+		}
 	}
 
 	@Override

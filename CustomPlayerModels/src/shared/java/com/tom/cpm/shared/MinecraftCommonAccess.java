@@ -14,4 +14,5 @@ public interface MinecraftCommonAccess {
 	ModConfigFile getConfig();
 	public ILogger getLogger();
 	public EnumSet<PlatformFeature> getSupportedFeatures();
+	String getPlatformVersionString();
 }

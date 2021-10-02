@@ -8,6 +8,7 @@ import com.tom.cpl.config.ConfigEntry.ModConfigFile.ConfigEntryTemp;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.InputPopup;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.MessagePopup;
@@ -31,7 +32,7 @@ import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.skin.TextureType;
 
 public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
-	private Frame frm;
+	private final Frame frm;
 	private ViewportCamera cam;
 	private Player<?, ?> player;
 	private CompletableFuture<ModelDefinition> def;
@@ -135,7 +136,7 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 		});
 		buttonsPanel.addElement(block);
 
-		Button playerSettings = new Button(gui, gui.i18nFormat("button.cpm.playerSettings"), () -> frm.openPopup(new SafetyPopup(this, player.getUUID().toString(), player.getName(), reload)));
+		Button playerSettings = new Button(gui, gui.i18nFormat("button.cpm.playerSettings"), () -> frm.openPopup(new SafetyPopup(this, player.getUUID().toString(), player.getName(), reload, frm)));
 		playerSettings.setBounds(new Box(5, 0, bpw - 5, 20));
 		buttonsPanel.addElement(playerSettings);
 
@@ -201,16 +202,19 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 	}
 
 	public static class SafetyPopup extends PopupPanel {
+		private final Frame frm;
 		private String uuid, name;
+		private ConfigEntryTemp config;
 
-		protected SafetyPopup(Panel parent, String uuid, String name, Runnable reload) {
+		protected SafetyPopup(Panel parent, String uuid, String name, Runnable reload, Frame frm) {
 			super(parent.getGui());
+			this.frm = frm;
 			Box b = parent.getBounds();
 			setBounds(new Box(0, 0, b.w - 30, b.h - 20));
 			this.uuid = uuid;
 			this.name = name;
 
-			ConfigEntryTemp config = ModConfig.getCommonConfig().createTemp();
+			config = ModConfig.getCommonConfig().createTemp();
 			ConfigEntry ce = config.getEntry(ConfigKeys.PLAYER_SETTINGS).getEntry(uuid);
 			if(ce.keySet().isEmpty() && name != null)ce.setString(ConfigKeys.NAME, name);
 
@@ -238,6 +242,13 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 		@Override
 		public String getTitle() {
 			return gui.i18nFormat("label.cpm.sSettingsFor", name == null ? gui.i18nFormat("label.cpm.unknown") : name);
+		}
+
+		@Override
+		public void close() {
+			if(config.isDirty()) {
+				frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.unsaved"), super::close, null));
+			} else super.close();
 		}
 	}
 

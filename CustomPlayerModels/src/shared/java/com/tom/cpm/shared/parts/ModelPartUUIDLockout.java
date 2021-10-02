@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.SafetyException;
+import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class ModelPartUUIDLockout implements IModelPart, IResolvedModelPart {
@@ -37,6 +39,6 @@ public class ModelPartUUIDLockout implements IModelPart, IResolvedModelPart {
 	public void apply(ModelDefinition def) {
 		UUID uuid = def.getPlayerObj().getUUID();
 		if(!lockID.equals(uuid) && !MinecraftClientAccess.get().getClientPlayer().getUUID().equals(uuid))
-			throw new IllegalStateException("UUID mismatch");
+			throw new SafetyException(BlockReason.UUID_LOCK);
 	}
 }

@@ -47,4 +47,9 @@ public class JsonMapImpl implements JsonMap {
 		return map;
 	}
 
+	@Override
+	public void put(String name, Object data) {
+		map.put(name, data);
+	}
+
 }

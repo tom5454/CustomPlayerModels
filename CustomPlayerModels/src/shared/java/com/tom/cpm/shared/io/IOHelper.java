@@ -338,6 +338,15 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		dout.writeShort(v.y);
 	}
 
+	public Vec2i read2v() throws IOException {
+		return new Vec2i(readVarInt(), readVarInt());
+	}
+
+	public void write2v(Vec2i v) throws IOException {
+		writeVarInt(v.x);
+		writeVarInt(v.y);
+	}
+
 	public DataInputStream getDin() {
 		return din;
 	}

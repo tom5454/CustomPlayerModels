@@ -3,6 +3,7 @@ package com.tom.cpm.shared.gui;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.gui.panel.SettingsPanel;
 
@@ -11,6 +12,11 @@ public class SettingsGui extends Frame {
 
 	public SettingsGui(IGui gui) {
 		super(gui);
+		gui.setCloseListener(c -> {
+			if(panel != null && panel.isChanged()) {
+				openPopup(new ConfirmPopup(this, gui.i18nFormat("label.cpm.unsaved"), c, null));
+			} else c.run();
+		});
 	}
 
 	@Override

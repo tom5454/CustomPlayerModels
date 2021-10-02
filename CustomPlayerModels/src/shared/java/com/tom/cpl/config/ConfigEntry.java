@@ -65,9 +65,10 @@ public class ConfigEntry {
 
 		public class ConfigEntryTemp extends ConfigEntry {
 			private ConfigEntry ent;
+			private boolean dirty;
 
 			public ConfigEntryTemp(Map<String, Object> map) {
-				changeListener = () -> {};
+				changeListener = this::markDirty;
 				this.data = new HashMap<>(map);
 			}
 
@@ -77,6 +78,7 @@ public class ConfigEntry {
 				ModConfigFile.this.entries.clear();
 				ModConfigFile.this.lists.clear();
 				save();
+				dirty = false;
 			}
 
 			@Override
@@ -92,6 +94,14 @@ public class ConfigEntry {
 			@SuppressWarnings("unchecked")
 			private <T> T mapGet(String name, Supplier<T> newV, UnaryOperator<T> copy) {
 				return (T) data.compute(name, (k, v) -> v == null ? newV.get() : copy.apply((T) v));
+			}
+
+			public void markDirty() {
+				dirty = true;
+			}
+
+			public boolean isDirty() {
+				return dirty;
 			}
 		}
 	}

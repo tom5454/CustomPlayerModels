@@ -58,7 +58,7 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 		refreshList();
 	}
 
-	private void refreshList() {
+	public void refreshList() {
 		String searchString = search.getText();
 		Pattern m = null;
 		try {

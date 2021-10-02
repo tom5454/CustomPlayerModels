@@ -2,30 +2,30 @@ package com.tom.cpm.client;
 
 import java.util.function.Function;
 
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
-import com.tom.cpm.core.CallbackReturnable;
-
 public class ModelTexture {
-	private CallbackReturnable<ResourceLocation> texture;
+	private CallbackInfoReturnable<ResourceLocation> texture;
 	private Function<ResourceLocation, RenderType> renderType;
 
-	public ModelTexture(CallbackReturnable<ResourceLocation> texture,
+	public ModelTexture(CallbackInfoReturnable<ResourceLocation> texture,
 			Function<ResourceLocation, RenderType> renderType) {
 		this.texture = texture;
 		this.renderType = renderType;
 	}
 
 	public ModelTexture(Function<ResourceLocation, RenderType> renderType) {
-		this(new CallbackReturnable<>(), renderType);
+		this(new CallbackInfoReturnable<>(null, true), renderType);
 	}
 
 	public ModelTexture(ResourceLocation tex, Function<ResourceLocation, RenderType> renderType) {
-		this(new CallbackReturnable<>(tex), renderType);
+		this(new CallbackInfoReturnable<>(null, true, tex), renderType);
 	}
 
-	public ModelTexture(CallbackReturnable<ResourceLocation> texture) {
+	public ModelTexture(CallbackInfoReturnable<ResourceLocation> texture) {
 		this(texture, PlayerRenderManager.entity);
 	}
 

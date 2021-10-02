@@ -72,9 +72,10 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 
 		p.render(stack, rp.getBuffer(types, getMode()));
 
+		Set<PlayerModelLayer> layers = getArmorLayers();
 		for(PlayerModelLayer l : PlayerModelLayer.VALUES) {
-			if(getArmorLayers().contains(l)) {
-				p.poseLayer(l);
+			if(layers.contains(l)) {
+				p.poseLayer(l, layers);
 			}
 		}
 

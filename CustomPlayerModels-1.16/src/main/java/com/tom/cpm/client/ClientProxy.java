@@ -18,12 +18,12 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -35,6 +35,8 @@ import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -48,6 +50,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
+import com.tom.cpm.shared.gui.SettingsGui;
 import com.tom.cpm.shared.model.RenderManager;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.Log;
@@ -55,6 +58,7 @@ import com.tom.cpm.shared.util.Log;
 import io.netty.buffer.Unpooled;
 
 public class ClientProxy extends CommonProxy {
+	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
 	public static boolean optifineLoaded;
 	public static ClientProxy INSTANCE = null;
 	public static MinecraftObject mc;
@@ -92,6 +96,7 @@ public class ClientProxy extends CommonProxy {
 		});
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).connection);
+		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, scr) -> new GuiImpl(SettingsGui::new, scr));
 	}
 
 	@SubscribeEvent
@@ -192,7 +197,6 @@ public class ClientProxy extends CommonProxy {
 			AbstractClientPlayerEntity playerIn, float partialTicks, PlayerModel<AbstractClientPlayerEntity> model,
 			ModelDefinition modelDefinition) {
 		matrixStackIn.pushPose();
-		matrixStackIn.translate(0.0D, 0.0D, 0.125D);
 
 		float f1, f2, f3;
 
@@ -226,15 +230,29 @@ public class ClientProxy extends CommonProxy {
 			if (playerIn.isCrouching()) {
 				f1 += 25.0F;
 			}
+			if (playerIn.getItemBySlot(EquipmentSlotType.CHEST).isEmpty()) {
+				if (playerIn.isCrouching()) {
+					model.cloak.z = 1.4F + 0.125F * 3;
+					model.cloak.y = 1.85F + 1 - 0.125F * 4;
+				} else {
+					model.cloak.z = 0.0F + 0.125F * 16f;
+					model.cloak.y = 0.0F;
+				}
+			} else if (playerIn.isCrouching()) {
+				model.cloak.z = 0.3F + 0.125F * 16f;
+				model.cloak.y = 0.8F + 0.3f;
+			} else {
+				model.cloak.z = -1.1F + 0.125F * 32f;
+				model.cloak.y = -0.85F + 1;
+			}
 		} else {
 			f1 = 0;
 			f2 = 0;
 			f3 = 0;
 		}
-
-		matrixStackIn.mulPose(Vector3f.XP.rotationDegrees(6.0F + f2 / 2.0F + f1));
-		matrixStackIn.mulPose(Vector3f.ZP.rotationDegrees(f3 / 2.0F));
-		matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F - f3 / 2.0F));
+		model.cloak.xRot = (float) -Math.toRadians(6.0F + f2 / 2.0F + f1);
+		model.cloak.yRot = (float) Math.toRadians(180.0F - f3 / 2.0F);
+		model.cloak.zRot = (float) Math.toRadians(f3 / 2.0F);
 		model.renderCloak(matrixStackIn, buffer, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}

@@ -23,6 +23,12 @@
   	],
   	"client": [
       "com.tom.cpm.client.CustomPlayerModelsClient"
+    ],
+	"mm:early_risers": [
+      "com.tom.cpm.LaunchMixinWithOptifineRunnable"
+    ],
+	"modmenu": [
+      "com.tom.cpm.ModMenu"
     ]
   },
   "mixins": [

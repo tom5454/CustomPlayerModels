@@ -19,6 +19,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
@@ -52,6 +53,7 @@ import com.tom.cpm.shared.network.NetHandler;
 import io.netty.buffer.Unpooled;
 
 public class ClientProxy extends CommonProxy {
+	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public static ClientProxy INSTANCE;
@@ -218,7 +220,6 @@ public class ClientProxy extends CommonProxy {
 	public static void renderCape(AbstractClientPlayer playerIn, float partialTicks, ModelPlayer model, ModelDefinition modelDefinition) {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.pushMatrix();
-		GlStateManager.translate(0.0F, 0.0F, 0.125F);
 		float f1, f2, f3;
 
 		if(playerIn != null) {
@@ -251,16 +252,30 @@ public class ClientProxy extends CommonProxy {
 			if (playerIn.isSneaking()) {
 				f1 += 25.0F;
 			}
+			if (playerIn.getItemStackFromSlot(EntityEquipmentSlot.CHEST).isEmpty()) {
+				if (playerIn.isSneaking()) {
+					model.bipedCape.rotationPointZ = 1.4F + 0.125F * 3;
+					model.bipedCape.rotationPointY = 1.85F + 1 - 0.125F * 4;
+				} else {
+					model.bipedCape.rotationPointZ = 0.0F + 0.125F * 16f;
+					model.bipedCape.rotationPointY = 0.0F;
+				}
+			} else if (playerIn.isSneaking()) {
+				model.bipedCape.rotationPointZ = 0.3F + 0.125F * 16f;
+				model.bipedCape.rotationPointY = 0.8F + 0.3f;
+			} else {
+				model.bipedCape.rotationPointZ = -1.1F + 0.125F * 32f;
+				model.bipedCape.rotationPointY = -0.85F + 1;
+			}
 		} else {
 			f1 = 0;
 			f2 = 0;
 			f3 = 0;
 		}
 
-		GlStateManager.rotate(6.0F + f2 / 2.0F + f1, 1.0F, 0.0F, 0.0F);
-		GlStateManager.rotate(f3 / 2.0F, 0.0F, 0.0F, 1.0F);
-		GlStateManager.rotate(-f3 / 2.0F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+		model.bipedCape.rotateAngleX = (float) -Math.toRadians(6.0F + f2 / 2.0F + f1);
+		model.bipedCape.rotateAngleY = (float) Math.toRadians(180.0F - f3 / 2.0F);
+		model.bipedCape.rotateAngleZ = (float) Math.toRadians(f3 / 2.0F);
 		model.renderCape(0.0625F);
 		GlStateManager.popMatrix();
 	}

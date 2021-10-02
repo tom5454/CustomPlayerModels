@@ -113,6 +113,7 @@ public class CPMASMClientHooks {
 				ItemStack chestplate = player.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
 				if(!player.isInvisible() && player.isWearing(EnumPlayerModelParts.CAPE) && chestplate.getItem() != Items.ELYTRA) {
 					ModelPlayer model = this0.playerRenderer.getMainModel();
+					ClientProxy.mc.getPlayerRenderManager().rebindModel(model);
 					ClientProxy.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
 					ClientProxy.renderCape(player, partialTicks, model, def);
 				}

@@ -232,7 +232,7 @@ public class SocialPanel extends Panel {
 			});
 			addElement(block);
 
-			Button playerSettings = new Button(gui, gui.i18nFormat("button.cpm.playerSettings"), () -> frm.openPopup(new SafetyPopup(this, pl.getUUID(), pl.getName(), () -> {})));
+			Button playerSettings = new Button(gui, gui.i18nFormat("button.cpm.playerSettings"), () -> frm.openPopup(new SafetyPopup(this, pl.getUUID(), pl.getName(), () -> {}, frm)));
 			playerSettings.setBounds(new Box(5, 0, w - 5, 20));
 			addElement(playerSettings);
 

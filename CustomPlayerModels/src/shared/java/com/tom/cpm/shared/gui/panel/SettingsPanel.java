@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -18,6 +17,7 @@ import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.InputPopup;
+import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.ScrollPanel;
@@ -27,6 +27,7 @@ import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey.KeyGroup;
@@ -178,10 +179,13 @@ public class SettingsPanel extends Panel {
 		addSafetyTab("player", player, 5);
 		buildListPanel(player, ce.getEntry(ConfigKeys.PLAYER_SETTINGS),
 				null,
-				(k, v) -> new Pl(UUID.fromString(k), v.getString(ConfigKeys.NAME, gui.i18nFormat("label.cpm.unknown"))),
-				k -> k.uuid.toString(),
-				e -> new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerInfo", e.name, e.uuid.toString())),
+				(k, v) -> new Pl(k, v.getString(ConfigKeys.NAME, gui.i18nFormat("label.cpm.unknown"))),
+				k -> k.uuid,
+				e -> new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerInfo", e.name, e.uuid)),
 				Collections.emptyMap(), Pl::getKeyGroup, false);
+
+		String v = gui.i18nFormat("label.cpm.runtimeVersion", PlatformFeature.getVersion());
+		addElement(new Label(gui, v).setBounds(new Box(width - gui.textWidth(v) - 3, height - 11, 0, 0)));
 	}
 
 	private void saveConfig() {
@@ -211,16 +215,16 @@ public class SettingsPanel extends Panel {
 	}
 
 	private class Pl {
-		private UUID uuid;
+		private String uuid;
 		private String name;
 
-		public Pl(UUID uuid, String name) {
+		public Pl(String uuid, String name) {
 			this.uuid = uuid;
 			this.name = name;
 		}
 
 		public KeyGroup getKeyGroup() {
-			return ce.getEntry(ConfigKeys.FRIEND_LIST).keySet().contains(uuid.toString()) ? KeyGroup.FRIEND : KeyGroup.GLOBAL;
+			return ce.getEntry(ConfigKeys.FRIEND_LIST).keySet().contains(uuid) ? KeyGroup.FRIEND : KeyGroup.GLOBAL;
 		}
 
 		@Override
@@ -274,7 +278,7 @@ public class SettingsPanel extends Panel {
 				Map<String, Object> f = new HashMap<>(fieldsIn);
 				if(fieldsIn.containsKey("nameBoxInit"))f.put("nameBox", s.toString());
 				scpS.setDisplay(new SafetyHeaderPanel(frm, ce.getEntry(getKey.apply(s)), spw,
-						gui.i18nFormat("label.cpm.sSettingsFor", s.toString()), f, getKg.apply(s), ce));
+						gui.i18nFormat("label.cpm.sSettingsFor", s.toString()), f, getKg.apply(s), this.ce));
 			} else {
 				playerList.setWidth(w);
 			}
@@ -297,6 +301,7 @@ public class SettingsPanel extends Panel {
 					entries.add(newE);
 					playerList.setSelected(newE);
 					selEvt.accept(newE);
+					playerList.refreshList();
 				}
 			}, null));
 		});
@@ -311,6 +316,7 @@ public class SettingsPanel extends Panel {
 					ce.clearValue(getKey.apply(elem));
 					scpS.setVisible(false);
 					playerList.setWidth(w);
+					playerList.refreshList();
 				}, null));
 			}
 		});
@@ -347,5 +353,9 @@ public class SettingsPanel extends Panel {
 		}
 		ip = bb.toString();
 		return ip;
+	}
+
+	public boolean isChanged() {
+		return ce.isDirty();
 	}
 }

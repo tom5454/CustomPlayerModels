@@ -58,31 +58,33 @@ public class Panel3dImpl extends Panel3dNative {
 
 		PoseStack matrixStack = RenderSystem.getModelViewStack();
 		matrixStack.pushPose();
-		matrixStack.translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 600.0D);//600
-		matrixStack.scale(1.0F, 1.0F, -0.1F);
-		RenderSystem.applyModelViewMatrix();
-		matrixstack = new PoseStack();
-		matrixstack.translate(0.0D, 0.0D, 1000.0D);
-		matrixstack.scale(size, size, size);
-		Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-		Quaternion quaternion1 = Vector3f.XP.rotation(-pitch);
-		quaternion.mul(quaternion1);
-		matrixstack.mulPose(quaternion);
+		try {
+			matrixStack.translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 600.0D);//600
+			matrixStack.scale(1.0F, 1.0F, -0.1F);
+			RenderSystem.applyModelViewMatrix();
+			matrixstack = new PoseStack();
+			matrixstack.translate(0.0D, 0.0D, 1000.0D);
+			matrixstack.scale(size, size, size);
+			Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+			Quaternion quaternion1 = Vector3f.XP.rotation(-pitch);
+			quaternion.mul(quaternion1);
+			matrixstack.mulPose(quaternion);
 
-		matrixstack.mulPose(Vector3f.YP.rotation((float) (yaw + Math.PI)));
-		matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
-		RenderSystem.enableDepthTest();
+			matrixstack.mulPose(Vector3f.YP.rotation((float) (yaw + Math.PI)));
+			matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
+			RenderSystem.enableDepthTest();
 
-		BufferSource bufs = mc.renderBuffers().bufferSource();
-		int light = LightTexture.pack(15, 15);
-		panel.render(new com.tom.cpl.math.MatrixStack(), new VBuffers(rt -> new VBuffer(bufs.getBuffer(rt.getNativeType()), light, OverlayTexture.NO_OVERLAY, matrixstack)), partialTicks);
-		mc.renderBuffers().bufferSource().endBatch();
-
-		RenderSystem.disableDepthTest();
-		matrixStack = RenderSystem.getModelViewStack();
-		matrixStack.popPose();
-		RenderSystem.applyModelViewMatrix();
-		matrixstack = null;
+			BufferSource bufs = mc.renderBuffers().bufferSource();
+			int light = LightTexture.pack(15, 15);
+			panel.render(new com.tom.cpl.math.MatrixStack(), new VBuffers(rt -> new VBuffer(bufs.getBuffer(rt.getNativeType()), light, OverlayTexture.NO_OVERLAY, matrixstack)), partialTicks);
+			mc.renderBuffers().bufferSource().endBatch();
+		} finally {
+			RenderSystem.disableDepthTest();
+			matrixStack = RenderSystem.getModelViewStack();
+			matrixStack.popPose();
+			RenderSystem.applyModelViewMatrix();
+			matrixstack = null;
+		}
 	}
 
 	@Override

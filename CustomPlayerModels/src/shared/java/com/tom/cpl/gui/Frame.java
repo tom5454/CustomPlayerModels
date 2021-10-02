@@ -135,7 +135,7 @@ public abstract class Frame extends Panel {
 			this.popup = panel;
 
 			if(panel.hasDecoration()) {
-				close = new Button(gui, "X", this::close);
+				close = new Button(gui, "X", popup::close);
 				addElement(close);
 				title = new Label(gui, panel.getTitle());
 				addElement(title);
@@ -216,9 +216,9 @@ public abstract class Frame extends Panel {
 		this.tooltipBox = tooltip;
 	}
 
-	public void logMessage(String msg) {
+	public void tick() {
 	}
 
-	public void tick() {
+	public void logMessage(String msg) {
 	}
 }

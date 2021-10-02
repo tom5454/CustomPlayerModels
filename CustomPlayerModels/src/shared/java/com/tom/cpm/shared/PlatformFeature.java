@@ -8,4 +8,12 @@ public enum PlatformFeature {
 	public boolean isSupported() {
 		return MinecraftCommonAccess.get().getSupportedFeatures().contains(this);
 	}
+
+	public static String getVersion() {
+		try {
+			return MinecraftCommonAccess.get().getPlatformVersionString();
+		} catch (Throwable e) {
+			return "Error: " + e.toString();
+		}
+	}
 }

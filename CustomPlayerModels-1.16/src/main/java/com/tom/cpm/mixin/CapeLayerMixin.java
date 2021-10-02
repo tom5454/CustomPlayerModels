@@ -15,6 +15,7 @@ import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.ResourceLocation;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -46,7 +47,10 @@ public abstract class CapeLayerMixin extends LayerRenderer<AbstractClientPlayerE
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
 				ItemStack chestplate = entitylivingbaseIn.getItemBySlot(EquipmentSlotType.CHEST);
 				if(!entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isModelPartShown(PlayerModelPart.CAPE) && chestplate.getItem() != Items.ELYTRA) {
-					ModelTexture mt = new ModelTexture();
+					ResourceLocation defLoc = entitylivingbaseIn.getCloakTextureLocation();
+					if(defLoc == null)defLoc = ClientProxy.DEFAULT_CAPE;
+					ModelTexture mt = new ModelTexture(defLoc);
+					ClientProxy.mc.getPlayerRenderManager().rebindModel(getParentModel());
 					ClientProxy.mc.getPlayerRenderManager().bindSkin(getParentModel(), mt, TextureSheetType.CAPE);
 					if(mt.getTexture() != null) {
 						IVertexBuilder buffer = bufferIn.getBuffer(mt.getRenderType());

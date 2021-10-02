@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.SharedConstants;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 import com.tom.cpl.util.ILogger;
@@ -66,5 +67,14 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 	@Override
 	public EnumSet<PlatformFeature> getSupportedFeatures() {
 		return features;
+	}
+
+	@Override
+	public String getPlatformVersionString() {
+		String modVer = FabricLoader.getInstance().getModContainer("cpm").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
+		String fVer = FabricLoader.getInstance().getModContainer("fabric").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
+		String lVer = FabricLoader.getInstance().getModContainer("fabricloader").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
+		String s = "Minecraft " + SharedConstants.getGameVersion().getName() + " (fabric/" + lVer + "/" + fVer + ") " + modVer;
+		return s;
 	}
 }

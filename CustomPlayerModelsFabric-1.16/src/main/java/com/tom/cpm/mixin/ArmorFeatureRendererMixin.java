@@ -57,4 +57,14 @@ public abstract class ArmorFeatureRendererMixin {
 			String string, CallbackInfo cbi) {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(this.getArmorTexture(armorItem, bl2, string), PlayerRenderManager.armor), model == leggingsModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
+
+	@Inject(at = @At("HEAD"),
+			method = {"renderModel(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I"
+					+ "ZLnet/minecraft/client/render/entity/model/BipedEntityModel;FFFLnet/minecraft/util/Identifier;)V",
+					"renderModel(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I"
+							+ "ZLnet/minecraft/class_572;FFFLnet/minecraft/class_2960;)V"},
+			remap = false, require = 0)//Optifine
+	private void preRender(MatrixStack p_241738_1_, VertexConsumerProvider p_241738_2_, int p_241738_3_, boolean p_241738_5_, BipedEntityModel<LivingEntity> model, float p_241738_8_, float p_241738_9_, float p_241738_10_, Identifier resLoc, CallbackInfo cbi) {
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == leggingsModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
+	}
 }

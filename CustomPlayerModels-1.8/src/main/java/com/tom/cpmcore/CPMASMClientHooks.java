@@ -101,6 +101,7 @@ public class CPMASMClientHooks {
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
 				if(!player.isInvisible() && player.isWearing(EnumPlayerModelParts.CAPE)) {
 					ModelPlayer model = this0.playerRenderer.getMainModel();
+					ClientProxy.mc.getPlayerRenderManager().rebindModel(model);
 					ClientProxy.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
 					ClientProxy.renderCape(player, partialTicks, model, def);
 				}

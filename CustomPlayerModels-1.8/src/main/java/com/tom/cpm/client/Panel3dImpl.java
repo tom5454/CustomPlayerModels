@@ -46,33 +46,35 @@ public class Panel3dImpl extends Panel3dNative {
 		GlStateManager.enableAlpha();
 		GlStateManager.enableColorMaterial();
 		GlStateManager.pushMatrix();
-		Box bounds = getBounds();
-		Vec2i off = panel.getGui().getOffset();
-		GlStateManager.translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 50);
-		float scale = cam.camDist;
-		GlStateManager.scale((-scale), scale, 0.1f);
-		GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
-		GlStateManager.rotate((float) Math.toDegrees(pitch), 1, 0, 0);
-		GlStateManager.rotate((float) Math.toDegrees(yaw), 0, 1, 0);
-		GlStateManager.translate(-cam.position.x, -cam.position.y, -cam.position.z);
-		float f = 1.0f;
-		glColor3f(f, f, f);
+		try {
+			Box bounds = getBounds();
+			Vec2i off = panel.getGui().getOffset();
+			GlStateManager.translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 50);
+			float scale = cam.camDist;
+			GlStateManager.scale((-scale), scale, 0.1f);
+			GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
+			GlStateManager.rotate((float) Math.toDegrees(pitch), 1, 0, 0);
+			GlStateManager.rotate((float) Math.toDegrees(yaw), 0, 1, 0);
+			GlStateManager.translate(-cam.position.x, -cam.position.y, -cam.position.z);
+			float f = 1.0f;
+			glColor3f(f, f, f);
 
-		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+			GlStateManager.enableBlend();
+			GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
 
-		GlStateManager.enableDepth();
-		GlStateManager.disableCull();
+			GlStateManager.enableDepth();
+			GlStateManager.disableCull();
 
-		panel.render(new MatrixStack(), new VBuffers(RetroGL::buffer), partialTicks);
-
-		GlStateManager.disableDepth();
-		GlStateManager.popMatrix();
-		RenderHelper.disableStandardItemLighting();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-		GlStateManager.disableTexture2D();
-		GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+			panel.render(new MatrixStack(), new VBuffers(RetroGL::buffer), partialTicks);
+		} finally {
+			GlStateManager.disableDepth();
+			GlStateManager.popMatrix();
+			RenderHelper.disableStandardItemLighting();
+			GlStateManager.disableRescaleNormal();
+			GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+			GlStateManager.disableTexture2D();
+			GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+		}
 	}
 
 	@Override

@@ -1,7 +1,10 @@
 package com.tom.cpm.shared.editor.project;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 public interface JsonMap {
 
@@ -61,4 +64,26 @@ public interface JsonMap {
 	}
 
 	Map<String, Object> asMap();
+
+	void put(String name, Object data);
+
+	default JsonMap putMap(String name) {
+		JsonMap map = getMap(name);
+		if(map == null) {
+			put(name, new HashMap<>());
+		}
+		return getMap(name);
+	}
+
+	default JsonList putList(String name) {
+		JsonList map = getList(name);
+		if(map == null) {
+			put(name, new ArrayList<>());
+		}
+		return getList(name);
+	}
+
+	default <T> T getObject(String name, BiFunction<JsonMap, T, T> ctr, T def) {
+		return ctr.apply(getMap(name), def);
+	}
 }

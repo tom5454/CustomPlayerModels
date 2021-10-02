@@ -2,9 +2,9 @@ package com.tom.cpm.shared.model.render;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.tom.cpl.math.MatrixStack;
-import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.render.VertexBuffer;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
@@ -85,7 +85,7 @@ public class VanillaPlayerModel {
 		rightLeg.render(stack, buffer);
 	}
 
-	public void poseLayer(PlayerModelLayer layer) {
+	public void poseLayer(PlayerModelLayer layer, Set<PlayerModelLayer> layers) {
 		switch (layer) {
 		case BODY:
 			armorBody.copyFrom(body);
@@ -99,7 +99,30 @@ public class VanillaPlayerModel {
 			break;
 
 		case CAPE:
-			break;
+		{
+			float f1 = 0;
+			if (crouching) {
+				f1 += 25.0F;
+			}
+			if (!layers.contains(PlayerModelLayer.BODY)) {
+				if (crouching) {
+					cape.z = 1.4F + 0.125F * 3;
+					cape.y = 1.85F + 1 - 0.125F * 4;
+				} else {
+					cape.z = 0.0F + 0.125F * 16f;
+					cape.y = 0.0F;
+				}
+			} else if (crouching) {
+				cape.z = 0.3F + 0.125F * 16f;
+				cape.y = 0.8F + 0.3f;
+			} else {
+				cape.z = -1.1F + 0.125F * 32f;
+				cape.y = -0.85F + 1;
+			}
+			cape.xRot = (float) -Math.toRadians(6.0F + f1);
+			cape.yRot = (float) Math.toRadians(180.0F);
+		}
+		break;
 
 		case ELYTRA:
 			elytraLeft.x = 5.0F;
@@ -143,12 +166,7 @@ public class VanillaPlayerModel {
 			break;
 
 		case CAPE:
-			stack.push();
-			stack.translate(0.0D, 0.0D, 0.125D);
-			stack.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(6.0F));
-			stack.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
 			cape.render(stack, buffer);
-			stack.pop();
 			break;
 
 		case ELYTRA:

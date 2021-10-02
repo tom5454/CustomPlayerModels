@@ -1,8 +1,6 @@
 package com.tom.cpm.shared.definition;
 
-import java.io.IOException;
-
-public class SafetyException extends IOException {
+public class SafetyException extends RuntimeException {
 	private BlockReason blockReason;
 
 	public SafetyException(BlockReason blockReason) {
@@ -17,6 +15,7 @@ public class SafetyException extends IOException {
 		CONFIG_DISABLED,
 		TOO_MANY_CUBES,
 		TEXTURE_OVERFLOW,
+		UUID_LOCK,
 	}
 
 	public BlockReason getBlockReason() {

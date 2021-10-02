@@ -17,6 +17,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.Identifier;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
@@ -45,7 +46,10 @@ public abstract class CapeFeatureRendererMixin extends FeatureRenderer<AbstractC
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
 				ItemStack chestplate = entitylivingbaseIn.getEquippedStack(EquipmentSlot.CHEST);
 				if(!entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isPartVisible(PlayerModelPart.CAPE) && chestplate.getItem() != Items.ELYTRA) {
-					ModelTexture mt = new ModelTexture();
+					Identifier defLoc = entitylivingbaseIn.getCapeTexture();
+					if(defLoc == null)defLoc = CustomPlayerModelsClient.DEFAULT_CAPE;
+					ModelTexture mt = new ModelTexture(defLoc);
+					CustomPlayerModelsClient.mc.getPlayerRenderManager().rebindModel(getContextModel());
 					CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getContextModel(), mt, TextureSheetType.CAPE);
 					if(mt.getTexture() != null) {
 						VertexConsumer buffer = bufferIn.getBuffer(mt.getRenderLayer());

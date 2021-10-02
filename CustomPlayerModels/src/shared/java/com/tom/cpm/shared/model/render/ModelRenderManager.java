@@ -32,7 +32,8 @@ import com.tom.cpm.shared.model.RenderedCube.ElementSelectMode;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
-import com.tom.cpm.shared.util.Log;
+import com.tom.cpm.shared.util.ErrorLog;
+import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 
 public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderManager {
 	public static final Predicate<Player<?, ?>> ALWAYS = p -> true;
@@ -94,6 +95,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 	public void bindSkin(MB model, S cbi, TextureSheetType tex) {
 		bindSkin(model, null, cbi, tex);
+	}
+
+	public void rebindModel(MB model) {
+		getHolderSafe(model, null, RedirectHolder::rebind);
 	}
 
 	public boolean isBound(MB model, String arg) {
@@ -201,6 +206,16 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			swappedIn = false;
 		}
 
+		private void rebind() {
+			if(!swappedIn)return;
+			ModelDefinition def = this.def;
+			D addDt = this.addDt;
+			Player<?, M> playerObj = this.playerObj;
+			AnimationMode mode = this.mode;
+			swapOut();
+			swapIn(def, addDt, playerObj, mode);
+		}
+
 		private void bindTexture0(S cbi, TextureSheetType tex) {
 			if(def == null)return;
 			TextureProvider skin = def.getTexture(tex, isInGui());
@@ -265,7 +280,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		public void logWarning() {
 			if(!loggedWarning) {
-				Log.warn("Failed to render element for model " + model.getClass() + " render system isn't initialized correctly, please report this to the mod author");
+				ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.renderInitFail", model.getClass().toString());
 				loggedWarning = true;
 			}
 		}

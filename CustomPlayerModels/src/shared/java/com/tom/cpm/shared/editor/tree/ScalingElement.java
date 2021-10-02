@@ -2,7 +2,7 @@ package com.tom.cpm.shared.editor.tree;
 
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
+import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
 
 public class ScalingElement implements TreeElement {
 	private Editor editor;
@@ -21,7 +21,7 @@ public class ScalingElement implements TreeElement {
 	public void updateGui() {
 		editor.applyScaling = true;
 		editor.setValue.accept(editor.scaling);
-		editor.setModePanel.accept(ModeDisplType.VALUE);
+		editor.setModePanel.accept(ModeDisplayType.VALUE);
 	}
 
 	@Override

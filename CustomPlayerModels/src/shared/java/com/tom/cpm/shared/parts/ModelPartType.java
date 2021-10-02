@@ -19,6 +19,7 @@ public enum ModelPartType {
 	CLONEABLE(ModelPartCloneable::new),
 	SCALE(ModelPartScale::new),
 	TEXTURE(ModelPartTexture::new),
+	ANIMATED_TEX(ModelPartAnimatedTexture::new),
 	;
 	public static final ModelPartType[] VALUES = values();
 	private final IModelPart.Factory factory;

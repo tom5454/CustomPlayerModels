@@ -7,6 +7,7 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.gui.panel.ErrorLogPanel;
 import com.tom.cpm.shared.gui.panel.SocialPanel;
 
 public class SocialGui extends Frame {
@@ -39,6 +40,8 @@ public class SocialGui extends Frame {
 
 		Button settings = new Button(gui, gui.i18nFormat("button.cpm.edit.settings"), () -> MinecraftClientAccess.get().openGui(SettingsGui::new));
 		panel.topPanel.add(settings);
+
+		panel.addTab("errorLog", new ErrorLogPanel(this, width / 3 * 2, height / 3 * 2 - 20), 0);
 
 		Button btn = new Button(gui, "X", gui::close);
 		btn.setBounds(new Box(width / 6 + width / 3 * 2 - 20, height / 6, 20, 20));

@@ -54,6 +54,7 @@ import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.parts.IModelPart;
+import com.tom.cpm.shared.parts.ModelPartAnimatedTexture;
 import com.tom.cpm.shared.parts.ModelPartAnimation;
 import com.tom.cpm.shared.parts.ModelPartCloneable;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
@@ -222,8 +223,10 @@ public class Exporter {
 			otherParts.add(new ModelPartAnimation(e));
 		}
 		e.textures.forEach((type, tex) -> {
-			if(type == TextureSheetType.SKIN)return;
-			otherParts.add(new ModelPartTexture(e, type));
+			if(type != TextureSheetType.SKIN)
+				otherParts.add(new ModelPartTexture(e, type));
+			if(!tex.animatedTexs.isEmpty() && type.editable)
+				tex.animatedTexs.forEach(at -> otherParts.add(new ModelPartAnimatedTexture(type, at)));
 		});
 		for (EditorTemplate et : e.templates) {
 			otherParts.add(new ModelPartTemplate(et));

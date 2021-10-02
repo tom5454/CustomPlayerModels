@@ -1,5 +1,6 @@
 package com.tom.cpl.math;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.tom.cpm.shared.editor.project.JsonMap;
@@ -64,5 +65,12 @@ public class Vec2i {
 	@Override
 	public String toString() {
 		return String.format("Vec2[%s, %s]", x, y);
+	}
+
+	public Map<String, Object> toMap() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("x", x);
+		map.put("y", y);
+		return map;
 	}
 }

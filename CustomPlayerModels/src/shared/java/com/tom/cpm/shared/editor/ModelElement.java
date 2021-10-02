@@ -14,7 +14,7 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpm.shared.editor.anim.IElem;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
+import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.model.Cube;
@@ -235,7 +235,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void modeSwitch() {
 		editor.action("switch", "action.cpm.cubeMode").updateValueOp(this, this.texture, !this.texture, (a, b) -> a.texture = b).execute();
 		editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
-		editor.setModePanel.accept(texture ? ModeDisplType.TEX : ModeDisplType.COLOR);
+		editor.setModePanel.accept(texture ? ModeDisplayType.TEX : ModeDisplayType.COLOR);
 		editor.setTexturePanel.accept(this.texture ? new Vec3i(this.u, this.v, this.textureSize) : new Vec3i(this.rgb, 0, 0));
 		if(!this.texture || this.recolor)
 			editor.setPartColor.accept(this.rgb);
@@ -259,7 +259,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 				editor.setMCScale.accept(this.mcScale);
 				editor.setMirror.accept(this.mirror);
 				editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
-				editor.setModePanel.accept(this.faceUV != null ? ModeDisplType.TEX_FACE : texture ? ModeDisplType.TEX : ModeDisplType.COLOR);
+				editor.setModePanel.accept(this.faceUV != null ? ModeDisplayType.TEX_FACE : texture ? ModeDisplayType.TEX : ModeDisplayType.COLOR);
 				editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize));
 				if(!this.texture || this.recolor)
 					editor.setPartColor.accept(this.rgb);
@@ -360,7 +360,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 		case PER_FACE_UV:
 			editor.action("switch", "label.cpm.perfaceUV").updateValueOp(this, this.texture, true, (a, b) -> a.texture = b).
-			update(editor.setModePanel, ModeDisplType.TEX_FACE).
+			update(editor.setModePanel, ModeDisplayType.TEX_FACE).
 			updateValueOp(this, this.faceUV, faceUV == null ? new PerFaceUV(this) : null, (a, b) -> a.faceUV = b, v -> editor.setPerFaceUV.accept(v != null)).
 			execute();
 			editor.updateGui();

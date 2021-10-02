@@ -12,7 +12,7 @@ import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
+import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
@@ -96,7 +96,7 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 				if(texSize != 0) {
 					editor.setModeBtn.accept(editor.gui().i18nFormat("button.cpm.template_remove_tex"));
 				}
-				editor.setModePanel.accept(ModeDisplType.TEX);
+				editor.setModePanel.accept(ModeDisplayType.TEX);
 				editor.setTexturePanel.accept(new Vec3i(u, v, texSize));
 			}
 
@@ -155,7 +155,7 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 			@Override
 			public void updateGui() {
 				editor.setModeBtn.accept(editor.gui().i18nFormat("button.cpm.template_place_tex"));
-				editor.setModePanel.accept(ModeDisplType.TEX);
+				editor.setModePanel.accept(ModeDisplayType.TEX);
 				editor.setTexturePanel.accept(new Vec3i(u, v, texSize));
 			}
 

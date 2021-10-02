@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplType;
+import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.model.Cube;
@@ -75,7 +75,7 @@ public class ColorEditorArg implements TemplateArg<ColorArg> {
 
 			@Override
 			public void updateGui() {
-				editor.setModePanel.accept(ModeDisplType.COLOR);
+				editor.setModePanel.accept(ModeDisplayType.COLOR);
 				editor.setPartColor.accept(value);
 			}
 		});

@@ -6,9 +6,12 @@ import java.util.EnumSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.SharedConstants;
+
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -16,10 +19,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import net.minecraftforge.fmlserverevents.FMLServerStoppingEvent;
+import net.minecraftforge.versions.forge.ForgeVersion;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
@@ -33,7 +38,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 
 		MinecraftForge.EVENT_BUS.register(this);
-		//MinecraftForge.EVENT_BUS.register(new ServerHandler());
+		MinecraftForge.EVENT_BUS.register(new ServerHandler());
 	}
 
 	public static final Logger LOG = LogManager.getLogger("CPM");
@@ -75,15 +80,18 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	}
 
 	private static final EnumSet<PlatformFeature> features = EnumSet.of(
-			PlatformFeature.EDITOR_HELD_ITEM/*,
-			PlatformFeature.RENDER_ARMOR,
-			PlatformFeature.RENDER_ELYTRA,
-			PlatformFeature.RENDER_CAPE,
-			PlatformFeature.EDITOR_SUPPORTED*/
+			PlatformFeature.EDITOR_HELD_ITEM,
+			PlatformFeature.EDITOR_SUPPORTED
 			);
 
 	@Override
 	public EnumSet<PlatformFeature> getSupportedFeatures() {
 		return features;
+	}
+
+	@Override
+	public String getPlatformVersionString() {
+		String modVer = ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
+		return "Minecraft " + SharedConstants.getCurrentVersion().getName() + " (forge/" + ForgeVersion.getVersion() + ") " + modVer;
 	}
 }
