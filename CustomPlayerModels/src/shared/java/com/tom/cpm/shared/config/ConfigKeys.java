@@ -32,5 +32,5 @@ public class ConfigKeys {
 		else return (v / 1024) + " MB";
 	}, 100, KeyGroup.FRIEND, 1024);
 	public static final PlayerSpecificConfigKey<Integer> MAX_CUBE_COUNT = PlayerSpecificConfigKey.createIntF("maxCubeCount", 16, Integer.MAX_VALUE, Math::log10, v -> Math.pow(10, v), Object::toString, 0, 256, KeyGroup.FRIEND, (int) Short.MAX_VALUE);
-	public static final PlayerSpecificConfigKey[] SAFETY_KEYS = new PlayerSpecificConfigKey[] {ENABLE_MODEL_LOADING, MAX_TEX_SHEET_SIZE, MAX_LINK_SIZE, MAX_CUBE_COUNT};//ENABLE_ANIMATED_TEXTURES
+	public static final PlayerSpecificConfigKey[] SAFETY_KEYS = new PlayerSpecificConfigKey[] {ENABLE_MODEL_LOADING, ENABLE_ANIMATED_TEXTURES, MAX_TEX_SHEET_SIZE, MAX_LINK_SIZE, MAX_CUBE_COUNT};
 }

@@ -259,7 +259,7 @@
 	"label.cpm.enterServerIP": "Enter server IP:",
 	"label.cpm.error": "Error",
 	"label.cpm.error.blockedBySafety": "Model loading stopped by safety settings for %s",
-	"label.cpm.error.errorWhileLoading": "",
+	"label.cpm.error.errorWhileLoading": "Unexpected error occurred while loading model for %s. Error: %s",
 	"label.cpm.error.load": "Project load error",
 	"label.cpm.error.renderInitFail": "Failed to render element for model %s render system isn't initialized correctly, please report this to the mod author",
 	"label.cpm.error.save": "Project save error",

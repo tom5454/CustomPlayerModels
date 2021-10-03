@@ -129,6 +129,21 @@ public class AnimatedTex implements TreeElement {
 		return editor.textures.get(TextureSheetType.SKIN);
 	}
 
+	@Override
+	public void delete() {
+		ETextures tex = editor.textures.get(sheet);
+		editor.action("remove", "action.cpm.animTex").removeFromList(tex.animatedTexs, this).onRun(() -> {
+			editor.selectedElement = null;
+			tex.refreshTexture();
+		}).execute();
+		editor.updateGui();
+	}
+
+	@Override
+	public void updateGui() {
+		editor.setDelEn.accept(true);
+	}
+
 	private class OptionElem implements TreeElement {
 		protected String name;
 		private Tooltip tooltip;

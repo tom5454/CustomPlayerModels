@@ -39,6 +39,7 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
 
 import com.mojang.authlib.GameProfile;
@@ -79,6 +80,7 @@ public class ClientProxy extends CommonProxy {
 		optifineLoaded = OFDetector.doApply();
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
 		MinecraftForge.EVENT_BUS.register(this);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), net.minecraft.world.entity.player.Player::getGameProfile);
 		netHandler = new NetHandler<>(ResourceLocation::new);
@@ -181,8 +183,7 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	@SubscribeEvent
-	public void registerShaders(RegisterShadersEvent evt) {
+	private void registerShaders(RegisterShadersEvent evt) {
 		try {
 			evt.registerShader(new ShaderInstance(evt.getResourceManager(), new ResourceLocation("cpm", "rendertype_entity_translucent_cull_no_light"), DefaultVertexFormat.NEW_ENTITY), s -> CustomRenderTypes.entityTranslucentCullNoLightShaderProgram = s);
 		} catch (IOException e) {
