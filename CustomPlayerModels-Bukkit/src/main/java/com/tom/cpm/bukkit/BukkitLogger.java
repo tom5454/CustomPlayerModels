@@ -36,4 +36,9 @@ public class BukkitLogger implements ILogger {
 	public void error(String text) {
 		log.log(Level.SEVERE, text);
 	}
+
+	@Override
+	public void info(String text, Throwable thr) {
+		log.log(Level.INFO, text, thr);
+	}
 }

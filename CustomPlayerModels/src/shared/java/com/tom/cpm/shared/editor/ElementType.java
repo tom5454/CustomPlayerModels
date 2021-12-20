@@ -58,6 +58,7 @@ public enum ElementType {
 			elem.rc.glow = elem.glow;
 			elem.rc.singleTex = elem.singleTex;
 			elem.rc.faceUVs = elem.faceUV;
+			elem.rc.extrude = elem.extrude;
 			elem.rc.itemRenderer = elem.itemRenderer;
 		}
 

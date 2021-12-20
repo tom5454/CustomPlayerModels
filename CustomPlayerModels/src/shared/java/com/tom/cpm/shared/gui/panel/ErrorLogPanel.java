@@ -118,7 +118,7 @@ public class ErrorLogPanel extends Panel {
 
 			addElement(new Label(gui, gui.i18nFormat("label.cpm.level." + entry.getLevel().name().toLowerCase())).setBounds(new Box(5, 4, 20, 10)));
 
-			addElement(new Label(gui, entry.getMessage().toString(gui)).setBounds(new Box(40, 4, w - 35, 10)));
+			addElement(new Label(gui, entry.getMessage().toString(gui)).setBounds(new Box(45, 4, w - 35, 10)));
 
 			tooltip = new Tooltip(frm, entry.toTooltipString(gui, false));
 			tooltipST = new Tooltip(frm, entry.toTooltipString(gui, true));
@@ -131,7 +131,7 @@ public class ErrorLogPanel extends Panel {
 				setBackgroundColor(0xff888888);
 				break;
 			case WARNING:
-				setBackgroundColor(0xffffff22);
+				setBackgroundColor(0xffaaaa22);
 				break;
 			default:
 				break;

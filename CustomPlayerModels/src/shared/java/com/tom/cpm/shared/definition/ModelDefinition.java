@@ -13,7 +13,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
@@ -50,7 +49,7 @@ import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ModelDefinition {
-	private final ModelDefinitionLoader loader;
+	private final ModelDefinitionLoader<?> loader;
 	private final Player<?, ?> playerObj;
 	private List<IModelPart> parts;
 	private List<IResolvedModelPart> resolved;
@@ -69,7 +68,7 @@ public class ModelDefinition {
 	public ModelPartCloneable cloneable;
 	private Throwable error;
 
-	public ModelDefinition(ModelDefinitionLoader loader, Player<?, ?> player) {
+	public ModelDefinition(ModelDefinitionLoader<?> loader, Player<?, ?> player) {
 		this.loader = loader;
 		this.playerObj = player;
 	}
@@ -198,7 +197,7 @@ public class ModelDefinition {
 			stitcher.setBase(skin);
 			skinTexture = new TextureProvider(skin, new Vec2i(64, 64));
 		}
-		Vec2i whiteBox = new Vec2i(0, 0);
+		/*Vec2i whiteBox = new Vec2i(0, 0);
 		List<RenderedCube> coloredCubes = new ArrayList<>();
 		cubes.forEach(t -> {
 			if(t.getCube().texSize == 0) {
@@ -219,7 +218,7 @@ public class ModelDefinition {
 					cube.getCube().v = uv.y;
 				});
 			});
-		}
+		}*/
 		resolved.forEach(r -> r.stitch(stitcher));
 		TextureProvider tx = stitcher.finish();
 		if(tx != null) {
@@ -405,7 +404,7 @@ public class ModelDefinition {
 		return rootRenderingCubes.containsKey(type);
 	}
 
-	public ModelDefinitionLoader getLoader() {
+	public ModelDefinitionLoader<?> getLoader() {
 		return loader;
 	}
 

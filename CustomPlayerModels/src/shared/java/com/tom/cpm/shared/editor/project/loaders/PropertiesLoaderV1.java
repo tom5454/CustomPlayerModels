@@ -28,7 +28,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 			editor.customSkinType = true;
 			editor.skinType = SkinType.get(data.getString("skinType"));
 		}
-		editor.scaling = data.getFloat("scaling", 0);
+		editor.scalingElem.entityScaling = data.getFloat("scaling", 0);
 		editor.hideHeadIfSkull = data.getBoolean("hideHeadIfSkull", true);
 		editor.removeArmorOffset = data.getBoolean("removeArmorOffset", !editor.elements.stream().anyMatch(e -> e.duplicated));
 	}
@@ -37,7 +37,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 	public void save(Editor editor, ProjectWriter project) throws IOException {
 		JsonMap data = project.getJson("config.json");
 		data.put("skinType", editor.skinType.getName());
-		data.put("scaling", editor.scaling);
+		data.put("scaling", editor.scalingElem.entityScaling);
 		data.put("hideHeadIfSkull", editor.hideHeadIfSkull);
 		data.put("removeArmorOffset", editor.removeArmorOffset);
 	}

@@ -57,4 +57,8 @@ public class Button extends GuiElement {
 	public void setTooltip(Tooltip tooltip) {
 		this.tooltip = tooltip;
 	}
+
+	public Runnable getAction() {
+		return action;
+	}
 }

@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.MessageType;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
@@ -27,19 +27,19 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
-	public static NetHandler<Identifier, CompoundTag, ServerPlayerEntity, PacketByteBuf, ServerPlayNetworkHandler> netHandler;
+	public static NetHandler<Identifier, NbtCompound, ServerPlayerEntity, PacketByteBuf, ServerPlayNetworkHandler> netHandler;
 
 	static {
 		netHandler = new NetHandler<>(Identifier::new);
-		netHandler.setNewNbt(CompoundTag::new);
+		netHandler.setNewNbt(NbtCompound::new);
 		netHandler.setNewPacketBuffer(() -> new PacketByteBuf(Unpooled.buffer()));
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUuid);
-		netHandler.setWriteCompound(PacketByteBuf::writeCompoundTag, PacketByteBuf::readCompoundTag);
+		netHandler.setWriteCompound(PacketByteBuf::writeNbt, PacketByteBuf::readNbt);
 		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new CustomPayloadS2CPacket(rl, pb), ServerHandler::hasMod, null));
 		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getEntityId()));
-		netHandler.setNBTSetters(CompoundTag::putBoolean, CompoundTag::putByteArray, CompoundTag::putFloat);
-		netHandler.setNBTGetters(CompoundTag::getBoolean, CompoundTag::getByteArray, CompoundTag::getFloat);
-		netHandler.setContains(CompoundTag::contains);
+		netHandler.setNBTSetters(NbtCompound::putBoolean, NbtCompound::putByteArray, NbtCompound::putFloat);
+		netHandler.setNBTGetters(NbtCompound::getBoolean, NbtCompound::getByteArray, NbtCompound::getFloat);
+		netHandler.setContains(NbtCompound::contains);
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTracker tr : ((ServerWorld)p.world).getChunkManager().threadedAnvilChunkStorage.entityTrackers.values()) {
 				if(tr.entity instanceof PlayerEntity && tr.playersTracking.contains(p)) {

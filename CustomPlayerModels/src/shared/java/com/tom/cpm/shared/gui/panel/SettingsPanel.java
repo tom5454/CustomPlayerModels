@@ -358,4 +358,8 @@ public class SettingsPanel extends Panel {
 	public boolean isChanged() {
 		return ce.isDirty();
 	}
+
+	public void setOpenTab(int tabID) {
+		((Button)topPanel.getPanel().getElements().get(tabID)).getAction().run();
+	}
 }

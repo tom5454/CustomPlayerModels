@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.7-SNAPSHOT'
+	id 'fabric-loom' version '0.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -34,7 +34,7 @@ dependencies {
     modRuntime("me.shedaniel:RoughlyEnoughItems:5.8.7"){
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modImplementation ('com.github.Virtuoel:Pehkui:2.3.0'){
+    modImplementation ('com.github.Virtuoel:Pehkui:3.0.0'){
         exclude(group: "net.fabricmc.fabric-api")
     }
     

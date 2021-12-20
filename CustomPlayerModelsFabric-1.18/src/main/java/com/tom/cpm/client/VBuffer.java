@@ -16,8 +16,8 @@ public class VBuffer extends DirectBuffer<VertexConsumer> {
 		super(buffer);
 		this.light = light;
 		this.overlay = overlay;
-		mat4 = matrixStackIn.peek().getModel();
-		mat3 = matrixStackIn.peek().getNormal();
+		mat4 = matrixStackIn.peek().getPositionMatrix();
+		mat3 = matrixStackIn.peek().getNormalMatrix();
 	}
 
 	@Override

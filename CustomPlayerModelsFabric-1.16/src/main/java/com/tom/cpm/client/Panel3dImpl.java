@@ -15,13 +15,13 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.SkullBlockEntityRenderer;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Quaternion;
+import net.minecraft.util.math.Vec3f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -64,12 +64,12 @@ public class Panel3dImpl extends Panel3dNative {
 			matrixstack = new MatrixStack();
 			matrixstack.translate(0.0D, 0.0D, 1000.0D);
 			matrixstack.scale(size, size, size);
-			Quaternion quaternion = Vector3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
-			Quaternion quaternion1 = Vector3f.POSITIVE_X.getRadialQuaternion(-pitch);
+			Quaternion quaternion = Vec3f.POSITIVE_Z.getDegreesQuaternion(180.0F);
+			Quaternion quaternion1 = Vec3f.POSITIVE_X.getRadialQuaternion(-pitch);
 			quaternion.hamiltonProduct(quaternion1);
 			matrixstack.multiply(quaternion);
 
-			matrixstack.multiply(Vector3f.POSITIVE_Y.getRadialQuaternion((float) (yaw + Math.PI)));
+			matrixstack.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion((float) (yaw + Math.PI)));
 			matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
 			RenderSystem.enableDepthTest();
 
@@ -168,8 +168,8 @@ public class Panel3dImpl extends Panel3dNative {
 			boolean flag = false;
 			ModelTransformation.Mode view = ModelTransformation.Mode.FIXED;
 			if(hand == ItemSlot.LEFT_HAND || hand == ItemSlot.RIGHT_HAND) {
-				matrixstack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-90.0F));
-				matrixstack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
+				matrixstack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-90.0F));
+				matrixstack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
 				flag = hand == ItemSlot.LEFT_HAND;
 				view = flag ? ModelTransformation.Mode.THIRD_PERSON_LEFT_HAND : ModelTransformation.Mode.THIRD_PERSON_RIGHT_HAND;
 				matrixstack.translate((flag ? -1 : 1) / 16.0F, 0.125D, -0.625D);
@@ -183,7 +183,7 @@ public class Panel3dImpl extends Panel3dNative {
 					return;
 				} else {
 					matrixstack.translate(0.0D, -0.25D, 0.0D);
-					matrixstack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
+					matrixstack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180.0F));
 					matrixstack.scale(0.625F, -0.625F, -0.625F);
 					view = ModelTransformation.Mode.HEAD;
 				}

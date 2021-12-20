@@ -146,6 +146,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		map.put("recolor", elem.recolor);
 		map.put("hidden", elem.hidden);
 		map.put("singleTex", elem.singleTex);
+		map.put("extrude", elem.extrude);
 		if(elem.faceUV != null)map.put("faceUV", elem.faceUV.toMap());
 		if(elem.itemRenderer != null)map.put("itemRenderer", elem.itemRenderer.slot.name().toLowerCase());
 	}
@@ -169,6 +170,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		elem.recolor = map.getBoolean("recolor", false);
 		elem.hidden = map.getBoolean("hidden", false);
 		elem.singleTex = map.getBoolean("singleTex", false);
+		elem.extrude = map.getBoolean("extrude", false);
 		if(map.containsKey("faceUV"))elem.faceUV = new PerFaceUV(map.getMap("faceUV"));
 		if(map.containsKey("itemRenderer")) {
 			String name = map.getString("itemRenderer");

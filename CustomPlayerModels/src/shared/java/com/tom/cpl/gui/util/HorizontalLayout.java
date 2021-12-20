@@ -33,4 +33,8 @@ public class HorizontalLayout {
 	public void addX(int i) {
 		x += i;
 	}
+
+	public Panel getPanel() {
+		return panel;
+	}
 }

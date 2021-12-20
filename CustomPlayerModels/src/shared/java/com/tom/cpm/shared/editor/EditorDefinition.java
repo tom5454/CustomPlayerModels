@@ -79,7 +79,6 @@ public class EditorDefinition extends ModelDefinition {
 
 	public void render(MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube) {
 		if(editor.renderPaint)return;
-		editor.render(stack, buf);
 		drawSelect(cube, stack, buf, renderTypes);
 	}
 

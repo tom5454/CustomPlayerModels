@@ -26,6 +26,8 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
+import com.tom.cpm.shared.editor.TestIngameManager;
+import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.Log;
@@ -33,6 +35,7 @@ import com.tom.cpm.shared.util.Log;
 public class GestureGui extends Frame {
 	private GestureButton hoveredBtn;
 	private Panel panel;
+	private int openEditor;
 
 	public GestureGui(IGui gui) {
 		super(gui);
@@ -40,6 +43,7 @@ public class GestureGui extends Frame {
 			ModConfig.getCommonConfig().save();
 			r.run();
 		});
+		openEditor = TestIngameManager.isTesting() ? 3 : 0;
 	}
 
 	@Override
@@ -70,6 +74,15 @@ public class GestureGui extends Frame {
 			panel.getElements().forEach(e -> ((GestureButton)e).getKb());
 		}
 		super.keyPressed(event);
+	}
+
+	@Override
+	public void tick() {
+		if(openEditor > 0) {
+			openEditor--;
+			if(gui.isShiftDown())
+				MinecraftClientAccess.get().openGui(EditorGui::new);
+		}
 	}
 
 	@Override
@@ -165,6 +178,10 @@ public class GestureGui extends Frame {
 
 		FlowLayout fl = new FlowLayout(btnPanel2, 0, 1);
 
+		Button btnSafety = new Button(gui, gui.i18nFormat("button.cpm.safetySettings"), () -> MinecraftClientAccess.get().openGui(SettingsGui::safetySettings));
+		btnSafety.setBounds(new Box(0, 0, 160, 20));
+		btnPanel2.addElement(btnSafety);
+
 		Button btnSocial = new Button(gui, gui.i18nFormat("button.cpm.socialMenu"), () -> MinecraftClientAccess.get().openGui(SocialGui::new));
 		btnSocial.setBounds(new Box(0, 0, 160, 20));
 		btnPanel2.addElement(btnSocial);
@@ -198,15 +215,21 @@ public class GestureGui extends Frame {
 		btnPanel2.setBounds(new Box(bp2.x, height - bp2.h - 2, bp2.w, bp2.h));
 
 		Panel btnPanel3 = new Panel(gui);
-		btnPanel3.setBounds(new Box(0, height - 20, 160, 50));
+		btnPanel3.setBounds(new Box(0, height - 40, 160, 40));
 		addElement(btnPanel3);
 
 		Button btnSkinMenu = new Button(gui, gui.i18nFormat("button.cpm.models"), () -> MinecraftClientAccess.get().openGui(ModelsGui::new));
-		btnSkinMenu.setBounds(new Box(0, 0, 160, 20));
+		btnSkinMenu.setBounds(new Box(0, 20, 160, 20));
 		btnPanel3.addElement(btnSkinMenu);
 		if(MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.INSTALLED) {
 			btnSkinMenu.setEnabled(false);
 			btnSkinMenu.setTooltip(new Tooltip(this, gui.i18nFormat("label.cpm.feature_unavailable")));
+		}
+
+		if(TestIngameManager.isTesting()) {
+			Button btnOpenEditor = new Button(gui, gui.i18nFormat("button.cpm.open_editor"), () -> MinecraftClientAccess.get().openGui(EditorGui::new));
+			btnOpenEditor.setBounds(new Box(0, 0, 160, 20));
+			btnPanel3.addElement(btnOpenEditor);
 		}
 	}
 

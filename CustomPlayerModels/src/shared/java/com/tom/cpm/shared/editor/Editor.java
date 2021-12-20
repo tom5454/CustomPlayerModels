@@ -47,6 +47,8 @@ import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
+import com.tom.cpm.shared.editor.gui.RenderUtil;
+import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.project.ProjectFile;
 import com.tom.cpm.shared.editor.project.ProjectIO;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
@@ -66,6 +68,7 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.PerFaceUV.Dir;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
+import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.PlayerModelLayer;
@@ -108,6 +111,7 @@ public class Editor {
 	public Updater<Boolean> setHiddenEffect = updaterReg.create();
 	public Updater<Boolean> setSingleTex = updaterReg.create();
 	public Updater<Boolean> setPerFaceUV = updaterReg.create();
+	public Updater<Boolean> setExtrudeEffect = updaterReg.create();
 	public Updater<Boolean> setSkinEdited = updaterReg.create();
 	public Updater<String> setReload = updaterReg.create();
 	public Updater<Boolean> setAnimPlay = updaterReg.create();
@@ -127,6 +131,7 @@ public class Editor {
 	public int penColor = 0xffffff;
 	public EditorTool drawMode = EditorTool.PEN;
 	public int brushSize = 1;
+	public int alphaValue = 255;
 	public boolean drawAllUVs = false;
 	public boolean onlyDrawOnSelected = true;
 	public boolean playVanillaAnims = true;
@@ -145,6 +150,7 @@ public class Editor {
 	public boolean playFullAnim;
 	public boolean playerTpose;
 	public boolean applyScaling;
+	public boolean drawBoundingBox;
 	public long playStartTime, gestureStartTime;
 	public StoreIDGen storeIDgen;
 	public AnimationEncodingData animEnc;
@@ -155,6 +161,7 @@ public class Editor {
 	public EditorAnim selectedAnim;
 	public List<EditorAnim> animsToPlay = new ArrayList<>();
 	public IPose poseToApply;
+	public IPose renderedPose;
 	public List<EditorAnim> animations = new ArrayList<>();
 	public List<EditorTemplate> templates = new ArrayList<>();
 	public TemplateSettings templateSettings;
@@ -162,7 +169,6 @@ public class Editor {
 	public SkinType skinType;
 	public boolean customSkinType;
 	public ModelDescription description;
-	public float scaling;
 	public boolean hideHeadIfSkull, removeArmorOffset;
 	public Image vanillaSkin;
 	public boolean dirty, autoSaveDirty;
@@ -171,6 +177,7 @@ public class Editor {
 	public Map<TextureSheetType, ETextures> textures = new HashMap<>();
 	public File file;
 	public ProjectFile project = new ProjectFile();
+	public int exportSize;
 
 	public Editor() {
 		this.definition = new EditorDefinition(this);
@@ -200,6 +207,7 @@ public class Editor {
 			action("set", "label.cpm.name").
 			updateValueOp(selectedElement, selectedElement.getElemName(), name, TreeElement::setElemName).
 			execute();
+			updateGui.accept(null);
 		}
 	}
 
@@ -253,6 +261,10 @@ public class Editor {
 		if(selectedElement != null)selectedElement.switchEffect(Effect.HIDE);
 	}
 
+	public void switchExtrude() {
+		if(selectedElement != null)selectedElement.switchEffect(Effect.EXTRUDE);
+	}
+
 	public void setTexSize(int x, int y) {
 		ETextures texs = getTextureProvider();
 		if(texs != null) {
@@ -272,7 +284,7 @@ public class Editor {
 	public void drawPixel(int x, int y, boolean isSkin) {
 		switch (drawMode) {
 		case PEN:
-			setPixel(x, y, penColor | 0xff000000);
+			setPixel(x, y, penColor | (alphaValue << 24));
 			break;
 
 		case RUBBER:
@@ -300,6 +312,9 @@ public class Editor {
 					if(pixels.contains(p) || p.x < 0 || p.y < 0 || p.x >= img.getWidth() || p.y >= img.getHeight())continue;
 					int color = img.getRGB(p.x, p.y);
 					if(color == old) {
+						if(box != null && onlyDrawOnSelected) {
+							if(!box.isInBounds(p.x, p.y))continue;
+						}
 						pixels.add(p);
 						nextPixels.add(new Vec2i(p.x - 1, p.y));
 						nextPixels.add(new Vec2i(p.x + 1, p.y));
@@ -307,7 +322,7 @@ public class Editor {
 						nextPixels.add(new Vec2i(p.x, p.y + 1));
 					}
 				}
-				int color = penColor | 0xff000000;
+				int color = penColor | (alphaValue << 24);
 				action("bucketFill").
 				onRun(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, color))).
 				onUndo(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, old))).
@@ -382,6 +397,7 @@ public class Editor {
 		setAnimPlayEn.accept(false);
 		setHiddenEffect.accept(null);
 		setSingleTex.accept(null);
+		setExtrudeEffect.accept(null);
 		setPerFaceUV.accept(null);
 		setVis.accept(false);
 		setAnimPriority.accept(null);
@@ -476,7 +492,7 @@ public class Editor {
 		selectedAnim = null;
 		animEnc = null;
 		description = null;
-		scaling = 0;
+		scalingElem.reset();
 		removeArmorOffset = true;
 		hideHeadIfSkull = true;
 		storeIDgen = new StoreIDGen();
@@ -487,15 +503,13 @@ public class Editor {
 			this.vanillaSkin = skinType.getSkinTexture();
 			skinTex.setDefaultImg(vanillaSkin);
 			img.thenAccept(s -> {
+				if(s != null) {
+					this.vanillaSkin = s;
+				}
 				if(!skinTex.isEdited()) {
-					if(s != null) {
-						this.vanillaSkin = s;
-						skinTex.provider.size = new Vec2i(s.getWidth(), s.getHeight());
-						skinTex.setDefaultImg(vanillaSkin);
-						skinTex.setImage(new Image(this.vanillaSkin));
-					} else {
-						skinTex.setImage(new Image(this.vanillaSkin));
-					}
+					skinTex.provider.size = new Vec2i(vanillaSkin.getWidth(), vanillaSkin.getHeight());
+					skinTex.setDefaultImg(vanillaSkin);
+					skinTex.setImage(new Image(this.vanillaSkin));
 					restitchTextures();
 				}
 			});
@@ -589,6 +603,7 @@ public class Editor {
 			try {
 				tex.getImage().storeTo(f);
 				tex.file = f;
+				updateGui();
 			} catch (IOException e) {
 				Log.error("Failed to save image", e);
 				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_save_failed", e.getLocalizedMessage())));
@@ -808,6 +823,7 @@ public class Editor {
 		} else if(applyAnim && poseToApply != null && poseToApply instanceof VanillaPose) {
 			func.accept((VanillaPose) poseToApply);
 		}
+		renderedPose = poseToApply;
 		poseToApply = null;
 	}
 
@@ -885,8 +901,17 @@ public class Editor {
 		updateGui();
 	}
 
-	public void render(MatrixStack stack, VBuffers buf) {
-		if(selectedElement != null)selectedElement.render3d(stack, buf);
+	public void render(MatrixStack stack, VBuffers buf, ViewportPanel panel) {
+		if(drawBoundingBox) {
+			VanillaPose pose = null;
+			if(applyAnim && selectedAnim != null && selectedAnim.pose instanceof VanillaPose) {
+				pose = (VanillaPose) selectedAnim.pose;
+			} else if(applyAnim && renderedPose != null && renderedPose instanceof VanillaPose) {
+				pose = (VanillaPose) renderedPose;
+			}
+
+			RenderUtil.renderBounds(stack, buf.getBuffer(panel.getRenderTypes(), RenderMode.OUTLINE), pose, applyScaling ? scalingElem.entityScaling : 0);
+		}
 	}
 
 	public void animMoveFrame(int i) {

@@ -5,7 +5,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
@@ -15,8 +14,9 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.options.ChatVisibility;
+import net.minecraft.client.option.ChatVisibility;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.resource.language.I18n;
@@ -84,13 +84,12 @@ public class GuiImpl extends Screen implements IGui {
 			this.matrixStack = matrixStack;
 			matrixStack.push();
 			matrixStack.translate(0, 0, 1000);
-			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			stack = new CtxStack(width, height);
 			RenderSystem.runAsFancy(() -> gui.draw(mouseX, mouseY, partialTicks));
 		} catch (Throwable e) {
 			onGuiException("Error drawing gui", e, true);
 		} finally {
-			GL11.glDisable(GL11.GL_SCISSOR_TEST);
+			RenderSystem.disableScissor();
 			String modVer = FabricLoader.getInstance().getModContainer("cpm").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
 			String s = "Minecraft " + SharedConstants.getGameVersion().getName() + " (" + this.client.getGameVersion() + "/" + ClientBrandRetriever.getClientModName() + ") " + modVer;
 			textRenderer.draw(matrixStack, s, width - textRenderer.getWidth(s) - 4, 2, 0xff000000);
@@ -250,7 +249,10 @@ public class GuiImpl extends Screen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		RenderSystem.color4f(1, 1, 1, 1);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
 		drawTexture(matrixStack, x, y, u, v, w, h);
+		RenderSystem.disableBlend();
 	}
 
 	@Override
@@ -259,6 +261,8 @@ public class GuiImpl extends Screen implements IGui {
 		y += getOffset().y;
 		client.getTextureManager().bindTexture(DynTexture.getBoundLoc());
 		RenderSystem.color4f(1, 1, 1, 1);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
 		Matrix4f mat = matrixStack.peek().getModel();
 		float bo = getZOffset();
 		Tessellator tessellator = Tessellator.getInstance();
@@ -269,7 +273,9 @@ public class GuiImpl extends Screen implements IGui {
 		bufferbuilder.vertex(mat, x + width, y, bo).texture(u2, v1).next();
 		bufferbuilder.vertex(mat, x, y, bo).texture(u1, v1).next();
 		RenderSystem.enableAlphaTest();
-		tessellator.draw();
+		bufferbuilder.end();
+		BufferRenderer.draw(bufferbuilder);
+		RenderSystem.disableBlend();
 	}
 
 	@Override
@@ -284,7 +290,7 @@ public class GuiImpl extends Screen implements IGui {
 		float multiplierX = dw / (float)width;
 		float multiplierY = dh / (float)height;
 		Box box = getContext().cutBox;
-		GL11.glScissor((int) (box.x * multiplierX), dh - (int) ((box.y + box.h) * multiplierY),
+		RenderSystem.enableScissor((int) (box.x * multiplierX), dh - (int) ((box.y + box.h) * multiplierY),
 				(int) (box.w * multiplierX), (int) (box.h * multiplierY));
 	}
 

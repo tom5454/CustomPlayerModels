@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "com.tom.cpm.mixin.of",
   "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
   ],
   "client": [

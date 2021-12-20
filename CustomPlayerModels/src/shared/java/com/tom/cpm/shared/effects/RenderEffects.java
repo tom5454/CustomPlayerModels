@@ -13,6 +13,7 @@ public enum RenderEffects {
 	ITEM(EffectRenderItem::new),
 	HIDE_SKULL(EffectHideSkull::new),
 	REMOVE_ARMOR_OFFSET(EffectRemoveArmorOffset::new),
+	EXTRUDE(EffectExtrude::new),
 	;
 	public static final RenderEffects[] VALUES = values();
 	private Supplier<IRenderEffect> factory;

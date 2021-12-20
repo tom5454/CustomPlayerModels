@@ -7,4 +7,5 @@ public enum Effect {
 	RECOLOR,
 	SINGLE_TEX,
 	PER_FACE_UV,
+	EXTRUDE,
 }

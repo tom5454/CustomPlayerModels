@@ -276,6 +276,10 @@ public class ClientProxy extends CommonProxy {
 		model.bipedCape.rotateAngleX = (float) -Math.toRadians(6.0F + f2 / 2.0F + f1);
 		model.bipedCape.rotateAngleY = (float) Math.toRadians(180.0F - f3 / 2.0F);
 		model.bipedCape.rotateAngleZ = (float) Math.toRadians(f3 / 2.0F);
+		mc.getPlayerRenderManager().setModelPose(model);
+		model.bipedCape.rotateAngleX = 0;
+		model.bipedCape.rotateAngleY = 0;
+		model.bipedCape.rotateAngleZ = 0;
 		model.renderCape(0.0625F);
 		GlStateManager.popMatrix();
 	}

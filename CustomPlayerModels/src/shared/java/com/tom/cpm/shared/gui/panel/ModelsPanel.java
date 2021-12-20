@@ -28,6 +28,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
 import com.tom.cpm.shared.editor.Exporter;
+import com.tom.cpm.shared.editor.TestIngameManager;
 import com.tom.cpm.shared.gui.SelectSkinPopup;
 import com.tom.cpm.shared.gui.SkinUploadPopup;
 import com.tom.cpm.shared.gui.ViewportCamera;
@@ -36,6 +37,7 @@ import com.tom.cpm.shared.io.IOHelper.ImageBlock;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.Log;
 
 public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	private ViewportCamera camera;
@@ -85,13 +87,13 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			MinecraftClientAccess.get().getDefinitionLoader().execute(() -> {
 				int y = 20;
 				for (int i = 0; i < fs.length; i++) {
-					if(fs[i].getName().equals(Exporter.TEMP_MODEL))continue;
+					if(fs[i].getName().equals(TestIngameManager.TEST_MODEL_NAME))continue;
 					try {
 						ModelPanel p = new ModelPanel(gui, ModelFile.load(fs[i]), model != null && fs[i].getName().equals(model), y);
 						y += p.getHeight();
 						panels.add(p);
 					} catch (Exception e) {
-						e.printStackTrace();
+						Log.warn("Error loading model: " + fs[i].getName(), e);
 					}
 				}
 				final int fy = y;

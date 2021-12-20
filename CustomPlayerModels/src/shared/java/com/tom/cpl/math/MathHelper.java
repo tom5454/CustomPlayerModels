@@ -68,4 +68,14 @@ public class MathHelper {
 	public static float sqrt(float f) {
 		return (float) Math.sqrt(f);
 	}
+
+	public static int floor(float value) {
+		int i = (int)value;
+		return value < i ? i - 1 : i;
+	}
+
+	public static int floor(double value) {
+		int i = (int)value;
+		return value < i ? i - 1 : i;
+	}
 }

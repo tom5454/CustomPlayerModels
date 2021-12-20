@@ -2,6 +2,7 @@ package com.tom.cpl.render;
 
 import com.tom.cpl.math.Mat3f;
 import com.tom.cpl.math.Mat4f;
+import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
 
@@ -17,6 +18,14 @@ public interface VertexBuffer {
 		this.color(red, green, blue, alpha);
 		this.tex(texU, texV);
 		this.normal(normalX, normalY, normalZ);
+		this.endVertex();
+	}
+
+	default void addVertex(MatrixStack.Entry mat, float x, float y, float z, float red, float green, float blue, float alpha, float texU, float texV, float normalX, float normalY, float normalZ) {
+		this.pos(mat.getMatrix(), x, y, z);
+		this.color(red, green, blue, alpha);
+		this.tex(texU, texV);
+		this.normal(mat.getNormal(), normalX, normalY, normalZ);
 		this.endVertex();
 	}
 

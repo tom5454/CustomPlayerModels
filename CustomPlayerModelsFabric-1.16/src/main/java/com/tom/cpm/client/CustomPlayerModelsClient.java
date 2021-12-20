@@ -9,14 +9,14 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.options.SkinOptionsScreen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.screen.option.SkinOptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -28,7 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.text.TranslatableText;
@@ -56,7 +56,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public static CustomPlayerModelsClient INSTANCE;
 	public static boolean optifineLoaded;
 	public RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
-	public NetHandler<Identifier, CompoundTag, PlayerEntity, PacketByteBuf, ClientPlayNetworkHandler> netHandler;
+	public NetHandler<Identifier, NbtCompound, PlayerEntity, PacketByteBuf, ClientPlayNetworkHandler> netHandler;
 
 	@Override
 	public void onInitializeClient() {
@@ -89,12 +89,12 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		});
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerEntity::getGameProfile);
 		netHandler = new NetHandler<>(Identifier::new);
-		netHandler.setNewNbt(CompoundTag::new);
+		netHandler.setNewNbt(NbtCompound::new);
 		netHandler.setNewPacketBuffer(() -> new PacketByteBuf(Unpooled.buffer()));
-		netHandler.setWriteCompound(PacketByteBuf::writeCompoundTag, PacketByteBuf::readCompoundTag);
-		netHandler.setNBTSetters(CompoundTag::putBoolean, CompoundTag::putByteArray, CompoundTag::putFloat);
-		netHandler.setNBTGetters(CompoundTag::getBoolean, CompoundTag::getByteArray, CompoundTag::getFloat);
-		netHandler.setContains(CompoundTag::contains);
+		netHandler.setWriteCompound(PacketByteBuf::writeNbt, PacketByteBuf::readNbt);
+		netHandler.setNBTSetters(NbtCompound::putBoolean, NbtCompound::putByteArray, NbtCompound::putFloat);
+		netHandler.setNBTGetters(NbtCompound::getBoolean, NbtCompound::getByteArray, NbtCompound::getFloat);
+		netHandler.setContains(NbtCompound::contains);
 		netHandler.setExecutor(MinecraftClient::getInstance);
 		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadC2SPacket(rl, pb)), null);
 		netHandler.setPlayerToLoader(PlayerEntity::getGameProfile);
@@ -118,7 +118,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		manager.tryUnbind();
 	}
 
-	public void initGui(Screen screen, List<Element> children, List<AbstractButtonWidget> buttons) {
+	public void initGui(Screen screen, List<Element> children, List<ClickableWidget> buttons) {
 		if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				screen instanceof SkinOptionsScreen) {
 			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen)));
@@ -206,18 +206,18 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 			}
 			if (abstractClientPlayerEntity.getEquippedStack(EquipmentSlot.CHEST).isEmpty()) {
 				if (abstractClientPlayerEntity.isSneaking()) {
-					model.cape.pivotZ = 1.4F + 0.125F * 3;
-					model.cape.pivotY = 1.85F + 1 - 0.125F * 4;
+					model.cloak.pivotZ = 1.4F + 0.125F * 3;
+					model.cloak.pivotY = 1.85F + 1 - 0.125F * 4;
 				} else {
-					model.cape.pivotZ = 0.0F + 0.125F * 16f;
-					model.cape.pivotY = 0.0F;
+					model.cloak.pivotZ = 0.0F + 0.125F * 16f;
+					model.cloak.pivotY = 0.0F;
 				}
 			} else if (abstractClientPlayerEntity.isSneaking()) {
-				model.cape.pivotZ = 0.3F + 0.125F * 16f;
-				model.cape.pivotY = 0.8F + 0.3f;
+				model.cloak.pivotZ = 0.3F + 0.125F * 16f;
+				model.cloak.pivotY = 0.8F + 0.3f;
 			} else {
-				model.cape.pivotZ = -1.1F + 0.125F * 32f;
-				model.cape.pivotY = -0.85F + 1;
+				model.cloak.pivotZ = -1.1F + 0.125F * 32f;
+				model.cloak.pivotY = -0.85F + 1;
 			}
 		} else {
 			r = 0;
@@ -225,9 +225,13 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 			s = 0;
 		}
 
-		model.cape.pitch = (float) -Math.toRadians(6.0F + q / 2.0F + r);
-		model.cape.yaw = (float) Math.toRadians(180.0F - s / 2.0F);
-		model.cape.roll = (float) Math.toRadians(s / 2.0F);
+		model.cloak.pitch = (float) -Math.toRadians(6.0F + q / 2.0F + r);
+		model.cloak.yaw = (float) Math.toRadians(180.0F - s / 2.0F);
+		model.cloak.roll = (float) Math.toRadians(s / 2.0F);
+		mc.getPlayerRenderManager().setModelPose(model);
+		model.cloak.pitch = 0;
+		model.cloak.yaw = 0;
+		model.cloak.roll = 0;
 		model.renderCape(matrixStack, buffer, packedLightIn, OverlayTexture.DEFAULT_UV);
 		matrixStack.pop();
 	}

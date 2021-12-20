@@ -312,8 +312,8 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 	}
 
 	public static void multiplyStacks(com.tom.cpl.math.MatrixStack.Entry e, MatrixStack stack) {
-		stack.peek().getModel().multiply(Mat4Access.load(e.getMatrixArray()));
-		stack.peek().getNormal().multiply(new Matrix3f(Mat4Access.load(e.getNormalArray())));
+		stack.peek().getPositionMatrix().multiply(Mat4Access.load(e.getMatrixArray()));
+		stack.peek().getNormalMatrix().multiply(new Matrix3f(Mat4Access.load(e.getNormalArray())));
 	}
 
 	public static interface Mat4Access {

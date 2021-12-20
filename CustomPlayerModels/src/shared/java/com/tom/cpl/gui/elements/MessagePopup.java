@@ -1,6 +1,7 @@
 package com.tom.cpl.gui.elements;
 
 import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.math.Box;
 
 public class MessagePopup extends PopupPanel implements Runnable {
@@ -39,5 +40,14 @@ public class MessagePopup extends PopupPanel implements Runnable {
 	@Override
 	public void run() {
 		frame.openPopup(this);
+	}
+
+	@Override
+	public void keyPressed(KeyboardEvent event) {
+		if(event.matches(gui.getKeyCodes().KEY_ENTER)) {
+			close();
+			event.consume();
+		}
+		super.keyPressed(event);
 	}
 }

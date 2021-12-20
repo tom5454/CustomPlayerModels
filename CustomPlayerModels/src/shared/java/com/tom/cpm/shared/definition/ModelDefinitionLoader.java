@@ -44,6 +44,7 @@ import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.SkinDataInputStream;
 import com.tom.cpm.shared.loaders.GistResourceLoader;
 import com.tom.cpm.shared.loaders.GithubRepoResourceLoader;
+import com.tom.cpm.shared.loaders.PasteResourceLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartEnd;
@@ -89,6 +90,7 @@ public class ModelDefinitionLoader<GP> {
 	static {
 		LOADERS.put("git", new GistResourceLoader());
 		LOADERS.put("gh", new GithubRepoResourceLoader());
+		LOADERS.put("p", new PasteResourceLoader());
 	}
 	private Image template;
 	public static final int HEADER = 0x53;

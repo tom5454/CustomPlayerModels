@@ -31,6 +31,7 @@ import net.minecraftforge.common.MinecraftForge;
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -57,6 +58,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void init() {
 		super.init();
+		FixSSL.fixup();
 		INSTANCE = this;
 		minecraft = Minecraft.getMinecraft();
 		mc = new MinecraftObject(minecraft);

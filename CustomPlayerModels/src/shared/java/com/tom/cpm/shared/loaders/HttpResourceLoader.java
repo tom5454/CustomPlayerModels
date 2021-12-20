@@ -12,6 +12,7 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ResourceLoader;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.SafetyException.BlockReason;
+import com.tom.cpm.shared.io.HTTPIO;
 
 public abstract class HttpResourceLoader implements ResourceLoader {
 
@@ -24,7 +25,7 @@ public abstract class HttpResourceLoader implements ResourceLoader {
 		URLConnection connection = null;
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			connection = url.openConnection();
+			connection = HTTPIO.createUrlConnection(url, false);
 			web = connection.getInputStream();
 
 			byte[] buffer = new byte[10240];

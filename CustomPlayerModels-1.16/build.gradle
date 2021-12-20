@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
@@ -55,11 +55,6 @@ minecraft {
             
             property 'mixin.env.remapRefMap', 'true'
 			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-			
-			args '--mixin', 'assets/cpm/cpm.mixins.json', '--mixin assets/cpm/cpm.mixins.of.json'
-			
-			property 'cpm.debug', 'true'
-			property 'mixin.debug', 'true'
         }
 
         server {
@@ -79,8 +74,6 @@ minecraft {
             
             property 'mixin.env.remapRefMap', 'true'
 			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-			
-			args '--mixin', 'assets/cpm/cpm.mixins.json', '--mixin assets/cpm/cpm.mixins.of.json'
         }
 
         data {
@@ -103,32 +96,24 @@ minecraft {
     }
 }
 
-sourceSets {
-    main {
-        ext.refMap = "cpm.mixins.refmap.json"
-    }
+mixin {
+    add sourceSets.main, "cpm.mixins.refmap.json"
+    config 'cpm.mixins.json'
+    config 'cpm.mixins.of.json'
+    
+    debug.verbose = true
+    debug.export = true
 }
+
 repositories {
-    maven { url "http://dvs1.progwml6.com/files/maven" }
-    //maven { url "https://tehnut.info/maven" }
+    maven { url "https://dvs1.progwml6.com/files/maven" }
     maven { // TOP
         name 'tterrag maven'
-        url "http://maven.tterrag.com/"
+        url "https://maven.tterrag.com/"
     }
     maven { // McJtyLib
-        url "http://maven.k-4u.nl"
+        url "https://maven.k-4u.nl"
     }
-    maven {
-        name = "CoFH Maven"
-        url = "http://maven.covers1624.net"
-    }
-    jcenter()
-	/*maven {
-		url "http://maven.shadowfacts.net/"
-	}*/
-	maven {
-		url "http://chickenbones.net/maven/"
-	}
 	maven { url 'https://jitpack.io' }
 }
 
@@ -136,7 +121,7 @@ dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.13'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.20'
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
@@ -155,12 +140,12 @@ dependencies {
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 	// compile against the JEI API but do not include it at runtime
-  	compileOnly fg.deobf("mezz.jei:jei-1.16.5:7.6.4.87:api")
+  	compileOnly fg.deobf("mezz.jei:jei-1.16.5:7.7.1.137:api")
   	// at runtime, use the full JEI jar
-  	runtimeOnly fg.deobf("mezz.jei:jei-1.16.5:7.6.4.87")
+  	runtimeOnly fg.deobf("mezz.jei:jei-1.16.5:7.7.1.137")
   	
   	// compile against the TOP API but do not include it at runtime
   	compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.0.7-13:api")
@@ -168,7 +153,8 @@ dependencies {
   	runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.0.7-13")
   	
   	compileOnly files("of.jar")
-  	compileOnly files("stubs.jar")
+  	
+  	compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.0.0-forge")
 }
 
 sourceSets {

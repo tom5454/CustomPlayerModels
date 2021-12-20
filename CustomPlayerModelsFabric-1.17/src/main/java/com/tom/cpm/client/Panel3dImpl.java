@@ -103,7 +103,7 @@ public class Panel3dImpl extends Panel3dNative {
 		renderTypes.put(RenderMode.DEFAULT, new NativeRenderType(RenderLayer.getEntityTranslucent(rl), 0));
 		renderTypes.put(RenderMode.PAINT, new NativeRenderType(CustomRenderTypes.getEntityTranslucentCullNoLight(rl), 0));
 		renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderLayer.getEyes(rl), 1));
-		renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RenderLayer.getLines(), 2));
+		renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(CustomRenderTypes.getLinesNoDepth(), 2));
 		renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
 		return renderTypes;
 	}

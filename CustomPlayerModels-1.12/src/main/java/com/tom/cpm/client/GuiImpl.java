@@ -240,7 +240,10 @@ public class GuiImpl extends GuiScreen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		GlStateManager.color(1, 1, 1, 1);
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		drawTexturedModalRect(x, y, u, v, w, h);
+		GlStateManager.disableBlend();
 	}
 
 	@Override
@@ -248,6 +251,8 @@ public class GuiImpl extends GuiScreen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		GlStateManager.color(1, 1, 1, 1);
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
 		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
@@ -256,6 +261,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 		bufferbuilder.pos(x + width, y, 0.0D).tex(u2, v1).endVertex();
 		bufferbuilder.pos(x, y, 0.0D).tex(u1, v1).endVertex();
 		tessellator.draw();
+		GlStateManager.disableBlend();
 	}
 
 	@Override

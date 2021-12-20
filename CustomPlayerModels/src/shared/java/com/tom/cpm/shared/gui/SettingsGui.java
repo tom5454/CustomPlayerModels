@@ -9,6 +9,7 @@ import com.tom.cpm.shared.gui.panel.SettingsPanel;
 
 public class SettingsGui extends Frame {
 	private SettingsPanel panel;
+	private int openTab = -1;
 
 	public SettingsGui(IGui gui) {
 		super(gui);
@@ -19,10 +20,17 @@ public class SettingsGui extends Frame {
 		});
 	}
 
+	public static SettingsGui safetySettings(IGui gui) {
+		SettingsGui g = new SettingsGui(gui);
+		g.openTab = 2;
+		return g;
+	}
+
 	@Override
 	public void initFrame(int width, int height) {
 		panel = new SettingsPanel(this, panel, width / 3 * 2, height / 3 * 2, gui::close);
 		panel.setBounds(new Box(width / 6, height / 6, width / 3 * 2, height / 3 * 2));
+		if(openTab != -1)panel.setOpenTab(openTab);
 		addElement(panel);
 
 		Button btn = new Button(gui, "X", gui::close);

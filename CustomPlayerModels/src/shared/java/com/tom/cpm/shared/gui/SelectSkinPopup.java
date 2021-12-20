@@ -24,7 +24,7 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.editor.Exporter;
+import com.tom.cpm.shared.editor.TestIngameManager;
 import com.tom.cpm.shared.gui.panel.ModelDisplayPanel;
 import com.tom.cpm.shared.gui.panel.ModelDisplayPanel.IModelDisplayPanel;
 import com.tom.cpm.shared.model.SkinType;
@@ -66,7 +66,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 			MinecraftClientAccess.get().getDefinitionLoader().execute(() -> {
 				int y = 0;
 				for (int i = 0; i < fs.length; i++) {
-					if(fs[i].getName().equals(Exporter.TEMP_MODEL))continue;
+					if(fs[i].getName().equals(TestIngameManager.TEST_MODEL_NAME))continue;
 					try {
 						Image img = Image.loadFrom(fs[i]);
 						if(img.getWidth() != 64 || (img.getHeight() != 64 && img.getHeight() != 32))continue;
@@ -114,7 +114,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 						modelsDir.mkdirs();
 						if(fn.exists()) {
 							int ind = f.getName().lastIndexOf('.');
-							String name = ind != -1 ? f.getName() : f.getName().substring(0, ind);
+							String name = ind == -1 ? f.getName() : f.getName().substring(0, ind);
 							fn = new File(modelsDir, name + "_" + (System.nanoTime() % 1000) + ".png");
 						}
 						try {
@@ -163,7 +163,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 	public void setSize(int width, int height) {
 		Vec2i s = new Vec2i(width / 2 - 30, height - 80);
 		list.setBounds(new Box(20, 40, s.x, s.y));
-		openSkin.setBounds(new Box(20, 45 + s.y, s.x, 20));
+		openSkin.setBounds(new Box(20, 20, s.x, 20));
 		sizeSetters.forEach(c -> c.accept(s));
 		int dispSize = Math.min(width / 2 - 40, height - 100);
 		set.setBounds(new Box(width / 2 + (dispSize / 2) - 50, height / 2 + (dispSize / 2) + 10, 100, 20));
@@ -207,7 +207,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 			if(icon != null) {
 				icon.bind();
 				gui.drawTexture(bounds.x + 1, bounds.y + 1, 64, 64, 8/64f, 8/64f, 16/64f, 16/64f);
-				gui.drawTexture(bounds.x + 1, bounds.y + 1, 64, 64, 40/64f, 8/64f, 56/64f, 16/64f);
+				gui.drawTexture(bounds.x + 1, bounds.y + 1, 64, 64, 40/64f, 8/64f, 48/64f, 16/64f);
 			}
 		}
 

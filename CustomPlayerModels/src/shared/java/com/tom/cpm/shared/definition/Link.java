@@ -82,4 +82,12 @@ public class Link {
 			return new ByteArrayInputStream(data);
 		}
 	}
+
+	public String getLoader() {
+		return loader;
+	}
+
+	public String getPath() {
+		return path;
+	}
 }

@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "com.tom.cpm.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [
   	"common.ServerPlayNetHandlerMixin",
   	"common.PlayerManagerMixin"
@@ -9,7 +9,6 @@
   "client": [
     "PlayerRendererMixin",
     "ScreenMixin",
-    "BufferBuilderStorageMixin",
     "MinecraftClientMixin",
     "SkullBlockEntityRendererMixin",
     "BuiltinModelItemRendererMixin",

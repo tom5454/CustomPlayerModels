@@ -35,4 +35,9 @@ public class Log4JLogger implements ILogger {
 	public void error(String text) {
 		log.error(text);
 	}
+
+	@Override
+	public void info(String text, Throwable thr) {
+		log.info(text, thr);
+	}
 }

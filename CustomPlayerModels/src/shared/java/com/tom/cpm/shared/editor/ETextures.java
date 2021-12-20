@@ -198,4 +198,8 @@ public class ETextures implements TreeElement {
 	public TextureSheetType getType() {
 		return type;
 	}
+
+	public int getMaxSize() {
+		return Math.max(provider.getImage().getWidth(), provider.getImage().getHeight());
+	}
 }

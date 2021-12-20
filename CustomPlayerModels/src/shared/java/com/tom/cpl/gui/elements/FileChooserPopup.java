@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -65,37 +66,7 @@ public class FileChooserPopup extends PopupPanel {
 			addElement(openNative);
 		}
 
-		acceptBtn.setAction(() -> {
-			if(selected != null) {
-				if(saveDialog) {
-					if(!filter.test(selected, selected.getName())) {
-						File ext = new File(selected.getParentFile(), extAdder.apply(selected.getName()));
-						if(filter.test(ext, ext.getName())) {
-							selected = ext;
-							name.setText(ext.getName());
-						}
-					}
-					if(selected.exists()) {
-						frame.openPopup(new ConfirmPopup(frame, gui.i18nFormat("label.cpm.overwrite"), gui.i18nFormat("label.cpm.overwrite"), () -> {
-							close();
-							accept.run();
-						}, () -> frame.openPopup(this)));
-					} else {
-						close();
-						accept.run();
-					}
-				} else if(selected.exists()) {
-					if(!filter.test(selected, selected.getName()))return;
-					close();
-					accept.run();
-				}
-			} else {
-				if(!filter.test(currDir, currDir.getName()))return;
-				selected = currDir;
-				close();
-				accept.run();
-			}
-		});
+		acceptBtn.setAction(this::accept);
 		path.setEventListener(() -> {
 			File dir = new File(path.getText());
 			if(dir.exists() && dir.isDirectory()) {
@@ -107,6 +78,38 @@ public class FileChooserPopup extends PopupPanel {
 			selected = new File(currDir, name.getText());
 		});
 		files.refresh();
+	}
+
+	private void accept() {
+		if(selected != null) {
+			if(saveDialog) {
+				if(!filter.test(selected, selected.getName())) {
+					File ext = new File(selected.getParentFile(), extAdder.apply(selected.getName()));
+					if(filter.test(ext, ext.getName())) {
+						selected = ext;
+						name.setText(ext.getName());
+					}
+				}
+				if(selected.exists()) {
+					frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.overwrite"), gui.i18nFormat("label.cpm.overwrite"), () -> {
+						close();
+						accept.run();
+					}, () -> frm.openPopup(this)));
+				} else {
+					close();
+					accept.run();
+				}
+			} else if(selected.exists()) {
+				if(!filter.test(selected, selected.getName()))return;
+				close();
+				accept.run();
+			}
+		} else {
+			if(!filter.test(currDir, currDir.getName()))return;
+			selected = currDir;
+			close();
+			accept.run();
+		}
 	}
 
 	public void setTitle(String text) {
@@ -302,5 +305,14 @@ public class FileChooserPopup extends PopupPanel {
 
 	public interface NativeChooser {
 		File open();
+	}
+
+	@Override
+	public void keyPressed(KeyboardEvent event) {
+		if(event.matches(gui.getKeyCodes().KEY_ENTER)) {
+			accept();
+			event.consume();
+		}
+		super.keyPressed(event);
 	}
 }

@@ -10,6 +10,7 @@ public class Slider extends GuiElement {
 	private boolean enableDrag;
 	protected float v;
 	protected float steps;
+	protected Tooltip tooltip;
 	public Slider(IGui gui, String name) {
 		super(gui);
 		this.name = name;
@@ -27,6 +28,8 @@ public class Slider extends GuiElement {
 			color = gui.getColors().button_text_hover;
 			bgColor = gui.getColors().button_hover;
 		}
+		if(event.isHovered(bounds) && tooltip != null)
+			tooltip.set();
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
 		gui.drawBox((int) (bounds.x+1 + v * (bounds.w - 5)), bounds.y+1, 3, bounds.h-2, gui.getColors().slider_bar);
@@ -78,5 +81,9 @@ public class Slider extends GuiElement {
 
 	public void setSteps(float steps) {
 		this.steps = steps;
+	}
+
+	public void setTooltip(Tooltip tooltip) {
+		this.tooltip = tooltip;
 	}
 }

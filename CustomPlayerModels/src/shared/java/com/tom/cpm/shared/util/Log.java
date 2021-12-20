@@ -32,4 +32,9 @@ public class Log {
 		if(MinecraftObjectHolder.DEBUGGING)
 			MinecraftCommonAccess.get().getLogger().info(String.valueOf(text));
 	}
+
+	public static void debug(Object text, Throwable thr) {
+		if(MinecraftObjectHolder.DEBUGGING)
+			MinecraftCommonAccess.get().getLogger().info(String.valueOf(text), thr);
+	}
 }

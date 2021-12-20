@@ -1,7 +1,9 @@
 package com.tom.cpm.shared.model;
 
+import com.tom.cpl.math.BoundingBox;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 
 public enum PlayerPartValues implements PartValues {//                          px, py, pz, ox, oy, oz, sx, sy, sz,  u,  v, u2, v2, [type]
@@ -14,6 +16,14 @@ public enum PlayerPartValues implements PartValues {//                          
 	LEFT_LEG   (PlayerModelParts.LEFT_LEG,  PlayerSkinLayer.LEFT_PANTS_LEG,   1.9f, 12,  0, -2,  0, -2,  4, 12,  4, 16, 48,  0, 48),
 	RIGHT_LEG  (PlayerModelParts.RIGHT_LEG, PlayerSkinLayer.RIGHT_PANTS_LEG, -1.9f, 12,  0, -2,  0, -2,  4, 12,  4,  0, 16,  0, 32),
 	;
+	public static final BoundingBox PLAYER_BOUNDING_BOX = new BoundingBox(-0.3F, 0, -0.3F, 0.3F, 1.8F, 0.3F);
+	public static final BoundingBox PLAYER_SNEAKING_BOUNDING_BOX = new BoundingBox(-0.3F, 0, -0.3F, 0.3F, 1.5F, 0.3F);
+	public static final BoundingBox PLAYER_SMALL_BOUNDING_BOX = new BoundingBox(-0.3F, 0, -0.3F, 0.3F, 0.6F, 0.3F);
+	public static final BoundingBox PLAYER_SKULL = new BoundingBox(-0.25F, 0, -0.25F, 0.25F, 0.5F, 0.25F).mul(1 / 1.1f);
+	public static final float PLAYER_EYE_HEIGHT = 1.62F;
+	public static final float PLAYER_EYE_HEIGHT_SNEAKING = 1.27F;
+	public static final float PLAYER_EYE_HEIGHT_SMALL = 0.4F;
+
 	public static final PlayerPartValues[] VALUES = values();
 	public final PlayerModelParts part;
 	public final PlayerSkinLayer layer;
@@ -81,5 +91,41 @@ public enum PlayerPartValues implements PartValues {//                          
 	@Override
 	public float getMCScale() {
 		return 0;
+	}
+
+	public static float getEyeHeight(VanillaPose pose) {
+		if(pose == null)pose = VanillaPose.STANDING;
+		switch(pose) {
+		case FLYING:
+		case SWIMMING:
+			return PLAYER_EYE_HEIGHT_SMALL;
+
+		case SNEAKING:
+			return PLAYER_EYE_HEIGHT_SNEAKING;
+
+		case SKULL_RENDER:
+			return -1;
+
+		default:
+			return PLAYER_EYE_HEIGHT;
+		}
+	}
+
+	public static BoundingBox getBounds(VanillaPose pose) {
+		if(pose == null)return PLAYER_BOUNDING_BOX;
+		switch(pose) {
+		case FLYING:
+		case SWIMMING:
+			return PLAYER_SMALL_BOUNDING_BOX;
+
+		case SNEAKING:
+			return PLAYER_SNEAKING_BOUNDING_BOX;
+
+		case SKULL_RENDER:
+			return PLAYER_SKULL;
+
+		default:
+			return PLAYER_BOUNDING_BOX;
+		}
 	}
 }

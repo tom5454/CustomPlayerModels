@@ -22,6 +22,7 @@ import net.minecraft.util.Identifier;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.Player;
@@ -101,9 +102,9 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 							if (skinType == null) {
 								skinType = "default";
 							}
-							cf.complete(null);
-
+							RenderSystem.recordRenderCall(() -> cf.complete(null));
 							break;
+
 						default:
 							break;
 						}

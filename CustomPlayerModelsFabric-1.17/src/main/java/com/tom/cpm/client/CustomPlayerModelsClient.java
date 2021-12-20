@@ -74,7 +74,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 				return;
 
 			if(KeyBindings.gestureMenuBinding.wasPressed()) {
-				client.openScreen(new GuiImpl(GestureGui::new, null));
+				client.setScreen(new GuiImpl(GestureGui::new, null));
 			}
 
 			if(KeyBindings.renderToggleBinding.wasPressed()) {
@@ -121,7 +121,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public void initGui(Screen screen) {
 		if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				screen instanceof SkinOptionsScreen) {
-			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen)));
+			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().setScreen(new GuiImpl(EditorGui::new, screen)));
 			((IScreen)screen).cpm$addDrawableChild(btn);
 		}
 	}
@@ -230,6 +230,10 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		model.cloak.pitch = (float) -Math.toRadians(6.0F + q / 2.0F + r);
 		model.cloak.yaw = (float) Math.toRadians(180.0F - s / 2.0F);
 		model.cloak.roll = (float) Math.toRadians(s / 2.0F);
+		mc.getPlayerRenderManager().setModelPose(model);
+		model.cloak.pitch = 0;
+		model.cloak.yaw = 0;
+		model.cloak.roll = 0;
 		model.renderCape(matrixStack, buffer, packedLightIn, OverlayTexture.DEFAULT_UV);
 		matrixStack.pop();
 	}

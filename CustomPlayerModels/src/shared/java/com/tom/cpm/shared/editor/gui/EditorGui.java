@@ -27,6 +27,8 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
+import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -35,17 +37,19 @@ import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Generators;
 import com.tom.cpm.shared.editor.RootGroups;
+import com.tom.cpm.shared.editor.TestIngameManager;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.DescPopup;
 import com.tom.cpm.shared.editor.gui.popup.ErrorLogPopup;
-import com.tom.cpm.shared.editor.gui.popup.ExportSkinPopup;
+import com.tom.cpm.shared.editor.gui.popup.ExportPopup;
 import com.tom.cpm.shared.editor.gui.popup.ModelsPopup;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.paste.PastePopup;
 import com.tom.cpm.shared.util.ErrorLog;
 import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.Log;
@@ -67,9 +71,11 @@ public class EditorGui extends Frame {
 		if(toReopen != null) {
 			this.editor = toReopen;
 			this.editor.setGui(this);
-			toReopen = null;
-			ModConfig.getCommonConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
-			ModConfig.getCommonConfig().save();
+			if(MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.INSTALLED) {
+				toReopen = null;
+				ModConfig.getCommonConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
+				ModConfig.getCommonConfig().save();
+			}
 		} else {
 			this.editor = new Editor();
 			this.editor.setGui(this);
@@ -258,8 +264,7 @@ public class EditorGui extends Frame {
 
 		newMenu.addMenuButton(gui.i18nFormat("button.cpm.new.model"), newModelMenu);
 
-		for (SkinType type : SkinType.VALUES) {
-			if(type == SkinType.UNKNOWN)continue;
+		for (SkinType type : SkinType.VANILLA_TYPES) {
 			newModelMenu.addButton(gui.i18nFormat("label.cpm.skin_type." + type.getName()), () -> newModel(type));
 		}
 
@@ -304,10 +309,10 @@ public class EditorGui extends Frame {
 
 		//pp.addMenuButton(gui.i18nFormat("button.cpm.file.import"), importMenu);
 
-		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> openPopup(ExportSkinPopup.createPopup(this)));
+		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> openPopup(ExportPopup.createPopup(this)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.test"), () -> {
-			if(TestIngameManager.openTestIngame(this))toReopen = editor;
+			if(TestIngameManager.openTestIngame(this, false))toReopen = editor;
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.exit"), gui::close);
@@ -373,7 +378,7 @@ public class EditorGui extends Frame {
 			}).start();
 		}, null));
 
-		pp.addButton(gui.i18nFormat("label.cpm.desc"), () -> openPopup(new DescPopup(this, null)));
+		pp.addButton(gui.i18nFormat("label.cpm.desc"), () -> openPopup(new DescPopup(this, true, null)));
 
 		PopupMenu parts = new PopupMenu(gui, this);
 		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.parts"), parts);
@@ -393,6 +398,8 @@ public class EditorGui extends Frame {
 		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(this, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
 
 		pp.addButton(gui.i18nFormat("tab.cpm.social.errorLog"), () -> openPopup(new ErrorLogPopup(this)));
+
+		pp.addButton(gui.i18nFormat("button.cpm.edit.pastes"), () -> new PastePopup(this).open());
 	}
 
 	private void initEffectMenu() {
@@ -431,15 +438,19 @@ public class EditorGui extends Frame {
 		editor.setHiddenEffect.add(boxHidden::updateState);
 		boxHidden.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.hidden_effect")));
 
+		Checkbox boxExtrude = pp.addCheckbox(gui.i18nFormat("label.cpm.extrude_effect"), editor::switchExtrude);
+		editor.setExtrudeEffect.add(boxExtrude::updateState);
+		boxExtrude.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.extrude_effect")));
+
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.modelEffects")).setBounds(new Box(5, 5, 0, 0)));
 
 		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), () -> {
-			float nv = editor.scaling != 0 ? 0 : 1;
+			float nv = editor.scalingElem.entityScaling != 0 ? 0 : 1;
 			editor.action("switch", "label.cpm.display.scaling").
-			updateValueOp(editor, editor.scaling, nv, (a, b) -> a.scaling = b).execute();
+			updateValueOp(editor, editor.scalingElem.entityScaling, nv, (a, b) -> a.scalingElem.entityScaling = b).execute();
 			editor.updateGui();
 		});
-		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scaling != 0));
+		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scalingElem.entityScaling != 0));
 		chxbxScale.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.scaling")));
 
 		Checkbox hideHead = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.hideHeadIfSkull"), () -> {
@@ -510,6 +521,12 @@ public class EditorGui extends Frame {
 		});
 		chxbxAnimatedTex.setSelected(editor.playAnimatedTex);
 		chxbxAnimatedTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playAnimatedTex")));
+
+		Checkbox chxbxBoundingBox = pp.addCheckbox(gui.i18nFormat("label.cpm.display.drawBoundingBox"), b -> {
+			editor.drawBoundingBox = !b.isSelected();
+			b.setSelected(editor.drawBoundingBox);
+		});
+		chxbxBoundingBox.setSelected(editor.drawBoundingBox);
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
 
@@ -595,6 +612,11 @@ public class EditorGui extends Frame {
 			ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.save", e);
 			showError("save", e.toString());
 			editor.setInfoMsg.accept(Pair.of(0, ""));
+		}
+		if(TestIngameManager.isTesting()) {
+			if(TestIngameManager.openTestIngame(this, true)) {
+				editor.setInfoMsg.accept(Pair.of(2000, gui.i18nFormat("tooltip.cpm.saveSuccess", file.getName()) + "\\" + gui.i18nFormat("label.cpm.test_model_exported")));
+			}
 		}
 	}
 

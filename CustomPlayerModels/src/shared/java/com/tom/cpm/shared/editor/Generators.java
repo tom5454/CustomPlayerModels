@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.ConfirmPopup;
@@ -27,6 +28,8 @@ import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.actions.ImageAction;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
+import com.tom.cpm.shared.editor.util.SafetyLevel;
+import com.tom.cpm.shared.editor.util.SafetyLevel.SafetyReport;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
@@ -43,6 +46,7 @@ public class Generators {
 		generators.add(new Generators("button.cpm.tools.add_skin_layer2", null, eg -> addSkinLayer(eg.getEditor())));
 		generators.add(new Generators("button.cpm.tools.convert2template", null, Generators::convertTemplate));
 		generators.add(new Generators("button.cpm.tools.fillUV", null, Generators::fillUV));
+		generators.add(new Generators("button.cpm.tools.safetyLevel", null, Generators::checkSafetyLevel));
 	}
 
 	public String name, tooltip;
@@ -255,8 +259,26 @@ public class Generators {
 					tex.restitchTexture();
 				} else if(type == TextureType.ELYTRA) {
 					loadTexture(tex, profile, TextureType.CAPE);
+				} else if(type == TextureType.CAPE) {
+					Image.download("http://s.optifine.net/capes/" + profile.getName() + ".png").thenAccept(i -> {
+						if(!tex.isEdited()) {
+							if(i != null) {
+								tex.setDefaultImg(i);
+								tex.setImage(new Image(i));
+								tex.restitchTexture();
+							}
+						}
+					});
 				}
 			}
 		});
+	}
+
+	private static void checkSafetyLevel(EditorGui eg) {
+		IGui gui = eg.getGui();
+		SafetyReport report = SafetyLevel.getLevel(eg.getEditor());
+		String msg = report.details.stream().map(t -> t.toString(gui)).collect(Collectors.joining("\\"));
+		String lvl = gui.i18nFormat("label.cpm.safetyLevel", gui.i18nFormat("label.cpm.safetyProfile." + report.getLvl()));
+		eg.openPopup(new MessagePopup(eg, gui.i18nFormat("label.cpm.info"), lvl + "\\" + msg));
 	}
 }

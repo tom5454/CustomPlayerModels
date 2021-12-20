@@ -1,6 +1,7 @@
 package com.tom.cpm.shared;
 
 import java.io.File;
+import java.net.Proxy;
 import java.util.List;
 import java.util.function.Function;
 
@@ -13,7 +14,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
-import com.tom.cpm.shared.util.MojangSkinUploadAPI;
+import com.tom.cpm.shared.util.MojangAPI;
 
 public interface MinecraftClientAccess {
 	IPlayerRenderManager getPlayerRenderManager();
@@ -46,10 +47,11 @@ public interface MinecraftClientAccess {
 	NetHandler<?, ?, ?, ?, ?> getNetHandler();
 	void openGui(Function<IGui, Frame> creator);
 	IImageIO getImageIO();
-	MojangSkinUploadAPI getUploadAPI();
+	MojangAPI getMojangAPI();
 	void clearSkinCache();
 	String getConnectedServer();
 	List<Object> getPlayers();
+	Proxy getProxy();
 
 	default Runnable openSingleplayer() {
 		throw new UnsupportedOperationException();

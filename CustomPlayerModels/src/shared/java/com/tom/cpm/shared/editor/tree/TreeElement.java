@@ -8,10 +8,8 @@ import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.elements.Tree.TreeModel;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
-import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Effect;
@@ -36,7 +34,7 @@ public abstract interface TreeElement {
 				e.elements.forEach(c);
 				e.templates.forEach(c);
 				if(e.templateSettings != null)c.accept(e.templateSettings);
-				if(e.scaling != 0)c.accept(e.scalingElem);
+				if(e.scalingElem.entityScaling != 0)c.accept(e.scalingElem);
 				c.accept(e.texElem);
 			} else
 				parent.getTreeElements(c);
@@ -61,7 +59,12 @@ public abstract interface TreeElement {
 			if(evt.btn == 1 && elem != null) {
 				PopupMenu popup = new PopupMenu(e.gui(), e.frame);
 				if(elem.canMove() || (moveElem != null && elem.canAccept(moveElem))) {
-					popup.addButton(moveElem != null ? e.gui().i18nFormat("button.cpm.tree.put") : e.gui().i18nFormat("button.cpm.tree.move"), () -> {
+					String btnTxt;
+					if(moveElem != null) {
+						if(moveElem == elem)btnTxt = e.gui().i18nFormat("button.cpm.tree.cancelMove");
+						else btnTxt = e.gui().i18nFormat("button.cpm.tree.put");
+					} else btnTxt = e.gui().i18nFormat("button.cpm.tree.move");
+					popup.addButton(btnTxt, () -> {
 						if(moveElem != null) {
 							if(moveElem != elem)
 								elem.accept(moveElem);
@@ -70,7 +73,7 @@ public abstract interface TreeElement {
 					});
 				}
 				elem.populatePopup(popup);
-				if(!popup.getElements().isEmpty()) {
+				if(popup.getY() > 0) {
 					Vec2i p = evt.getPos();
 					popup.display(p.x, p.y);
 				}
@@ -134,5 +137,4 @@ public abstract interface TreeElement {
 	public default void switchEffect(Effect effect) {}
 	public default float getValue() { return 0; }
 	public default void setValue(float value) {}
-	public default void render3d(MatrixStack stack, VBuffers buf) {}
 }

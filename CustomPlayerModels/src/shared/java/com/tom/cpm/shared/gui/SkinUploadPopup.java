@@ -14,7 +14,7 @@ import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.util.Log;
-import com.tom.cpm.shared.util.MojangSkinUploadAPI;
+import com.tom.cpm.shared.util.MojangAPI;
 
 public class SkinUploadPopup extends ProcessPopup<Void> {
 	private SkinType type;
@@ -37,7 +37,7 @@ public class SkinUploadPopup extends ProcessPopup<Void> {
 
 	private Void process() {
 		setupLabelsExec(gui.i18nFormat("label.cpm.uploading.connecting"));
-		MojangSkinUploadAPI api = MinecraftClientAccess.get().getUploadAPI();
+		MojangAPI api = MinecraftClientAccess.get().getMojangAPI();
 		/*if(!api.checkAuth()) {
 			if(cancelled.get())return null;
 			gui.executeLater(new ConfirmPopup(frame, title, gui.i18nFormat("label.cpm.uploading.authFail"), this::save, null, gui.i18nFormat("button.cpm.saveSkinFile")));

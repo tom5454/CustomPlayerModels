@@ -257,11 +257,6 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 
 		@Override
-		public boolean noReset() {
-			return RetroGL.renderCallLoc == RetroGL.HURT_OVERLAY_LOC;
-		}
-
-		@Override
 		public void postRender(float scale) {
 			MatrixStack.Entry e = getPartTransform();
 			if(e != null) {

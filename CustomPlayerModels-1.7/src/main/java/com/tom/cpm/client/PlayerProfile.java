@@ -100,7 +100,7 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 			define.accept(typeIn, profileTexture.getUrl());
 			switch (typeIn) {
 			case SKIN:
-				cf.complete(null);
+				ClientProxy.mc.getDefinitionLoader().execute(() -> Minecraft.getMinecraft().func_152344_a(() -> cf.complete(null)));
 
 				break;
 			default:

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -21,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import com.tom.cpl.gui.elements.MessagePopup;
+import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -29,11 +31,13 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
-import com.tom.cpm.shared.editor.gui.popup.CreateGistPopup;
+import com.tom.cpm.shared.editor.gui.popup.ExportStringResultPopup;
+import com.tom.cpm.shared.editor.gui.popup.OverflowPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.effects.EffectColor;
+import com.tom.cpm.shared.effects.EffectExtrude;
 import com.tom.cpm.shared.effects.EffectGlow;
 import com.tom.cpm.shared.effects.EffectHide;
 import com.tom.cpm.shared.effects.EffectHideSkull;
@@ -71,11 +75,11 @@ import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartTemplate;
 import com.tom.cpm.shared.parts.ModelPartTexture;
 import com.tom.cpm.shared.parts.ModelPartUUIDLockout;
+import com.tom.cpm.shared.paste.PastePopup;
 import com.tom.cpm.shared.template.Template;
 import com.tom.cpm.shared.util.Log;
 
 public class Exporter {
-	public static final String TEMP_MODEL = ".temp.cpmmodel";
 	public static final Gson sgson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
 	public static void exportSkin(Editor e, EditorGui gui, File f, boolean forceOut) {
@@ -91,7 +95,7 @@ public class Exporter {
 		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getDefinitionLoader().getTemplate(), e.skinType.getChannel()), () -> {
 			img.storeTo(f);
 			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
-		}, (d, c) -> handleGistOverflow(d, c, gui)), forceOut);
+		}, (d, c) -> handleOverflow(d, c, gui)), forceOut);
 	}
 
 	public static void exportSkin(Editor e, EditorGui gui, Consumer<Image> out, boolean forceOut) {
@@ -106,7 +110,7 @@ public class Exporter {
 		Image img = new Image(e.vanillaSkin);
 		exportSkin0(e, gui,
 				new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getDefinitionLoader().getTemplate(), e.skinType.getChannel()),
-						() -> out.accept(img), (d, c) -> handleGistOverflow(d, c, gui)), forceOut);
+						() -> out.accept(img), (d, c) -> handleOverflow(d, c, gui)), forceOut);
 	}
 
 	public static void exportB64(Editor e, EditorGui gui, Consumer<String> b64Out, boolean forceOut) {
@@ -116,10 +120,10 @@ public class Exporter {
 			size[0] = 0;
 			return new BAOS(buffer, size);
 		}, () -> b64Out.accept(Base64.getEncoder().encodeToString(Arrays.copyOf(buffer, size[0]))),
-				(d, c) -> handleGistOverflow(d, c, gui)), forceOut);
+				(d, c) -> handleOverflow(d, c, gui)), forceOut);
 	}
 
-	public static void exportGistUpdate(Editor e, EditorGui gui, Consumer<String> b64Out) {
+	public static void exportUpdate(Editor e, EditorGui gui, Link linkToUpdate) {
 		try {
 			ModelPartDefinition def = prepareDefinition(e);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -131,7 +135,16 @@ public class Exporter {
 			}
 			String b64 = Base64.getEncoder().encodeToString(baos.toByteArray());
 			Log.info(b64);
-			b64Out.accept(b64);
+			if(linkToUpdate.getLoader().equals("p")) {
+				PastePopup.runRequest(gui, c -> c.updateFile(linkToUpdate.getPath(), b64.getBytes(StandardCharsets.UTF_8)),
+						() -> {
+							PopupPanel popup = new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.paste.updatedModel"));
+							popup.setOnClosed(MinecraftClientAccess.get().getDefinitionLoader()::clearCache);
+							gui.openPopup(popup);
+						}, () -> {}, "uploading");
+			} else {
+				gui.openPopup(new ExportStringResultPopup(gui, gui.getGui(), "skin_update", b64));
+			}
 		} catch (ExportException ex) {
 			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
 		} catch (Exception ex) {
@@ -145,7 +158,7 @@ public class Exporter {
 		exportSkin0(e, gui, new Result(wr::getOut, () -> {
 			if(wr.finish())
 				gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
-		}, (d, c) -> handleGistOverflow(d, l -> {
+		}, (d, c) -> handleOverflow(d, l -> {
 			wr.setOverflow(d, l);
 			c.accept(l);
 		}, gui)), false);
@@ -154,7 +167,7 @@ public class Exporter {
 	public static boolean exportTempModel(Editor e, EditorGui gui) {
 		File models = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 		models.mkdirs();
-		ModelWriter wr = new ModelWriter(gui, new File(models, TEMP_MODEL), false);
+		ModelWriter wr = new ModelWriter(gui, new File(models, TestIngameManager.TEST_MODEL_NAME), false);
 		wr.setDesc("Test model", "", null);
 		return exportSkin0(e, gui, new Result(wr::getOut, wr::finish,
 				(d, c) -> {
@@ -198,6 +211,9 @@ public class Exporter {
 				if(el.singleTex) {
 					otherParts.add(new ModelPartRenderEffect(new EffectSingleTexture(el.id)));
 				}
+				if(el.extrude) {
+					otherParts.add(new ModelPartRenderEffect(new EffectExtrude(el.id)));
+				}
 				if(el.faceUV != null) {
 					otherParts.add(new ModelPartRenderEffect(new EffectPerFaceUV(el.id, el.faceUV)));
 				} else if(el.u > 255 || el.v > 255) {
@@ -231,7 +247,8 @@ public class Exporter {
 		for (EditorTemplate et : e.templates) {
 			otherParts.add(new ModelPartTemplate(et));
 		}
-		if(e.scaling != 0 && e.scaling != 1)otherParts.add(new ModelPartScale(e.scaling));
+		float scaling = e.scalingElem.entityScaling;
+		if(scaling != 0 && scaling != 1)otherParts.add(new ModelPartScale(scaling));
 		if(!e.hideHeadIfSkull)otherParts.add(new ModelPartRenderEffect(new EffectHideSkull(e.hideHeadIfSkull)));
 		if(e.removeArmorOffset)otherParts.add(new ModelPartRenderEffect(new EffectRemoveArmorOffset(e.removeArmorOffset)));
 
@@ -420,10 +437,10 @@ public class Exporter {
 		return true;
 	}
 
-	private static void handleGistOverflow(byte[] data, Consumer<Link> linkC, EditorGui gui) {
+	private static void handleOverflow(byte[] data, Consumer<Link> linkC, EditorGui gui) {
 		String b64 = Base64.getEncoder().encodeToString(data);
 		Log.info(b64);
-		gui.openPopup(new CreateGistPopup(gui, gui.getGui(), "skinOverflow", b64, linkC));
+		gui.openPopup(new OverflowPopup(gui, b64, linkC));
 	}
 
 	public static class ExportException extends RuntimeException {
@@ -491,7 +508,7 @@ public class Exporter {
 		public ModelWriter(EditorGui gui, File out, boolean skinCompat) {
 			this.gui = gui;
 			this.out = out;
-			buffer = new byte[skinCompat ? 2*1024 : 32*1024];
+			buffer = new byte[skinCompat ? 2*1024 : 30*1024];
 		}
 
 		public void setDesc(String name, String desc, Image icon) {

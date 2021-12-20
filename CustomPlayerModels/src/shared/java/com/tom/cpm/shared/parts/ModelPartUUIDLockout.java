@@ -38,7 +38,7 @@ public class ModelPartUUIDLockout implements IModelPart, IResolvedModelPart {
 	@Override
 	public void apply(ModelDefinition def) {
 		UUID uuid = def.getPlayerObj().getUUID();
-		if(!lockID.equals(uuid) && !MinecraftClientAccess.get().getClientPlayer().getUUID().equals(uuid))
+		if(!lockID.equals(uuid) && !MinecraftClientAccess.get().getClientPlayer().getUUID().equals(lockID))
 			throw new SafetyException(BlockReason.UUID_LOCK);
 	}
 }

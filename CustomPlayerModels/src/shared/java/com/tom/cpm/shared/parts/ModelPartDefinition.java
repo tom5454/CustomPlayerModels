@@ -23,12 +23,23 @@ public class ModelPartDefinition implements IModelPart, IResolvedModelPart {
 	private IResolvedModelPart skinImage;
 
 	public ModelPartDefinition(IOHelper is, ModelDefinition def) throws IOException {
-		int count = is.readVarInt();
-		cubes = new ArrayList<>();
-		for (int i = 0; i < count; i++) {
-			Cube c = Cube.loadDefinitionCube(is);
-			c.id = i+10;
-			cubes.add(c);
+		try {
+			int count = is.readVarInt();
+			cubes = new ArrayList<>();
+			for (int i = 0; i < count; i++) {
+				Cube c = Cube.loadDefinitionCube(is);
+				c.id = i+10;
+				cubes.add(c);
+			}
+		} catch (IOException e) {
+			is.reset();
+			int count = is.read();
+			cubes = new ArrayList<>();
+			for (int i = 0; i < count; i++) {
+				Cube c = Cube.loadDefinitionCube(is);
+				c.id = i+10;
+				cubes.add(c);
+			}
 		}
 		rc = Cube.resolveCubes(cubes);
 		templates = new ArrayList<>();

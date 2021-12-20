@@ -36,7 +36,7 @@ public class NativeImageIO implements IImageIO {
 		Image i = new Image(ni.getWidth(), ni.getHeight());
 		for(int y = 0;y<ni.getHeight();y++) {
 			for(int x = 0;x<ni.getWidth();x++) {
-				int rgb = ni.getPixelColor(x, y);
+				int rgb = ni.getColor(x, y);
 				int a = (rgb >> 24 & 255);
 				int b = (rgb >> 16 & 255);
 				int g = (rgb >> 8 & 255);
@@ -49,7 +49,7 @@ public class NativeImageIO implements IImageIO {
 
 	@Override
 	public void write(Image img, File f) throws IOException {
-		createFromBufferedImage(img).writeFile(f);
+		createFromBufferedImage(img).writeTo(f);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class NativeImageIO implements IImageIO {
 				int r = (rgb >> 16 & 255);
 				int g = (rgb >> 8 & 255);
 				int b = (rgb & 255);
-				ni.setPixelColor(x, y, (a << 24) | (b << 16) | (g << 8) | r);
+				ni.setColor(x, y, (a << 24) | (b << 16) | (g << 8) | r);
 			}
 		}
 		return ni;

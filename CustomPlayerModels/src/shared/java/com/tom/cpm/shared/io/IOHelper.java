@@ -17,6 +17,8 @@ import java.util.function.Function;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.nbt.NBTTag;
+import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO;
 
@@ -137,6 +139,10 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		return new String(s, StandardCharsets.UTF_8);
 	}
 
+	public String readJUTF() throws IOException {
+		return din.readUTF();
+	}
+
 	@Override
 	public void write(int b) throws IOException {
 		dout.write(b);
@@ -209,6 +215,10 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		write(b);
 	}
 
+	public void writeJUTF(String s) throws IOException {
+		dout.writeUTF(s);
+	}
+
 	@Override
 	public int skipBytes(int n) throws IOException {
 		return din.skipBytes(n);
@@ -239,7 +249,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 			i |= (b0 & 127) << j++ * 7;
 
 			if (j > 5) {
-				throw new RuntimeException("VarInt too big");
+				throw new IOException("VarInt too big");
 			}
 		}
 		while ((b0 & 128) == 128);
@@ -512,5 +522,25 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		while((len = is.read(d, 0, d.length)) > 0){
 			os.write(d, 0, len);
 		}
+	}
+
+	public void writeNBT(NBTTag tag) throws IOException {
+		this.writeByte(tag.getId());
+
+		if (tag.getId() != 0)
+		{
+			this.writeJUTF("");
+			tag.write(this);
+		}
+	}
+
+	public NBTTagCompound readNBT() throws IOException {
+		byte type = this.readByte();
+		System.out.println("ReadNBT: " + type + " " + readJUTF());
+		NBTTag tag = NBTTag.createNewByType(type);
+		tag.read(this);
+		if(tag instanceof NBTTagCompound)
+			return (NBTTagCompound) tag;
+		else throw new IOException("Root tag must be a named compound tag");
 	}
 }

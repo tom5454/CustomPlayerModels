@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.widget.ClickableWidget;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
 
@@ -19,7 +19,7 @@ import com.tom.cpm.client.CustomPlayerModelsClient;
 public class ScreenMixin {
 
 	@Shadow
-	protected List<AbstractButtonWidget> buttons;
+	protected List<ClickableWidget> buttons;
 
 	@Shadow
 	protected List<Element> children;

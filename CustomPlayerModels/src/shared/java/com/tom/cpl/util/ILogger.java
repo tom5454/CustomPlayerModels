@@ -2,6 +2,7 @@ package com.tom.cpl.util;
 
 public interface ILogger {
 	void info(String text);
+	void info(String text, Throwable thr);
 	void error(String text);
 	void error(String text, Throwable thr);
 	void warn(String text);
@@ -34,6 +35,12 @@ public interface ILogger {
 		@Override
 		public void error(String text) {
 			System.err.println(text);
+		}
+
+		@Override
+		public void info(String text, Throwable thr) {
+			System.out.println(text);
+			thr.printStackTrace(System.out);
 		}
 	}
 }

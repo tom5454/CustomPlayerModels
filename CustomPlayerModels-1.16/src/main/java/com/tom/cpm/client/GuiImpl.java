@@ -6,7 +6,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
@@ -96,15 +95,13 @@ public class GuiImpl extends Screen implements IGui {
 			this.matrixStack = matrixStack;
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 1000);
-			if(!noScissorTest)
-				GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			stack = new CtxStack(width, height);
 			RenderSystem.runAsFancy(() -> gui.draw(mouseX, mouseY, partialTicks));
 		} catch (Throwable e) {
 			onGuiException("Error drawing gui", e, true);
 		} finally {
 			if(!noScissorTest)
-				GL11.glDisable(GL11.GL_SCISSOR_TEST);
+				RenderSystem.disableScissor();
 			String modVer = ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
 			String s = "Minecraft " + SharedConstants.getCurrentVersion().getName() + " (" + minecraft.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ("release".equalsIgnoreCase(minecraft.getVersionType()) ? "" : "/" + minecraft.getVersionType()) + ") " + modVer;
 			font.draw(matrixStack, s, width - font.width(s) - 4, 2, 0xff000000);
@@ -346,7 +343,10 @@ public class GuiImpl extends Screen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		RenderSystem.color4f(1, 1, 1, 1);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
 		blit(matrixStack, x, y, u, v, w, h);
+		RenderSystem.disableBlend();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -356,6 +356,8 @@ public class GuiImpl extends Screen implements IGui {
 		y += getOffset().y;
 		RenderSystem.color4f(1, 1, 1, 1);
 		minecraft.getTextureManager().bind(DynTexture.getBoundLoc());
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
 		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
@@ -365,8 +367,10 @@ public class GuiImpl extends Screen implements IGui {
 		bufferbuilder.vertex(matrix, x + width, y + height, bo).uv(u2, v2).endVertex();
 		bufferbuilder.vertex(matrix, x + width, y, bo).uv(u2, v1).endVertex();
 		bufferbuilder.vertex(matrix, x, y, bo).uv(u1, v1).endVertex();
+		bufferbuilder.end();
 		RenderSystem.enableAlphaTest();
-		tessellator.end();
+		WorldVertexBufferUploader.end(bufferbuilder);
+		RenderSystem.disableBlend();
 	}
 
 	@Override
@@ -382,7 +386,7 @@ public class GuiImpl extends Screen implements IGui {
 			float multiplierX = dw / (float)width;
 			float multiplierY = dh / (float)height;
 			Box box = getContext().cutBox;
-			GL11.glScissor((int) (box.x * multiplierX), dh - (int) ((box.y + box.h) * multiplierY),
+			RenderSystem.enableScissor((int) (box.x * multiplierX), dh - (int) ((box.y + box.h) * multiplierY),
 					(int) (box.w * multiplierX), (int) (box.h * multiplierY));
 		}
 	}

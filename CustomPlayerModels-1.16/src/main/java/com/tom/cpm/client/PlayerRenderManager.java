@@ -37,6 +37,10 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 	public static final Function<ResourceLocation, RenderType> armor = RenderType::armorCutoutNoCull;
 	public static final Function<ResourceLocation, RenderType> entity = RenderType::entityTranslucent;
 
+	private RedirectHolder mixin(Object model, String arg) {
+		return null;
+	}
+
 	public PlayerRenderManager() {
 		setFactory(new RedirectHolderFactory<IRenderTypeBuffer, ModelTexture, ModelRenderer>() {
 
@@ -44,6 +48,9 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 			@Override
 			public <M> RedirectHolder<?, IRenderTypeBuffer, ModelTexture, ModelRenderer> create(
 					M model, String arg) {
+				RedirectHolder<?, IRenderTypeBuffer, ModelTexture, ModelRenderer> m = mixin(model, arg);
+				if(m != null)return m;
+
 				if(model instanceof PlayerModel) {
 					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<AbstractClientPlayerEntity>) model);
 				} else if(model instanceof HumanoidHeadModel) {
@@ -138,7 +145,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 			register(new Field<>(               () -> model.rightPants , v -> model.rightPants  = v, null));
 			register(new Field<>(               () -> model.jacket     , v -> model.jacket      = v, null));
 
-			register(new Field<>(() -> model.cloak        , v -> model.cloak     = v, RootModelType.CAPE));
+			register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
 		}
 
 		@SuppressWarnings("unchecked")

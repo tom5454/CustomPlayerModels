@@ -6,6 +6,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Tooltip;
@@ -50,9 +51,9 @@ public class AnimatedTex implements TreeElement {
 		uvSize = new Vec2i();
 		animStart = new Vec2i();
 		options = new ArrayList<>();
-		options.add(new TexElem("start", uvStart));
-		options.add(new TexElem("size", uvSize));
-		options.add(new TexElem("from", animStart));
+		options.add(new TexElem("start", () -> uvStart));
+		options.add(new TexElem("size", () -> uvSize));
+		options.add(new TexElem("from", () -> animStart));
 		options.add(new ValElem("frameTime", () -> frameTime, v -> frameTime = v));
 		options.add(new ValElem("frameCount", () -> frameCount, v -> frameCount = v));
 		options.add(new BoolElem("anX", () -> anX, v -> anX = v));
@@ -175,15 +176,16 @@ public class AnimatedTex implements TreeElement {
 	}
 
 	private class TexElem extends OptionElem {
-		private Vec2i vec;
+		private Supplier<Vec2i> vec;
 
-		public TexElem(String name, Vec2i vec) {
+		public TexElem(String name, Supplier<Vec2i> vec) {
 			super(name);
 			this.vec = vec;
 		}
 
 		@Override
 		public void updateGui() {
+			Vec2i vec = this.vec.get();
 			editor.setModePanel.accept(ModeDisplayType.TEX);
 			editor.setTexturePanel.accept(new Vec3i(vec.x, vec.y, 0));
 		}
@@ -191,6 +193,7 @@ public class AnimatedTex implements TreeElement {
 		@Override
 		public void setVec(Vec3f v, VecType object) {
 			if(object == VecType.TEXTURE) {
+				Vec2i vec = this.vec.get();
 				vec.x = (int) v.x;
 				vec.y = (int) v.y;
 				editor.action("set", "label.cpm.tree.at." + name).

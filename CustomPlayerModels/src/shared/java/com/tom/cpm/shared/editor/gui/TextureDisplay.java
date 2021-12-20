@@ -59,7 +59,7 @@ public class TextureDisplay extends GuiElement {
 	public static void drawBoxTextureOverlay(IGui gui, ModelElement element, int x, int y, float xs, float ys, int alpha) {
 		if(element.type == ElementType.NORMAL) {
 			int a = alpha << 24;
-			if(element.singleTex) {
+			if(element.singleTex || element.extrude) {
 				Box bx = element.getTextureBox();
 				gui.drawBox(x + bx.x * xs, y + bx.y * ys, bx.w * xs, bx.h * ys, 0xffffff | a);
 			} else if(element.faceUV != null) {
@@ -86,6 +86,7 @@ public class TextureDisplay extends GuiElement {
 				gui.drawBox(x + bx + dz * xs * 2 + dx * xs, y + by + dz * ys, dx * xs, dy * ys, 0x0000dd | a);
 			}
 		} else if(element.type == ElementType.ROOT_PART) {
+			if(element.hidden)return;
 			PartValues val = ((VanillaModelPart) element.typeData).getDefaultSize(element.editor.skinType);
 			float texW = 64;
 			float texH = 64;

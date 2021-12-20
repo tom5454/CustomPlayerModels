@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.editor.gui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import com.tom.cpl.gui.IGui;
@@ -48,7 +50,22 @@ public class TextureEditorPanel extends GuiElement {
 			}
 			int rw = (int) (zoom * provider.getImage().getWidth());
 			int rh = (int) (zoom * provider.getImage().getHeight());
-			gui.drawBox(offX, offY, rw, rh, 0xffffffff);
+
+			{
+				int chkW = Math.min(bounds.w, offX + rw);
+				int chkH = Math.min(bounds.h, offY + rh);
+				for(int x = offX;x<chkW;x+= 8) {
+					for(int y = offY;y<chkH;y+= 8) {
+						if(x + 8 < 0 || y + 8 < 0 || x - 8 > bounds.w || y - 8 > bounds.w)continue;
+						int w = Math.min(8, chkW - x);
+						int h = Math.min(8, chkH - y);
+						if(((x - offX) / 8 + (y - offY) / 8) % 2 == 0)
+							gui.drawBox(x, y, w, h, gui.getColors().button_border);
+						else
+							gui.drawBox(x, y, w, h, gui.getColors().button_disabled);
+					}
+				}
+			}
 			gui.drawTexture(offX, offY, rw, rh, 0, 0, 1, 1);
 			int imgX = (int) ((event.x - offX - bounds.x) / zoom);
 			int imgY = (int) ((event.y - offY - bounds.y) / zoom);
@@ -78,9 +95,7 @@ public class TextureEditorPanel extends GuiElement {
 					int a = (imgC >> 24) & 0xff;
 					if(a < 64)outlineColor = 0x000000;
 					if(a == 0)imgC = 0xffffffff;
-					gui.drawBox(p.x * zoom + offX, p.y * zoom + offY, zoom, zoom, 0xff000000 | outlineColor);
-					gui.drawBox(p.x * zoom + offX + 1, p.y * zoom + offY + 1, zoom - 2, zoom - 2, 0xff000000);
-					gui.drawBox(p.x * zoom + offX + 1, p.y * zoom + offY + 1, zoom - 2, zoom - 2, imgC);
+					gui.drawRectangle(p.x * zoom + offX, p.y * zoom + offY, zoom, zoom, 0xff000000 | outlineColor);
 				}
 			}
 			break;
@@ -93,16 +108,16 @@ public class TextureEditorPanel extends GuiElement {
 	}
 
 	private ModelElement getElementUnderMouse(int x, int y) {
-		ModelElement[] elem = new ModelElement[1];
+		List<ModelElement> elems = new ArrayList<>();
 		Editor.walkElements(editor.elements, e -> {
-			if(elem[0] != null)return;
 			if(e.type != ElementType.NORMAL)return;
 			Box b = e.getTextureBox();
 			if(b != null && b.isInBounds(x, y)) {
-				elem[0] = e;
+				elems.add(e);
 			}
 		});
-		return elem[0];
+		if(elems.contains(editor.selectedElement))return editor.getSelectedElement();
+		return !elems.isEmpty() ? elems.get(0) : null;
 	}
 
 	@Override

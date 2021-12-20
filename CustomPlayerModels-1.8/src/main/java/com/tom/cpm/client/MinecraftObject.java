@@ -3,6 +3,7 @@ package com.tom.cpm.client;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +39,7 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
-import com.tom.cpm.shared.util.MojangSkinUploadAPI;
+import com.tom.cpm.shared.util.MojangAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private final Minecraft mc;
@@ -179,13 +180,13 @@ public class MinecraftObject implements MinecraftClientAccess {
 		return new AWTImageIO();
 	}
 	@Override
-	public MojangSkinUploadAPI getUploadAPI() {
-		return new MojangSkinUploadAPI(mc.getSession().getProfile().getId(), mc.getSession().getToken());
+	public MojangAPI getMojangAPI() {
+		return new MojangAPI(mc.getSession().getProfile().getName(), mc.getSession().getProfile().getId(), mc.getSession().getToken());
 	}
 
 	@Override
 	public void clearSkinCache() {
-		MojangSkinUploadAPI.clearYggdrasilCache(mc.getSessionService());
+		MojangAPI.clearYggdrasilCache(mc.getSessionService());
 		mc.func_181037_M().clear();
 		mc.func_181037_M();//refresh
 	}
@@ -203,5 +204,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	public List<Object> getPlayers() {
 		if(mc.getNetHandler() == null)return Collections.emptyList();
 		return mc.getNetHandler().getPlayerInfoMap().stream().map(NetworkPlayerInfo::getGameProfile).collect(Collectors.toList());
+	}
+
+	@Override
+	public Proxy getProxy() {
+		return mc.getProxy();
 	}
 }

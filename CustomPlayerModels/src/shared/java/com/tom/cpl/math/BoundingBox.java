@@ -20,4 +20,12 @@ public class BoundingBox {
 	public static BoundingBox create(float x, float y, float z, float w, float h, float d) {
 		return new BoundingBox(x, y, z, x+w, y+h, z+d);
 	}
+
+	public BoundingBox mul(float v) {
+		return new BoundingBox(minX * v, minY * v, minZ * v, maxX * v, maxY * v, maxZ * v);
+	}
+
+	public BoundingBox offset(float x, float y, float z) {
+		return new BoundingBox(minX + x, minY + y, minZ + z, maxX + x, maxY + y, maxZ + z);
+	}
 }

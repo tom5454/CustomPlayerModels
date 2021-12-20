@@ -270,6 +270,10 @@ public class ClientProxy extends CommonProxy {
 		model.cloak.xRot = (float) -Math.toRadians(6.0F + f2 / 2.0F + f1);
 		model.cloak.yRot = (float) Math.toRadians(180.0F - f3 / 2.0F);
 		model.cloak.zRot = (float) Math.toRadians(f3 / 2.0F);
+		mc.getPlayerRenderManager().setModelPose(model);
+		model.cloak.xRot = 0;
+		model.cloak.yRot = 0;
+		model.cloak.zRot = 0;
 		model.renderCloak(matrixStackIn, buffer, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
 	}

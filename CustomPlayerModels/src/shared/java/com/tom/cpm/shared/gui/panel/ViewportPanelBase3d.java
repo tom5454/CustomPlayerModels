@@ -124,10 +124,10 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		VertexBuffer t = buf.getBuffer(rt, RenderMode.DEFAULT);
 		Mat3f n = stack.getLast().getNormal();
 		Mat4f m = stack.getLast().getMatrix();
-		t.pos(m, 4,  0,  4).tex(1, 1).normal(n, 0, 1, 0).color(1, 1, 1, 1).endVertex();
-		t.pos(m, 4,  0, -3).tex(0, 1).normal(n, 0, 1, 0).color(1, 1, 1, 1).endVertex();
-		t.pos(m, -3, 0, -3).tex(0, 0).normal(n, 0, 1, 0).color(1, 1, 1, 1).endVertex();
-		t.pos(m, -3, 0,  4).tex(1, 0).normal(n, 0, 1, 0).color(1, 1, 1, 1).endVertex();
+		t.pos(m, 4,  0,  4).tex(1, 1).normal(n, 0, -1, 0).color(1, 1, 1, 1).endVertex();
+		t.pos(m, 4,  0, -3).tex(0, 1).normal(n, 0, -1, 0).color(1, 1, 1, 1).endVertex();
+		t.pos(m, -3, 0, -3).tex(0, 0).normal(n, 0, -1, 0).color(1, 1, 1, 1).endVertex();
+		t.pos(m, -3, 0,  4).tex(1, 0).normal(n, 0, -1, 0).color(1, 1, 1, 1).endVertex();
 		t.finish();
 
 		rt = getRenderTypes("base");

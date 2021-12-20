@@ -38,6 +38,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import com.mojang.authlib.GameProfile;
 
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -61,6 +62,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void init() {
 		super.init();
+		FixSSL.fixup();
 		INSTANCE = this;
 		minecraft = Minecraft.getMinecraft();
 		mc = new MinecraftObject(minecraft);
@@ -270,6 +272,10 @@ public class ClientProxy extends CommonProxy {
 		model.bipedCape.rotateAngleX = (float) -Math.toRadians(6.0F + f2 / 2.0F + f1);
 		model.bipedCape.rotateAngleY = (float) Math.toRadians(180.0F - f3 / 2.0F);
 		model.bipedCape.rotateAngleZ = (float) Math.toRadians(f3 / 2.0F);
+		mc.getPlayerRenderManager().setModelPose(model);
+		model.bipedCape.rotateAngleX = 0;
+		model.bipedCape.rotateAngleY = 0;
+		model.bipedCape.rotateAngleZ = 0;
 		model.renderCape(0.0625F);
 		GlStateManager.popMatrix();
 	}

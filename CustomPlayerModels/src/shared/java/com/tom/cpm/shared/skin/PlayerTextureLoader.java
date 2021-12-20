@@ -2,10 +2,10 @@ package com.tom.cpm.shared.skin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -20,15 +20,17 @@ import com.tom.cpm.shared.util.LegacySkinConverter;
 
 public abstract class PlayerTextureLoader {
 	private static final LoadingCache<String, CompletableFuture<Image>> cache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).build(CacheLoader.from(Image::download));
-	private Map<TextureType, Texture> textures = new HashMap<>();
+	private Map<TextureType, Texture> textures = new ConcurrentHashMap<>();
 
 	private static class Texture {
+		private final TextureType type;
 		private CompletableFuture<Image> skinFuture;
 		private String url;
 		private UnaryOperator<Image> postProcessor;
 
 		public Texture(TextureType type) {
 			this.postProcessor = type == TextureType.SKIN ? LegacySkinConverter::processLegacySkin : UnaryOperator.identity();
+			this.type = type;
 		}
 
 		public CompletableFuture<Image> get() {
@@ -39,10 +41,10 @@ public abstract class PlayerTextureLoader {
 		}
 
 		private CompletableFuture<Image> get0() {
-			if(MinecraftObjectHolder.DEBUGGING && new File("skin_test.png").exists()) {
+			if(MinecraftObjectHolder.DEBUGGING && new File(type.name().toLowerCase() + "_test.png").exists()) {
 				return CompletableFuture.supplyAsync(() -> {
 					try {
-						return Image.loadFrom(new File("skin_test.png"));
+						return Image.loadFrom(new File(type.name().toLowerCase() + "_test.png"));
 					} catch (IOException e) {
 						return null;
 					}
@@ -55,12 +57,11 @@ public abstract class PlayerTextureLoader {
 
 	private CompletableFuture<Void> loadFuture;
 
-
 	public CompletableFuture<Void> load() {
 		if(loadFuture == null) {
 			loadFuture = load0();
-			if(MinecraftObjectHolder.DEBUGGING)
-				loadFuture.complete(null);
+			/*if(MinecraftObjectHolder.DEBUGGING)
+				loadFuture.complete(null);*/
 		}
 		return loadFuture;
 	}

@@ -22,22 +22,22 @@ public abstract class MinecraftClientMixin {
 	@Shadow private float pausedTickDelta;
 	@Shadow private RenderTickCounter renderTickCounter;
 	@Shadow public Screen currentScreen;
-	@Shadow public abstract void openScreen(Screen screen);
+	@Shadow public abstract void setScreen(Screen screen);
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V"), method = "render(Z)V")
 	public void onRenderTick(boolean v, CallbackInfo cbi) {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().getAnimationEngine().update(this.paused ? this.pausedTickDelta : this.renderTickCounter.tickDelta);
 	}
 
-	@Inject(at = @At("HEAD"), method = "openScreen(Lnet/minecraft/client/gui/screen/Screen;)V", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", cancellable = true)
 	public void onOpenScreen(Screen screen, CallbackInfo cbi) {
 		if(screen == null && currentScreen instanceof GuiImpl.Overlay) {
 			cbi.cancel();
-			openScreen(((GuiImpl.Overlay)currentScreen).getGui());
+			setScreen(((GuiImpl.Overlay)currentScreen).getGui());
 		}
 		if(screen instanceof TitleScreen && EditorGui.doOpenEditor()) {
 			cbi.cancel();
-			openScreen(new GuiImpl(EditorGui::new, screen));
+			setScreen(new GuiImpl(EditorGui::new, screen));
 		}
 	}
 }

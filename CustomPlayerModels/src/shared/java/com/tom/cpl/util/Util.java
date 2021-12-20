@@ -1,11 +1,7 @@
 package com.tom.cpl.util;
 
-import java.lang.invoke.LambdaMetafactory;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,8 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class Util {
 
@@ -47,39 +41,20 @@ public class Util {
 		else return data;
 	}
 
-	public static <T> Supplier<T> constructor(Class<T> clazz) {
-		try {
-			Constructor<T> c = clazz.getConstructor();
-			c.setAccessible(true);
-			MethodHandles.Lookup lookup = MethodHandles.publicLookup();
-			MethodHandle mh = lookup.unreflectConstructor(c);
-			Method im = Supplier.class.getDeclaredMethods()[0];
-			MethodType imt = MethodType.methodType(im.getReturnType(), im.getParameterTypes());
-			return (Supplier<T>) LambdaMetafactory.metafactory(MethodHandles.lookup(), "get",
-					MethodType.methodType(Supplier.class), imt, mh, mh.type()).getTarget().invoke();
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static <A, T> Function<A, T> constructor(Class<T> clazz, Class<A> arg1) {
-		try {
-			Constructor<T> c = clazz.getConstructor(arg1);
-			c.setAccessible(true);
-			MethodHandles.Lookup lookup = MethodHandles.publicLookup();
-			MethodHandle mh = lookup.unreflectConstructor(c);
-			return (Function<A, T>) LambdaMetafactory.metafactory(MethodHandles.lookup(), "apply",
-					MethodType.methodType(Function.class),
-					MethodType.methodType(Object.class, Object.class), mh, mh.type()).getTarget().invoke();
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	public static UUID uuidFromString(final String input) {
 		if(input.indexOf('-') != -1)
 			return UUID.fromString(input);
 		else
 			return UUID.fromString(input.replaceFirst("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
+	}
+
+	public static void closeQuietly(final Closeable closeable) {
+		try {
+			if (closeable != null) {
+				closeable.close();
+			}
+		} catch (final IOException ioe) {
+			// ignore
+		}
 	}
 }

@@ -141,7 +141,7 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 							if (skinType == null) {
 								skinType = "default";
 							}
-							cf.complete(null);
+							ClientProxy.mc.getDefinitionLoader().execute(() -> Minecraft.getMinecraft().addScheduledTask(() -> cf.complete(null)));
 							break;
 
 						default:

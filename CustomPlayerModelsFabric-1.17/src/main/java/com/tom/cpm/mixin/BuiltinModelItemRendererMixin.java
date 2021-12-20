@@ -66,8 +66,8 @@ public class BuiltinModelItemRendererMixin {
 			Block block = ((BlockItem)item).getBlock();
 			if (block instanceof AbstractSkullBlock) {
 				GameProfile gameProfile = null;
-				if (stack.hasTag()) {
-					NbtCompound nbtCompound = stack.getTag();
+				if (stack.hasNbt()) {
+					NbtCompound nbtCompound = stack.getNbt();
 					if (nbtCompound.contains("SkullOwner", 10)) {
 						gameProfile = NbtHelper.toGameProfile(nbtCompound.getCompound("SkullOwner"));
 					} else if (nbtCompound.contains("SkullOwner", 8)

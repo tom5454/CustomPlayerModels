@@ -3,10 +3,12 @@ package com.tom.cpm.shared.editor.gui.popup;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.util.ButtonGroup;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.editor.Editor;
@@ -14,13 +16,17 @@ import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
+import com.tom.cpm.shared.model.SkinType;
 
 public class DescPopup extends PopupPanel {
 	private EditorTexture icon;
+	private SkinType skinType;
 
-	public DescPopup(EditorGui g, Runnable onOk) {
+	public DescPopup(EditorGui g, boolean skinTypeSettings, Runnable onOk) {
 		super(g.getGui());
+		setBounds(new Box(0, 0, 320, 195));
 		Editor editor = g.getEditor();
+		skinType = editor.skinType;
 
 		Label nameLbl = new Label(gui, gui.i18nFormat("label.cpm.name"));
 		nameLbl.setBounds(new Box(5, 5, 130, 10));
@@ -81,7 +87,30 @@ public class DescPopup extends PopupPanel {
 			}
 		});
 
+		if(skinTypeSettings) {
+			ButtonGroup<SkinType, Checkbox> group = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> skinType = i);
+			for (int j = 0; j < SkinType.VANILLA_TYPES.length; j++) {
+				SkinType s = SkinType.VANILLA_TYPES[j];
+				Checkbox chbxSt = new Checkbox(gui, gui.i18nFormat("label.cpm.skin_type." + s.getName()));
+				chbxSt.setBounds(new Box(bounds.w - 135, bounds.y + 5 + j * 25, 60, 20));
+				addElement(chbxSt);
+				group.addElement(s, chbxSt);
+			}
+			group.accept(skinType);
+		}
+
 		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
+			if(skinTypeSettings && editor.skinType != skinType) {
+				if(editor.elements.stream().anyMatch(m -> !m.hidden)) {
+					g.openPopup(new ConfirmPopup(g, gui.i18nFormat("label.cpm.confirmSkinTypeEdit", gui.i18nFormat("label.cpm.skin_type." + editor.skinType.getName()), gui.i18nFormat("label.cpm.skin_type." + skinType.getName())), () -> {
+						editor.skinType = skinType;
+						editor.markDirty();
+					}, null));
+				} else {
+					editor.skinType = skinType;
+					editor.markDirty();
+				}
+			}
 			if(editor.description == null)editor.description = new ModelDescription();
 			editor.description.name = nameField.getText();
 			editor.description.desc = descField.getText();
@@ -93,8 +122,6 @@ public class DescPopup extends PopupPanel {
 		});
 		ok.setBounds(new Box(5, 170, 60, 20));
 		addElement(ok);
-
-		setBounds(new Box(0, 0, 320, 195));
 	}
 
 	@Override

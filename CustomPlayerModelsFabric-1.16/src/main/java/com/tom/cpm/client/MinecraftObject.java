@@ -2,6 +2,7 @@ package com.tom.cpm.client;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
-import com.tom.cpm.shared.util.MojangSkinUploadAPI;
+import com.tom.cpm.shared.util.MojangAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private final MinecraftClient mc;
@@ -117,7 +118,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 		setEncPart(s, value, 3, PlayerModelPart.RIGHT_PANTS_LEG);
 		setEncPart(s, value, 4, PlayerModelPart.LEFT_SLEEVE);
 		setEncPart(s, value, 5, PlayerModelPart.RIGHT_SLEEVE);
-		mc.options.onPlayerModelPartChange();
+		mc.options.sendClientSettings();
 	}
 
 	private static void setEncPart(Set<PlayerModelPart> s, int value, int off, PlayerModelPart part) {
@@ -176,13 +177,13 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public MojangSkinUploadAPI getUploadAPI() {
-		return new MojangSkinUploadAPI(mc.getSession().getProfile().getId(), mc.getSession().getAccessToken());
+	public MojangAPI getMojangAPI() {
+		return new MojangAPI(mc.getSession().getProfile().getName(), mc.getSession().getProfile().getId(), mc.getSession().getAccessToken());
 	}
 
 	@Override
 	public void clearSkinCache() {
-		MojangSkinUploadAPI.clearYggdrasilCache(mc.getSessionService());
+		MojangAPI.clearYggdrasilCache(mc.getSessionService());
 		mc.getSessionProperties().clear();
 		mc.getSessionProperties();//refresh
 	}
@@ -200,5 +201,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	public List<Object> getPlayers() {
 		if(mc.getNetworkHandler() == null)return Collections.emptyList();
 		return mc.getNetworkHandler().getPlayerList().stream().map(PlayerListEntry::getProfile).collect(Collectors.toList());
+	}
+
+	@Override
+	public Proxy getProxy() {
+		return mc.getNetworkProxy();
 	}
 }

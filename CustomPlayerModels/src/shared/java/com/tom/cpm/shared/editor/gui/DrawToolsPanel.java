@@ -87,6 +87,18 @@ public class DrawToolsPanel extends Panel {
 			});
 			sizeSlider.setBounds(new Box(5, 0, w - 10, 20));
 			//panel.addElement(sizeSlider);//TODO
+
+			Slider alphaSlider = new Slider(gui, gui.i18nFormat("label.cpm.brushAlpha", editor.alphaValue));
+			alphaSlider.setValue(editor.alphaValue / 255f);
+			group.addElement(EditorTool.PEN, alphaSlider);
+			group.addElement(EditorTool.FILL, alphaSlider);
+			alphaSlider.setAction(() -> {
+				editor.alphaValue = Math.max(1, (int) (alphaSlider.getValue() * 255));
+				alphaSlider.setText(gui.i18nFormat("label.cpm.brushAlpha", editor.alphaValue));
+			});
+			alphaSlider.setBounds(new Box(5, 0, w - 10, 20));
+			alphaSlider.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.brushAlpha")));
+			panel.addElement(alphaSlider);
 		}
 
 		editor.setTool.accept(editor.drawMode);

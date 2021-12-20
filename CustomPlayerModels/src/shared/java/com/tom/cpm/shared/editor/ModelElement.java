@@ -41,6 +41,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public boolean glow;
 	public boolean recolor;
 	public boolean singleTex;
+	public boolean extrude;
 	public long storeID;
 	public boolean hidden;
 	public boolean templateElement, generated;
@@ -71,6 +72,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		recolor = element.recolor;
 		hidden = element.hidden;
 		singleTex = element.singleTex;
+		extrude = element.extrude;
 		if(element.faceUV != null)faceUV = new PerFaceUV(element.faceUV);
 	}
 
@@ -269,8 +271,10 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 				editor.setGlow.accept(this.glow);
 				editor.setReColor.accept(this.recolor);
 				editor.setHiddenEffect.accept(this.hidden);
-				if(faceUV == null)editor.setSingleTex.accept(this.singleTex);
-				else {
+				if(faceUV == null) {
+					editor.setSingleTex.accept(this.singleTex);
+					editor.setExtrudeEffect.accept(this.extrude);
+				} else {
 					editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir));
 					editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir));
 					editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir));
@@ -355,7 +359,11 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			break;
 
 		case SINGLE_TEX:
-			editor.action("switch", "label.cpm.singleTex").updateValueOp(this, this.singleTex, !this.singleTex, (a, b) -> a.singleTex = b, editor.setSingleTex).execute();;
+			editor.action("switch", "label.cpm.singleTex").updateValueOp(this, this.singleTex, !this.singleTex, (a, b) -> a.singleTex = b, editor.setSingleTex).execute();
+			break;
+
+		case EXTRUDE:
+			editor.action("switch", "label.cpm.extrude_effect").updateValueOp(this, this.extrude, !this.extrude, (a, b) -> a.extrude = b, editor.setExtrudeEffect).execute();
 			break;
 
 		case PER_FACE_UV:
@@ -391,6 +399,9 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		int dx = MathHelper.ceil(size.x);
 		int dy = MathHelper.ceil(size.y);
 		int dz = MathHelper.ceil(size.z);
+		if(extrude) {
+			return new Box(u * textureSize, v * textureSize, dx * textureSize, dy * textureSize);
+		}
 		if(singleTex) {
 			if(mcScale == 0 && (size.x == 0 || size.y == 0 || size.z == 0)) {
 				if(size.x == 0) {

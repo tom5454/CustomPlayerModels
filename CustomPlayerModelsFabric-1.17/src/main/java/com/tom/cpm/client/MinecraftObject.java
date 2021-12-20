@@ -2,6 +2,7 @@ package com.tom.cpm.client;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
-import com.tom.cpm.shared.util.MojangSkinUploadAPI;
+import com.tom.cpm.shared.util.MojangAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private final MinecraftClient mc;
@@ -157,12 +158,12 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public void openGui(Function<IGui, Frame> creator) {
-		mc.openScreen(new GuiImpl(creator, mc.currentScreen));
+		mc.setScreen(new GuiImpl(creator, mc.currentScreen));
 	}
 
 	@Override
 	public Runnable openSingleplayer() {
-		return () -> mc.openScreen(new SelectWorldScreen(mc.currentScreen));
+		return () -> mc.setScreen(new SelectWorldScreen(mc.currentScreen));
 	}
 
 	@Override
@@ -176,13 +177,13 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public MojangSkinUploadAPI getUploadAPI() {
-		return new MojangSkinUploadAPI(mc.getSession().getProfile().getId(), mc.getSession().getAccessToken());
+	public MojangAPI getMojangAPI() {
+		return new MojangAPI(mc.getSession().getProfile().getName(), mc.getSession().getProfile().getId(), mc.getSession().getAccessToken());
 	}
 
 	@Override
 	public void clearSkinCache() {
-		MojangSkinUploadAPI.clearYggdrasilCache(mc.getSessionService());
+		MojangAPI.clearYggdrasilCache(mc.getSessionService());
 		mc.getSessionProperties().clear();
 		mc.getSessionProperties();//refresh
 	}
@@ -200,5 +201,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	public List<Object> getPlayers() {
 		if(mc.getNetworkHandler() == null)return Collections.emptyList();
 		return mc.getNetworkHandler().getPlayerList().stream().map(PlayerListEntry::getProfile).collect(Collectors.toList());
+	}
+
+	@Override
+	public Proxy getProxy() {
+		return mc.getNetworkProxy();
 	}
 }

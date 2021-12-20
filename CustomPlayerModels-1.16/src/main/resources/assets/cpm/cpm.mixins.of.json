@@ -13,7 +13,10 @@
     "IRenderTypeBufferImplMixin_OF",
     "IVertexBuilderMixin_OF",
     "PlayerItemModelMixin_OF",
-    "TextureMixin_OF"
+    "TextureMixin_OF",
+	"RedirectHolderFactoryMixin_VR",
+	"VRArmRendererMixin_VR",
+	"VRPlayerRendererMixin_VR"
   ],
   "injectors": {
     "defaultRequire": 1

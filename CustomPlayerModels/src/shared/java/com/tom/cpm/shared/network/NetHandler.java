@@ -10,13 +10,16 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 
+import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.util.TriConsumer;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.PlayerData;
+import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.util.Log;
@@ -340,5 +343,49 @@ public class NetHandler<RL, NBT, P, PB, NET> {
 	@FunctionalInterface
 	public interface NBTGetter<NBT, T> {
 		T get(NBT nbt, String key);
+	}
+
+	public static <RL, P, NET> void initBuiltin(NetHandler<RL, NBTTagCompound, P, IOHelper, NET> netHandler,
+			ToIntFunction<P> getId, TriConsumer<NET, RL, byte[]> sendPacket,
+			TriConsumer<P, RL, byte[]> sendToAllTracking) {
+		netHandler.setNewNbt(NBTTagCompound::new);
+		netHandler.setNewPacketBuffer(IOHelper::new);
+		netHandler.setWritePlayerId((b, pl) -> {
+			try {
+				b.writeVarInt(getId.applyAsInt(pl));
+			} catch (IOException e) {
+				Log.error("Error writing packet", e);
+			}
+		});
+		netHandler.setNBTSetters(NBTTagCompound::setBoolean, NBTTagCompound::setByteArray, NBTTagCompound::setFloat);
+		netHandler.setNBTGetters(NBTTagCompound::getBoolean, NBTTagCompound::getByteArray, NBTTagCompound::getFloat);
+		netHandler.setContains(NBTTagCompound::hasKey);
+		netHandler.setSendPacket((pl, pck, dt) -> {
+			try {
+				sendPacket.accept(pl, pck, dt.toBytes());
+			} catch (IOException e) {
+				Log.error("Error writing packet", e);
+			}
+		}, (pl, pck, dt) -> {
+			try {
+				sendToAllTracking.accept(pl, pck, dt.toBytes());
+			} catch (IOException e) {
+				Log.error("Error writing packet", e);
+			}
+		});
+		netHandler.setWriteCompound((t, u) -> {
+			try {
+				t.writeNBT(u);
+			} catch (IOException e) {
+				Log.error("Error writing packet", e);
+			}
+		}, t -> {
+			try {
+				return t.readNBT();
+			} catch (IOException e) {
+				Log.error("Error reading packet", e);
+				return new NBTTagCompound();
+			}
+		});
 	}
 }

@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.ItemSlot;
@@ -21,6 +22,7 @@ import com.tom.cpm.shared.gui.panel.ViewportPanelBase3d;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
+import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaPlayerModel;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
@@ -36,6 +38,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 	public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
 		if(editor.renderBase)renderBase(stack, buf);
 		renderModel(stack, buf, partialTicks);
+		editor.render(stack, buf, this);
 	}
 
 	@Override
@@ -65,7 +68,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public float getScale() {
-		return editor.applyScaling ? editor.scaling : 1;
+		return editor.applyScaling ? editor.scalingElem.entityScaling : 1;
 	}
 
 	@Override
@@ -173,5 +176,15 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			pose.accept(ArmPose.EMPTY);
 			break;
 		}
+	}
+
+	@Override
+	public RenderTypes<RenderMode> getRenderTypes() {
+		return super.getRenderTypes();
+	}
+
+	@Override
+	public RenderTypes<RenderMode> getRenderTypes(String tex) {
+		return super.getRenderTypes(tex);
 	}
 }

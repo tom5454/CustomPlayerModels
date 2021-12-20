@@ -55,11 +55,13 @@ public class ReplayBuffer implements VertexBuffer {
 
 	@Override
 	public void finish() {
-		VertexBuffer p = parent.get();
-		for (Entry entry : toReplay) {
-			entry.replay(p);
+		if(!toReplay.isEmpty()) {
+			VertexBuffer p = parent.get();
+			for (Entry entry : toReplay) {
+				entry.replay(p);
+			}
+			p.finish();
 		}
-		p.finish();
 	}
 
 	private static class Entry {

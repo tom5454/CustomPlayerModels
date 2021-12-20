@@ -3,12 +3,12 @@ package com.tom.cpm.common;
 import net.minecraft.entity.player.ServerPlayerEntity;
 
 import virtuoel.pehkui.api.ScaleData;
-import virtuoel.pehkui.api.ScaleType;
+import virtuoel.pehkui.api.ScaleTypes;
 
 public class PehkuiInterface {
 
 	public static void setScale(ServerPlayerEntity player, float newScale) {
-		ScaleData scaleData = ScaleType.BASE.getScaleData(player);
+		ScaleData scaleData = ScaleTypes.BASE.getScaleData(player);
 		scaleData.setTargetScale(newScale);
 		scaleData.setScale(newScale);
 		scaleData.setScale(newScale);

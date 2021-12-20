@@ -27,6 +27,7 @@ public abstract class ModelPartLink implements IModelPart {
 	public IResolvedModelPart resolve() throws IOException {
 		try(InputStream in = def.getLoader().load(link, ResourceEncoding.BASE64, def)) {
 			if(in.read() != ModelDefinitionLoader.HEADER)throw new IOException();
+			in.mark(256);
 			ChecksumInputStream cis = new ChecksumInputStream(in);
 			IModelPart part = load(new IOHelper(cis), def);
 			cis.checkSum();

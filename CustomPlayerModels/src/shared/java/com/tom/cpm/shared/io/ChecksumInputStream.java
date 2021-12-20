@@ -46,4 +46,10 @@ public class ChecksumInputStream extends InputStream {
 			throw new IOException("Sum error: expected: " + sum + " actual: " + getSum());
 		}
 	}
+
+	@Override
+	public synchronized void reset() throws IOException {
+		is.reset();
+		sum = 0;
+	}
 }

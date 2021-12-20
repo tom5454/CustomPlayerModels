@@ -124,21 +124,21 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerEntityModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
-			bipedHead = register(new Field<>(() -> model.head        , v -> model.head         = v, PlayerModelParts.HEAD), p -> !((PlayerProfile)p).hasPlayerHead);
-			register(new Field<>(() -> model.torso       , v -> model.torso        = v, PlayerModelParts.BODY));
-			bipedRightArm = register(new Field<>(() -> model.rightArm    , v -> model.rightArm     = v, PlayerModelParts.RIGHT_ARM));
-			bipedLeftArm = register(new Field<>(() -> model.leftArm     , v -> model.leftArm      = v, PlayerModelParts.LEFT_ARM));
-			register(new Field<>(() -> model.rightLeg    , v -> model.rightLeg     = v, PlayerModelParts.RIGHT_LEG));
-			register(new Field<>(() -> model.leftLeg     , v -> model.leftLeg      = v, PlayerModelParts.LEFT_LEG));
+			bipedHead = register(new Field<>(    () -> model.head    , v -> model.head     = v, PlayerModelParts.HEAD), p -> !((PlayerProfile)p).hasPlayerHead);
+			register(new Field<>(                () -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+			bipedRightArm = register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			bipedLeftArm = register(new Field<>( () -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(                () -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(                () -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.helmet      , v -> model.helmet       = v, null)).setCopyFrom(bipedHead);
-			bipedLeftArmwear = register(new Field<>(() -> model.leftSleeve  , v -> model.leftSleeve   = v, null));
-			bipedRightArmwear = register(new Field<>(() -> model.rightSleeve , v -> model.rightSleeve  = v, null));
-			register(new Field<>(() -> model.leftPantLeg , v -> model.leftPantLeg  = v, null));
-			register(new Field<>(() -> model.rightPantLeg, v -> model.rightPantLeg = v, null));
-			register(new Field<>(() -> model.jacket      , v -> model.jacket       = v, null));
+			register(new Field<>(                    () -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(bipedHead);
+			bipedLeftArmwear = register(new Field<>( () -> model.leftSleeve , v -> model.leftSleeve  = v, null));
+			bipedRightArmwear = register(new Field<>(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
+			register(new Field<>(                    () -> model.leftPants  , v -> model.leftPants   = v, null));
+			register(new Field<>(                    () -> model.rightPants , v -> model.rightPants  = v, null));
+			register(new Field<>(                    () -> model.jacket     , v -> model.jacket      = v, null));
 
-			register(new Field<>(() -> model.cape        , v -> model.cape     = v, RootModelType.CAPE));
+			register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
 		}
 
 		@SuppressWarnings("unchecked")
@@ -162,7 +162,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		public RedirectHolderSkull(PlayerRenderManager mngr, SkullOverlayEntityModel model) {
 			super(mngr, model);
 
-			register(new Field<>(() -> model.skull, v -> model.skull = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
 			hat = register(new Field<>(() -> model.skullOverlay        , v -> model.skullOverlay         = v, null));
 		}
 
@@ -185,7 +185,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			super(mngr, model);
 
 			register(new Field<>(() -> model.head,      v -> model.head      = v, RootModelType.ARMOR_HELMET));
-			register(new Field<>(() -> model.torso,     v -> model.torso     = v, RootModelType.ARMOR_BODY));
+			register(new Field<>(() -> model.body,      v -> model.body      = v, RootModelType.ARMOR_BODY));
 			register(new Field<>(() -> model.rightArm,  v -> model.rightArm  = v, RootModelType.ARMOR_RIGHT_ARM));
 			register(new Field<>(() -> model.leftArm,   v -> model.leftArm   = v, RootModelType.ARMOR_LEFT_ARM));
 			register(new Field<>(() -> model.rightLeg,  v -> model.rightLeg  = v, RootModelType.ARMOR_RIGHT_FOOT));
@@ -199,7 +199,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		public RedirectHolderArmor2(PlayerRenderManager mngr, BipedEntityModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
 
-			register(new Field<>(() -> model.torso,     v -> model.torso     = v, RootModelType.ARMOR_LEGGINGS_BODY));
+			register(new Field<>(() -> model.body,      v -> model.body      = v, RootModelType.ARMOR_LEGGINGS_BODY));
 			register(new Field<>(() -> model.rightLeg,  v -> model.rightLeg  = v, RootModelType.ARMOR_RIGHT_LEG));
 			register(new Field<>(() -> model.leftLeg,   v -> model.leftLeg   = v, RootModelType.ARMOR_LEFT_LEG));
 		}

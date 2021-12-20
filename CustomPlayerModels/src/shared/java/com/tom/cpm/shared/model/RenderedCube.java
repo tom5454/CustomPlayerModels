@@ -35,6 +35,8 @@ public class RenderedCube implements IModelComponent {
 	public PerFaceUV faceUVs;
 	//Render Effect Item
 	public ItemRenderer itemRenderer;
+	//Render Effect Extrude
+	public boolean extrude = false;
 
 	protected RenderedCube() {
 	}

@@ -63,6 +63,10 @@ public class RenderManager<G, P, M, D> {
 		tryBindModel(null, player, buffer, null, null, AnimationMode.HAND);
 	}
 
+	public void bindHand(P player, D buffer, M model) {
+		tryBindModel(null, player, buffer, model, null, AnimationMode.HAND);
+	}
+
 	public void bindSkull(G profile, D buffer, M model) {
 		Player<P, M> prev = this.profile;
 		tryBindModel(profile, null, buffer, model, null, AnimationMode.SKULL);
@@ -71,6 +75,10 @@ public class RenderManager<G, P, M, D> {
 
 	public void bindPlayer(P player, D buffer) {
 		tryBindModel(null, player, buffer, null, null, AnimationMode.PLAYER);
+	}
+
+	public void bindPlayer(P player, D buffer, M model) {
+		tryBindModel(null, player, buffer, model, null, AnimationMode.PLAYER);
 	}
 
 	public void bindElytra(P player, D buffer, M model) {
