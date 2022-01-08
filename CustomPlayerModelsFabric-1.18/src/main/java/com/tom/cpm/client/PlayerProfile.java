@@ -135,6 +135,7 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 		else if(player.fallDistance > 4)pose = VanillaPose.FALLING;
 		else if(player.hasVehicle())pose = VanillaPose.RIDING;
 		else if(p == EntityPose.SWIMMING)pose = VanillaPose.SWIMMING;
+		else if(player.isSprinting() && p == EntityPose.CROUCHING)pose = VanillaPose.SNEAKING;
 		else if(player.isSprinting())pose = VanillaPose.RUNNING;
 		else if(p == EntityPose.CROUCHING)pose = VanillaPose.SNEAKING;
 		else if(Math.abs(player.getX() - player.prevX) > 0 || Math.abs(player.getZ() - player.prevZ) > 0)pose = VanillaPose.WALKING;

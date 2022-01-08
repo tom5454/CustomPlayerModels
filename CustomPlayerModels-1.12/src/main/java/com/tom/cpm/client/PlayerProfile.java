@@ -84,6 +84,7 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 		else if(player.isElytraFlying())pose = VanillaPose.FLYING;
 		else if(player.fallDistance > 4)pose = VanillaPose.FALLING;
 		else if(player.isRiding() && (player.getRidingEntity() != null && player.getRidingEntity().shouldRiderSit()))pose = VanillaPose.RIDING;
+		else if(player.isSprinting() && player.isSneaking())pose = VanillaPose.SNEAKING;
 		else if(player.isSprinting())pose = VanillaPose.RUNNING;
 		else if(player.isSneaking())pose = VanillaPose.SNEAKING;
 		else if(Math.abs(player.posX - player.prevPosX) > 0 || Math.abs(player.posZ - player.prevPosZ) > 0)pose = VanillaPose.WALKING;

@@ -130,6 +130,7 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 		else if(player.isDead)pose = VanillaPose.DYING;
 		else if(player.fallDistance > 4 && !player.capabilities.isFlying)pose = VanillaPose.FALLING;
 		else if(player.isRiding() && (player.ridingEntity != null && player.ridingEntity.shouldRiderSit()))pose = VanillaPose.RIDING;
+		else if(player.isSprinting() && player.isSneaking())pose = VanillaPose.SNEAKING;
 		else if(player.isSprinting())pose = VanillaPose.RUNNING;
 		else if(player.isSneaking())pose = VanillaPose.SNEAKING;
 		else if(Math.abs(player.posX - player.prevPosX) > 0 || Math.abs(player.posZ - player.prevPosZ) > 0)pose = VanillaPose.WALKING;
