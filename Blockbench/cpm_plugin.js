@@ -6,7 +6,7 @@
 		description: 'Customizable Player Models Project (.cpmproject) support for Blockbench.',
 		tags: ["Minecraft: Java Edition", "Modded"],
 		icon: 'icon-player',
-		version: '0.0.4',
+		version: '0.0.5',
 		variant: 'both',
 		onload() {
 			//================================
@@ -321,7 +321,11 @@
 			var codec = new Codec('cpmproject', {
 				name: 'Customizable Player Models Project',
 				extension: 'cpmproject',
-				remember: false,
+				remember: true,
+				load_filter: {
+					type: 'text',
+					extensions: ['cpmproject']
+				},
 				compile(options) {
 					let all_groups = getAllGroups();
 					let box_uv = Project.box_uv;
@@ -471,6 +475,7 @@
 										elem.recolor = true;
 										elem.color = extDt.color;
 									}
+									if(extDt.item)elem.itemRenderer = extDt.item;
 								} catch(e) {
 									warnings.push("Error parsing additional data: " + e);
 								}
@@ -492,6 +497,8 @@
 										storeIDData = extDt.data;
 									} else if(extDt.export.mode == "store") {
 										zip.file(extDt.export.file, JSON.stringify(extDt.data, null, "  "));
+									} else if(extDt.export.mode == "conf") {
+										for (var key in extDt.data) { p[key] = extDt.data[key]; }
 									}
 								} catch(e) {
 									warnings.push("Error parsing additional data: " + e);
@@ -513,6 +520,7 @@
 						if(!part.dup && !VANILLA_VALUES[groupName].custom) {
 							if(partsFound[groupName]) {
 								warnings.push("Duplicated root group without marking: " + group.name + "<br>    Add '_dup' to the end of the group name");
+								continue;
 							}
 							partsFound[groupName] = true;
 						}
@@ -594,6 +602,10 @@
 							e.show = cube.visibility;
 							e.name = cube.name;
 							applyNameEffects(e);
+							if(!modelTree[group.parent.uuid]) {
+								warnings.push("Skipped cube: " + group.name + "/" + cube.name + ". Check skipped roots");
+								continue;								
+							}
 							modelTree[group.parent.uuid].push(e);
 							storeIDObjects[cube.uuid] = e;
 						}
@@ -605,7 +617,16 @@
 							e.mirror = false;
 							e.show = true;
 							e.size = { x: 0, y: 0, z: 0 };
+							if(!modelTree[group.parent.uuid]) {
+								warnings.push("Skipped cube: " + group.name + "/" + cube.name + ". Check skipped roots");
+								continue;								
+							}
 							modelTree[group.parent.uuid].push(e);
+						}
+						if(!modelTree[group.uuid]) {
+							warnings.push("Skipped adding children: " + group.name + ". Check skipped roots");
+							e.children = [];
+							continue;								
 						}
 						e.children = modelTree[group.uuid];
 					}
@@ -712,7 +733,6 @@
 				},
 				parse(arraybuffer) {
 					this.dispatchEvent('parse', { arraybuffer });
-					newProject(Formats.cpm);
 					var loadedZip = new JSZip().loadAsync(arraybuffer);
 					loadedZip.then(zip => {
 						let textureFutures = {};
@@ -806,6 +826,7 @@
 											extDt.recolor = true;
 											extDt.color = e.color;
 										}
+										if(e.itemRenderer)extDt.item = e.itemRenderer;
 										if(Object.keys(extDt).length != 0) {
 											cubeName = cubeName + "|CPM:" + base64Encode(JSON.stringify(extDt));
 										}
@@ -853,10 +874,10 @@
 													}
 												}
 											} else if (e.singleTex || e.extrude) {
-												if (e.mcScale == 0 && (e.pos.x == 0 || e.pos.y == 0 || e.pos.z == 0)) {
+												if (e.mcScale == 0 && (e.size.x == 0 || e.size.y == 0 || e.size.z == 0)) {
 													var texU = e.u * e.textureSize;
 													var texV = e.v * e.textureSize;
-													if (e.pos.x == 0) {
+													if (e.size.x == 0) {
 														var tu = texU + ceil(e.size.z * e.textureSize);
 														var tv = texV + ceil(e.size.y * e.textureSize);
 														for (var faceName of Object.keys(cube.faces)) {
@@ -869,7 +890,7 @@
 																face.uv = [0, 0, 0, 0];
 															}
 														}
-													} else if (e.pos.y == 0) {
+													} else if (e.size.y == 0) {
 														var tu = texU + ceil(e.size.x * e.textureSize);
 														var tv = texV + ceil(e.size.z * e.textureSize);
 														for (var faceName of Object.keys(cube.faces)) {
@@ -882,7 +903,7 @@
 																face.uv = [0, 0, 0, 0];
 															}
 														}
-													} else if (e.pos.z == 0) {
+													} else if (e.size.z == 0) {
 														var tu = texU + ceil(e.size.x * e.textureSize);
 														var tv = texV + ceil(e.size.y * e.textureSize);
 														for (var faceName of Object.keys(cube.faces)) {
@@ -897,7 +918,7 @@
 														}
 													}
 												} else {
-													var size = Math.max(e.pos.x, e.pos.y, e.pos.z);
+													var size = Math.max(e.size.x, e.size.y, e.size.z);
 													for (var faceName of Object.keys(cube.faces)) {
 														let face = cube.faces[faceName];
 														face.uv[0] = e.u * e.textureSize;
@@ -1003,10 +1024,35 @@
 									}
 								}
 								
+								if(p.textures) {
+									var dt = {};
+									extraDataElements["textures"] = dt;
+									dt.export = {mode: "conf"};
+									dt.data = {textures: p.textures};
+								}
+								
 								var dt = {};
 								extraDataElements["store"] = dt;
 								dt.export = {mode: "ids"};
 								dt.data = storeIDtoUUID;
+								
+								dt = {};
+								extraDataElements["properties"] = dt;
+								dt.export = {mode: "conf"};
+								dt.data = {};
+								dt.data.hideHeadIfSkull = p.hideHeadIfSkull;
+								dt.data.removeArmorOffset = p.removeArmorOffset;
+								
+								if(p.scaling && p.scaling != 0) {
+									dt = {};
+									extraDataElements["scaling"] = dt;
+									dt.export = {mode: "conf"};
+									dt.data = {};
+									dt.data.scaling = p.scaling;
+									if(p.scalingEx) {
+										dt.data.scalingEx = p.scalingEx;
+									}
+								}
 
 								this.dispatchEvent('parsed', { arraybuffer });
 							}
@@ -1075,6 +1121,7 @@
 				rotate_cubes: true,
 				codec
 			});
+			codec.format = format;
 			format.new = function() {
 				skin_dialog.show();
 				return true;
@@ -1183,7 +1230,7 @@
 			}
 
 			import_action = new Action('import_cpmproject', {
-				name: 'Import Customizable Player Models Project',
+				name: 'Open Customizable Player Models Project',
 				description: '',
 				icon: 'icon-player',
 				category: 'file',
@@ -1194,6 +1241,7 @@
 						readtype: 'binary',
 						resource_id: 'cpmproject_files'
 					}, files => {
+						newProject(Formats.cpm);
 						try {
 							codec.parse(files[0].content);
 						} catch (exc) {
@@ -1218,7 +1266,7 @@
 				}
 			});
 
-			MenuBar.addAction(import_action, 'file.import')
+			MenuBar.addAction(import_action, 'file.5')
 			MenuBar.addAction(export_action, 'file.export')
 			add_more_parts = new Action('add_parts', {
 				name: 'Add Parts',
