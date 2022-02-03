@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.InputPopup;
 import com.tom.cpl.gui.elements.Label;
@@ -18,6 +19,7 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.config.BuiltInSafetyProfiles;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
@@ -57,6 +59,29 @@ public class SafetyHeaderPanel extends Panel {
 			txt.setEventListener(() -> ce.setString(ConfigKeys.NAME, txt.getText()));
 		}
 
+		if(fields.containsKey("server")) {
+			Checkbox chbxIgnoreSafetyRec = new Checkbox(gui, gui.i18nFormat("label.cpm.safety.ignoreServerSafetySettings"));
+			chbxIgnoreSafetyRec.setAction(() -> {
+				boolean v = !chbxIgnoreSafetyRec.isSelected();
+				chbxIgnoreSafetyRec.setSelected(v);
+				ce.setBoolean(ConfigKeys.IGNORE_SAFETY_RECOMMENDATIONS, v);
+			});
+			chbxIgnoreSafetyRec.setSelected(ce.getBoolean(ConfigKeys.IGNORE_SAFETY_RECOMMENDATIONS, false));
+			chbxIgnoreSafetyRec.setBounds(new Box(5, 0, 170, 20));
+			addElement(chbxIgnoreSafetyRec);
+
+			Checkbox chbxDisableNetwork = new Checkbox(gui, gui.i18nFormat("label.cpm.safety.blockNetwork"));
+			chbxDisableNetwork.setAction(() -> {
+				boolean v = !chbxDisableNetwork.isSelected();
+				chbxDisableNetwork.setSelected(v);
+				ce.setBoolean(ConfigKeys.DISABLE_NETWORK, v);
+			});
+			chbxDisableNetwork.setSelected(ce.getBoolean(ConfigKeys.DISABLE_NETWORK, false));
+			chbxDisableNetwork.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.safety.blockNetwork")));
+			chbxDisableNetwork.setBounds(new Box(5, 0, 170, 20));
+			addElement(chbxDisableNetwork);
+		}
+
 		if(fields.containsKey("safetyBtn")) {
 			List<String> profiles = new ArrayList<>();
 			for(BuiltInSafetyProfiles p : BuiltInSafetyProfiles.VALUES) {
@@ -64,7 +89,14 @@ public class SafetyHeaderPanel extends Panel {
 				profiles.add(p.name().toLowerCase());
 			}
 			ConfigEntry spfs = (ConfigEntry) fields.get("safetyBtn");
-			spfs.keySet().stream().map(e -> "custom:" + e).forEach(profiles::add);
+			String server = MinecraftClientAccess.get().getConnectedServer();
+			spfs.keySet().stream().filter(k -> {
+				ConfigEntry e = spfs.getEntry(k);
+				if(e.getBoolean(ConfigKeys.IMPORTED, false)) {
+					return k.equals("import-" + server);
+				}
+				return true;
+			}).map(e -> "custom:" + e).forEach(profiles::add);
 
 			Supplier<String> current = () -> ce.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase());
 

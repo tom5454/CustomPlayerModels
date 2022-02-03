@@ -5,6 +5,7 @@ import java.util.Deque;
 import com.google.common.collect.Queues;
 
 public class MatrixStack {
+	public static final MatrixStack.Entry NO_RENDER;
 	private final Deque<MatrixStack.Entry> stack;
 
 	public MatrixStack() {
@@ -14,6 +15,12 @@ public class MatrixStack {
 		Mat3f matrix3f = new Mat3f();
 		matrix3f.setIdentity();
 		stack.add(new MatrixStack.Entry(matrix4f, matrix3f));
+	}
+
+	static {
+		MatrixStack s = new MatrixStack();
+		s.scale(0, 0, 0);
+		NO_RENDER = s.getLast();
 	}
 
 	public void translate(double x, double y, double z) {
@@ -96,5 +103,11 @@ public class MatrixStack {
 	public void setLast(Entry in) {
 		pop();
 		this.stack.addLast(new MatrixStack.Entry(in.matrix.copy(), in.normal.copy()));
+	}
+
+	public void mul(Entry matrix) {
+		MatrixStack.Entry e = this.stack.getLast();
+		e.matrix.mul(matrix.matrix);
+		e.normal.mul(e.normal);
 	}
 }

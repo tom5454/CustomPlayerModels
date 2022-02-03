@@ -24,6 +24,8 @@ import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.client.optifine.OptifineTexture;
+import com.tom.cpm.client.optifine.proxy.ModelPartOF;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -100,6 +102,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 		@Override
 		protected void bindTexture(ModelTexture cbi, TextureProvider skin) {
 			skin.bind();
+			OptifineTexture.applyOptifineTexture(cbi.getTexture(), skin);
 			cbi.setTexture(DynTexture.getBoundLoc());
 		}
 
@@ -113,53 +116,38 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 	private static class RedirectHolderPlayer extends RDH {
 		private RedirectRenderer<ModelPart> bipedHead;
-		private RedirectRenderer<ModelPart> bipedLeftArm;
-		private RedirectRenderer<ModelPart> bipedRightArm;
-		private RedirectRenderer<ModelPart> bipedLeftArmwear;
-		private RedirectRenderer<ModelPart> bipedRightArmwear;
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerEntityModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
-			bipedHead = register(new Field<>(() -> model.head        , v -> model.head         = v, PlayerModelParts.HEAD), p -> !((PlayerProfile)p).hasPlayerHead);
-			register(new Field<>(() -> model.body       , v -> model.body        = v, PlayerModelParts.BODY));
-			bipedRightArm = register(new Field<>(() -> model.rightArm    , v -> model.rightArm     = v, PlayerModelParts.RIGHT_ARM));
-			bipedLeftArm = register(new Field<>(() -> model.leftArm     , v -> model.leftArm      = v, PlayerModelParts.LEFT_ARM));
-			register(new Field<>(() -> model.rightLeg    , v -> model.rightLeg     = v, PlayerModelParts.RIGHT_LEG));
-			register(new Field<>(() -> model.leftLeg     , v -> model.leftLeg      = v, PlayerModelParts.LEFT_LEG));
+			bipedHead = registerHead(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+			register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			register(new Field<>(() -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.hat      , v -> model.hat       = v, null)).setCopyFrom(bipedHead);
-			bipedLeftArmwear = register(new Field<>(() -> model.leftSleeve  , v -> model.leftSleeve   = v, null));
-			bipedRightArmwear = register(new Field<>(() -> model.rightSleeve , v -> model.rightSleeve  = v, null));
-			register(new Field<>(() -> model.leftPants , v -> model.leftPants  = v, null));
-			register(new Field<>(() -> model.rightPants, v -> model.rightPants = v, null));
-			register(new Field<>(() -> model.jacket      , v -> model.jacket       = v, null));
+			register(new Field<>(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(bipedHead);
+			register(new Field<>(() -> model.leftSleeve , v -> model.leftSleeve  = v, null));
+			register(new Field<>(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
+			register(new Field<>(() -> model.leftPants  , v -> model.leftPants   = v, null));
+			register(new Field<>(() -> model.rightPants , v -> model.rightPants  = v, null));
+			register(new Field<>(() -> model.jacket     , v -> model.jacket      = v, null));
 
-			register(new Field<>(() -> model.cloak        , v -> model.cloak     = v, RootModelType.CAPE));
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean skipTransform(RedirectRenderer<ModelPart> part) {
-			PlayerEntityModel<AbstractClientPlayerEntity> model = (PlayerEntityModel<AbstractClientPlayerEntity>) this.model;
-			boolean skipTransform = false;
-			if(bipedLeftArm == part && model.leftArmPose.ordinal() > 2) {
-				skipTransform = true;
-			}
-			if(bipedRightArm == part && model.rightArmPose.ordinal() > 2) {
-				skipTransform = true;
-			}
-			return skipTransform;
+			register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
 		}
 	}
 
 	private static class RedirectHolderSkull extends RDH {
-		private RedirectRenderer<ModelPart> hat;
 
 		public RedirectHolderSkull(PlayerRenderManager mngr, SkullEntityModel model) {
 			super(mngr, model);
 
-			register(new Field<>(() -> model.head, v -> {model.root.children.put("head", v);model.head = v;}, PlayerModelParts.HEAD));
-			//hat = register(new Field<>(() -> model.head, v -> model.head.children.put("hat", v), null));
+			register(new Field<>(() -> model.head, v -> {
+				model.root.children.put("head", v);
+				model.head = v;
+				if(model.root instanceof ModelPartOF)
+					((ModelPartOF)model.root).cpm$updateChildModelsList();
+			}, PlayerModelParts.HEAD));
 		}
 	}
 

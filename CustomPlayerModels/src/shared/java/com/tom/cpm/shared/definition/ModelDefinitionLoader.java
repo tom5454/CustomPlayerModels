@@ -54,6 +54,8 @@ import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
 
 public class ModelDefinitionLoader<GP> {
+	public static final String PLAYER_UNIQUE = "player";
+	public static final String SKULL_UNIQUE = "skull";
 	public static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(0, 2, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
 	private Function<GP, Player<?, ?>> playerFactory;
 	private Function<GP, UUID> getUUID;
@@ -64,25 +66,31 @@ public class ModelDefinitionLoader<GP> {
 		public void onRemoval(RemovalNotification<ModelDefinitionLoader<GP>.Key, Player<?, ?>> notification) {
 			notification.getValue().cleanup();
 		}
-	}).build(new CacheLoader<Key, Player<?, ?>>() {
+	}).build(CacheLoader.from(this::loadPlayer));
 
-		@Override
-		public Player<?, ?> load(Key key) throws Exception {
-			Player<?, ?> player = playerFactory.apply(key.profile);
-			if(serverModels.containsKey(key)) {
-				player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(serverModels.get(key), player), THREAD_POOL));
-			} else {
-				player.setModelDefinition(player.getTextures().load().thenCompose(v -> player.getTextures().getTexture(TextureType.SKIN)).thenApplyAsync(skin -> {
-					if(skin != null && player.getModelDefinition() == null) {
-						return loadModel(skin, player);
-					} else {
-						return null;
-					}
-				}, THREAD_POOL));
-			}
-			return player;
+	private Player<?, ?> loadPlayer(Key key) {
+		Player<?, ?> player = playerFactory.apply(key.profile);
+		CompletableFuture<Void> texLoad = player.getTextures().load();
+		if(key.uniqueKey != null && key.uniqueKey.startsWith("model:")) {
+			String b64 = key.uniqueKey.substring(6);
+			Log.debug("Loading key model for " + key.profile);
+			player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(b64, player), THREAD_POOL));
+		} else if(serverModels.containsKey(key)) {
+			Log.debug("Loading server model for " + key.profile);
+			player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(serverModels.get(key), player), THREAD_POOL));
+		} else {
+			Log.debug("Loading skin model for " + key.profile);
+			player.setModelDefinition(texLoad.thenCompose(v -> player.getTextures().getTexture(TextureType.SKIN)).thenApplyAsync(skin -> {
+				if(skin != null && player.getModelDefinition() == null) {
+					return loadModel(skin, player);
+				} else {
+					return null;
+				}
+			}, THREAD_POOL));
 		}
-	});
+		return player;
+	}
+
 	private static final Map<String, ResourceLoader> LOADERS = new HashMap<>();
 	private final Cache<Link, ResolvedLink> linkCache = CacheBuilder.newBuilder().expireAfterAccess(5L, TimeUnit.MINUTES).build();
 	private final Cache<Link, ResolvedLink> localCache = CacheBuilder.newBuilder().expireAfterAccess(5L, TimeUnit.MINUTES).build();
@@ -106,9 +114,9 @@ public class ModelDefinitionLoader<GP> {
 		this.getName = getName;
 	}
 
-	public Player<?, ?> loadPlayer(GP player) {
+	public Player<?, ?> loadPlayer(GP player, String unique) {
 		try {
-			return cache.get(new Key(player));
+			return cache.get(new Key(player, unique));
 		} catch (ExecutionException | UncheckedExecutionException e) {
 			e.printStackTrace();
 			return null;
@@ -215,15 +223,20 @@ public class ModelDefinitionLoader<GP> {
 
 	public void setModel(GP forPlayer, byte[] data, boolean forced) {
 		if(data == null) {
-			Key key = new Key(forPlayer);
+			Key key = new Key(forPlayer, null);
 			serverModels.remove(key);
-			cache.invalidate(key);
+			invalidateAll(key);
 		} else {
-			Player<?, ?> player = loadPlayer(forPlayer);
-			player.setModelDefinition(CompletableFuture.completedFuture(loadModel(data, player)));
+			Key key = new Key(forPlayer, null);
+			serverModels.put(key, data);
+			invalidateAll(key);
+			Player<?, ?> player = loadPlayer(forPlayer, PLAYER_UNIQUE);
 			player.forcedSkin = forced;
-			serverModels.put(new Key(forPlayer), data);
 		}
+	}
+
+	private void invalidateAll(Key key) {
+		cache.asMap().keySet().removeIf(key::equals);
 	}
 
 	public void execute(Runnable task) {
@@ -237,10 +250,12 @@ public class ModelDefinitionLoader<GP> {
 	private class Key {
 		private UUID uuid;
 		private GP profile;
+		private String uniqueKey;
 
-		public Key(GP player) {
+		public Key(GP player, String unique) {
 			this.profile = player;
 			this.uuid = getUUID.apply(player);
+			this.uniqueKey = unique;
 		}
 
 		public Key(UUID uuid) {
@@ -265,12 +280,14 @@ public class ModelDefinitionLoader<GP> {
 			if (uuid == null) {
 				if (other.uuid != null) return false;
 			} else if (!uuid.equals(other.uuid)) return false;
+			if(uniqueKey == null || other.uniqueKey == null)return true;
+			if(!uniqueKey.equals(other.uniqueKey))return false;
 			return true;
 		}
 	}
 
 	public void settingsChanged(UUID uuid) {
-		cache.invalidate(new Key(uuid));
+		invalidateAll(new Key(uuid));
 	}
 
 	public UUID getGP_UUID(GP gp) {

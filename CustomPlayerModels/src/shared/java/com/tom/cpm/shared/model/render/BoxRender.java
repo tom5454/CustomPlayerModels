@@ -504,8 +504,10 @@ public class BoxRender {
 
 		x = x - delta;
 		y = y - delta;
-		w = w * sc.x + delta* 2;
+		z = z - delta;
+		w = w * sc.x + delta * 2;
 		h = h * sc.y + delta * 2;
+		d = d * sc.z + delta * 2;
 
 		texU *= ts;
 		texV *= ts;

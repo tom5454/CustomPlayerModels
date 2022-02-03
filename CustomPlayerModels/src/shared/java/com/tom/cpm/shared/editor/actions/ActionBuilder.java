@@ -142,6 +142,11 @@ public class ActionBuilder extends Action {
 		return this;
 	}
 
+	public <T> ActionBuilder onAction(T v, Consumer<T> run) {
+		actions.add(new RunnableAction(() -> run.accept(v), () -> run.accept(v)));
+		return this;
+	}
+
 	public void execute() {
 		e.executeAction(this);
 		e.markDirty();

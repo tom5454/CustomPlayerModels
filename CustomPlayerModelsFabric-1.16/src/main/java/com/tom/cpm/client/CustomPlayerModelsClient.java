@@ -28,14 +28,18 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.MessageType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+
+import com.google.common.collect.Iterables;
 
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
@@ -56,7 +60,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public static CustomPlayerModelsClient INSTANCE;
 	public static boolean optifineLoaded;
 	public RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
-	public NetHandler<Identifier, NbtCompound, PlayerEntity, PacketByteBuf, ClientPlayNetworkHandler> netHandler;
+	public NetHandler<Identifier, PlayerEntity, ClientPlayNetworkHandler> netHandler;
 
 	@Override
 	public void onInitializeClient() {
@@ -88,17 +92,16 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 			}
 		});
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerEntity::getGameProfile);
+		manager.setGetSkullModel(profile -> {
+			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
+			if(property != null)return property.getValue();
+			return null;
+		});
 		netHandler = new NetHandler<>(Identifier::new);
-		netHandler.setNewNbt(NbtCompound::new);
-		netHandler.setNewPacketBuffer(() -> new PacketByteBuf(Unpooled.buffer()));
-		netHandler.setWriteCompound(PacketByteBuf::writeNbt, PacketByteBuf::readNbt);
-		netHandler.setNBTSetters(NbtCompound::putBoolean, NbtCompound::putByteArray, NbtCompound::putFloat);
-		netHandler.setNBTGetters(NbtCompound::getBoolean, NbtCompound::getByteArray, NbtCompound::getFloat);
-		netHandler.setContains(NbtCompound::contains);
 		netHandler.setExecutor(MinecraftClient::getInstance);
-		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new CustomPayloadC2SPacket(rl, pb)), null);
+		netHandler.setSendPacket(d -> new PacketByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new CustomPayloadC2SPacket(rl, pb)), null);
 		netHandler.setPlayerToLoader(PlayerEntity::getGameProfile);
-		netHandler.setReadPlayerId(PacketByteBuf::readVarInt, id -> {
+		netHandler.setGetPlayerById(id -> {
 			Entity ent = MinecraftClient.getInstance().world.getEntityById(id);
 			if(ent instanceof PlayerEntity) {
 				return (PlayerEntity) ent;
@@ -107,6 +110,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		});
 		netHandler.setGetClient(() -> MinecraftClient.getInstance().player);
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).networkHandler);
+		netHandler.setDisplayText(f -> MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.SYSTEM, f.remap(), Util.NIL_UUID));
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
 	}
 
@@ -115,7 +119,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void playerRenderPost() {
-		manager.tryUnbind();
+		manager.unbindClear();
 	}
 
 	public void initGui(Screen screen, List<Element> children, List<ClickableWidget> buttons) {
@@ -146,10 +150,6 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		manager.bindArmor(player, bufferIn, modelLeggings, 2);
 	}
 
-	public void unbind(Model model) {
-		manager.tryUnbind(model);
-	}
-
 	public static class Button extends ButtonWidget {
 
 		public Button(int x, int y, Runnable r) {
@@ -159,7 +159,14 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	}
 
 	public void onLogout() {
-		mc.getDefinitionLoader().clearServerData();
+		mc.onLogOut();
+	}
+
+	public void updateJump() {
+		MinecraftClient minecraft = MinecraftClient.getInstance();
+		if(minecraft.player.isOnGround() && minecraft.player.input.jumping) {
+			manager.jump(minecraft.player);
+		}
 	}
 
 	//Copy from CapeFeatureRenderer

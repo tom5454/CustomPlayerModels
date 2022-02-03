@@ -96,7 +96,7 @@ public class GuiImpl extends Screen implements IGui {
 		try {
 			this.matrixStack = matrixStack;
 			matrixStack.pushPose();
-			matrixStack.translate(0, 0, 1000);
+			matrixStack.translate(0, 0, 800);
 			stack = new CtxStack(width, height);
 			RenderSystem.runAsFancy(() -> gui.draw(mouseX, mouseY, partialTicks));
 		} catch (Throwable e) {
@@ -113,18 +113,22 @@ public class GuiImpl extends Screen implements IGui {
 			this.matrixStack = null;
 			matrixStack.popPose();
 		}
-		if(minecraft.player != null) {
+		if(minecraft.player != null && gui.enableChat()) {
+			matrixStack.pushPose();
+			matrixStack.translate(0, 0, 800);
 			try {
 				Method m = ForgeIngameGui.class.getDeclaredMethod("renderChat", int.class, int.class, MatrixStack.class);
 				m.setAccessible(true);
 				m.invoke(minecraft.gui, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight(), matrixStack);
 			} catch (Throwable e) {
 			}
+			matrixStack.popPose();
 		}
 	}
 
 	@Override
 	public void removed() {
+		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 		if(vanillaScale >= 0 && vanillaScale != minecraft.options.guiScale) {
 			minecraft.options.guiScale = vanillaScale;
 			vanillaScale = -999;
@@ -190,6 +194,7 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	protected void init() {
+		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		try {
 			gui.init(width, height);
 		} catch (Throwable e) {
@@ -200,7 +205,10 @@ public class GuiImpl extends Screen implements IGui {
 	public void drawText(int x, int y, String text, int color) {
 		x += getOffset().x;
 		y += getOffset().y;
+		matrixStack.pushPose();
+		matrixStack.translate(0, 0, 50);
 		font.draw(matrixStack, text, x, y, color);
+		matrixStack.popPose();
 	}
 
 	@Override
@@ -211,7 +219,12 @@ public class GuiImpl extends Screen implements IGui {
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
 				if(minecraft.player != null && minecraft.options.keyChat.matches(keyCode, scanCode) && minecraft.options.chatVisibility != ChatVisiblity.HIDDEN) {
-					minecraft.setScreen(new Overlay());
+					RenderSystem.recordRenderCall(() -> {
+						int scale = vanillaScale;
+						vanillaScale = -1;
+						minecraft.setScreen(new Overlay());
+						vanillaScale = scale;
+					});
 					return true;
 				}
 			}
@@ -422,7 +435,7 @@ public class GuiImpl extends Screen implements IGui {
 				if(field.charTyped(evt.charTyped, keyModif))
 					evt.consume();
 			} else {
-				if(field.keyPressed(evt.keyCode, evt.scancode, keyModif))
+				if(field.keyPressed(evt.keyCode, evt.scancode, keyModif) || field.canConsumeInput())
 					evt.consume();
 			}
 		}

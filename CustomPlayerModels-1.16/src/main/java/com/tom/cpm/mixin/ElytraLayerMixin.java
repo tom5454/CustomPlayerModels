@@ -43,7 +43,7 @@ public class ElytraLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void postRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity)ClientProxy.INSTANCE.unbind(elytraModel);
+		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity)ClientProxy.INSTANCE.manager.unbind(elytraModel);
 	}
 
 	@Redirect(at = @At(

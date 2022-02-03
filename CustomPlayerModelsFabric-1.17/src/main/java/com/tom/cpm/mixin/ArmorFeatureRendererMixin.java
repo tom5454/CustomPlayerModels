@@ -44,8 +44,8 @@ public abstract class ArmorFeatureRendererMixin {
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void postRender(MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
 		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity) {
-			CustomPlayerModelsClient.INSTANCE.unbind(bodyModel);
-			CustomPlayerModelsClient.INSTANCE.unbind(leggingsModel);
+			CustomPlayerModelsClient.INSTANCE.manager.unbind(bodyModel);
+			CustomPlayerModelsClient.INSTANCE.manager.unbind(leggingsModel);
 		}
 	}
 

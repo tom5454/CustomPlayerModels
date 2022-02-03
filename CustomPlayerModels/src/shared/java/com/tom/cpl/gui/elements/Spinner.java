@@ -94,6 +94,7 @@ public class Spinner extends GuiElement implements Focusable {
 		if(!txtf.isFocused())
 			txtf.setText(lastValue = String.format("%." + dp + "f", value));
 		else txtfNeedsUpdate = true;
+		error = null;
 	}
 
 	public void setDp(int dp) {

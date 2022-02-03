@@ -11,6 +11,8 @@ import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemBow;
+import net.minecraft.item.ItemElytra;
 import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -19,17 +21,17 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
-import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.util.Hand;
+import com.tom.cpl.util.HandAnimation;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 	private final GameProfile profile;
 	private String skinType;
-	private VanillaPose pose = VanillaPose.STANDING;
-	private int encodedGesture;
-	public boolean hasPlayerHead;
 
 	public PlayerProfile(GameProfile profile) {
 		this.profile = profile;
@@ -73,42 +75,64 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 	}
 
 	@Override
-	public VanillaPose getPose() {
-		return pose;
-	}
-
-	@Override
 	public void updateFromPlayer(EntityPlayer player) {
-		if(player.isPlayerSleeping())pose = VanillaPose.SLEEPING;
-		else if(player.isDead)pose = VanillaPose.DYING;
-		else if(player.isElytraFlying())pose = VanillaPose.FLYING;
-		else if(player.fallDistance > 4)pose = VanillaPose.FALLING;
-		else if(player.isRiding() && (player.getRidingEntity() != null && player.getRidingEntity().shouldRiderSit()))pose = VanillaPose.RIDING;
-		else if(player.isSprinting())pose = VanillaPose.RUNNING;
-		else if(player.isSneaking())pose = VanillaPose.SNEAKING;
-		else if(Math.abs(player.posX - player.prevPosX) > 0 || Math.abs(player.posZ - player.prevPosZ) > 0)pose = VanillaPose.WALKING;
-		else pose = VanillaPose.STANDING;
+		animState.resetPlayer();
+		if(player.isPlayerSleeping())animState.sleeping = true;
+		if(player.isDead)animState.dying = true;
+		if(player.isElytraFlying())animState.elytraFlying = true;
+		if(player.isRiding() && (player.getRidingEntity() != null && player.getRidingEntity().shouldRiderSit()))animState.riding = true;
+		if(player.isSneaking())animState.sneaking = true;
+		if(player.capabilities.isFlying)animState.creativeFlying = true;
+		if(player.isSprinting())animState.sprinting = true;
+		if(player.isHandActive()) {
+			animState.usingAnimation = HandAnimation.of(player.getActiveItemStack().getItemUseAction());
+		}
+		if(player.isInWater())animState.retroSwimming = true;
+		animState.fallDistance = player.fallDistance;
+		animState.moveAmountX = (float) (player.posX - player.prevPosX);
+		animState.moveAmountY = (float) (player.posY - player.prevPosY);
+		animState.moveAmountZ = (float) (player.posZ - player.prevPosZ);
+		animState.yaw = player.rotationYaw;
+		animState.pitch = player.rotationPitch;
 
-		encodedGesture = 0;
-		if(player.isWearing(EnumPlayerModelParts.HAT))encodedGesture |= 1;
-		if(player.isWearing(EnumPlayerModelParts.JACKET))encodedGesture |= 2;
-		if(player.isWearing(EnumPlayerModelParts.LEFT_PANTS_LEG))encodedGesture |= 4;
-		if(player.isWearing(EnumPlayerModelParts.RIGHT_PANTS_LEG))encodedGesture |= 8;
-		if(player.isWearing(EnumPlayerModelParts.LEFT_SLEEVE))encodedGesture |= 16;
-		if(player.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE))encodedGesture |= 32;
+		if(player.isWearing(EnumPlayerModelParts.HAT))animState.encodedState |= 1;
+		if(player.isWearing(EnumPlayerModelParts.JACKET))animState.encodedState |= 2;
+		if(player.isWearing(EnumPlayerModelParts.LEFT_PANTS_LEG))animState.encodedState |= 4;
+		if(player.isWearing(EnumPlayerModelParts.RIGHT_PANTS_LEG))animState.encodedState |= 8;
+		if(player.isWearing(EnumPlayerModelParts.LEFT_SLEEVE))animState.encodedState |= 16;
+		if(player.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE))animState.encodedState |= 32;
 
 		ItemStack is = player.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
-		hasPlayerHead = is.getItem() instanceof ItemSkull;
+		animState.hasSkullOnHead = is.getItem() instanceof ItemSkull;
+		animState.wearingHelm = !is.isEmpty();
+		is = player.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
+		animState.wearingElytra = is.getItem() instanceof ItemElytra;
+		animState.wearingBody = !is.isEmpty();
+		animState.wearingLegs = !player.getItemStackFromSlot(EntityEquipmentSlot.LEGS).isEmpty();
+		animState.wearingBoots = !player.getItemStackFromSlot(EntityEquipmentSlot.FEET).isEmpty();
+		animState.mainHand = Hand.of(player.getPrimaryHand());
+		animState.activeHand = Hand.of(animState.mainHand, player.getActiveHand());
+		animState.swingingHand = Hand.of(animState.mainHand, player.swingingHand);
+
+		if(player.getActiveItemStack().getItem() instanceof ItemBow) {
+			float f = 20F;
+			float f1 = MathHelper.clamp(player.getItemInUseMaxCount(), 0.0F, f);
+			animState.bowPullback = f1 / f;
+		}
+
+		animState.parrotLeft = !player.getLeftShoulderEntity().getString("id").isEmpty();
+		animState.parrotRight = !player.getRightShoulderEntity().getString("id").isEmpty();
 	}
 
 	@Override
-	public int getEncodedGestureId() {
-		return encodedGesture;
-	}
-
-	public void setRenderPose(VanillaPose pose) {
-		this.pose = pose;
-		encodedGesture = 0;
+	public void updateFromModel(Object model) {
+		if(model instanceof ModelPlayer) {
+			ModelPlayer m = (ModelPlayer) model;
+			animState.resetModel();
+			animState.attackTime = m.swingProgress;
+			animState.leftArm = ArmPose.of(m.leftArmPose);
+			animState.rightArm = ArmPose.of(m.rightArmPose);
+		}
 	}
 
 	@Override

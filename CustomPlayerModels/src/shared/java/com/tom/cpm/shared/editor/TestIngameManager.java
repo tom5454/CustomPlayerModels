@@ -12,16 +12,16 @@ public class TestIngameManager {
 	public static final String TEST_MODEL_NAME = ".temp.cpmmodel";
 
 	public static boolean isTesting() {
-		return ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL_OLD, null) != null;
+		return TEST_MODEL_NAME.equals(ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null));
 	}
 
 	public static void checkConfig() {
 		String old = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL_OLD, null);
-		if(old != null && MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.INSTALLED) {
+		if(MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.INSTALLED) {
 			ModConfig.getCommonConfig().clearValue(ConfigKeys.SELECTED_MODEL_OLD);
 			String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
 			if(TEST_MODEL_NAME.equals(model)) {
-				if(VANILLA_MODEL.equals(old))
+				if(old == null || VANILLA_MODEL.equals(old))
 					ModConfig.getCommonConfig().clearValue(ConfigKeys.SELECTED_MODEL);
 				else
 					ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL, old);
@@ -51,12 +51,14 @@ public class TestIngameManager {
 			}
 			if(!Exporter.exportTempModel(e.getEditor(), e))return false;
 			String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
-			if(model != null) {
-				ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, model);
-			} else {
-				ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, VANILLA_MODEL);
+			if(!TEST_MODEL_NAME.equals(model)) {
+				if(model != null) {
+					ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, model);
+				} else {
+					ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL_OLD, VANILLA_MODEL);
+				}
+				ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL, TestIngameManager.TEST_MODEL_NAME);
 			}
-			ModConfig.getCommonConfig().setString(ConfigKeys.SELECTED_MODEL, TestIngameManager.TEST_MODEL_NAME);
 			open.run();
 			ModConfig.getCommonConfig().setString(ConfigKeys.REOPEN_PROJECT, e.getEditor().file.getAbsolutePath());
 			ModConfig.getCommonConfig().save();

@@ -105,4 +105,12 @@ public class AnimationRegistry {
 			animatedTextures.get(i).update(time);
 		}
 	}
+
+	public Map<IPose, List<Animation>> getAnimations() {
+		return animations;
+	}
+
+	public boolean hasPoseAnimations(VanillaPose pose) {
+		return !getPoseAnimations(pose).isEmpty();
+	}
 }

@@ -25,6 +25,7 @@ import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.RedirectRendererOF;
+import com.tom.cpm.client.vr.VRPlayerRenderer;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -37,10 +38,6 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 	public static final Function<ResourceLocation, RenderType> armor = RenderType::armorCutoutNoCull;
 	public static final Function<ResourceLocation, RenderType> entity = RenderType::entityTranslucent;
 
-	private RedirectHolder mixin(Object model, String arg) {
-		return null;
-	}
-
 	public PlayerRenderManager() {
 		setFactory(new RedirectHolderFactory<IRenderTypeBuffer, ModelTexture, ModelRenderer>() {
 
@@ -48,10 +45,9 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 			@Override
 			public <M> RedirectHolder<?, IRenderTypeBuffer, ModelTexture, ModelRenderer> create(
 					M model, String arg) {
-				RedirectHolder<?, IRenderTypeBuffer, ModelTexture, ModelRenderer> m = mixin(model, arg);
-				if(m != null)return m;
-
-				if(model instanceof PlayerModel) {
+				if(ClientProxy.vrLoaded && VRPlayerRenderer.isVRPlayer(model)) {
+					return VRPlayerRenderer.createVRPlayer(PlayerRenderManager.this, model);
+				} else if(model instanceof PlayerModel) {
 					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<AbstractClientPlayerEntity>) model);
 				} else if(model instanceof HumanoidHeadModel) {
 					return new RedirectHolderSkull(PlayerRenderManager.this, (HumanoidHeadModel) model);
@@ -124,53 +120,34 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 
 	private static class RedirectHolderPlayer extends RDH {
 		private RedirectRenderer<ModelRenderer> head;
-		private RedirectRenderer<ModelRenderer> leftArm;
-		private RedirectRenderer<ModelRenderer> rightArm;
-		private RedirectRenderer<ModelRenderer> leftArmwear;
-		private RedirectRenderer<ModelRenderer> rightArmwear;
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerModel<AbstractClientPlayerEntity> model) {
 			super(mngr, model);
-			head = register(new Field<>(    () -> model.head    , v -> model.head     = v, PlayerModelParts.HEAD), p -> !((PlayerProfile)p).hasPlayerHead);
-			register(new Field<>(           () -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
-			rightArm = register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
-			leftArm = register(new Field<>( () -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
-			register(new Field<>(           () -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
-			register(new Field<>(           () -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
+			head = registerHead(new Field<>(    () -> model.head    , v -> model.head     = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+			register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			register(new Field<>(() -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(               () -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
-			leftArmwear = register(new Field<>( () -> model.leftSleeve , v -> model.leftSleeve  = v, null));
-			rightArmwear = register(new Field<>(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
-			register(new Field<>(               () -> model.leftPants  , v -> model.leftPants   = v, null));
-			register(new Field<>(               () -> model.rightPants , v -> model.rightPants  = v, null));
-			register(new Field<>(               () -> model.jacket     , v -> model.jacket      = v, null));
+			register(new Field<>(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
+			register(new Field<>(() -> model.leftSleeve , v -> model.leftSleeve  = v, null));
+			register(new Field<>(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
+			register(new Field<>(() -> model.leftPants  , v -> model.leftPants   = v, null));
+			register(new Field<>(() -> model.rightPants , v -> model.rightPants  = v, null));
+			register(new Field<>(() -> model.jacket     , v -> model.jacket      = v, null));
 
 			register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean skipTransform(RedirectRenderer<ModelRenderer> part) {
-			PlayerModel<AbstractClientPlayerEntity> model = (PlayerModel<AbstractClientPlayerEntity>) this.model;
-			boolean skipTransform = false;
-			if(leftArm == part && model.leftArmPose.ordinal() > 2) {
-				skipTransform = true;
-			}
-			if(rightArm == part && model.rightArmPose.ordinal() > 2) {
-				skipTransform = true;
-			}
-			return skipTransform;
 		}
 	}
 
 	private static class RedirectHolderSkull extends RDH {
-		private RedirectRenderer<ModelRenderer> hat;
 
 		public RedirectHolderSkull(PlayerRenderManager mngr, HumanoidHeadModel model) {
 			super(mngr, model);
 
-			register(new Field<>(      () -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
-			hat = register(new Field<>(() -> model.hat , v -> model.hat  = v, null));
+			register(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.hat , v -> model.hat  = v, null));
 		}
 
 	}

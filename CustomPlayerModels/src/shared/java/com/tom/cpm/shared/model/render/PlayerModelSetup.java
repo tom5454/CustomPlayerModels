@@ -2,6 +2,8 @@ package com.tom.cpm.shared.model.render;
 
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
+import com.tom.cpm.shared.model.builtin.VanillaPartRenderer;
+import com.tom.cpm.shared.model.builtin.VanillaPlayerModel;
 
 public class PlayerModelSetup {
 
@@ -162,9 +164,15 @@ public class PlayerModelSetup {
 			player.leftArm.xRot = (-(float)Math.PI / 2F) + player.head.xRot;
 			break;
 		case CROSSBOW_CHARGE:
+			animateCrossbowCharge(player.rightArm, player.leftArm, player.useAmount, false);
 			break;
 		case CROSSBOW_HOLD:
 			animateCrossbowHold(player.rightArm, player.leftArm, player.head, false);
+			break;
+		case SPYGLASS:
+			player.leftArm.xRot = MathHelper.clamp(player.head.xRot - 1.9198622F - (player.crouching ? 0.2617994F : 0.0F), -2.4F, 3.3F);
+			player.leftArm.yRot = player.head.yRot + 0.2617994F;
+			break;
 		}
 
 	}
@@ -193,9 +201,15 @@ public class PlayerModelSetup {
 			player.leftArm.xRot = (-(float)Math.PI / 2F) + player.head.xRot;
 			break;
 		case CROSSBOW_CHARGE:
+			animateCrossbowCharge(player.rightArm, player.leftArm, player.useAmount, true);
 			break;
 		case CROSSBOW_HOLD:
 			animateCrossbowHold(player.rightArm, player.leftArm, player.head, true);
+			break;
+		case SPYGLASS:
+			player.rightArm.xRot = MathHelper.clamp(player.head.xRot - 1.9198622F - (player.crouching ? 0.2617994F : 0.0F), -2.4F, 3.3F);
+			player.rightArm.yRot = player.head.yRot - 0.2617994F;
+			break;
 		}
 
 	}
@@ -237,6 +251,16 @@ public class PlayerModelSetup {
 		modelrenderer1.xRot = -1.5F + p_239104_2_.xRot;
 	}
 
+	public static void animateCrossbowCharge(VanillaPartRenderer p_102087_, VanillaPartRenderer p_102088_, float chargeValue, boolean p_102090_) {
+		VanillaPartRenderer modelpart = p_102090_ ? p_102087_ : p_102088_;
+		VanillaPartRenderer modelpart1 = p_102090_ ? p_102088_ : p_102087_;
+		modelpart.yRot = p_102090_ ? -0.8F : 0.8F;
+		modelpart.xRot = -0.97079635F;
+		modelpart1.xRot = modelpart.xRot;
+		modelpart1.yRot = MathHelper.lerp(chargeValue, 0.4F, 0.85F) * (p_102090_ ? 1 : -1);
+		modelpart1.xRot = MathHelper.lerp(chargeValue, modelpart1.xRot, (-(float)Math.PI / 2F));
+	}
+
 	private static VanillaPartRenderer getArmForSide(VanillaPlayerModel player, Hand side) {
 		return side == Hand.LEFT ? player.leftArm : player.rightArm;
 	}
@@ -252,7 +276,11 @@ public class PlayerModelSetup {
 		BOW_AND_ARROW(true),
 		THROW_SPEAR(false),
 		CROSSBOW_CHARGE(true),
-		CROSSBOW_HOLD(true);
+		CROSSBOW_HOLD(true),
+		SPYGLASS(false)
+		;
+
+		public static final ArmPose[] VALUES = values();
 
 		private final boolean twoHanded;
 
@@ -262,6 +290,15 @@ public class PlayerModelSetup {
 
 		public boolean isTwoHanded() {
 			return this.twoHanded;
+		}
+
+		public static <T extends Enum<T>> ArmPose of(T value) {
+			for (int i = 0; i < VALUES.length; i++) {
+				ArmPose armPose = VALUES[i];
+				if(armPose.name().equals(value.name()))
+					return armPose;
+			}
+			return EMPTY;
 		}
 	}
 }

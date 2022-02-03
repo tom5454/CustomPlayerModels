@@ -41,7 +41,9 @@ import com.tom.cpm.shared.effects.EffectExtrude;
 import com.tom.cpm.shared.effects.EffectGlow;
 import com.tom.cpm.shared.effects.EffectHide;
 import com.tom.cpm.shared.effects.EffectHideSkull;
+import com.tom.cpm.shared.effects.EffectModelScale;
 import com.tom.cpm.shared.effects.EffectPerFaceUV;
+import com.tom.cpm.shared.effects.EffectPlayerScale;
 import com.tom.cpm.shared.effects.EffectRemoveArmorOffset;
 import com.tom.cpm.shared.effects.EffectRenderItem;
 import com.tom.cpm.shared.effects.EffectScale;
@@ -171,7 +173,7 @@ public class Exporter {
 		wr.setDesc("Test model", "", null);
 		return exportSkin0(e, gui, new Result(wr::getOut, wr::finish,
 				(d, c) -> {
-					Link l = new Link("local:test");
+					Link l = new Link("local:test" + System.nanoTime());
 					wr.setOverflow(d, l);
 					c.accept(l);
 				}), false);
@@ -247,8 +249,13 @@ public class Exporter {
 		for (EditorTemplate et : e.templates) {
 			otherParts.add(new ModelPartTemplate(et));
 		}
-		float scaling = e.scalingElem.entityScaling;
-		if(scaling != 0 && scaling != 1)otherParts.add(new ModelPartScale(scaling));
+		if(e.scalingElem.entityScaling != 0) {
+			otherParts.add(new ModelPartScale(e.scalingElem.entityScaling));
+			if(e.scalingElem.eyeHeight != 0 || e.scalingElem.hitboxW != 0 || e.scalingElem.hitboxH != 0)
+				otherParts.add(new ModelPartRenderEffect(new EffectPlayerScale(e.scalingElem.eyeHeight, e.scalingElem.hitboxW, e.scalingElem.hitboxH)));
+			if(e.scalingElem.hasTransform())
+				otherParts.add(new ModelPartRenderEffect(new EffectModelScale(e.scalingElem.pos, e.scalingElem.rotation, e.scalingElem.scale)));
+		}
 		if(!e.hideHeadIfSkull)otherParts.add(new ModelPartRenderEffect(new EffectHideSkull(e.hideHeadIfSkull)));
 		if(e.removeArmorOffset)otherParts.add(new ModelPartRenderEffect(new EffectRemoveArmorOffset(e.removeArmorOffset)));
 

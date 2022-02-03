@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.model.ScaleData;
 
 public class ModelPartScale implements IModelPart, IResolvedModelPart {
 	private float scale;
@@ -38,12 +39,6 @@ public class ModelPartScale implements IModelPart, IResolvedModelPart {
 
 	@Override
 	public void apply(ModelDefinition def) {
-		def.setScale(this);
-	}
-
-	public float getScale() {
-		if(scale > 10)return 0;
-		else if(scale < 0.05f)return 0;
-		return scale;
+		def.setScale(new ScaleData(scale));
 	}
 }

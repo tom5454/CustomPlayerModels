@@ -26,6 +26,7 @@ import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.Util;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -163,10 +164,10 @@ public class SettingsPanel extends Panel {
 		String server = MinecraftClientAccess.get().getConnectedServer();
 		buildListPanel(serverList, ce.getEntry(ConfigKeys.SERVER_SETTINGS),
 				(server != null ? new Srv(server) : null),
-				(k, v) -> new Srv(k, v.getString(ConfigKeys.NAME, hideIp(k))),
+				(k, v) -> new Srv(k, v.getString(ConfigKeys.NAME, Util.hideIp(k))),
 				k -> k.ip,
 				e -> new Tooltip(frm, gui.isShiftDown() && gui.isAltDown() ? gui.i18nFormat("tooltip.cpm.serverInfo", e.ip) : gui.i18nFormat("tooltip.cpm.displServerInfo")),
-				createMap("nameBoxInit", true, "safetyBtn", spfs), e -> KeyGroup.GLOBAL, true);
+				createMap("nameBoxInit", true, "safetyBtn", spfs, "server", true), e -> KeyGroup.GLOBAL, true);
 
 		SafetyHeaderPanel friends = new SafetyHeaderPanel(frm, ce.getEntry(ConfigKeys.FRIEND_SETTINGS), width,
 				gui.i18nFormat("label.cpm.friendSafetyS"),
@@ -205,7 +206,7 @@ public class SettingsPanel extends Panel {
 
 		public Srv(String ip) {
 			this.ip = ip;
-			this.name = hideIp(ip);
+			this.name = Util.hideIp(ip);
 		}
 
 		@Override
@@ -337,22 +338,6 @@ public class SettingsPanel extends Panel {
 			data.put(key, v);
 		}
 		return data;
-	}
-
-	public static String hideIp(String ip) {
-		ip = ip.replaceAll("[0-9]", "*");
-		int cnt = 0;
-		StringBuilder bb = new StringBuilder();
-		for(int i = 0;i<ip.length();i++) {
-			char c = ip.charAt(i);
-			if(c == '.' || c == ':')cnt = -1;
-			if(cnt++ > 1) {
-				c = '*';
-			}
-			bb.append(c);
-		}
-		ip = bb.toString();
-		return ip;
 	}
 
 	public boolean isChanged() {

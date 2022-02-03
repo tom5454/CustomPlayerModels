@@ -6,7 +6,7 @@
   "mixins": [
   	"common.ServerPlayNetHandlerMixin",
   	"common.PlayerManagerMixin",
-  	"common.EntityTrackerEntryMixin"
+	"common.PlayerEntityMixin"
   ],
   "client": [
     "PlayerRendererMixin",
@@ -17,7 +17,9 @@
 	"ArmorFeatureRendererMixin",
 	"ElytraFeatureRendererMixin",
 	"CapeFeatureRendererMixin",
-	"Matrix4fMixin"
+	"Matrix4fMixin",
+	"ShoulderParrotFeatureRendererMixin",
+	"ClientPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

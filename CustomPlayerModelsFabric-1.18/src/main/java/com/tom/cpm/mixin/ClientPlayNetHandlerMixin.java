@@ -12,6 +12,8 @@ import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.network.NetH;
 
+import io.netty.buffer.ByteBufInputStream;
+
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetHandlerMixin implements NetH {
 	private boolean cpm$hasMod;
@@ -29,7 +31,7 @@ public class ClientPlayNetHandlerMixin implements NetH {
 	@Inject(at = @At("HEAD"), method = "onCustomPayload(Lnet/minecraft/network/packet/s2c/play/CustomPayloadS2CPacket;)V", cancellable = true)
 	public void onHandleCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo cbi) {
 		if(packet.getChannel().getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
-			CustomPlayerModelsClient.INSTANCE.netHandler.receiveClient(packet.getChannel(), packet.getData(), this);
+			CustomPlayerModelsClient.INSTANCE.netHandler.receiveClient(packet.getChannel(), new ByteBufInputStream(packet.getData()), this);
 			cbi.cancel();
 		}
 	}

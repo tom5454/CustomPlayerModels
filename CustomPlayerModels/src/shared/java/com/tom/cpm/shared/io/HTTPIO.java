@@ -13,15 +13,18 @@ import java.nio.charset.StandardCharsets;
 
 import com.tom.cpl.util.Util;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.util.Log;
 
 public class HTTPIO {
+	private static final String userAgent = "CPM " + MinecraftCommonAccess.get().getPlatformVersionString() + " Java/" + System.getProperty("java.version");
 
 	public static HttpURLConnection createUrlConnection(final URL url, boolean noCache) throws IOException {
 		Log.debug("Opening connection to " + url);
 		final HttpURLConnection connection = (HttpURLConnection) url.openConnection(MinecraftClientAccess.get().getProxy());
 		connection.setConnectTimeout(15000);
 		connection.setReadTimeout(15000);
+		connection.setRequestProperty("User-Agent", userAgent.replace('$', '?'));
 		if(noCache)connection.setUseCaches(false);
 		return connection;
 	}

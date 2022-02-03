@@ -2,7 +2,6 @@ package com.tom.cpm.mixinplugin;
 
 public class VRDetector {
 
-	//Taken from Immersive Portals
 	public static boolean doApply() {
 		try {
 			//do not load other vivecraft classes that loads vanilla classes

@@ -6,17 +6,19 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "cpm.mixins.refmap.json",
   "mixins": [
-  	"ServerPlayNetHandlerMixin"
+  	"ServerGamePacketListenerImplMixin"
   ],
   "client": [
     "PlayerRendererMixin",
-    "ClientPlayNetHandlerMixin",
+    "ClientPacketListenerMixin",
 	"CapeLayerMixin",
 	"ElytraLayerMixin",
-	"BipedArmorLayerMixin",
+	"HumanoidArmorLayerMixin",
 	"SkullBlockRendererMixin",
 	"CustomHeadLayerMixin",
-	"BlockEntityWithoutLevelRendererMixin"
+	"BlockEntityWithoutLevelRendererMixin",
+	"ParrotOnShoulderLayerMixin",
+	"LocalPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

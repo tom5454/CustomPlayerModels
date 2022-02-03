@@ -47,6 +47,7 @@ public class Generators {
 		generators.add(new Generators("button.cpm.tools.convert2template", null, Generators::convertTemplate));
 		generators.add(new Generators("button.cpm.tools.fillUV", null, Generators::fillUV));
 		generators.add(new Generators("button.cpm.tools.safetyLevel", null, Generators::checkSafetyLevel));
+		generators.add(new Generators("button.cpm.tools.mirror", null, Generators::mirrorElement));
 	}
 
 	public String name, tooltip;
@@ -205,6 +206,10 @@ public class Generators {
 				case RIGHT_HAND:
 					elem.parent = findPart(editor, PlayerModelParts.RIGHT_ARM);
 					break;
+				case RIGHT_SHOULDER:
+				case LEFT_SHOULDER:
+					elem.parent = findPart(editor, PlayerModelParts.BODY);
+					break;
 				default:
 					break;
 				}
@@ -280,5 +285,27 @@ public class Generators {
 		String msg = report.details.stream().map(t -> t.toString(gui)).collect(Collectors.joining("\\"));
 		String lvl = gui.i18nFormat("label.cpm.safetyLevel", gui.i18nFormat("label.cpm.safetyProfile." + report.getLvl()));
 		eg.openPopup(new MessagePopup(eg, gui.i18nFormat("label.cpm.info"), lvl + "\\" + msg));
+	}
+
+	private static void mirrorElement(EditorGui eg) {
+		Editor editor = eg.getEditor();
+		ModelElement me = editor.getSelectedElement();
+		if(me != null && me.type == ElementType.NORMAL) {
+			ActionBuilder b = eg.getEditor().action("i", "button.cpm.tools.mirror");
+			mirror(me, b);
+			b.execute();
+		}
+	}
+
+	private static void mirror(ModelElement e, ActionBuilder b) {
+		b.updateValueOp(e, e.mirror, !e.mirror, (a, c) -> a.mirror = c);
+		Vec3f s = e.size;
+		Vec3f v = new Vec3f(e.pos);
+		v.x = -v.x;
+		b.updateValueOp(e, e.pos, v, (a, c) -> a.pos = c);
+		v = new Vec3f(e.offset);
+		v.x = -v.x - s.x;
+		b.updateValueOp(e, e.offset, v, (a, c) -> a.offset = c);
+		e.children.forEach(p -> mirror(p, b));
 	}
 }

@@ -25,19 +25,74 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.builtin.BlockModel;
+import com.tom.cpm.shared.model.builtin.IItemModel;
+import com.tom.cpm.shared.model.builtin.IItemModel.ItemRenderTransform;
+import com.tom.cpm.shared.model.builtin.ItemModel;
+import com.tom.cpm.shared.model.builtin.ParrotModel;
+import com.tom.cpm.shared.model.builtin.ShieldModel;
+import com.tom.cpm.shared.model.builtin.SkullModel;
+import com.tom.cpm.shared.model.builtin.SpyglassModel;
+import com.tom.cpm.shared.model.builtin.TridentModel;
+import com.tom.cpm.shared.model.builtin.VanillaPlayerModel;
 import com.tom.cpm.shared.model.render.GuiModelRenderManager;
+import com.tom.cpm.shared.model.render.ItemTransform;
 import com.tom.cpm.shared.model.render.PlayerModelSetup;
 import com.tom.cpm.shared.model.render.RenderMode;
-import com.tom.cpm.shared.model.render.VanillaPlayerModel;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public abstract class ViewportPanelBase3d extends Panel3d {
 	private static final GuiModelRenderManager manager = new GuiModelRenderManager();
 	private static final EnumMap<SkinType, VanillaPlayerModel> models = new EnumMap<>(SkinType.class);
+	private static final ParrotModel parrot = new ParrotModel();
+	private static final ShieldModel shield = new ShieldModel();
+	private static final BlockModel block = new BlockModel();
+	private static final TridentModel trident = new TridentModel();
+	private static final SkullModel skull = new SkullModel();
+	private static final ItemRenderTransform[] swordTransform = new ItemRenderTransform[] {
+			new ItemRenderTransform(new Vec3f(0, 4, 0.5F), new Vec3f(0, -90, 55), new Vec3f(0.85F, 0.85F, 0.85F)),
+			new ItemRenderTransform(new Vec3f(0, 4, 0.5F), new Vec3f(0, 90, -55), new Vec3f(0.85F, 0.85F, 0.85F))
+	};
+	private static final ItemRenderTransform[] bowTransform = new ItemRenderTransform[] {
+			new ItemRenderTransform(new Vec3f(-1, -2, 2.5F), new Vec3f(-80, 260, -40), new Vec3f(0.9F, 0.9F, 0.9F)),
+			new ItemRenderTransform(new Vec3f(-1, -2, 2.5F), new Vec3f(-80, -280, 40), new Vec3f(0.9F, 0.9F, 0.9F))
+	};
+	private static final ItemRenderTransform[] crossbowTransform = new ItemRenderTransform[] {
+			new ItemRenderTransform(new Vec3f(2, 0.1F, -3), new Vec3f(-90, 0, -60), new Vec3f(0.9F, 0.9F, 0.9F)),
+			new ItemRenderTransform(new Vec3f(2, 0.1F, -3), new Vec3f(-90, 0,  30), new Vec3f(0.9F, 0.9F, 0.9F))
+	};
+	private static final ItemRenderTransform[] itemTransform = new ItemRenderTransform[] {
+			new ItemRenderTransform(new Vec3f(0, 3, 1), new Vec3f(0, 0, 0), new Vec3f(0.55F, 0.55F, 0.55F))
+	};
+	private static final ItemModel sword = new ItemModel("sword", swordTransform);
+	private static final ItemModel food = new ItemModel("food", itemTransform);
+	private static final IItemModel[] bow = new IItemModel[] {
+			new ItemModel("bow_pulling_0", bowTransform),
+			new ItemModel("bow_pulling_1", bowTransform),
+			new ItemModel("bow_pulling_2", bowTransform)
+	};
+	private static final IItemModel[] crossbow = new IItemModel[] {
+			new ItemModel("crossbow", crossbowTransform),
+			new ItemModel("crossbow_pulling_0", crossbowTransform),
+			new ItemModel("crossbow_pulling_1", crossbowTransform),
+			new ItemModel("crossbow_pulling_2", crossbowTransform)
+	};
+	private static final SpyglassModel spyglass = new SpyglassModel();
+	private static final EnumMap<DisplayItem, IItemModel[]> itemModels = new EnumMap<>(DisplayItem.class);
+
 	static {
 		for (SkinType t : SkinType.VANILLA_TYPES) {
 			models.put(t, new VanillaPlayerModel(t));
 		}
+		itemModels.put(DisplayItem.BLOCK, new IItemModel[] {block});
+		itemModels.put(DisplayItem.SHIELD, new IItemModel[] {shield});
+		itemModels.put(DisplayItem.TRIDENT, new IItemModel[] {trident});
+		itemModels.put(DisplayItem.SKULL, new IItemModel[] {skull});
+		itemModels.put(DisplayItem.SWORD, new IItemModel[] {sword});
+		itemModels.put(DisplayItem.FOOD, new IItemModel[] {food});
+		itemModels.put(DisplayItem.BOW, bow);
+		itemModels.put(DisplayItem.CROSSBOW, crossbow);
+		itemModels.put(DisplayItem.SPYGLASS, new IItemModel[] {spyglass});
 	}
 
 	protected int mx, my;
@@ -80,24 +135,56 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		}
 
 		stack.push();
-		p.rightArm.translateRotatePart(stack);
-		renderItem(stack, ItemSlot.RIGHT_HAND, getHeldItem(ItemSlot.RIGHT_HAND));
+		ItemTransform tr = def.getTransform(ItemSlot.RIGHT_HAND);
+		if(tr != null)
+			stack.mul(tr.getMatrix());
+		else
+			p.rightArm.translateRotatePart(stack);
+		renderItem(stack, rp, ItemSlot.RIGHT_HAND, getHeldItem(ItemSlot.RIGHT_HAND));
 		stack.pop();
 
 		stack.push();
-		p.leftArm.translateRotatePart(stack);
-		renderItem(stack, ItemSlot.LEFT_HAND, getHeldItem(ItemSlot.LEFT_HAND));
+		tr = def.getTransform(ItemSlot.LEFT_HAND);
+		if(tr != null)
+			stack.mul(tr.getMatrix());
+		else
+			p.leftArm.translateRotatePart(stack);
+		renderItem(stack, rp, ItemSlot.LEFT_HAND, getHeldItem(ItemSlot.LEFT_HAND));
 		stack.pop();
 
 		stack.push();
-		p.head.translateRotatePart(stack);
-		renderItem(stack, ItemSlot.HEAD, getHeldItem(ItemSlot.HEAD));
+		tr = def.getTransform(ItemSlot.HEAD);
+		if(tr != null)
+			stack.mul(tr.getMatrix());
+		else
+			p.head.translateRotatePart(stack);
+		renderItem(stack, rp, ItemSlot.HEAD, getHeldItem(ItemSlot.HEAD));
 		stack.pop();
+
+		if((drawParrots() & 1) != 0) {
+			stack.push();
+			tr = def.getTransform(ItemSlot.LEFT_SHOULDER);
+			if(tr != null)
+				stack.mul(tr.getMatrix());
+			stack.translate(0.4F, p.crouching ? (double)-1.3F : -1.5D, 0.0D);
+			parrot.render(stack, rp.getBuffer(getRenderTypes(parrot.getTexture()), RenderMode.DEFAULT));
+			stack.pop();
+		}
+
+		if((drawParrots() & 2) != 0) {
+			stack.push();
+			tr = def.getTransform(ItemSlot.RIGHT_SHOULDER);
+			if(tr != null)
+				stack.mul(tr.getMatrix());
+			stack.translate(-0.4F, p.crouching ? (double)-1.3F : -1.5D, 0.0D);
+			parrot.render(stack, rp.getBuffer(getRenderTypes(parrot.getTexture()), RenderMode.DEFAULT));
+			stack.pop();
+		}
 
 		manager.unbindModel(p);
 
 		for(PlayerModelLayer l : PlayerModelLayer.VALUES) {
-			if(getArmorLayers().contains(l)) {
+			if(layers.contains(l)) {
 				manager.bindModel(p, l.name(), rp, def, null, getAnimMode());
 				manager.bindSkin(p, this, RootGroups.getGroup(l.parts[0]).getTexSheet(l.parts[0]));
 				p.renderLayer(stack, rp.getBuffer(types, getMode()), l);
@@ -107,6 +194,14 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 
 		rp.finishAll();
 		stack.pop();
+	}
+
+	public void renderItem(MatrixStack stack, VBuffers rp, ItemSlot hand, DisplayItem item) {
+		IItemModel[] models = itemModels.get(item);
+		if(models != null) {
+			IItemModel model = models[getItemState(hand, models.length)];
+			model.render(stack, rp.getBuffer(getRenderTypes(model.getTexture()), RenderMode.DEFAULT), hand);
+		}
 	}
 
 	protected void poseModel(VanillaPlayerModel p, MatrixStack stack, float partialTicks) {
@@ -171,6 +266,10 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		types = getRenderTypes();
 	}
 
+	public void load(String tex) {
+		types = getRenderTypes(tex);
+	}
+
 	public void putRenderTypes(RenderTypes<RenderMode> types) {
 		if(this.types == null)load();
 		types.putAll(this.types);
@@ -183,6 +282,8 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 	protected Set<PlayerModelLayer> getArmorLayers() {return Collections.emptySet();}
 	public DisplayItem getHeldItem(ItemSlot hand) {return DisplayItem.NONE;}
 	protected boolean applyLighting() {return true;}
+	protected int drawParrots() {return 0;}
+	protected int getItemState(ItemSlot slot, int maxStates) {return 0;}
 
 	@Override
 	public boolean mouseClick(int x, int y, int btn) {

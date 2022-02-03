@@ -23,6 +23,14 @@ public class ConfigKeys {
 	public static final String NAME = "name";
 	public static final String SAFETY_PROFILE = "safetyProfile";
 	public static final String SAFETY_PROFILES = "safetyProfiles";
+	public static final String RECOMMEND_SAFETY_SETTINGS = "serverRecommendSafetySettings";
+	public static final String SAFETY_SETTINGS = "safetySettings";
+	public static final String IGNORE_SAFETY_RECOMMENDATIONS = "ignoreSafetyRec";
+	public static final String DISABLE_NETWORK = "disableNet";
+	public static final String KICK_PLAYERS_WITHOUT_MOD = "kickPlayersWithoutMod";
+	public static final String KICK_MESSAGE = "kickMessage";
+	public static final String DEFAULT_KICK_MESSAGE = "Customizable Player Models is requied on this server";
+	public static final String IMPORTED = "imported";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

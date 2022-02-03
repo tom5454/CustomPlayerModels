@@ -466,6 +466,10 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		throw new IOException("Not a byte array backed io handler");
 	}
 
+	public int available() throws IOException {
+		return din.available();
+	}
+
 	@FunctionalInterface
 	public static interface ObjectReader<T, R> {
 		R read(T type, IOHelper block) throws IOException;
@@ -536,7 +540,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 
 	public NBTTagCompound readNBT() throws IOException {
 		byte type = this.readByte();
-		System.out.println("ReadNBT: " + type + " " + readJUTF());
+		readJUTF();
 		NBTTag tag = NBTTag.createNewByType(type);
 		tag.read(this);
 		if(tag instanceof NBTTagCompound)

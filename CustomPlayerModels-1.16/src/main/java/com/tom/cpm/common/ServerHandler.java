@@ -5,7 +5,6 @@ import java.util.function.Predicate;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.ServerPlayNetHandler;
@@ -14,11 +13,13 @@ import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ChunkManager.EntityTracker;
 import net.minecraft.world.server.ServerWorld;
 
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
@@ -36,19 +37,12 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
-	public static NetHandler<ResourceLocation, CompoundNBT, ServerPlayerEntity, PacketBuffer, ServerPlayNetHandler> netHandler;
+	public static NetHandler<ResourceLocation, ServerPlayerEntity, ServerPlayNetHandler> netHandler;
 
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
-		netHandler.setNewNbt(CompoundNBT::new);
-		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUUID);
-		netHandler.setWriteCompound(PacketBuffer::writeNbt, PacketBuffer::readNbt);
-		netHandler.setSendPacket((c, rl, pb) -> c.send(new SCustomPayloadPlayPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SCustomPayloadPlayPacket(rl, pb), ServerHandler::hasMod, null));
-		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getId()));
-		netHandler.setNBTSetters(CompoundNBT::putBoolean, CompoundNBT::putByteArray, CompoundNBT::putFloat);
-		netHandler.setNBTGetters(CompoundNBT::getBoolean, CompoundNBT::getByteArray, CompoundNBT::getFloat);
-		netHandler.setContains(CompoundNBT::contains);
+		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new SCustomPayloadPlayPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SCustomPayloadPlayPacket(rl, pb), ServerHandler::hasMod, null));
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTracker tr : ((ServerWorld)p.level).getChunkSource().chunkMap.entityMap.values()) {
 				if(tr.entity instanceof PlayerEntity && tr.seenBy.contains(p)) {
@@ -56,19 +50,17 @@ public class ServerHandler {
 				}
 			}
 		});
-		netHandler.setSendChat((p, m) -> p.connection.send(new SChatPacket(new TranslationTextComponent(m), ChatType.CHAT, Util.NIL_UUID)));
+		netHandler.setSendChat((p, m) -> p.connection.send(new SChatPacket(m.remap(), ChatType.SYSTEM, Util.NIL_UUID)));
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
-		netHandler.setScaleSetter((spe, sc) -> {
-			if(ModList.get().isLoaded("pehkui")) {
-				if(sc == 0) {
-					PehkuiInterface.setScale(spe, 1);
-				} else {
-					PehkuiInterface.setScale(spe, sc);
-				}
-			}
-		});
+		if(ModList.get().isLoaded("pehkui")) {
+			netHandler.setScaler(new PehkuiInterface());
+		}
 		netHandler.setGetNet(spe -> spe.connection);
 		netHandler.setGetPlayer(net -> net.player);
+		netHandler.setGetPlayerId(ServerPlayerEntity::getId);
+		netHandler.setGetOnlinePlayers(() -> ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers());
+		netHandler.setKickPlayer((p, m) -> p.connection.disconnect(m.remap()));
+		netHandler.setGetPlayerAnimGetters(p -> p.fallDistance, p -> p.abilities.flying);
 	}
 
 	@SubscribeEvent
@@ -90,7 +82,7 @@ public class ServerHandler {
 	@SubscribeEvent
 	public void registerCommands(RegisterCommandsEvent evt) {
 		CommandDispatcher<CommandSource> d = evt.getDispatcher();
-		CommandCPM.register(d);
+		new Command(d);
 	}
 
 	@SubscribeEvent
@@ -100,15 +92,31 @@ public class ServerHandler {
 		}
 	}
 
+	@SubscribeEvent
+	public void onTick(ServerTickEvent evt) {
+		if(evt.phase == Phase.END) {
+			netHandler.tick();
+		}
+	}
+
+	@SubscribeEvent
+	public void onJump(LivingJumpEvent evt) {
+		if(evt.getEntityLiving() instanceof ServerPlayerEntity) {
+			netHandler.onJump((ServerPlayerEntity) evt.getEntityLiving());
+		}
+	}
+
 	public static boolean hasMod(ServerPlayerEntity spe) {
 		return ((NetH)spe.connection).cpm$hasMod();
 	}
 
 	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, IPacket<?> pckt, Predicate<ServerPlayerEntity> test, GenericFutureListener<? extends Future<? super Void>> future) {
 		EntityTracker tr = ((ServerWorld)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
-		for (ServerPlayerEntity p : tr.seenBy) {
-			if(test.test(p)) {
-				p.connection.send(pckt, future);
+		if(tr != null) {
+			for (ServerPlayerEntity p : tr.seenBy) {
+				if(test.test(p)) {
+					p.connection.send(pckt, future);
+				}
 			}
 		}
 		ent.connection.send(pckt, future);

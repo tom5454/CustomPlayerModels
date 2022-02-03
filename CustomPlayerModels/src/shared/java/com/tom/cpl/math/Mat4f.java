@@ -219,6 +219,25 @@ public class Mat4f {
 		this.mul(new Mat4f(quaternion));
 	}
 
+	public void mul(float pMultiplier) {
+		this.m00 *= pMultiplier;
+		this.m01 *= pMultiplier;
+		this.m02 *= pMultiplier;
+		this.m03 *= pMultiplier;
+		this.m10 *= pMultiplier;
+		this.m11 *= pMultiplier;
+		this.m12 *= pMultiplier;
+		this.m13 *= pMultiplier;
+		this.m20 *= pMultiplier;
+		this.m21 *= pMultiplier;
+		this.m22 *= pMultiplier;
+		this.m23 *= pMultiplier;
+		this.m30 *= pMultiplier;
+		this.m31 *= pMultiplier;
+		this.m32 *= pMultiplier;
+		this.m33 *= pMultiplier;
+	}
+
 	public Mat4f copy() {
 		return new Mat4f(this);
 	}
@@ -286,5 +305,74 @@ public class Mat4f {
 		values[14] = m32;
 		values[15] = m33;
 		return values;
+	}
+
+	public float adjugateAndDet() {
+		float f = this.m00 * this.m11 - this.m01 * this.m10;
+		float f1 = this.m00 * this.m12 - this.m02 * this.m10;
+		float f2 = this.m00 * this.m13 - this.m03 * this.m10;
+		float f3 = this.m01 * this.m12 - this.m02 * this.m11;
+		float f4 = this.m01 * this.m13 - this.m03 * this.m11;
+		float f5 = this.m02 * this.m13 - this.m03 * this.m12;
+		float f6 = this.m20 * this.m31 - this.m21 * this.m30;
+		float f7 = this.m20 * this.m32 - this.m22 * this.m30;
+		float f8 = this.m20 * this.m33 - this.m23 * this.m30;
+		float f9 = this.m21 * this.m32 - this.m22 * this.m31;
+		float f10 = this.m21 * this.m33 - this.m23 * this.m31;
+		float f11 = this.m22 * this.m33 - this.m23 * this.m32;
+		float f12 = this.m11 * f11 - this.m12 * f10 + this.m13 * f9;
+		float f13 = -this.m10 * f11 + this.m12 * f8 - this.m13 * f7;
+		float f14 = this.m10 * f10 - this.m11 * f8 + this.m13 * f6;
+		float f15 = -this.m10 * f9 + this.m11 * f7 - this.m12 * f6;
+		float f16 = -this.m01 * f11 + this.m02 * f10 - this.m03 * f9;
+		float f17 = this.m00 * f11 - this.m02 * f8 + this.m03 * f7;
+		float f18 = -this.m00 * f10 + this.m01 * f8 - this.m03 * f6;
+		float f19 = this.m00 * f9 - this.m01 * f7 + this.m02 * f6;
+		float f20 = this.m31 * f5 - this.m32 * f4 + this.m33 * f3;
+		float f21 = -this.m30 * f5 + this.m32 * f2 - this.m33 * f1;
+		float f22 = this.m30 * f4 - this.m31 * f2 + this.m33 * f;
+		float f23 = -this.m30 * f3 + this.m31 * f1 - this.m32 * f;
+		float f24 = -this.m21 * f5 + this.m22 * f4 - this.m23 * f3;
+		float f25 = this.m20 * f5 - this.m22 * f2 + this.m23 * f1;
+		float f26 = -this.m20 * f4 + this.m21 * f2 - this.m23 * f;
+		float f27 = this.m20 * f3 - this.m21 * f1 + this.m22 * f;
+		this.m00 = f12;
+		this.m10 = f13;
+		this.m20 = f14;
+		this.m30 = f15;
+		this.m01 = f16;
+		this.m11 = f17;
+		this.m21 = f18;
+		this.m31 = f19;
+		this.m02 = f20;
+		this.m12 = f21;
+		this.m22 = f22;
+		this.m32 = f23;
+		this.m03 = f24;
+		this.m13 = f25;
+		this.m23 = f26;
+		this.m33 = f27;
+		return f * f11 - f1 * f10 + f2 * f9 + f3 * f8 - f4 * f7 + f5 * f6;
+	}
+
+	public boolean invert() {
+		float f = this.adjugateAndDet();
+		if (Math.abs(f) > 1.0E-6F) {
+			this.mul(f);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static Mat4f perspective(float fov, float aspectRatio, float zNear, float zFar) {
+		float f = (float)(1.0D / Math.tan(fov * (double)((float)Math.PI / 180F) / 2.0D));
+		Mat4f matrix4f = new Mat4f();
+		matrix4f.m00 = f / aspectRatio;
+		matrix4f.m11 = f;
+		matrix4f.m22 = (zFar + zNear) / (zNear - zFar);
+		matrix4f.m32 = -1.0F;
+		matrix4f.m23 = 2.0F * zFar * zNear / (zNear - zFar);
+		return matrix4f;
 	}
 }

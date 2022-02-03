@@ -6,18 +6,20 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerStatisticIncrementEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.PlayerData;
-import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.io.FastByteArrayInputStream;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.Log;
@@ -25,31 +27,40 @@ import com.tom.cpm.shared.util.Log;
 public class Network implements PluginMessageListener, Listener {
 	public static final String PLAYER_DATA = MinecraftObjectHolder.NETWORK_ID + ":data";
 	private final CPMBukkitPlugin plugin;
-	private NetHandler<String, NBTTagCompound, Player, IOHelper, Meta> netHandler;
+	public NetHandler<String, Player, Meta> netHandler;
 
 	public Network(CPMBukkitPlugin plugin) {
 		this.plugin = plugin;
 		try {
 			netHandler = new NetHandler<>((k, v) -> k + ":" + v);
-			NetHandler.initBuiltin(netHandler, Player::getEntityId, (pl, pck, dt) -> pl.owner.sendPluginMessage(plugin, pck, dt), this::sendToAllTrackingAndSelf);
+			netHandler.setSendPacket((pl, pck, dt) -> pl.owner.sendPluginMessage(plugin, pck, dt), this::sendToAllTrackingAndSelf);
 			netHandler.setGetPlayerUUID(Player::getUniqueId);
 			netHandler.setFindTracking((p, c) -> getPlayersWithin(p, 64, c));
-			netHandler.setSendChat((pl, msg) -> pl.sendMessage(plugin.i18n.format(msg)));
+			netHandler.setSendChat((pl, msg) -> pl.sendMessage(msg.<String>remap()));
 			netHandler.setExecutor(() -> Runnable::run);
 			netHandler.setGetNet(this::getMetadata);
 			netHandler.setGetPlayer(n -> n.owner);
+			netHandler.setGetPlayerId(Player::getEntityId);
+			netHandler.setGetOnlinePlayers(Bukkit::getOnlinePlayers);
+			netHandler.setKickPlayer((p, m) -> p.kickPlayer(m.remap()));
+			netHandler.setGetPlayerAnimGetters(Player::getFallDistance, Player::isFlying);
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	public void register() {
-		Bukkit.getMessenger().registerIncomingPluginChannel(plugin, netHandler.helloPacket, this);
-		Bukkit.getMessenger().registerIncomingPluginChannel(plugin, netHandler.setSkin, this);
-		Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, netHandler.helloPacket);
-		Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, netHandler.setSkin);
-		Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, netHandler.getSkin);
+		netHandler.registerOut(c -> Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, c));
+		netHandler.registerIn(c -> Bukkit.getMessenger().registerIncomingPluginChannel(plugin, c, this));
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+		new BukkitRunnable(){
+
+			@Override
+			public void run(){
+				netHandler.tick();
+			}
+
+		}.runTaskTimer(plugin, 0L, 1L);
 	}
 
 	public void onCommand(Player pl, String skin, boolean force, boolean save) {
@@ -75,21 +86,26 @@ public class Network implements PluginMessageListener, Listener {
 
 	@Override
 	public void onPluginMessageReceived(String name, Player player, byte[] packet) {
-		netHandler.receiveServer(name, new IOHelper(packet), getMetadata(player));
+		netHandler.receiveServer(name, new FastByteArrayInputStream(packet), getMetadata(player));
 	}
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent evt) {
 		try {
 			Method addChn = evt.getPlayer().getClass().getDeclaredMethod("addChannel", String.class);
-			addChn.invoke(evt.getPlayer(), netHandler.helloPacket);
-			addChn.invoke(evt.getPlayer(), netHandler.setSkin);
-			addChn.invoke(evt.getPlayer(), netHandler.getSkin);
+			netHandler.registerOut(c -> addChn.invoke(evt.getPlayer(), c));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		evt.getPlayer().setMetadata(PLAYER_DATA, new FixedMetadataValue(plugin, new Meta(evt.getPlayer())));
 		netHandler.onJoin(evt.getPlayer());
+	}
+
+	@EventHandler
+	public void onPlayerStatisticIncrement(PlayerStatisticIncrementEvent event) {
+		if (event.getStatistic() == Statistic.JUMP) {
+			netHandler.onJump(event.getPlayer());
+		}
 	}
 
 	public Meta getMetadata(Player player) {

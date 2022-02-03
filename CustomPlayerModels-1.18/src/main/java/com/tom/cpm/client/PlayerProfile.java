@@ -16,6 +16,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 
@@ -24,17 +27,17 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.util.Hand;
+import com.tom.cpl.util.HandAnimation;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public class PlayerProfile extends Player<net.minecraft.world.entity.player.Player, Model> {
 	private final GameProfile profile;
 	private String skinType;
-	private VanillaPose pose;
-	private int encodedGesture;
-	public boolean hasPlayerHead;
 
 	public PlayerProfile(GameProfile profile) {
 		this.profile = profile;
@@ -78,44 +81,91 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 	}
 
 	@Override
-	public VanillaPose getPose() {
-		return pose;
-	}
-
-	@Override
 	public void updateFromPlayer(net.minecraft.world.entity.player.Player player) {
 		Pose p = player.getPose();
-		if(p == Pose.SLEEPING)pose = VanillaPose.SLEEPING;
-		else if(!player.isAlive())pose = VanillaPose.DYING;
-		else if(p == Pose.FALL_FLYING)pose = VanillaPose.FLYING;
-		else if(player.fallDistance > 4)pose = VanillaPose.FALLING;
-		else if(player.isPassenger() && (player.getVehicle() != null && player.getVehicle().shouldRiderSit()))pose = VanillaPose.RIDING;
-		else if(p == Pose.SWIMMING)pose = VanillaPose.SWIMMING;
-		else if(player.isSprinting())pose = VanillaPose.RUNNING;
-		else if(p == Pose.CROUCHING)pose = VanillaPose.SNEAKING;
-		else if(Math.abs(player.getX() - player.xo) > 0 || Math.abs(player.getZ() - player.zo) > 0)pose = VanillaPose.WALKING;
-		else pose = VanillaPose.STANDING;
+		animState.resetPlayer();
+		switch (p) {
+		case CROUCHING:
+			animState.sneaking = true;
+			break;
+		case DYING:
+			break;
+		case FALL_FLYING:
+			animState.elytraFlying = true;
+			break;
+		case SLEEPING:
+			animState.sleeping = true;
+			break;
+		case SPIN_ATTACK:
+			animState.tridentSpin = true;
+			break;
+		case STANDING:
+			break;
+		case SWIMMING:
+			animState.swimming = true;
+			break;
+		default:
+			break;
+		}
+		if(!player.isAlive())animState.dying = true;
+		if(player.isPassenger() && (player.getVehicle() != null && player.getVehicle().shouldRiderSit()))animState.riding = true;
+		if(player.getAbilities().flying)animState.creativeFlying = true;
+		if(player.isSprinting())animState.sprinting = true;
+		if(player.isUsingItem()) {
+			animState.usingAnimation = HandAnimation.of(player.getUseItem().getUseAnimation());
+		}
+		animState.fallDistance = player.fallDistance;
+		animState.moveAmountX = (float) (player.getX() - player.xo);
+		animState.moveAmountY = (float) (player.getY() - player.yo);
+		animState.moveAmountZ = (float) (player.getZ() - player.zo);
+		animState.yaw = player.getYRot();
+		animState.pitch = player.getXRot();
 
-		encodedGesture = 0;
-		if(player.isModelPartShown(PlayerModelPart.HAT))encodedGesture |= 1;
-		if(player.isModelPartShown(PlayerModelPart.JACKET))encodedGesture |= 2;
-		if(player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG))encodedGesture |= 4;
-		if(player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG))encodedGesture |= 8;
-		if(player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE))encodedGesture |= 16;
-		if(player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE))encodedGesture |= 32;
+		if(player.isModelPartShown(PlayerModelPart.HAT))animState.encodedState |= 1;
+		if(player.isModelPartShown(PlayerModelPart.JACKET))animState.encodedState |= 2;
+		if(player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG))animState.encodedState |= 4;
+		if(player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG))animState.encodedState |= 8;
+		if(player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE))animState.encodedState |= 16;
+		if(player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE))animState.encodedState |= 32;
 
 		ItemStack is = player.getItemBySlot(EquipmentSlot.HEAD);
-		hasPlayerHead = is.getItem() instanceof BlockItem && ((BlockItem)is.getItem()).getBlock() instanceof AbstractSkullBlock;
-	}
+		animState.hasSkullOnHead = is.getItem() instanceof BlockItem && ((BlockItem)is.getItem()).getBlock() instanceof AbstractSkullBlock;
+		animState.wearingHelm = !is.isEmpty();
+		is = player.getItemBySlot(EquipmentSlot.CHEST);
+		animState.wearingElytra = is.getItem() instanceof ElytraItem;
+		animState.wearingBody = !is.isEmpty();
+		animState.wearingLegs = !player.getItemBySlot(EquipmentSlot.LEGS).isEmpty();
+		animState.wearingBoots = !player.getItemBySlot(EquipmentSlot.FEET).isEmpty();
+		animState.mainHand = Hand.of(player.getMainArm());
+		animState.activeHand = Hand.of(animState.mainHand, player.getUsedItemHand());
+		animState.swingingHand = Hand.of(animState.mainHand, player.swingingArm);
 
-	public void setRenderPose(VanillaPose pose) {
-		this.pose = pose;
-		this.encodedGesture = 0;
+		if(player.getUseItem().getItem() instanceof CrossbowItem) {
+			float f = CrossbowItem.getChargeDuration(player.getUseItem());
+			float f1 = MathHelper.clamp(player.getTicksUsingItem(), 0.0F, f);
+			animState.crossbowPullback = f1 / f;
+		}
+
+		if(player.getUseItem().getItem() instanceof BowItem) {
+			float f = 20F;
+			float f1 = MathHelper.clamp(player.getTicksUsingItem(), 0.0F, f);
+			animState.bowPullback = f1 / f;
+		}
+
+		animState.parrotLeft = !player.getShoulderEntityLeft().getString("id").isEmpty();
+		animState.parrotRight = !player.getShoulderEntityRight().getString("id").isEmpty();
 	}
 
 	@Override
-	public int getEncodedGestureId() {
-		return encodedGesture;
+	public void updateFromModel(Object model) {
+		if(model instanceof PlayerModel) {
+			PlayerModel m = (PlayerModel) model;
+			animState.resetModel();
+			animState.attackTime = m.attackTime;
+			animState.swimAmount = m.swimAmount;
+			animState.leftArm = ArmPose.of(m.leftArmPose);
+			animState.rightArm = ArmPose.of(m.rightArmPose);
+		}
 	}
 
 	@Override

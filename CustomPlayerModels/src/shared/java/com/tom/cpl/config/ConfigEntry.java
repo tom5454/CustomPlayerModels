@@ -143,7 +143,7 @@ public class ConfigEntry {
 
 	public int getSetInt(String name, int def) {
 		try {
-			return getSet(name, def);
+			return getSet(name, (Number) Integer.valueOf(def)).intValue();
 		} catch (ClassCastException e) {
 			return def;
 		}

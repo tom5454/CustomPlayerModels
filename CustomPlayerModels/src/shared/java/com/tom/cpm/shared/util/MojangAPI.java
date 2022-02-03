@@ -12,8 +12,10 @@ import java.util.UUID;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonParseException;
 
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.HTTPMultipart;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.LocalizedIOException;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.io.HTTPIO;
 import com.tom.cpm.shared.model.SkinType;
@@ -57,21 +59,26 @@ public class MojangAPI {
 
 	public void joinServer(String serverId) throws IOException {
 		if(uuid == null || auth == null)throw new IOException("Missing auth info");
-		URL url = new URL("https://sessionserver.mojang.com/session/minecraft/join");
-		HttpURLConnection httpCon = HTTPIO.createUrlConnection(url, true);
-		Map<String, String> data = new HashMap<>();
-		data.put("accessToken", auth);
-		data.put("selectedProfile", fromUUID(uuid));
-		data.put("serverId", serverId);
-		httpCon.setDoOutput(true);
-		httpCon.setRequestMethod("POST");
-		httpCon.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-		byte[] d = MinecraftObjectHolder.gson.toJson(data).getBytes("UTF-8");
-		httpCon.setRequestProperty("Content-Length", "" + d.length);
-		httpCon.getOutputStream().write(d);
-		String response = HTTPIO.getResponse(httpCon, url);
+		String response;
+		try {
+			URL url = new URL("https://sessionserver.mojang.com/session/minecraft/join");
+			HttpURLConnection httpCon = HTTPIO.createUrlConnection(url, true);
+			Map<String, String> data = new HashMap<>();
+			data.put("accessToken", auth);
+			data.put("selectedProfile", fromUUID(uuid));
+			data.put("serverId", serverId);
+			httpCon.setDoOutput(true);
+			httpCon.setRequestMethod("POST");
+			httpCon.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+			byte[] d = MinecraftObjectHolder.gson.toJson(data).getBytes("UTF-8");
+			httpCon.setRequestProperty("Content-Length", "" + d.length);
+			httpCon.getOutputStream().write(d);
+			response = HTTPIO.getResponse(httpCon, url);
+			Log.info("[MojangSkinsAPI.joinServer]: Response " + httpCon.getResponseCode() + ": " + response);
+		} catch (IOException | JsonParseException e) {
+			throw new LocalizedIOException("Cannot contact authentication server", new FormatText("disconnect.loginFailedInfo.serversUnavailable"), e);
+		}
 		parseError(response);
-		Log.info("[MojangSkinsAPI.joinServer]: Response " + httpCon.getResponseCode() + ": " + response);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -79,7 +86,13 @@ public class MojangAPI {
 		try {
 			Map<String, Object> r = (Map<String, Object>) MinecraftObjectHolder.gson.fromJson(response, Object.class);
 			if(r != null && r.containsKey("error")) {
-				throw new IOException(String.valueOf(r.get("error")) + ": " + String.valueOf(r.get("errorMessage")));
+				String error = String.valueOf(r.get("error"));
+				if(error.equals("ForbiddenOperationException")) {
+					throw new LocalizedIOException("ForbiddenOperationException", new FormatText("disconnect.loginFailedInfo.invalidSession"));
+				} else if(error.equals("InsufficientPrivilegesException")) {
+					throw new LocalizedIOException("InsufficientPrivilegesException", new FormatText("disconnect.loginFailedInfo.insufficientPrivileges"));
+				}
+				throw new IOException(error + ": " + String.valueOf(r.get("errorMessage")));
 			}
 		} catch (ClassCastException | JsonParseException e) {
 		}

@@ -20,6 +20,7 @@ import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Exporter;
@@ -166,6 +167,15 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd.priority = block.readByte();
 			}
 			break;
+
+			case ANIMATION_DATA_INTERPOLATION:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.it = block.readEnum(InterpolatorType.VALUES);
+			}
+			break;
 			default:
 				break;
 			}
@@ -189,7 +199,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd = new ResolvedData(ea.pose, ea.add);
 				resolveEncID(rd, idc[1]++, allLayers);
 			} else {
-				rd = new ResolvedData(ea.displayName, ea.loop, ea.add);
+				rd = new ResolvedData(ea.getId(), ea.loop, ea.add);
 				resolveEncID(rd, idc[1]++, allLayers);
 			}
 			rd.gid &= valMask;
@@ -209,6 +219,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.show = new Boolean[cs][];
 			rd.loop = ea.loop;
 			rd.priority = ea.priority;
+			rd.it = ea.intType;
 			for (int i = 0; i < cs; i++) {
 				ModelElement elem = elems.get(i);
 				rd.components[i] = elem.id;
@@ -279,7 +290,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					if(dt.add)flags |= 1;
 					d.write(flags);
 					if(dt.pose instanceof CustomPose) {
-						d.writeUTF(((CustomPose) dt.pose).getName());
+						d.writeUTF(((CustomPose) dt.pose).getId());
 					}
 				}
 			} else {
@@ -366,6 +377,13 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					d.writeByte(dt.priority);
 				}
 			}
+			if(dt.it != InterpolatorType.POLY_LOOP) {
+				dout.writeEnum(Type.ANIMATION_DATA_INTERPOLATION);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+					d.writeEnum(dt.it);
+				}
+			}
 		}
 		dout.writeEnum(Type.CTRL_IDS);
 		try(IOHelper d = dout.writeNextBlock()) {
@@ -423,7 +441,8 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					Arrays.fill(rd.show[i], c.isVisible());
 				}
 			}
-			rd.anim = new Animation(comp, data, rd.show, rd.duration, rd.priority, rd.add);
+			if(rd.dynamicProgress())rd.duration = VanillaPose.DYNAMIC_DURATION_DIV;
+			rd.anim = new Animation(comp, data, rd.show, rd.duration, rd.priority, rd.add, rd.it);
 		});
 		Map<String, List<Animation>> gestures = new HashMap<>();
 		parsedData.values().forEach(rd -> {
@@ -476,6 +495,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		ENCODING,
 		CTRL_IDS,
 		ANIMATION_DATA_EXTRA,
+		ANIMATION_DATA_INTERPOLATION,
 		;
 		public static final Type[] VALUES = values();
 	}
@@ -494,6 +514,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		private boolean loop;
 		private boolean add;
 		private int priority;
+		private InterpolatorType it = InterpolatorType.POLY_LOOP;
 
 		public ResolvedData(VanillaPose pose, boolean add) {
 			this.pose = pose;
@@ -537,6 +558,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			}
 			bb.append("]");
 			return bb.toString();
+		}
+
+		public boolean dynamicProgress() {
+			return pose instanceof VanillaPose && ((VanillaPose)pose).hasStateGetter();
 		}
 	}
 }

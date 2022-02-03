@@ -238,6 +238,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				Vec2i s = tex.getDefSize();
 				sheetX = s.x;
 				sheetY = s.y;
+				bindDefaultTexture(cbi, tex);
 			}
 			setupRenderSystem(cbi, tex);
 		}
@@ -247,8 +248,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected abstract void swapIn0();
 		protected abstract void swapOut0();
 		protected void bindSkin() {}
+		protected void bindDefaultTexture(S cbi, TextureSheetType tex) {}
 
 		protected void bindFirstSetup() {
+			if(playerObj != null)playerObj.updateFromModel(model);
 			for (int i = 0; i < redirectRenderers.size(); i++) {
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();
@@ -278,6 +281,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			return register(f).setRenderPredicate(doRender);
 		}
 
+		protected RedirectRenderer<P> registerHead(Field<P> f) {
+			return register(f).setRenderPredicate(p -> !p.animState.hasSkullOnHead);
+		}
+
 		public void copyModel(P from, P to) {
 			mngr.posSet.set(to, mngr.px.apply(from), mngr.py.apply(from), mngr.pz.apply(from));
 			mngr.rotSet.set(to, mngr.rx.apply(from), mngr.ry.apply(from), mngr.rz.apply(from));
@@ -297,7 +304,22 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		protected boolean isInGui() {return false;}
 
-		protected void setupTransform(MatrixStack stack, RedirectRenderer<P> forPart, boolean pre) {}
+		protected void setupTransform(MatrixStack stack, RedirectRenderer<P> forPart, boolean pre) {
+			if(pre && def != null && def.getScale() != null && mode == AnimationMode.PLAYER) {
+				transform(stack, def.getRenderPosition(), def.getRenderRotation(), def.getRenderScale());
+			}
+		}
+
+		protected void transform(MatrixStack stack, Vec3f p, Vec3f r, Vec3f s) {
+			RedirectRenderer.translateRotate(p.x, p.y, p.z, (float) Math.toRadians(r.x), (float) Math.toRadians(r.y), (float) Math.toRadians(r.z), stack);
+			float sx = s.x;
+			float sy = s.y;
+			float sz = s.z;
+			if(sx < 0.1F || sx > 10)sx = 1;
+			if(sy < 0.1F || sy > 10)sy = 1;
+			if(sz < 0.1F || sz > 10)sz = 1;
+			stack.scale(sx, sy, sz);
+		}
 	}
 
 	private static class RedirectDataHolder<P> {
@@ -427,16 +449,13 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			translateRotate(m.px.apply(tp), m.py.apply(tp), m.pz.apply(tp), m.rx.apply(tp), m.ry.apply(tp), m.rz.apply(tp), matrixStackIn);
 		}
 
-		public default void render(RenderedCube elem, MatrixStack matrixStackIn, VBuffers buf, float red, float green, float blue, float alpha) {
+		public default void render(RenderedCube elem, MatrixStack matrixStackIn, VBuffers buf, float red, float green, float blue, float alpha, boolean doRenderRoot, boolean doRenderElems) {
 			RedirectHolder<?, ?, ?, P> holder = getHolder();
 			if(holder.def instanceof EditorDefinition && buf != null) {
 				((EditorDefinition)holder.def).render(matrixStackIn, buf, holder.renderTypes, elem);
 			}
 			if(elem.children == null)return;
 			for(RenderedCube cube : elem.children) {
-				if(!cube.display) {
-					continue;
-				}
 				matrixStackIn.push();
 				translateRotate(cube, matrixStackIn);
 				if(cube.itemRenderer != null) {
@@ -446,15 +465,16 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					}
 					matrixStackIn.translate(c.offset.x / 16f, c.offset.y / 16f, c.offset.z / 16f);
 					matrixStackIn.scale(c.scale.x, c.scale.y, c.scale.z);
-					if(cube.itemRenderer.slot == ItemSlot.ANY_SLOT) {
-						//TODO render item here
-					} else {
-						holder.def.storeTransform(cube.itemRenderer.slot, matrixStackIn);
-					}
+					holder.def.storeTransform(cube.itemRenderer, matrixStackIn, !doRenderRoot || (doRenderElems && cube.display));
 					matrixStackIn.pop();
 					continue;
 				}
-				if(buf != null) {
+				if(!cube.display) {
+					render(cube, matrixStackIn, null, red, green, blue, alpha, doRenderRoot, false);
+					matrixStackIn.pop();
+					continue;
+				}
+				if(buf != null && doRenderElems) {
 					float r = red;
 					float g = green;
 					float b = blue;
@@ -483,7 +503,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					}
 					mesh.draw(matrixStackIn, buffer, r, g, b, alpha);
 				}
-				render(cube, matrixStackIn, buf, red, green, blue, alpha);
+				render(cube, matrixStackIn, buf, red, green, blue, alpha, doRenderRoot, doRenderElems);
 				matrixStackIn.pop();
 			}
 		}
@@ -497,14 +517,20 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			if(doRender) {
 				Vec4f color = getColor();
 				VBuffers buf = getVBuffers().replay();
-				render(elem, stack, buf, color.x, color.y, color.z, color.w);
+				render(elem, stack, buf, color.x, color.y, color.z, color.w, doRender, true);
 				buf.finishAll();
 			} else {
-				render(elem, stack, null, 1, 1, 1, 1);
+				render(elem, stack, null, 1, 1, 1, 1, doRender, true);
 			}
 		}
 
 		public default MatrixStack.Entry getPartTransform() {
+			ItemTransform t = getPartTransform0();
+			if(t != null)return t.getMatrix();
+			return null;
+		}
+
+		public default ItemTransform getPartTransform0() {
 			RedirectHolder<?, ?, ?, P> holder = getHolder();
 			VanillaModelPart part = getPart();
 			if(part == PlayerModelParts.LEFT_ARM) {

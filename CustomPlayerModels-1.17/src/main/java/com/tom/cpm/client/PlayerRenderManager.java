@@ -66,9 +66,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			public RedirectRenderer<ModelPart> create(Model model,
 					RedirectHolder<Model, ?, ModelTexture, ModelPart> access,
 					Supplier<ModelPart> modelPart, VanillaModelPart part) {
-				return /*ClientProxy.optifineLoaded ?
-						new RedirectRendererOF((RDH) access, modelPart, part) :*/
-						new RedirectModelRendererVanilla((RDH) access, modelPart, part);
+				return new RedirectModelRendererVanilla((RDH) access, modelPart, part);
 			}
 		});
 		setVis(m -> m.visible, (m, v) -> m.visible = v);
@@ -119,42 +117,24 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 	private static class RedirectHolderPlayer extends RDH {
 		private RedirectRenderer<ModelPart> head;
-		private RedirectRenderer<ModelPart> leftArm;
-		private RedirectRenderer<ModelPart> rightArm;
-		private RedirectRenderer<ModelPart> leftArmwear;
-		private RedirectRenderer<ModelPart> rightArmwear;
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerModel<AbstractClientPlayer> model) {
 			super(mngr, model);
-			head = register(new Field<>(    () -> model.head    , v -> model.head     = v, PlayerModelParts.HEAD), p -> !((PlayerProfile)p).hasPlayerHead);
-			register(new Field<>(           () -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
-			rightArm = register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
-			leftArm = register(new Field<>( () -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
-			register(new Field<>(           () -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
-			register(new Field<>(           () -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
+			head = registerHead(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+			register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			register(new Field<>(() -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(               () -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
-			leftArmwear = register(new Field<>( () -> model.leftSleeve , v -> model.leftSleeve  = v, null));
-			rightArmwear = register(new Field<>(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
-			register(new Field<>(               () -> model.leftPants  , v -> model.leftPants   = v, null));
-			register(new Field<>(               () -> model.rightPants , v -> model.rightPants  = v, null));
-			register(new Field<>(               () -> model.jacket     , v -> model.jacket      = v, null));
+			register(new Field<>(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
+			register(new Field<>(() -> model.leftSleeve , v -> model.leftSleeve  = v, null));
+			register(new Field<>(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
+			register(new Field<>(() -> model.leftPants  , v -> model.leftPants   = v, null));
+			register(new Field<>(() -> model.rightPants , v -> model.rightPants  = v, null));
+			register(new Field<>(() -> model.jacket     , v -> model.jacket      = v, null));
 
 			register(new Field<>(() -> model.cloak        , v -> model.cloak     = v, RootModelType.CAPE));
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean skipTransform(RedirectRenderer<ModelPart> part) {
-			PlayerModel<AbstractClientPlayer> model = (PlayerModel<AbstractClientPlayer>) this.model;
-			boolean skipTransform = false;
-			if(leftArm == part && model.leftArmPose.ordinal() > 2) {
-				skipTransform = true;
-			}
-			if(rightArm == part && model.rightArmPose.ordinal() > 2) {
-				skipTransform = true;
-			}
-			return skipTransform;
 		}
 	}
 

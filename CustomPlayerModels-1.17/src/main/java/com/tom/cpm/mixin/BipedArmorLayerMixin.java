@@ -42,8 +42,8 @@ public class BipedArmorLayerMixin {
 					+ "Lnet/minecraft/world/entity/LivingEntity;FFFFFF)V")
 	public void postRender(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
 		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.unbind(outerModel);
-			ClientProxy.INSTANCE.unbind(innerModel);
+			ClientProxy.INSTANCE.manager.unbind(outerModel);
+			ClientProxy.INSTANCE.manager.unbind(innerModel);
 		}
 	}
 

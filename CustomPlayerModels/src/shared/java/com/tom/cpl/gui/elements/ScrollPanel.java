@@ -180,6 +180,14 @@ public class ScrollPanel extends Panel {
 		this.yScroll = yScroll;
 	}
 
+	public int getScrollX() {
+		return xScroll;
+	}
+
+	public int getScrollY() {
+		return yScroll;
+	}
+
 	public Panel getDisplay() {
 		return display;
 	}

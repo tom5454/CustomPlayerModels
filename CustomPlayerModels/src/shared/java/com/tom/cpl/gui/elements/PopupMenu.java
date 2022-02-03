@@ -36,7 +36,7 @@ public class PopupMenu extends PopupPanel {
 		int y = panel.elements.size() * 20;
 		Button btn = new Button(gui, name, null);
 		btn.setAction(() -> {
-			menu.display(x + getBounds().w, this.y + y);
+			menu.display(x + getBounds().w, this.y + y - scroll.getScrollY());
 			menu.setOnClosed(this::close);
 		});
 		btn.setBounds(new Box(0, y, 80, 20));

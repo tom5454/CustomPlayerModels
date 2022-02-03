@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
-import com.tom.cpl.util.FormatText;
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.StringBuilderStream;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.config.Player;
@@ -22,7 +22,7 @@ public class ErrorLog {
 		List<LogEntry> entries = players.stream().map(Player::getModelDefinition0).filter(d -> d != null && d.getError() != null).map(d -> {
 			Throwable err = d.getError();
 			if(err instanceof SafetyException)
-				return new LogEntry(LogLevel.INFO, new FormatText("label.cpm.error.blockedBySafety", d.getPlayerObj().getName()), err, 0);
+				return new LogEntry(LogLevel.INFO, new FormatText("label.cpm.error.blockedBySafety", d.getPlayerObj().getName(), new FormatText("label.cpm.block_reason." + ((SafetyException)err).getBlockReason().name().toLowerCase())), err, 0);
 			else
 				return new LogEntry(LogLevel.WARNING, new FormatText("label.cpm.error.errorWhileLoading", d.getPlayerObj().getName(), err.toString()), err, 0);
 		}).collect(Collectors.toList());

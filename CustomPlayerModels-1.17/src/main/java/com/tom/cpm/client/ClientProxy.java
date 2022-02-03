@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
 
+import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.SkinCustomizationScreen;
@@ -18,8 +19,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -43,9 +44,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+
+import com.google.common.collect.Iterables;
 
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.mixinplugin.OFDetector;
@@ -69,7 +73,7 @@ public class ClientProxy extends CommonProxy {
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public RenderManager<GameProfile, net.minecraft.world.entity.player.Player, Model, MultiBufferSource> manager;
-	public NetHandler<ResourceLocation, CompoundTag, net.minecraft.world.entity.player.Player, FriendlyByteBuf, ClientPacketListener> netHandler;
+	public NetHandler<ResourceLocation, net.minecraft.world.entity.player.Player, ClientPacketListener> netHandler;
 
 	@Override
 	public void init() {
@@ -83,17 +87,16 @@ public class ClientProxy extends CommonProxy {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), net.minecraft.world.entity.player.Player::getGameProfile);
+		manager.setGetSkullModel(profile -> {
+			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
+			if(property != null)return property.getValue();
+			return null;
+		});
 		netHandler = new NetHandler<>(ResourceLocation::new);
-		netHandler.setNewNbt(CompoundTag::new);
-		netHandler.setNewPacketBuffer(() -> new FriendlyByteBuf(Unpooled.buffer()));
-		netHandler.setWriteCompound(FriendlyByteBuf::writeNbt, FriendlyByteBuf::readNbt);
-		netHandler.setNBTSetters(CompoundTag::putBoolean, CompoundTag::putByteArray, CompoundTag::putFloat);
-		netHandler.setNBTGetters(CompoundTag::getBoolean, CompoundTag::getByteArray, CompoundTag::getFloat);
-		netHandler.setContains(CompoundTag::contains);
 		netHandler.setExecutor(() -> minecraft);
-		netHandler.setSendPacket((c, rl, pb) -> c.send(new ServerboundCustomPayloadPacket(rl, pb)), null);
+		netHandler.setSendPacket(d -> new FriendlyByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new ServerboundCustomPayloadPacket(rl, pb)), null);
 		netHandler.setPlayerToLoader(net.minecraft.world.entity.player.Player::getGameProfile);
-		netHandler.setReadPlayerId(FriendlyByteBuf::readVarInt, id -> {
+		netHandler.setGetPlayerById(id -> {
 			Entity ent = Minecraft.getInstance().level.getEntity(id);
 			if(ent instanceof net.minecraft.world.entity.player.Player) {
 				return (net.minecraft.world.entity.player.Player) ent;
@@ -102,6 +105,7 @@ public class ClientProxy extends CommonProxy {
 		});
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
+		netHandler.setDisplayText(f -> minecraft.gui.handleChat(ChatType.SYSTEM, f.remap(), Util.NIL_UUID));
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
@@ -112,7 +116,7 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		manager.tryUnbind();
+		manager.unbindClear();
 	}
 
 	@SubscribeEvent
@@ -201,11 +205,13 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void onLogout(ClientPlayerNetworkEvent.LoggedOutEvent evt) {
-		mc.getDefinitionLoader().clearServerData();
+		mc.onLogOut();
 	}
 
-	public void unbind(Model model) {
-		manager.tryUnbind(model);
+	public void updateJump() {
+		if(minecraft.player.isOnGround() && minecraft.player.input.jumping) {
+			manager.jump(minecraft.player);
+		}
 	}
 
 	//Copy from CapeLayer

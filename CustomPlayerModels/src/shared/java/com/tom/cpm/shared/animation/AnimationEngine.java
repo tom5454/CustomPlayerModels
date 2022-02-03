@@ -10,12 +10,13 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.parts.ModelPartScale;
+import com.tom.cpm.shared.model.ScaleData;
+import com.tom.cpm.shared.util.Log;
 
 public class AnimationEngine {
 	private long tickCounter;
 	private float partial;
-	private ModelPartScale modelScale;
+	private ScaleData modelScale;
 
 	public void tick() {
 		tickCounter++;
@@ -24,16 +25,17 @@ public class AnimationEngine {
 			ModelDefinition def = player.getModelDefinition();
 			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 				if(def != null && def.doRender()) {
+					player.sendEventSubs();
 					if(def.getScale() != modelScale) {
 						modelScale = def.getScale();
 						if(modelScale == null) {
-							MinecraftClientAccess.get().setModelScale(0);
+							MinecraftClientAccess.get().setModelScale(null);
 						} else {
-							MinecraftClientAccess.get().setModelScale(modelScale.getScale());
+							MinecraftClientAccess.get().setModelScale(modelScale);
 						}
 					}
 				} else if(modelScale != null) {
-					MinecraftClientAccess.get().setModelScale(0);
+					MinecraftClientAccess.get().setModelScale(null);
 					modelScale = null;
 				}
 			}
@@ -53,7 +55,9 @@ public class AnimationEngine {
 	public void handleAnimation(Player<?, ?> player, AnimationMode mode) {
 		AnimationHandler h = player.getAnimationHandler(mode);
 		try {
+			long time = getTime();
 			ModelDefinition def = player.getModelDefinition();
+			AnimationRegistry reg = def.getAnimations();
 			switch (mode) {
 			case HAND:
 				def.resetAnimationPos();
@@ -61,39 +65,36 @@ public class AnimationEngine {
 
 			case PLAYER:
 			{
-				VanillaPose pose = player.getPose();
-				int gesture = player.getEncodedGestureId();
-				AnimationRegistry reg = def.getAnimations();
+				VanillaPose pose = player.animState.getMainPose(time, reg);
+				int gesture = player.animState.encodedState;
 				if(pose != player.prevPose || gesture == reg.getPoseResetId()) {
 					player.currentPose = pose;
 				}
-				player.currentPose = def.getAnimations().getPose(gesture, player.currentPose);
+				player.currentPose = reg.getPose(gesture, player.currentPose);
 				player.prevPose = pose;
-				List<Animation> anim = def.getAnimations().getPoseAnimations(player.currentPose);
-				List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
-				h.addAnimations(anim);
-				h.addAnimations(global);
-				h.setGesture(def.getAnimations().getGesture(gesture));
+				List<Animation> anim = reg.getPoseAnimations(player.currentPose);
+				h.addAnimations(anim, player.currentPose);
+				player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p));
+				h.setGesture(reg.getGesture(gesture));
 			}
 			break;
 
 			case SKULL:
 			{
-				List<Animation> anim = def.getAnimations().getPoseAnimations(VanillaPose.SKULL_RENDER);
-				List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
-				h.addAnimations(anim);
-				h.addAnimations(global);
+				List<Animation> anim = reg.getPoseAnimations(VanillaPose.SKULL_RENDER);
+				List<Animation> global = reg.getPoseAnimations(VanillaPose.GLOBAL);
+				h.addAnimations(anim, VanillaPose.SKULL_RENDER);
+				h.addAnimations(global, VanillaPose.GLOBAL);
 			}
 			break;
 
 			default:
 				break;
 			}
-			long time = getTime();
-			h.animate(time);
-			def.getAnimations().tickAnimated(time);
+			h.animate(player.animState, time);
+			reg.tickAnimated(time);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.warn("Error animating model", e);
 			player.getModelDefinition().resetAnimationPos();
 			h.clear();
 		}
@@ -103,9 +104,9 @@ public class AnimationEngine {
 		try {
 			List<Animation> anim = def.getAnimations().getPoseAnimations(VanillaPose.STANDING);
 			List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
-			h.addAnimations(anim);
-			h.addAnimations(global);
-			h.animate(getTime());
+			h.addAnimations(anim, VanillaPose.STANDING);
+			h.addAnimations(global, VanillaPose.GLOBAL);
+			h.animate(null, getTime());
 		} catch (Exception e) {
 			e.printStackTrace();
 			def.resetAnimationPos();
@@ -139,7 +140,7 @@ public class AnimationEngine {
 		if(status == ServerStatus.OFFLINE || status == ServerStatus.UNAVAILABLE)return;
 		int enc = pose == null ? reg.getPoseResetId() : reg.getEncoded(pose);
 		if(enc != -1) {
-			if(enc == MinecraftClientAccess.get().getCurrentClientPlayer().getEncodedGestureId()) {
+			if(enc == MinecraftClientAccess.get().getCurrentClientPlayer().animState.encodedState) {
 				enc = reg.getPoseResetId();
 			}
 			MinecraftClientAccess.get().setEncodedGesture(enc);
@@ -151,7 +152,7 @@ public class AnimationEngine {
 		if(status == ServerStatus.OFFLINE || status == ServerStatus.UNAVAILABLE)return;
 		int enc = g == null ? reg.getBlankGesture() : reg.getEncoded(g);
 		if(enc != -1) {
-			if(enc == MinecraftClientAccess.get().getCurrentClientPlayer().getEncodedGestureId()) {
+			if(enc == MinecraftClientAccess.get().getCurrentClientPlayer().animState.encodedState) {
 				enc = reg.getBlankGesture();
 			}
 			MinecraftClientAccess.get().setEncodedGesture(enc);

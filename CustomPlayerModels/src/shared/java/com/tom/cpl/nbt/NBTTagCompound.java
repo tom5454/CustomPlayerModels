@@ -298,4 +298,8 @@ public class NBTTagCompound extends NBTTag {
 			}
 		}
 	}
+
+	public int tagCount() {
+		return tagMap.size();
+	}
 }

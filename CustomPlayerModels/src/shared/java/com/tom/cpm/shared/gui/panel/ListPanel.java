@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.regex.Pattern;
 
 import com.tom.cpl.gui.IGui;
@@ -27,13 +28,16 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 	private Panel listPanel;
 	private ScrollPanel scpList;
 	private int w, h;
-	private E selected;
+	private ToIntFunction<E> getWidth;
+	private ListElementRenderer<E> renderer;
+	private Comparator<E> comparator;
 
 	public ListPanel(IGui gui, List<E> listIn, int w, int h) {
 		super(gui);
 
 		this.list = new ArrayList<>();
 		this.listIn = listIn;
+		this.comparator = Comparator.comparing(Object::toString);
 
 		listPanel = new Panel(gui);
 		listPanel.setBackgroundColor(gui.getColors().menu_bar_background);
@@ -51,6 +55,9 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 
 		search.setBounds(new Box(5, 5, w - 10, 20));
 		scpList.setBounds(new Box(5, 30, w - 10, h - 35));
+
+		getWidth = e -> ListModel.super.getWidth(gui, e);
+		renderer = (e, x, y, lw, lh, m, s) -> ListModel.super.draw(gui, e, x, y, lw, lh, m, s);
 
 		this.w = w;
 		this.h = h;
@@ -75,11 +82,18 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 		listIn.stream().filter(e -> {
 			String dspName = e.toString();
 			return fp.matcher(dspName.toLowerCase()).find();
-		}).sorted(Comparator.comparing(Object::toString)).forEach(list::add);
+		}).sorted(comparator).forEach(list::add);
 		Vec2i size = listElement.getSize();
 		size.x = Math.max(size.x, w - 10);
 		listElement.setBounds(new Box(0, 0, size.x, size.y));
 		listPanel.setBounds(new Box(0, 0, size.x, size.y));
+		int i = list.indexOf(listElement.getSelected());
+		if(i != -1) {
+			if(scpList.getBounds().h < i*10) {
+				scpList.setScrollY(i*10 - scpList.getBounds().h + 10);
+			}
+		} else
+			scpList.setScrollY(0);
 	}
 
 	@Override
@@ -94,8 +108,8 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 
 	@Override
 	public void selected(E selected) {
-		this.selected = selected;
-		onSelect.accept(selected);
+		if(onSelect != null)
+			onSelect.accept(selected);
 	}
 
 	public void setSelect(Consumer<E> select) {
@@ -112,6 +126,7 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 
 	public void setSelected(E selected) {
 		listElement.setSelected(selected);
+		refreshList();
 	}
 
 	public void setWidth(int w) {
@@ -127,10 +142,38 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 	}
 
 	public E getSelected() {
-		return selected;
+		return listElement.getSelected();
 	}
 
 	public void setGetTooltip(Function<E, Tooltip> getTooltip) {
 		this.getTooltip = getTooltip;
+	}
+
+	@Override
+	public void draw(IGui gui, E el, int x, int y, int w, int h, boolean hovered, boolean selected) {
+		renderer.draw(el, x, y, w, h, hovered, selected);
+	}
+
+	@Override
+	public int getWidth(IGui gui, E el) {
+		return getWidth.applyAsInt(el);
+	}
+
+	public void setGetWidth(ToIntFunction<E> getWidth) {
+		this.getWidth = getWidth;
+	}
+
+	public void setRenderer(ListElementRenderer<E> renderer) {
+		this.renderer = renderer;
+	}
+
+	public void setComparator(Comparator<E> comparator) {
+		this.comparator = comparator;
+		refreshList();
+	}
+
+	@FunctionalInterface
+	public static interface ListElementRenderer<E> {
+		void draw(E element, int x, int y, int w, int h, boolean hovered, boolean selected);
 	}
 }

@@ -97,7 +97,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			s = "FPS: " + Minecraft.getDebugFPS();
 			fontRenderer.drawString(s, width - fontRenderer.getStringWidth(s) - 4, 11, 0xff000000);
 		}
-		if(mc.player != null) {
+		if(mc.player != null && gui.enableChat()) {
 			try {
 				ScaledResolution res = new ScaledResolution(mc);
 				Method m = GuiIngameForge.class.getDeclaredMethod("renderChat", int.class, int.class);
@@ -110,6 +110,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void onGuiClosed() {
+		Keyboard.enableRepeatEvents(false);
 		if(vanillaScale != -1 && vanillaScale != mc.gameSettings.guiScale) {
 			mc.gameSettings.guiScale = vanillaScale;
 		}
@@ -129,6 +130,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void initGui() {
+		Keyboard.enableRepeatEvents(true);
 		try {
 			gui.init(width, height);
 		} catch (Throwable e) {
@@ -150,7 +152,10 @@ public class GuiImpl extends GuiScreen implements IGui {
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
 				if(mc.player != null && mc.gameSettings.keyBindChat.getKeyCode() == keyCode && mc.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN) {
+					int scale = vanillaScale;
+					vanillaScale = -1;
 					mc.displayGuiScreen(new Overlay());
+					vanillaScale = scale;
 				}
 			}
 		} catch (Throwable e) {

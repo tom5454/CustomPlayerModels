@@ -8,10 +8,12 @@ import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 
+import io.netty.buffer.ByteBufInputStream;
+
 public class CPMASMServerHooks {
 	public static boolean onServerPacket(CPacketCustomPayload pckt, NetHandlerPlayServer handler) {
 		if(pckt.getChannelName().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			ServerHandler.netHandler.receiveServer(new ResourceLocation(pckt.getChannelName()), pckt.getBufferData(), (ServerNetH) handler);
+			ServerHandler.netHandler.receiveServer(new ResourceLocation(pckt.getChannelName()), new ByteBufInputStream(pckt.getBufferData()), (ServerNetH) handler);
 			return true;
 		}
 		return false;

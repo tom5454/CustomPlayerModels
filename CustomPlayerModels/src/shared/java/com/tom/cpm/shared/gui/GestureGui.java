@@ -21,6 +21,7 @@ import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
 import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.config.ConfigChangeRequest;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -35,7 +36,7 @@ import com.tom.cpm.shared.util.Log;
 public class GestureGui extends Frame {
 	private GestureButton hoveredBtn;
 	private Panel panel;
-	private int openEditor;
+	private int tickCounter;
 
 	public GestureGui(IGui gui) {
 		super(gui);
@@ -43,7 +44,7 @@ public class GestureGui extends Frame {
 			ModConfig.getCommonConfig().save();
 			r.run();
 		});
-		openEditor = TestIngameManager.isTesting() ? 3 : 0;
+		tickCounter = 3;
 	}
 
 	@Override
@@ -78,10 +79,19 @@ public class GestureGui extends Frame {
 
 	@Override
 	public void tick() {
-		if(openEditor > 0) {
-			openEditor--;
-			if(gui.isShiftDown())
+		if(tickCounter > 0) {
+			tickCounter--;
+			if(TestIngameManager.isTesting() && gui.isShiftDown()) {
 				MinecraftClientAccess.get().openGui(EditorGui::new);
+				return;
+			}
+
+			List<ConfigChangeRequest<?, ?>> changes = MinecraftClientAccess.get().getNetHandler().getRecommendedSettingChanges();
+			String server = MinecraftClientAccess.get().getConnectedServer();
+			if(server != null && !changes.isEmpty()) {
+				openPopup(new RecommendSafetySettingsPopup(gui, server, changes));
+				tickCounter = 0;
+			}
 		}
 	}
 

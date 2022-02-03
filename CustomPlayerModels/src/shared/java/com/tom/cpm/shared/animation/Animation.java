@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.animation;
 
+import com.tom.cpm.shared.animation.interpolator.Interpolator;
+import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
 
 public class Animation {
@@ -22,7 +24,7 @@ public class Animation {
 	 *            attributeIDs: 0: rotationPointX 1: rotationPointY 2:
 	 *            rotationPointZ 3: rotationX 4: rotationY 5: rotationZ
 	 */
-	public Animation(IModelComponent[] components2, float[][][] data, Boolean[][] show, int duration, int priority, boolean add) {
+	public Animation(IModelComponent[] components2, float[][][] data, Boolean[][] show, int duration, int priority, boolean add, InterpolatorType itType) {
 		this.componentIDs = components2;
 		this.duration = duration;
 		this.show = show;
@@ -42,7 +44,7 @@ public class Animation {
 
 		for (int component = 0; component < components; component++) {
 			for (InterpolatorChannel channel : InterpolatorChannel.VALUES) {
-				PolynomialSplineInterpolator i = new PolynomialSplineInterpolator();
+				Interpolator i = itType.create();
 				i.init(data[component][channel.channelID()], channel);
 				psfs[component][channel.channelID()] = i;
 			}

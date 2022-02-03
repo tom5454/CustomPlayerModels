@@ -85,7 +85,7 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 	private static void onRenderPost(@Nullable Direction directionIn, float p_228879_1_, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, CallbackInfo cbi) {
 		if (skullType == SkullBlock.Types.PLAYER && gameProfileIn != null) {
 			GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
-			ClientProxy.INSTANCE.unbind(model);
+			ClientProxy.INSTANCE.manager.unbind(model);
 		}
 	}
 }

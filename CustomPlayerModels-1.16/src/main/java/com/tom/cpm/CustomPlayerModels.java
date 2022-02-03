@@ -7,6 +7,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.util.SharedConstants;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.KeybindTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -22,6 +26,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.versions.forge.ForgeVersion;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.common.ServerHandler;
@@ -93,5 +98,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	public String getPlatformVersionString() {
 		String modVer = ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
 		return "Minecraft " + SharedConstants.getCurrentVersion().getName() + " (forge/" + ForgeVersion.getVersion() + ") " + modVer;
+	}
+
+	@Override
+	public TextRemapper<IFormattableTextComponent> getTextRemapper() {
+		return new TextRemapper<>(TranslationTextComponent::new, StringTextComponent::new, IFormattableTextComponent::append, KeybindTextComponent::new);
 	}
 }

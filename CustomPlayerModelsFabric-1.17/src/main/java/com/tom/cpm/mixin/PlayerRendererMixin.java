@@ -58,12 +58,12 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 
 	@Inject(at = @At("RETURN"), method = "renderRightArm(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/network/AbstractClientPlayerEntity;)V")
 	public void onRenderRightArmPost(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.unbind(getModel());
+		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
 	}
 
 	@Inject(at = @At("RETURN"), method = "renderLeftArm(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/network/AbstractClientPlayerEntity;)V")
 	public void onRenderLeftArmPost(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.unbind(getModel());
+		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
 	}
 
 	@Redirect(at =

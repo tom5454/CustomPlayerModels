@@ -16,6 +16,7 @@ import com.tom.cpm.shared.editor.project.ProjectWriter;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.template.TemplateArgType;
+import com.tom.cpm.shared.editor.template.TemplateSettings;
 
 public class TemplateLoaderV1 implements ProjectPartLoader {
 
@@ -38,6 +39,7 @@ public class TemplateLoaderV1 implements ProjectPartLoader {
 			});
 		});
 		project.jsonIfExists("template_settings.json", data -> {
+			if(editor.templateSettings == null)editor.templateSettings = new TemplateSettings(editor);
 			editor.templateSettings.hasTex = data.getBoolean("texture");
 			JsonList lst = data.getList("args");
 			lst.forEachMap(map -> {

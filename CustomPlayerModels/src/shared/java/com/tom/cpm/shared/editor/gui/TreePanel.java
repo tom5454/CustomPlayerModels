@@ -8,7 +8,6 @@ import com.tom.cpl.gui.elements.Tree;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 
 public class TreePanel extends Panel {
 
@@ -22,7 +21,7 @@ public class TreePanel extends Panel {
 		treePanel.setBounds(new Box(0, 0, 150, height - 30));
 		addElement(treePanel);
 
-		Tree<TreeElement> tree = new Tree<>(e, new ModelTree(editor));
+		Tree<TreeElement> tree = new Tree<>(e, editor.treeHandler);
 		editor.updateGui.add(tree::updateTree);
 
 		Panel tp = new Panel(gui);

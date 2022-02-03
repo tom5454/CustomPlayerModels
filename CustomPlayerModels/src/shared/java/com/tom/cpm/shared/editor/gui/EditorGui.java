@@ -68,6 +68,7 @@ public class EditorGui extends Frame {
 
 	public EditorGui(IGui gui) {
 		super(gui);
+		rescaleGui = true;
 		if(toReopen != null) {
 			this.editor = toReopen;
 			this.editor.setGui(this);
@@ -444,14 +445,14 @@ public class EditorGui extends Frame {
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.modelEffects")).setBounds(new Box(5, 5, 0, 0)));
 
-		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.display.scaling"), () -> {
+		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.scaling"), () -> {
 			float nv = editor.scalingElem.entityScaling != 0 ? 0 : 1;
-			editor.action("switch", "label.cpm.display.scaling").
+			editor.action("switch", "label.cpm.effect.scaling").
 			updateValueOp(editor, editor.scalingElem.entityScaling, nv, (a, b) -> a.scalingElem.entityScaling = b).execute();
 			editor.updateGui();
 		});
 		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scalingElem.entityScaling != 0));
-		chxbxScale.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.scaling")));
+		chxbxScale.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.scaling")));
 
 		Checkbox hideHead = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.hideHeadIfSkull"), () -> {
 			editor.action("switch", "label.cpm.effect.hideHeadIfSkull").
@@ -528,6 +529,12 @@ public class EditorGui extends Frame {
 		});
 		chxbxBoundingBox.setSelected(editor.drawBoundingBox);
 
+		Checkbox chxbxChat = pp.addCheckbox(gui.i18nFormat("label.cpm.display.displayChat"), b -> {
+			editor.displayChat = !b.isSelected();
+			b.setSelected(editor.displayChat);
+		});
+		chxbxChat.setSelected(editor.displayChat);
+
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
 
 		PopupMenu heldItemRight = new PopupMenu(gui, this);
@@ -573,6 +580,12 @@ public class EditorGui extends Frame {
 		});
 
 		addLayerToggle(pp, PlayerModelLayer.ELYTRA);
+
+		Checkbox chxbxParrots = pp.addCheckbox(gui.i18nFormat("label.cpm.display.drawParrots"), b -> {
+			editor.drawParrots = !b.isSelected();
+			b.setSelected(editor.drawParrots);
+		});
+		chxbxParrots.setSelected(editor.drawParrots);
 	}
 
 	private void addLayerToggle(PopupMenu pp, PlayerModelLayer layer) {
@@ -587,6 +600,7 @@ public class EditorGui extends Frame {
 	private void initHeldItemPopup(PopupMenu pp, ItemSlot hand) {
 		ButtonGroup<DisplayItem, Checkbox> group = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> editor.handDisplay.put(hand, i));
 		for(DisplayItem item : DisplayItem.VALUES) {
+			if(hand == ItemSlot.HEAD && !item.canBeOnHead)continue;
 			group.addElement(item, r -> pp.addCheckbox(gui.i18nFormat("button.cpm.heldItem." + item.name().toLowerCase()), r));
 		}
 		group.accept(editor.handDisplay.getOrDefault(hand, DisplayItem.NONE));
@@ -625,6 +639,7 @@ public class EditorGui extends Frame {
 		if(tex != null) {
 			tex.file = file;
 			editor.reloadSkin();
+			editor.updateGui();
 		}
 	}
 
@@ -689,5 +704,10 @@ public class EditorGui extends Frame {
 	@Override
 	public void logMessage(String msg) {
 		editor.setInfoMsg.accept(Pair.of(3000, gui.i18nFormat("tooltip.cpm.errorTooltip", msg)));
+	}
+
+	@Override
+	public boolean enableChat() {
+		return editor.displayChat;
 	}
 }

@@ -11,6 +11,14 @@ public class MathHelper {
 		}
 	}
 
+	public static float clamp(float num, float min, float max) {
+		if (num < min) {
+			return min;
+		} else {
+			return num > max ? max : num;
+		}
+	}
+
 	/**
 	 * Returns the value of the first parameter, clamped to be within the lower and upper limits given by the second and
 	 * third parameters.

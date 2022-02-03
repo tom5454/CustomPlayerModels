@@ -5,25 +5,25 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
-import com.tom.cpm.shared.animation.PolynomialSplineInterpolator;
+import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpm.shared.animation.interpolator.Interpolator;
+import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.gui.AnimPanel.IAnim;
-import com.tom.cpm.shared.editor.project.JsonMap;
 
 public class EditorAnim implements IAnim {
 	private List<ModelElement> components;
 	private final List<AnimFrame> frames = new ArrayList<>();
 	public int duration = 1000;
-	private DoubleUnaryOperator[][] psfs;
+	private Interpolator[][] psfs;
 	private AnimFrame currentFrame;
 	public final Editor editor;
 	public String filename;
@@ -33,6 +33,7 @@ public class EditorAnim implements IAnim {
 	public boolean add = true;
 	public boolean loop;
 	public int priority;
+	public InterpolatorType intType = InterpolatorType.POLY_LOOP;
 
 	public EditorAnim(Editor e, String filename, AnimationType type, boolean initNew) {
 		this.editor = e;
@@ -44,11 +45,11 @@ public class EditorAnim implements IAnim {
 	private void calculateSplines() {
 		components = frames.stream().flatMap(AnimFrame::getAllElements).distinct().collect(Collectors.toList());
 
-		psfs = new DoubleUnaryOperator[components.size()][InterpolatorChannel.VALUES.length];
+		psfs = new Interpolator[components.size()][InterpolatorChannel.VALUES.length];
 
 		for (int component = 0; component < components.size(); component++) {
 			for (InterpolatorChannel channel : InterpolatorChannel.VALUES) {
-				PolynomialSplineInterpolator i = new PolynomialSplineInterpolator();
+				Interpolator i = intType.create();
 				i.init(AnimFrame.toArray(this, components.get(component), channel), channel);
 				psfs[component][channel.channelID()] = i;
 			}
@@ -67,7 +68,11 @@ public class EditorAnim implements IAnim {
 
 	public void applyPlay(long millis) {
 		if(components == null || psfs == null)calculateSplines();
-		float step = (float) millis % duration / duration * frames.size();
+		float step;
+		if(pose != null && pose instanceof VanillaPose && ((VanillaPose)pose).hasStateGetter()) {
+			int dd = (int) (editor.animTestSlider * VanillaPose.DYNAMIC_DURATION_MUL);
+			step = (float) dd % VanillaPose.DYNAMIC_DURATION_DIV / VanillaPose.DYNAMIC_DURATION_DIV * frames.size();
+		} else step = (float) millis % duration / duration * frames.size();
 		for (int i = 0; i < components.size(); i++) {
 			ModelElement component = components.get(i);
 			component.rc.setRotation(add,
@@ -136,19 +141,10 @@ public class EditorAnim implements IAnim {
 
 	public void deleteFrame() {
 		if(currentFrame != null) {
+			int ind = frames.indexOf(currentFrame) - 1 + frames.size();
 			editor.action("remove", "action.cpm.animFrame").removeFromList(frames, currentFrame).onAction(this::clearCache).execute();
+			if(!frames.isEmpty())currentFrame = frames.get(ind % frames.size());
 		}
-	}
-
-	public void loadFrame(JsonMap data) {
-		AnimFrame frm = new AnimFrame(this);
-		frm.loadFrom(data);
-		frames.add(frm);
-		if(currentFrame == null)currentFrame = frm;
-	}
-
-	public List<Map<String, Object>> writeFrames() {
-		return frames.stream().map(AnimFrame::store).collect(Collectors.toList());
 	}
 
 	public List<AnimFrame> getFrames() {
@@ -167,6 +163,10 @@ public class EditorAnim implements IAnim {
 
 	public AnimFrame getSelectedFrame() {
 		return currentFrame;
+	}
+
+	public void setSelectedFrame(AnimFrame currentFrame) {
+		this.currentFrame = currentFrame;
 	}
 
 	public void prevFrame() {
@@ -209,5 +209,24 @@ public class EditorAnim implements IAnim {
 		ab.onAction(() -> frames.sort(Comparator.comparing(map::get)));
 		ab.onAction(this::clearCache);
 		ab.execute();
+	}
+
+	public float getAnimProgess() {
+		int ind = frames.indexOf(currentFrame);
+		if(ind == -1)return 0;
+		if(frames.size() == 1)return 1;
+		return ind / (float) (frames.size() - 1);
+	}
+
+	@Override
+	public IPose getPose() {
+		return pose;
+	}
+
+	public String getId() {
+		int i = displayName.indexOf('#');
+		if(i == -1)return displayName;
+		if(i == 0)return "";
+		return displayName.substring(0, i);
 	}
 }

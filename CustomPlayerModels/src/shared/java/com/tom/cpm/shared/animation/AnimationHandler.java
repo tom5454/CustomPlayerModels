@@ -11,7 +11,7 @@ public class AnimationHandler {
 	private final Supplier<ModelDefinition> player;
 
 	private List<PlayingAnim> currentAnimations = new ArrayList<>();
-	private List<Animation> nextAnims = new ArrayList<>();
+	private List<NextAnim> nextAnims = new ArrayList<>();
 
 	private Gesture currentGesture;
 
@@ -19,20 +19,20 @@ public class AnimationHandler {
 		this.player = player;
 	}
 
-	public void animate(long currentTime) {
+	public void animate(AnimationState state, long currentTime) {
 		boolean needsSort = false;
-		currentAnimations.removeIf(a -> !nextAnims.contains(a.currentAnimation));
-		for (Animation animation : nextAnims) {
+		currentAnimations.removeIf(a -> nextAnims.stream().noneMatch(n -> n.animation == a.currentAnimation));
+		for (NextAnim animation : nextAnims) {
 			boolean found = false;
 			for (int i = 0; i < currentAnimations.size(); i++) {
-				if(currentAnimations.get(i).currentAnimation == animation) {
+				if(currentAnimations.get(i).currentAnimation == animation.animation) {
 					found = true;
 					break;
 				}
 			}
 			if(!found) {
 				currentAnimations.add(new PlayingAnim(animation, currentTime,
-						currentGesture != null ? (currentGesture.animation.contains(animation) ? currentGesture.isLoop : true) : true));
+						currentGesture != null ? (currentGesture.animation.contains(animation.animation) ? currentGesture.isLoop : true) : true));
 				needsSort = true;
 			}
 		}
@@ -44,7 +44,7 @@ public class AnimationHandler {
 		for (PlayingAnim a : currentAnimations) {
 			if(!a.finished) {
 				long currentStep = (currentTime - a.currentStart);
-				a.currentAnimation.animate(currentStep, player.get());
+				a.currentAnimation.animate(a.pose.getTime(state, currentStep), player.get());
 
 				if(!a.loop && currentStep > a.currentAnimation.duration) {
 					a.finished = true;
@@ -55,14 +55,14 @@ public class AnimationHandler {
 		nextAnims.clear();
 	}
 
-	public void addAnimations(List<Animation> next) {
-		nextAnims.addAll(next);
+	public void addAnimations(List<Animation> next, IPose pose) {
+		next.stream().map(a -> new NextAnim(a, pose)).forEach(nextAnims::add);
 	}
 
 	public void setGesture(Gesture next) {
 		currentGesture = next;
 		if(next != null) {
-			nextAnims.addAll(next.animation);
+			addAnimations(next.animation, null);
 		}
 	}
 
@@ -72,13 +72,25 @@ public class AnimationHandler {
 		currentAnimations.clear();
 	}
 
+	private static class NextAnim {
+		private Animation animation;
+		private IPose pose;
+
+		public NextAnim(Animation animation, IPose pose) {
+			this.animation = animation;
+			this.pose = pose;
+		}
+	}
+
 	private static class PlayingAnim {
 		private Animation currentAnimation;
+		private IPose pose;
 		private long currentStart;
 		private boolean loop, finished;
 
-		public PlayingAnim(Animation currentAnimation, long currentStart, boolean loop) {
-			this.currentAnimation = currentAnimation;
+		public PlayingAnim(NextAnim anim, long currentStart, boolean loop) {
+			this.currentAnimation = anim.animation;
+			this.pose = anim.pose;
 			this.currentStart = currentStart;
 			this.loop = loop;
 			this.finished = false;

@@ -1,6 +1,5 @@
 package com.tom.cpm.client;
 
-import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
@@ -18,7 +17,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.util.MathHelper;
@@ -26,7 +24,6 @@ import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,6 +33,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+
+import com.google.common.collect.Iterables;
 
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.lefix.FixSSL;
@@ -57,7 +57,7 @@ public class ClientProxy extends CommonProxy {
 	private Minecraft minecraft;
 	public static ClientProxy INSTANCE;
 	public RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
-	public NetHandler<ResourceLocation, NBTTagCompound, EntityPlayer, PacketBuffer, NetHandlerPlayClient> netHandler;
+	public NetHandler<ResourceLocation, EntityPlayer, NetHandlerPlayClient> netHandler;
 
 	@Override
 	public void init() {
@@ -69,24 +69,17 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), EntityPlayer::getGameProfile);
-		netHandler = new NetHandler<>(ResourceLocation::new);
-		netHandler.setNewNbt(NBTTagCompound::new);
-		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
-		netHandler.setWriteCompound(PacketBuffer::writeNBTTagCompoundToBuffer, t -> {
-			try {
-				return t.readNBTTagCompoundFromBuffer();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+		manager.setGetSkullModel(profile -> {
+			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
+			if(property != null)return property.getValue();
+			return null;
 		});
-		netHandler.setNBTSetters(NBTTagCompound::setBoolean, NBTTagCompound::setByteArray, NBTTagCompound::setFloat);
-		netHandler.setNBTGetters(NBTTagCompound::getBoolean, NBTTagCompound::getByteArray, NBTTagCompound::getFloat);
-		netHandler.setContains(NBTTagCompound::hasKey);
+		netHandler = new NetHandler<>(ResourceLocation::new);
 		Executor ex = minecraft::addScheduledTask;
 		netHandler.setExecutor(() -> ex);
-		netHandler.setSendPacket((c, rl, pb) -> c.addToSendQueue(new C17PacketCustomPayload(rl.toString(), pb)), null);
+		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.addToSendQueue(new C17PacketCustomPayload(rl.toString(), pb)), null);
 		netHandler.setPlayerToLoader(EntityPlayer::getGameProfile);
-		netHandler.setReadPlayerId(PacketBuffer::readVarIntFromBuffer, id -> {
+		netHandler.setGetPlayerById(id -> {
 			Entity ent = Minecraft.getMinecraft().theWorld.getEntityByID(id);
 			if(ent instanceof EntityPlayer) {
 				return (AbstractClientPlayer) ent;
@@ -95,6 +88,7 @@ public class ClientProxy extends CommonProxy {
 		});
 		netHandler.setGetClient(() -> minecraft.thePlayer);
 		netHandler.setGetNet(c -> ((EntityPlayerSP)c).sendQueue);
+		netHandler.setDisplayText(f -> minecraft.ingameGUI.getChatGUI().printChatMessage(f.remap()));
 	}
 
 	@SubscribeEvent
@@ -105,7 +99,7 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		manager.tryUnbind();
+		manager.unbindClear();
 	}
 
 	@SubscribeEvent
@@ -133,12 +127,6 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	@SubscribeEvent
-	public void renderHand(RenderHandEvent evt) {
-		manager.bindHand(Minecraft.getMinecraft().thePlayer, null);
-		manager.bindSkin(TextureSheetType.SKIN);
-	}
-
 	public void renderSkull(ModelBase skullModel, GameProfile profile) {
 		manager.bindSkull(profile, null, skullModel);
 		manager.bindSkin(skullModel, TextureSheetType.SKIN);
@@ -163,6 +151,10 @@ public class ClientProxy extends CommonProxy {
 	public void clientTick(ClientTickEvent evt) {
 		if(evt.phase == Phase.START && !minecraft.isGamePaused()) {
 			mc.getPlayerRenderManager().getAnimationEngine().tick();
+
+			if(minecraft.thePlayer != null && minecraft.thePlayer.onGround && minecraft.gameSettings.keyBindJump.isKeyDown()) {
+				manager.jump(minecraft.thePlayer);
+			}
 		}
 
 		if (minecraft.thePlayer == null || evt.phase == Phase.START)
@@ -200,15 +192,7 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public void onLogout() {
-		mc.getDefinitionLoader().clearServerData();
-	}
-
-	public void unbind(ModelBase model) {
-		manager.tryUnbind(model);
-	}
-
-	public void unbindHand(AbstractClientPlayer player) {
-		manager.tryUnbindPlayer(player);
+		mc.onLogOut();
 	}
 
 	//Copy from LayerCape
@@ -247,21 +231,9 @@ public class ClientProxy extends CommonProxy {
 					* 6.0F) * 32.0F * lvt_24_1_;
 			if (playerIn.isSneaking()) {
 				f1 += 25.0F;
-			}
-			if (playerIn.getEquipmentInSlot(3) != null) {
-				if (playerIn.isSneaking()) {
-					model.bipedCape.rotationPointZ = 1.4F + 0.125F * 3;
-					model.bipedCape.rotationPointY = 1.85F + 1 - 0.125F * 4;
-				} else {
-					model.bipedCape.rotationPointZ = 0.0F + 0.125F * 16f;
-					model.bipedCape.rotationPointY = 0.0F;
-				}
-			} else if (playerIn.isSneaking()) {
-				model.bipedCape.rotationPointZ = 0.3F + 0.125F * 16f;
-				model.bipedCape.rotationPointY = 0.8F + 0.3f;
+				model.bipedCape.rotationPointY = 2.0F;
 			} else {
-				model.bipedCape.rotationPointZ = -1.1F + 0.125F * 32f;
-				model.bipedCape.rotationPointY = -0.85F + 1;
+				model.bipedCape.rotationPointY = 0.0F;
 			}
 		} else {
 			f1 = 0;

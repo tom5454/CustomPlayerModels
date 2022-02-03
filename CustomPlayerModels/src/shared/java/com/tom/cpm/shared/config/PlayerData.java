@@ -1,13 +1,17 @@
 package com.tom.cpm.shared.config;
 
 import java.util.Base64;
+import java.util.EnumSet;
 
 import com.tom.cpl.config.ConfigEntry;
+import com.tom.cpm.shared.network.ModelEventType;
 
 public class PlayerData {
+	public long ticksSinceLogin;
 	public byte[] data;
 	public boolean forced, save;
-	public float scale;
+	public float scale, eyeH, hitboxW, hitboxH;
+	public EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
 
 	public PlayerData() {
 	}

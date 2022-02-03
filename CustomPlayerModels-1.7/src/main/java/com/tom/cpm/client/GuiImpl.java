@@ -9,6 +9,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiErrorScreen;
@@ -22,6 +23,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.common.MinecraftForge;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
@@ -89,10 +91,12 @@ public class GuiImpl extends GuiScreen implements IGui {
 			onGuiException("Error drawing gui", e, true);
 		} finally {
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
-			String s =  Minecraft.getMinecraft().debug + " " + Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
+			String s = "Minecraft " + MinecraftForge.MC_VERSION + " (" + ClientBrandRetriever.getClientModName() + ") " + Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
 			fontRendererObj.drawString(s, width - fontRendererObj.getStringWidth(s) - 4, 2, 0xff000000);
+			s =  Minecraft.getMinecraft().debug;
+			fontRendererObj.drawString(s, width - fontRendererObj.getStringWidth(s) - 4, 11, 0xff000000);
 		}
-		if(mc.thePlayer != null) {
+		if(mc.thePlayer != null && gui.enableChat()) {
 			try {
 				ScaledResolution res = new ScaledResolution(mc, this.mc.displayWidth, this.mc.displayHeight);
 				Method m = GuiIngameForge.class.getDeclaredMethod("renderChat", int.class, int.class);
@@ -105,6 +109,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void onGuiClosed() {
+		Keyboard.enableRepeatEvents(false);
 		if(vanillaScale != -1 && vanillaScale != mc.gameSettings.guiScale) {
 			mc.gameSettings.guiScale = vanillaScale;
 		}
@@ -124,6 +129,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void initGui() {
+		Keyboard.enableRepeatEvents(true);
 		try {
 			gui.init(width, height);
 		} catch (Throwable e) {

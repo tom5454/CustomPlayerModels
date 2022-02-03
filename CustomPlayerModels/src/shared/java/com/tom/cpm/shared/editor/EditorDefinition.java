@@ -2,9 +2,11 @@ package com.tom.cpm.shared.editor;
 
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.RenderedCube;
@@ -29,6 +31,7 @@ public class EditorDefinition extends ModelDefinition {
 			return new Vec2i(64, 64);
 		}
 	};
+	public ViewportPanel renderingPanel;
 
 	public EditorDefinition(Editor editor) {
 		this.editor = editor;
@@ -44,6 +47,7 @@ public class EditorDefinition extends ModelDefinition {
 				if(!e.duplicated)root.setMainRoot(el);
 			}
 		});
+		if(root.isEmpty())return null;
 		return root;
 	}
 
@@ -105,5 +109,20 @@ public class EditorDefinition extends ModelDefinition {
 	@Override
 	public boolean isRemoveArmorOffset() {
 		return editor.removeArmorOffset;
+	}
+
+	@Override
+	public Vec3f getRenderPosition() {
+		return editor.scalingElem.pos;
+	}
+
+	@Override
+	public Vec3f getRenderRotation() {
+		return editor.scalingElem.rotation;
+	}
+
+	@Override
+	public Vec3f getRenderScale() {
+		return editor.scalingElem.scale;
 	}
 }

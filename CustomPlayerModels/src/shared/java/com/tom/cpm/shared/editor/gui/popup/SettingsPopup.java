@@ -36,7 +36,7 @@ public class SettingsPopup extends PopupPanel {
 
 	@Override
 	public void close() {
-		if(panel != null && panel.isChanged()) {
+		if(EditorGui.rescaleGui && panel != null && panel.isChanged()) {
 			frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("button.cpm.edit.settings"), gui.i18nFormat("label.cpm.unsaved"), super::close, null));
 		} else super.close();
 	}

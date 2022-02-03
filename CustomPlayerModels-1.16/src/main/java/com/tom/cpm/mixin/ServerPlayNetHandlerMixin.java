@@ -13,6 +13,8 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 
+import io.netty.buffer.ByteBufInputStream;
+
 @Mixin(ServerPlayNetHandler.class)
 public class ServerPlayNetHandlerMixin implements ServerNetH {
 	private boolean cpm$hasMod;
@@ -31,7 +33,7 @@ public class ServerPlayNetHandlerMixin implements ServerNetH {
 	@Inject(at = @At("HEAD"), method = "handleCustomPayload(Lnet/minecraft/network/play/client/CCustomPayloadPacket;)V", cancellable = true)
 	public void onProcessCustomPayload(CCustomPayloadPacket packet, CallbackInfo cbi) {
 		if(packet.getName().getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
-			ServerHandler.netHandler.receiveServer(packet.getName(), packet.getInternalData(), this);
+			ServerHandler.netHandler.receiveServer(packet.getName(), new ByteBufInputStream(packet.getInternalData()), this);
 			cbi.cancel();
 		}
 	}

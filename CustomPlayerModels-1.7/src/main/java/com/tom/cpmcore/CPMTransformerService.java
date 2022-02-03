@@ -286,27 +286,49 @@ public class CPMTransformerService implements IClassTransformer {
 				return input;
 			}
 		});
-		transformers.put("net.minecraft.client.renderer.EntityRenderer", new UnaryOperator<ClassNode>() {
+		transformers.put("net.minecraft.client.renderer.entity.RenderPlayer", new UnaryOperator<ClassNode>() {
 
 			@Override
 			public ClassNode apply(ClassNode input) {
 				for(MethodNode method : input.methods) {
-					if(method.desc.equals("(FJ)V") && (method.name.equals("a") || method.name.equals("renderWorld"))) {
-						LOG.info("CPM Hand hook: found renderWorld method");
+					if(method.name.equals("renderEquippedItems") || (method.name.equals("a") && method.desc.equals("(Lblg;F)V"))) {
+						LOG.info("CPM Cape Hook: Found renderEquippedItems");
 						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
 							AbstractInsnNode insnNode = it.next();
-							if(insnNode instanceof MethodInsnNode) {
-								MethodInsnNode mn = (MethodInsnNode) insnNode;
-								if(mn.desc.equals("(FI)V") && (mn.name.equals("renderHand") || (mn.owner.equals("blt") && mn.name.equals("b")))) {
-									LOG.info("CPM Hand hook: found renderHand method node");
-									while (it.hasNext()) {
-										insnNode = it.next();
-										if(insnNode instanceof VarInsnNode) {
-											method.instructions.insertBefore(insnNode, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "unbindHand", "()V", false));
-											LOG.info("CPM Hand hook: injected");
-											break;
-										}
-									}
+							if(insnNode instanceof FieldInsnNode) {
+								FieldInsnNode mn = (FieldInsnNode) insnNode;
+								if(mn.owner.equals("net/minecraftforge/client/event/RenderPlayerEvent$Specials$Pre") && mn.name.equals("renderCape")) {
+									LOG.info("CPM Cape Hook: Found renderCape");
+									InsnList lst = new InsnList();
+									lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
+									lst.add(new VarInsnNode(Opcodes.ALOAD, 1));
+									lst.add(new VarInsnNode(Opcodes.FLOAD, 2));
+									lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "renderCape", "(ZLnet/minecraft/client/renderer/entity/RenderPlayer;Lnet/minecraft/client/entity/AbstractClientPlayer;F)Z", false));
+									method.instructions.insert(insnNode, lst);
+								}
+							}
+						}
+					}
+					if(method.name.equals("renderFirstPersonArm") || (method.name.equals("a") && method.desc.equals("(Lyz;)V"))) {
+						LOG.info("CPM Hand Hook: Found renderFirstPersonArm");
+						InsnList lst = new InsnList();
+						lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
+						lst.add(new VarInsnNode(Opcodes.ALOAD, 1));
+						lst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onHandPre", "(Lnet/minecraft/client/renderer/entity/RenderPlayer;Lnet/minecraft/entity/player/EntityPlayer;)V", false));
+						method.instructions.insertBefore(method.instructions.getFirst(), lst);
+						LOG.info("CPM Render Hand Hook Pre: injected");
+
+						InsnList lst2 = new InsnList();
+						lst2.add(new VarInsnNode(Opcodes.ALOAD, 0));
+						lst2.add(new VarInsnNode(Opcodes.ALOAD, 1));
+						lst2.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onHandPost", "(Lnet/minecraft/client/renderer/entity/RenderPlayer;Lnet/minecraft/entity/player/EntityPlayer;)V", false));
+
+						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
+							AbstractInsnNode insnNode = it.next();
+							if(insnNode instanceof InsnNode){
+								if(insnNode.getOpcode() == Opcodes.RETURN) {
+									method.instructions.insertBefore(insnNode, lst2);
+									LOG.info("CPM Render Hand Hook Post: injected");
 								}
 							}
 						}

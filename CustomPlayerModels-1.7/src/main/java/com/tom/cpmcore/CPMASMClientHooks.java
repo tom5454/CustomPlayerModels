@@ -1,5 +1,6 @@
 package com.tom.cpmcore;
 
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -7,7 +8,7 @@ import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 
@@ -20,9 +21,12 @@ import com.tom.cpm.client.PlayerProfile;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.client.RetroGL;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.io.FastByteArrayInputStream;
+import com.tom.cpm.shared.model.RootModelType;
+import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.network.NetH;
-
-import io.netty.buffer.Unpooled;
 
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
@@ -33,12 +37,8 @@ public class CPMASMClientHooks {
 
 	public static void renderSkullPost(ModelBase skullModel, GameProfile profile) {
 		if(profile != null) {
-			ClientProxy.INSTANCE.unbind(skullModel);
+			ClientProxy.INSTANCE.manager.unbind(skullModel);
 		}
-	}
-
-	public static void unbindHand() {
-		ClientProxy.INSTANCE.unbind();
 	}
 
 	public static void loadSkinHook(MinecraftProfileTexture tex, final Type type, final SkinManager.SkinAvailableCallback cb) {
@@ -73,7 +73,7 @@ public class CPMASMClientHooks {
 
 	public static boolean onClientPacket(S3FPacketCustomPayload pckt, NetHandlerPlayClient handler) {
 		if(pckt.func_149169_c().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.func_149169_c()), new PacketBuffer(Unpooled.wrappedBuffer(pckt.func_149168_d())), (NetH) handler);
+			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.func_149169_c()), new FastByteArrayInputStream(pckt.func_149168_d()), (NetH) handler);
 			return true;
 		}
 		return false;
@@ -86,5 +86,33 @@ public class CPMASMClientHooks {
 	public static void prePlayerRender() {
 		RetroGL.color4f(1, 1, 1, 1);
 		RetroGL.renderCallLoc = 0;
+	}
+
+	public static void onHandPre(RenderPlayer this0, EntityPlayer player) {
+		ClientProxy.INSTANCE.manager.bindHand(player, null);
+		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+	}
+
+	public static void onHandPost(RenderPlayer this0, EntityPlayer player) {
+		ClientProxy.INSTANCE.manager.unbindClear();
+	}
+
+	public static boolean renderCape(boolean evtRC, RenderPlayer this0, AbstractClientPlayer player, float partialTicks) {
+		if(evtRC) {
+			Player<?, ?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+			if(pl != null) {
+				ModelDefinition def = pl.getModelDefinition();
+				if(def != null && def.hasRoot(RootModelType.CAPE)) {
+					if(!player.isInvisible() && !player.getHideCape()) {
+						ModelBiped model = this0.modelBipedMain;
+						ClientProxy.mc.getPlayerRenderManager().rebindModel(model);
+						ClientProxy.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
+						ClientProxy.renderCape(player, partialTicks, model, def);
+					}
+					return false;
+				}
+			}
+		}
+		return evtRC;
 	}
 }

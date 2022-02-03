@@ -2,7 +2,6 @@ package com.tom.cpm.shared.editor.gui;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.math.MatrixStack;
@@ -13,6 +12,7 @@ import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
+import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.editor.Editor;
@@ -20,10 +20,9 @@ import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.gui.panel.ViewportPanelBase3d;
 import com.tom.cpm.shared.model.RootModelType;
+import com.tom.cpm.shared.model.builtin.VanillaPlayerModel;
 import com.tom.cpm.shared.model.render.PlayerModelSetup;
-import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.model.render.RenderMode;
-import com.tom.cpm.shared.model.render.VanillaPlayerModel;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class ViewportPanel extends ViewportPanelBase3d {
@@ -37,8 +36,10 @@ public class ViewportPanel extends ViewportPanelBase3d {
 	@Override
 	public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
 		if(editor.renderBase)renderBase(stack, buf);
+		editor.definition.renderingPanel = this;
 		renderModel(stack, buf, partialTicks);
 		editor.render(stack, buf, this);
+		editor.definition.renderingPanel = null;
 	}
 
 	@Override
@@ -73,7 +74,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public AnimationMode getAnimMode() {
-		return AnimationMode.PLAYER;
+		return editor.getRenderedPose() == VanillaPose.SKULL_RENDER ? AnimationMode.SKULL : AnimationMode.PLAYER;
 	}
 
 	@Override
@@ -97,9 +98,10 @@ public class ViewportPanel extends ViewportPanelBase3d {
 	protected void poseModel(VanillaPlayerModel p, MatrixStack matrixstack, float partialTicks) {
 		p.reset();
 		p.setAllVisible(true);
-		setHeldItem(this, ItemSlot.RIGHT_HAND, ap -> p.rightArmPose = ap);
-		setHeldItem(this, ItemSlot.LEFT_HAND, ap -> p.leftArmPose = ap);
-		PlayerModelSetup.setRotationAngles(p, 0, 0, Hand.RIGHT, false);
+		p.rightArmPose = getHeldItem(ItemSlot.RIGHT_HAND).pose;
+		p.leftArmPose = getHeldItem(ItemSlot.LEFT_HAND).pose;
+		Hand hand = poseModel0(p, matrixstack, partialTicks);
+		PlayerModelSetup.setRotationAngles(p, 0, 0, hand, false);
 
 		if(!editor.applyAnim && editor.playerTpose) {
 			p.rightArm.zRot = (float) Math.toRadians(90);
@@ -119,12 +121,17 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 			case SNEAKING:
 				p.crouching = true;
-				PlayerModelSetup.setRotationAngles(p, 0, 0, Hand.RIGHT, false);
+				PlayerModelSetup.setRotationAngles(p, 0, 0, hand, false);
+				break;
+
+			case SNEAK_WALK:
+				p.crouching = true;
+				PlayerModelSetup.setRotationAngles(p, ls, lsa, hand, false);
 				break;
 
 			case RIDING:
 				p.riding = true;
-				PlayerModelSetup.setRotationAngles(p, 0, 0, Hand.RIGHT, false);
+				PlayerModelSetup.setRotationAngles(p, 0, 0, hand, false);
 				break;
 			case CUSTOM:
 			case DYING:
@@ -133,23 +140,24 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				break;
 
 			case FLYING:
+			case TRIDENT_SPIN:
 				matrixstack.translate(0.0D, 1.0D, -0.5d);
 				matrixstack.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(90));
 				p.head.xRot = -(float)Math.PI / 4F;
 				break;
 
 			case RUNNING:
-				PlayerModelSetup.setRotationAngles(p, ls, 1, Hand.RIGHT, false);
+				PlayerModelSetup.setRotationAngles(p, ls, 1, hand, false);
 				break;
 
 			case SWIMMING:
-				PlayerModelSetup.setRotationAngles(p, ls, lsa, Hand.RIGHT, true);
+				PlayerModelSetup.setRotationAngles(p, ls, lsa, hand, true);
 				matrixstack.translate(0.0D, 1.0D, -0.5d);
 				matrixstack.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(90));
 				break;
 
 			case WALKING:
-				PlayerModelSetup.setRotationAngles(p, ls, lsa, Hand.RIGHT, false);
+				PlayerModelSetup.setRotationAngles(p, ls, lsa, hand, false);
 				break;
 
 			case SKULL_RENDER:
@@ -164,18 +172,8 @@ public class ViewportPanel extends ViewportPanelBase3d {
 		});
 	}
 
-	private static void setHeldItem(ViewportPanelBase3d panel, ItemSlot hand, Consumer<ArmPose> pose) {
-		switch (panel.getHeldItem(hand)) {
-		case BLOCK:
-		case SWORD:
-		case SKULL:
-			pose.accept(ArmPose.ITEM);
-			break;
-		case NONE:
-		default:
-			pose.accept(ArmPose.EMPTY);
-			break;
-		}
+	protected Hand poseModel0(VanillaPlayerModel p, MatrixStack matrixstack, float partialTicks) {
+		return Hand.RIGHT;
 	}
 
 	@Override
@@ -186,5 +184,10 @@ public class ViewportPanel extends ViewportPanelBase3d {
 	@Override
 	public RenderTypes<RenderMode> getRenderTypes(String tex) {
 		return super.getRenderTypes(tex);
+	}
+
+	@Override
+	protected int drawParrots() {
+		return editor.drawParrots ? 3 : 0;
 	}
 }

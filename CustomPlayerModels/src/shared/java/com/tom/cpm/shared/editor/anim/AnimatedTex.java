@@ -147,11 +147,9 @@ public class AnimatedTex implements TreeElement {
 
 	private class OptionElem implements TreeElement {
 		protected String name;
-		private Tooltip tooltip;
 
 		public OptionElem(String name) {
 			this.name = name;
-			tooltip = new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.tree.at." + name));
 		}
 
 		@Override
@@ -171,7 +169,7 @@ public class AnimatedTex implements TreeElement {
 
 		@Override
 		public Tooltip getTooltip() {
-			return tooltip;
+			return new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.tree.at." + name));
 		}
 	}
 

@@ -187,11 +187,16 @@ import java.util.Stack;
  * <li>The SQRT() function implementation was taken from the book [The Java Programmers Guide To numerical Computing](http://www.amazon.de/Java-Number-Cruncher-Programmers-Numerical/dp/0130460419) (Ronald Mak, 2002)</li>
  * </ul>
  *
+ * <h1>tom5454 changes:</h1>
+ * <ul>
+ * <li>use float instead of BigDecimal
+ * <li>made fields protected
+ * <li>accepts numbers in '.##' and '-.##' format
+ * </ul>
+ * </p>
+ *
  *@author Udo Klimaschewski (http://about.me/udo.klimaschewski)
  *
- * tom5454 changes:
- * use float instead of BigDecimal
- * made fields protected
  */
 public class Expression {
 
@@ -404,12 +409,14 @@ public class Expression {
 			while (Character.isWhitespace(ch) && pos < input.length()) {
 				ch = input.charAt(++pos);
 			}
-			if (Character.isDigit(ch)) {
+			//tom5454: accept numbers starting with .###
+			if (Character.isDigit(ch) || (ch == decimalSeparator && Character.isDigit(peekNextChar()))) {
 				while ((Character.isDigit(ch) || ch == decimalSeparator) && pos < input.length()) {
 					token.append(input.charAt(pos++));
 					ch = pos == input.length() ? 0 : input.charAt(pos);
 				}
-			} else if (ch == minusSign && Character.isDigit(peekNextChar()) && ("(".equals(previousToken) || ",".equals(previousToken) || previousToken == null || operators.containsKey(previousToken))) {
+				//tom5454: accept numbers starting with -.###
+			} else if (ch == minusSign && (Character.isDigit(peekNextChar()) || (peekNextChar() == decimalSeparator && pos < input.length() - 2 && Character.isDigit(input.charAt(pos + 2)))) && ("(".equals(previousToken) || ",".equals(previousToken) || previousToken == null || operators.containsKey(previousToken))) {
 				token.append(minusSign);
 				pos++;
 				token.append(next());

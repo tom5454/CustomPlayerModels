@@ -57,4 +57,20 @@ public class Util {
 			// ignore
 		}
 	}
+
+	public static String hideIp(String ip) {
+		ip = ip.replaceAll("[0-9]", "*");
+		int cnt = 0;
+		StringBuilder bb = new StringBuilder();
+		for(int i = 0;i<ip.length();i++) {
+			char c = ip.charAt(i);
+			if(c == '.' || c == ':')cnt = -1;
+			if(cnt++ > 1) {
+				c = '*';
+			}
+			bb.append(c);
+		}
+		ip = bb.toString();
+		return ip;
+	}
 }

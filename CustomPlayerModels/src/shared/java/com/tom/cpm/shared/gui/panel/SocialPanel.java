@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.gui.panel;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.config.SocialConfig;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.gui.panel.SocialPlayerPanel.SafetyPopup;
+import com.tom.cpm.shared.skin.TextureProvider;
 
 public class SocialPanel extends Panel {
 	private final Frame frm;
@@ -34,6 +36,7 @@ public class SocialPanel extends Panel {
 	private ViewportCamera cam;
 	private ListPanel<PlayerInServer> playerList;
 	private int listWidth, scrollWidth;
+	private List<TextureProvider> vanillaSkins = new ArrayList<>();
 
 	@SuppressWarnings("unchecked")
 	public SocialPanel(Frame frm, int width, int height, ViewportCamera cam, UUID selected, boolean isInServer) {
@@ -111,21 +114,24 @@ public class SocialPanel extends Panel {
 	@SuppressWarnings("unchecked")
 	private class PlayerInServer {
 		private Object gp;
+		private UUID uuid;
 
 		private PlayerInServer(Object gp) {
 			this.gp = gp;
+			uuid = MinecraftClientAccess.get().getDefinitionLoader().getGP_UUID(gp);
+			if(uuid == null)uuid = UUID.randomUUID();
 		}
 
 		private PlayerInServer(Player<?, ?> pl) {
-			this.gp = pl.getGameProfile();
+			this(pl.getGameProfile());
 		}
 
 		public Player<?, ?> getPlayer() {
-			return MinecraftClientAccess.get().getDefinitionLoader().loadPlayer(gp);
+			return MinecraftClientAccess.get().getDefinitionLoader().loadPlayer(gp, "social_gui");
 		}
 
 		public UUID getUUID() {
-			return MinecraftClientAccess.get().getDefinitionLoader().getGP_UUID(gp);
+			return uuid;
 		}
 
 		private boolean isOtherPlayer() {
@@ -134,13 +140,19 @@ public class SocialPanel extends Panel {
 
 		@Override
 		public String toString() {
+			String name = getName();
+			if(name.length() > 16)name = gui.i18nFormat("label.cpm.shortName", name.substring(0, 15));
+			return name;
+		}
+
+		private String getName() {
 			String name = MinecraftClientAccess.get().getDefinitionLoader().getGP_Name(gp);
 			if(name == null)return gui.i18nFormat("label.cpm.unknown");
 			return name;
 		}
 
 		private Tooltip getTooltip() {
-			return new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerUUID", getUUID().toString()));
+			return new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerUUID", getName(), getUUID().toString()));
 		}
 	}
 
@@ -253,5 +265,7 @@ public class SocialPanel extends Panel {
 	public void cleanup() {
 		if(scrollPlayer.getDisplay() != null)
 			((SocialPlayerPanel)scrollPlayer.getDisplay()).cleanup();
+		vanillaSkins.forEach(TextureProvider::free);
+		vanillaSkins.clear();
 	}
 }

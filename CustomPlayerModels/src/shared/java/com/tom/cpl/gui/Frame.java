@@ -71,6 +71,16 @@ public abstract class Frame extends Panel {
 	public abstract void initFrame(int width, int height);
 
 	public void openPopup(PopupPanel popup) {
+		for (GuiElement e : this.popup.getElements()) {
+			if(e instanceof PopupLayer) {
+				PopupLayer l = (PopupLayer) e;
+				if(l.popup == popup) {
+					this.popup.remove(l);
+					this.popup.add(l);
+					return;
+				}
+			}
+		}
 		this.popup.add(new PopupLayer(popup));
 	}
 
@@ -220,5 +230,9 @@ public abstract class Frame extends Panel {
 	}
 
 	public void logMessage(String msg) {
+	}
+
+	public boolean enableChat() {
+		return false;
 	}
 }

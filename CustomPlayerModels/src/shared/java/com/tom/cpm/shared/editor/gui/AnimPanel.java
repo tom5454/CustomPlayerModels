@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.gui;
 
 import java.util.Collections;
+import java.util.Comparator;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
@@ -8,8 +9,8 @@ import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
-import com.tom.cpl.gui.elements.DropDownBox;
 import com.tom.cpl.gui.elements.Label;
+import com.tom.cpl.gui.elements.ListPicker;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.Tooltip;
@@ -18,6 +19,9 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.ListView;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.IPose;
+import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
@@ -26,7 +30,7 @@ import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 
 public class AnimPanel extends Panel {
 	private Editor editor;
-	private DropDownBox<IAnim> animSel;
+	private ListPicker<IAnim> animSel;
 	private TabFocusHandler tabHandler;
 	private Button prevFrm, nextFrm;
 
@@ -37,13 +41,26 @@ public class AnimPanel extends Panel {
 		setBounds(new Box(0, 0, 170, 330));
 		setBackgroundColor(gui.getColors().panel_background);
 
-		animSel = new DropDownBox<>(e, new CombinedListView<IAnim>(Collections.singletonList(new IAnim() {
+		animSel = new ListPicker<>(e, new CombinedListView<IAnim>(Collections.singletonList(new IAnim() {
 			@Override
 			public String toString() {
 				return gui.i18nFormat("label.cpm.no_animation");
 			}
+
+			@Override
+			public String noAnim() {
+				return "";
+			}
 		}), new ListView<>(editor.animations, v -> (IAnim) v)));
 		animSel.setBounds(new Box(5, 5, 160, 20));
+		animSel.setListLoader(l -> {
+			l.setComparator(
+					Comparator.comparing(IAnim::noAnim, Comparator.nullsLast(Comparator.naturalOrder())).
+					thenComparing(Comparator.comparing(IAnim::getPose0, Comparator.nullsLast(Comparator.naturalOrder()))).
+					thenComparing(Comparator.comparing(IAnim::getPose1, Comparator.nullsLast(Comparator.naturalOrder()))).
+					thenComparing(Comparator.comparing(IAnim::toString))
+					);
+		});
 		addElement(animSel);
 		animSel.setAction(() -> {
 			IAnim sel = animSel.getSelected();
@@ -175,7 +192,29 @@ public class AnimPanel extends Panel {
 		tabHandler.add(animPriority);
 	}
 
-	public interface IAnim {}
+	public static interface IAnim {
+		default IPose getPose() {
+			return null;
+		}
+
+		default VanillaPose getPose0() {
+			IPose pose = getPose();
+			if(pose == null || !(pose instanceof VanillaPose))
+				return null;
+			return (VanillaPose) pose;
+		}
+
+		default String getPose1() {
+			IPose pose = getPose();
+			if(pose == null || !(pose instanceof CustomPose))
+				return null;
+			return ((CustomPose) pose).getName();
+		}
+
+		default String noAnim() {
+			return null;
+		}
+	}
 
 	@Override
 	public void setVisible(boolean visible) {

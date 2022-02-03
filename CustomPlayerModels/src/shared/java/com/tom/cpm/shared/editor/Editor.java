@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.tom.cpl.gui.UIColors;
 import com.tom.cpl.gui.UpdaterRegistry;
 import com.tom.cpl.gui.UpdaterRegistry.Updater;
 import com.tom.cpl.gui.elements.MessagePopup;
+import com.tom.cpl.gui.elements.Tree.TreeHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
@@ -35,8 +37,8 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.config.Player;
-import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.actions.Action;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
@@ -57,18 +59,20 @@ import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.tree.ScalingElement;
 import com.tom.cpm.shared.editor.tree.TexturesElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
 import com.tom.cpm.shared.gui.ViewportCamera;
+import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.PlayerModelParts;
-import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.PerFaceUV.Dir;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 import com.tom.cpm.shared.model.render.RenderMode;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.PlayerModelLayer;
@@ -126,6 +130,7 @@ public class Editor {
 	public Updater<Boolean> setAutoUV = updaterReg.create();
 	public Updater<Boolean> setEnAddAnimTex = updaterReg.create();
 	public Updater<Pair<Integer, String>> setInfoMsg = updaterReg.create();
+	public TreeHandler<TreeElement> treeHandler = new TreeHandler<>(new ModelTree(this));
 
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
@@ -136,8 +141,12 @@ public class Editor {
 	public boolean onlyDrawOnSelected = true;
 	public boolean playVanillaAnims = true;
 	public boolean playAnimatedTex = true;
+	public boolean drawParrots = false;
+	public boolean displayChat = true;
 	public EnumMap<ItemSlot, DisplayItem> handDisplay = new EnumMap<>(ItemSlot.class);
 	public Set<PlayerModelLayer> modelDisplayLayers = new HashSet<>();
+	public float animTestSlider;
+	public Set<VanillaPose> testPoses = EnumSet.noneOf(VanillaPose.class);
 	public ScalingElement scalingElem = new ScalingElement(this);
 	public Dir perfaceFaceDir = Dir.UP;
 
@@ -173,7 +182,7 @@ public class Editor {
 	public Image vanillaSkin;
 	public boolean dirty, autoSaveDirty;
 	public long lastEdit;
-	public ModelDefinition definition;
+	public EditorDefinition definition;
 	public Map<TextureSheetType, ETextures> textures = new HashMap<>();
 	public File file;
 	public ProjectFile project = new ProjectFile();
@@ -207,6 +216,7 @@ public class Editor {
 			action("set", "label.cpm.name").
 			updateValueOp(selectedElement, selectedElement.getElemName(), name, TreeElement::setElemName).
 			execute();
+			treeHandler.update();
 			updateGui.accept(null);
 		}
 	}
@@ -358,13 +368,17 @@ public class Editor {
 	}
 
 	public void markDirty() {
+		markDirty0();
+		redoQueue.clear();
+		setUndo.accept(undoQueue.empty() ? null : undoQueue.peek().getName());
+		setRedo.accept(null);
+	}
+
+	public void markDirty0() {
 		setNameDisplay.accept((file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : file.getName()) + "*");
 		dirty = true;
 		if(!autoSaveDirty)lastEdit = System.currentTimeMillis();
 		autoSaveDirty = true;
-		redoQueue.clear();
-		setUndo.accept(undoQueue.empty() ? null : undoQueue.peek().getName());
-		setRedo.accept(null);
 	}
 
 	public void updateGui() {
@@ -427,7 +441,7 @@ public class Editor {
 							setAnimPos.accept(new Vec3f());
 							setAnimRot.accept(new Vec3f());
 						} else if(selectedElement.type == ElementType.ROOT_PART){
-							PlayerPartValues val = PlayerPartValues.getFor((PlayerModelParts) selectedElement.typeData, skinType);
+							PartValues val = ((VanillaModelPart)selectedElement.typeData).getDefaultSize(skinType);
 							setAnimPos.accept(val.getPos());
 							setAnimRot.accept(new Vec3f());
 						} else {
@@ -454,7 +468,8 @@ public class Editor {
 			}
 			setFrameAddEn.accept(true);
 			setAnimDelEn.accept(true);
-			setAnimDuration.accept(selectedAnim.duration);
+			if(!(selectedAnim.pose instanceof VanillaPose && ((VanillaPose)selectedAnim.pose).hasStateGetter()))
+				setAnimDuration.accept(selectedAnim.duration);
 			setAnimPlayEn.accept(selectedAnim.getFrames().size() > 1);
 			setAnimPriority.accept(selectedAnim.priority);
 		}
@@ -462,6 +477,7 @@ public class Editor {
 		ETextures tex = getTextureProvider();
 		setSkinEdited.accept(tex != null ? tex.isEdited() : false);
 		setReload.accept(tex != null && tex.file != null ? tex.file.getName() : null);
+		treeHandler.update();
 		updateGui.accept(null);
 	}
 
@@ -522,7 +538,7 @@ public class Editor {
 	}
 
 	public void preRender() {
-		definition.clearTransforms();
+		definition.itemTransforms.clear();
 		elements.forEach(ModelElement::preRender);
 		applyAnimations();
 		if(playAnimatedTex)textures.values().forEach(ETextures::updateAnim);
@@ -631,6 +647,7 @@ public class Editor {
 			redoQueue.add(r);
 			r.undo();
 		}
+		markDirty0();
 		updateGui();
 	}
 
@@ -641,6 +658,7 @@ public class Editor {
 			undoQueue.add(r);
 			r.run();
 		}
+		markDirty0();
 		updateGui();
 	}
 
@@ -695,7 +713,7 @@ public class Editor {
 		}
 	}
 
-	public void addNewAnim(IPose pose, String displayName, boolean add, boolean loop) {
+	public void addNewAnim(IPose pose, String displayName, boolean add, boolean loop, InterpolatorType it) {
 		String fname = null;
 		AnimationType type;
 		if(pose instanceof VanillaPose) {
@@ -713,13 +731,14 @@ public class Editor {
 		anim.add = add;
 		anim.loop = loop;
 		anim.displayName = displayName;
+		anim.intType = it;
 		action("add", "action.cpm.anim").addToList(animations, anim).onUndo(() -> selectedAnim = null).execute();
 		selectedAnim = anim;
 		markDirty();
 		updateGui();
 	}
 
-	public void editAnim(IPose pose, String displayName, boolean add, boolean loop) {
+	public void editAnim(IPose pose, String displayName, boolean add, boolean loop, InterpolatorType it) {
 		if(selectedAnim != null) {
 			String fname = null;
 			AnimationType type;
@@ -740,6 +759,8 @@ public class Editor {
 			updateValueOp(selectedAnim, selectedAnim.pose, pose, (a, b) -> a.pose = b).
 			updateValueOp(selectedAnim, selectedAnim.type, type, (a, b) -> a.type = b).
 			updateValueOp(selectedAnim, selectedAnim.filename, fname, (a, b) -> a.filename = b).
+			updateValueOp(selectedAnim, selectedAnim.intType, it, (a, b) -> a.intType = b).
+			onAction(selectedAnim, EditorAnim::clearCache).
 			execute();
 			updateGui();
 		}
@@ -903,15 +924,18 @@ public class Editor {
 
 	public void render(MatrixStack stack, VBuffers buf, ViewportPanel panel) {
 		if(drawBoundingBox) {
-			VanillaPose pose = null;
-			if(applyAnim && selectedAnim != null && selectedAnim.pose instanceof VanillaPose) {
-				pose = (VanillaPose) selectedAnim.pose;
-			} else if(applyAnim && renderedPose != null && renderedPose instanceof VanillaPose) {
-				pose = (VanillaPose) renderedPose;
-			}
-
-			RenderUtil.renderBounds(stack, buf.getBuffer(panel.getRenderTypes(), RenderMode.OUTLINE), pose, applyScaling ? scalingElem.entityScaling : 0);
+			RenderUtil.renderBounds(stack, buf.getBuffer(panel.getRenderTypes(), RenderMode.OUTLINE), getRenderedPose(), applyScaling, scalingElem);
 		}
+	}
+
+	public VanillaPose getRenderedPose() {
+		VanillaPose pose = null;
+		if(applyAnim && selectedAnim != null && selectedAnim.pose instanceof VanillaPose) {
+			pose = (VanillaPose) selectedAnim.pose;
+		} else if(applyAnim && renderedPose != null && renderedPose instanceof VanillaPose) {
+			pose = (VanillaPose) renderedPose;
+		}
+		return pose;
 	}
 
 	public void animMoveFrame(int i) {

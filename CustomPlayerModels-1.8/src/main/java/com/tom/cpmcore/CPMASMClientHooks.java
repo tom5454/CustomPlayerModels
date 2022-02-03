@@ -28,6 +28,8 @@ import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.network.NetH;
 
+import io.netty.buffer.ByteBufInputStream;
+
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
 		if(profile != null) {
@@ -37,12 +39,8 @@ public class CPMASMClientHooks {
 
 	public static void renderSkullPost(ModelBase skullModel, GameProfile profile) {
 		if(profile != null) {
-			ClientProxy.INSTANCE.unbind(skullModel);
+			ClientProxy.INSTANCE.manager.unbind(skullModel);
 		}
-	}
-
-	public static void unbindHand(AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.unbindHand(player);
 	}
 
 	public static void renderArmor(ModelBase in, Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale, RendererLivingEntity<?> renderer) {
@@ -75,7 +73,7 @@ public class CPMASMClientHooks {
 
 	public static boolean onClientPacket(S3FPacketCustomPayload pckt, NetHandlerPlayClient handler) {
 		if(pckt.getChannelName().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.getChannelName()), pckt.getBufferData(), (NetH) handler);
+			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.getChannelName()), new ByteBufInputStream(pckt.getBufferData()), (NetH) handler);
 			return true;
 		}
 		return false;
@@ -89,8 +87,8 @@ public class CPMASMClientHooks {
 
 	public static void onArmorPost(LayerArmorBase this0, EntityLivingBase entitylivingbaseIn) {
 		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.unbind(this0.field_177186_d);
-			ClientProxy.INSTANCE.unbind(this0.field_177189_c);
+			ClientProxy.INSTANCE.manager.unbind(this0.field_177186_d);
+			ClientProxy.INSTANCE.manager.unbind(this0.field_177189_c);
 		}
 	}
 
@@ -113,5 +111,23 @@ public class CPMASMClientHooks {
 
 	public static boolean renderCape(LayerCape this0, EntityLivingBase entitylivingbaseIn, float partialTicks) {
 		return renderCape(this0, (AbstractClientPlayer) entitylivingbaseIn, partialTicks);
+	}
+
+	public static void onHandRightPre(RenderPlayer this0, AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.manager.bindHand(player, null);
+		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+	}
+
+	public static void onHandRightPost(RenderPlayer this0, AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.manager.unbindClear();
+	}
+
+	public static void onHandLeftPre(RenderPlayer this0, AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.manager.bindHand(player, null);
+		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+	}
+
+	public static void onHandLeftPost(RenderPlayer this0, AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.manager.unbindClear();
 	}
 }

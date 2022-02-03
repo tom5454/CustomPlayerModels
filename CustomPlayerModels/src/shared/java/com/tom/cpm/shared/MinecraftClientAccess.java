@@ -12,6 +12,7 @@ import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.ImageIO.IImageIO;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.MojangAPI;
@@ -27,13 +28,13 @@ public interface MinecraftClientAccess {
 	}
 
 	default Player<?, ?> getClientPlayer() {
-		return getDefinitionLoader().loadPlayer(getPlayerIDObject());
+		return getDefinitionLoader().loadPlayer(getPlayerIDObject(), ModelDefinitionLoader.PLAYER_UNIQUE);
 	}
 
 	default Player<?, ?> getCurrentClientPlayer() {
 		Object v = getCurrentPlayerIDObject();
 		if(v == null)return getClientPlayer();
-		return getDefinitionLoader().loadPlayer(v);
+		return getDefinitionLoader().loadPlayer(v, ModelDefinitionLoader.PLAYER_UNIQUE);
 	}
 
 	Object getPlayerIDObject();
@@ -44,7 +45,7 @@ public interface MinecraftClientAccess {
 	boolean isInGame();
 	List<IKeybind> getKeybinds();
 	File getGameDir();
-	NetHandler<?, ?, ?, ?, ?> getNetHandler();
+	NetHandler<?, ?, ?> getNetHandler();
 	void openGui(Function<IGui, Frame> creator);
 	IImageIO getImageIO();
 	MojangAPI getMojangAPI();
@@ -68,11 +69,16 @@ public interface MinecraftClientAccess {
 		getNetHandler().sendSkinData();
 	}
 
-	default void setModelScale(float scl) {
+	default void setModelScale(ScaleData scl) {
 		getNetHandler().setScale(scl);
 	}
 
 	default ServerStatus getServerSideStatus() {
 		return isInGame() ? getNetHandler().hasModClient() ? ServerStatus.INSTALLED : ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
+	}
+
+	default void onLogOut() {
+		getDefinitionLoader().clearServerData();
+		getNetHandler().onLogOut();
 	}
 }

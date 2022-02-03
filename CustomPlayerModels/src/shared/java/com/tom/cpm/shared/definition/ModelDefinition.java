@@ -3,7 +3,6 @@ package com.tom.cpm.shared.definition;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +30,11 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.ItemRenderer;
+import com.tom.cpm.shared.model.render.ItemTransform;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.IResolvedModelPart;
@@ -40,7 +42,6 @@ import com.tom.cpm.shared.parts.ModelPartCloneable;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
 import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
-import com.tom.cpm.shared.parts.ModelPartScale;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinLink;
 import com.tom.cpm.shared.skin.TextureProvider;
@@ -58,11 +59,11 @@ public class ModelDefinition {
 	private Map<Integer, RenderedCube> cubeMap;
 	private Map<TextureSheetType, TextureProvider> textures;
 	private TextureProvider skinTexture;
-	private Map<ItemSlot, MatrixStack.Entry> slotTransforms = new EnumMap<>(ItemSlot.class);
+	public Map<ItemRenderer, ItemTransform> itemTransforms = new HashMap<>();
 	protected Map<VanillaModelPart, PartRoot> rootRenderingCubes;
 	private ModelLoadingState resolveState = ModelLoadingState.NEW;
 	private AnimationRegistry animations = new AnimationRegistry();
-	private ModelPartScale scale;
+	private ScaleData scale;
 	private boolean stitchedTexture;
 	public boolean hideHeadIfSkull = true, removeArmorOffset;
 	public ModelPartCloneable cloneable;
@@ -388,11 +389,11 @@ public class ModelDefinition {
 		return playerObj.getSkinType();
 	}
 
-	public void setScale(ModelPartScale scale) {
+	public void setScale(ScaleData scale) {
 		this.scale = scale;
 	}
 
-	public ModelPartScale getScale() {
+	public ScaleData getScale() {
 		return scale;
 	}
 
@@ -419,12 +420,16 @@ public class ModelDefinition {
 		clear();
 	}
 
-	public MatrixStack.Entry getTransform(ItemSlot slot) {
-		return slotTransforms.get(slot);
+	public ItemTransform getTransform(ItemSlot slot) {
+		return itemTransforms.keySet().stream().filter(s -> s.slot == slot).findFirst().map(this::getTransform).orElse(null);
 	}
 
-	public void storeTransform(ItemSlot slot, MatrixStack stack) {
-		slotTransforms.put(slot, stack.storeLast());
+	public ItemTransform getTransform(ItemRenderer slot) {
+		return itemTransforms.get(slot);
+	}
+
+	public void storeTransform(ItemRenderer render, MatrixStack stack, boolean doRender) {
+		itemTransforms.computeIfAbsent(render, k -> new ItemTransform()).set(stack, doRender);
 	}
 
 	private void clear() {
@@ -437,11 +442,7 @@ public class ModelDefinition {
 		rootRenderingCubes = null;
 		animations = null;
 		scale = null;
-		slotTransforms = null;
-	}
-
-	public void clearTransforms() {
-		slotTransforms.clear();
+		itemTransforms = null;
 	}
 
 	public static enum ModelLoadingState {
@@ -477,5 +478,17 @@ public class ModelDefinition {
 
 	public boolean isRemoveArmorOffset() {
 		return removeArmorOffset;
+	}
+
+	public Vec3f getRenderPosition() {
+		return scale != null ? scale.getRPos() : new Vec3f();
+	}
+
+	public Vec3f getRenderRotation() {
+		return scale != null ? scale.getRRotation() : new Vec3f();
+	}
+
+	public Vec3f getRenderScale() {
+		return scale != null ? scale.getRScale() : new Vec3f();
 	}
 }

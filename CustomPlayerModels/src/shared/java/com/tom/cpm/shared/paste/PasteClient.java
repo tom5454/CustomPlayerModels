@@ -2,7 +2,9 @@ package com.tom.cpm.shared.paste;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -12,27 +14,43 @@ import java.util.Map;
 
 import com.google.gson.JsonParseException;
 
+import com.tom.cpl.text.FormatText;
+import com.tom.cpl.util.LocalizedIOException;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.io.HTTPIO;
+import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.MojangAPI;
 
 public class PasteClient {
 	public static final String URL = "https://paste.tom5454.com";
+	public static final String URL_CF = "https://cf-paste.tom5454.com";
 	private MojangAPI mojang;
-	private String url;
+	private String url, fallback;
 	private String session;
 	private long loginTime = -1;
 	private int maxSize = -1, maxPastes = -1;
 
-	public PasteClient(MojangAPI mojang, String url) {
+	public PasteClient(MojangAPI mojang, String url, String fallback) {
 		this.mojang = mojang;
 		this.url = url;
+		this.fallback = fallback;
 	}
 
 	public void connect() throws IOException {
 		URL url = new URL(this.url + "/api/connect?name=" + mojang.getName());
 		HttpURLConnection httpCon = HTTPIO.createUrlConnection(url, false);
-		String response = HTTPIO.getResponse(httpCon, url);
+		String response;
+		try {
+			response = HTTPIO.getResponse(httpCon, url);
+			Log.info("[Paste API]: Connected to paste site");
+		} catch (SocketTimeoutException | ConnectException e) {
+			Log.info("[Paste API]: Paste site timeout, trying fallback");
+			url = new URL(this.fallback + "/api/connect?name=" + mojang.getName());
+			httpCon = HTTPIO.createUrlConnection(url, false);
+			response = HTTPIO.getResponse(httpCon, url);
+			this.url = this.fallback;
+			Log.info("[Paste API]: Connection success using fallback");
+		}
 		Map<String, Object> r = parseResponse(response);
 		session = (String) r.get("id");
 		byte[] mojKey = Base64.getDecoder().decode((String) r.get("key"));
@@ -40,14 +58,19 @@ public class PasteClient {
 		try {
 			mojangKey = digestData("tom5454-paste".getBytes(), session.getBytes(), mojKey);
 		} catch (Exception e) {
-			throw new LocalizedIOException("Unknown error", "error.paste.unknown", e);
+			throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"), e);
 		}
-		mojang.joinServer(new BigInteger(mojangKey).toString(16));
+		try {
+			mojang.joinServer(new BigInteger(mojangKey).toString(16));
+		} catch (LocalizedIOException e) {
+			throw new LocalizedIOException(e.getMessage(), new FormatText("error.paste.authFail", e.getLoc()), e.getCause());
+		}
 		url = new URL(this.url + "/api/session");
 		httpCon = createUrlConnection(url);
 		response = HTTPIO.getResponse(httpCon, url);
 		parseResponse(response);
 		loginTime = System.currentTimeMillis();
+		Log.info("[Paste API]: Connection success");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -123,30 +146,11 @@ public class PasteClient {
 			if(r.containsKey("error")) {
 				if("error.paste.invalidSession".equals(r.get("errorMessage")))
 					loginTime = -1;
-				throw new LocalizedIOException(String.valueOf(r.get("error")), String.valueOf(r.get("errorMessage")));
+				throw new LocalizedIOException(String.valueOf(r.get("error")), new FormatText(String.valueOf(r.get("errorMessage"))));
 			}
 			return r;
 		} catch (ClassCastException | JsonParseException e) {
-			throw new LocalizedIOException("Result parse error", "error.paste.parseError", e);
-		}
-	}
-
-	public static class LocalizedIOException extends IOException {
-		private static final long serialVersionUID = -6332369839511402034L;
-		private String loc;
-
-		public LocalizedIOException(String msg, String loc) {
-			super(msg);
-			this.loc = loc;
-		}
-
-		public LocalizedIOException(String msg, String loc, Throwable thr) {
-			super(msg, thr);
-			this.loc = loc;
-		}
-
-		public String getLoc() {
-			return loc;
+			throw new LocalizedIOException("Result parse error", new FormatText("error.paste.parseError"), e);
 		}
 	}
 

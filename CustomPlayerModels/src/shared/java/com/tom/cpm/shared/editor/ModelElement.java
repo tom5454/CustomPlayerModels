@@ -185,7 +185,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 		case SCALE:
 			editor.action("set", "label.cpm.scale").
-			updateValueOp(this, this.pos, v, 0, 25, false, (a, b) -> a.scale = b, editor.setScale).
+			updateValueOp(this, this.scale, v, 0, 25, false, (a, b) -> a.scale = b, editor.setScale).
 			execute();
 			break;
 
@@ -342,6 +342,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 		case HIDE:
 			editor.action("switch", "label.cpm.hidden_effect").updateValueOp(this, this.hidden, !this.hidden, (a, b) -> a.hidden = b, editor.setHiddenEffect).execute();
+			editor.treeHandler.update();
 			editor.updateGui.accept(null);
 			break;
 

@@ -70,33 +70,20 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 	}
 
 	private static class RedirectHolderPlayer extends RDH {
-		private RedirectRenderer<ModelRenderer> bipedLeftArm;
-		private RedirectRenderer<ModelRenderer> bipedRightArm;
-		private RedirectRenderer<ModelRenderer> bipedLeftArmwear;
-		private RedirectRenderer<ModelRenderer> bipedRightArmwear;
+		private RedirectRenderer<ModelRenderer> head;
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, ModelBiped model) {
 			super(mngr, model);
-			register(new Field<>(() -> model.bipedHead        , v -> model.bipedHead         = v, PlayerModelParts.HEAD), p -> !((PlayerProfile)p).hasPlayerHead);
-			register(new Field<>(() -> model.bipedBody        , v -> model.bipedBody         = v, PlayerModelParts.BODY));
-			bipedRightArm = register(new Field<>(() -> model.bipedRightArm    , v -> model.bipedRightArm     = v, PlayerModelParts.RIGHT_ARM));
-			bipedLeftArm = register(new Field<>(() -> model.bipedLeftArm     , v -> model.bipedLeftArm      = v, PlayerModelParts.LEFT_ARM));
-			register(new Field<>(() -> model.bipedRightLeg    , v -> model.bipedRightLeg     = v, PlayerModelParts.RIGHT_LEG));
-			register(new Field<>(() -> model.bipedLeftLeg     , v -> model.bipedLeftLeg      = v, PlayerModelParts.LEFT_LEG));
+			head = registerHead(new Field<>(() -> model.bipedHead, v -> model.bipedHead = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.bipedBody    , v -> model.bipedBody     = v, PlayerModelParts.BODY));
+			register(new Field<>(() -> model.bipedRightArm, v -> model.bipedRightArm = v, PlayerModelParts.RIGHT_ARM));
+			register(new Field<>(() -> model.bipedLeftArm , v -> model.bipedLeftArm  = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.bipedLeftLeg , v -> model.bipedLeftLeg  = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.bipedHeadwear    , v -> model.bipedHeadwear     = v, null));
+			register(new Field<>(() -> model.bipedHeadwear, v -> model.bipedHeadwear = v, null)).setCopyFrom(head);
 
-			//register(new Field<>(() -> model.bipedCloak       , v -> model.bipedCloak     = v, RootModelType.CAPE));
-		}
-
-		@Override
-		public boolean skipTransform(RedirectRenderer<ModelRenderer> part) {
-			ModelBiped model = (ModelBiped) this.model;
-			boolean skipTransform = false;
-			if(bipedRightArm == part && model.aimedBow) {
-				skipTransform = true;
-			}
-			return skipTransform;
+			register(new Field<>(() -> model.bipedCloak,    v -> model.bipedCloak    = v, RootModelType.CAPE));
 		}
 	}
 

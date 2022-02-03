@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
+
+import com.tom.cpl.math.MatrixStack;
 
 public class VBuffers {
 	private Function<NativeRenderType, VertexBuffer> bufferFactory;
@@ -88,5 +91,14 @@ public class VBuffers {
 		public void finish() {
 			bufs.finish(rt);
 		}
+	}
+
+	public VBuffers map(UnaryOperator<VertexBuffer> map) {
+		return new VBuffers(rt -> map.apply(getBuffer(rt)), normalBuffer != null ? map.apply(normalBuffer) : null);
+	}
+
+	public VBuffers transform(MatrixStack stack) {
+		MatrixStack.Entry e = stack.storeLast();
+		return map(b -> new TransformedBuffer(b, e));
 	}
 }

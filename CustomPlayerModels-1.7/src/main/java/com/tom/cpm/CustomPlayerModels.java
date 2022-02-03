@@ -6,11 +6,16 @@ import java.util.EnumSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
+
 import net.minecraftforge.common.MinecraftForge;
 
 import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.util.ILogger;
-import com.tom.cpm.common.CommandCPM;
+import com.tom.cpm.common.Command;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -49,7 +54,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@EventHandler
 	public void serverStart(FMLServerStartingEvent evt) {
 		MinecraftObjectHolder.setServerObject(new MinecraftServerObject(evt.getServer()));
-		evt.registerServerCommand(new CommandCPM());
+		new Command(evt::registerServerCommand);
 	}
 
 	@EventHandler
@@ -86,5 +91,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public String getPlatformVersionString() {
 		return "Minecraft 1.7.10 (" + FMLCommonHandler.instance().getModName() + ") " + Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
+	}
+
+	@Override
+	public TextRemapper<IChatComponent> getTextRemapper() {
+		return new TextRemapper<>(ChatComponentTranslation::new, ChatComponentText::new, IChatComponent::appendSibling, null);
 	}
 }

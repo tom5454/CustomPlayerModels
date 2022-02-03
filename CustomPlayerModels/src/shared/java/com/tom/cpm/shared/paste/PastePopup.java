@@ -16,15 +16,15 @@ import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.LocalizedIOException;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpl.util.ThrowingFunction;
 import com.tom.cpl.util.ThrowingRunnable;
 import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.paste.PasteClient.LocalizedIOException;
 import com.tom.cpm.shared.paste.PasteClient.Paste;
 
 public class PastePopup extends PopupPanel {
-	private static PasteClient client = new PasteClient(MinecraftClientAccess.get().getMojangAPI(), PasteClient.URL);
+	private static PasteClient client = new PasteClient(MinecraftClientAccess.get().getMojangAPI(), PasteClient.URL, PasteClient.URL_CF);
 	private final Frame frm;
 	private Panel panel;
 	private ScrollPanel scp;
@@ -59,7 +59,7 @@ public class PastePopup extends PopupPanel {
 		IGui gui = frm.getGui();
 		if(e instanceof LocalizedIOException) {
 			frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.error"),
-					gui.i18nFormat(((LocalizedIOException) e).getLoc()),
+					gui.i18nFormat("label.cpm.paste.error", ((LocalizedIOException) e).getLoc().toString(gui)),
 					retry, () -> {
 						if(!client.isConnected())
 							close.run();

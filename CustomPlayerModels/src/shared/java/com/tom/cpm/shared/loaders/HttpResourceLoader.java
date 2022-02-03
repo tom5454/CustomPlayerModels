@@ -21,6 +21,10 @@ public abstract class HttpResourceLoader implements ResourceLoader {
 	@Override
 	public byte[] loadResource(String path, ResourceEncoding enc, ModelDefinition def) throws IOException {
 		URL url = createURL(path);
+		return loadResource(url, enc, def);
+	}
+
+	protected byte[] loadResource(URL url, ResourceEncoding enc, ModelDefinition def) throws IOException {
 		InputStream web = null;
 		URLConnection connection = null;
 		try {

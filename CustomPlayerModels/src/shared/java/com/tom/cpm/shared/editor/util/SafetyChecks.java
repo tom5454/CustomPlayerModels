@@ -1,6 +1,6 @@
 package com.tom.cpm.shared.editor.util;
 
-import com.tom.cpl.util.FormatText;
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.util.SafetyLevel.SafetyReport;

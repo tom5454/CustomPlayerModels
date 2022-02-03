@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationHandler;
+import com.tom.cpm.shared.animation.AnimationState;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -21,9 +22,13 @@ public abstract class Player<P, M> {
 	private CompletableFuture<ModelDefinition> definition;
 	private EnumMap<AnimationMode, AnimationHandler> animHandler = new EnumMap<>(AnimationMode.class);
 	private PlayerTextureLoader textures;
+	public AnimationState animState = new AnimationState();
+
 	public VanillaPose prevPose;
 	public IPose currentPose;
+
 	public boolean forcedSkin;
+	public boolean sentEventSubs;
 
 	public PlayerTextureLoader getTextures() {
 		if(textures == null) {
@@ -37,11 +42,10 @@ public abstract class Player<P, M> {
 	protected abstract PlayerTextureLoader initTextures();
 	public abstract String getName();
 	public abstract UUID getUUID();
-	public abstract VanillaPose getPose();
-	public abstract int getEncodedGestureId();
 	public abstract M getModel();
 	public abstract void updateFromPlayer(P player);
 	public abstract Object getGameProfile();
+	public abstract void updateFromModel(Object model);
 
 	public void setModelDefinition(CompletableFuture<ModelDefinition> definition) {
 		this.definition = definition;
@@ -99,5 +103,13 @@ public abstract class Player<P, M> {
 
 	public boolean isClientPlayer() {
 		return getUUID().equals(MinecraftClientAccess.get().getCurrentClientPlayer().getUUID());
+	}
+
+	public void sendEventSubs() {
+		ModelDefinition def = getModelDefinition();
+		if(!sentEventSubs && def != null) {
+			sentEventSubs = true;
+			MinecraftClientAccess.get().getNetHandler().sendEventSubs(def);
+		}
 	}
 }

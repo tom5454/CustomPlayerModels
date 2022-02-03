@@ -85,7 +85,7 @@ public class GuiImpl extends Screen implements IGui {
 		try {
 			this.matrixStack = matrixStack;
 			matrixStack.push();
-			matrixStack.translate(0, 0, 1000);
+			matrixStack.translate(0, 0, 800);
 			stack = new CtxStack(width, height);
 			RenderSystem.runAsFancy(() -> gui.draw(mouseX, mouseY, partialTicks));
 		} catch (Throwable e) {
@@ -100,14 +100,17 @@ public class GuiImpl extends Screen implements IGui {
 			this.matrixStack = null;
 			matrixStack.pop();
 		}
-		matrixStack.push();
-		matrixStack.translate(0.0D, client.getWindow().getScaledHeight() - 48, 0.0D);
-		client.inGameHud.getChatHud().render(matrixStack, client.inGameHud.getTicks());
-		matrixStack.pop();
+		if(client.player != null && gui.enableChat()) {
+			matrixStack.push();
+			matrixStack.translate(0.0D, client.getWindow().getScaledHeight() - 48, 800);
+			client.inGameHud.getChatHud().render(matrixStack, client.inGameHud.getTicks());
+			matrixStack.pop();
+		}
 	}
 
 	@Override
 	public void removed() {
+		this.client.keyboard.setRepeatEvents(false);
 		if(vanillaScale >= 0 && vanillaScale != client.options.guiScale) {
 			client.options.guiScale = vanillaScale;
 			vanillaScale = -999;
@@ -136,6 +139,7 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	protected void init() {
+		this.client.keyboard.setRepeatEvents(true);
 		try {
 			gui.init(width, height);
 		} catch (Throwable e) {
@@ -147,7 +151,10 @@ public class GuiImpl extends Screen implements IGui {
 	public void drawText(int x, int y, String text, int color) {
 		x += getOffset().x;
 		y += getOffset().y;
+		matrixStack.push();
+		matrixStack.translate(0, 0, 50);
 		textRenderer.draw(matrixStack, text, x, y, color);
+		matrixStack.pop();
 	}
 
 	@Override
@@ -158,7 +165,12 @@ public class GuiImpl extends Screen implements IGui {
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
 				if(client.player != null && client.options.keyChat.matchesKey(keyCode, scanCode) && client.options.chatVisibility != ChatVisibility.HIDDEN) {
-					client.setScreen(new Overlay());
+					RenderSystem.recordRenderCall(() -> {
+						int scale = vanillaScale;
+						vanillaScale = -1;
+						client.setScreen(new Overlay());
+						vanillaScale = scale;
+					});
 					return true;
 				}
 			}
@@ -354,7 +366,7 @@ public class GuiImpl extends Screen implements IGui {
 				if(field.charTyped(evt.charTyped, keyModif))
 					evt.consume();
 			} else {
-				if(field.keyPressed(evt.keyCode, evt.scancode, keyModif))
+				if(field.keyPressed(evt.keyCode, evt.scancode, keyModif) || field.isActive())
 					evt.consume();
 			}
 		}

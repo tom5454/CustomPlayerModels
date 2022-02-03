@@ -17,6 +17,7 @@ import com.tom.cpm.shared.model.render.RenderMode;
 public abstract class Panel3d extends GuiElement {
 	private Panel3dNative nat;
 	protected int backgroundColor;
+	private MouseEvent mouse;
 
 	public Panel3d(IGui gui) {
 		super(gui);
@@ -49,6 +50,7 @@ public abstract class Panel3d extends GuiElement {
 
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
+		this.mouse = event;
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);
 		gui.setupCut();
@@ -60,6 +62,7 @@ public abstract class Panel3d extends GuiElement {
 		}
 		gui.popMatrix();
 		gui.setupCut();
+		this.mouse = null;
 	}
 
 	protected RenderTypes<RenderMode> getRenderTypes() {
@@ -88,5 +91,9 @@ public abstract class Panel3d extends GuiElement {
 
 	public void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
+	}
+
+	public MouseEvent getMouse() {
+		return mouse;
 	}
 }

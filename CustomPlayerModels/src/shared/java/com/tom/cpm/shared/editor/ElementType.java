@@ -53,7 +53,7 @@ public enum ElementType {
 			elem.rc.recolor = elem.recolor;
 			elem.texSize = elem.texture ? (elem.mirror ? -elem.textureSize : elem.textureSize) : 0;
 			elem.rc.reset();
-			elem.rc.display = elem.showInEditor;
+			elem.rc.display = elem.showInEditor && (!elem.editor.applyAnim || !elem.hidden);
 			elem.rc.rotation = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
 			elem.rc.glow = elem.glow;
 			elem.rc.singleTex = elem.singleTex;

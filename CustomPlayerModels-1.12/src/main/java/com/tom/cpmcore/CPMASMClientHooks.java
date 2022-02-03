@@ -6,6 +6,7 @@ import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.layers.LayerArmorBase;
@@ -23,6 +24,7 @@ import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
 
+import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -30,7 +32,10 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.ItemTransform;
 import com.tom.cpm.shared.network.NetH;
+
+import io.netty.buffer.ByteBufInputStream;
 
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
@@ -41,12 +46,8 @@ public class CPMASMClientHooks {
 
 	public static void renderSkullPost(ModelBase skullModel, GameProfile profile) {
 		if(profile != null) {
-			ClientProxy.INSTANCE.unbind(skullModel);
+			ClientProxy.INSTANCE.manager.unbind(skullModel);
 		}
-	}
-
-	public static void unbindHand(AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.unbindHand(player);
 	}
 
 	public static void renderArmor(ModelBase in, Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale, RenderLivingBase<?> renderer) {
@@ -78,7 +79,7 @@ public class CPMASMClientHooks {
 
 	public static boolean onClientPacket(SPacketCustomPayload pckt, NetHandlerPlayClient handler) {
 		if(pckt.getChannelName().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.getChannelName()), pckt.getBufferData(), (NetH) handler);
+			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.getChannelName()), new ByteBufInputStream(pckt.getBufferData()), (NetH) handler);
 			return true;
 		}
 		return false;
@@ -92,8 +93,8 @@ public class CPMASMClientHooks {
 
 	public static void onArmorPost(LayerArmorBase this0, EntityLivingBase entitylivingbaseIn) {
 		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.unbind(this0.modelArmor);
-			ClientProxy.INSTANCE.unbind(this0.modelLeggings);
+			ClientProxy.INSTANCE.manager.unbind(this0.modelArmor);
+			ClientProxy.INSTANCE.manager.unbind(this0.modelLeggings);
 		}
 	}
 
@@ -102,7 +103,7 @@ public class CPMASMClientHooks {
 	}
 
 	public static void onElytraPost(LayerElytra this0, EntityLivingBase entitylivingbaseIn) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer)ClientProxy.INSTANCE.unbind(this0.modelElytra);
+		if(entitylivingbaseIn instanceof AbstractClientPlayer)ClientProxy.INSTANCE.manager.unbind(this0.modelElytra);
 	}
 
 	public static boolean renderCape(LayerCape this0, AbstractClientPlayer player, float partialTicks) {
@@ -125,5 +126,38 @@ public class CPMASMClientHooks {
 
 	public static boolean renderCape(LayerCape this0, EntityLivingBase entitylivingbaseIn, float partialTicks) {
 		return renderCape(this0, (AbstractClientPlayer) entitylivingbaseIn, partialTicks);
+	}
+
+	public static void onHandRightPre(RenderPlayer this0, AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.manager.bindHand(player, null);
+		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+	}
+
+	public static void onHandRightPost(RenderPlayer this0, AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.manager.unbindClear();
+	}
+
+	public static void onHandLeftPre(RenderPlayer this0, AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.manager.bindHand(player, null);
+		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+	}
+
+	public static void onHandLeftPost(RenderPlayer this0, AbstractClientPlayer player) {
+		ClientProxy.INSTANCE.manager.unbindClear();
+	}
+
+	public static void onRenderParrot(EntityPlayer entitylivingbaseIn, boolean leftShoulderIn) {
+		Player pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		if(pl != null) {
+			ModelDefinition def = pl.getModelDefinition();
+			if(def != null) {
+				ItemTransform tr = def.getTransform(leftShoulderIn ? ItemSlot.LEFT_SHOULDER : ItemSlot.RIGHT_SHOULDER);
+				if(tr != null) {
+					PlayerRenderManager.multiplyStacks(tr.getMatrix());
+					if(entitylivingbaseIn.isSneaking())
+						GlStateManager.translate(0, -0.2f, 0);
+				}
+			}
+		}
 	}
 }

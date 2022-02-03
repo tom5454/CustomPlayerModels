@@ -5,6 +5,7 @@ import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.tom.cpl.command.ArgType;
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
@@ -14,6 +15,10 @@ import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.text.FormatText;
+import com.tom.cpl.text.IText;
+import com.tom.cpl.text.LiteralText;
+import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.SafetyException;
 import com.tom.cpm.shared.definition.SafetyException.BlockReason;
@@ -65,7 +70,12 @@ public abstract class PlayerSpecificConfigKey<V> {
 			}
 
 			private String formatName(IGui gui, T v) {
-				return gui.i18nFormat("label.cpm.safety." + name, gui.i18nFormat("label.cpm.safety." + name + "." + v.name().toLowerCase()));
+				return formatValue(v).toString(gui);
+			}
+
+			@Override
+			public IText formatValue(T v) {
+				return new FormatText("label.cpm.safety." + name, new FormatText("label.cpm.safety." + name + "." + v.name().toLowerCase()));
 			}
 
 			@Override
@@ -76,6 +86,16 @@ public abstract class PlayerSpecificConfigKey<V> {
 			@Override
 			public T getValue(ConfigEntry c, T d) {
 				return values[Math.abs(c.getInt(name, d.ordinal()) % values.length)];
+			}
+
+			@Override
+			public ArgType getType() {
+				return ArgType.ENUM;
+			}
+
+			@Override
+			public Object getTypeArg() {
+				return values;
 			}
 		};
 	}
@@ -128,6 +148,11 @@ public abstract class PlayerSpecificConfigKey<V> {
 			public void checkFor(Player<?, ?> player, BlockReason err) throws SafetyException {
 				checkFor(player, v -> v, err);
 			}
+
+			@Override
+			public ArgType getType() {
+				return ArgType.BOOLEAN;
+			}
 		};
 	}
 
@@ -145,14 +170,14 @@ public abstract class PlayerSpecificConfigKey<V> {
 				int val = getValueFor(null, panel.uuid, panel.mainConfig);
 				double min = sliderFunc.applyAsDouble(minVal);
 				double div = sliderFunc.applyAsDouble(maxVal) - min;
-				Slider slider = new Slider(gui, gui.i18nFormat("label.cpm.safety." + name, toStringFunc.apply(val)));
+				Slider slider = new Slider(gui, formatText(gui, val));
 
 				Button clr = new Button(gui, gui.i18nFormat("button.cpm.safetyClear"), null);
 				clr.setAction(() -> {
 					int v = getValueFor(null, panel.uuid, panel.mainConfig);
 					resetValue(panel.getConfig());
 					slider.setValue((float) ((sliderFunc.applyAsDouble(v) - min) / div));
-					slider.setText(gui.i18nFormat("label.cpm.safety." + name, toStringFunc.apply(v)));
+					slider.setText(formatText(gui, v));
 					clr.setEnabled(false);
 				});
 				clr.setEnabled(hasValue(panel.getConfig()));
@@ -162,7 +187,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 				slider.setAction(() -> {
 					int v = (int) revFunc.applyAsDouble(slider.getValue() * div + min);
 					setValue(panel.getConfig(), v);
-					slider.setText(gui.i18nFormat("label.cpm.safety." + name, toStringFunc.apply(v)));
+					slider.setText(formatText(gui, v));
 					clr.setEnabled(true);
 				});
 
@@ -175,9 +200,18 @@ public abstract class PlayerSpecificConfigKey<V> {
 				return p;
 			}
 
+			private String formatText(IGui gui, int v) {
+				return gui.i18nFormat("label.cpm.safety.slider", gui.i18nFormat("label.cpm.safety." + name), toStringFunc.apply(v));
+			}
+
 			@Override
 			public void setValue(ConfigEntry c, Integer v) {
 				c.setInt(name, v);
+			}
+
+			@Override
+			public IText formatValue(Integer value) {
+				return new LiteralText(toStringFunc.apply(value));
 			}
 
 			@Override
@@ -188,6 +222,16 @@ public abstract class PlayerSpecificConfigKey<V> {
 			@Override
 			public void checkFor(Player<?, ?> player, Integer w, BlockReason err) throws SafetyException {
 				checkFor(player, o -> w <= o, err);
+			}
+
+			@Override
+			public ArgType getType() {
+				return ArgType.INT;
+			}
+
+			@Override
+			public Object getTypeArg() {
+				return Pair.of(minVal, maxVal);
 			}
 		};
 	}
@@ -265,7 +309,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 					return getValue(e, defValue.get(KeyGroup.GLOBAL));
 			}
 		} else {
-			V v = profile.getValue(name);
+			V v = getValue(profile);
 			if(v != null)return v;
 		}
 
@@ -292,6 +336,11 @@ public abstract class PlayerSpecificConfigKey<V> {
 		return getValue(ce, defValue.get(group));
 	}
 
+	public V getValue(BuiltInSafetyProfiles profile) {
+		if(profile == BuiltInSafetyProfiles.CUSTOM)return null;
+		return profile.getValue(name);
+	}
+
 	public void resetValue(ConfigEntry ce) {
 		ce.clearValue(name);
 	}
@@ -310,6 +359,14 @@ public abstract class PlayerSpecificConfigKey<V> {
 	public abstract GuiElement createConfigElement(SafetyPanel panel);
 	public abstract void setValue(ConfigEntry c, V v);
 	public abstract V getValue(ConfigEntry c, V d);
+	public abstract ArgType getType();
+	public Object getTypeArg() {
+		return null;
+	}
+
+	public IText formatValue(V value) {
+		return new LiteralText(String.valueOf(value));
+	}
 
 	public String getName() {
 		return name;

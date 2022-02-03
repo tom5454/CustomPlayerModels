@@ -1,12 +1,10 @@
 package com.tom.cpm.common;
 
-import java.io.IOException;
 import java.util.function.Predicate;
 
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
@@ -14,13 +12,15 @@ import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 
+import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.network.NetHandler;
@@ -29,25 +29,12 @@ import io.netty.buffer.Unpooled;
 
 public class ServerHandler {
 
-	public static NetHandler<ResourceLocation, NBTTagCompound, EntityPlayerMP, PacketBuffer, NetHandlerPlayServer> netHandler;
+	public static NetHandler<ResourceLocation, EntityPlayerMP, NetHandlerPlayServer> netHandler;
 
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
-		netHandler.setNewNbt(NBTTagCompound::new);
-		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
 		netHandler.setGetPlayerUUID(EntityPlayerMP::getUniqueID);
-		netHandler.setWriteCompound(PacketBuffer::writeCompoundTag, t -> {
-			try {
-				return t.readCompoundTag();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
-		netHandler.setSendPacket((c, rl, pb) -> c.sendPacket(new SPacketCustomPayload(rl.toString(), pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SPacketCustomPayload(rl.toString(), pb), ServerHandler::hasMod));
-		netHandler.setWritePlayerId((pb, pl) -> pb.writeVarInt(pl.getEntityId()));
-		netHandler.setNBTSetters(NBTTagCompound::setBoolean, NBTTagCompound::setByteArray, NBTTagCompound::setFloat);
-		netHandler.setNBTGetters(NBTTagCompound::getBoolean, NBTTagCompound::getByteArray, NBTTagCompound::getFloat);
-		netHandler.setContains(NBTTagCompound::hasKey);
+		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new SPacketCustomPayload(rl.toString(), pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SPacketCustomPayload(rl.toString(), pb), ServerHandler::hasMod));
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTrackerEntry tr : ((WorldServer)p.world).getEntityTracker().entries) {
 				if(tr.getTrackedEntity() instanceof EntityPlayer && tr.trackingPlayers.contains(p)) {
@@ -55,10 +42,14 @@ public class ServerHandler {
 				}
 			}
 		});
-		netHandler.setSendChat((p, m) -> p.connection.sendPacket(new SPacketChat(new TextComponentTranslation(m), ChatType.CHAT)));
+		netHandler.setSendChat((p, m) -> p.connection.sendPacket(new SPacketChat(m.remap(), ChatType.CHAT)));
 		netHandler.setExecutor(() -> FMLCommonHandler.instance().getMinecraftServerInstance()::addScheduledTask);
 		netHandler.setGetNet(spe -> spe.connection);
 		netHandler.setGetPlayer(net -> net.player);
+		netHandler.setGetPlayerId(EntityPlayerMP::getEntityId);
+		netHandler.setGetOnlinePlayers(() -> FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers());
+		netHandler.setKickPlayer((p, m) -> p.connection.disconnect(m.remap()));
+		netHandler.setGetPlayerAnimGetters(p -> p.fallDistance, p -> p.capabilities.isFlying);
 	}
 
 	@SubscribeEvent
@@ -73,6 +64,20 @@ public class ServerHandler {
 			if(evt.getTarget() instanceof EntityPlayer) {
 				netHandler.sendPlayerData((EntityPlayerMP) evt.getTarget(), (EntityPlayerMP) evt.getEntityPlayer());
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public void onTick(ServerTickEvent evt) {
+		if(evt.phase == Phase.END) {
+			netHandler.tick();
+		}
+	}
+
+	@SubscribeEvent
+	public void onJump(LivingJumpEvent evt) {
+		if(evt.getEntityLiving() instanceof EntityPlayerMP) {
+			netHandler.onJump((EntityPlayerMP) evt.getEntityLiving());
 		}
 	}
 

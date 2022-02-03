@@ -16,7 +16,9 @@
 	"BipedArmorLayerMixin",
 	"SkullBlockRendererMixin",
 	"CustomHeadLayerMixin",
-	"BlockEntityWithoutLevelRendererMixin"
+	"BlockEntityWithoutLevelRendererMixin",
+	"ParrotOnShoulderLayerMixin",
+	"LocalPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

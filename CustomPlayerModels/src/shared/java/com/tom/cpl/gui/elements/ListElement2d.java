@@ -35,17 +35,16 @@ public class ListElement2d<T> extends ListElement<T> {
 		int colW = getMaxWidth();
 		int cols = Math.max(preferredWidth / colW, 1);
 		for (int i = 0; i < elements.size(); i++) {
-			int textColor = gui.getColors().button_text_color;
 			T el = elements.get(i);
 			int x = i % cols;
 			int y = i / cols;
+			boolean hovered = false;
 			if (event.isHovered(new Box(bounds.x + x * colW, bounds.y + y * 10, colW, 10))) {
-				textColor = gui.getColors().button_text_hover;
+				hovered = true;
 				Tooltip tt = model.getTooltip(el);
 				if(tt != null)tt.set();
 			}
-			if(el == selected)gui.drawBox(bounds.x + x * colW, bounds.y + y * 10, colW, 10, gui.getColors().select_background);
-			gui.drawText(bounds.x + x * colW + 3, bounds.y + y * 10 + 1, model.getDisplay(el), textColor);
+			model.draw(gui, el, bounds.x + x * colW, bounds.y + y * 10, colW, 10, hovered, el == selected);
 		}
 	}
 
@@ -60,7 +59,7 @@ public class ListElement2d<T> extends ListElement<T> {
 		int w = 0;
 		for (int i = 0; i < elements.size(); i++) {
 			T el = elements.get(i);
-			w = Math.max(w, gui.textWidth(model.getDisplay(el)));
+			w = Math.max(w, model.getWidth(gui, el));
 		}
 		return w + 10;
 	}

@@ -86,4 +86,14 @@ public interface JsonMap {
 	default <T> T getObject(String name, BiFunction<JsonMap, T, T> ctr, T def) {
 		return ctr.apply(getMap(name), def);
 	}
+
+	default <T extends Enum<T>> T getEnum(String name, T[] values, T def) {
+		String id = getString(name);
+		if(id == null)return def;
+		for (T v : values) {
+			if(v.name().equalsIgnoreCase(id))
+				return v;
+		}
+		return def;
+	}
 }

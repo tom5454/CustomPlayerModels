@@ -11,6 +11,8 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.builtin.VanillaPartRenderer;
+import com.tom.cpm.shared.model.builtin.VanillaPlayerModel;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
@@ -114,6 +116,11 @@ public class GuiModelRenderManager extends ModelRenderManager<VBuffers, Viewport
 		}
 
 		@Override
+		protected void bindDefaultTexture(ViewportPanelBase3d cbi, TextureSheetType tex) {
+			cbi.load(tex.name().toLowerCase());
+		}
+
+		@Override
 		protected boolean isInGui() {
 			return true;
 		}
@@ -186,7 +193,7 @@ public class GuiModelRenderManager extends ModelRenderManager<VBuffers, Viewport
 		public void render(MatrixStack stack, VertexBuffer buf) {
 			this.stack = stack;
 			this.buf = buf;
-			this.buffers = holder.addDt.normal(buf);
+			this.buffers = holder.addDt.normal(buf).transform(stack);
 			render();
 			this.buffers = null;
 			this.stack = null;
@@ -195,11 +202,13 @@ public class GuiModelRenderManager extends ModelRenderManager<VBuffers, Viewport
 
 		@Override
 		public void doRender0(RootModelElement elem, boolean doRender) {
+			MatrixStack stack = new MatrixStack();
 			stack.push();
+			holder.transform(stack, holder.def.getRenderPosition(), holder.def.getRenderRotation(), holder.def.getRenderScale());
 			translateRotate(stack);
 			VBuffers buf = getVBuffers();
 			Vec4f color = getColor();
-			render(elem, stack, buf, color.x, color.y, color.z, color.w);
+			render(elem, stack, buf, color.x, color.y, color.z, color.w, true, true);
 			stack.pop();
 		}
 

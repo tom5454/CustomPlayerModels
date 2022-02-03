@@ -41,9 +41,10 @@ public class TextureEditorPanel extends GuiElement {
 		gui.setPosOffset(bounds);
 		gui.setupCut();
 
+		gui.drawBox(0, 0, bounds.w, bounds.h, gui.getColors().button_fill);
+
 		ETextures provider = editor.getTextureProvider();
 		if(provider != null) {
-			gui.drawBox(0, 0, bounds.w, bounds.h, gui.getColors().button_fill);
 			provider.provider.bind();
 			if(zoom == 0) {
 				zoom = bounds.h / (float) provider.getImage().getWidth();

@@ -22,12 +22,31 @@ public class Quaternion {
 		this.angle = angle;
 	}
 
+	public Quaternion(float x, float y, float z, boolean degrees) {
+		if (degrees) {
+			x *= ((float)Math.PI / 180F);
+			y *= ((float)Math.PI / 180F);
+			z *= ((float)Math.PI / 180F);
+		}
+
+		float f = sin(0.5F * x);
+		float f1 = cos(0.5F * x);
+		float f2 = sin(0.5F * y);
+		float f3 = cos(0.5F * y);
+		float f4 = sin(0.5F * z);
+		float f5 = cos(0.5F * z);
+		this.x = f * f3 * f5 + f1 * f2 * f4;
+		this.y = f1 * f2 * f5 - f * f3 * f4;
+		this.z = f * f2 * f5 + f1 * f3 * f4;
+		this.w = f1 * f3 * f5 - f * f2 * f4;
+	}
+
 	@Override
-	public boolean equals(Object p_equals_1_) {
-		if (this == p_equals_1_) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
-		} else if (p_equals_1_ != null && this.getClass() == p_equals_1_.getClass()) {
-			Quaternion quaternion = (Quaternion)p_equals_1_;
+		} else if (other != null && this.getClass() == other.getClass()) {
+			Quaternion quaternion = (Quaternion)other;
 			if (Float.compare(quaternion.x, this.x) != 0) {
 				return false;
 			} else if (Float.compare(quaternion.y, this.y) != 0) {
@@ -76,12 +95,12 @@ public class Quaternion {
 		return this.w;
 	}
 
-	private static float cos(float p_214904_0_) {
-		return (float)Math.cos(p_214904_0_);
+	private static float cos(float v) {
+		return (float)Math.cos(v);
 	}
 
-	private static float sin(float p_214903_0_) {
-		return (float)Math.sin(p_214903_0_);
+	private static float sin(float v) {
+		return (float)Math.sin(v);
 	}
 
 	public float getAngle() {

@@ -17,6 +17,13 @@ public class CustomPose implements IPose {
 		return name;
 	}
 
+	public String getId() {
+		int i = name.indexOf('#');
+		if(i == -1)return name;
+		if(i == 0)return "";
+		return name.substring(0, i);
+	}
+
 	@Override
 	public String toString() {
 		return "Custom Pose: " + name;

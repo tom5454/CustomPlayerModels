@@ -2,8 +2,6 @@ package com.tom.cpm.shared.editor.gui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
@@ -20,6 +18,7 @@ import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.util.NamedElement;
+import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
@@ -105,11 +104,9 @@ public class PerfaceUVPanel extends Panel {
 			spinnerEV.setValue(v.w);
 		});
 
-		Map<Rot, NamedElement<Rot>> rotMap = new TreeMap<>();
-		for (Rot ro : Rot.VALUES) {
-			rotMap.put(ro, new NamedElement<>(ro, rot -> gui.i18nFormat("label.cpm.rot." + rot.name().toLowerCase())));
-		}
-		DropDownBox<NamedElement<Rot>> rots = new DropDownBox<>(e, new ArrayList<>(rotMap.values()));
+		NameMapper<Rot> rotMap = new NameMapper<>(Rot.VALUES, rot -> gui.i18nFormat("label.cpm.rot." + rot.name().toLowerCase()));
+		DropDownBox<NamedElement<Rot>> rots = new DropDownBox<>(e, new ArrayList<>(rotMap.asList()));
+		rotMap.setSetter(rots::setSelected);
 		rots.setBounds(new Box(5, 45, 80, 20));
 		rots.setAction(() -> {
 			ModelElement el = editor.getSelectedElement();
@@ -120,7 +117,7 @@ public class PerfaceUVPanel extends Panel {
 				ab.execute();
 			}
 		});
-		editor.setFaceRot.add(rot -> rots.setSelected(rotMap.get(rot)));
+		editor.setFaceRot.add(rotMap::setValue);
 		addElement(rots);
 
 		Checkbox autoUV = new Checkbox(gui, gui.i18nFormat("label.cpm.auto_uv"));

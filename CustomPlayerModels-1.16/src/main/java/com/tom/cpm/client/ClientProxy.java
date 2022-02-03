@@ -19,11 +19,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -39,11 +40,15 @@ import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import com.google.common.collect.Iterables;
+
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.mixinplugin.OFDetector;
+import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -59,12 +64,12 @@ import io.netty.buffer.Unpooled;
 
 public class ClientProxy extends CommonProxy {
 	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
-	public static boolean optifineLoaded;
+	public static boolean optifineLoaded, vrLoaded;
 	public static ClientProxy INSTANCE = null;
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public RenderManager<GameProfile, PlayerEntity, Model, IRenderTypeBuffer> manager;
-	public NetHandler<ResourceLocation, CompoundNBT, PlayerEntity, PacketBuffer, ClientPlayNetHandler> netHandler;
+	public NetHandler<ResourceLocation, PlayerEntity, ClientPlayNetHandler> netHandler;
 
 	@Override
 	public void init() {
@@ -73,21 +78,22 @@ public class ClientProxy extends CommonProxy {
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();
+		vrLoaded = VRDetector.doApply();
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
+		if(vrLoaded)Log.info("ViveCraft detected, enabling ViveCraft compatibility");
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerEntity::getGameProfile);
+		manager.setGetSkullModel(profile -> {
+			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
+			if(property != null)return property.getValue();
+			return null;
+		});
 		netHandler = new NetHandler<>(ResourceLocation::new);
-		netHandler.setNewNbt(CompoundNBT::new);
-		netHandler.setNewPacketBuffer(() -> new PacketBuffer(Unpooled.buffer()));
-		netHandler.setWriteCompound(PacketBuffer::writeNbt, PacketBuffer::readNbt);
-		netHandler.setNBTSetters(CompoundNBT::putBoolean, CompoundNBT::putByteArray, CompoundNBT::putFloat);
-		netHandler.setNBTGetters(CompoundNBT::getBoolean, CompoundNBT::getByteArray, CompoundNBT::getFloat);
-		netHandler.setContains(CompoundNBT::contains);
 		netHandler.setExecutor(() -> minecraft);
-		netHandler.setSendPacket((c, rl, pb) -> c.send(new CCustomPayloadPacket(rl, pb)), null);
+		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new CCustomPayloadPacket(rl, pb)), null);
 		netHandler.setPlayerToLoader(PlayerEntity::getGameProfile);
-		netHandler.setReadPlayerId(PacketBuffer::readVarInt, id -> {
+		netHandler.setGetPlayerById(id -> {
 			Entity ent = Minecraft.getInstance().level.getEntity(id);
 			if(ent instanceof PlayerEntity) {
 				return (PlayerEntity) ent;
@@ -96,6 +102,7 @@ public class ClientProxy extends CommonProxy {
 		});
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).connection);
+		netHandler.setDisplayText(f -> minecraft.gui.handleChat(ChatType.SYSTEM, f.remap(), Util.NIL_UUID));
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, scr) -> new GuiImpl(SettingsGui::new, scr));
 	}
 
@@ -106,7 +113,7 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		manager.tryUnbind();
+		manager.unbindClear();
 	}
 
 	@SubscribeEvent
@@ -185,11 +192,13 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void onLogout(ClientPlayerNetworkEvent.LoggedOutEvent evt) {
-		mc.getDefinitionLoader().clearServerData();
+		mc.onLogOut();
 	}
 
-	public void unbind(Model model) {
-		manager.tryUnbind(model);
+	public void updateJump() {
+		if(minecraft.player.isOnGround() && minecraft.player.input.jumping) {
+			manager.jump(minecraft.player);
+		}
 	}
 
 	//Copy from CapeLayer

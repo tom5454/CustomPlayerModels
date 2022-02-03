@@ -1,25 +1,20 @@
 package com.tom.cpm.shared.editor.anim;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
-import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
-import com.tom.cpm.shared.editor.project.JsonList;
-import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class AnimFrame {
-	private final Map<ModelElement, Data> components = new HashMap<>();
+	private final Map<ModelElement, FrameData> components = new HashMap<>();
 	private EditorAnim anim;
 	public AnimFrame(EditorAnim anim) {
 		this.anim = anim;
@@ -27,17 +22,17 @@ public class AnimFrame {
 
 	public AnimFrame(AnimFrame cpy) {
 		this.anim = cpy.anim;
-		for (Entry<ModelElement, Data> e : cpy.components.entrySet()) {
-			components.put(e.getKey(), new Data(e.getValue()));
+		for (Entry<ModelElement, FrameData> e : cpy.components.entrySet()) {
+			components.put(e.getKey(), new FrameData(e.getValue()));
 		}
 	}
 
-	private class Data implements IElem {
+	public class FrameData implements IElem {
 		private Vec3f pos, rot, color;
 		private boolean show = true;
 		private ModelElement comp;
 
-		public Data(ModelElement comp) {
+		public FrameData(ModelElement comp) {
 			this.comp = comp;
 			if(!anim.add) {
 				if(comp.type == ElementType.ROOT_PART) {
@@ -59,7 +54,7 @@ public class AnimFrame {
 			show = !comp.hidden;
 		}
 
-		public Data(Data cpy) {
+		public FrameData(FrameData cpy) {
 			this.comp = cpy.comp;
 			pos = new Vec3f(cpy.pos);
 			rot = new Vec3f(cpy.rot);
@@ -129,13 +124,29 @@ public class AnimFrame {
 		public boolean hasVisChanges() {
 			return comp.hidden == show;
 		}
+
+		public void setPos(Vec3f pos) {
+			this.pos = pos;
+		}
+
+		public void setRot(Vec3f rot) {
+			this.rot = rot;
+		}
+
+		public void setColor(Vec3f color) {
+			this.color = color;
+		}
+
+		public void setShow(boolean show) {
+			this.show = show;
+		}
 	}
 
 	public void setPos(ModelElement elem, Vec3f v) {
-		Data dt = components.get(elem);
+		FrameData dt = components.get(elem);
 		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.position");
 		if(dt == null) {
-			dt = new Data(elem);
+			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
 		ab.updateValueOp(dt, dt.pos, v, (a, b) -> a.pos = b);
@@ -143,10 +154,10 @@ public class AnimFrame {
 	}
 
 	public void setRot(ModelElement elem, Vec3f v) {
-		Data dt = components.get(elem);
+		FrameData dt = components.get(elem);
 		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.rotation");
 		if(dt == null) {
-			dt = new Data(elem);
+			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
 		ab.updateValueOp(dt, dt.rot, v, (a, b) -> a.rot = b);
@@ -154,10 +165,10 @@ public class AnimFrame {
 	}
 
 	public void setColor(ModelElement elem, int rgb) {
-		Data dt = components.get(elem);
+		FrameData dt = components.get(elem);
 		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.rotation");
 		if(dt == null) {
-			dt = new Data(elem);
+			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
 		int r = ((rgb & 0xff0000) >> 16);
@@ -168,10 +179,10 @@ public class AnimFrame {
 	}
 
 	public void switchVis(ModelElement elem) {
-		Data dt = components.get(elem);
+		FrameData dt = components.get(elem);
 		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.hidden_effect");
 		if(dt == null) {
-			dt = new Data(elem);
+			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
 		ab.updateValueOp(dt, dt.show, !dt.show, (a, b) -> a.show = b);
@@ -183,7 +194,7 @@ public class AnimFrame {
 	}
 
 	public void apply() {
-		components.values().forEach(Data::apply);
+		components.values().forEach(FrameData::apply);
 	}
 
 	public boolean getVisible(ModelElement component) {
@@ -199,71 +210,32 @@ public class AnimFrame {
 		return components.entrySet().stream().filter(e -> e.getValue().hasChanges()).map(Entry::getKey);
 	}
 
-	public void loadFrom(JsonMap data) {
-		JsonList c = data.getList("components");
-		c.forEachMap(map -> {
-			long sid = map.getLong("storeID");
-			Editor.walkElements(anim.editor.elements, elem -> {
-				if(elem.storeID == sid) {
-					Data dt = new Data(elem);
-					components.put(elem, dt);
-					dt.pos = new Vec3f(map.getMap("pos"), new Vec3f());
-					dt.rot = new Vec3f(map.getMap("rotation"), new Vec3f());
-					int rgb = Integer.parseUnsignedInt(map.getString("color"), 16);
-					int r = (rgb & 0xff0000) >> 16;
-					int g = (rgb & 0x00ff00) >> 8;
-					int b =  rgb & 0x0000ff;
-					dt.color = new Vec3f(r, g, b);
-					dt.show = map.getBoolean("show");
-				}
-			});
-		});
-	}
-
-	public Map<String, Object> store() {
-		List<Map<String, Object>> c = new ArrayList<>();
-		for(Entry<ModelElement, Data> e : components.entrySet()) {
-			Map<String, Object> map = new HashMap<>();
-			c.add(map);
-			map.put("storeID", e.getKey().storeID);
-			Data dt = e.getValue();
-			map.put("pos", dt.pos.toMap());
-			map.put("rotation", dt.rot.toMap());
-			int rgb = (((int) dt.color.x) << 16) | (((int) dt.color.y) << 8) | ((int) dt.color.z);
-			map.put("color", Integer.toHexString(rgb));
-			map.put("show", dt.show);
-		}
-		Map<String, Object> data = new HashMap<>();
-		data.put("components", c);
-		return data;
-	}
-
 	public boolean hasPosChanges(ModelElement me) {
-		Data data = components.get(me);
+		FrameData data = components.get(me);
 		if(data == null)return false;
 		return data.hasPosChanges();
 	}
 
 	public boolean hasRotChanges(ModelElement me) {
-		Data data = components.get(me);
+		FrameData data = components.get(me);
 		if(data == null)return false;
 		return data.hasRotChanges();
 	}
 
 	public boolean hasColorChanges(ModelElement me) {
-		Data data = components.get(me);
+		FrameData data = components.get(me);
 		if(data == null)return false;
 		return data.hasColorChanges();
 	}
 
 	public boolean hasVisChanges(ModelElement me) {
-		Data data = components.get(me);
+		FrameData data = components.get(me);
 		if(data == null)return false;
 		return data.hasVisChanges();
 	}
 
 	public void copy(AnimFrame from) {
-		from.components.forEach((e, dt) -> components.put(e, new Data(dt)));
+		from.components.forEach((e, dt) -> components.put(e, new FrameData(dt)));
 	}
 
 	public void clearSelectedData(ModelElement me) {
@@ -281,5 +253,19 @@ public class AnimFrame {
 			} else data[i] = dt.part(channel);
 		}
 		return data;
+	}
+
+	public Map<ModelElement, FrameData> getComponents() {
+		return components;
+	}
+
+	public EditorAnim getAnim() {
+		return anim;
+	}
+
+	public FrameData makeData(ModelElement elem) {
+		FrameData d = new FrameData(elem);
+		components.put(elem, d);
+		return d;
 	}
 }
