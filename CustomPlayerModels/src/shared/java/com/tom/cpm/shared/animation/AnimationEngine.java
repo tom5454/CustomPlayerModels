@@ -1,6 +1,8 @@
 package com.tom.cpm.shared.animation;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -12,11 +14,14 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.util.Log;
+import com.tom.cpm.shared.util.ScalingOptions;
 
 public class AnimationEngine {
 	private long tickCounter;
 	private float partial;
 	private ScaleData modelScale;
+	private ScaleData modelScaleToReset;
+	private long resetCounter;
 
 	public void tick() {
 		tickCounter++;
@@ -26,7 +31,12 @@ public class AnimationEngine {
 			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 				if(def != null && def.doRender()) {
 					player.sendEventSubs();
-					if(def.getScale() != modelScale) {
+					if(resetCounter > tickCounter) {
+						resetCounter = 0;
+						modelScale = modelScaleToReset;
+						modelScaleToReset = null;
+					}
+					if(!Objects.equals(def.getScale(), modelScale)) {
 						modelScale = def.getScale();
 						if(modelScale == null) {
 							MinecraftClientAccess.get().setModelScale(null);
@@ -65,6 +75,7 @@ public class AnimationEngine {
 
 			case PLAYER:
 			{
+				player.animState.preAnimate();
 				VanillaPose pose = player.animState.getMainPose(time, reg);
 				int gesture = player.animState.encodedState;
 				if(pose != player.prevPose || gesture == reg.getPoseResetId()) {
@@ -167,5 +178,10 @@ public class AnimationEngine {
 		PLAYER,
 		SKULL,
 		HAND
+	}
+
+	public void setServerScaling(Map<ScalingOptions, Float> scaling) {
+		modelScaleToReset = new ScaleData(scaling);
+		resetCounter = tickCounter + 100;
 	}
 }

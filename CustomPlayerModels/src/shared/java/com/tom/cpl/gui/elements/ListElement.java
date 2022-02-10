@@ -34,7 +34,7 @@ public class ListElement<T> extends GuiElement {
 		for (int i = 0; i < elements.size(); i++) {
 			boolean hovered = false;
 			T el = elements.get(i);
-			if (event.isHovered(new Box(bounds.x, i * 10, bounds.w, 10))) {
+			if (event.isHovered(bounds) && event.isHovered(new Box(bounds.x, i * 10, bounds.w, 10))) {
 				hovered = true;
 				Tooltip tt = model.getTooltip(el);
 				if(tt != null)tt.set();

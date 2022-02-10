@@ -5,5 +5,5 @@ public enum ArgType {
 	PLAYER,
 	BOOLEAN,
 	INT,
-	ENUM,
+	FLOAT,
 }

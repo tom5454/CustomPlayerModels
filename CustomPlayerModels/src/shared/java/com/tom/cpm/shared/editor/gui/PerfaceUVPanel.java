@@ -17,12 +17,12 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
+import com.tom.cpl.util.Direction;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
-import com.tom.cpm.shared.model.render.PerFaceUV.Dir;
 import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 
@@ -33,7 +33,7 @@ public class PerfaceUVPanel extends Panel {
 		setBounds(new Box(0, 0, 170, 95));
 		Editor editor = e.getEditor();
 
-		DropDownBox<NamedElement<Dir>> faces = new DropDownBox<>(e, Arrays.stream(Dir.VALUES).
+		DropDownBox<NamedElement<Direction>> faces = new DropDownBox<>(e, Arrays.stream(Direction.VALUES).
 				map(d -> new NamedElement<>(d, dir -> gui.i18nFormat("label.cpm.dir." + dir.name().toLowerCase()))).
 				collect(Collectors.toList()));
 		faces.setBounds(new Box(5, 0, 160, 20));
@@ -161,7 +161,7 @@ public class PerfaceUVPanel extends Panel {
 				Face f = el.faceUV.faces.get(editor.perfaceFaceDir);
 				if(f != null) {
 					ActionBuilder ab = editor.action("toAllFaces");
-					for(Dir d : Dir.VALUES) {
+					for(Direction d : Direction.VALUES) {
 						if(d == editor.perfaceFaceDir)continue;
 						ab.addToMap(el.faceUV.faces, d, new Face(f));
 					}
@@ -185,7 +185,7 @@ public class PerfaceUVPanel extends Panel {
 		return f;
 	}
 
-	private static void autoUV(Vec4f v, Dir dir, Vec3f size) {
+	private static void autoUV(Vec4f v, Direction dir, Vec3f size) {
 		int dx = MathHelper.ceil(size.x);
 		int dy = MathHelper.ceil(size.y);
 		int dz = MathHelper.ceil(size.z);

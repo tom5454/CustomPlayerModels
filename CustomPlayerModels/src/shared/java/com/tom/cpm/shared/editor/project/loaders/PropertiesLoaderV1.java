@@ -9,6 +9,7 @@ import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.project.ProjectPartLoader;
 import com.tom.cpm.shared.editor.project.ProjectWriter;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.util.ScalingOptions;
 
 public class PropertiesLoaderV1 implements ProjectPartLoader {
 
@@ -29,14 +30,19 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 			editor.customSkinType = true;
 			editor.skinType = SkinType.get(data.getString("skinType"));
 		}
-		editor.scalingElem.entityScaling = data.getFloat("scaling", 0);
 		editor.hideHeadIfSkull = data.getBoolean("hideHeadIfSkull", true);
 		editor.removeArmorOffset = data.getBoolean("removeArmorOffset", !editor.elements.stream().anyMatch(e -> e.duplicated));
+		float defScaling = data.getFloat("scaling", 0);
+		editor.scalingElem.enabled = defScaling != 0;
+		editor.scalingElem.scaling.put(ScalingOptions.ENTITY, defScaling);
 		JsonMap scaling = data.getMap("scalingEx");
 		if(scaling != null) {
-			editor.scalingElem.eyeHeight = scaling.getFloat("eye_height", 0);
-			editor.scalingElem.hitboxW = scaling.getFloat("hitbox_width", 0);
-			editor.scalingElem.hitboxH = scaling.getFloat("hitbox_height", 0);
+			for(ScalingOptions opt : ScalingOptions.VALUES) {
+				if(opt == ScalingOptions.ENTITY)continue;
+				float v = scaling.getFloat(opt.name().toLowerCase(), 0);
+				if(v != 0)
+					editor.scalingElem.scaling.put(opt, v);
+			}
 			editor.scalingElem.pos = new Vec3f(scaling.getMap("render_position"), new Vec3f());
 			editor.scalingElem.rotation = new Vec3f(scaling.getMap("render_rotation"), new Vec3f());
 			editor.scalingElem.scale = new Vec3f(scaling.getMap("render_scale"), new Vec3f());
@@ -47,13 +53,14 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 	public void save(Editor editor, ProjectWriter project) throws IOException {
 		JsonMap data = project.getJson("config.json");
 		data.put("skinType", editor.skinType.getName());
-		data.put("scaling", editor.scalingElem.entityScaling);
+		data.put("scaling", editor.scalingElem.enabled ? editor.scalingElem.getScale() : 0);
 		data.put("hideHeadIfSkull", editor.hideHeadIfSkull);
 		data.put("removeArmorOffset", editor.removeArmorOffset);
 		JsonMap scaling = data.putMap("scalingEx");
-		scaling.put("eye_height", editor.scalingElem.eyeHeight);
-		scaling.put("hitbox_width", editor.scalingElem.hitboxW);
-		scaling.put("hitbox_height", editor.scalingElem.hitboxH);
+		for(ScalingOptions opt : ScalingOptions.VALUES) {
+			if(opt == ScalingOptions.ENTITY)continue;
+			scaling.put(opt.name().toLowerCase(), editor.scalingElem.getScale(opt));
+		}
 		scaling.put("render_position", editor.scalingElem.pos.toMap());
 		scaling.put("render_rotation", editor.scalingElem.rotation.toMap());
 		scaling.put("render_scale", editor.scalingElem.scale.toMap());

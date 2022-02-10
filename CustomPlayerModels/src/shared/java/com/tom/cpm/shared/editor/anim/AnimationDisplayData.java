@@ -49,6 +49,11 @@ public enum AnimationDisplayData {
 	BLOCKING_RIGHT(VanillaPose.BLOCKING_RIGHT, ItemSlot.RIGHT_HAND, DisplayItem.SHIELD, Type.HAND),
 	PARROT_LEFT(VanillaPose.PARROT_LEFT, ItemSlot.LEFT_SHOULDER, null, Type.LAYERS),
 	PARROT_RIGHT(VanillaPose.PARROT_RIGHT, ItemSlot.RIGHT_SHOULDER, null, Type.LAYERS),
+	HURT(VanillaPose.HURT, null, null, Type.LAYERS),
+	ON_FIRE(VanillaPose.ON_FIRE, null, null, Type.LAYERS),
+	FREEZING(VanillaPose.FREEZING, null, null, Type.LAYERS),
+	ON_LADDER(VanillaPose.ON_LADDER, null, null, Type.POSE),
+	CLIMBING_ON_LADDER(VanillaPose.CLIMBING_ON_LADDER, null, null, Type.POSE),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;

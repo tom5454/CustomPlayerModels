@@ -6,15 +6,16 @@ import java.util.Map;
 
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec4f;
+import com.tom.cpl.util.Direction;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class PerFaceUV {
-	public Map<Dir, Face> faces = new HashMap<>();
+	public Map<Direction, Face> faces = new HashMap<>();
 
 	public PerFaceUV() {
-		for (Dir d : Dir.VALUES) {
+		for (Direction d : Direction.VALUES) {
 			faces.put(d, new Face());
 		}
 	}
@@ -39,12 +40,12 @@ public class PerFaceUV {
 		int f11 = el.v + dz;
 		int f12 = el.v + dz + dy;
 
-		faces.put(Dir.UP,    new Face(f5, f10, f6, f11));
-		faces.put(Dir.DOWN,  new Face(f6, f11, f7, f10));
-		faces.put(Dir.WEST,  new Face(f4, f11, f5, f12));
-		faces.put(Dir.NORTH, new Face(f5, f11, f6, f12));
-		faces.put(Dir.EAST,  new Face(f6, f11, f8, f12));
-		faces.put(Dir.SOUTH, new Face(f8, f11, f9, f12));
+		faces.put(Direction.UP,    new Face(f5, f10, f6, f11));
+		faces.put(Direction.DOWN,  new Face(f6, f11, f7, f10));
+		faces.put(Direction.WEST,  new Face(f4, f11, f5, f12));
+		faces.put(Direction.NORTH, new Face(f5, f11, f6, f12));
+		faces.put(Direction.EAST,  new Face(f6, f11, f8, f12));
+		faces.put(Direction.SOUTH, new Face(f8, f11, f9, f12));
 	}
 
 	public PerFaceUV(PerFaceUV pfUV) {
@@ -52,7 +53,7 @@ public class PerFaceUV {
 	}
 
 	public PerFaceUV(JsonMap map) {
-		for (Dir d : Dir.VALUES) {
+		for (Direction d : Direction.VALUES) {
 			if(map.containsKey(d.name().toLowerCase()))
 				faces.put(d, Face.load(map.getMap(d.name().toLowerCase())));
 		}
@@ -154,7 +155,7 @@ public class PerFaceUV {
 
 	public void readFaces(IOHelper h) throws IOException {
 		int hidden = h.read();
-		for (Dir dir : Dir.VALUES) {
+		for (Direction dir : Direction.VALUES) {
 			if((hidden & (1 << dir.ordinal())) != 0) {
 				Face f = new Face();
 				f.sx = h.readVarInt();
@@ -169,13 +170,13 @@ public class PerFaceUV {
 
 	public void writeFaces(IOHelper h) throws IOException {
 		int hidden = 0;
-		for (Dir dir : Dir.VALUES) {
+		for (Direction dir : Direction.VALUES) {
 			if(faces.get(dir) != null) {
 				hidden |= (1 << dir.ordinal());
 			}
 		}
 		h.write(hidden);
-		for (Dir dir : Dir.VALUES) {
+		for (Direction dir : Direction.VALUES) {
 			Face face = faces.get(dir);
 			if(face != null) {
 				h.writeVarInt(face.sx);
@@ -193,39 +194,33 @@ public class PerFaceUV {
 		return m;
 	}
 
-	public static enum Dir {
-		UP, DOWN, NORTH, SOUTH, EAST, WEST
-		;
-		public static final Dir[] VALUES = values();
-	}
-
 	public static enum Rot {
 		ROT_0, ROT_90, ROT_180, ROT_270
 		;
 		public static final Rot[] VALUES = values();
 	}
 
-	public boolean contains(Dir key) {
+	public boolean contains(Direction key) {
 		return faces.containsKey(key);
 	}
 
-	public Face get(Dir key) {
+	public Face get(Direction key) {
 		return faces.get(key);
 	}
 
-	public Vec4f getVec(Dir key) {
+	public Vec4f getVec(Direction key) {
 		Face f = faces.get(key);
 		if(f == null)return new Vec4f(0, 0, 0, 0);
 		else return f.getVec();
 	}
 
-	public Rot getRot(Dir key) {
+	public Rot getRot(Direction key) {
 		Face f = faces.get(key);
 		if(f == null)return Rot.ROT_0;
 		else return f.rotation;
 	}
 
-	public Boolean isAutoUV(Dir key) {
+	public Boolean isAutoUV(Direction key) {
 		Face f = faces.get(key);
 		if(f == null)return false;
 		else return f.autoUV;

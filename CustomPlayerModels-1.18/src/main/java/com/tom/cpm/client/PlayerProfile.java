@@ -139,6 +139,10 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 		animState.mainHand = Hand.of(player.getMainArm());
 		animState.activeHand = Hand.of(animState.mainHand, player.getUsedItemHand());
 		animState.swingingHand = Hand.of(animState.mainHand, player.swingingArm);
+		animState.hurtTime = player.hurtTime;
+		animState.isOnLadder = player.onClimbable();
+		animState.isBurning = player.displayFireAnimation();
+		animState.isFreezing = player.getTicksFrozen() > 0;
 
 		if(player.getUseItem().getItem() instanceof CrossbowItem) {
 			float f = CrossbowItem.getChargeDuration(player.getUseItem());

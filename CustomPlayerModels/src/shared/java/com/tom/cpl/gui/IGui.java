@@ -1,7 +1,10 @@
 package com.tom.cpl.gui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
@@ -142,5 +145,35 @@ public interface IGui {
 				displayError(msg + "\n" + e.toString());
 			}
 		}
+	}
+
+	default String wordWrap(String in, int w) {
+		List<String> text = new ArrayList<>();
+		int splitStart = 0;
+		int space = -1;
+		for (int i = 0;i<in.length();i++) {
+			char c = in.charAt(i);
+			if(c == ' ' || c == '\\') {
+				String s = in.substring(splitStart, i);
+				int lw = textWidth(s);
+				if(lw > w) {
+					if(splitStart == space + 1) {
+						text.add(s);
+						splitStart = i + 1;
+					} else {
+						text.add(in.substring(splitStart, space));
+						splitStart = space + 1;
+					}
+				}
+				space = i;
+			}
+			if(c == '\\') {
+				text.add(in.substring(splitStart, i));
+				splitStart = i + 1;
+				continue;
+			}
+		}
+		text.add(in.substring(splitStart, in.length()));
+		return text.stream().collect(Collectors.joining("\\"));
 	}
 }

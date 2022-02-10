@@ -185,12 +185,20 @@ public class Generators {
 	}
 
 	public static void addItemHoldPos(Editor editor) {
+		addSlots(editor, ItemSlot.SLOTS);
+	}
+
+	public static void addParrots(Editor editor) {
+		addSlots(editor, ItemSlot.PARROTS);
+	}
+
+	private static void addSlots(Editor editor, ItemSlot[] slots) {
 		ActionBuilder ab = editor.action("add", "action.cpm.itemHold");
 		Set<ItemSlot> added = new HashSet<>();
 		Editor.walkElements(editor.elements, e -> {
 			if(e.itemRenderer != null)added.add(e.itemRenderer.slot);
 		});
-		for (ItemSlot itemSlot : ItemSlot.SLOTS) {
+		for (ItemSlot itemSlot : slots) {
 			if(!added.contains(itemSlot)) {
 				ModelElement elem = new ModelElement(editor);
 				elem.itemRenderer = new ItemRenderer(itemSlot, 0);
@@ -306,6 +314,10 @@ public class Generators {
 		v = new Vec3f(e.offset);
 		v.x = -v.x - s.x;
 		b.updateValueOp(e, e.offset, v, (a, c) -> a.offset = c);
+		v = new Vec3f(e.rotation);
+		v.y = 360 - v.y;
+		v.z = 360 - v.z;
+		b.updateValueOp(e, e.rotation, v, (a, c) -> a.rotation = c);
 		e.children.forEach(p -> mirror(p, b));
 	}
 }

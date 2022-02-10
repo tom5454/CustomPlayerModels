@@ -98,6 +98,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderType.eyes(cbi.getTexture()), 1));
 			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RenderType.lines(), 2));
 			renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
+			renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(CustomRenderTypes.getEntityColorEyes(), 1));
 		}
 
 		@Override

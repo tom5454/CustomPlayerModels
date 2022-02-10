@@ -90,7 +90,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 
 			@Override
 			public ArgType getType() {
-				return ArgType.ENUM;
+				return ArgType.STRING;
 			}
 
 			@Override

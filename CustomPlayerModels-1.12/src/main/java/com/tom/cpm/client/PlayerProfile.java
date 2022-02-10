@@ -113,6 +113,9 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 		animState.mainHand = Hand.of(player.getPrimaryHand());
 		animState.activeHand = Hand.of(animState.mainHand, player.getActiveHand());
 		animState.swingingHand = Hand.of(animState.mainHand, player.swingingHand);
+		animState.hurtTime = player.hurtTime;
+		animState.isOnLadder = player.isOnLadder();
+		animState.isBurning = player.canRenderOnFire();
 
 		if(player.getActiveItemStack().getItem() instanceof ItemBow) {
 			float f = 20F;

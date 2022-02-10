@@ -146,6 +146,9 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 		animState.wearingBoots = player.getEquipmentInSlot(1) != null;
 		animState.mainHand = Hand.RIGHT;
 		animState.activeHand = animState.mainHand;
+		animState.hurtTime = player.hurtTime;
+		animState.isOnLadder = player.isOnLadder();
+		animState.isBurning = player.canRenderOnFire();
 
 		if(player.getItemInUse() != null && player.getItemInUse().getItem() instanceof ItemBow) {
 			float f = 20F;

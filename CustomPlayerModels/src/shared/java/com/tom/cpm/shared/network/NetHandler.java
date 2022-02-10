@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -22,6 +24,8 @@ import java.util.function.ToIntFunction;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.function.ToFloatFunction;
+import com.tom.cpl.function.TriFunction;
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.nbt.NBTTag;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.nbt.NBTTagList;
@@ -30,6 +34,7 @@ import com.tom.cpl.text.FormatText;
 import com.tom.cpl.text.IText;
 import com.tom.cpl.text.KeybindText;
 import com.tom.cpl.text.LiteralText;
+import com.tom.cpl.util.Pair;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpl.util.TriConsumer;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -50,7 +55,9 @@ import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.util.Log;
+import com.tom.cpm.shared.util.ScalingOptions;
 
+@SuppressWarnings("resource")
 public class NetHandler<RL, P, NET> {
 	public static final String GET_SKIN = "get_skin";
 	public static final String SET_SKIN = "set_skin";
@@ -63,15 +70,12 @@ public class NetHandler<RL, P, NET> {
 
 	public static final String FORCED_TAG = "forced";
 	public static final String DATA_TAG = "data";
-	public static final String SCALE_TAG = "scale";
 	public static final String PROFILE_TAG = "profile";
 	public static final String PROFILE_DATA = "data";
 	public static final String SERVER_CAPS = "caps";
 	public static final String EVENT_LIST = "eventList";
 	public static final String KICK_TIME = "kickTime";
-	public static final String EYE_HEIGHT_TAG = "eyeHeight";
-	public static final String HITBOX_W_TAG = "hitboxW";
-	public static final String HITBOX_H_TAG = "hitboxH";
+	public static final String SCALING = "scaling";
 
 	public static final FormatText FORCED_CHAT_MSG = new FormatText("chat.cpm.skinForced");
 
@@ -83,7 +87,6 @@ public class NetHandler<RL, P, NET> {
 	protected BiConsumer<P, Consumer<P>> findTracking;
 	protected Function<NET, Executor> executor;
 	protected Function<P, Object> playerToLoader;
-	protected BiConsumer<P, Float> scaleSetter;
 	protected Supplier<P> getClient;
 	protected Function<P, NET> getNet;
 	protected Function<NET, P> getPlayer;
@@ -93,8 +96,7 @@ public class NetHandler<RL, P, NET> {
 	protected Supplier<Collection<? extends P>> getOnlinePlayers;
 	protected ToFloatFunction<P> getFallDistance;
 	protected Predicate<P> getIsCreativeFlying;
-	protected BiConsumer<P, Float> eyeHeightSetter;
-	protected TriConsumer<P, Float, Float> hitboxSetter;
+	protected Map<ScalingOptions, BiConsumer<P, Float>> scaleSetters = new EnumMap<>(ScalingOptions.class);
 
 	public final RL helloPacket;
 	public final RL setSkin;
@@ -126,11 +128,22 @@ public class NetHandler<RL, P, NET> {
 			int kickTimer = ModConfig.getWorldConfig().getInt(ConfigKeys.KICK_PLAYERS_WITHOUT_MOD, 0);
 			data.setInteger(KICK_TIME, kickTimer);
 			data.setTag(SERVER_CAPS, writeCaps());
-			pb.writeNBT(data);
+
 			PlayerData pd = newData();
 			getSNetH(player).cpm$setEncodedModelData(pd);
+			pd.load(getID(player));
+
+			NBTTagCompound scaling = new NBTTagCompound();
+			data.setTag(SCALING, scaling);
+			for(ScalingOptions o : scaleSetters.keySet()) {
+				float v = pd.scale.getOrDefault(o, 1F);
+				if(v != 1) {
+					scaling.setFloat(o.getNetKey(), v);
+				}
+			}
+
+			pb.writeNBT(data);
 			sendPacket.accept(getNet.apply(player), helloPacket, pb.toBytes());
-			pd.load(getPlayerUUID.apply(player).toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -138,9 +151,7 @@ public class NetHandler<RL, P, NET> {
 
 	private NBTTag writeCaps() {
 		NBTTagCompound data = new NBTTagCompound();
-		if(scaleSetter != null)setCap(data, ServerCaps.SCALING);
-		if(eyeHeightSetter != null)setCap(data, ServerCaps.EYE_HEIGHT);
-		if(hitboxSetter != null)setCap(data, ServerCaps.HITBOX_SCALING);
+		scaleSetters.keySet().stream().map(ScalingOptions::getCaps).filter(e -> e != null).distinct().forEach(c -> setCap(data, c));
 		setCap(data, ServerCaps.MODEL_EVENT_SUBS);
 		return data;
 	}
@@ -180,7 +191,7 @@ public class NetHandler<RL, P, NET> {
 					executor.apply(from).execute(() -> {
 						pd.setModel(tag.hasKey(DATA_TAG) ? tag.getByteArray(DATA_TAG) : null, false, false);
 						sendToAllTracking.accept(pl, setSkin, writeSkinData(pd, pl));
-						pd.save(getPlayerUUID.apply(pl).toString());
+						pd.save(getID(pl));
 					});
 				} else {
 					sendChat.accept(pl, FORCED_CHAT_MSG);
@@ -188,36 +199,28 @@ public class NetHandler<RL, P, NET> {
 			} else if(key.equals(setScale)) {
 				IOHelper pb = new IOHelper(data);
 				NBTTagCompound tag = pb.readNBT();
-				if(tag.hasKey(SCALE_TAG)) {
-					float scale = tag.getFloat(SCALE_TAG);
-					if(scaleSetter != null) {
-						scaleSetter.accept(pl, scale);
-						net.cpm$getEncodedModelData().scale = scale;
+				executor.apply(from).execute(() -> {
+					PlayerData pd = net.cpm$getEncodedModelData();
+					for(Entry<ScalingOptions, BiConsumer<P, Float>> e : scaleSetters.entrySet()) {
+						float oldV = pd.scale.getOrDefault(e.getKey(), 1F);
+						float newV = tag.getFloat(e.getKey().getNetKey());
+						Pair<Float, Float> l = getScalingLimits(e.getKey(), getID(pl));
+						newV = newV == 0 || l == null ? 1F : MathHelper.clamp(newV, l.getKey(), l.getValue());
+						Log.info("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
+						if(newV != oldV) {
+							e.getValue().accept(pl, newV);
+							pd.scale.put(e.getKey(), newV);
+						}
 					}
-				}
-				if(tag.hasKey(EYE_HEIGHT_TAG)) {
-					float scale = tag.getFloat(EYE_HEIGHT_TAG);
-					if(eyeHeightSetter != null) {
-						eyeHeightSetter.accept(pl, scale);
-						net.cpm$getEncodedModelData().eyeH = scale;
-					}
-				}
-				if(tag.hasKey(HITBOX_W_TAG) || tag.hasKey(HITBOX_H_TAG)) {
-					float scaleW = tag.getFloat(HITBOX_W_TAG);
-					float scaleH = tag.getFloat(HITBOX_H_TAG);
-					if(hitboxSetter != null) {
-						hitboxSetter.accept(pl, scaleW, scaleH);
-						net.cpm$getEncodedModelData().hitboxW = scaleW;
-						net.cpm$getEncodedModelData().hitboxH = scaleH;
-					}
-				}
+					pd.save(getID(pl));
+				});
 			} else if(key.equals(subEvent)) {
 				IOHelper pb = new IOHelper(data);
 				NBTTagCompound tag = pb.readNBT();
 				PlayerData pd = net.cpm$getEncodedModelData();
 				pd.eventSubs.clear();
 				NBTTagList list = tag.getTagList(EVENT_LIST, NBTTag.TAG_STRING);
-				for(int i = 0;i<list.tagCount();i++) {
+				for (int i = 0;i<list.tagCount();i++) {
 					ModelEventType type = ModelEventType.of(list.getStringTagAt(i));
 					if(type != null)pd.eventSubs.add(type);
 				}
@@ -264,6 +267,12 @@ public class NetHandler<RL, P, NET> {
 			if(key.equals(helloPacket)) {
 				IOHelper pb = new IOHelper(data);
 				NBTTagCompound tag = pb.readNBT();
+				NBTTagCompound scaling = tag.getCompoundTag(SCALING);
+				Map<ScalingOptions, Float> scalingMap = new EnumMap<>(ScalingOptions.class);
+				for(ScalingOptions o : ScalingOptions.VALUES) {
+					float v = scaling.getFloat(o.getNetKey());
+					scalingMap.put(o, v);
+				}
 				executor.apply(from).execute(() -> {
 					handleServerCaps(tag.getCompoundTag(SERVER_CAPS));
 					String server = MinecraftClientAccess.get().getConnectedServer();
@@ -283,6 +292,7 @@ public class NetHandler<RL, P, NET> {
 					net.cpm$setHasMod(true);
 					MinecraftClientAccess.get().getDefinitionLoader().clearServerData();
 					sendPacket.accept(from, helloPacket, new byte[0]);
+					MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setServerScaling(scalingMap);
 				});
 			} else if(net.cpm$hasMod()) {
 				if(key.equals(setSkin)) {
@@ -436,14 +446,14 @@ public class NetHandler<RL, P, NET> {
 		}
 	}
 
-	public void onCommand(P pl, String skin, boolean force, boolean save) {
+	public void setSkin(P pl, String skin, boolean force, boolean save) {
 		PlayerData pd = getSNetH(pl).cpm$getEncodedModelData();
 		pd.setModel(skin, force, save);
 		if(skin == null) {
 			sendPacket.accept(getNet.apply(pl), getSkin, new byte[0]);
 		}
 		sendToAllTracking.accept(pl, setSkin, writeSkinData(pd, pl));
-		pd.save(getPlayerUUID.apply(pl).toString());
+		pd.save(getID(pl));
 	}
 
 	public void setScale(ScaleData scl) {
@@ -451,11 +461,10 @@ public class NetHandler<RL, P, NET> {
 			try {
 				if(scl == null)scl = ScaleData.NULL;
 				NBTTagCompound nbt = new NBTTagCompound();
-				nbt.setFloat(SCALE_TAG, scl.getScale());
-				if(serverCaps.contains(ServerCaps.EYE_HEIGHT))nbt.setFloat(EYE_HEIGHT_TAG, scl.getEyeHScale());
-				if(serverCaps.contains(ServerCaps.HITBOX_SCALING)) {
-					nbt.setFloat(HITBOX_W_TAG, scl.getWidthScale());
-					nbt.setFloat(HITBOX_H_TAG, scl.getHeightScale());
+				for(Entry<ScalingOptions, Float> e : scl.getScaling().entrySet()) {
+					if(serverCaps.contains(e.getKey().getCaps())) {
+						nbt.setFloat(e.getKey().getNetKey(), e.getValue());
+					}
 				}
 				IOHelper pb = new IOHelper();
 				pb.writeNBT(nbt);
@@ -468,25 +477,10 @@ public class NetHandler<RL, P, NET> {
 
 	public void onRespawn(P pl) {
 		PlayerData pd = getSNetH(pl).cpm$getEncodedModelData();
-		if(scaleSetter != null) {
-			float sc = pd.scale;
+		for(Entry<ScalingOptions, BiConsumer<P, Float>> e : scaleSetters.entrySet()) {
+			float sc = pd.scale.getOrDefault(e.getKey(), 1F);
 			if(sc != 1 || sc != 0) {
-				scaleSetter.accept(pl, sc);
-			}
-		}
-		if(eyeHeightSetter != null) {
-			float sc = pd.eyeH;
-			if(sc != 1 || sc != 0) {
-				eyeHeightSetter.accept(pl, sc);
-			}
-		}
-		if(hitboxSetter != null) {
-			float scW = pd.scale;
-			float scH = pd.scale;
-			if(scW == 0)scW = 1;
-			if(scH == 0)scH = 1;
-			if(scW != 1 || scH != 1) {
-				hitboxSetter.accept(pl, scW, scH);
+				e.getValue().accept(pl, sc);
 			}
 		}
 	}
@@ -562,6 +556,10 @@ public class NetHandler<RL, P, NET> {
 		}
 	}
 
+	public String getID(P pl) {
+		return getPlayerUUID.apply(pl).toString();
+	}
+
 	public P getClient() {
 		return getClient.get();
 	}
@@ -612,10 +610,6 @@ public class NetHandler<RL, P, NET> {
 		this.playerToLoader = playerToloader;
 	}
 
-	public void setScaleSetter(BiConsumer<P, Float> scaleSetter) {
-		this.scaleSetter = scaleSetter;
-	}
-
 	public void setGetClient(Supplier<P> getClient) {
 		this.getClient = getClient;
 	}
@@ -653,14 +647,6 @@ public class NetHandler<RL, P, NET> {
 		this.getFallDistance = getFallDistance;
 	}
 
-	public void setEyeHeightSetter(BiConsumer<P, Float> eyeHeightSetter) {
-		this.eyeHeightSetter = eyeHeightSetter;
-	}
-
-	public void setHitboxSetter(TriConsumer<P, Float, Float> hitboxSetter) {
-		this.hitboxSetter = hitboxSetter;
-	}
-
 	public <E extends Throwable> void registerOut(ThrowingConsumer<RL, E> reg) throws E {
 		reg.accept(helloPacket);
 		reg.accept(setSkin);
@@ -669,21 +655,54 @@ public class NetHandler<RL, P, NET> {
 		reg.accept(receiveEvent);
 	}
 
-	public <E extends Throwable> void registerIn(ThrowingConsumer<RL, E> reg) throws E{
+	public <E extends Throwable> void registerIn(ThrowingConsumer<RL, E> reg) throws E {
 		reg.accept(helloPacket);
 		reg.accept(setSkin);
 		reg.accept(subEvent);
 	}
 
-	public void setScaler(ScalerInterface<P> intf) {
-		setScaleSetter(intf::setScale);
-		setEyeHeightSetter(intf::setEyeHeight);
-		setHitboxSetter(intf::setHitbox);
+	public <K> void setScaler(ScalerInterface<P, K> intf) {
+		for(ScalingOptions opt : ScalingOptions.VALUES) {
+			K key = intf.toKey(opt);
+			if(key != null)
+				scaleSetters.put(opt, (p, v) -> intf.setScale(key, p, v));
+		}
 	}
 
-	public static interface ScalerInterface<P> {
-		void setScale(P player, float value);
-		void setEyeHeight(P player, float value);
-		void setHitbox(P player, float width, float height);
+	public BiConsumer<P, Float> setScaler(ScalingOptions key, BiConsumer<P, Float> value) {
+		return scaleSetters.put(key, value);
+	}
+
+	public static interface ScalerInterface<P, K> {
+		void setScale(K key, P player, float value);
+		K toKey(ScalingOptions opt);
+	}
+
+	public boolean isSupported(ScalingOptions o) {
+		return scaleSetters.containsKey(o);
+	}
+
+	public Pair<Float, Float> getScalingLimits(ScalingOptions o, String id) {
+		ConfigEntry e = ModConfig.getWorldConfig();
+		ConfigEntry pl = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS);
+		ConfigEntry g = e.getEntry(ConfigKeys.SCALING_SETTINGS);
+		if(!getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.ENABLED, ConfigEntry::getBoolean, o.getDefualtEnabled()))
+			return null;
+		float min = getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.MIN, ConfigEntry::getFloat, o.getMin());
+		float max = getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.MAX, ConfigEntry::getFloat, o.getMax());
+		return Pair.of(min, max);
+	}
+
+	private <T> T getValue(ConfigEntry pl, ConfigEntry g, String id, String opt, String key, TriFunction<ConfigEntry, String, T, T> getter, T def) {
+		if(pl.hasEntry(id)) {
+			pl = pl.getEntry(id);
+			if(pl.hasEntry(opt)) {
+				pl = pl.getEntry(opt);
+				if(pl.hasEntry(key))
+					return getter.apply(g, key, def);
+			}
+		}
+		g = g.getEntry(opt);
+		return getter.apply(g, key, def);
 	}
 }

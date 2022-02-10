@@ -154,7 +154,7 @@ public class EditorGui extends Frame {
 		notSupportedWarning = false;
 
 		editor.setInfoMsg.add(p -> {
-			msgTooltip = new Tooltip(this, p.getValue());
+			msgTooltip = new Tooltip(this, gui.wordWrap(p.getValue(), width));
 			tooltipTime = System.currentTimeMillis() + p.getKey();
 		});
 	}
@@ -175,7 +175,6 @@ public class EditorGui extends Frame {
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
 		editor.displayViewport.add(view::setEnabled);
-		editor.heldRenderEnable.accept(PlatformFeature.EDITOR_HELD_ITEM.isSupported());
 	}
 
 	private void initTexturePanel(int width, int height) {
@@ -390,6 +389,8 @@ public class EditorGui extends Frame {
 
 		parts.addButton(gui.i18nFormat("button.cpm.root_group.itemHoldPos"), () -> Generators.addItemHoldPos(editor));
 
+		parts.addButton(gui.i18nFormat("button.cpm.root_group.parrots"), () -> Generators.addParrots(editor));
+
 		pp.add(new Label(gui, "=========").setBounds(new Box(5, 5, 0, 0)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.settings"), () -> openPopup(new SettingsPopup(this)));
@@ -446,12 +447,11 @@ public class EditorGui extends Frame {
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.modelEffects")).setBounds(new Box(5, 5, 0, 0)));
 
 		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.scaling"), () -> {
-			float nv = editor.scalingElem.entityScaling != 0 ? 0 : 1;
 			editor.action("switch", "label.cpm.effect.scaling").
-			updateValueOp(editor, editor.scalingElem.entityScaling, nv, (a, b) -> a.scalingElem.entityScaling = b).execute();
+			updateValueOp(editor, editor.scalingElem.enabled, !editor.scalingElem.enabled, (a, b) -> a.scalingElem.enabled = b).execute();
 			editor.updateGui();
 		});
-		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scalingElem.entityScaling != 0));
+		editor.updateGui.add(() -> chxbxScale.setSelected(editor.scalingElem.enabled));
 		chxbxScale.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.scaling")));
 
 		Checkbox hideHead = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.hideHeadIfSkull"), () -> {
@@ -538,28 +538,16 @@ public class EditorGui extends Frame {
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
 
 		PopupMenu heldItemRight = new PopupMenu(gui, this);
-		Button btnHeldRight = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.right"), heldItemRight);
+		pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.right"), heldItemRight);
 		initHeldItemPopup(heldItemRight, ItemSlot.RIGHT_HAND);
-		editor.heldRenderEnable.add(e -> {
-			if(!e)btnHeldRight.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.editor_held_item"))));
-			btnHeldRight.setEnabled(e);
-		});
 
 		PopupMenu heldItemLeft = new PopupMenu(gui, this);
-		Button btnHeldLeft = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
+		pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
 		initHeldItemPopup(heldItemLeft, ItemSlot.LEFT_HAND);
-		editor.heldRenderEnable.add(e -> {
-			if(!e)btnHeldLeft.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.editor_held_item"))));
-			btnHeldLeft.setEnabled(e);
-		});
 
 		PopupMenu heldItemHead = new PopupMenu(gui, this);
-		Button btnHeldHead = pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.head"), heldItemHead);
+		pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.head"), heldItemHead);
 		initHeldItemPopup(heldItemHead, ItemSlot.HEAD);
-		editor.heldRenderEnable.add(e -> {
-			if(!e)btnHeldHead.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.notSupported", gui.i18nFormat("label.cpm.feature.editor_held_item"))));
-			btnHeldHead.setEnabled(e);
-		});
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.layers")).setBounds(new Box(5, 5, 0, 0)));
 

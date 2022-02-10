@@ -12,7 +12,7 @@ import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.ListBuffer;
 import com.tom.cpl.render.VertexBuffer;
-import com.tom.cpm.shared.model.render.PerFaceUV.Dir;
+import com.tom.cpl.util.Direction;
 import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 
 public class BoxRender {
@@ -312,12 +312,12 @@ public class BoxRender {
 			Vertex ptv4 = new Vertex(ex, y, ez, 0.0F, 8.0F);
 			Vertex ptv5 = new Vertex(ex, ey, ez, 8.0F, 8.0F);
 			Vertex ptv6 = new Vertex(x, ey, ez, 8.0F, 0.0F);
-			if(uv.contains(Dir.EAST ))quadList.add(new Quad(new Vertex[]{ptv4, ptv, ptv1, ptv5},  uv.get(Dir.EAST ), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_X));
-			if(uv.contains(Dir.WEST ))quadList.add(new Quad(new Vertex[]{ptv7, ptv3, ptv6, ptv2}, uv.get(Dir.WEST ), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_X));
-			if(uv.contains(Dir.UP   ))quadList.add(new Quad(new Vertex[]{ptv4, ptv3, ptv7, ptv},  uv.get(Dir.UP   ), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_Y));
-			if(uv.contains(Dir.DOWN ))quadList.add(new Quad(new Vertex[]{ptv1, ptv2, ptv6, ptv5}, uv.get(Dir.DOWN ), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_Y));
-			if(uv.contains(Dir.NORTH))quadList.add(new Quad(new Vertex[]{ptv, ptv7, ptv2, ptv1},  uv.get(Dir.NORTH), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_Z));
-			if(uv.contains(Dir.SOUTH))quadList.add(new Quad(new Vertex[]{ptv3, ptv4, ptv5, ptv6}, uv.get(Dir.SOUTH), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_Z));
+			if(uv.contains(Direction.EAST ))quadList.add(new Quad(new Vertex[]{ptv4, ptv, ptv1, ptv5},  uv.get(Direction.EAST ), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_X));
+			if(uv.contains(Direction.WEST ))quadList.add(new Quad(new Vertex[]{ptv7, ptv3, ptv6, ptv2}, uv.get(Direction.WEST ), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_X));
+			if(uv.contains(Direction.UP   ))quadList.add(new Quad(new Vertex[]{ptv4, ptv3, ptv7, ptv},  uv.get(Direction.UP   ), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_Y));
+			if(uv.contains(Direction.DOWN ))quadList.add(new Quad(new Vertex[]{ptv1, ptv2, ptv6, ptv5}, uv.get(Direction.DOWN ), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_Y));
+			if(uv.contains(Direction.NORTH))quadList.add(new Quad(new Vertex[]{ptv, ptv7, ptv2, ptv1},  uv.get(Direction.NORTH), sheetSizeX, sheetSizeY, Vec3f.NEGATIVE_Z));
+			if(uv.contains(Direction.SOUTH))quadList.add(new Quad(new Vertex[]{ptv3, ptv4, ptv5, ptv6}, uv.get(Direction.SOUTH), sheetSizeX, sheetSizeY, Vec3f.POSITIVE_Z));
 		}
 
 		return new QuadMesh(quadList.toArray(new Quad[0]), RenderMode.NORMAL);

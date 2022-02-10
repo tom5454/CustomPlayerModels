@@ -139,6 +139,9 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 		animState.mainHand = Hand.of(player.getMainArm());
 		animState.activeHand = Hand.of(animState.mainHand, player.getUsedItemHand());
 		animState.swingingHand = Hand.of(animState.mainHand, player.swingingArm);
+		animState.hurtTime = player.hurtTime;
+		animState.isOnLadder = player.onClimbable();
+		animState.isBurning = player.displayFireAnimation();
 
 		if(player.getUseItem().getItem() instanceof CrossbowItem) {
 			float f = CrossbowItem.getChargeDuration(player.getUseItem());

@@ -48,6 +48,11 @@ public enum VanillaPose implements IPose {
 	BLOCKING_RIGHT,
 	PARROT_LEFT,
 	PARROT_RIGHT,
+	HURT,
+	ON_FIRE,
+	FREEZING,
+	ON_LADDER,
+	CLIMBING_ON_LADDER,
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;

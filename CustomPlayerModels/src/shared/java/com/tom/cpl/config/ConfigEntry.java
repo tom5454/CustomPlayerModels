@@ -130,6 +130,7 @@ public class ConfigEntry {
 	public void clearValue(String name) {
 		data.remove(name);
 		entries.remove(name);
+		lists.remove(name);
 		changeListener.run();
 	}
 
@@ -202,6 +203,34 @@ public class ConfigEntry {
 
 	public Set<String> keySet() {
 		return data.keySet();
+	}
+
+	public float getFloat(String name, float def) {
+		try {
+			return ((Number) data.getOrDefault(name, def)).floatValue();
+		} catch (ClassCastException e) {
+			return def;
+		}
+	}
+
+	public float getSetFloat(String name, float def) {
+		try {
+			return getSet(name, (Number) Float.valueOf(def)).floatValue();
+		} catch (ClassCastException e) {
+			return def;
+		}
+	}
+
+	public void setFloat(String name, float value) {
+		data.put(name, value);
+		changeListener.run();
+	}
+
+	public void clear() {
+		data.clear();
+		entries.clear();
+		lists.clear();
+		changeListener.run();
 	}
 
 	public static class ConfigEntryList {

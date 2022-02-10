@@ -120,8 +120,8 @@ public class ErrorLogPanel extends Panel {
 
 			addElement(new Label(gui, entry.getMessage().toString(gui)).setBounds(new Box(45, 4, w - 35, 10)));
 
-			tooltip = new Tooltip(frm, entry.toTooltipString(gui, false));
-			tooltipST = new Tooltip(frm, entry.toTooltipString(gui, true));
+			tooltip = new Tooltip(frm, gui.wordWrap(entry.toTooltipString(gui, false), frm.getBounds().w));
+			tooltipST = new Tooltip(frm, gui.wordWrap(entry.toTooltipString(gui, true), frm.getBounds().w));
 
 			switch (entry.getLevel()) {
 			case ERROR:

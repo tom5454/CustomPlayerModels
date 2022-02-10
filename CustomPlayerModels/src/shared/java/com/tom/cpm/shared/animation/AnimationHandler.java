@@ -44,7 +44,7 @@ public class AnimationHandler {
 		for (PlayingAnim a : currentAnimations) {
 			if(!a.finished) {
 				long currentStep = (currentTime - a.currentStart);
-				a.currentAnimation.animate(a.pose.getTime(state, currentStep), player.get());
+				a.currentAnimation.animate(a.getTime(state, currentStep), player.get());
 
 				if(!a.loop && currentStep > a.currentAnimation.duration) {
 					a.finished = true;
@@ -94,6 +94,11 @@ public class AnimationHandler {
 			this.currentStart = currentStart;
 			this.loop = loop;
 			this.finished = false;
+		}
+
+		public long getTime(AnimationState state, long time) {
+			if(pose == null)return time;
+			else return pose.getTime(state, time);
 		}
 	}
 }

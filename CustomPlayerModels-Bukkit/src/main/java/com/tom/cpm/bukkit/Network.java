@@ -63,10 +63,6 @@ public class Network implements PluginMessageListener, Listener {
 		}.runTaskTimer(plugin, 0L, 1L);
 	}
 
-	public void onCommand(Player pl, String skin, boolean force, boolean save) {
-		netHandler.onCommand(pl, skin, force, save);
-	}
-
 	public static void getPlayersWithin(Player player, int distance, Consumer<Player> cons) {
 		int d2 = distance * distance;
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {

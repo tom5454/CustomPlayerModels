@@ -34,7 +34,7 @@ public abstract interface TreeElement {
 				e.elements.forEach(c);
 				e.templates.forEach(c);
 				if(e.templateSettings != null)c.accept(e.templateSettings);
-				if(e.scalingElem.entityScaling != 0)c.accept(e.scalingElem);
+				if(e.scalingElem.enabled)c.accept(e.scalingElem);
 				c.accept(e.texElem);
 			} else
 				parent.getTreeElements(c);

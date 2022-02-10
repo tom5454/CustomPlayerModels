@@ -496,10 +496,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 							g = 1;
 							b = 1;
 						}else if(cube.glow) {
-							buffer = buf.getBuffer(holder.renderTypes, RenderMode.GLOW);
+							buffer = buf.getBuffer(holder.renderTypes, mesh.getLayer().glow());
 						}
 					} else if(cube.glow) {
-						buffer = buf.getBuffer(holder.renderTypes, RenderMode.GLOW);
+						buffer = buf.getBuffer(holder.renderTypes, mesh.getLayer().glow());
 					}
 					mesh.draw(matrixStackIn, buffer, r, g, b, alpha);
 				}

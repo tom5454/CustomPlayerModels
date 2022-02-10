@@ -106,6 +106,7 @@ public class Panel3dImpl extends Panel3dNative {
 		renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RetroGL.linesNoDepth(), 2));
 		renderTypes.put(RenderMode.COLOR, new NativeRenderType(RetroGL.color(), 0));
 		renderTypes.put(RenderMode.PAINT, new NativeRenderType(RetroGL.paint(tex), 0));
+		renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(RetroGL.color(), 1));
 		return renderTypes;
 	}
 

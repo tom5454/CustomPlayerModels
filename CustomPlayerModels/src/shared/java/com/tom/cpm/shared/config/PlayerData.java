@@ -1,16 +1,19 @@
 package com.tom.cpm.shared.config;
 
 import java.util.Base64;
+import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Map;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpm.shared.network.ModelEventType;
+import com.tom.cpm.shared.util.ScalingOptions;
 
 public class PlayerData {
 	public long ticksSinceLogin;
 	public byte[] data;
 	public boolean forced, save;
-	public float scale, eyeH, hitboxW, hitboxH;
+	public Map<ScalingOptions, Float> scale = new EnumMap<>(ScalingOptions.class);
 	public EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
 
 	public PlayerData() {
@@ -39,6 +42,14 @@ public class PlayerData {
 		if(b64 != null) {
 			setModel(b64, forced, true);
 		}
+		ConfigEntry sc = ModConfig.getWorldConfig().getEntry(ConfigKeys.PLAYER_SCALING);
+		if(sc.hasEntry(id)) {
+			sc = sc.getEntry(id);
+			for(ScalingOptions opt : ScalingOptions.VALUES) {
+				float v = sc.getFloat(opt.getNetKey(), 1F);
+				if(v != 1)scale.put(opt, v);
+			}
+		}
 	}
 
 	public void save(String id) {
@@ -54,6 +65,9 @@ public class PlayerData {
 		} else {
 			e.clearValue(id);
 		}
+		ConfigEntry sc = ModConfig.getWorldConfig().getEntry(ConfigKeys.PLAYER_SCALING).getEntry(id);
+		sc.clear();
+		scale.forEach((k, v) -> sc.setFloat(k.getNetKey(), v));
 		ModConfig.getWorldConfig().save();
 	}
 }

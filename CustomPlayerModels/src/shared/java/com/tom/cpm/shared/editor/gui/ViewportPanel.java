@@ -69,7 +69,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public float getScale() {
-		return editor.applyScaling ? editor.scalingElem.entityScaling : 1;
+		return editor.applyScaling ? editor.scalingElem.getScale() : 1;
 	}
 
 	@Override

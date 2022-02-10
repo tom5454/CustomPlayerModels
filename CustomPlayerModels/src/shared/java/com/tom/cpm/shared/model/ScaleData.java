@@ -1,44 +1,35 @@
 package com.tom.cpm.shared.model;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpm.shared.util.ScalingOptions;
 
 public class ScaleData {
-	public static final ScaleData NULL = new ScaleData(1);
-	private float scale, eyeH, hitboxW, hitboxH;
+	public static final ScaleData NULL = new ScaleData();
+	private Map<ScalingOptions, Float> scaling;
 	private Vec3f rPos = new Vec3f(), rRotation = new Vec3f(), rScale = new Vec3f();
 
+	@Deprecated
 	public ScaleData(float scale) {
-		this.scale = scale;
+		scaling = new EnumMap<>(ScalingOptions.class);
+		this.scaling.put(ScalingOptions.ENTITY, scale);
 	}
 
-	public float getScale() {
-		if(scale > 10)return 0;
-		else if(scale < 0.05f)return 0;
-		return scale;
+	private ScaleData() {
+		this(new EnumMap<>(ScalingOptions.class));
 	}
 
-	public float getEyeHScale() {
-		if(eyeH > 10)return 0;
-		else if(eyeH < 0.05f)return 0;
-		return eyeH;
+	public ScaleData(Map<ScalingOptions, Float> scaling) {
+		this.scaling = scaling;
 	}
 
-	public float getWidthScale() {
-		if(hitboxW > 10)return 0;
-		else if(hitboxW < 0.05f)return 0;
-		return hitboxW;
-	}
-
-	public float getHeightScale() {
-		if(hitboxH > 10)return 0;
-		else if(hitboxH < 0.05f)return 0;
-		return hitboxH;
-	}
-
+	@Deprecated
 	public void setScale(float eyeHeight, float hitboxW, float hitboxH) {
-		this.eyeH = eyeHeight;
-		this.hitboxW = hitboxW;
-		this.hitboxH = hitboxH;
+		this.scaling.put(ScalingOptions.EYE_HEIGHT, eyeHeight);
+		this.scaling.put(ScalingOptions.HITBOX_WIDTH, hitboxW);
+		this.scaling.put(ScalingOptions.EYE_HEIGHT, hitboxH);
 	}
 
 	public void setRenderScale(Vec3f pos, Vec3f rotation, Vec3f scale) {
@@ -57,5 +48,41 @@ public class ScaleData {
 
 	public Vec3f getRScale() {
 		return rScale;
+	}
+
+	public Map<ScalingOptions, Float> getScaling() {
+		return scaling;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((rPos == null) ? 0 : rPos.hashCode());
+		result = prime * result + ((rRotation == null) ? 0 : rRotation.hashCode());
+		result = prime * result + ((rScale == null) ? 0 : rScale.hashCode());
+		result = prime * result + ((scaling == null) ? 0 : scaling.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		ScaleData other = (ScaleData) obj;
+		if (rPos == null) {
+			if (other.rPos != null) return false;
+		} else if (!rPos.equals(other.rPos)) return false;
+		if (rRotation == null) {
+			if (other.rRotation != null) return false;
+		} else if (!rRotation.equals(other.rRotation)) return false;
+		if (rScale == null) {
+			if (other.rScale != null) return false;
+		} else if (!rScale.equals(other.rScale)) return false;
+		if (scaling == null) {
+			if (other.scaling != null) return false;
+		} else if (!scaling.equals(other.scaling)) return false;
+		return true;
 	}
 }

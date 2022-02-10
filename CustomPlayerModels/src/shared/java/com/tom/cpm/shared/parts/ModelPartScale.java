@@ -7,6 +7,7 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.ScaleData;
 
+@Deprecated
 public class ModelPartScale implements IModelPart, IResolvedModelPart {
 	private float scale;
 

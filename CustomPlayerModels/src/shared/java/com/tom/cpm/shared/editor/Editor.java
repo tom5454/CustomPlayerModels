@@ -30,6 +30,7 @@ import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
+import com.tom.cpl.util.Direction;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
@@ -69,7 +70,6 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
-import com.tom.cpm.shared.model.render.PerFaceUV.Dir;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -122,7 +122,6 @@ public class Editor {
 	public Updater<Integer> setAnimPriority = updaterReg.create();
 	public Updater<Void> gestureFinished = updaterReg.create();
 	public Updater<Boolean> displayViewport = updaterReg.create();
-	public Updater<Boolean> heldRenderEnable = updaterReg.create();
 	public Updater<Float> setValue = updaterReg.create();
 	public Updater<EditorTool> setTool = updaterReg.create();
 	public Updater<Vec4f> setFaceUVs = updaterReg.create();
@@ -148,7 +147,7 @@ public class Editor {
 	public float animTestSlider;
 	public Set<VanillaPose> testPoses = EnumSet.noneOf(VanillaPose.class);
 	public ScalingElement scalingElem = new ScalingElement(this);
-	public Dir perfaceFaceDir = Dir.UP;
+	public Direction perfaceFaceDir = Direction.UP;
 
 	public ViewportCamera camera = new ViewportCamera();
 	private Stack<Action> undoQueue = new Stack<>();

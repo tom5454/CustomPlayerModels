@@ -1,23 +1,25 @@
 package com.tom.cpm.shared.editor.tree;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
-import com.tom.cpl.function.FloatConsumer;
-import com.tom.cpl.function.FloatSupplier;
+import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
+import com.tom.cpm.shared.util.ScalingOptions;
 
 public class ScalingElement implements TreeElement {
+	private static boolean editPopupShown = false;
 	private List<TreeElement> options;
 	private Editor editor;
-	public float entityScaling;
-	public float eyeHeight;
-	public float hitboxW, hitboxH;
+	public Map<ScalingOptions, Float> scaling = new EnumMap<>(ScalingOptions.class);
 	public Vec3f pos, rotation, scale;
+	public boolean enabled;
 
 	public ScalingElement(Editor editor) {
 		this.editor = editor;
@@ -27,10 +29,9 @@ public class ScalingElement implements TreeElement {
 		scale = new Vec3f();
 
 		options = new ArrayList<>();
-		options.add(new EntityElem());
-		options.add(new ValElem("eye_height", () -> eyeHeight, v -> eyeHeight = v));
-		options.add(new ValElem("hitbox_width", () -> hitboxW, v -> hitboxW = v));
-		options.add(new ValElem("hitbox_height", () -> hitboxH, v -> hitboxH = v));
+		for(ScalingOptions opt : ScalingOptions.VALUES) {
+			options.add(new ValElem(opt));
+		}
 		options.add(new ModelScale());
 	}
 
@@ -67,59 +68,25 @@ public class ScalingElement implements TreeElement {
 		}
 	}
 
-	private class EntityElem extends OptionElem {
-
-		public EntityElem() {
-			super("entity");
-		}
-
-		@Override
-		public float getValue() {
-			return entityScaling;
-		}
-
-		@Override
-		public void setValue(float value) {
-			entityScaling = value;
-			if(entityScaling > 10) {
-				entityScaling = 10;
-				editor.setValue.accept(entityScaling);
-			}
-			if(entityScaling < 0.05f) {
-				entityScaling = 0.05f;
-				editor.setValue.accept(entityScaling);
-			}
-		}
-
-		@Override
-		public void updateGui() {
-			editor.applyScaling = true;
-			editor.setValue.accept(entityScaling);
-			editor.setModePanel.accept(ModeDisplayType.VALUE);
-		}
-	}
-
 	private class ValElem extends OptionElem {
-		private FloatSupplier get;
-		private FloatConsumer set;
+		private ScalingOptions opt;
 
-		public ValElem(String name, FloatSupplier get, FloatConsumer set) {
-			super(name);
-			this.get = get;
-			this.set = set;
+		public ValElem(ScalingOptions opt) {
+			super(opt.name().toLowerCase());
+			this.opt = opt;
 		}
 
 		@Override
 		public void updateGui() {
+			if(opt == ScalingOptions.ENTITY)editor.applyScaling = true;
 			editor.setModePanel.accept(ModeDisplayType.VALUE);
-			editor.setValue.accept(get.getAsFloat());
+			editor.setValue.accept(scaling.getOrDefault(opt, 1F));
 		}
 
 		@Override
 		public void setValue(float value) {
-			set.accept(value);
 			editor.action("set", "label.cpm.tree.scaling." + name).
-			updateValueOp(set, get.getAsFloat(), value, FloatConsumer::accept).execute();
+			addToMap(scaling, opt, value).execute();
 		}
 	}
 
@@ -138,6 +105,10 @@ public class ScalingElement implements TreeElement {
 
 		@Override
 		public void setVec(Vec3f v, VecType object) {
+			if(editor.elements.stream().anyMatch(e -> !e.hidden) && !editPopupShown) {
+				editPopupShown = true;
+				editor.frame.openPopup(new MessagePopup(editor.frame, editor.gui().i18nFormat("label.cpm.info"), editor.gui().i18nFormat("label.cpm.warnEditTransform")));
+			}
 			switch (object) {
 			case ROTATION:
 				editor.action("set", "label.cpm.rotation").
@@ -164,11 +135,25 @@ public class ScalingElement implements TreeElement {
 	}
 
 	public void reset() {
-		entityScaling = 0;
+		scaling.clear();
+		enabled = false;
+		pos = new Vec3f();
+		rotation = new Vec3f();
+		scale = new Vec3f();
 	}
 
 	public boolean hasTransform() {
 		return pos.x != 0 || pos.y != 0 || pos.z != 0 || rotation.x != 0 || rotation.y != 0 || rotation.z != 0 ||
 				scale.x != 0 || scale.y != 0 || scale.z != 0 || scale.x != 1 || scale.y != 1 || scale.z != 1;
+	}
+
+	public float getScale() {
+		return getScale(ScalingOptions.ENTITY);
+	}
+
+	public float getScale(ScalingOptions opt) {
+		float v = scaling.getOrDefault(opt, 1F);
+		if(v == 0)return 1F;
+		return v;
 	}
 }

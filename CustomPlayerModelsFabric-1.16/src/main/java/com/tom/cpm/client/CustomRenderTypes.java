@@ -18,6 +18,7 @@ public class CustomRenderTypes extends RenderLayer {
 			.depthTest(ALWAYS_DEPTH_TEST)
 			.build(false));
 	public static final RenderLayer ENTITY_COLOR = getEntityTranslucent(new Identifier("cpm:textures/white.png"));
+	public static final RenderLayer ENTITY_COLOR_EYES = getEyes(new Identifier("cpm:textures/white.png"));
 
 	public CustomRenderTypes(String nameIn, VertexFormat formatIn, int drawModeIn, int bufferSizeIn,
 			boolean useDelegateIn, boolean needsSortingIn, Runnable setupTaskIn, Runnable clearTaskIn) {
@@ -30,6 +31,10 @@ public class CustomRenderTypes extends RenderLayer {
 
 	public static RenderLayer getEntityColorTranslucentCull() {
 		return ENTITY_COLOR;
+	}
+
+	public static RenderLayer getEntityColorEyes() {
+		return ENTITY_COLOR_EYES;
 	}
 
 	public static RenderLayer getEntityTranslucentCullNoLight(Identifier texture) {

@@ -10,6 +10,7 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.tree.ScalingElement;
 import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.render.BoxRender;
+import com.tom.cpm.shared.util.ScalingOptions;
 
 public class RenderUtil {
 
@@ -17,19 +18,19 @@ public class RenderUtil {
 		stack.push();
 		stack.translate(0.5f, 0, 0.5f);
 		stack.scale(1.1f, 1.1f, 1.1f);
-		float scaling = applySc ? sce.entityScaling : 0;
+		float scaling = applySc ? sce.getScale() : 0;
 		if(scaling > 0 && poseToApply != VanillaPose.SKULL_RENDER)stack.scale(scaling, scaling, scaling);
 		BoundingBox bb = PlayerPartValues.getBounds(poseToApply);
 		float eyeh = PlayerPartValues.getEyeHeight(poseToApply);
-		if(sce.eyeHeight != 0)eyeh *= sce.eyeHeight;
+		eyeh *= sce.getScale(ScalingOptions.EYE_HEIGHT);
 		if(poseToApply == VanillaPose.SLEEPING) {
 			stack.translate(0, 0, 1.36f);
 			stack.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90));
 			stack.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(90));
 			stack.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
 		}
-		float w = sce.hitboxW == 0 ? 1 : sce.hitboxW;
-		float h = sce.hitboxH == 0 ? 1 : sce.hitboxH;
+		float w = sce.getScale(ScalingOptions.HITBOX_WIDTH);
+		float h = sce.getScale(ScalingOptions.HITBOX_HEIGHT);
 		bb = new BoundingBox(
 				bb.minX * w,
 				bb.minY,

@@ -43,10 +43,10 @@ import com.tom.cpm.shared.effects.EffectHide;
 import com.tom.cpm.shared.effects.EffectHideSkull;
 import com.tom.cpm.shared.effects.EffectModelScale;
 import com.tom.cpm.shared.effects.EffectPerFaceUV;
-import com.tom.cpm.shared.effects.EffectPlayerScale;
 import com.tom.cpm.shared.effects.EffectRemoveArmorOffset;
 import com.tom.cpm.shared.effects.EffectRenderItem;
 import com.tom.cpm.shared.effects.EffectScale;
+import com.tom.cpm.shared.effects.EffectScaling;
 import com.tom.cpm.shared.effects.EffectSingleTexture;
 import com.tom.cpm.shared.effects.EffectUV;
 import com.tom.cpm.shared.io.ChecksumOutputStream;
@@ -71,7 +71,6 @@ import com.tom.cpm.shared.parts.ModelPartPlayer;
 import com.tom.cpm.shared.parts.ModelPartPlayerPos;
 import com.tom.cpm.shared.parts.ModelPartRenderEffect;
 import com.tom.cpm.shared.parts.ModelPartRoot;
-import com.tom.cpm.shared.parts.ModelPartScale;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartTemplate;
@@ -249,10 +248,8 @@ public class Exporter {
 		for (EditorTemplate et : e.templates) {
 			otherParts.add(new ModelPartTemplate(et));
 		}
-		if(e.scalingElem.entityScaling != 0) {
-			otherParts.add(new ModelPartScale(e.scalingElem.entityScaling));
-			if(e.scalingElem.eyeHeight != 0 || e.scalingElem.hitboxW != 0 || e.scalingElem.hitboxH != 0)
-				otherParts.add(new ModelPartRenderEffect(new EffectPlayerScale(e.scalingElem.eyeHeight, e.scalingElem.hitboxW, e.scalingElem.hitboxH)));
+		if(e.scalingElem.enabled) {
+			otherParts.add(new ModelPartRenderEffect(new EffectScaling(e.scalingElem.scaling)));
 			if(e.scalingElem.hasTransform())
 				otherParts.add(new ModelPartRenderEffect(new EffectModelScale(e.scalingElem.pos, e.scalingElem.rotation, e.scalingElem.scale)));
 		}

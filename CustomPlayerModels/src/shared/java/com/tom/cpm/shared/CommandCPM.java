@@ -16,6 +16,7 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.util.ScalingOptions;
 
 public class CommandCPM {
 
@@ -71,6 +72,9 @@ public class CommandCPM {
 										run(CommandCPM::executeSetKickMessage)
 										)
 								)
+						).
+				then(new LiteralCommandBuilder("scaling").
+						thenAll(CommandCPM::buildScaling)
 						)
 				;
 		dispatcher.register(cpm);
@@ -133,8 +137,77 @@ public class CommandCPM {
 	private static void executeSkinChange(CommandCtx<?> context, String skin, boolean force, boolean save) {
 		Object player = context.getArgument("target");
 		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
-		h.onCommand(player, skin, force, save);
+		h.setSkin(player, skin, force, save);
 		if(force)context.sendSuccess(new FormatText("commands.cpm.setskin.success.force", context.handler.toStringPlayer(player)));
 		else context.sendSuccess(new FormatText("commands.cpm.setskin.success", context.handler.toStringPlayer(player)));
+	}
+
+	private static List<LiteralCommandBuilder> buildScaling() {
+		List<LiteralCommandBuilder> l = new ArrayList<>();
+		for(ScalingOptions o : ScalingOptions.VALUES) {
+			String name = o.name().toLowerCase();
+			LiteralCommandBuilder s = new LiteralCommandBuilder(name);
+			s.then(new LiteralCommandBuilder("limit").
+					then(new RequiredCommandBuilder("target", ArgType.PLAYER).
+							then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+									run(c -> setScalingLimit(c, c.getArgument("target"), o, o.getMin(), c.getArgument("max")))
+									).
+							then(new RequiredCommandBuilder("min", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+									then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+											run(c -> setScalingLimit(c, c.getArgument("target"), o, c.getArgument("min"), c.getArgument("max")))
+											)
+									)
+							).
+					then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+							run(c -> setScalingLimit(c, null, o, o.getMin(), c.getArgument("max")))
+							).
+					then(new RequiredCommandBuilder("min", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+							then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+									run(c -> setScalingLimit(c, null, o, c.getArgument("min"), c.getArgument("max")))
+									)
+							)
+					).
+			then(new LiteralCommandBuilder("enabled").
+					then(new RequiredCommandBuilder("target", ArgType.PLAYER).
+							then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
+									run(c -> setScalingEn(c, c.getArgument("target"), o, c.getArgument("enable")))
+									)
+							).
+					then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
+							run(c -> setScalingEn(c, null, o, c.getArgument("enable")))
+							)
+					);
+			l.add(s);
+		}
+		return l;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void setScalingEn(CommandCtx<?> context, Object player, ScalingOptions sc, boolean en) {
+		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
+		ConfigEntry e = ModConfig.getWorldConfig();
+		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
+		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
+		e = e.getEntry(sc.name().toLowerCase());
+		e.setBoolean(ConfigKeys.ENABLED, en);
+		ModConfig.getWorldConfig().save();
+		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase()), new FormatText("label.cpm.enableX", en)));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void setScalingLimit(CommandCtx<?> context, Object player, ScalingOptions sc, float min, float max) {
+		if(min > 1 || min > max || max < 1) {
+			context.fail(new FormatText("commands.cpm.numberOutOfBounds"));
+			return;
+		}
+		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
+		ConfigEntry e = ModConfig.getWorldConfig();
+		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
+		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
+		e = e.getEntry(sc.name().toLowerCase());
+		e.setFloat(ConfigKeys.MIN, min);
+		e.setFloat(ConfigKeys.MAX, max);
+		ModConfig.getWorldConfig().save();
+		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase()), new FormatText("label.cpm.rangeOf", min, max)));
 	}
 }

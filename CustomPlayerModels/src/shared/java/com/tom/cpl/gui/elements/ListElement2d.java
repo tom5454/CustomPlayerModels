@@ -39,7 +39,7 @@ public class ListElement2d<T> extends ListElement<T> {
 			int x = i % cols;
 			int y = i / cols;
 			boolean hovered = false;
-			if (event.isHovered(new Box(bounds.x + x * colW, bounds.y + y * 10, colW, 10))) {
+			if (event.isHovered(bounds) && event.isHovered(new Box(bounds.x + x * colW, bounds.y + y * 10, colW, 10))) {
 				hovered = true;
 				Tooltip tt = model.getTooltip(el);
 				if(tt != null)tt.set();

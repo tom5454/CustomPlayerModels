@@ -141,6 +141,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RetroGL.eyes(texID), 1));
 			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RetroGL.linesNoDepth(), 2));
 			renderTypes.put(RenderMode.COLOR, new NativeRenderType(RetroGL.color(), 0));
+			renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(RetroGL.color(), 1));
 		}
 
 		@Override

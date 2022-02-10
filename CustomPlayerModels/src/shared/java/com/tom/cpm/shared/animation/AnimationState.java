@@ -17,11 +17,12 @@ public class AnimationState {
 	public boolean wearingHelm, wearingBody, wearingLegs, wearingBoots, wearingElytra;
 	public boolean sleeping, dying, riding, elytraFlying, creativeFlying, creativeFlyingServer, swimming, retroSwimming, sprinting, sneaking, takingDmg, tridentSpin;
 	public float fallDistance, fallDistanceServer, moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, pitch;
+	public int hurtTime;
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
 	public IPose selectedPose;
 	public ArmPose leftArm = ArmPose.EMPTY, rightArm = ArmPose.EMPTY;
 	public HandAnimation usingAnimation = HandAnimation.NONE;
-	public boolean parrotLeft, parrotRight;
+	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing;
 
 	public void resetPlayer() {
 		sleeping = false;
@@ -44,6 +45,7 @@ public class AnimationState {
 		crossbowPullback = 0;
 		yaw = 0;
 		pitch = 0;
+		hurtTime = 0;
 	}
 
 	public void resetModel() {
@@ -63,6 +65,8 @@ public class AnimationState {
 		else if(riding)return VanillaPose.RIDING;
 		else if(swimming)return VanillaPose.SWIMMING;
 		else if(retroSwimming && registry.hasPoseAnimations(VanillaPose.RETRO_SWIMMING))return VanillaPose.RETRO_SWIMMING;
+		else if(isClimbing && Math.abs(moveAmountY) > 0.05F && registry.hasPoseAnimations(VanillaPose.CLIMBING_ON_LADDER))return VanillaPose.CLIMBING_ON_LADDER;
+		else if(isClimbing && registry.hasPoseAnimations(VanillaPose.ON_LADDER))return VanillaPose.ON_LADDER;
 		else if(jumping + 500 > time && registry.hasPoseAnimations(VanillaPose.JUMPING))return VanillaPose.JUMPING;
 		else if(sneaking)return (Math.abs(moveAmountX) > 0 || Math.abs(moveAmountZ) > 0) && registry.hasPoseAnimations(VanillaPose.SNEAK_WALK) ? VanillaPose.SNEAK_WALK : VanillaPose.SNEAKING;
 		else if(sprinting)return VanillaPose.RUNNING;
@@ -92,6 +96,9 @@ public class AnimationState {
 		}
 		if(parrotLeft)h.accept(VanillaPose.PARROT_LEFT);
 		if(parrotRight)h.accept(VanillaPose.PARROT_RIGHT);
+		if(hurtTime > 0)h.accept(VanillaPose.HURT);
+		if(isBurning)h.accept(VanillaPose.ON_FIRE);
+		if(isFreezing)h.accept(VanillaPose.FREEZING);
 	}
 
 	private static VanillaPose getArmPose(ArmPose pose, boolean left) {
@@ -128,5 +135,10 @@ public class AnimationState {
 
 	public void jump() {
 		jumping = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
+	}
+
+	public void preAnimate() {
+		if(isOnLadder && moveAmountY > 0)isClimbing = true;
+		else if(!isOnLadder)isClimbing = false;
 	}
 }

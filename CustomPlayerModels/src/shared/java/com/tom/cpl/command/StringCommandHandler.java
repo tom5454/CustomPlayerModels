@@ -104,6 +104,23 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 						}
 						break;
 
+						case FLOAT:
+						{
+							try {
+								float v = Float.parseFloat(arg);
+								if(r.getSettings() != null) {
+									Pair<Float, Float> p = (Pair<Float, Float>) r.getSettings();
+									if(v < p.getKey())throw wrongUsage("commands.generic.num.tooSmall", v);
+									if(v > p.getValue())throw wrongUsage("commands.generic.num.tooBig", v);
+								}
+								ctx.arg(r.getId(), v);
+								e = next;
+							} catch (NumberFormatException num) {
+								lastExc = wrongUsage("commands.generic.num.invalid", arg);
+							}
+						}
+						break;
+
 						case STRING:
 						{
 							boolean greedyString = r.getSettings() == null || !((Boolean)r.getSettings());
@@ -122,7 +139,6 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 						}
 						break;
 
-						case ENUM:
 						default:
 							e = next;
 							ctx.arg(r.getId(), arg);

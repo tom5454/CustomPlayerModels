@@ -31,6 +31,12 @@ public class ConfigKeys {
 	public static final String KICK_MESSAGE = "kickMessage";
 	public static final String DEFAULT_KICK_MESSAGE = "Customizable Player Models is requied on this server";
 	public static final String IMPORTED = "imported";
+	public static final String PLAYER_SCALING = "player_scaling";
+	public static final String SCALING_SETTINGS = "scaling_settings";
+	public static final String PLAYER_SCALING_SETTINGS = "player_scaling_settings";
+	public static final String ENABLED = "enabled";
+	public static final String MIN = "min";
+	public static final String MAX = "max";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

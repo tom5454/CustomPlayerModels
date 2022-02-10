@@ -5,6 +5,13 @@ public enum RenderMode {
 	GLOW,
 	OUTLINE,
 	COLOR,
+	COLOR_GLOW,
 	DEFAULT,
 	PAINT,
+	;
+
+	public RenderMode glow() {
+		if(this == COLOR)return COLOR_GLOW;
+		return GLOW;
+	}
 }

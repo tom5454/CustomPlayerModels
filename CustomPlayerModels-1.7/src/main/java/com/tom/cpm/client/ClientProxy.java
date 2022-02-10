@@ -13,6 +13,7 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiOptions;
+import net.minecraft.client.gui.GuiSelectWorld;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -126,7 +127,7 @@ public class ClientProxy extends CommonProxy {
 		if(openGui.gui == null && minecraft.currentScreen instanceof GuiImpl.Overlay) {
 			openGui.gui = ((GuiImpl.Overlay) minecraft.currentScreen).getGui();
 		}
-		if(openGui.gui instanceof GuiMainMenu && EditorGui.doOpenEditor()) {
+		if(openGui.gui instanceof GuiMainMenu && !(minecraft.currentScreen instanceof GuiSelectWorld || minecraft.currentScreen instanceof GuiMainMenu) && EditorGui.doOpenEditor()) {
 			openGui.gui = new GuiImpl(EditorGui::new, openGui.gui);
 		}
 	}

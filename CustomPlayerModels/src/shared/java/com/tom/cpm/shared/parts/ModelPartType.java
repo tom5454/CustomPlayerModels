@@ -17,7 +17,7 @@ public enum ModelPartType {
 	@Deprecated LIST_ICON(ModelPartListIcon::new),
 	DUP_ROOT(ModelPartDupRoot::new),
 	CLONEABLE(ModelPartCloneable::new),
-	SCALE(ModelPartScale::new),
+	@Deprecated SCALE(ModelPartScale::new),
 	TEXTURE(ModelPartTexture::new),
 	ANIMATED_TEX(ModelPartAnimatedTexture::new),
 	;

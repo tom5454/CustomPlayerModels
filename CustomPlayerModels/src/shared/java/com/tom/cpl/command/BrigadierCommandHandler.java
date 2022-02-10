@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -100,7 +101,12 @@ public abstract class BrigadierCommandHandler<S> implements CommandHandler<S> {
 		case STRING:
 			if(settings == null || !((Boolean)settings))return (ArgumentType<T>) StringArgumentType.word();
 			else return (ArgumentType<T>) StringArgumentType.greedyString();
-		case ENUM:
+		case FLOAT:
+			if(settings != null) {
+				Pair<Float, Float> p = (Pair<Float, Float>) settings;
+				return (ArgumentType<T>) FloatArgumentType.floatArg(p.getKey(), p.getValue());
+			}
+			else return (ArgumentType<T>) FloatArgumentType.floatArg();
 		default:
 			return (ArgumentType<T>) StringArgumentType.word();
 		}
@@ -115,7 +121,8 @@ public abstract class BrigadierCommandHandler<S> implements CommandHandler<S> {
 			return (T) getPlayer(ctx, id);
 		case INT:
 			return (T) Integer.valueOf(IntegerArgumentType.getInteger(ctx, id));
-		case ENUM:
+		case FLOAT:
+			return (T) Float.valueOf(FloatArgumentType.getFloat(ctx, id));
 		case STRING:
 		default:
 			return (T) ctx.getArgument(id, String.class);
