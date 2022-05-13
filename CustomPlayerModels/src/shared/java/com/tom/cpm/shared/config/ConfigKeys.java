@@ -37,6 +37,10 @@ public class ConfigKeys {
 	public static final String ENABLED = "enabled";
 	public static final String MIN = "min";
 	public static final String MAX = "max";
+	public static final String SHOW_LOADING_INFO = "showLoadingInfo";
+	public static final String ADV_SCALING_SETTINGS = "advScalingSettings";
+	public static final String EDITOR_DRAG_MOUSE_BUTTON = "editorDragMouseButton";
+	public static final String EDITOR_RECENT_PROJECTS = "editorRecentProjects";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

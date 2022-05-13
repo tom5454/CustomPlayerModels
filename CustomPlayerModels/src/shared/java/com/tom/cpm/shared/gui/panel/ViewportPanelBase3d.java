@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Set;
 
-import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.KeyboardEvent;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Mat3f;
 import com.tom.cpl.math.Mat4f;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.MatrixStack;
-import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
@@ -21,7 +21,7 @@ import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.editor.RootGroups;
-import com.tom.cpm.shared.editor.gui.EditorGui;
+import com.tom.cpm.shared.gui.Keybinds;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -42,43 +42,43 @@ import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public abstract class ViewportPanelBase3d extends Panel3d {
-	private static final GuiModelRenderManager manager = new GuiModelRenderManager();
-	private static final EnumMap<SkinType, VanillaPlayerModel> models = new EnumMap<>(SkinType.class);
-	private static final ParrotModel parrot = new ParrotModel();
-	private static final ShieldModel shield = new ShieldModel();
-	private static final BlockModel block = new BlockModel();
-	private static final TridentModel trident = new TridentModel();
-	private static final SkullModel skull = new SkullModel();
-	private static final ItemRenderTransform[] swordTransform = new ItemRenderTransform[] {
+	public static final GuiModelRenderManager manager = new GuiModelRenderManager();
+	protected static final EnumMap<SkinType, VanillaPlayerModel> models = new EnumMap<>(SkinType.class);
+	protected static final ParrotModel parrot = new ParrotModel();
+	protected static final ShieldModel shield = new ShieldModel();
+	protected static final BlockModel block = new BlockModel();
+	protected static final TridentModel trident = new TridentModel();
+	protected static final SkullModel skull = new SkullModel();
+	protected static final ItemRenderTransform[] swordTransform = new ItemRenderTransform[] {
 			new ItemRenderTransform(new Vec3f(0, 4, 0.5F), new Vec3f(0, -90, 55), new Vec3f(0.85F, 0.85F, 0.85F)),
 			new ItemRenderTransform(new Vec3f(0, 4, 0.5F), new Vec3f(0, 90, -55), new Vec3f(0.85F, 0.85F, 0.85F))
 	};
-	private static final ItemRenderTransform[] bowTransform = new ItemRenderTransform[] {
+	protected static final ItemRenderTransform[] bowTransform = new ItemRenderTransform[] {
 			new ItemRenderTransform(new Vec3f(-1, -2, 2.5F), new Vec3f(-80, 260, -40), new Vec3f(0.9F, 0.9F, 0.9F)),
 			new ItemRenderTransform(new Vec3f(-1, -2, 2.5F), new Vec3f(-80, -280, 40), new Vec3f(0.9F, 0.9F, 0.9F))
 	};
-	private static final ItemRenderTransform[] crossbowTransform = new ItemRenderTransform[] {
+	protected static final ItemRenderTransform[] crossbowTransform = new ItemRenderTransform[] {
 			new ItemRenderTransform(new Vec3f(2, 0.1F, -3), new Vec3f(-90, 0, -60), new Vec3f(0.9F, 0.9F, 0.9F)),
 			new ItemRenderTransform(new Vec3f(2, 0.1F, -3), new Vec3f(-90, 0,  30), new Vec3f(0.9F, 0.9F, 0.9F))
 	};
-	private static final ItemRenderTransform[] itemTransform = new ItemRenderTransform[] {
+	protected static final ItemRenderTransform[] itemTransform = new ItemRenderTransform[] {
 			new ItemRenderTransform(new Vec3f(0, 3, 1), new Vec3f(0, 0, 0), new Vec3f(0.55F, 0.55F, 0.55F))
 	};
-	private static final ItemModel sword = new ItemModel("sword", swordTransform);
-	private static final ItemModel food = new ItemModel("food", itemTransform);
-	private static final IItemModel[] bow = new IItemModel[] {
+	protected static final ItemModel sword = new ItemModel("sword", swordTransform);
+	protected static final ItemModel food = new ItemModel("food", itemTransform);
+	protected static final IItemModel[] bow = new IItemModel[] {
 			new ItemModel("bow_pulling_0", bowTransform),
 			new ItemModel("bow_pulling_1", bowTransform),
 			new ItemModel("bow_pulling_2", bowTransform)
 	};
-	private static final IItemModel[] crossbow = new IItemModel[] {
+	protected static final IItemModel[] crossbow = new IItemModel[] {
 			new ItemModel("crossbow", crossbowTransform),
 			new ItemModel("crossbow_pulling_0", crossbowTransform),
 			new ItemModel("crossbow_pulling_1", crossbowTransform),
 			new ItemModel("crossbow_pulling_2", crossbowTransform)
 	};
-	private static final SpyglassModel spyglass = new SpyglassModel();
-	private static final EnumMap<DisplayItem, IItemModel[]> itemModels = new EnumMap<>(DisplayItem.class);
+	protected static final SpyglassModel spyglass = new SpyglassModel();
+	protected static final EnumMap<DisplayItem, IItemModel[]> itemModels = new EnumMap<>(DisplayItem.class);
 
 	static {
 		for (SkinType t : SkinType.VANILLA_TYPES) {
@@ -99,10 +99,9 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 	protected boolean enableDrag;
 	protected boolean dragMode;
 	protected int paintColor;
-	protected Vec2i mouseCursorPos = new Vec2i();
 
-	public ViewportPanelBase3d(IGui gui) {
-		super(gui);
+	public ViewportPanelBase3d(Frame frm) {
+		super(frm);
 		setBackgroundColor(gui.getColors().popup_background);
 	}
 
@@ -114,18 +113,18 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		stack.scale((-scale), -scale, scale);
 		stack.translate(0, -1.5f, 0);
 
-		preRender();
-
 		ModelDefinition def = getDefinition();
 		VanillaPlayerModel p = models.get(def.getSkinType());
 		VBuffers rp = buf.replay();
+
+		preRender(stack, rp);
 
 		manager.bindModel(p, GuiModelRenderManager.PLAYER, rp, def, null, getAnimMode());
 		manager.bindSkin(p, this, TextureSheetType.SKIN);
 
 		poseModel(p, stack, partialTicks);
 
-		p.render(stack, rp.getBuffer(types, getMode()));
+		p.render(stack, rp.getBuffer(types, RenderMode.DEFAULT));
 
 		Set<PlayerModelLayer> layers = getArmorLayers();
 		for(PlayerModelLayer l : PlayerModelLayer.VALUES) {
@@ -187,10 +186,12 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 			if(layers.contains(l)) {
 				manager.bindModel(p, l.name(), rp, def, null, getAnimMode());
 				manager.bindSkin(p, this, RootGroups.getGroup(l.parts[0]).getTexSheet(l.parts[0]));
-				p.renderLayer(stack, rp.getBuffer(types, getMode()), l);
+				p.renderLayer(stack, rp.getBuffer(types, RenderMode.DEFAULT), l);
 				manager.unbindModel(p);
 			}
 		}
+
+		postRender(stack, rp);
 
 		rp.finishAll();
 		stack.pop();
@@ -208,10 +209,6 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		p.reset();
 		p.setAllVisible(true);
 		PlayerModelSetup.setRotationAngles(p, 0, 0, Hand.RIGHT, false);
-	}
-
-	protected RenderMode getMode() {
-		return applyLighting() ? RenderMode.DEFAULT : RenderMode.PAINT;
 	}
 
 	public void renderBase(MatrixStack stack, VBuffers buf) {
@@ -260,7 +257,7 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		t.finish();
 	}
 
-	private RenderTypes<RenderMode> types;
+	protected RenderTypes<RenderMode> types;
 
 	public void load() {
 		types = getRenderTypes();
@@ -276,45 +273,49 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 	}
 
 	protected float getScale() {return 1;}
-	protected abstract void preRender();
+	protected abstract void preRender(MatrixStack stack, VBuffers buf);
+	protected void postRender(MatrixStack stack, VBuffers buf) {}
 	protected abstract ModelDefinition getDefinition();
 	protected AnimationMode getAnimMode() {return AnimationMode.PLAYER;}
 	protected Set<PlayerModelLayer> getArmorLayers() {return Collections.emptySet();}
 	public DisplayItem getHeldItem(ItemSlot hand) {return DisplayItem.NONE;}
-	protected boolean applyLighting() {return true;}
 	protected int drawParrots() {return 0;}
 	protected int getItemState(ItemSlot slot, int maxStates) {return 0;}
 
+	protected boolean isRotate(int btn) {
+		return true;
+	}
+	protected boolean isDrag(int btn) {
+		return btn == 1;
+	}
+
 	@Override
-	public boolean mouseClick(int x, int y, int btn) {
-		if(btn == EditorGui.getRotateMouseButton() && bounds.isInBounds(x, y)) {
-			this.mx = x;
-			this.my = y;
+	public void mouseClick(MouseEvent evt) {
+		super.mouseClick(evt);
+		if(isRotate(evt.btn) && evt.isHovered(bounds)) {
+			this.mx = evt.x;
+			this.my = evt.y;
 			this.enableDrag = true;
-			this.dragMode = gui.isShiftDown();
-			return true;
-		} else if(bounds.isInBounds(x, y)){
-			ViewportCamera cam = getCamera();
-			cam.position.x = 0.5f;
-			cam.position.y = 1;
-			cam.position.z = 0.5f;
-			return true;
+			this.dragMode = isDrag(evt.btn);
+			evt.consume();
 		}
-		return false;
 	}
 
 	@Override
-	public boolean mouseRelease(int x, int y, int btn) {
-		if(btn == EditorGui.getRotateMouseButton() && bounds.isInBounds(x, y)) {
+	public void mouseRelease(MouseEvent evt) {
+		super.mouseRelease(evt);
+		if(isRotate(evt.btn) && evt.isHovered(bounds)) {
 			enableDrag = false;
-			return true;
+			evt.consume();
 		}
-		return false;
 	}
 
 	@Override
-	public boolean mouseDrag(int x, int y, int btn) {
-		if(btn == EditorGui.getRotateMouseButton() && bounds.isInBounds(x, y) && enableDrag) {
+	public void mouseDrag(MouseEvent evt) {
+		super.mouseDrag(evt);
+		if(isRotate(evt.btn) && evt.isHovered(bounds) && enableDrag) {
+			int x = evt.x;
+			int y = evt.y;
 			ViewportCamera cam = getCamera();
 			if(dragMode) {
 				float yaw = cam.look.getYaw();
@@ -345,6 +346,8 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 				if(Float.isNaN(yaw))yaw = 0;
 				yaw += Math.toRadians(x - mx);
 				pitch -= Math.toRadians(y - my);
+				if(yaw < -Math.PI)yaw += 2 * Math.PI;
+				if(yaw > Math.PI)yaw -= 2 * Math.PI;
 				yaw = (float) MathHelper.clamp(yaw, -Math.PI, Math.PI);
 				pitch = (float) MathHelper.clamp(pitch, -Math.PI/2, Math.PI/2);
 				cam.look.y = (float) Math.sin(pitch);
@@ -356,18 +359,17 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 			}
 			this.mx = x;
 			this.my = y;
-			return true;
+			evt.consume();
 		}
-		return false;
 	}
 
 	@Override
-	public boolean mouseWheel(int x, int y, int dir) {
-		if(bounds.isInBounds(x, y)) {
-			zoom(dir);
-			return true;
+	public void mouseWheel(MouseEvent evt) {
+		if(evt.isHovered(bounds)) {
+			zoom(evt.btn);
+			evt.consume();
 		}
-		return false;
+		super.mouseWheel(evt);
 	}
 
 	private void zoom(int dir) {
@@ -379,17 +381,18 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		if(!event.isConsumed() && bounds.isInBounds(mouseCursorPos)) {
-			if(event.matches("+")) {
+		if(!event.isConsumed()) {
+			if(Keybinds.ZOOM_IN_CAMERA.isPressed(gui, event)) {
 				zoom(1);
-			} else if(event.matches("-")) {
+				event.consume();
+			} else if(Keybinds.ZOOM_OUT_CAMERA.isPressed(gui, event)) {
 				zoom(-1);
-			} else if(event.matches("r")) {
-				ViewportCamera cam = getCamera();
-				cam.camDist = 64;
-				cam.position = new Vec3f(0.5f, 1, 0.5f);
-				cam.look = new Vec3f(0.25f, 0.5f, 0.25f);
+				event.consume();
+			} else if(Keybinds.RESET_CAMERA.isPressed(gui, event)) {
+				getCamera().reset();
+				event.consume();
 			}
 		}
+		super.keyPressed(event);
 	}
 }

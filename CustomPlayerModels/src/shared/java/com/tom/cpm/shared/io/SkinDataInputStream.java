@@ -9,6 +9,7 @@ public class SkinDataInputStream extends InputStream {
 	private int block;
 	private int channel;
 	private int x, y;
+	private boolean finished;
 
 	public SkinDataInputStream(Image img, Image template, int channel) {
 		this.img = img;
@@ -20,8 +21,10 @@ public class SkinDataInputStream extends InputStream {
 
 	@Override
 	public int read() {
+		if(finished)return -1;
 		if(block == -1 || block > 3) {
-			if(!findNextBlock())return -1;
+			findNextBlock();
+			if(finished)return -1;
 			block = 0;
 		}
 		int dt = img.getRGB(x, y);
@@ -32,7 +35,7 @@ public class SkinDataInputStream extends InputStream {
 		return ((dt & (0xff << shift)) >>> shift) & 0xff;
 	}
 
-	private boolean findNextBlock() {
+	private void findNextBlock() {
 		int shift = 8 * (2 - channel);
 		for(int y = this.y;y<img.getHeight();y++) {
 			for(int x = this.x + 1;x<img.getWidth();x++) {
@@ -40,12 +43,12 @@ public class SkinDataInputStream extends InputStream {
 				if((((t & (0xff << shift)) >>> shift) & 0xff) == 0xff) {
 					this.x = x;
 					this.y = y;
-					return true;
+					return;
 				}
 			}
 			this.x = -1;
 		}
-		return false;
+		finished = true;
 	}
 
 	public void setChannel(int channel) {

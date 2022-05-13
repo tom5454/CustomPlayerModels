@@ -10,10 +10,10 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -23,7 +23,6 @@ import com.mojang.math.Matrix4f;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
-import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.proxy.ModelPartOF;
@@ -46,16 +45,18 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			@Override
 			public <M> RedirectHolder<?, MultiBufferSource, ModelTexture, ModelPart> create(
 					M model, String arg) {
-				if(model instanceof PlayerModel) {
-					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<AbstractClientPlayer>) model);
+				if ("api".equals(arg) && model instanceof HumanoidModel) {
+					return new RedirectHolderApi(PlayerRenderManager.this, (HumanoidModel<LivingEntity>) model);
+				} else if(model instanceof PlayerModel) {
+					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<LivingEntity>) model);
 				} else if(model instanceof SkullModel) {
 					return new RedirectHolderSkull(PlayerRenderManager.this, (SkullModel) model);
 				} else if(model instanceof ElytraModel) {
-					return new RedirectHolderElytra(PlayerRenderManager.this, (ElytraModel<AbstractClientPlayer>) model);
+					return new RedirectHolderElytra(PlayerRenderManager.this, (ElytraModel<LivingEntity>) model);
 				} else if(model instanceof HumanoidModel && "armor1".equals(arg)) {
-					return new RedirectHolderArmor1(PlayerRenderManager.this, (HumanoidModel<AbstractClientPlayer>) model);
+					return new RedirectHolderArmor1(PlayerRenderManager.this, (HumanoidModel<LivingEntity>) model);
 				} else if(model instanceof HumanoidModel && "armor2".equals(arg)) {
-					return new RedirectHolderArmor2(PlayerRenderManager.this, (HumanoidModel<AbstractClientPlayer>) model);
+					return new RedirectHolderArmor2(PlayerRenderManager.this, (HumanoidModel<LivingEntity>) model);
 				}
 				return null;
 			}
@@ -93,12 +94,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 		@Override
 		public void setupRenderSystem(ModelTexture cbi, TextureSheetType tex) {
-			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(0));
-			renderTypes.put(RenderMode.DEFAULT, new NativeRenderType(cbi.getRenderType(), 0));
-			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderType.eyes(cbi.getTexture()), 1));
-			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RenderType.lines(), 2));
-			renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
-			renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(CustomRenderTypes.getEntityColorEyes(), 1));
+			ClientProxy.mc.renderBuilder.build(renderTypes, cbi);
 		}
 
 		@Override
@@ -119,7 +115,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 	private static class RedirectHolderPlayer extends RDH {
 		private RedirectRenderer<ModelPart> head;
 
-		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerModel<AbstractClientPlayer> model) {
+		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerModel<LivingEntity> model) {
 			super(mngr, model);
 			head = registerHead(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
 			register(new Field<>(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
@@ -136,6 +132,33 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			register(new Field<>(() -> model.jacket     , v -> model.jacket      = v, null));
 
 			register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
+		}
+	}
+
+	private static class RedirectHolderApi extends RDH {
+		private RedirectRenderer<ModelPart> head;
+
+		public RedirectHolderApi(PlayerRenderManager mngr, HumanoidModel<LivingEntity> model) {
+			super(mngr, model);
+			head = registerHead(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+			register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			register(new Field<>(() -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
+
+			register(new Field<>(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
+
+			if(model instanceof PlayerModel) {
+				PlayerModel<LivingEntity> mp = (PlayerModel<LivingEntity>) model;
+				register(new Field<>(() -> mp.leftSleeve , v -> mp.leftSleeve  = v, null));
+				register(new Field<>(() -> mp.rightSleeve, v -> mp.rightSleeve = v, null));
+				register(new Field<>(() -> mp.leftPants  , v -> mp.leftPants   = v, null));
+				register(new Field<>(() -> mp.rightPants , v -> mp.rightPants  = v, null));
+				register(new Field<>(() -> mp.jacket     , v -> mp.jacket      = v, null));
+
+				register(new Field<>(() -> mp.cloak, v -> mp.cloak = v, RootModelType.CAPE));
+			}
 		}
 	}
 
@@ -156,7 +179,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 	private static class RedirectHolderElytra extends RDH {
 
-		public RedirectHolderElytra(PlayerRenderManager mngr, ElytraModel<AbstractClientPlayer> model) {
+		public RedirectHolderElytra(PlayerRenderManager mngr, ElytraModel<LivingEntity> model) {
 			super(mngr, model);
 
 			register(new Field<>(() -> model.rightWing, v -> model.rightWing = v, RootModelType.ELYTRA_RIGHT));
@@ -167,7 +190,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 	private static class RedirectHolderArmor1 extends RDH {
 
-		public RedirectHolderArmor1(PlayerRenderManager mngr, HumanoidModel<AbstractClientPlayer> model) {
+		public RedirectHolderArmor1(PlayerRenderManager mngr, HumanoidModel<LivingEntity> model) {
 			super(mngr, model);
 
 			register(new Field<>(() -> model.head,     v -> model.head     = v, RootModelType.ARMOR_HELMET));
@@ -182,7 +205,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 	private static class RedirectHolderArmor2 extends RDH {
 
-		public RedirectHolderArmor2(PlayerRenderManager mngr, HumanoidModel<AbstractClientPlayer> model) {
+		public RedirectHolderArmor2(PlayerRenderManager mngr, HumanoidModel<LivingEntity> model) {
 			super(mngr, model);
 
 			register(new Field<>(() -> model.body,     v -> model.body     = v, RootModelType.ARMOR_LEGGINGS_BODY));

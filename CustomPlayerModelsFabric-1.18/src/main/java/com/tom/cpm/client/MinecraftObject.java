@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
@@ -25,6 +26,7 @@ import com.mojang.blaze3d.platform.TextureUtil;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.render.RenderTypeBuilder;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
@@ -32,6 +34,7 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.MojangAPI;
@@ -40,12 +43,19 @@ public class MinecraftObject implements MinecraftClientAccess {
 	private final MinecraftClient mc;
 	private final PlayerRenderManager prm;
 	private final ModelDefinitionLoader<GameProfile> loader;
+	public RenderTypeBuilder<Identifier, RenderLayer> renderBuilder;
 
 	public MinecraftObject(MinecraftClient mc) {
 		this.mc = mc;
 		MinecraftObjectHolder.setClientObject(this);
 		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId, GameProfile::getName);
 		prm = new PlayerRenderManager();
+		renderBuilder = new RenderTypeBuilder<>();
+		renderBuilder.register(RenderMode.DEFAULT, RenderLayer::getEntityTranslucent, 0);
+		renderBuilder.register(RenderMode.GLOW, RenderLayer::getEyes, 1);
+		renderBuilder.register(RenderMode.COLOR, CustomRenderTypes::getEntityColorTranslucent, 0);
+		renderBuilder.register(RenderMode.COLOR_GLOW, CustomRenderTypes::getEntityColorEyes, 1);
+		renderBuilder.register(RenderMode.OUTLINE, CustomRenderTypes::getLinesNoDepth, 2);
 	}
 
 	@Override
@@ -206,5 +216,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public Proxy getProxy() {
 		return mc.getNetworkProxy();
+	}
+
+	@Override
+	public RenderTypeBuilder<?, ?> getRenderBuilder() {
+		return renderBuilder;
 	}
 }

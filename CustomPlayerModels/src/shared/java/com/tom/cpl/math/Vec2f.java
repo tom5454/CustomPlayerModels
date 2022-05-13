@@ -18,6 +18,11 @@ public class Vec2f {
 		this.y = 0;
 	}
 
+	public Vec2f(Vec4f v) {
+		this.x = v.x;
+		this.y = v.y;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -36,5 +41,10 @@ public class Vec2f {
 		if (Float.floatToIntBits(x) != Float.floatToIntBits(other.x)) return false;
 		if (Float.floatToIntBits(y) != Float.floatToIntBits(other.y)) return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Vec2f[%s, %s]", x, y);
 	}
 }

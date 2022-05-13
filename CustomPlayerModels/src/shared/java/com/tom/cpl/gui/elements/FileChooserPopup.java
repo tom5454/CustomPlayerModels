@@ -2,6 +2,8 @@ package com.tom.cpl.gui.elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -296,15 +298,24 @@ public class FileChooserPopup extends PopupPanel {
 
 	public void openNative() {
 		NativeChooser nc = gui.getNative().getNative(FileChooserPopup.class, this);
-		new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.waiting"), gui.i18nFormat("label.cpm.filechooser.waitingForNative"), nc::open, this::setSelected, ex -> {
-			if(ex == null)return;
+		CompletableFuture<File> f = nc.openFuture();
+		if(f == null) {
+			f = new CompletableFuture<>();
+			new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.waiting"), gui.i18nFormat("label.cpm.filechooser.waitingForNative"), nc::open, f).start();
+		}
+		f.thenAccept(this::setSelected).exceptionally(ex -> {
 			Log.error("Error while opening native file chooser", ex);
 			frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.filechooser.nativeError", ex.getMessage())));
-		}).start();
+			return null;
+		});
 	}
 
 	public interface NativeChooser {
 		File open();
+
+		default CompletableFuture<File> openFuture() {
+			return null;
+		}
 	}
 
 	@Override
@@ -314,5 +325,19 @@ public class FileChooserPopup extends PopupPanel {
 			event.consume();
 		}
 		super.keyPressed(event);
+	}
+
+	public Frame getFrame() {
+		return frm;
+	}
+
+	@Override
+	public void filesDropped(List<File> files) {
+		if(!saveDialog && files.size() == 1) {
+			File f = files.get(0);
+			if(filter.test(f, f.getName())) {
+				setSelected(f);
+			}
+		}
 	}
 }

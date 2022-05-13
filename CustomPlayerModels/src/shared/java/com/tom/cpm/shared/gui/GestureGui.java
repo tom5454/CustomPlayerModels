@@ -29,6 +29,7 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
 import com.tom.cpm.shared.editor.TestIngameManager;
 import com.tom.cpm.shared.editor.gui.EditorGui;
+import com.tom.cpm.shared.editor.gui.FirstPersonHandPosGui;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.Log;
@@ -37,6 +38,7 @@ public class GestureGui extends Frame {
 	private GestureButton hoveredBtn;
 	private Panel panel;
 	private int tickCounter;
+	private Tooltip qaTip;
 
 	public GestureGui(IGui gui) {
 		super(gui);
@@ -85,6 +87,10 @@ public class GestureGui extends Frame {
 				MinecraftClientAccess.get().openGui(EditorGui::new);
 				return;
 			}
+			if(TestIngameManager.isTesting() && gui.isCtrlDown()) {
+				MinecraftClientAccess.get().openGui(FirstPersonHandPosGui::new);
+				return;
+			}
 
 			List<ConfigChangeRequest<?, ?>> changes = MinecraftClientAccess.get().getNetHandler().getRecommendedSettingChanges();
 			String server = MinecraftClientAccess.get().getConnectedServer();
@@ -107,6 +113,7 @@ public class GestureGui extends Frame {
 			addElement(lbl);
 			return;
 		}
+		qaTip = new Tooltip(this, gui.i18nFormat("tooltip.cpm.gestureQuickAccess"));
 		int h;
 		if(def != null && def.getResolveState() == ModelLoadingState.LOADED && status != ServerStatus.UNAVAILABLE) {
 			int[] id = new int[] {0};
@@ -138,12 +145,10 @@ public class GestureGui extends Frame {
 			default:
 				break;
 			}
-			if(!txt.isEmpty()) {
-				Label lbl = new Label(gui, txt);
-				lbl.setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4, 0, 0));
-				addElement(lbl);
-			}
-			h = 10;
+			addElement(new Label(gui, txt).setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4, 0, 0)));
+			txt = gui.i18nFormat("label.cpm.checkErrorLog");
+			addElement(new Label(gui, txt).setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4 + 10, 0, 0)));
+			h = 20;
 		} else if(status == ServerStatus.UNAVAILABLE) {
 			String str = gui.i18nFormat("label.cpm.feature_unavailable");
 			Label lbl = new Label(gui, str);
@@ -225,11 +230,11 @@ public class GestureGui extends Frame {
 		btnPanel2.setBounds(new Box(bp2.x, height - bp2.h - 2, bp2.w, bp2.h));
 
 		Panel btnPanel3 = new Panel(gui);
-		btnPanel3.setBounds(new Box(0, height - 40, 160, 40));
+		btnPanel3.setBounds(new Box(0, height - 60, 160, 60));
 		addElement(btnPanel3);
 
 		Button btnSkinMenu = new Button(gui, gui.i18nFormat("button.cpm.models"), () -> MinecraftClientAccess.get().openGui(ModelsGui::new));
-		btnSkinMenu.setBounds(new Box(0, 20, 160, 20));
+		btnSkinMenu.setBounds(new Box(0, 40, 160, 20));
 		btnPanel3.addElement(btnSkinMenu);
 		if(MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.INSTALLED) {
 			btnSkinMenu.setEnabled(false);
@@ -238,15 +243,19 @@ public class GestureGui extends Frame {
 
 		if(TestIngameManager.isTesting()) {
 			Button btnOpenEditor = new Button(gui, gui.i18nFormat("button.cpm.open_editor"), () -> MinecraftClientAccess.get().openGui(EditorGui::new));
-			btnOpenEditor.setBounds(new Box(0, 0, 160, 20));
+			btnOpenEditor.setBounds(new Box(0, 20, 160, 20));
 			btnPanel3.addElement(btnOpenEditor);
+
+			Button btnOpenFP = new Button(gui, gui.i18nFormat("button.cpm.effect.setFpHandPos"), () -> MinecraftClientAccess.get().openGui(FirstPersonHandPosGui::new));
+			btnOpenFP.setBounds(new Box(0, 0, 160, 20));
+			btnPanel3.addElement(btnOpenFP);
 		}
 	}
 
 	@Override
-	public void draw(int mouseX, int mouseY, float partialTicks) {
+	public void draw(MouseEvent event, float partialTicks) {
 		hoveredBtn = null;
-		super.draw(mouseX, mouseY, partialTicks);
+		super.draw(event, partialTicks);
 		int i = 0;
 		for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
 			if(kb.getName().startsWith("qa")) {
@@ -255,6 +264,9 @@ public class GestureGui extends Frame {
 				if(k.isEmpty())k = gui.i18nFormat("label.cpm.key_unbound");
 				gui.drawText(10, i * 10, gui.i18nFormat("label.cpm.quick_key_bound", i, k), 0xffffffff);
 			}
+		}
+		if(event.isInBounds(new Box(10, 10, 100, 60))) {
+			qaTip.set();
 		}
 
 		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();

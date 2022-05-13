@@ -4,7 +4,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.tom.cpl.config.ConfigEntry;
-import com.tom.cpl.config.ConfigEntry.ModConfigFile.ConfigEntryTemp;
+import com.tom.cpl.config.ModConfigFile.ConfigEntryTemp;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
@@ -18,6 +18,7 @@ import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -34,7 +35,7 @@ import com.tom.cpm.shared.skin.TextureType;
 public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 	private final Frame frm;
 	private ViewportCamera cam;
-	private Player<?, ?> player;
+	private Player<?> player;
 	private CompletableFuture<ModelDefinition> def;
 	private AnimationHandler animHandler;
 	private TextureProvider vanillaSkin;
@@ -43,7 +44,7 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 	private Button cloneBtn;
 	private boolean cloneLoaded;
 
-	public SocialPlayerPanel(Frame frm, Player<?, ?> player, ViewportCamera cam, int w, int h, Runnable reload) {
+	public SocialPlayerPanel(Frame frm, Player<?> player, ViewportCamera cam, int w, int h, Runnable reload) {
 		super(frm.getGui());
 		this.frm = frm;
 		Box parentBox = new Box(0, 0, w, h);
@@ -55,31 +56,16 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 		String uuid = player.getUUID().toString();
 		int s = Math.min(w, h) - 30;
 		if(!SocialConfig.isBlocked(uuid) && !gui.isShiftDown()) {
-			ModelDisplayPanel modelPanel = new ModelDisplayPanel(gui, this) {
+			ModelDisplayPanel modelPanel = new ModelDisplayPanel(frm, this) {
 				@Override
 				public void draw(MouseEvent event, float partialTicks) {
 					gui.drawBox(parentBox.x, parentBox.y, parentBox.w, parentBox.h, gui.getColors().popup_background & 0x80FFFFFF);
 					if(def == null) {
 						ModelDefinition d = player.getModelDefinition0();
 						if(d != null) {
-							switch (d.getResolveState()) {
-							case CLEANED_UP:
-								break;
-							case ERRORRED:
-								setLoadingText(gui.i18nFormat("label.cpm.errorLoadingModel", d.getError().toString()));
-								break;
-							case LOADED:
-								break;
-							case NEW:
-							case RESOLVING:
-								setLoadingText(gui.i18nFormat("label.cpm.loading"));
-								break;
-							case SAFETY_BLOCKED:
-								setLoadingText(gui.i18nFormat("label.cpm.safetyBlocked"));
-								break;
-							default:
-								break;
-							}
+							FormatText t = d.getStatus();
+							if(t != null)
+								setLoadingText(t.toString(gui));
 						}
 					}
 					super.draw(event, partialTicks);

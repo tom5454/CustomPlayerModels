@@ -3,7 +3,6 @@ package com.tom.cpm.client;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -11,11 +10,11 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Mat4f;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
-import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
@@ -68,33 +67,12 @@ public class Panel3dImpl extends Panel3dNative {
 
 	@Override
 	public RenderTypes<RenderMode> getRenderTypes() {
-		return getRenderTypes(DynTexture.getBoundLoc());
+		return getRenderTypes0(DynTexture.getBoundLoc());
 	}
 
 	@Override
 	public RenderTypes<RenderMode> getRenderTypes(String tex) {
-		return getRenderTypes(new ResourceLocation("cpm", "textures/gui/" + tex + ".png"));
-	}
-
-	public RenderTypes<RenderMode> getRenderTypes(ResourceLocation tex) {
-		RenderTypes<RenderMode> renderTypes = new RenderTypes<>(RenderMode.class);
-		renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RetroGL.texture(tex), 0));
-		renderTypes.put(RenderMode.DEFAULT, new NativeRenderType(RetroGL.texture(tex), 0));
-		renderTypes.put(RenderMode.GLOW, new NativeRenderType(RetroGL.eyes(tex), 1));
-		renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RetroGL.linesNoDepth(), 2));
-		renderTypes.put(RenderMode.COLOR, new NativeRenderType(RetroGL.color(), 0));
-		renderTypes.put(RenderMode.PAINT, new NativeRenderType(RetroGL.paint(tex), 0));
-		renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(RetroGL.color(), 1));
-		return renderTypes;
-	}
-
-	@Override
-	public int getColorUnderMouse() {
-		FloatBuffer buffer = BufferUtils.createFloatBuffer(3);
-		GL11.glReadPixels(Mouse.getX(), Mouse.getY(), 1, 1, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
-		int colorUnderMouse = (((int)(buffer.get(0) * 255)) << 16) | (((int)(buffer.get(1) * 255)) << 8) | ((int)(buffer.get(2) * 255));
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		return colorUnderMouse;
+		return getRenderTypes0(new ResourceLocation("cpm", "textures/gui/" + tex + ".png"));
 	}
 
 	@Override
@@ -123,5 +101,15 @@ public class Panel3dImpl extends Panel3dNative {
 
 	@Override
 	public void renderItem(MatrixStack stack, ItemSlot hand, DisplayItem item) {
+	}
+
+	@Override
+	public Mat4f getView() {
+		return Mat4f.map(GL11.GL_MODELVIEW_MATRIX, GL11::glGetFloat);
+	}
+
+	@Override
+	public Mat4f getProjection() {
+		return Mat4f.map(GL11.GL_PROJECTION_MATRIX, GL11::glGetFloat);
 	}
 }

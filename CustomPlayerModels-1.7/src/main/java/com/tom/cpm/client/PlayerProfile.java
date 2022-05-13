@@ -6,10 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBow;
@@ -29,12 +26,13 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
-public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
+public class PlayerProfile extends Player<EntityPlayer> {
 	private final GameProfile profile;
 	public int encGesture;
 
 	public PlayerProfile(GameProfile profile) {
-		this.profile = profile;
+		this.profile = new GameProfile(profile.getId(), profile.getName());
+		cloneProperties(profile.getProperties(), this.profile.getProperties());
 	}
 
 	@Override
@@ -60,11 +58,6 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 			if (other.profile != null) return false;
 		} else if (!profile.equals(other.profile)) return false;
 		return true;
-	}
-
-	@Override
-	public ModelBiped getModel() {
-		return ((RenderPlayer) RenderManager.instance.entityRenderMap.get(EntityPlayer.class)).modelBipedMain;
 	}
 
 	@Override

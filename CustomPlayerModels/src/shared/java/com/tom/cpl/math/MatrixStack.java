@@ -1,6 +1,8 @@
 package com.tom.cpl.math;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Queues;
 
@@ -15,6 +17,10 @@ public class MatrixStack {
 		Mat3f matrix3f = new Mat3f();
 		matrix3f.setIdentity();
 		stack.add(new MatrixStack.Entry(matrix4f, matrix3f));
+	}
+
+	private MatrixStack(Deque<Entry> stack) {
+		this.stack = stack;
 	}
 
 	static {
@@ -69,6 +75,10 @@ public class MatrixStack {
 		return this.stack.size() == 1;
 	}
 
+	public MatrixStack fork() {
+		return new MatrixStack(stack.stream().map(Entry::copy).collect(Collectors.toCollection(ArrayDeque::new)));
+	}
+
 	public static final class Entry {
 		private final Mat4f matrix;
 		private final Mat3f normal;
@@ -93,16 +103,20 @@ public class MatrixStack {
 		public float[] getNormalArray() {
 			return new Mat4f(normal).toArray();
 		}
+
+		public Entry copy() {
+			return new MatrixStack.Entry(matrix.copy(), normal.copy());
+		}
 	}
 
 	public Entry storeLast() {
 		MatrixStack.Entry e = this.stack.getLast();
-		return new MatrixStack.Entry(e.matrix.copy(), e.normal.copy());
+		return e.copy();
 	}
 
 	public void setLast(Entry in) {
 		pop();
-		this.stack.addLast(new MatrixStack.Entry(in.matrix.copy(), in.normal.copy()));
+		this.stack.addLast(in.copy());
 	}
 
 	public void mul(Entry matrix) {

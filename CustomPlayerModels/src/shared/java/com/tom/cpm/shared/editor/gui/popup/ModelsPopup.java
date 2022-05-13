@@ -1,5 +1,8 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
+import java.io.File;
+import java.util.List;
+
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.gui.EditorGui;
@@ -26,5 +29,10 @@ public class ModelsPopup extends PopupPanel {
 	@Override
 	public String getTitle() {
 		return gui.i18nFormat("button.cpm.models");
+	}
+
+	@Override
+	public void filesDropped(List<File> files) {
+		panel.filesDropped(files);
 	}
 }

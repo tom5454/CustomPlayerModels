@@ -20,6 +20,7 @@ public interface IGui {
 	String i18nFormat(String key, Object... obj);
 	int textWidth(String text);
 	void drawTexture(int x, int y, int w, int h, int u, int v, String texture);
+	void drawTexture(int x, int y, int w, int h, int u, int v, String texture, int color);
 	void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2);
 	void close();
 	UIColors getColors();
@@ -175,5 +176,10 @@ public interface IGui {
 		}
 		text.add(in.substring(splitStart, in.length()));
 		return text.stream().collect(Collectors.joining("\\"));
+	}
+
+	default void drawText(int x, int y, String text, int bgColor, int color) {
+		drawBox(x, y, textWidth(text), 10, bgColor);
+		drawText(x, y + 1, text, color);
 	}
 }

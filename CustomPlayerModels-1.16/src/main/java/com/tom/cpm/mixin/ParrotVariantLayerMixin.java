@@ -25,7 +25,7 @@ public class ParrotVariantLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/entity/player/PlayerEntity;FFFFZ)V")
 	public void onRenderPre(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, PlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float netHeadYaw, float headPitch, boolean leftShoulderIn, CallbackInfo cbi) {
 		matrixStackIn.pushPose();
-		Player pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null) {

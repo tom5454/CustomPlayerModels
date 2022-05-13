@@ -86,28 +86,30 @@ public class CPMASMClientHooks {
 	}
 
 	public static void onArmorPre(LayerArmorBase this0, EntityLivingBase entitylivingbaseIn) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.renderArmor(this0.modelArmor, this0.modelLeggings, (EntityPlayer) entitylivingbaseIn);
+		ModelBase model = this0.renderer.getMainModel();
+		if(model instanceof ModelBiped) {
+			ClientProxy.INSTANCE.renderArmor(this0.modelArmor, this0.modelLeggings, (ModelBiped) model);
 		}
 	}
 
 	public static void onArmorPost(LayerArmorBase this0, EntityLivingBase entitylivingbaseIn) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.manager.unbind(this0.modelArmor);
-			ClientProxy.INSTANCE.manager.unbind(this0.modelLeggings);
-		}
+		ClientProxy.INSTANCE.manager.unbind(this0.modelArmor);
+		ClientProxy.INSTANCE.manager.unbind(this0.modelLeggings);
 	}
 
 	public static void onElytraPre(LayerElytra this0, EntityLivingBase entitylivingbaseIn) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer)ClientProxy.INSTANCE.renderElytra((EntityPlayer) entitylivingbaseIn, this0.modelElytra);
+		ModelBase model = this0.renderPlayer.getMainModel();
+		if(model instanceof ModelBiped) {
+			ClientProxy.INSTANCE.renderElytra((ModelBiped) model, this0.modelElytra);
+		}
 	}
 
 	public static void onElytraPost(LayerElytra this0, EntityLivingBase entitylivingbaseIn) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer)ClientProxy.INSTANCE.manager.unbind(this0.modelElytra);
+		ClientProxy.INSTANCE.manager.unbind(this0.modelElytra);
 	}
 
 	public static boolean renderCape(LayerCape this0, AbstractClientPlayer player, float partialTicks) {
-		Player<?, ?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
@@ -129,25 +131,25 @@ public class CPMASMClientHooks {
 	}
 
 	public static void onHandRightPre(RenderPlayer this0, AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.manager.bindHand(player, null);
-		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+		ClientProxy.INSTANCE.manager.bindHand(player, null, this0.getMainModel());
+		ClientProxy.INSTANCE.manager.bindSkin(this0.getMainModel(), TextureSheetType.SKIN);
 	}
 
 	public static void onHandRightPost(RenderPlayer this0, AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.manager.unbindClear();
+		ClientProxy.INSTANCE.manager.unbindClear(this0.getMainModel());
 	}
 
 	public static void onHandLeftPre(RenderPlayer this0, AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.manager.bindHand(player, null);
-		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+		ClientProxy.INSTANCE.manager.bindHand(player, null, this0.getMainModel());
+		ClientProxy.INSTANCE.manager.bindSkin(this0.getMainModel(), TextureSheetType.SKIN);
 	}
 
 	public static void onHandLeftPost(RenderPlayer this0, AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.manager.unbindClear();
+		ClientProxy.INSTANCE.manager.unbindClear(this0.getMainModel());
 	}
 
 	public static void onRenderParrot(EntityPlayer entitylivingbaseIn, boolean leftShoulderIn) {
-		Player pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null) {

@@ -98,6 +98,11 @@ public abstract interface TreeElement {
 		protected void refresh(TreeElement elem) {
 			elem.onRefreshTree();
 		}
+
+		@Override
+		protected boolean isSelected(TreeElement elem) {
+			return e.selectedElement == elem;
+		}
 	}
 
 	public String getName();
@@ -118,6 +123,9 @@ public abstract interface TreeElement {
 		POSITION,
 		SCALE,
 		TEXTURE,
+		;
+		public static final VecType[] MOUSE_EDITOR_TYPES = {SIZE, OFFSET, ROTATION, POSITION};
+		public static final VecType[] MOUSE_EDITOR_ANIM_TYPES = {ROTATION, POSITION};
 	}
 
 	public default void setVec(Vec3f v, VecType object) {}

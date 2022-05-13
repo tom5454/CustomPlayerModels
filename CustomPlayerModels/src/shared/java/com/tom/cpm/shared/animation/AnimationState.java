@@ -10,16 +10,14 @@ import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.network.ModelEventType;
 
 public class AnimationState {
-	public IPose currentPose;
 	public int encodedState;
 	public long jumping;
 	public boolean hasSkullOnHead;
 	public boolean wearingHelm, wearingBody, wearingLegs, wearingBoots, wearingElytra;
 	public boolean sleeping, dying, riding, elytraFlying, creativeFlying, creativeFlyingServer, swimming, retroSwimming, sprinting, sneaking, takingDmg, tridentSpin;
-	public float fallDistance, fallDistanceServer, moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, pitch;
+	public float fallDistance, fallDistanceServer, moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, pitch, speakLevel;
 	public int hurtTime;
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
-	public IPose selectedPose;
 	public ArmPose leftArm = ArmPose.EMPTY, rightArm = ArmPose.EMPTY;
 	public HandAnimation usingAnimation = HandAnimation.NONE;
 	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing;
@@ -46,6 +44,7 @@ public class AnimationState {
 		yaw = 0;
 		pitch = 0;
 		hurtTime = 0;
+		speakLevel = 0;
 	}
 
 	public void resetModel() {
@@ -99,6 +98,7 @@ public class AnimationState {
 		if(hurtTime > 0)h.accept(VanillaPose.HURT);
 		if(isBurning)h.accept(VanillaPose.ON_FIRE);
 		if(isFreezing)h.accept(VanillaPose.FREEZING);
+		if(speakLevel > 0.1F)h.accept(VanillaPose.SPEAKING);
 	}
 
 	private static VanillaPose getArmPose(ArmPose pose, boolean left) {

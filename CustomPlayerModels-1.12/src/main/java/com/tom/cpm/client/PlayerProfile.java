@@ -29,7 +29,7 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
-public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
+public class PlayerProfile extends Player<EntityPlayer> {
 	private final GameProfile profile;
 	private String skinType;
 
@@ -62,11 +62,6 @@ public class PlayerProfile extends Player<EntityPlayer, ModelPlayer> {
 			if (other.profile != null) return false;
 		} else if (!profile.equals(other.profile)) return false;
 		return true;
-	}
-
-	@Override
-	public ModelPlayer getModel() {
-		return Minecraft.getMinecraft().getRenderManager().getSkinMap().get(skinType == null ? "default" : skinType).getMainModel();
 	}
 
 	@Override

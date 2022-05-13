@@ -252,6 +252,22 @@ public class GuiImpl extends GuiScreen implements IGui {
 	}
 
 	@Override
+	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture, int color) {
+		mc.getTextureManager().bindTexture(new ResourceLocation("cpm", "textures/gui/" + texture + ".png"));
+		x += getOffset().x;
+		y += getOffset().y;
+		float a = (color >> 24 & 255) / 255.0F;
+		float r = (color >> 16 & 255) / 255.0F;
+		float g = (color >> 8 & 255) / 255.0F;
+		float b = (color & 255) / 255.0F;
+		GlStateManager.color(r, g, b, a);
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		drawTexturedModalRect(x, y, u, v, w, h);
+		GlStateManager.disableBlend();
+	}
+
+	@Override
 	public void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2) {
 		x += getOffset().x;
 		y += getOffset().y;
@@ -389,6 +405,16 @@ public class GuiImpl extends GuiScreen implements IGui {
 		@Override
 		public void setFocused(boolean focused) {
 			field.setFocused(focused);
+		}
+
+		@Override
+		public int getCursorPos() {
+			return field.getCursorPosition();
+		}
+
+		@Override
+		public void setCursorPos(int pos) {
+			field.setCursorPosition(pos);
 		}
 	}
 

@@ -24,7 +24,7 @@ public class ParrotOnShoulderLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/player/Player;FFFFZ)V")
 	public void onRenderPre(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, net.minecraft.world.entity.player.Player entitylivingbaseIn, float limbSwing, float limbSwingAmount, float netHeadYaw, float headPitch, boolean leftShoulderIn, CallbackInfo cbi) {
 		matrixStackIn.pushPose();
-		Player pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null) {

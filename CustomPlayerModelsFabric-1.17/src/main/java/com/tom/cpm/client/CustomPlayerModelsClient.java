@@ -1,6 +1,7 @@
 package com.tom.cpm.client;
 
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -16,8 +17,12 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.Shader;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.ElytraEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
@@ -29,6 +34,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.MessageType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -39,6 +45,7 @@ import com.mojang.authlib.properties.Property;
 
 import com.google.common.collect.Iterables;
 
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -112,14 +119,16 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).networkHandler);
 		netHandler.setDisplayText(f -> MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.SYSTEM, f.remap(), Util.NIL_UUID));
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
+		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class).localModelApi(GameProfile::new).
+		renderApi(Model.class, Identifier.class, RenderLayer.class, VertexConsumerProvider.class, GameProfile.class, ModelTexture::new).init();
 	}
 
-	public void playerRenderPre(AbstractClientPlayerEntity player, VertexConsumerProvider buffer) {
-		manager.bindPlayer(player, buffer);
+	public void playerRenderPre(AbstractClientPlayerEntity player, VertexConsumerProvider buffer, PlayerEntityModel model) {
+		manager.bindPlayer(player, buffer, model);
 	}
 
-	public void playerRenderPost() {
-		manager.unbindClear();
+	public void playerRenderPost(PlayerEntityModel model) {
+		manager.unbindClear(model);
 	}
 
 	public void initGui(Screen screen) {
@@ -134,22 +143,22 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		void cpm$addDrawableChild(Element drawableElement);
 	}
 
-	public void renderHand(VertexConsumerProvider buffer) {
-		manager.bindHand(MinecraftClient.getInstance().player, buffer);
+	public void renderHand(VertexConsumerProvider buffer, PlayerEntityModel model) {
+		manager.bindHand(MinecraftClient.getInstance().player, buffer, model);
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, VertexConsumerProvider buffer) {
 		manager.bindSkull(profile, buffer, skullModel);
 	}
 
-	public void renderElytra(PlayerEntity player, VertexConsumerProvider buffer, ElytraEntityModel<LivingEntity> model) {
-		manager.bindElytra(player, buffer, model);
+	public void renderElytra(BipedEntityModel<LivingEntity> player, ElytraEntityModel<LivingEntity> model) {
+		manager.bindElytra(player, model);
 	}
 
 	public void renderArmor(BipedEntityModel<LivingEntity> modelArmor, BipedEntityModel<LivingEntity> modelLeggings,
-			PlayerEntity player, VertexConsumerProvider bufferIn) {
-		manager.bindArmor(player, bufferIn, modelArmor, 1);
-		manager.bindArmor(player, bufferIn, modelLeggings, 2);
+			BipedEntityModel<LivingEntity> player) {
+		manager.bindArmor(player, modelArmor, 1);
+		manager.bindArmor(player, modelLeggings, 2);
 	}
 
 	public static class Button extends ButtonWidget {
@@ -243,5 +252,31 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		model.cloak.roll = 0;
 		model.renderCape(matrixStack, buffer, packedLightIn, OverlayTexture.DEFAULT_UV);
 		matrixStack.pop();
+	}
+
+	public static interface ShaderLoader {
+		void cpm$registerShader(String name, VertexFormat vertexFormat, Consumer<Shader> finish);
+	}
+
+	public void registerShaders(ShaderLoader loader) {
+	}
+
+	public static interface PlayerNameTagRenderer<E extends Entity> {
+		void cpm$renderNameTag(E entityIn, Text displayNameIn, MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn);
+		EntityRenderDispatcher cpm$entityRenderDispatcher();
+	}
+
+	public static <E extends Entity> void renderNameTag(PlayerNameTagRenderer<E> r, E entityIn, GameProfile gprofile, String unique, MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn) {
+		double d0 = r.cpm$entityRenderDispatcher().getSquaredDistanceToCamera(entityIn);
+		if (d0 < 100.0D) {
+			FormatText st = INSTANCE.manager.getStatus(gprofile, unique);
+			if(st != null) {
+				matrixStackIn.push();
+				matrixStackIn.translate(0.0D, 1.3F, 0.0D);
+				matrixStackIn.scale(0.5f, 0.5f, 0.5f);
+				r.cpm$renderNameTag(entityIn, st.remap(), matrixStackIn, bufferIn, packedLightIn);
+				matrixStackIn.pop();
+			}
+		}
 	}
 }

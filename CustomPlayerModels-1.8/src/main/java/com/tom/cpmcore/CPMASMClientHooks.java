@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.entity.layers.LayerArmorBase;
 import net.minecraft.client.renderer.entity.layers.LayerCape;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
@@ -80,20 +79,19 @@ public class CPMASMClientHooks {
 	}
 
 	public static void onArmorPre(LayerArmorBase this0, EntityLivingBase entitylivingbaseIn) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.renderArmor(this0.field_177186_d, this0.field_177189_c, (EntityPlayer) entitylivingbaseIn);
+		ModelBase model = this0.renderer.getMainModel();
+		if(model instanceof ModelBiped) {
+			ClientProxy.INSTANCE.renderArmor(this0.field_177186_d, this0.field_177189_c, (ModelBiped) model);
 		}
 	}
 
 	public static void onArmorPost(LayerArmorBase this0, EntityLivingBase entitylivingbaseIn) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.manager.unbind(this0.field_177186_d);
-			ClientProxy.INSTANCE.manager.unbind(this0.field_177189_c);
-		}
+		ClientProxy.INSTANCE.manager.unbind(this0.field_177186_d);
+		ClientProxy.INSTANCE.manager.unbind(this0.field_177189_c);
 	}
 
 	public static boolean renderCape(LayerCape this0, AbstractClientPlayer player, float partialTicks) {
-		Player<?, ?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
@@ -114,20 +112,20 @@ public class CPMASMClientHooks {
 	}
 
 	public static void onHandRightPre(RenderPlayer this0, AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.manager.bindHand(player, null);
-		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+		ClientProxy.INSTANCE.manager.bindHand(player, null, this0.getMainModel());
+		ClientProxy.INSTANCE.manager.bindSkin(this0.getMainModel(), TextureSheetType.SKIN);
 	}
 
 	public static void onHandRightPost(RenderPlayer this0, AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.manager.unbindClear();
+		ClientProxy.INSTANCE.manager.unbindClear(this0.getMainModel());
 	}
 
 	public static void onHandLeftPre(RenderPlayer this0, AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.manager.bindHand(player, null);
-		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+		ClientProxy.INSTANCE.manager.bindHand(player, null, this0.getMainModel());
+		ClientProxy.INSTANCE.manager.bindSkin(this0.getMainModel(), TextureSheetType.SKIN);
 	}
 
 	public static void onHandLeftPost(RenderPlayer this0, AbstractClientPlayer player) {
-		ClientProxy.INSTANCE.manager.unbindClear();
+		ClientProxy.INSTANCE.manager.unbindClear(this0.getMainModel());
 	}
 }

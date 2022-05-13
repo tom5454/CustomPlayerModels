@@ -368,15 +368,15 @@ public class BoxRender {
 		return new QuadMesh(quadList, RenderMode.COLOR);
 	}
 
-	public static void drawOrigin(MatrixStack matrixStackIn, VertexBuffer bufferIn, float len) {
+	public static void drawOrigin(MatrixStack matrixStackIn, VertexBuffer bufferIn, float x, float y, float z, float len) {
 		Mat4f matrix4f = matrixStackIn.getLast().getMatrix();
 		Mat3f matrix3f = matrixStackIn.getLast().getNormal();
-		bufferIn.pos(matrix4f, 0, 0, 0).color(0f, 1, 0, 1).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-		bufferIn.pos(matrix4f, 0, len, 0).color(0f, 1, 0, 1).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
-		bufferIn.pos(matrix4f, 0, 0, 0).color(1f, 0, 0, 1).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-		bufferIn.pos(matrix4f, len, 0, 0).color(1f, 0, 0, 1).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
-		bufferIn.pos(matrix4f, 0, 0, 0).color(0f, 0, 1, 1).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
-		bufferIn.pos(matrix4f, 0, 0, len).color(0f, 0, 1, 1).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+		bufferIn.pos(matrix4f, x,       y,       z      ).color(0f, 1, 0, 1).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+		bufferIn.pos(matrix4f, x,       y + len, z      ).color(0f, 1, 0, 1).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
+		bufferIn.pos(matrix4f, x,       y,       z      ).color(1f, 0, 0, 1).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+		bufferIn.pos(matrix4f, x + len, y,       z      ).color(1f, 0, 0, 1).normal(matrix3f, 1.0F, 0.0F, 0.0F).endVertex();
+		bufferIn.pos(matrix4f, x,       y,       z      ).color(0f, 0, 1, 1).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+		bufferIn.pos(matrix4f, x,       y,       z + len).color(0f, 0, 1, 1).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
 	}
 
 	public static void drawBoundingBox(MatrixStack matrixStackIn, VertexBuffer bufferIn, BoundingBox bb, float red, float green, float blue, float alpha) {
@@ -412,6 +412,16 @@ public class BoxRender {
 		bufferIn.pos(matrix4f, ex, ey, ez).color(red, green, blue, alpha).normal(matrix3f, 0.0F, 1.0F, 0.0F).endVertex();
 		bufferIn.pos(matrix4f, ex, ey, sz).color(red, green, blue, alpha).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
 		bufferIn.pos(matrix4f, ex, ey, ez).color(red, green, blue, alpha).normal(matrix3f, 0.0F, 0.0F, 1.0F).endVertex();
+	}
+
+	public static void fillBoundingBox(MatrixStack matrixStackIn, VertexBuffer bufferIn, BoundingBox bb, float red, float green, float blue, float alpha) {
+		float sx = bb.minX * 16;
+		float sy = bb.minY * 16;
+		float sz = bb.minZ * 16;
+		float ex = bb.maxX * 16;
+		float ey = bb.maxY * 16;
+		float ez = bb.maxZ * 16;
+		createColored(sx, sy, sz, ex - sx, ey - sy, ez - sz, 0, 64, 64).draw(matrixStackIn, bufferIn, red, green, blue, alpha);
 	}
 
 	private static class ExtrudedMesh implements Mesh {

@@ -69,6 +69,14 @@ public class ListBuffer implements VertexBuffer {
 		public void replay(MatrixStack stack, VertexBuffer parent, float red, float green, float blue, float alpha) {
 			parent.addVertex(stack.getLast(), x, y, z, red, green, blue, alpha, u, v, nx, ny, nz);
 		}
+
+		public void replay(VertexBuffer parent) {
+			parent.addVertex(x, y, z, red, green, blue, alpha, u, v, nx, ny, nz);
+		}
+
+		public void replay(VertexBuffer parent, float red, float green, float blue, float alpha) {
+			parent.addVertex(x, y, z, red, green, blue, alpha, u, v, nx, ny, nz);
+		}
 	}
 
 	public void draw(MatrixStack stack, VertexBuffer buf) {
@@ -83,6 +91,22 @@ public class ListBuffer implements VertexBuffer {
 		if(!toReplay.isEmpty()) {
 			for (Entry entry : toReplay) {
 				entry.replay(stack, buf, red, green, blue, alpha);
+			}
+		}
+	}
+
+	public void draw(VertexBuffer buf) {
+		if(!toReplay.isEmpty()) {
+			for (Entry entry : toReplay) {
+				entry.replay(buf);
+			}
+		}
+	}
+
+	public void draw(VertexBuffer buf, float red, float green, float blue, float alpha) {
+		if(!toReplay.isEmpty()) {
+			for (Entry entry : toReplay) {
+				entry.replay( buf, red, green, blue, alpha);
 			}
 		}
 	}

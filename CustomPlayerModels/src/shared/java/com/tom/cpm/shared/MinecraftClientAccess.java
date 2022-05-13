@@ -8,6 +8,8 @@ import java.util.function.Function;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.render.RenderTypeBuilder;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.ImageIO.IImageIO;
 import com.tom.cpm.shared.config.Player;
@@ -27,11 +29,11 @@ public interface MinecraftClientAccess {
 		return MinecraftObjectHolder.clientObject;
 	}
 
-	default Player<?, ?> getClientPlayer() {
+	default Player<?> getClientPlayer() {
 		return getDefinitionLoader().loadPlayer(getPlayerIDObject(), ModelDefinitionLoader.PLAYER_UNIQUE);
 	}
 
-	default Player<?, ?> getCurrentClientPlayer() {
+	default Player<?> getCurrentClientPlayer() {
 		Object v = getCurrentPlayerIDObject();
 		if(v == null)return getClientPlayer();
 		return getDefinitionLoader().loadPlayer(v, ModelDefinitionLoader.PLAYER_UNIQUE);
@@ -53,6 +55,7 @@ public interface MinecraftClientAccess {
 	String getConnectedServer();
 	List<Object> getPlayers();
 	Proxy getProxy();
+	RenderTypeBuilder<?, ?> getRenderBuilder();
 
 	default Runnable openSingleplayer() {
 		throw new UnsupportedOperationException();
@@ -80,5 +83,8 @@ public interface MinecraftClientAccess {
 	default void onLogOut() {
 		getDefinitionLoader().clearServerData();
 		getNetHandler().onLogOut();
+	}
+
+	default void populatePlatformSettings(String group, Panel panel) {
 	}
 }

@@ -62,6 +62,12 @@ public class ActionBuilder extends Action {
 	}
 
 	public <E> ActionBuilder updateValueOp(E elem, Vec3f currVal, Vec3f newVal, int min, int max, boolean wrap, BiConsumer<E, Vec3f> setter, Consumer<Vec3f> updater) {
+		if(limitVec(newVal, min, max, wrap))updater.accept(newVal);
+		updateValueOp(elem, currVal, newVal, setter);
+		return this;
+	}
+
+	public static boolean limitVec(Vec3f newVal, int min, int max, boolean wrap) {
 		boolean changed = false;
 		if(newVal.x < min || newVal.x > max) {
 			newVal.x = calcVal(newVal.x, min, max, wrap);
@@ -75,9 +81,7 @@ public class ActionBuilder extends Action {
 			newVal.z = calcVal(newVal.z, min, max, wrap);
 			changed = true;
 		}
-		if(changed)updater.accept(newVal);
-		updateValueOp(elem, currVal, newVal, setter);
-		return this;
+		return changed;
 	}
 
 	private static float calcVal(float val, int min, int max, boolean wrap) {

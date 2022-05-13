@@ -1,8 +1,12 @@
 package com.tom.cpm.client;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -241,6 +245,15 @@ public class GuiImpl extends Screen implements IGui {
 	}
 
 	@Override
+	public void filesDragged(List<Path> filesIn) {
+		try {
+			gui.filesDropped(filesIn.stream().map(Path::toFile).filter(File::exists).collect(Collectors.toList()));
+		} catch (Throwable e) {
+			onGuiException("Error processing mouse event", e, false);
+		}
+	}
+
+	@Override
 	public void displayError(String e) {
 		Screen p = parent;
 		parent = null;
@@ -261,6 +274,22 @@ public class GuiImpl extends Screen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		RenderSystem.color4f(1, 1, 1, 1);
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		drawTexture(matrixStack, x, y, u, v, w, h);
+		RenderSystem.disableBlend();
+	}
+
+	@Override
+	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture, int color) {
+		client.getTextureManager().bindTexture(new Identifier("cpm", "textures/gui/" + texture + ".png"));
+		x += getOffset().x;
+		y += getOffset().y;
+		float a = (color >> 24 & 255) / 255.0F;
+		float r = (color >> 16 & 255) / 255.0F;
+		float g = (color >> 8 & 255) / 255.0F;
+		float b = (color & 255) / 255.0F;
+		RenderSystem.color4f(r, g, b, a);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		drawTexture(matrixStack, x, y, u, v, w, h);
@@ -297,8 +326,8 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void setupCut() {
-		int dw = client.getWindow().getWidth();
-		int dh = client.getWindow().getHeight();
+		int dw = client.getWindow().getFramebufferWidth();
+		int dh = client.getWindow().getFramebufferHeight();
 		float multiplierX = dw / (float)width;
 		float multiplierY = dh / (float)height;
 		Box box = getContext().cutBox;
@@ -414,6 +443,16 @@ public class GuiImpl extends Screen implements IGui {
 		@Override
 		public void setFocused(boolean focused) {
 			field.setTextFieldFocused(focused);
+		}
+
+		@Override
+		public int getCursorPos() {
+			return field.getCursor();
+		}
+
+		@Override
+		public void setCursorPos(int pos) {
+			field.setCursor(pos);
 		}
 	}
 

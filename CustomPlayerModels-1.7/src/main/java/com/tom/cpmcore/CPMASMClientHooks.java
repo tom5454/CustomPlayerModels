@@ -89,17 +89,17 @@ public class CPMASMClientHooks {
 	}
 
 	public static void onHandPre(RenderPlayer this0, EntityPlayer player) {
-		ClientProxy.INSTANCE.manager.bindHand(player, null);
-		ClientProxy.INSTANCE.manager.bindSkin(TextureSheetType.SKIN);
+		ClientProxy.INSTANCE.manager.bindHand(player, null, this0.modelBipedMain);
+		ClientProxy.INSTANCE.manager.bindSkin(this0.modelBipedMain, TextureSheetType.SKIN);
 	}
 
 	public static void onHandPost(RenderPlayer this0, EntityPlayer player) {
-		ClientProxy.INSTANCE.manager.unbindClear();
+		ClientProxy.INSTANCE.manager.unbindClear(this0.modelBipedMain);
 	}
 
 	public static boolean renderCape(boolean evtRC, RenderPlayer this0, AbstractClientPlayer player, float partialTicks) {
 		if(evtRC) {
-			Player<?, ?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+			Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
 			if(pl != null) {
 				ModelDefinition def = pl.getModelDefinition();
 				if(def != null && def.hasRoot(RootModelType.CAPE)) {

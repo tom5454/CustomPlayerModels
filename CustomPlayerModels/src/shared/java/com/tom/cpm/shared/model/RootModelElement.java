@@ -30,6 +30,7 @@ public class RootModelElement extends RenderedCube {
 	public void reset() {
 		this.pos = new Vec3f();
 		this.rotation = new Vec3f();
+		this.renderScale = new Vec3f(1, 1, 1);
 		display = !hidden;
 		posAdd = true;
 		rotAdd = true;
@@ -107,5 +108,10 @@ public class RootModelElement extends RenderedCube {
 
 	public boolean renderPart() {
 		return true;
+	}
+
+	@Override
+	public Vec3f getRenderScale() {
+		return new Vec3f(1, 1, 1);
 	}
 }

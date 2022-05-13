@@ -13,15 +13,18 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.SharedConstants;
 import net.minecraft.text.KeybindText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
 
-import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.util.ILogger;
+import com.tom.cpm.api.CPMApiManager;
+import com.tom.cpm.api.ICPMPlugin;
 import com.tom.cpm.common.Command;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
@@ -34,9 +37,11 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 
 	public static final Logger LOG = LogManager.getLogger("CPM");
 	public static final ILogger log = new Log4JLogger(LOG);
+	public static CPMApiManager api;
 
 	@Override
 	public void onInitialize() {
+		api = new CPMApiManager();
 		config = new ModConfigFile(new File(FabricLoader.getInstance().getConfigDir().toFile(), "cpm.json"));
 		MinecraftObjectHolder.setCommonObject(this);
 
@@ -55,7 +60,19 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 			if(!end)ServerHandler.netHandler.onRespawn(n);
 		});
 		EntityTrackingEvents.START_TRACKING.register(ServerHandler::onTrackingStart);
+		FabricLoader.getInstance().getEntrypointContainers("cpmapi", ICPMPlugin.class).forEach(entrypoint -> {
+			ModMetadata metadata = entrypoint.getProvider().getMetadata();
+			String modId = metadata.getId();
+			try {
+				ICPMPlugin plugin = entrypoint.getEntrypoint();
+				api.register(plugin);
+			} catch (Throwable e) {
+				LOG.error("Mod {} provides a broken implementation of CPM api", modId, e);
+			}
+		});
 		LOG.info("Customizable Player Models Initialized");
+		LOG.info(api.getPluginStatus());
+		api.buildCommon().init();
 	}
 
 	@Override
@@ -90,5 +107,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 	@Override
 	public TextRemapper<MutableText> getTextRemapper() {
 		return new TextRemapper<>(TranslatableText::new, LiteralText::new, MutableText::append, KeybindText::new);
+	}
+
+	@Override
+	public CPMApiManager getApi() {
+		return api;
 	}
 }

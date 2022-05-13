@@ -24,7 +24,7 @@ public class ShoulderParrotFeatureRendererMixin {
 			method = "renderShoulderParrot(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/entity/player/PlayerEntity;FFFFZ)V")
 	public void onRenderPre(MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn, PlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float netHeadYaw, float headPitch, boolean leftShoulderIn, CallbackInfo cbi) {
 		matrixStackIn.push();
-		Player pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null) {

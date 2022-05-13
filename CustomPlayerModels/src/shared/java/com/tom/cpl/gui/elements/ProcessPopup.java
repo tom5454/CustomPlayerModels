@@ -3,6 +3,7 @@ package com.tom.cpl.gui.elements;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -18,6 +19,10 @@ public class ProcessPopup<R> extends PopupPanel implements Runnable {
 	protected Consumer<R> finished;
 	protected Consumer<Throwable> error;
 	protected Button cancel;
+
+	public ProcessPopup(Frame frame, String title, String text, Callable<R> function, CompletableFuture<R> cf) {
+		this(frame, title, text, function, cf::complete, cf::completeExceptionally);
+	}
 
 	public ProcessPopup(Frame frame, String title, String text, Callable<R> function, Consumer<R> finished, Consumer<Throwable> error) {
 		this(frame);

@@ -1,9 +1,6 @@
 package com.tom.cpm.client;
 
-import java.nio.FloatBuffer;
 import java.util.function.Supplier;
-
-import org.lwjgl.BufferUtils;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
@@ -11,19 +8,15 @@ import net.minecraft.client.model.ModelHumanoidHead;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.ResourceLocation;
 
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
-import com.tom.cpl.render.VBuffers.NativeRenderType;
-import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
-import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
-import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.retro.RedirectHolderRetro;
 
 public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRenderer, ModelBase> {
 	private static final float scale = 0.0625F;
@@ -34,7 +27,9 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			@Override
 			public <M> RedirectHolder<?, Void, Void, ModelRenderer> create(
 					M model, String arg) {
-				if(model instanceof ModelPlayer) {
+				if ("api".equals(arg) && model instanceof ModelBiped) {
+					return new RedirectHolderApi(PlayerRenderManager.this, (ModelBiped) model);
+				} else if(model instanceof ModelPlayer) {
 					return new RedirectHolderPlayer(PlayerRenderManager.this, (ModelPlayer) model);
 				} else if(model instanceof ModelHumanoidHead) {
 					return new RedirectHolderSkull(PlayerRenderManager.this, (ModelHumanoidHead) model);
@@ -93,6 +88,32 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 	}
 
+	private static class RedirectHolderApi extends RDH {
+		private RedirectRenderer<ModelRenderer> bipedHead;
+
+		public RedirectHolderApi(PlayerRenderManager mngr, ModelBiped model) {
+			super(mngr, model);
+			bipedHead = registerHead(new Field<>(() -> model.bipedHead, v -> model.bipedHead = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.bipedBody        , v -> model.bipedBody         = v, PlayerModelParts.BODY));
+			register(new Field<>(() -> model.bipedRightArm    , v -> model.bipedRightArm     = v, PlayerModelParts.RIGHT_ARM));
+			register(new Field<>(() -> model.bipedLeftArm     , v -> model.bipedLeftArm      = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.bipedRightLeg    , v -> model.bipedRightLeg     = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.bipedLeftLeg     , v -> model.bipedLeftLeg      = v, PlayerModelParts.LEFT_LEG));
+
+			register(new Field<>(() -> model.bipedHeadwear    , v -> model.bipedHeadwear     = v, null)).setCopyFrom(bipedHead);
+			if(model instanceof ModelPlayer) {
+				ModelPlayer mp = (ModelPlayer) model;
+				register(new Field<>(() -> mp.bipedLeftArmwear , v -> mp.bipedLeftArmwear  = v, null));
+				register(new Field<>(() -> mp.bipedRightArmwear, v -> mp.bipedRightArmwear = v, null));
+				register(new Field<>(() -> mp.bipedLeftLegwear , v -> mp.bipedLeftLegwear  = v, null));
+				register(new Field<>(() -> mp.bipedRightLegwear, v -> mp.bipedRightLegwear = v, null));
+				register(new Field<>(() -> mp.bipedBodyWear    , v -> mp.bipedBodyWear     = v, null));
+
+				register(new Field<>(() -> mp.bipedCape        , v -> mp.bipedCape     = v, RootModelType.CAPE));
+			}
+		}
+	}
+
 	private static class RedirectHolderSkull extends RDH {
 
 		public RedirectHolderSkull(PlayerRenderManager mngr, ModelHumanoidHead model) {
@@ -130,39 +151,11 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 	}
 
-	private abstract static class RDH extends ModelRenderManager.RedirectHolder<ModelBase, Void, Void, ModelRenderer> {
-		private TextureProvider skin;
+	private abstract static class RDH extends RedirectHolderRetro<ModelBase, ModelRenderer> {
 
 		public RDH(ModelRenderManager<Void, Void, ModelRenderer, ModelBase> mngr, ModelBase model) {
 			super(mngr, model);
 		}
-
-		@Override
-		protected void bindSkin() {
-			ResourceLocation texID = null;
-			if(skin != null) {
-				skin.bind();
-				texID = DynTexture.getBoundLoc();
-			}
-			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(RetroGL.texture(texID), 0));
-			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RetroGL.eyes(texID), 1));
-			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RetroGL.linesNoDepth(), 2));
-			renderTypes.put(RenderMode.COLOR, new NativeRenderType(RetroGL.color(), 0));
-			renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(RetroGL.color(), 1));
-		}
-
-		@Override
-		protected void bindTexture(Void cbi, TextureProvider skin) {
-			this.skin = skin;
-			skinBound = false;
-		}
-
-		@Override
-		public void swapOut0() {
-			skin = null;
-		}
-
-		@Override public void swapIn0() {}
 	}
 
 	private static class RedirectModelRenderer extends ModelRenderer implements RedirectRenderer<ModelRenderer> {
@@ -261,11 +254,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 		}
 	}
 
-	private static final FloatBuffer BUF_FLOAT_16 = BufferUtils.createFloatBuffer(16);
 	public static void multiplyStacks(MatrixStack.Entry e) {
-		BUF_FLOAT_16.clear();
-		e.getMatrix().store(BUF_FLOAT_16);
-		BUF_FLOAT_16.rewind();
-		GlStateManager.multMatrix(BUF_FLOAT_16);
+		e.getMatrix().multiplyNative(GlStateManager::multMatrix);
 	}
 }

@@ -40,7 +40,7 @@ public abstract class CapeLayerMixin extends RenderLayer<AbstractClientPlayer, P
 	public void onRender(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn,
 			AbstractClientPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks,
 			float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		Player<?, ?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {

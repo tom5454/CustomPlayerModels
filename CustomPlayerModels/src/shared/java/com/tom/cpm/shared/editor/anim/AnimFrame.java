@@ -10,6 +10,7 @@ import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
@@ -28,7 +29,7 @@ public class AnimFrame {
 	}
 
 	public class FrameData implements IElem {
-		private Vec3f pos, rot, color;
+		private Vec3f pos, rot, color, scale;
 		private boolean show = true;
 		private ModelElement comp;
 
@@ -39,13 +40,16 @@ public class AnimFrame {
 					PartValues val = ((VanillaModelPart) comp.typeData).getDefaultSize(anim.editor.skinType);
 					pos = val.getPos();
 					rot = new Vec3f();
+					scale = new Vec3f(1, 1, 1);
 				} else {
 					pos = new Vec3f(comp.pos);
 					rot = new Vec3f(comp.rotation);
+					scale = new Vec3f(1, 1, 1);
 				}
 			} else {
 				pos = new Vec3f();
 				rot = new Vec3f();
+				scale = new Vec3f(1, 1, 1);
 			}
 			int r = (comp.rgb & 0xff0000) >> 16;
 			int g = (comp.rgb & 0x00ff00) >> 8;
@@ -59,6 +63,7 @@ public class AnimFrame {
 			pos = new Vec3f(cpy.pos);
 			rot = new Vec3f(cpy.rot);
 			color = new Vec3f(cpy.color);
+			scale = new Vec3f(cpy.scale);
 			show = cpy.show;
 		}
 
@@ -82,6 +87,11 @@ public class AnimFrame {
 			return show;
 		}
 
+		@Override
+		public Vec3f getScale() {
+			return scale;
+		}
+
 		private void apply() {
 			comp.rc.setRotation(anim.add,
 					(float) Math.toRadians(rot.x),
@@ -90,11 +100,12 @@ public class AnimFrame {
 					);
 			comp.rc.setPosition(anim.add, pos.x, pos.y, pos.z);
 			comp.rc.setColor(color.x, color.y, color.z);
+			comp.rc.setRenderScale(anim.add, scale.x, scale.y, scale.z);
 			comp.rc.display = show;
 		}
 
 		public boolean hasChanges() {
-			return hasPosChanges() || hasRotChanges() || hasColorChanges() || hasVisChanges();
+			return hasPosChanges() || hasRotChanges() || hasColorChanges() || hasVisChanges() || hasScaleChanges();
 		}
 
 		public boolean hasPosChanges() {
@@ -111,6 +122,10 @@ public class AnimFrame {
 			} else {
 				return Math.abs(rot.x - comp.rotation.x) > 0.01f || Math.abs(rot.y - comp.rotation.y) > 0.01f || Math.abs(rot.z - comp.rotation.z) > 0.01f;
 			}
+		}
+
+		public boolean hasScaleChanges() {
+			return Math.abs(scale.x - 1) > 0.01f || Math.abs(scale.y - 1) > 0.01f || Math.abs(scale.z - 1) > 0.01f;
 		}
 
 		public boolean hasColorChanges() {
@@ -140,6 +155,10 @@ public class AnimFrame {
 		public void setShow(boolean show) {
 			this.show = show;
 		}
+
+		public void setScale(Vec3f v) {
+			this.scale = v;
+		}
 	}
 
 	public void setPos(ModelElement elem, Vec3f v) {
@@ -161,6 +180,17 @@ public class AnimFrame {
 			ab.addToMap(components, elem, dt);
 		}
 		ab.updateValueOp(dt, dt.rot, v, (a, b) -> a.rot = b);
+		ab.execute();
+	}
+
+	public void setScale(ModelElement elem, Vec3f v) {
+		FrameData dt = components.get(elem);
+		ActionBuilder ab = anim.editor.action("setAnim", "label.cpm.render_scale");
+		if(dt == null) {
+			dt = new FrameData(elem);
+			ab.addToMap(components, elem, dt);
+		}
+		ab.updateValueOp(dt, dt.scale, v, (a, b) -> a.scale = b);
 		ab.execute();
 	}
 
@@ -195,6 +225,7 @@ public class AnimFrame {
 
 	public void apply() {
 		components.values().forEach(FrameData::apply);
+		if(applyDrag)draggingElem.apply();
 	}
 
 	public boolean getVisible(ModelElement component) {
@@ -234,6 +265,12 @@ public class AnimFrame {
 		return data.hasVisChanges();
 	}
 
+	public boolean hasScaleChanges(ModelElement me) {
+		FrameData data = components.get(me);
+		if(data == null)return false;
+		return data.hasScaleChanges();
+	}
+
 	public void copy(AnimFrame from) {
 		from.components.forEach((e, dt) -> components.put(e, new FrameData(dt)));
 	}
@@ -248,7 +285,7 @@ public class AnimFrame {
 			AnimFrame frm = anim.getFrames().get(i);
 			IElem dt = frm.getData(elem);
 			if(dt == null) {
-				if(anim.add)data[i] = 0;
+				if(anim.add)data[i] = channel.defaultValue;
 				else data[i] = elem.part(channel);
 			} else data[i] = dt.part(channel);
 		}
@@ -267,5 +304,35 @@ public class AnimFrame {
 		FrameData d = new FrameData(elem);
 		components.put(elem, d);
 		return d;
+	}
+
+	private FrameData draggingElem;
+	private boolean applyDrag;
+	public void beginDrag(ModelElement elem) {
+		draggingElem = components.get(elem);
+		if(draggingElem == null) {
+			draggingElem = new FrameData(elem);
+			applyDrag = true;
+		}
+	}
+
+	public void endDrag() {
+		applyDrag = false;
+		draggingElem = null;
+	}
+
+	public void dragVal(VecType type, Vec3f vec) {
+		switch (type) {
+		case POSITION:
+			draggingElem.setPos(vec);
+			break;
+
+		case ROTATION:
+			draggingElem.setRot(vec);
+			break;
+
+		default:
+			break;
+		}
 	}
 }

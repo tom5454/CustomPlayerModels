@@ -37,28 +37,30 @@ public class NewSkinPopup extends PopupPanel {
 		spinnerW.setValue(64);
 		spinnerH.setValue(64);
 
-		Label lblT = new Label(gui, gui.i18nFormat("label.cpm.sheetSize"));
-		lblT.setBounds(new Box(5, 50, 120, 18));
-		lblT.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.texture_sheet")));
-		addElement(lblT);
-
-		lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
-		lblTW.setBounds(new Box(5, 60, 40, 18));
-		lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
-		lblTH.setBounds(new Box(75, 60, 40, 18));
-
 		Spinner spinnerTW = new Spinner(gui);
 		Spinner spinnerTH = new Spinner(gui);
-		spinnerTW.setDp(0);
-		spinnerTH.setDp(0);
-		spinnerTW.setBounds(new Box(5, 70, 65, 18));
-		spinnerTH.setBounds(new Box(75, 70, 65, 18));
-		addElement(spinnerTW);
-		addElement(spinnerTH);
-		addElement(lblTW);
-		addElement(lblTH);
-		spinnerTW.setValue(64);
-		spinnerTH.setValue(64);
+		if(editor.displayAdvScaling) {
+			Label lblT = new Label(gui, gui.i18nFormat("label.cpm.sheetSize"));
+			lblT.setBounds(new Box(5, 50, 120, 18));
+			lblT.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.texture_sheet")));
+			addElement(lblT);
+
+			lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
+			lblTW.setBounds(new Box(5, 60, 40, 18));
+			lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
+			lblTH.setBounds(new Box(75, 60, 40, 18));
+
+			spinnerTW.setDp(0);
+			spinnerTH.setDp(0);
+			spinnerTW.setBounds(new Box(5, 70, 65, 18));
+			spinnerTH.setBounds(new Box(75, 70, 65, 18));
+			addElement(spinnerTW);
+			addElement(spinnerTH);
+			addElement(lblTW);
+			addElement(lblTH);
+			spinnerTW.setValue(64);
+			spinnerTH.setValue(64);
+		}
 
 		Checkbox keepOld = new Checkbox(gui, gui.i18nFormat("label.cpm.keepOldSkin"));
 		keepOld.setBounds(new Box(5, 100, 100, 18));

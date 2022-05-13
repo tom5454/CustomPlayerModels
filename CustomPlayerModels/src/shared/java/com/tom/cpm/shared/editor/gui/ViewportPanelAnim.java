@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.MatrixStack;
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -15,15 +16,19 @@ import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData.Type;
+import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.model.builtin.VanillaPlayerModel;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class ViewportPanelAnim extends ViewportPanel {
 	private List<AnimationDisplayData> anims;
+	private Vec3f animPos, animRot;
 
-	public ViewportPanelAnim(IGui gui, Editor editor) {
-		super(gui, editor);
+	public ViewportPanelAnim(Frame frm, Editor editor) {
+		super(frm, editor);
+		editor.setAnimPos.add(v -> animPos = v);
+		editor.setAnimRot.add(v -> animRot = v);
 	}
 
 	@Override
@@ -48,7 +53,7 @@ public class ViewportPanelAnim extends ViewportPanel {
 					return dt.item;
 				}
 			}
-			return DisplayItem.NONE;
+			if(!editor.forceHeldItemInAnim)return DisplayItem.NONE;
 		} else if(anims != null) {
 			return anims.stream().filter(p -> p.slot == hand).map(p -> p.item).filter(p -> p != null).findFirst().orElse(DisplayItem.NONE);
 		}
@@ -120,11 +125,78 @@ public class ViewportPanelAnim extends ViewportPanel {
 
 	@Override
 	protected int drawParrots() {
-		int r = 0;
+		int r = editor.forceHeldItemInAnim ? super.drawParrots() : 0;
 		if(anims != null) {
 			if(anims.contains(AnimationDisplayData.PARROT_LEFT))r |= 1;
 			if(anims.contains(AnimationDisplayData.PARROT_RIGHT))r |= 2;
 		}
 		return r;
+	}
+
+	@Override
+	protected VecType[] getVecTypes() {
+		return VecType.MOUSE_EDITOR_ANIM_TYPES;
+	}
+
+	@Override
+	protected Vec3f getVec(VecType type) {
+		if(editor.selectedAnim != null) {
+			editor.selectedAnim.beginDrag();
+		}
+		switch (type) {
+		case POSITION:
+			return animPos != null ? animPos : new Vec3f();
+		case ROTATION:
+			return animRot != null ? animRot : new Vec3f();
+		default:
+			return new Vec3f();
+		}
+	}
+
+	@Override
+	protected void setVec(VecType type, Vec3f vec, boolean temp) {
+		if(temp) {
+			switch (type) {
+			case POSITION:
+				editor.setAnimPos.accept(vec);
+				if(editor.selectedAnim != null) {
+					editor.selectedAnim.dragVal(type, vec);
+				}
+				break;
+
+			case ROTATION:
+				editor.setAnimRot.accept(vec);
+				if(editor.selectedAnim != null) {
+					editor.selectedAnim.dragVal(type, vec);
+				}
+				break;
+
+			default:
+				break;
+			}
+		} else {
+			switch (type) {
+			case POSITION:
+				editor.setAnimPos(vec);
+				editor.setAnimPos.accept(vec);
+				break;
+
+			case ROTATION:
+				editor.setAnimRot(vec);
+				editor.setAnimRot.accept(vec);
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void mouseRelease(MouseEvent event) {
+		super.mouseRelease(event);
+		if(event.btn == 0 && editor.selectedAnim != null) {
+			editor.selectedAnim.endDrag();
+		}
 	}
 }

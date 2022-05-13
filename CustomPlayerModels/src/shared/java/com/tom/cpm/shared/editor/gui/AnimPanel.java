@@ -14,6 +14,7 @@ import com.tom.cpl.gui.elements.ListPicker;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.CombinedListView;
@@ -41,6 +42,8 @@ public class AnimPanel extends Panel {
 		editor = e.getEditor();
 		setBounds(new Box(0, 0, 170, 330));
 		setBackgroundColor(gui.getColors().panel_background);
+
+		FlowLayout layout = new FlowLayout(this, 4, 1);
 
 		animSel = new ListPicker<>(e, new CombinedListView<IAnim>(Collections.singletonList(new IAnim() {
 			@Override
@@ -70,37 +73,45 @@ public class AnimPanel extends Panel {
 		});
 		editor.setSelAnim.add(animSel::setSelected);
 
+		Panel p = new Panel(gui);
+		p.setBounds(new Box(0, 0, bounds.w, 18));
+		addElement(p);
+
 		ButtonIcon newAnimBtn = new ButtonIcon(gui, "editor", 0, 16, () -> e.openPopup(new AnimationSettinsPopup(gui, editor, false)));
-		newAnimBtn.setBounds(new Box(5, 30, 18, 18));
-		addElement(newAnimBtn);
+		newAnimBtn.setBounds(new Box(5, 0, 18, 18));
+		p.addElement(newAnimBtn);
 
 		ButtonIcon delAnimBtn = new ButtonIcon(gui, "editor", 14, 16, new ConfirmPopup(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnim, null));
-		delAnimBtn.setBounds(new Box(25, 30, 18, 18));
-		addElement(delAnimBtn);
+		delAnimBtn.setBounds(new Box(25, 0, 18, 18));
+		p.addElement(delAnimBtn);
 		editor.setAnimDelEn.add(delAnimBtn::setEnabled);
 
 		Button editBtn = new Button(gui, gui.i18nFormat("button.cpm.edit"), () -> e.openPopup(new AnimationSettinsPopup(gui, editor, true)));
-		editBtn.setBounds(new Box(45, 30, 80, 18));
-		addElement(editBtn);
+		editBtn.setBounds(new Box(45, 0, 80, 18));
+		p.addElement(editBtn);
 		editor.setAnimDelEn.add(editBtn::setEnabled);
 
+		p = new Panel(gui);
+		p.setBounds(new Box(0, 0, bounds.w, 18));
+		addElement(p);
+
 		Label currFrame = new Label(gui, "");
-		currFrame.setBounds(new Box(30, 65, 110, 10));
-		addElement(currFrame);
+		currFrame.setBounds(new Box(30, 5, 110, 10));
+		p.addElement(currFrame);
 
 		prevFrm = new Button(gui, "<", () -> {
 			if(gui.isCtrlDown())editor.animMoveFrame(-1);
 			else editor.animPrevFrm();
 		});
-		prevFrm.setBounds(new Box(5, 60, 18, 18));
-		addElement(prevFrm);
+		prevFrm.setBounds(new Box(5, 0, 18, 18));
+		p.addElement(prevFrm);
 
 		nextFrm = new Button(gui, ">", () -> {
 			if(gui.isCtrlDown())editor.animMoveFrame(1);
 			else editor.animNextFrm();
 		});
-		nextFrm.setBounds(new Box(145, 60, 18, 18));
-		addElement(nextFrm);
+		nextFrm.setBounds(new Box(145, 0, 18, 18));
+		p.addElement(nextFrm);
 
 		editor.setAnimFrame.add(i -> {
 			prevFrm.setEnabled(i != null);
@@ -112,34 +123,42 @@ public class AnimPanel extends Panel {
 			}
 		});
 
+		p = new Panel(gui);
+		p.setBounds(new Box(0, 0, bounds.w, 18));
+		addElement(p);
+
 		ButtonIcon newFrmBtn = new ButtonIcon(gui, "editor", 0, 16, editor::addNewAnimFrame);
-		newFrmBtn.setBounds(new Box(5, 85, 18, 18));
-		addElement(newFrmBtn);
+		newFrmBtn.setBounds(new Box(5, 0, 18, 18));
+		p.addElement(newFrmBtn);
 		editor.setFrameAddEn.add(newFrmBtn::setEnabled);
 
 		ButtonIcon delFrmBtn = new ButtonIcon(gui, "editor", 14, 16, new ConfirmPopup(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimFrame, null));
-		delFrmBtn.setBounds(new Box(25, 85, 18, 18));
-		addElement(delFrmBtn);
+		delFrmBtn.setBounds(new Box(25, 0, 18, 18));
+		p.addElement(delFrmBtn);
 		editor.setFrameDelEn.add(delFrmBtn::setEnabled);
 
-		ButtonIcon playBtn = new ButtonIcon(gui, "editor", 56, 16, () -> {
+		ButtonIcon playBtn = new ButtonIcon(gui, "editor", 56, 16, true, () -> {
 			editor.playFullAnim = !editor.playFullAnim;
 			editor.playStartTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
 			editor.setAnimPlay.accept(editor.playFullAnim);
 		});
-		playBtn.setBounds(new Box(45, 85, 18, 18));
-		addElement(playBtn);
+		playBtn.setBounds(new Box(45, 0, 18, 18));
+		p.addElement(playBtn);
 		editor.setAnimPlayEn.add(playBtn::setEnabled);
 		editor.setAnimPlay.add(v -> playBtn.setU(v ? 72 : 56));
 
+		p = new Panel(gui);
+		p.setBounds(new Box(0, 0, bounds.w, 28));
+		addElement(p);
+
 		Label lblDuration = new Label(gui, gui.i18nFormat("label.cpm.duration"));
-		lblDuration.setBounds(new Box(5, 110, 0, 0));
-		addElement(lblDuration);
+		lblDuration.setBounds(new Box(5, 0, 0, 0));
+		p.addElement(lblDuration);
 
 		Spinner duration = new Spinner(gui);
 		duration.setDp(0);
-		duration.setBounds(new Box(5, 120, 100, 18));
-		addElement(duration);
+		duration.setBounds(new Box(5, 10, 100, 18));
+		p.addElement(duration);
 		editor.setAnimDuration.add(i -> {
 			duration.setEnabled(i != null);
 			if(i != null)duration.setValue(i);
@@ -148,11 +167,21 @@ public class AnimPanel extends Panel {
 		duration.addChangeListener(() -> editor.setAnimDuration((int) duration.getValue()));
 		tabHandler.add(duration);
 
-		PosPanel.addVec3("rotation", 145, v -> editor.setAnimRot(v), this, editor.setAnimRot, 1, tabHandler);
-		PosPanel.addVec3("position", 175, v -> editor.setAnimPos(v), this, editor.setAnimPos, 2, tabHandler);
+		Button clearAnimData = new Button(gui, gui.i18nFormat("button.cpm.clearAnimData"), new ConfirmPopup(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimPartData, null));
+		clearAnimData.setBounds(new Box(110, 10, 55, 18));
+		clearAnimData.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.clearAnimData")));
+		p.addElement(clearAnimData);
+
+		PosPanel.addVec3("rotation", v -> editor.setAnimRot(v), this, editor.setAnimRot, 1, tabHandler);
+		PosPanel.addVec3("position", v -> editor.setAnimPos(v), this, editor.setAnimPos, 2, tabHandler);
+		Panel sc = PosPanel.addVec3("render_scale", v -> editor.setAnimScale(v), this, editor.setAnimScale, 2, tabHandler);
+		editor.updateGui.add(() -> {
+			sc.setVisible(editor.displayAdvScaling);
+			layout.reflow();
+		});
 
 		ColorButton colorBtn = new ColorButton(gui, e, editor::setAnimColor);
-		colorBtn.setBounds(new Box(5, 205, 140, 20));
+		colorBtn.setBounds(new Box(5, 0, 140, 20));
 		editor.setAnimColor.add(c -> {
 			colorBtn.setEnabled(c != null);
 			if(c != null)colorBtn.setColor(c);
@@ -161,24 +190,23 @@ public class AnimPanel extends Panel {
 		addElement(colorBtn);
 
 		Checkbox boxShow = new Checkbox(gui, gui.i18nFormat("label.cpm.visible"));
-		boxShow.setBounds(new Box(5, 230, 60, 18));
+		boxShow.setBounds(new Box(5, 0, 60, 18));
 		boxShow.setAction(editor::switchAnimShow);
 		editor.setAnimShow.add(boxShow::updateState);
 		addElement(boxShow);
 
 		Button encSettings = new Button(gui, gui.i18nFormat("button.cpm.animEncSettings"), () -> e.openPopup(new AnimEncConfigPopup(gui, editor, null)));
-		encSettings.setBounds(new Box(5, 260, 155, 20));
+		encSettings.setBounds(new Box(5, 0, 155, 20));
 		addElement(encSettings);
 
-		Label lblPri = new Label(gui, gui.i18nFormat("label.cpm.anim_priority"));
-		lblPri.setBounds(new Box(5, 290, 160, 10));
-		lblPri.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim_priority")));
-		addElement(lblPri);
+		p = new Panel(gui);
+		p.setBounds(new Box(0, 0, bounds.w, 28));
+		addElement(p);
 
-		Button clearAnimData = new Button(gui, gui.i18nFormat("button.cpm.clearAnimData"), new ConfirmPopup(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimPartData, null));
-		clearAnimData.setBounds(new Box(110, 120, 55, 18));
-		clearAnimData.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.clearAnimData")));
-		addElement(clearAnimData);
+		Label lblPri = new Label(gui, gui.i18nFormat("label.cpm.anim_priority"));
+		lblPri.setBounds(new Box(5, 0, 160, 10));
+		lblPri.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim_priority")));
+		p.addElement(lblPri);
 
 		Spinner animPriority = new Spinner(gui);
 		editor.setAnimPriority.add(v -> {
@@ -186,11 +214,13 @@ public class AnimPanel extends Panel {
 			if(v != null)animPriority.setValue(v);
 			else animPriority.setValue(0);
 		});
-		animPriority.setBounds(new Box(5, 300, 100, 18));
+		animPriority.setBounds(new Box(5, 10, 100, 18));
 		animPriority.setDp(0);
 		animPriority.addChangeListener(() -> editor.setAnimPriority((int) animPriority.getValue()));
-		addElement(animPriority);
+		p.addElement(animPriority);
 		tabHandler.add(animPriority);
+
+		layout.reflow();
 	}
 
 	public static interface IAnim {

@@ -12,6 +12,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -21,12 +22,14 @@ import net.minecraft.resources.ResourceLocation;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.ClientProxy.PlayerNameTagRenderer;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(value = PlayerRenderer.class, priority = 900)
-public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> implements PlayerNameTagRenderer<AbstractClientPlayer> {
 
 	public PlayerRendererMixin(Context p_174289_, PlayerModel<AbstractClientPlayer> p_174290_, float p_174291_) {
 		super(p_174289_, p_174290_, p_174291_);
@@ -59,12 +62,12 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 
 	@Inject(at = @At("HEAD"), method = "renderRightHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderRightArmPre(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.renderHand(vertexConsumers);
+		ClientProxy.INSTANCE.renderHand(vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderLeftHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderLeftArmPre(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.renderHand(vertexConsumers);
+		ClientProxy.INSTANCE.renderHand(vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("RETURN"), method = "renderRightHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
@@ -80,6 +83,8 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 	@Inject(at = @At("HEAD"), method = "renderNameTag(Lnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/network/chat/Component;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", cancellable = true)
 	public void onRenderName(AbstractClientPlayer entityIn, Component displayNameIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(!Player.isEnableNames())cbi.cancel();
+		if(Player.isEnableLoadingInfo())
+			ClientProxy.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
 	}
 
 	@Redirect(at =
@@ -96,5 +101,16 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 			)
 	public RenderType getArmLayer(ResourceLocation loc, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, AbstractClientPlayer playerIn, ModelPart rendererArmIn, ModelPart rendererArmwearIn) {
 		return ClientProxy.mc.getPlayerRenderManager().isBound(getModel()) ? RenderType.entityTranslucent(getTextureLocation(playerIn)) : RenderType.entitySolid(getTextureLocation(playerIn));
+	}
+
+	@Override
+	public void cpm$renderNameTag(AbstractClientPlayer entityIn, Component displayNameIn, PoseStack matrixStackIn,
+			MultiBufferSource bufferIn, int packedLightIn) {
+		super.renderNameTag(entityIn, displayNameIn, matrixStackIn, bufferIn, packedLightIn);
+	}
+
+	@Override
+	public EntityRenderDispatcher cpm$entityRenderDispatcher() {
+		return entityRenderDispatcher;
 	}
 }

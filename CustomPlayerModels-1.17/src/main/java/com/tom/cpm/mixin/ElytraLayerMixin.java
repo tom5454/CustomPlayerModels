@@ -9,13 +9,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.model.ElytraModel;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -25,7 +27,11 @@ import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(ElytraLayer.class)
-public class ElytraLayerMixin {
+public abstract class ElytraLayerMixin extends RenderLayer<LivingEntity, EntityModel<LivingEntity>> {
+	public ElytraLayerMixin(RenderLayerParent<LivingEntity, EntityModel<LivingEntity>> pRenderer) {
+		super(pRenderer);
+	}
+
 	private @Shadow @Final ElytraModel<LivingEntity> elytraModel;
 
 	@Inject(at = @At(
@@ -34,7 +40,9 @@ public class ElytraLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 					+ "Lnet/minecraft/world/entity/LivingEntity;FFFFFF)V")
 	public void preRender(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer)ClientProxy.INSTANCE.renderElytra((Player) entitylivingbaseIn, bufferIn, elytraModel);
+		if(getParentModel() instanceof HumanoidModel) {
+			ClientProxy.INSTANCE.renderElytra((HumanoidModel<LivingEntity>) getParentModel(), elytraModel);
+		}
 	}
 
 	@Inject(at = @At(
@@ -43,7 +51,7 @@ public class ElytraLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 					+ "Lnet/minecraft/world/entity/LivingEntity;FFFFFF)V")
 	public void postRender(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer)ClientProxy.INSTANCE.manager.unbind(elytraModel);
+		ClientProxy.INSTANCE.manager.unbind(elytraModel);
 	}
 
 	@Redirect(at = @At(
@@ -55,7 +63,7 @@ public class ElytraLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 					+ "Lnet/minecraft/world/entity/LivingEntity;FFFFFF)V")
 	private RenderType onGetRenderType(ResourceLocation resLoc, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
+		if(getParentModel() instanceof HumanoidModel) {
 			ModelTexture mt = new ModelTexture(resLoc, PlayerRenderManager.armor);
 			ClientProxy.mc.getPlayerRenderManager().bindSkin(elytraModel, mt, TextureSheetType.ELYTRA);
 			return mt.getRenderType();

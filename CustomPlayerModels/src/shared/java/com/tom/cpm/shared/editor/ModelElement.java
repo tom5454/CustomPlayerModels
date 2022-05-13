@@ -13,9 +13,11 @@ import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
+import com.tom.cpm.shared.editor.gui.popup.CopyTransformSettingsPopup;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartValues;
@@ -49,6 +51,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public PerFaceUV faceUV;
 	public ItemRenderer itemRenderer;
 	public Tooltip tooltip;
+	public CopyTransformEffect copyTransform;
 
 	public ModelElement(ModelElement element, ModelElement parent) {
 		this(element.editor);
@@ -92,6 +95,11 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		children.forEach(ModelElement::preRender);
 	}
 
+	public void postRender() {
+		if(copyTransform != null)copyTransform.apply();
+		children.forEach(ModelElement::postRender);
+	}
+
 	@Override
 	public Vec3f getPosition() {
 		return pos;
@@ -100,6 +108,11 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public Vec3f getRotation() {
 		return rotation;
+	}
+
+	@Override
+	public Vec3f getScale() {
+		return new Vec3f(1, 1, 1);
 	}
 
 	@Override
@@ -119,6 +132,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public String getName() {
 		String name = this.name;
 		if(hidden)name = editor.gui().i18nFormat("label.cpm.tree.hidden", name);
+		if(copyTransform != null)name = editor.gui().i18nFormat("label.cpm.copyTransformFlag", name);
 		if(duplicated)name = editor.gui().i18nFormat("label.cpm.tree.duplicated", name);
 		return name;
 	}
@@ -204,6 +218,58 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		}
 	}
 
+	public Vec3f getVec(VecType v) {
+		switch (v) {
+		case OFFSET:
+			return new Vec3f(offset);
+		case POSITION:
+			return new Vec3f(pos);
+		case ROTATION:
+			return new Vec3f(rotation);
+		case SCALE:
+			return new Vec3f(scale);
+		case SIZE:
+			return new Vec3f(size);
+		case TEXTURE:
+		default:
+			return null;
+		}
+	}
+
+	public void setVecTemp(VecType vt, Vec3f v) {
+		switch (vt) {
+		case OFFSET:
+			ActionBuilder.limitVec(v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false);
+			offset = v;
+			editor.setOffset.accept(offset);
+			break;
+		case POSITION:
+			ActionBuilder.limitVec(v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false);
+			pos = v;
+			editor.setPosition.accept(pos);
+			break;
+		case ROTATION:
+			ActionBuilder.limitVec(v, 0, 360, true);
+			rotation = v;
+			editor.setRot.accept(rotation);
+			break;
+		case SCALE:
+			ActionBuilder.limitVec(v, 0, 25, false);
+			scale = v;
+			editor.setScale.accept(scale);
+			break;
+		case SIZE:
+			ActionBuilder.limitVec(v, 0, 25, false);
+			v.round(10);
+			size = v;
+			editor.setSize.accept(size);
+			break;
+		case TEXTURE:
+		default:
+			break;
+		}
+	}
+
 	@Override
 	public void setElemName(String name) {
 		this.name = name;
@@ -266,11 +332,12 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 				if(!this.texture || this.recolor)
 					editor.setPartColor.accept(this.rgb);
 			}
+			editor.setCopyTransformEffect.accept(copyTransform != null);
 			editor.setDelEn.accept(!templateElement);
+			editor.setHiddenEffect.accept(this.hidden);
 			if(itemRenderer == null) {
 				editor.setGlow.accept(this.glow);
 				editor.setReColor.accept(this.recolor);
-				editor.setHiddenEffect.accept(this.hidden);
 				if(faceUV == null) {
 					editor.setSingleTex.accept(this.singleTex);
 					editor.setExtrudeEffect.accept(this.extrude);
@@ -375,6 +442,15 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.updateGui();
 			break;
 
+		case COPY_TRANSFORM:
+			editor.action("switch", "label.cpm.copyTransform").updateValueOp(this, this.texture, true, (a, b) -> a.texture = b).
+			updateValueOp(this, this.copyTransform, copyTransform == null ? new CopyTransformEffect(this) : null, (a, b) -> a.copyTransform = b, v -> editor.setCopyTransformEffect.accept(v != null)).
+			execute();
+			editor.updateGui();
+			if(copyTransform != null)
+				editor.frame.openPopup(new CopyTransformSettingsPopup(editor.frame, editor, copyTransform));
+			break;
+
 		default:
 			break;
 
@@ -423,6 +499,11 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void populatePopup(PopupMenu popup) {
 		if(canDup()) {
 			popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), this::duplicate);
+		}
+		if(type == ElementType.NORMAL && copyTransform != null) {
+			popup.addButton(editor.gui().i18nFormat("button.cpm.editCopyTransform"), () -> {
+				editor.frame.openPopup(new CopyTransformSettingsPopup(editor.frame, editor, copyTransform));
+			});
 		}
 	}
 

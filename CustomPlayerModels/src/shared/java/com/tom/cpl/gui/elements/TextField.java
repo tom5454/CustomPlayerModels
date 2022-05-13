@@ -10,19 +10,26 @@ import com.tom.cpl.math.Box;
 
 public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 	private ITextField field;
+	private int bgColor;
+
 	public TextField(IGui gui) {
 		super(gui);
 		field = gui.getNative().getNative(TextField.class, this);
+		this.bgColor = gui.getColors().popup_border;
 	}
 
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
-		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, 0xff888888);
-		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, enabled ? 0xffaaaaaa : 0xff444444);
+		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_fill);
+		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, enabled ? bgColor : gui.getColors().button_disabled);
 		field.draw(event.x, event.y, partialTicks, bounds);
 	}
 	@Override
 	public void keyPressed(KeyboardEvent evt) {
+		if(evt.matches(gui.getKeyCodes().KEY_ENTER) || evt.matches(gui.getKeyCodes().KEY_KP_ENTER)) {
+			setFocused(false);
+			evt.consume();
+		}
 		field.keyPressed(evt);
 	}
 
@@ -41,6 +48,8 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 		void setEnabled(boolean enabled);
 		boolean isFocused();
 		void setFocused(boolean focused);
+		int getCursorPos();
+		void setCursorPos(int pos);
 	}
 
 	public String getText() {
@@ -74,5 +83,17 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 	@Override
 	public void setFocused(boolean focused) {
 		field.setFocused(focused);
+	}
+
+	public void setBackgroundColor(int bgColor) {
+		this.bgColor = bgColor;
+	}
+
+	public int getCursorPos() {
+		return field.getCursorPos();
+	}
+
+	public void setCursorPos(int pos) {
+		field.setCursorPos(pos);
 	}
 }

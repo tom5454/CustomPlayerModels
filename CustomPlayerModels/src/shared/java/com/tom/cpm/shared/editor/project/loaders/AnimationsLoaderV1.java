@@ -116,6 +116,7 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 			int rgb = (((int) color.x) << 16) | (((int) color.y) << 8) | ((int) color.z);
 			map.put("color", Integer.toHexString(rgb));
 			map.put("show", dt.isVisible());
+			map.put("scale", dt.getScale().toMap());
 		}
 		Map<String, Object> data = new HashMap<>();
 		data.put("components", c);
@@ -145,6 +146,7 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 					int b =  rgb & 0x0000ff;
 					dt.setColor(new Vec3f(r, g, b));
 					dt.setShow(map.getBoolean("show"));
+					dt.setScale(new Vec3f(map.getMap("scale"), new Vec3f(1, 1, 1)));
 				}
 			});
 		});

@@ -1,8 +1,14 @@
 package com.tom.cpl.math;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class Mat4f {
+	private static final FloatBuffer BUF_FLOAT_16 = ByteBuffer.allocateDirect(64).order(ByteOrder.nativeOrder()).asFloatBuffer();
+
 	protected float m00;
 	protected float m01;
 	protected float m02;
@@ -85,6 +91,25 @@ public class Mat4f {
 		this.m31 = 0;
 		this.m32 = 0;
 		this.m33 = 0;
+	}
+
+	public Mat4f(float[] values) {
+		m00 = values[0];
+		m01 = values[1];
+		m02 = values[2];
+		m03 = values[3];
+		m10 = values[4];
+		m11 = values[5];
+		m12 = values[6];
+		m13 = values[7];
+		m20 = values[8];
+		m21 = values[9];
+		m22 = values[10];
+		m23 = values[11];
+		m30 = values[12];
+		m31 = values[13];
+		m32 = values[14];
+		m33 = values[15];
 	}
 
 	@Override
@@ -267,23 +292,42 @@ public class Mat4f {
 		return p_27643_ * 4 + p_27642_;
 	}
 
-	public void store(FloatBuffer p_27651_) {
-		p_27651_.put(bufferIndex(0, 0), this.m00);
-		p_27651_.put(bufferIndex(0, 1), this.m01);
-		p_27651_.put(bufferIndex(0, 2), this.m02);
-		p_27651_.put(bufferIndex(0, 3), this.m03);
-		p_27651_.put(bufferIndex(1, 0), this.m10);
-		p_27651_.put(bufferIndex(1, 1), this.m11);
-		p_27651_.put(bufferIndex(1, 2), this.m12);
-		p_27651_.put(bufferIndex(1, 3), this.m13);
-		p_27651_.put(bufferIndex(2, 0), this.m20);
-		p_27651_.put(bufferIndex(2, 1), this.m21);
-		p_27651_.put(bufferIndex(2, 2), this.m22);
-		p_27651_.put(bufferIndex(2, 3), this.m23);
-		p_27651_.put(bufferIndex(3, 0), this.m30);
-		p_27651_.put(bufferIndex(3, 1), this.m31);
-		p_27651_.put(bufferIndex(3, 2), this.m32);
-		p_27651_.put(bufferIndex(3, 3), this.m33);
+	public void store(FloatBuffer buffer) {
+		buffer.put(bufferIndex(0, 0), this.m00);
+		buffer.put(bufferIndex(0, 1), this.m01);
+		buffer.put(bufferIndex(0, 2), this.m02);
+		buffer.put(bufferIndex(0, 3), this.m03);
+		buffer.put(bufferIndex(1, 0), this.m10);
+		buffer.put(bufferIndex(1, 1), this.m11);
+		buffer.put(bufferIndex(1, 2), this.m12);
+		buffer.put(bufferIndex(1, 3), this.m13);
+		buffer.put(bufferIndex(2, 0), this.m20);
+		buffer.put(bufferIndex(2, 1), this.m21);
+		buffer.put(bufferIndex(2, 2), this.m22);
+		buffer.put(bufferIndex(2, 3), this.m23);
+		buffer.put(bufferIndex(3, 0), this.m30);
+		buffer.put(bufferIndex(3, 1), this.m31);
+		buffer.put(bufferIndex(3, 2), this.m32);
+		buffer.put(bufferIndex(3, 3), this.m33);
+	}
+
+	public void load(FloatBuffer pBuffer) {
+		this.m00 = pBuffer.get(bufferIndex(0, 0));
+		this.m01 = pBuffer.get(bufferIndex(0, 1));
+		this.m02 = pBuffer.get(bufferIndex(0, 2));
+		this.m03 = pBuffer.get(bufferIndex(0, 3));
+		this.m10 = pBuffer.get(bufferIndex(1, 0));
+		this.m11 = pBuffer.get(bufferIndex(1, 1));
+		this.m12 = pBuffer.get(bufferIndex(1, 2));
+		this.m13 = pBuffer.get(bufferIndex(1, 3));
+		this.m20 = pBuffer.get(bufferIndex(2, 0));
+		this.m21 = pBuffer.get(bufferIndex(2, 1));
+		this.m22 = pBuffer.get(bufferIndex(2, 2));
+		this.m23 = pBuffer.get(bufferIndex(2, 3));
+		this.m30 = pBuffer.get(bufferIndex(3, 0));
+		this.m31 = pBuffer.get(bufferIndex(3, 1));
+		this.m32 = pBuffer.get(bufferIndex(3, 2));
+		this.m33 = pBuffer.get(bufferIndex(3, 3));
 	}
 
 	public float[] toArray() {
@@ -307,62 +351,25 @@ public class Mat4f {
 		return values;
 	}
 
-	public float adjugateAndDet() {
-		float f = this.m00 * this.m11 - this.m01 * this.m10;
-		float f1 = this.m00 * this.m12 - this.m02 * this.m10;
-		float f2 = this.m00 * this.m13 - this.m03 * this.m10;
-		float f3 = this.m01 * this.m12 - this.m02 * this.m11;
-		float f4 = this.m01 * this.m13 - this.m03 * this.m11;
-		float f5 = this.m02 * this.m13 - this.m03 * this.m12;
-		float f6 = this.m20 * this.m31 - this.m21 * this.m30;
-		float f7 = this.m20 * this.m32 - this.m22 * this.m30;
-		float f8 = this.m20 * this.m33 - this.m23 * this.m30;
-		float f9 = this.m21 * this.m32 - this.m22 * this.m31;
-		float f10 = this.m21 * this.m33 - this.m23 * this.m31;
-		float f11 = this.m22 * this.m33 - this.m23 * this.m32;
-		float f12 = this.m11 * f11 - this.m12 * f10 + this.m13 * f9;
-		float f13 = -this.m10 * f11 + this.m12 * f8 - this.m13 * f7;
-		float f14 = this.m10 * f10 - this.m11 * f8 + this.m13 * f6;
-		float f15 = -this.m10 * f9 + this.m11 * f7 - this.m12 * f6;
-		float f16 = -this.m01 * f11 + this.m02 * f10 - this.m03 * f9;
-		float f17 = this.m00 * f11 - this.m02 * f8 + this.m03 * f7;
-		float f18 = -this.m00 * f10 + this.m01 * f8 - this.m03 * f6;
-		float f19 = this.m00 * f9 - this.m01 * f7 + this.m02 * f6;
-		float f20 = this.m31 * f5 - this.m32 * f4 + this.m33 * f3;
-		float f21 = -this.m30 * f5 + this.m32 * f2 - this.m33 * f1;
-		float f22 = this.m30 * f4 - this.m31 * f2 + this.m33 * f;
-		float f23 = -this.m30 * f3 + this.m31 * f1 - this.m32 * f;
-		float f24 = -this.m21 * f5 + this.m22 * f4 - this.m23 * f3;
-		float f25 = this.m20 * f5 - this.m22 * f2 + this.m23 * f1;
-		float f26 = -this.m20 * f4 + this.m21 * f2 - this.m23 * f;
-		float f27 = this.m20 * f3 - this.m21 * f1 + this.m22 * f;
-		this.m00 = f12;
-		this.m10 = f13;
-		this.m20 = f14;
-		this.m30 = f15;
-		this.m01 = f16;
-		this.m11 = f17;
-		this.m21 = f18;
-		this.m31 = f19;
-		this.m02 = f20;
-		this.m12 = f21;
-		this.m22 = f22;
-		this.m32 = f23;
-		this.m03 = f24;
-		this.m13 = f25;
-		this.m23 = f26;
-		this.m33 = f27;
-		return f * f11 - f1 * f10 + f2 * f9 + f3 * f8 - f4 * f7 + f5 * f6;
-	}
-
-	public boolean invert() {
-		float f = this.adjugateAndDet();
-		if (Math.abs(f) > 1.0E-6F) {
-			this.mul(f);
-			return true;
-		} else {
-			return false;
-		}
+	public double[] toArrayD() {
+		double[] values = new double[16];
+		values[ 0] = m00;
+		values[ 1] = m01;
+		values[ 2] = m02;
+		values[ 3] = m03;
+		values[ 4] = m10;
+		values[ 5] = m11;
+		values[ 6] = m12;
+		values[ 7] = m13;
+		values[ 8] = m20;
+		values[ 9] = m21;
+		values[10] = m22;
+		values[11] = m23;
+		values[12] = m30;
+		values[13] = m31;
+		values[14] = m32;
+		values[15] = m33;
+		return values;
 	}
 
 	public static Mat4f perspective(float fov, float aspectRatio, float zNear, float zFar) {
@@ -374,5 +381,35 @@ public class Mat4f {
 		matrix4f.m32 = -1.0F;
 		matrix4f.m23 = 2.0F * zFar * zNear / (zNear - zFar);
 		return matrix4f;
+	}
+
+	public static <M> Mat4f map(M mat, BiConsumer<M, FloatBuffer> toBuf) {
+		BUF_FLOAT_16.clear();
+		toBuf.accept(mat, BUF_FLOAT_16);
+		BUF_FLOAT_16.rewind();
+		Mat4f ret = new Mat4f();
+		ret.load(BUF_FLOAT_16);
+		return ret;
+	}
+
+	public static <M1, M2> Mat4f map(M1 mat1, BiConsumer<M1, FloatBuffer> toBuf1, M2 mat2, BiConsumer<M2, FloatBuffer> toBuf2) {
+		Mat4f first = map(mat1, toBuf1);
+		Mat4f second = map(mat2, toBuf2);
+		first.mul(second);
+		return first;
+	}
+
+	public static <M> Mat4f map(M mat1, M mat2, BiConsumer<M, FloatBuffer> toBuf) {
+		Mat4f first = map(mat1, toBuf);
+		Mat4f second = map(mat2, toBuf);
+		first.mul(second);
+		return first;
+	}
+
+	public void multiplyNative(Consumer<FloatBuffer> func) {
+		BUF_FLOAT_16.clear();
+		store(BUF_FLOAT_16);
+		BUF_FLOAT_16.rewind();
+		func.accept(BUF_FLOAT_16);
 	}
 }

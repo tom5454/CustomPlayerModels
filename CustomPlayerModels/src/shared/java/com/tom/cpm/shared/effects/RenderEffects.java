@@ -17,6 +17,8 @@ public enum RenderEffects {
 	@Deprecated PLAYER_SCALE(EffectPlayerScale::new),
 	MODEL_SCALE(EffectModelScale::new),
 	SCALING(EffectScaling::new),
+	COPY_TRANSFORM(EffectCopyTransform::new),
+	FIRST_PERSON_HAND(EffectFirstPersonHandPos::new),
 	;
 	public static final RenderEffects[] VALUES = values();
 	private Supplier<IRenderEffect> factory;

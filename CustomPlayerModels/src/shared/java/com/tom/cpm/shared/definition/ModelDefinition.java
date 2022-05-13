@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.StringBuilderStream;
@@ -25,6 +26,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
 import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 import com.tom.cpm.shared.model.Cube;
+import com.tom.cpm.shared.model.PartPosition;
 import com.tom.cpm.shared.model.PartRoot;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
@@ -51,7 +53,7 @@ import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ModelDefinition {
 	private final ModelDefinitionLoader<?> loader;
-	private final Player<?, ?> playerObj;
+	private final Player<?> playerObj;
 	private List<IModelPart> parts;
 	private List<IResolvedModelPart> resolved;
 	private ModelPartPlayer player;
@@ -64,17 +66,18 @@ public class ModelDefinition {
 	private ModelLoadingState resolveState = ModelLoadingState.NEW;
 	private AnimationRegistry animations = new AnimationRegistry();
 	private ScaleData scale;
+	public PartPosition fpLeftHand, fpRightHand;
 	private boolean stitchedTexture;
 	public boolean hideHeadIfSkull = true, removeArmorOffset;
 	public ModelPartCloneable cloneable;
 	private Throwable error;
 
-	public ModelDefinition(ModelDefinitionLoader<?> loader, Player<?, ?> player) {
+	public ModelDefinition(ModelDefinitionLoader<?> loader, Player<?> player) {
 		this.loader = loader;
 		this.playerObj = player;
 	}
 
-	public ModelDefinition(Throwable e, Player<?, ?> player) {
+	public ModelDefinition(Throwable e, Player<?> player) {
 		this.loader = null;
 		this.playerObj = player;
 		setError(e);
@@ -93,7 +96,7 @@ public class ModelDefinition {
 
 	public void startResolve() {
 		resolveState = ModelLoadingState.RESOLVING;
-		ModelDefinitionLoader.THREAD_POOL.submit(() -> {
+		ModelDefinitionLoader.THREAD_POOL.execute(() -> {
 			try {
 				resolveAll();
 			} catch (SafetyException e) {
@@ -299,7 +302,7 @@ public class ModelDefinition {
 		return animations;
 	}
 
-	public Player<?, ?> getPlayerObj() {
+	public Player<?> getPlayerObj() {
 		return playerObj;
 	}
 
@@ -468,7 +471,8 @@ public class ModelDefinition {
 		cleanup();
 		resolveState = ModelLoadingState.ERRORRED;
 		error = ex;
-		Log.error("Failed to load model", ex);
+		if(!(ex instanceof IOException))
+			Log.error("Failed to load model", ex);
 		clear();
 	}
 
@@ -480,15 +484,19 @@ public class ModelDefinition {
 		return removeArmorOffset;
 	}
 
-	public Vec3f getRenderPosition() {
-		return scale != null ? scale.getRPos() : new Vec3f();
-	}
-
-	public Vec3f getRenderRotation() {
-		return scale != null ? scale.getRRotation() : new Vec3f();
-	}
-
-	public Vec3f getRenderScale() {
-		return scale != null ? scale.getRScale() : new Vec3f();
+	public FormatText getStatus() {
+		switch (getResolveState()) {
+		case ERRORRED:
+			return new FormatText("label.cpm.errorLoadingModel", getError().toString());
+		case NEW:
+		case RESOLVING:
+			return new FormatText("label.cpm.loading");
+		case SAFETY_BLOCKED:
+			return new FormatText("label.cpm.safetyBlocked");
+		case LOADED:
+		case CLEANED_UP:
+		default:
+			return null;
+		}
 	}
 }

@@ -10,7 +10,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.SkullTileEntityRenderer;
@@ -19,6 +18,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -26,10 +26,10 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Mat4f;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
-import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
@@ -87,33 +87,12 @@ public class Panel3dImpl extends Panel3dNative {
 
 	@Override
 	public RenderTypes<RenderMode> getRenderTypes() {
-		return getRenderTypes(DynTexture.getBoundLoc());
+		return getRenderTypes0(DynTexture.getBoundLoc());
 	}
 
 	@Override
 	public RenderTypes<RenderMode> getRenderTypes(String texture) {
-		return getRenderTypes(new ResourceLocation("cpm", "textures/gui/" + texture + ".png"));
-	}
-
-	public RenderTypes<RenderMode> getRenderTypes(ResourceLocation rl) {
-		RenderTypes<RenderMode> renderTypes = new RenderTypes<>(RenderMode.class);
-		renderTypes.put(RenderMode.NORMAL, new NativeRenderType(0));
-		renderTypes.put(RenderMode.DEFAULT, new NativeRenderType(RenderType.entityTranslucent(rl), 0));
-		renderTypes.put(RenderMode.PAINT, new NativeRenderType(CustomRenderTypes.getEntityTranslucentCullNoLight(rl), 0));
-		renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderType.eyes(rl), 1));
-		renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(CustomRenderTypes.getLinesNoDepth(), 2));
-		renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
-		renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(CustomRenderTypes.getEntityColorEyes(), 1));
-		return renderTypes;
-	}
-
-	@Override
-	public int getColorUnderMouse() {
-		FloatBuffer buffer = BufferUtils.createFloatBuffer(3);
-		GL11.glReadPixels((int) mc.mouseHandler.xpos(), mc.getWindow().getHeight() - (int) mc.mouseHandler.ypos(), 1, 1, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
-		int colorUnderMouse = (((int)(buffer.get(0) * 255)) << 16) | (((int)(buffer.get(1) * 255)) << 8) | ((int)(buffer.get(2) * 255));
-		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-		return colorUnderMouse;
+		return getRenderTypes0(new ResourceLocation("cpm", "textures/gui/" + texture + ".png"));
 	}
 
 	@Override
@@ -193,5 +172,15 @@ public class Panel3dImpl extends Panel3dNative {
 			mc.getItemRenderer().renderStatic(null, itemstack, view, flag, matrixstack, mc.renderBuffers().bufferSource(), null, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY);
 			matrixstack.popPose();
 		}
+	}
+
+	@Override
+	public Mat4f getView() {
+		return Mat4f.map(GL11.GL_MODELVIEW_MATRIX, GL11::glGetFloatv, matrixstack.last().pose(), Matrix4f::store);
+	}
+
+	@Override
+	public Mat4f getProjection() {
+		return Mat4f.map(GL11.GL_PROJECTION_MATRIX, GL11::glGetFloatv);
 	}
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import com.tom.cpm.shared.editor.project.JsonMap;
 
 public class Vec3f {
+	public static final Vec3f ZERO = new Vec3f(0.0F, 0.0F, 0.0F);
 	public static final Vec3f NEGATIVE_X = new Vec3f(-1.0F, 0.0F, 0.0F);
 	public static final Vec3f POSITIVE_X = new Vec3f(1.0F, 0.0F, 0.0F);
 	public static final Vec3f NEGATIVE_Y = new Vec3f(0.0F, -1.0F, 0.0F);
@@ -28,6 +29,12 @@ public class Vec3f {
 		x = v.x;
 		y = v.y;
 		z = v.z;
+	}
+
+	public Vec3f(Vec2f v, float z) {
+		x = v.x;
+		y = v.y;
+		this.z = z;
 	}
 
 	public Vec3f(JsonMap m, Vec3f def) {
@@ -134,5 +141,12 @@ public class Vec3f {
 		this.x = matrixIn.m00 * f + matrixIn.m01 * f1 + matrixIn.m02 * f2;
 		this.y = matrixIn.m10 * f + matrixIn.m11 * f1 + matrixIn.m12 * f2;
 		this.z = matrixIn.m20 * f + matrixIn.m21 * f1 + matrixIn.m22 * f2;
+	}
+
+	public void normalize() {
+		float invLength = 1.0f / MathHelper.sqrt(x * x + y * y + z * z);
+		x *= invLength;
+		y *= invLength;
+		z *= invLength;
 	}
 }

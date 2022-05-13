@@ -1,5 +1,8 @@
 package com.tom.cpl.gui;
 
+import java.io.File;
+import java.util.List;
+
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.Label;
@@ -129,8 +132,20 @@ public abstract class Frame extends Panel {
 						guiElement.draw(event.offset(bounds).cancelled(), partialTicks);
 				}
 			}
+			elements.removeIf(e -> e instanceof PopupLayer && ((PopupLayer)e).handleClosing());
 			gui.popMatrix();
 			gui.setupCut();
+		}
+
+		public void filesDropped(List<File> files) {
+			GuiElement top = null;
+			for (GuiElement guiElement : elements) {
+				if(guiElement.isVisible()) {
+					top = guiElement;
+				}
+			}
+			if(top != null && top instanceof PopupLayer)
+				((PopupLayer)top).filesDropped(files);
 		}
 	}
 
@@ -138,6 +153,7 @@ public abstract class Frame extends Panel {
 		private Button close;
 		private PopupPanel popup;
 		private Label title;
+		private boolean closing, rendering;
 
 		public PopupLayer(PopupPanel panel) {
 			super(Frame.this.gui);
@@ -167,8 +183,13 @@ public abstract class Frame extends Panel {
 			}
 		}
 
+		public void filesDropped(List<File> files) {
+			popup.filesDropped(files);
+		}
+
 		@Override
 		public void draw(MouseEvent event, float partialTicks) {
+			rendering = true;
 			gui.pushMatrix();
 			gui.setPosOffset(bounds);
 			gui.setupCut();
@@ -180,6 +201,7 @@ public abstract class Frame extends Panel {
 			}
 			gui.popMatrix();
 			gui.setupCut();
+			rendering = false;
 		}
 
 		@Override
@@ -217,8 +239,19 @@ public abstract class Frame extends Panel {
 		}
 
 		public void close() {
-			Frame.this.popup.remove(this);
-			popup.onClosed();
+			if(rendering)closing = true;
+			else {
+				Frame.this.popup.remove(this);
+				popup.onClosed();
+			}
+		}
+
+		public boolean handleClosing() {
+			if(closing) {
+				popup.onClosed();
+				return true;
+			}
+			return false;
 		}
 	}
 
@@ -234,5 +267,9 @@ public abstract class Frame extends Panel {
 
 	public boolean enableChat() {
 		return false;
+	}
+
+	public void filesDropped(List<File> files) {
+		popup.filesDropped(files);
 	}
 }

@@ -11,8 +11,10 @@ import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.DirectBuffer;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpl.render.VertexBuffer;
+import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.shared.retro.RetroGLAccess;
 
-public class RetroGL {
+public class RetroGL implements RetroGLAccess<ResourceLocation> {
 	public static final RetroTessellator tessellator = new RetroTessellator(Tessellator.instance);
 	public static int renderCallLoc;
 	public static final int HURT_OVERLAY_LOC = 3;
@@ -31,7 +33,8 @@ public class RetroGL {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}, GL11.GL_QUADS);
 
-	public static RenderStage texture(ResourceLocation tex) {
+	@Override
+	public RenderStage texture(ResourceLocation tex) {
 		return new RenderStage(true, true, true, () -> {
 			bindTex(tex);
 		}, () -> {
@@ -40,7 +43,8 @@ public class RetroGL {
 
 	private static float lx, ly;
 
-	public static RenderStage eyes(ResourceLocation tex) {
+	@Override
+	public RenderStage eyes(ResourceLocation tex) {
 		return new RenderStage(true, true, true, () -> {
 			if(renderCallLoc == RetroGL.HURT_OVERLAY_LOC)return;
 			lx = OpenGlHelper.lastBrightnessX;
@@ -62,21 +66,14 @@ public class RetroGL {
 		}, GL11.GL_QUADS);
 	}
 
-	public static RenderStage linesNoDepth() {
+	@Override
+	public RenderStage linesNoDepth() {
 		return lines;
 	}
 
-	public static RenderStage color() {
+	@Override
+	public RenderStage color() {
 		return color;
-	}
-
-	public static RenderStage paint(ResourceLocation tex) {
-		return new RenderStage(true, true, true, () -> {
-			GL11.glDisable(GL11.GL_LIGHTING);
-			bindTex(tex);
-		}, () -> {
-			GL11.glEnable(GL11.GL_LIGHTING);
-		}, GL11.GL_QUADS);
 	}
 
 	private static void bindTex(ResourceLocation tex) {
@@ -89,7 +86,7 @@ public class RetroGL {
 		return new RetroBuffer(tessellator, stage);
 	}
 
-	private static class RenderStage {
+	private static class RenderStage implements RetroLayer {
 		private boolean color, texture, normal;
 		private Runnable begin, end;
 		private int glMode;
@@ -194,5 +191,10 @@ public class RetroGL {
 		blue = b;
 		alpha = a;
 		GL11.glColor4f(r, g, b, a);
+	}
+
+	@Override
+	public ResourceLocation getDynTexture() {
+		return DynTexture.getBoundLoc();
 	}
 }

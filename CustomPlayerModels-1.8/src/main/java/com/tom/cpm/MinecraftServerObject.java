@@ -4,7 +4,7 @@ import java.io.File;
 
 import net.minecraft.server.MinecraftServer;
 
-import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftServerAccess;
 import com.tom.cpm.shared.network.NetHandler;
@@ -15,7 +15,7 @@ public class MinecraftServerObject implements MinecraftServerAccess {
 
 	public MinecraftServerObject(MinecraftServer server) {
 		this.server = server;
-		cfg = new ModConfigFile(new File(server.getEntityWorld().getSaveHandler().getWorldDirectory(), "data/cpm.json"));
+		cfg = ModConfigFile.createServer(new File(server.getEntityWorld().getSaveHandler().getWorldDirectory(), "data/cpm.json"));
 	}
 
 	@Override

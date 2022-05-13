@@ -7,12 +7,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;
+import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -23,7 +23,11 @@ import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(BipedArmorLayer.class)
-public class BipedArmorLayerMixin {
+public abstract class BipedArmorLayerMixin extends LayerRenderer<LivingEntity, BipedModel<LivingEntity>> {
+
+	public BipedArmorLayerMixin(IEntityRenderer<LivingEntity, BipedModel<LivingEntity>> p_i50926_1_) {
+		super(p_i50926_1_);
+	}
 
 	private @Final @Shadow BipedModel<LivingEntity> innerModel;
 	private @Final @Shadow BipedModel<LivingEntity> outerModel;
@@ -32,19 +36,15 @@ public class BipedArmorLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void preRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity) {
-			ClientProxy.INSTANCE.renderArmor(outerModel, innerModel, (PlayerEntity) entitylivingbaseIn, bufferIn);
-		}
+		ClientProxy.INSTANCE.renderArmor(outerModel, innerModel, getParentModel());
 	}
 
 	@Inject(at = @At("RETURN"),
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void postRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity) {
-			ClientProxy.INSTANCE.manager.unbind(outerModel);
-			ClientProxy.INSTANCE.manager.unbind(innerModel);
-		}
+		ClientProxy.INSTANCE.manager.unbind(outerModel);
+		ClientProxy.INSTANCE.manager.unbind(innerModel);
 	}
 
 	@Inject(at = @At("HEAD"),

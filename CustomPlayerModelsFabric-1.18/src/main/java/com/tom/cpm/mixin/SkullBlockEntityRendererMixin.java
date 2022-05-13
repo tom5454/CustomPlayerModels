@@ -64,7 +64,7 @@ public abstract class SkullBlockEntityRendererMixin {
 		RefHolder.CPM_MODELS = null;
 		ModelTexture mt = new ModelTexture(resLoc);
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
-		return mt.getRenderLayer();
+		return mt.getRenderType();
 	}
 
 	@Redirect(at = @At(
@@ -80,7 +80,7 @@ public abstract class SkullBlockEntityRendererMixin {
 		RefHolder.CPM_MODELS = null;
 		ModelTexture mt = new ModelTexture(resLoc);
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
-		return mt.getRenderLayer();
+		return mt.getRenderType();
 	}
 
 	@Inject(at = @At("RETURN"),

@@ -50,6 +50,7 @@ import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey.KeyGroup;
 import com.tom.cpm.shared.config.SocialConfig;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.ScaleData;
@@ -80,8 +81,8 @@ public class NetHandler<RL, P, NET> {
 	public static final FormatText FORCED_CHAT_MSG = new FormatText("chat.cpm.skinForced");
 
 	protected Function<P, UUID> getPlayerUUID;
-	protected TriConsumer<NET, RL, byte[]> sendPacket;
-	protected TriConsumer<P, RL, byte[]> sendToAllTracking;
+	private TriConsumer<NET, RL, byte[]> sendPacket;
+	private TriConsumer<P, RL, byte[]> sendToAllTracking;
 	protected IntFunction<P> getPlayerById;
 	protected BiConsumer<P, IText> sendChat;
 	protected BiConsumer<P, Consumer<P>> findTracking;
@@ -143,7 +144,7 @@ public class NetHandler<RL, P, NET> {
 			}
 
 			pb.writeNBT(data);
-			sendPacket.accept(getNet.apply(player), helloPacket, pb.toBytes());
+			sendPacketTo(getNet.apply(player), helloPacket, pb.toBytes());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -175,9 +176,9 @@ public class NetHandler<RL, P, NET> {
 					findTracking.accept(pl, p -> sendPlayerData(p, pl));
 					PlayerData pd = net.cpm$getEncodedModelData();
 					if(pd.canChangeModel()) {
-						sendPacket.accept(from, getSkin, new byte[0]);
+						sendPacketTo(from, getSkin, new byte[] {0});
 					} else {
-						sendPacket.accept(from, setSkin, writeSkinData(pd, pl));
+						sendPacketTo(from, setSkin, writeSkinData(pd, pl));
 					}
 					if(ModConfig.getWorldConfig().getBoolean(ConfigKeys.RECOMMEND_SAFETY_SETTINGS, false)) {
 						sendSafetySettings(from);
@@ -190,7 +191,7 @@ public class NetHandler<RL, P, NET> {
 					NBTTagCompound tag = pb.readNBT();
 					executor.apply(from).execute(() -> {
 						pd.setModel(tag.hasKey(DATA_TAG) ? tag.getByteArray(DATA_TAG) : null, false, false);
-						sendToAllTracking.accept(pl, setSkin, writeSkinData(pd, pl));
+						sendPacketToTracking(pl, setSkin, writeSkinData(pd, pl));
 						pd.save(getID(pl));
 					});
 				} else {
@@ -206,7 +207,7 @@ public class NetHandler<RL, P, NET> {
 						float newV = tag.getFloat(e.getKey().getNetKey());
 						Pair<Float, Float> l = getScalingLimits(e.getKey(), getID(pl));
 						newV = newV == 0 || l == null ? 1F : MathHelper.clamp(newV, l.getKey(), l.getValue());
-						Log.info("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
+						Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
 						if(newV != oldV) {
 							e.getValue().accept(pl, newV);
 							pd.scale.put(e.getKey(), newV);
@@ -226,7 +227,7 @@ public class NetHandler<RL, P, NET> {
 				}
 			}
 		} catch (Throwable e) {
-			Log.error("Exception while processing cpm packet", e);
+			Log.error("Exception while processing cpm packet: " + key, e);
 		}
 	}
 
@@ -248,7 +249,7 @@ public class NetHandler<RL, P, NET> {
 			try {
 				IOHelper pb = new IOHelper();
 				pb.writeNBT(tag);
-				sendPacket.accept(to, recommendSafety, pb.toBytes());
+				sendPacketTo(to, recommendSafety, pb.toBytes());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -291,7 +292,7 @@ public class NetHandler<RL, P, NET> {
 					}
 					net.cpm$setHasMod(true);
 					MinecraftClientAccess.get().getDefinitionLoader().clearServerData();
-					sendPacket.accept(from, helloPacket, new byte[0]);
+					sendPacketTo(from, helloPacket, new byte[] {0});
 					MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setServerScaling(scalingMap);
 				});
 			} else if(net.cpm$hasMod()) {
@@ -374,14 +375,14 @@ public class NetHandler<RL, P, NET> {
 					executor.apply(from).execute(() -> {
 						P player = getPlayerById.apply(plid);
 						if(player != null) {
-							Player<?, ?> pl = MinecraftClientAccess.get().getDefinitionLoader().loadPlayer(playerToLoader.apply(player), null);
+							Player<?> pl = MinecraftClientAccess.get().getDefinitionLoader().loadPlayer(playerToLoader.apply(player), ModelDefinitionLoader.PLAYER_UNIQUE);
 							pl.animState.receiveEvent(tag, pl.isClientPlayer());
 						}
 					});
 				}
 			}
 		} catch (Throwable e) {
-			Log.error("Exception while processing cpm packet", e);
+			Log.error("Exception while processing cpm packet: " + key, e);
 		}
 	}
 
@@ -410,7 +411,7 @@ public class NetHandler<RL, P, NET> {
 				data.setByteArray(DATA_TAG, file.getDataBlock());
 				pb.writeNBT(data);
 				file.registerLocalCache(MinecraftClientAccess.get().getDefinitionLoader());
-				sendPacket.accept(pl, setSkin, pb.toBytes());
+				sendPacketTo(pl, setSkin, pb.toBytes());
 			} catch (IOException e) {
 			}
 		} else {
@@ -418,7 +419,7 @@ public class NetHandler<RL, P, NET> {
 				IOHelper pb = new IOHelper();
 				NBTTagCompound data = new NBTTagCompound();
 				pb.writeNBT(data);
-				sendPacket.accept(pl, setSkin, pb.toBytes());
+				sendPacketTo(pl, setSkin, pb.toBytes());
 			} catch (IOException e) {
 			}
 		}
@@ -427,7 +428,7 @@ public class NetHandler<RL, P, NET> {
 	public void sendPlayerData(P target, P to) {
 		PlayerData dt = getSNetH(target).cpm$getEncodedModelData();
 		if(dt == null)return;
-		sendPacket.accept(getNet.apply(to), setSkin, writeSkinData(dt, target));
+		sendPacketTo(getNet.apply(to), setSkin, writeSkinData(dt, target));
 	}
 
 	private byte[] writeSkinData(PlayerData dt, P target) {
@@ -450,9 +451,9 @@ public class NetHandler<RL, P, NET> {
 		PlayerData pd = getSNetH(pl).cpm$getEncodedModelData();
 		pd.setModel(skin, force, save);
 		if(skin == null) {
-			sendPacket.accept(getNet.apply(pl), getSkin, new byte[0]);
+			sendPacketTo(getNet.apply(pl), getSkin, new byte[] {0});
 		}
-		sendToAllTracking.accept(pl, setSkin, writeSkinData(pd, pl));
+		sendPacketToTracking(pl, setSkin, writeSkinData(pd, pl));
 		pd.save(getID(pl));
 	}
 
@@ -468,7 +469,7 @@ public class NetHandler<RL, P, NET> {
 				}
 				IOHelper pb = new IOHelper();
 				pb.writeNBT(nbt);
-				sendPacket.accept(getClientNet(), setScale, pb.toBytes());
+				sendPacketToServer(setScale, pb.toBytes());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -505,7 +506,7 @@ public class NetHandler<RL, P, NET> {
 					try {
 						h.writeVarInt(getPlayerId.applyAsInt(p));
 						h.writeNBT(evt);
-						sendToAllTracking.accept(p, receiveEvent, h.toBytes());
+						sendPacketToTracking(p, receiveEvent, h.toBytes());
 					} catch (IOException e) {
 					}
 				}
@@ -534,7 +535,7 @@ public class NetHandler<RL, P, NET> {
 			IOHelper h = new IOHelper();
 			try {
 				h.writeNBT(tag);
-				sendPacket.accept(getClientNet(), subEvent, h.toBytes());
+				sendPacketToServer(subEvent, h.toBytes());
 			} catch (IOException e) {
 			}
 		}
@@ -550,10 +551,24 @@ public class NetHandler<RL, P, NET> {
 			try {
 				h.writeVarInt(getPlayerId.applyAsInt(p));
 				h.writeNBT(evt);
-				sendToAllTracking.accept(p, receiveEvent, h.toBytes());
+				sendPacketToTracking(p, receiveEvent, h.toBytes());
 			} catch (IOException e) {
 			}
 		}
+	}
+
+	protected void sendPacketTo(NET net, RL rl, byte[] dt) {
+		if(dt.length == 0)new Throwable("Empty packet sending: " + rl).printStackTrace();
+		sendPacket.accept(net, rl, dt);
+	}
+
+	protected void sendPacketToServer(RL rl, byte[] dt) {
+		sendPacketTo(getClientNet(), rl, dt);
+	}
+
+	protected void sendPacketToTracking(P p, RL rl, byte[] dt) {
+		if(dt.length == 0)new Throwable("Empty packet sending: " + rl).printStackTrace();
+		sendToAllTracking.accept(p, rl, dt);
 	}
 
 	public String getID(P pl) {
@@ -583,6 +598,11 @@ public class NetHandler<RL, P, NET> {
 	public <PB> void setSendPacket(Function<byte[], PB> wrapper, TriConsumer<NET, RL, PB> sendPacket, TriConsumer<P, RL, PB> sendToAllTracking) {
 		this.sendPacket = (a, b, c) -> sendPacket.accept(a, b, wrapper.apply(c));
 		this.sendToAllTracking = (a, b, c) -> sendToAllTracking.accept(a, b, wrapper.apply(c));
+	}
+
+	public <PB, PCK> void setSendPacket(Function<byte[], PB> wrapper, BiFunction<RL, PB, PCK> makePacket, BiConsumer<NET, PCK> sendPacket, BiConsumer<P, Consumer<NET>> forEachTracking) {
+		this.sendPacket = (a, b, c) -> sendPacket.accept(a, makePacket.apply(b, wrapper.apply(c)));
+		this.sendToAllTracking = (a, b, c) -> forEachTracking.accept(a, n -> sendPacket.accept(n, makePacket.apply(b, wrapper.apply(c))));
 	}
 
 	public void setSendPacket(TriConsumer<NET, RL, byte[]> sendPacket, TriConsumer<P, RL, byte[]> sendToAllTracking) {

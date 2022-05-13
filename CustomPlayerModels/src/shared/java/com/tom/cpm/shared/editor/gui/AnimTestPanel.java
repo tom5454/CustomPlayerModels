@@ -106,6 +106,7 @@ public class AnimTestPanel extends Panel {
 		slots.get(Slot.RIGHT_HAND).stream().filter(i -> i.getElem() != null).forEach(handItems::add);
 		handItems.add(new NamedElement<>(VanillaPose.PUNCH_LEFT, this::poseToString));
 		handItems.add(new NamedElement<>(VanillaPose.PUNCH_RIGHT, this::poseToString));
+		handItems.add(new NamedElement<>(VanillaPose.SPEAKING, this::poseToString));
 		handItems.sort(Comparator.comparing(NamedElement::toString));
 		mainPose = createDropDown("label.cpm.animSlot.heldItem", handItems);
 		mainPose.dropDown.setAction(() -> {
@@ -155,6 +156,16 @@ public class AnimTestPanel extends Panel {
 			DropDownPanel<VanillaPose> dropDown = createDropDown("label.cpm.animSlot." + key.name().toLowerCase(), val);
 			poseBoxes.add(dropDown);
 		}
+
+		List<NamedElement<VanillaPose>> val = new ArrayList<>();
+		val.add(new NamedElement<>(null, k -> gui.i18nFormat("label.cpm.animSlot.noEffect")));
+		for (VanillaPose p : VanillaPose.VALUES) {
+			AnimationDisplayData d = AnimationDisplayData.getFor(p);
+			if(d == null || d.layerSlot != null || d.type != Type.LAYERS || p.hasStateGetter())continue;
+			val.add(new NamedElement<>(p, this::poseToString));
+		}
+		DropDownPanel<VanillaPose> dropDown = createDropDown("label.cpm.animSlot.effects", val);
+		poseBoxes.add(dropDown);
 
 		chbxLeftParrot = new Checkbox(gui, gui.i18nFormat("label.cpm.animSlot.leftParrot"));
 		chbxLeftParrot.setBounds(new Box(5, 0, 160, 20));

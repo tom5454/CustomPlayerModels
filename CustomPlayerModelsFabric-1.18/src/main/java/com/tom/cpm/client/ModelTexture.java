@@ -7,7 +7,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 
-public class ModelTexture {
+import com.tom.cpl.render.RenderTypeBuilder.TextureHandler;
+
+public class ModelTexture implements TextureHandler<Identifier, RenderLayer> {
 	private CallbackInfoReturnable<Identifier> texture;
 	private Function<Identifier, RenderLayer> RenderLayer;
 
@@ -37,6 +39,7 @@ public class ModelTexture {
 		this(tex, PlayerRenderManager.entity);
 	}
 
+	@Override
 	public Identifier getTexture() {
 		return texture.getReturnValue();
 	}
@@ -45,7 +48,8 @@ public class ModelTexture {
 		this.texture.setReturnValue(texture);
 	}
 
-	public RenderLayer getRenderLayer() {
+	@Override
+	public RenderLayer getRenderType() {
 		return RenderLayer.apply(getTexture());
 	}
 }

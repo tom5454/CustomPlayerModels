@@ -7,7 +7,6 @@ public enum RenderMode {
 	COLOR,
 	COLOR_GLOW,
 	DEFAULT,
-	PAINT,
 	;
 
 	public RenderMode glow() {

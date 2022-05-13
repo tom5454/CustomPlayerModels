@@ -15,18 +15,31 @@ public enum InterpolatorChannel {
 	COLOR_R(6),
 	COLOR_G(7),
 	COLOR_B(8),
+	SCALE_X(9, 1),
+	SCALE_Y(10, 1),
+	SCALE_Z(11, 1),
 	;
 	public static final InterpolatorChannel[] VALUES = values();
 	private final Supplier<DoubleUnaryOperator> interpolatorSetupFactory;
 	private final int id;
+	public final int defaultValue;
 
 	private InterpolatorChannel(int id) {
-		this(() -> a -> a, id);
+		this(id, 0);
+	}
+
+	private InterpolatorChannel(int id, int defVal) {
+		this(() -> a -> a, id, defVal);
 	}
 
 	private InterpolatorChannel(Supplier<DoubleUnaryOperator> interpolatorSetupFactory, int id) {
+		this(interpolatorSetupFactory, id, 0);
+	}
+
+	private InterpolatorChannel(Supplier<DoubleUnaryOperator> interpolatorSetupFactory, int id, int defVal) {
 		this.interpolatorSetupFactory = interpolatorSetupFactory;
 		this.id = id;
+		this.defaultValue = defVal;
 	}
 
 	public DoubleUnaryOperator createInterpolatorSetup() {

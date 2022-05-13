@@ -9,6 +9,8 @@ import net.minecraft.client.gui.screen.CustomizeSkinScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.ElytraModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -25,6 +27,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -44,9 +47,9 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import com.google.common.collect.Iterables;
-
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -84,11 +87,7 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerEntity::getGameProfile);
-		manager.setGetSkullModel(profile -> {
-			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
-			if(property != null)return property.getValue();
-			return null;
-		});
+		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setExecutor(() -> minecraft);
 		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new CCustomPayloadPacket(rl, pb)), null);
@@ -106,14 +105,21 @@ public class ClientProxy extends CommonProxy {
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, scr) -> new GuiImpl(SettingsGui::new, scr));
 	}
 
+	@Override
+	public void apiInit() {
+		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class).
+		renderApi(Model.class, ResourceLocation.class, RenderType.class, IRenderTypeBuffer.class, GameProfile.class, ModelTexture::new).
+		localModelApi(GameProfile::new).init();
+	}
+
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		manager.bindPlayer(event.getPlayer(), event.getBuffers());
+		manager.bindPlayer(event.getPlayer(), event.getBuffers(), event.getRenderer().getModel());
 	}
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		manager.unbindClear();
+		manager.unbindClear(event.getRenderer().getModel());
 	}
 
 	@SubscribeEvent
@@ -124,22 +130,22 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	public void renderHand(IRenderTypeBuffer buffer) {
-		manager.bindHand(Minecraft.getInstance().player, buffer);
+	public void renderHand(IRenderTypeBuffer buffer, PlayerModel model) {
+		manager.bindHand(Minecraft.getInstance().player, buffer, model);
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, IRenderTypeBuffer buffer) {
 		manager.bindSkull(profile, buffer, skullModel);
 	}
 
-	public void renderElytra(PlayerEntity player, IRenderTypeBuffer buffer, ElytraModel<LivingEntity> model) {
-		manager.bindElytra(player, buffer, model);
+	public void renderElytra(BipedModel<LivingEntity> player, ElytraModel<LivingEntity> model) {
+		manager.bindElytra(player, model);
 	}
 
 	public void renderArmor(BipedModel<LivingEntity> modelArmor, BipedModel<LivingEntity> modelLeggings,
-			PlayerEntity player, IRenderTypeBuffer bufferIn) {
-		manager.bindArmor(player, bufferIn, modelArmor, 1);
-		manager.bindArmor(player, bufferIn, modelLeggings, 2);
+			BipedModel<LivingEntity> player) {
+		manager.bindArmor(player, modelArmor, 1);
+		manager.bindArmor(player, modelLeggings, 2);
 	}
 
 	@SubscribeEvent
@@ -268,5 +274,24 @@ public class ClientProxy extends CommonProxy {
 		model.cloak.zRot = 0;
 		model.renderCloak(matrixStackIn, buffer, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
+	}
+
+	public static interface PlayerNameTagRenderer<E extends Entity> {
+		void cpm$renderNameTag(E entityIn, ITextComponent displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn);
+		EntityRendererManager cpm$entityRenderDispatcher();
+	}
+
+	public static <E extends Entity> void renderNameTag(PlayerNameTagRenderer<E> r, E entityIn, GameProfile gprofile, String unique, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
+		double d0 = r.cpm$entityRenderDispatcher().distanceToSqr(entityIn);
+		if (d0 < 32*32) {
+			FormatText st = INSTANCE.manager.getStatus(gprofile, unique);
+			if(st != null) {
+				matrixStackIn.pushPose();
+				matrixStackIn.translate(0.0D, 1.3F, 0.0D);
+				matrixStackIn.scale(0.5f, 0.5f, 0.5f);
+				r.cpm$renderNameTag(entityIn, st.remap(), matrixStackIn, bufferIn, packedLightIn);
+				matrixStackIn.popPose();
+			}
+		}
 	}
 }

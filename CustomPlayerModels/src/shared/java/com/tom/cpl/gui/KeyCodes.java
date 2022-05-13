@@ -1,5 +1,8 @@
 package com.tom.cpl.gui;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class KeyCodes {
 	/** Printable keys. */
 	public int
@@ -127,4 +130,69 @@ public abstract class KeyCodes {
 	KEY_RIGHT_SUPER   ,
 	KEY_MENU          ,
 	KEY_LAST          ;
+
+	private Map<Integer, String> keyNames;
+
+	public String keyToString(IGui gui, int key) {
+		if(keyNames == null)initKeyNames();
+		String k = keyNames.get(key);
+		return k == null ? "key: " + key : gui.i18nFormat(k);
+	}
+
+	private void initKeyNames() {
+		keyNames = new HashMap<>();
+
+		keyNames.put(KEY_F1, "label.cpm.key.f1");
+		keyNames.put(KEY_F2, "label.cpm.key.f2");
+		keyNames.put(KEY_F3, "label.cpm.key.f3");
+		keyNames.put(KEY_F4, "label.cpm.key.f4");
+		keyNames.put(KEY_F5, "label.cpm.key.f5");
+		keyNames.put(KEY_F6, "label.cpm.key.f6");
+		keyNames.put(KEY_F7, "label.cpm.key.f7");
+		keyNames.put(KEY_F8, "label.cpm.key.f8");
+		keyNames.put(KEY_F9, "label.cpm.key.f9");
+		keyNames.put(KEY_F10, "label.cpm.key.f10");
+		keyNames.put(KEY_F11, "label.cpm.key.f11");
+		keyNames.put(KEY_F12, "label.cpm.key.f12");
+		keyNames.put(KEY_F13, "label.cpm.key.f13");
+		keyNames.put(KEY_F14, "label.cpm.key.f14");
+		keyNames.put(KEY_F15, "label.cpm.key.f15");
+		keyNames.put(KEY_F16, "label.cpm.key.f16");
+		keyNames.put(KEY_F17, "label.cpm.key.f17");
+		keyNames.put(KEY_F18, "label.cpm.key.f18");
+		keyNames.put(KEY_F19, "label.cpm.key.f19");
+		keyNames.put(KEY_F20, "label.cpm.key.f20");
+		keyNames.put(KEY_F21, "label.cpm.key.f21");
+		keyNames.put(KEY_F22, "label.cpm.key.f22");
+		keyNames.put(KEY_F23, "label.cpm.key.f23");
+		keyNames.put(KEY_F24, "label.cpm.key.f24");
+		keyNames.put(KEY_F25, "label.cpm.key.f25");
+		keyNames.put(KEY_ENTER, "label.cpm.key.enter");
+		keyNames.put(KEY_KP_ENTER, "label.cpm.key.keypad.enter");
+		keyNames.put(KEY_SPACE, "label.cpm.key.space");
+		keyNames.put(KEY_TAB, "label.cpm.key.tab");
+		keyNames.put(KEY_LEFT_ALT, "label.cpm.key.left.alt");
+		keyNames.put(KEY_LEFT_CONTROL, "label.cpm.key.left.control");
+		keyNames.put(KEY_LEFT_SHIFT, "label.cpm.key.left.shift");
+		keyNames.put(KEY_RIGHT_ALT, "label.cpm.key.right.alt");
+		keyNames.put(KEY_RIGHT_CONTROL, "label.cpm.key.right.control");
+		keyNames.put(KEY_RIGHT_SHIFT, "label.cpm.key.right.shift");
+		keyNames.put(KEY_DOWN, "label.cpm.key.down");
+		keyNames.put(KEY_LEFT, "label.cpm.key.left");
+		keyNames.put(KEY_RIGHT, "label.cpm.key.right");
+		keyNames.put(KEY_UP, "label.cpm.key.up");
+		keyNames.put(KEY_BACKSPACE, "label.cpm.key.backspace");
+		keyNames.put(KEY_DELETE, "label.cpm.key.delete");
+		keyNames.put(KEY_END, "label.cpm.key.end");
+		keyNames.put(KEY_HOME, "label.cpm.key.home");
+		keyNames.put(KEY_INSERT, "label.cpm.key.insert");
+		keyNames.put(KEY_PAGE_DOWN, "label.cpm.key.page.down");
+		keyNames.put(KEY_PAGE_UP, "label.cpm.key.page.up");
+		keyNames.put(KEY_CAPS_LOCK, "label.cpm.key.caps.lock");
+		keyNames.put(KEY_PAUSE, "label.cpm.key.pause");
+		keyNames.put(KEY_SCROLL_LOCK, "label.cpm.key.scroll.lock");
+		keyNames.put(KEY_MENU, "label.cpm.key.menu");
+		keyNames.put(KEY_PRINT_SCREEN, "label.cpm.key.print.screen");
+		keyNames.put(KEY_NUM_LOCK, "label.cpm.key.num.lock");
+	}
 }

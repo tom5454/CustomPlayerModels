@@ -2,7 +2,7 @@ name: CustomizablePlayerModels
 version: 1.0
 description: Customizable Player Models server-side plugin.
 author: tom5454
-website: ...
+website: https://github.com/tom5454/CustomPlayerModels
 main: com.tom.cpm.bukkit.CPMBukkitPlugin
 api-version: "1.13"
 commands:

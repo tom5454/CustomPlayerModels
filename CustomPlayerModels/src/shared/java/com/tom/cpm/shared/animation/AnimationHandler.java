@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.animation;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -37,7 +38,7 @@ public class AnimationHandler {
 			}
 		}
 		if(needsSort)
-			currentAnimations.sort((a, b) -> Integer.compare(a.currentAnimation.priority, b.currentAnimation.priority));
+			currentAnimations.sort(Comparator.comparingInt(e -> e.currentAnimation.getPriority()));
 
 		player.get().resetAnimationPos();
 
@@ -46,7 +47,7 @@ public class AnimationHandler {
 				long currentStep = (currentTime - a.currentStart);
 				a.currentAnimation.animate(a.getTime(state, currentStep), player.get());
 
-				if(!a.loop && currentStep > a.currentAnimation.duration) {
+				if(!a.loop && currentStep > a.currentAnimation.getDuration()) {
 					a.finished = true;
 				}
 			}
@@ -55,7 +56,7 @@ public class AnimationHandler {
 		nextAnims.clear();
 	}
 
-	public void addAnimations(List<Animation> next, IPose pose) {
+	public void addAnimations(List<? extends IAnimation> next, IPose pose) {
 		next.stream().map(a -> new NextAnim(a, pose)).forEach(nextAnims::add);
 	}
 
@@ -73,17 +74,17 @@ public class AnimationHandler {
 	}
 
 	private static class NextAnim {
-		private Animation animation;
+		private IAnimation animation;
 		private IPose pose;
 
-		public NextAnim(Animation animation, IPose pose) {
+		public NextAnim(IAnimation animation, IPose pose) {
 			this.animation = animation;
 			this.pose = pose;
 		}
 	}
 
 	private static class PlayingAnim {
-		private Animation currentAnimation;
+		private IAnimation currentAnimation;
 		private IPose pose;
 		private long currentStart;
 		private boolean loop, finished;

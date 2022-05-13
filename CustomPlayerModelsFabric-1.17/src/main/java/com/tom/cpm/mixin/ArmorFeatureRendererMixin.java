@@ -7,13 +7,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.ArmorFeatureRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRenderer;
+import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.util.Identifier;
 
@@ -23,7 +23,11 @@ import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(ArmorFeatureRenderer.class)
-public abstract class ArmorFeatureRendererMixin {
+public abstract class ArmorFeatureRendererMixin extends FeatureRenderer<LivingEntity, BipedEntityModel<LivingEntity>> {
+
+	public ArmorFeatureRendererMixin(FeatureRendererContext<LivingEntity, BipedEntityModel<LivingEntity>> context) {
+		super(context);
+	}
 
 	private @Final @Shadow BipedEntityModel<LivingEntity> leggingsModel;
 	private @Final @Shadow BipedEntityModel<LivingEntity> bodyModel;
@@ -34,19 +38,15 @@ public abstract class ArmorFeatureRendererMixin {
 			method = "render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void preRender(MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity) {
-			CustomPlayerModelsClient.INSTANCE.renderArmor(bodyModel, leggingsModel, (PlayerEntity) entitylivingbaseIn, bufferIn);
-		}
+		CustomPlayerModelsClient.INSTANCE.renderArmor(bodyModel, leggingsModel, getContextModel());
 	}
 
 	@Inject(at = @At("RETURN"),
 			method = "render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void postRender(MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayerEntity) {
-			CustomPlayerModelsClient.INSTANCE.manager.unbind(bodyModel);
-			CustomPlayerModelsClient.INSTANCE.manager.unbind(leggingsModel);
-		}
+		CustomPlayerModelsClient.INSTANCE.manager.unbind(bodyModel);
+		CustomPlayerModelsClient.INSTANCE.manager.unbind(leggingsModel);
 	}
 
 	@Inject(at = @At("HEAD"),

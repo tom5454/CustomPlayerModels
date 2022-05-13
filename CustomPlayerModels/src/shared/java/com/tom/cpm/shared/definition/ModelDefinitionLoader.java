@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -56,37 +56,42 @@ import com.tom.cpm.shared.util.Log;
 public class ModelDefinitionLoader<GP> {
 	public static final String PLAYER_UNIQUE = "player";
 	public static final String SKULL_UNIQUE = "skull";
-	public static final ExecutorService THREAD_POOL = new ThreadPoolExecutor(0, 2, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
-	private Function<GP, Player<?, ?>> playerFactory;
+	public static final Executor THREAD_POOL = new ThreadPoolExecutor(0, 2, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
+	private Function<GP, Player<?>> playerFactory;
 	private Function<GP, UUID> getUUID;
 	private Function<GP, String> getName;
-	private final LoadingCache<Key, Player<?, ?>> cache = CacheBuilder.newBuilder().expireAfterAccess(15L, TimeUnit.SECONDS).removalListener(new RemovalListener<Key, Player<?, ?>>() {
+	private final LoadingCache<Key, Player<?>> cache = CacheBuilder.newBuilder().expireAfterAccess(15L, TimeUnit.SECONDS).removalListener(new RemovalListener<Key, Player<?>>() {
 
 		@Override
-		public void onRemoval(RemovalNotification<ModelDefinitionLoader<GP>.Key, Player<?, ?>> notification) {
+		public void onRemoval(RemovalNotification<ModelDefinitionLoader<GP>.Key, Player<?>> notification) {
 			notification.getValue().cleanup();
 		}
 	}).build(CacheLoader.from(this::loadPlayer));
 
-	private Player<?, ?> loadPlayer(Key key) {
-		Player<?, ?> player = playerFactory.apply(key.profile);
-		CompletableFuture<Void> texLoad = player.getTextures().load();
-		if(key.uniqueKey != null && key.uniqueKey.startsWith("model:")) {
-			String b64 = key.uniqueKey.substring(6);
-			Log.debug("Loading key model for " + key.profile);
-			player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(b64, player), THREAD_POOL));
-		} else if(serverModels.containsKey(key)) {
-			Log.debug("Loading server model for " + key.profile);
-			player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(serverModels.get(key), player), THREAD_POOL));
-		} else {
-			Log.debug("Loading skin model for " + key.profile);
-			player.setModelDefinition(texLoad.thenCompose(v -> player.getTextures().getTexture(TextureType.SKIN)).thenApplyAsync(skin -> {
-				if(skin != null && player.getModelDefinition() == null) {
-					return loadModel(skin, player);
-				} else {
-					return null;
-				}
-			}, THREAD_POOL));
+	private Player<?> loadPlayer(Key key) {
+		Player<?> player = playerFactory.apply(key.profile);
+		try {
+			player.unique = key.uniqueKey;
+			CompletableFuture<Void> texLoad = player.getTextures().load();
+			if(key.uniqueKey.startsWith("model:")) {
+				String b64 = key.uniqueKey.substring(6);
+				Log.debug("Loading key model for " + key.profile);
+				player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(b64, player), THREAD_POOL));
+			} else if(serverModels.containsKey(key)) {
+				Log.debug("Loading server model for " + key.profile);
+				player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(serverModels.get(key), player), THREAD_POOL));
+			} else {
+				Log.debug("Loading skin model for " + key.profile);
+				player.setModelDefinition(texLoad.thenCompose(v -> player.getTextures().getTexture(TextureType.SKIN)).thenApplyAsync(skin -> {
+					if(skin != null && player.getModelDefinition() == null) {
+						return loadModel(skin, player);
+					} else {
+						return null;
+					}
+				}, THREAD_POOL));
+			}
+		} catch (Exception e) {
+			player.setModelDefinition(CompletableFuture.completedFuture(new ModelDefinition(e, player)));
 		}
 		return player;
 	}
@@ -103,7 +108,7 @@ public class ModelDefinitionLoader<GP> {
 	private Image template;
 	public static final int HEADER = 0x53;
 
-	public ModelDefinitionLoader(Function<GP, Player<?, ?>> playerFactory, Function<GP, UUID> getUUID, Function<GP, String> getName) {
+	public ModelDefinitionLoader(Function<GP, Player<?>> playerFactory, Function<GP, UUID> getUUID, Function<GP, String> getName) {
 		try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/free_space_template.png")) {
 			this.template = Image.loadFrom(is);
 		} catch (IOException e) {
@@ -114,20 +119,20 @@ public class ModelDefinitionLoader<GP> {
 		this.getName = getName;
 	}
 
-	public Player<?, ?> loadPlayer(GP player, String unique) {
+	public Player<?> loadPlayer(GP player, String unique) {
 		try {
 			return cache.get(new Key(player, unique));
 		} catch (ExecutionException | UncheckedExecutionException e) {
-			e.printStackTrace();
+			Log.debug("Error loading player model data", e);
 			return null;
 		}
 	}
 
-	public ModelDefinition loadModel(String data, Player<?, ?> player) {
+	public ModelDefinition loadModel(String data, Player<?> player) {
 		return loadModel(Base64.getDecoder().decode(data), player);
 	}
 
-	public ModelDefinition loadModel(byte[] data, Player<?, ?> player) {
+	public ModelDefinition loadModel(byte[] data, Player<?> player) {
 		try(ByteArrayInputStream in = new ByteArrayInputStream(data)) {
 			return loadModel(in, player);
 		} catch (Exception e) {
@@ -135,7 +140,7 @@ public class ModelDefinitionLoader<GP> {
 		}
 	}
 
-	public ModelDefinition loadModel(Image skin, Player<?, ?> player) {
+	public ModelDefinition loadModel(Image skin, Player<?> player) {
 		try(SkinDataInputStream in = new SkinDataInputStream(skin, template, player.getSkinType().getChannel())) {
 			return loadModel(in, player);
 		} catch (Exception e) {
@@ -143,7 +148,7 @@ public class ModelDefinitionLoader<GP> {
 		}
 	}
 
-	private ModelDefinition loadModel(InputStream in, Player<?, ?> player) {
+	private ModelDefinition loadModel(InputStream in, Player<?> player) {
 		ModelDefinition def = new ModelDefinition(this, player);
 		try {
 			if(in.read() != HEADER)return null;
@@ -194,7 +199,7 @@ public class ModelDefinitionLoader<GP> {
 		try {
 			ResourceLoader rl = LOADERS.get(link.loader);
 			if(rl == null)throw new IOException("Couldn't find loader");
-			return new ResolvedLink(rl.loadResource(link.path, enc, def));
+			return new ResolvedLink(rl.loadResource(link, enc, def));
 		} catch (SafetyException e) {
 			throw e;
 		} catch (IOException e) {
@@ -230,7 +235,7 @@ public class ModelDefinitionLoader<GP> {
 			Key key = new Key(forPlayer, null);
 			serverModels.put(key, data);
 			invalidateAll(key);
-			Player<?, ?> player = loadPlayer(forPlayer, PLAYER_UNIQUE);
+			Player<?> player = loadPlayer(forPlayer, PLAYER_UNIQUE);
 			player.forcedSkin = forced;
 		}
 	}
@@ -243,7 +248,7 @@ public class ModelDefinitionLoader<GP> {
 		THREAD_POOL.execute(task);
 	}
 
-	public List<Player<?, ?>> getPlayers() {
+	public List<Player<?>> getPlayers() {
 		return new ArrayList<>(cache.asMap().values());
 	}
 
@@ -298,7 +303,7 @@ public class ModelDefinitionLoader<GP> {
 		return getName.apply(gp);
 	}
 
-	public CompletableFuture<Boolean> cloneModel(Player<?, ?> player, String name) {
+	public CompletableFuture<Boolean> cloneModel(Player<?> player, String name) {
 		ModelDefinition d = player.getModelDefinition();
 		if(d != null && d.cloneable != null) {
 			String desc = d.cloneable.desc;

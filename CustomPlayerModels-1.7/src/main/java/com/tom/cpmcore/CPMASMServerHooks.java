@@ -12,7 +12,8 @@ import com.tom.cpm.shared.network.NetH.ServerNetH;
 public class CPMASMServerHooks {
 	public static boolean onServerPacket(C17PacketCustomPayload pckt, NetHandlerPlayServer handler) {
 		if(pckt.func_149559_c().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			ServerHandler.netHandler.receiveServer(new ResourceLocation(pckt.func_149559_c()), new FastByteArrayInputStream(pckt.func_149558_e()), (ServerNetH) handler);
+			byte[] dt = pckt.func_149558_e();
+			ServerHandler.netHandler.receiveServer(new ResourceLocation(pckt.func_149559_c()), new FastByteArrayInputStream(dt != null ? dt : new byte[0]), (ServerNetH) handler);
 			return true;
 		}
 		return false;

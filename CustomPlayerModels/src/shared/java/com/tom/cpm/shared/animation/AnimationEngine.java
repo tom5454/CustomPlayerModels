@@ -26,7 +26,7 @@ public class AnimationEngine {
 	public void tick() {
 		tickCounter++;
 		if(MinecraftClientAccess.get().isInGame()) {
-			Player<?, ?> player = MinecraftClientAccess.get().getCurrentClientPlayer();//Keep client player loaded
+			Player<?> player = MinecraftClientAccess.get().getCurrentClientPlayer();//Keep client player loaded
 			ModelDefinition def = player.getModelDefinition();
 			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 				if(def != null && def.doRender()) {
@@ -62,7 +62,7 @@ public class AnimationEngine {
 		return (long) ((tickCounter + partial) * 50);
 	}
 
-	public void handleAnimation(Player<?, ?> player, AnimationMode mode) {
+	public void handleAnimation(Player<?> player, AnimationMode mode) {
 		AnimationHandler h = player.getAnimationHandler(mode);
 		try {
 			long time = getTime();
@@ -83,7 +83,7 @@ public class AnimationEngine {
 				}
 				player.currentPose = reg.getPose(gesture, player.currentPose);
 				player.prevPose = pose;
-				List<Animation> anim = reg.getPoseAnimations(player.currentPose);
+				List<IAnimation> anim = reg.getPoseAnimations(player.currentPose);
 				h.addAnimations(anim, player.currentPose);
 				player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p));
 				h.setGesture(reg.getGesture(gesture));
@@ -92,8 +92,8 @@ public class AnimationEngine {
 
 			case SKULL:
 			{
-				List<Animation> anim = reg.getPoseAnimations(VanillaPose.SKULL_RENDER);
-				List<Animation> global = reg.getPoseAnimations(VanillaPose.GLOBAL);
+				List<IAnimation> anim = reg.getPoseAnimations(VanillaPose.SKULL_RENDER);
+				List<IAnimation> global = reg.getPoseAnimations(VanillaPose.GLOBAL);
 				h.addAnimations(anim, VanillaPose.SKULL_RENDER);
 				h.addAnimations(global, VanillaPose.GLOBAL);
 			}
@@ -113,8 +113,8 @@ public class AnimationEngine {
 
 	public void handleGuiAnimation(AnimationHandler h, ModelDefinition def) {
 		try {
-			List<Animation> anim = def.getAnimations().getPoseAnimations(VanillaPose.STANDING);
-			List<Animation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
+			List<IAnimation> anim = def.getAnimations().getPoseAnimations(VanillaPose.STANDING);
+			List<IAnimation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
 			h.addAnimations(anim, VanillaPose.STANDING);
 			h.addAnimations(global, VanillaPose.GLOBAL);
 			h.animate(null, getTime());

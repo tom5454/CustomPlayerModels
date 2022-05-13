@@ -68,7 +68,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 				for (int i = 0; i < fs.length; i++) {
 					if(fs[i].getName().equals(TestIngameManager.TEST_MODEL_NAME))continue;
 					try {
-						Image img = Image.loadFrom(fs[i]);
+						Image img = Image.loadFrom(fs[i]).get();
 						if(img.getWidth() != 64 || (img.getHeight() != 64 && img.getHeight() != 32))continue;
 						if(img.getHeight() == 32)img = LegacySkinConverter.processLegacySkin(img);
 						SkinPanel p = new SkinPanel(gui, fs[i].getName(), img, y);
@@ -102,8 +102,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 			fc.setFilter(new FileFilter("png"));
 			fc.setExtAdder(n -> n + ".png");
 			fc.setAccept(f -> {
-				try {
-					Image imgIn = Image.loadFrom(f);
+				Image.loadFrom(f).thenAccept(imgIn -> {
 					if(imgIn.getWidth() != 64 || (imgIn.getHeight() != 64 && imgIn.getHeight() != 32)) {
 						frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.vanillaSkinSize")));
 						return;
@@ -128,9 +127,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 						selectedOpen.setImage(img);
 						selected = selectedOpen;
 					}));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				});
 			});
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
 			frm.openPopup(fc);
@@ -141,7 +138,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 		panel.setBackgroundColor(gui.getColors().panel_background & 0x00_ffffff | 0x80_000000);
 		addElement(list);
 
-		display = new ModelDisplayPanel(gui, this);
+		display = new ModelDisplayPanel(frm, this);
 		display.setLoadingText(gui.i18nFormat("button.cpm.selectSkin"));
 		addElement(display);
 

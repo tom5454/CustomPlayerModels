@@ -31,4 +31,8 @@ public class ElementGroup<S, P> implements Consumer<S> {
 		map.values().stream().flatMap(Set::stream).forEach(e -> setValue.accept(e, false));
 		type.stream().map(map::get).filter(e -> e != null).flatMap(Set::stream).forEach(e -> setValue.accept(e, true));
 	}
+
+	public boolean containsKey(S key) {
+		return map.containsKey(key);
+	}
 }

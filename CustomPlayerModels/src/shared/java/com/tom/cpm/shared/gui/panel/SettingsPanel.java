@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.config.ConfigEntry;
-import com.tom.cpl.config.ConfigEntry.ModConfigFile.ConfigEntryTemp;
+import com.tom.cpl.config.ModConfigFile.ConfigEntryTemp;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
@@ -33,6 +33,7 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey.KeyGroup;
 import com.tom.cpm.shared.editor.gui.EditorGui;
+import com.tom.cpm.shared.gui.KeybindsPopup;
 
 public class SettingsPanel extends Panel {
 	private final Frame frm;
@@ -75,32 +76,52 @@ public class SettingsPanel extends Panel {
 
 		{
 			Panel general = new Panel(gui);
-			addTab("general", general, 5);
+			addTabScroll("general", general, 5);
 
-			Checkbox chxbxTSBtn = new Checkbox(gui, gui.i18nFormat("label.cpm.config.titleScreenButton"));
-			chxbxTSBtn.setSelected(ce.getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true));
-			chxbxTSBtn.setAction(() -> {
-				boolean b = !ce.getBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true);
-				chxbxTSBtn.setSelected(b);
-				ce.setBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, b);
-			});
-			chxbxTSBtn.setBounds(new Box(5, 0, 200, 20));
-			chxbxTSBtn.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.config.titleScreenButton")));
-			general.addElement(chxbxTSBtn);
+			FlowLayout layout = new FlowLayout(general, 4, 1);
+			makeCheckbox(general, ConfigKeys.SHOW_LOADING_INFO, true);
+
+			Button kbButton = new Button(gui, gui.i18nFormat("label.cpm.keybinds.title"), () -> frm.openPopup(new KeybindsPopup(frm, ce)));
+			kbButton.setBounds(new Box(5, 0, 150, 20));
+			general.addElement(kbButton);
+
+			MinecraftClientAccess.get().populatePlatformSettings("general", general);
+
+			layout.reflow();
 		}
 
 		{
 			Panel editor = new Panel(gui);
-			addTab("editor", editor, 5);
+			addTabScroll("editor", editor, 5);
 			FlowLayout editorLayout = new FlowLayout(editor, 5, 1);
 
+			makeCheckbox(editor, ConfigKeys.TITLE_SCREEN_BUTTON, true);
+
 			Button buttonRMB = new Button(gui, gui.i18nFormat("button.cpm.config.rotateButton", getRotateBtn()), null);
+			Button buttonDMB = new Button(gui, gui.i18nFormat("button.cpm.config.dragButton", getDragBtn()), null);
+
 			buttonRMB.setAction(() -> {
-				ce.setInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, ce.getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2) == 2 ? 1 : 2);
+				int b = ce.getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2) - 1;
+				int d = ce.getSetInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1);
+				if(b < 0)b = 2;
+				if(b == d)ce.setInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1);
+				ce.setInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, b);
 				buttonRMB.setText(gui.i18nFormat("button.cpm.config.rotateButton", getRotateBtn()));
+				buttonDMB.setText(gui.i18nFormat("button.cpm.config.dragButton", getDragBtn()));
 			});
-			buttonRMB.setBounds(new Box(5, 0, 200, 20));
+			buttonRMB.setBounds(new Box(5, 0, 250, 20));
 			editor.addElement(buttonRMB);
+
+			buttonDMB.setAction(() -> {
+				int b = ce.getSetInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1) - 1;
+				int r = ce.getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2);
+				if(b < -1)b = 2;
+				if(b == r)b--;
+				ce.setInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, b);
+				buttonDMB.setText(gui.i18nFormat("button.cpm.config.dragButton", getDragBtn()));
+			});
+			buttonDMB.setBounds(new Box(5, 0, 250, 20));
+			editor.addElement(buttonDMB);
 
 			if(gui.getMaxScale() != -1) {
 				Button guiScale = new Button(gui, gui.i18nFormat("button.cpm.config.scale", getScale()), null);
@@ -122,18 +143,22 @@ public class SettingsPanel extends Panel {
 						}
 					}
 				});
-				guiScale.setBounds(new Box(5, 0, 200, 20));
+				guiScale.setBounds(new Box(5, 0, 250, 20));
 				editor.addElement(guiScale);
 			}
+
+			makeCheckbox(editor, ConfigKeys.ADV_SCALING_SETTINGS, false);
 
 			buttonPosMode = new Button(gui, "", null);
 			buttonPosMode.setAction(() -> {
 				ce.setBoolean(ConfigKeys.EDITOR_POSITION_MODE, !ce.getSetBoolean(ConfigKeys.EDITOR_POSITION_MODE, false));
 				updatePosModeBtn();
 			});
-			buttonPosMode.setBounds(new Box(5, 0, 200, 20));
+			buttonPosMode.setBounds(new Box(5, 0, 250, 20));
 			//editor.addElement(buttonPosMode);
 			updatePosModeBtn();
+
+			MinecraftClientAccess.get().populatePlatformSettings("editor", editor);
 
 			editorLayout.reflow();
 		}
@@ -189,6 +214,19 @@ public class SettingsPanel extends Panel {
 		addElement(new Label(gui, v).setBounds(new Box(width - gui.textWidth(v) - 3, height - 11, 0, 0)));
 	}
 
+	private void makeCheckbox(Panel panel, String key, boolean def) {
+		Checkbox chxbx = new Checkbox(gui, gui.i18nFormat("label.cpm.config." + key));
+		chxbx.setSelected(ce.getSetBoolean(key, def));
+		chxbx.setAction(() -> {
+			boolean b = !ce.getBoolean(key, def);
+			chxbx.setSelected(b);
+			ce.setBoolean(key, b);
+		});
+		chxbx.setBounds(new Box(5, 0, 200, 20));
+		chxbx.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.config." + key)));
+		panel.addElement(chxbx);
+	}
+
 	private void saveConfig() {
 		ce.saveConfig();
 		MinecraftClientAccess.get().getDefinitionLoader().clearCache();
@@ -234,6 +272,17 @@ public class SettingsPanel extends Panel {
 		}
 	}
 
+	public void addTabScroll(String name, Panel panel, int topPadding) {
+		ScrollPanel scp = new ScrollPanel(gui);
+		scp.setBounds(new Box(0, 0, bounds.w, bounds.h - 50));
+		panel.setBounds(new Box(0, 0, bounds.w, 0));
+		scp.setDisplay(panel);
+
+		Panel p = new Panel(gui);
+		p.addElement(scp);
+		addTab(name, p, topPadding);
+	}
+
 	public void addTab(String name, Panel panel, int topPadding) {
 		panel.setBounds(new Box(0, topPadding, bounds.w, bounds.h - 50));
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.settings." + name), panel));
@@ -251,6 +300,12 @@ public class SettingsPanel extends Panel {
 
 	private String getRotateBtn() {
 		return gui.i18nFormat("button.cpm.config.rotateButton." + ce.getInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2));
+	}
+
+	private String getDragBtn() {
+		int d = ce.getInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1);
+		if(d == -1)return gui.i18nFormat("button.cpm.config.dragButton.shift", getRotateBtn());
+		else return gui.i18nFormat("button.cpm.config.rotateButton." + d);
 	}
 
 	private void updatePosModeBtn() {

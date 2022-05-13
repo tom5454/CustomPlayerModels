@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
@@ -28,12 +27,14 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
-public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
+public class PlayerProfile extends Player<EntityPlayer> {
 	private final GameProfile profile;
 	private String skinType;
 
 	public PlayerProfile(GameProfile profile) {
-		this.profile = profile;
+		this.profile = new GameProfile(profile.getId(), profile.getName());
+		cloneProperties(profile.getProperties(), this.profile.getProperties());
+
 		if(profile.getId() != null)
 			this.skinType = DefaultPlayerSkin.getSkinType(profile.getId());
 	}
@@ -65,11 +66,6 @@ public class PlayerProfile extends Player<EntityPlayer, ModelBase> {
 			if (other.profile != null) return false;
 		} else if (!profile.equals(other.profile)) return false;
 		return true;
-	}
-
-	@Override
-	public ModelPlayer getModel() {
-		return Minecraft.getMinecraft().getRenderManager().getSkinMap().get(skinType == null ? "default" : skinType).getMainModel();
 	}
 
 	@Override

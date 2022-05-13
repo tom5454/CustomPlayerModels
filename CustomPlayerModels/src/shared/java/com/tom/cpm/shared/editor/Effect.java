@@ -8,4 +8,5 @@ public enum Effect {
 	SINGLE_TEX,
 	PER_FACE_UV,
 	EXTRUDE,
+	COPY_TRANSFORM,
 }

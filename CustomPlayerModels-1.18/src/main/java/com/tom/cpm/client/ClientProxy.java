@@ -3,6 +3,7 @@ package com.tom.cpm.client;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
@@ -17,10 +18,13 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -45,13 +49,13 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
-import com.google.common.collect.Iterables;
-
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -87,11 +91,7 @@ public class ClientProxy extends CommonProxy {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), net.minecraft.world.entity.player.Player::getGameProfile);
-		manager.setGetSkullModel(profile -> {
-			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
-			if(property != null)return property.getValue();
-			return null;
-		});
+		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setExecutor(() -> minecraft);
 		netHandler.setSendPacket(d -> new FriendlyByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new ServerboundCustomPayloadPacket(rl, pb)), null);
@@ -109,14 +109,21 @@ public class ClientProxy extends CommonProxy {
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
+	@Override
+	public void apiInit() {
+		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class).
+		renderApi(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class, ModelTexture::new).
+		localModelApi(GameProfile::new).init();
+	}
+
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		manager.bindPlayer(event.getPlayer(), event.getMultiBufferSource());
+		manager.bindPlayer(event.getPlayer(), event.getMultiBufferSource(), event.getRenderer().getModel());
 	}
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		manager.unbindClear();
+		manager.unbindClear(event.getRenderer().getModel());
 	}
 
 	@SubscribeEvent
@@ -129,22 +136,22 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	public void renderHand(MultiBufferSource buffer) {
-		manager.bindHand(Minecraft.getInstance().player, buffer);
+	public void renderHand(MultiBufferSource buffer, PlayerModel model) {
+		manager.bindHand(Minecraft.getInstance().player, buffer, model);
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, MultiBufferSource buffer) {
 		manager.bindSkull(profile, buffer, skullModel);
 	}
 
-	public void renderElytra(net.minecraft.world.entity.player.Player player, MultiBufferSource buffer, ElytraModel<LivingEntity> model) {
-		manager.bindElytra(player, buffer, model);
+	public void renderElytra(HumanoidModel<LivingEntity> player, ElytraModel<LivingEntity> model) {
+		manager.bindElytra(player, model);
 	}
 
 	public void renderArmor(HumanoidModel<LivingEntity> modelArmor, HumanoidModel<LivingEntity> modelLeggings,
-			net.minecraft.world.entity.player.Player player, MultiBufferSource bufferIn) {
-		manager.bindArmor(player, bufferIn, modelArmor, 1);
-		manager.bindArmor(player, bufferIn, modelLeggings, 2);
+			HumanoidModel<LivingEntity> player) {
+		manager.bindArmor(player, modelArmor, 1);
+		manager.bindArmor(player, modelLeggings, 2);
 	}
 
 	@SubscribeEvent
@@ -188,10 +195,13 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	private void registerShaders(RegisterShadersEvent evt) {
+	}
+
+	private void registerShader(RegisterShadersEvent evt, String name, VertexFormat vertexFormat, Consumer<ShaderInstance> finish) {
 		try {
-			evt.registerShader(new ShaderInstance(evt.getResourceManager(), new ResourceLocation("cpm", "rendertype_entity_translucent_cull_no_light"), DefaultVertexFormat.NEW_ENTITY), s -> CustomRenderTypes.entityTranslucentCullNoLightShaderProgram = s);
+			evt.registerShader(new ShaderInstance(evt.getResourceManager(), new ResourceLocation("cpm", name), vertexFormat), finish);
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.error("Failed to load cpm '" + name + "' shader", e);
 		}
 	}
 
@@ -282,5 +292,24 @@ public class ClientProxy extends CommonProxy {
 		model.cloak.zRot = 0;
 		model.renderCloak(matrixStackIn, buffer, packedLightIn, OverlayTexture.NO_OVERLAY);
 		matrixStackIn.popPose();
+	}
+
+	public static interface PlayerNameTagRenderer<E extends Entity> {
+		void cpm$renderNameTag(E entityIn, Component displayNameIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn);
+		EntityRenderDispatcher cpm$entityRenderDispatcher();
+	}
+
+	public static <E extends Entity> void renderNameTag(PlayerNameTagRenderer<E> r, E entityIn, GameProfile gprofile, String unique, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
+		double d0 = r.cpm$entityRenderDispatcher().distanceToSqr(entityIn);
+		if (d0 < 100.0D) {
+			FormatText st = INSTANCE.manager.getStatus(gprofile, unique);
+			if(st != null) {
+				matrixStackIn.pushPose();
+				matrixStackIn.translate(0.0D, 1.3F, 0.0D);
+				matrixStackIn.scale(0.5f, 0.5f, 0.5f);
+				r.cpm$renderNameTag(entityIn, st.remap(), matrixStackIn, bufferIn, packedLightIn);
+				matrixStackIn.popPose();
+			}
+		}
 	}
 }

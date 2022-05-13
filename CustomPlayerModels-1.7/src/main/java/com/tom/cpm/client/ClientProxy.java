@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiOptions;
@@ -17,11 +18,15 @@ import net.minecraft.client.gui.GuiSelectWorld;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
@@ -34,9 +39,9 @@ import net.minecraftforge.common.MinecraftForge;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
-import com.google.common.collect.Iterables;
-
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -74,11 +79,7 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), EntityPlayer::getGameProfile);
-		manager.setGetSkullModel(profile -> {
-			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
-			if(property != null)return property.getValue();
-			return null;
-		});
+		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetH();
 		Executor ex = minecraft::func_152344_a;
 		netHandler.setExecutor(() -> ex);
@@ -96,15 +97,28 @@ public class ClientProxy extends CommonProxy {
 		netHandler.setDisplayText(f -> minecraft.ingameGUI.getChatGUI().printChatMessage(f.remap()));
 	}
 
+	@Override
+	public void apiInit() {
+		CustomPlayerModels.api.buildClient().voicePlayer(EntityPlayer.class).localModelApi(GameProfile::new).
+		renderApi(ModelBase.class, GameProfile.class).init();
+	}
+
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		manager.bindPlayer(event.entityPlayer, null);
-		manager.bindSkin(TextureSheetType.SKIN);
+		manager.bindPlayer(event.entityPlayer, null, event.renderer.modelBipedMain);
+		manager.bindSkin(event.renderer.modelBipedMain, TextureSheetType.SKIN);
+		ModelBiped model = event.renderer.modelBipedMain;
+		manager.bindArmor(model, event.renderer.modelArmorChestplate, 1);
+		manager.bindArmor(model, event.renderer.modelArmor, 2);
+		manager.bindSkin(event.renderer.modelArmorChestplate, TextureSheetType.ARMOR1);
+		manager.bindSkin(event.renderer.modelArmor, TextureSheetType.ARMOR2);
 	}
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		manager.unbindClear();
+		manager.unbind(event.renderer.modelArmor);
+		manager.unbind(event.renderer.modelArmorChestplate);
+		manager.unbindClear(event.renderer.modelBipedMain);
 	}
 
 	@SubscribeEvent
@@ -177,6 +191,104 @@ public class ClientProxy extends CommonProxy {
 		if(evt.entity instanceof AbstractClientPlayer) {
 			if(!Player.isEnableNames())
 				evt.setCanceled(true);
+			if(Player.isEnableLoadingInfo()) {
+				FormatText st = INSTANCE.manager.getStatus(((AbstractClientPlayer) evt.entity).getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE);
+				if(st != null) {
+					float f = 1.6F;
+					float f1 = 0.016666668F * f / 2;
+					double d3 = evt.entity.getDistanceSqToEntity(net.minecraft.client.renderer.entity.RenderManager.instance.livingPlayer);
+
+					if (d3 < 32*32) {
+						GL11.glPushMatrix();
+						GL11.glTranslated(0, 0.125F, 0);
+						String s = ((IChatComponent) st.remap()).getFormattedText();
+
+						if (evt.entity.isSneaking()) {
+							FontRenderer fontrenderer = minecraft.fontRenderer;
+							GL11.glPushMatrix();
+							GL11.glTranslatef((float)evt.x + 0.0F, (float)evt.y + evt.entity.height + 0.5F, (float)evt.z);
+							GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+							GL11.glRotatef(-net.minecraft.client.renderer.entity.RenderManager.instance.playerViewY, 0.0F, 1.0F, 0.0F);
+							GL11.glRotatef(net.minecraft.client.renderer.entity.RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
+							GL11.glScalef(-f1, -f1, f1);
+							GL11.glDisable(GL11.GL_LIGHTING);
+							GL11.glTranslatef(0.0F, 0.25F / f1, 0.0F);
+							GL11.glDepthMask(false);
+							GL11.glEnable(GL11.GL_BLEND);
+							OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+							Tessellator tessellator = Tessellator.instance;
+							GL11.glDisable(GL11.GL_TEXTURE_2D);
+							tessellator.startDrawingQuads();
+							int i = fontrenderer.getStringWidth(s) / 2;
+							tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);
+							tessellator.addVertex(-i - 1, -1.0D, 0.0D);
+							tessellator.addVertex(-i - 1, 8.0D, 0.0D);
+							tessellator.addVertex(i + 1, 8.0D, 0.0D);
+							tessellator.addVertex(i + 1, -1.0D, 0.0D);
+							tessellator.draw();
+							GL11.glEnable(GL11.GL_TEXTURE_2D);
+							GL11.glDepthMask(true);
+							fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, 0, 553648127);
+							GL11.glEnable(GL11.GL_LIGHTING);
+							GL11.glDisable(GL11.GL_BLEND);
+							GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+							GL11.glPopMatrix();
+						} else {
+							this.renderLivingLabel(evt.entity, evt.x, evt.y, evt.z, s, f1, d3);
+						}
+						GL11.glPopMatrix();
+					}
+				}
+			}
+		}
+	}
+
+	protected void renderLivingLabel(EntityLivingBase p_96449_1_, double p_96449_2_, double p_96449_4_, double p_96449_6_, String p_96449_8_, float p_96449_9_, double p_96449_10_) {
+		if (p_96449_1_.isPlayerSleeping())this.renderLivingLabel0(p_96449_1_, p_96449_8_, p_96449_2_, p_96449_4_ - 1.5D, p_96449_6_, 64);
+		else this.renderLivingLabel0(p_96449_1_, p_96449_8_, p_96449_2_, p_96449_4_, p_96449_6_, 64);
+	}
+
+	protected void renderLivingLabel0(Entity p_147906_1_, String p_147906_2_, double p_147906_3_, double p_147906_5_, double p_147906_7_, int p_147906_9_) {
+		double d3 = p_147906_1_.getDistanceSqToEntity(net.minecraft.client.renderer.entity.RenderManager.instance.livingPlayer);
+
+		if (d3 <= p_147906_9_ * p_147906_9_) {
+			FontRenderer fontrenderer = minecraft.fontRenderer;
+			float f = 1.6F;
+			float f1 = 0.016666668F * f / 2;
+			GL11.glPushMatrix();
+			GL11.glTranslatef((float)p_147906_3_ + 0.0F, (float)p_147906_5_ + p_147906_1_.height + 0.5F, (float)p_147906_7_);
+			GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+			GL11.glRotatef(-net.minecraft.client.renderer.entity.RenderManager.instance.playerViewY, 0.0F, 1.0F, 0.0F);
+			GL11.glRotatef(net.minecraft.client.renderer.entity.RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
+			GL11.glScalef(-f1, -f1, f1);
+			GL11.glDisable(GL11.GL_LIGHTING);
+			GL11.glDepthMask(false);
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			GL11.glEnable(GL11.GL_BLEND);
+			OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+			Tessellator tessellator = Tessellator.instance;
+			byte b0 = 0;
+
+			if (p_147906_2_.equals("deadmau5"))b0 = -10;
+
+			GL11.glDisable(GL11.GL_TEXTURE_2D);
+			tessellator.startDrawingQuads();
+			int j = fontrenderer.getStringWidth(p_147906_2_) / 2;
+			tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);
+			tessellator.addVertex(-j - 1, -1 + b0, 0.0D);
+			tessellator.addVertex(-j - 1, 8 + b0, 0.0D);
+			tessellator.addVertex(j + 1, 8 + b0, 0.0D);
+			tessellator.addVertex(j + 1, -1 + b0, 0.0D);
+			tessellator.draw();
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+			fontrenderer.drawString(p_147906_2_, -fontrenderer.getStringWidth(p_147906_2_) / 2, b0, 553648127);
+			GL11.glEnable(GL11.GL_DEPTH_TEST);
+			GL11.glDepthMask(true);
+			fontrenderer.drawString(p_147906_2_, -fontrenderer.getStringWidth(p_147906_2_) / 2, b0, -1);
+			GL11.glEnable(GL11.GL_LIGHTING);
+			GL11.glDisable(GL11.GL_BLEND);
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			GL11.glPopMatrix();
 		}
 	}
 
@@ -219,7 +331,7 @@ public class ClientProxy extends CommonProxy {
 
 		public void sendLayer(int value) {
 			if(hasModClient()) {
-				sendPacket.accept(getClientNet(), setLayer, new byte[] {(byte) value});
+				sendPacketToServer(setLayer, new byte[] {(byte) value});
 			}
 		}
 	}

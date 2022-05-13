@@ -1,5 +1,8 @@
 package com.tom.cpm.shared.gui;
 
+import java.io.File;
+import java.util.List;
+
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
@@ -29,5 +32,10 @@ public class ModelsGui extends Frame {
 		Button openEditor = new Button(gui, gui.i18nFormat("button.cpm.open_editor"), () -> MinecraftClientAccess.get().openGui(EditorGui::new));
 		openEditor.setBounds(new Box(0, 0, 100, 20));
 		addElement(openEditor);
+	}
+
+	@Override
+	public void filesDropped(List<File> files) {
+		panel.filesDropped(files);
 	}
 }

@@ -1,8 +1,11 @@
 package com.tom.cpm.shared.editor.gui;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import com.tom.cpl.config.ConfigEntry.ConfigEntryList;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
@@ -24,6 +27,7 @@ import com.tom.cpl.gui.util.ButtonGroup;
 import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.text.KeybindText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
@@ -35,6 +39,7 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.Generators;
 import com.tom.cpm.shared.editor.RootGroups;
 import com.tom.cpm.shared.editor.TestIngameManager;
@@ -47,6 +52,7 @@ import com.tom.cpm.shared.editor.gui.popup.ModelsPopup;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
+import com.tom.cpm.shared.gui.Keybinds;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.paste.PastePopup;
@@ -57,6 +63,7 @@ import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class EditorGui extends Frame {
 	public static boolean rescaleGui = true;
+	private static List<File> recent = new ArrayList<>();
 	private static Editor toReopen;
 	private TabbedPanelManager tabs;
 	private HorizontalLayout topPanel;
@@ -65,6 +72,23 @@ public class EditorGui extends Frame {
 	private static boolean notSupportedWarning = true;
 	private Tooltip msgTooltip;
 	private long tooltipTime;
+
+	static {
+		ConfigEntryList ce = ModConfig.getCommonConfig().getEntryList(ConfigKeys.EDITOR_RECENT_PROJECTS);
+		for (int i = 0;i<ce.size();i++) {
+			String o = String.valueOf(ce.get(i));
+			File f = new File(o);
+			if(f.exists()) {
+				recent.add(f);
+			}
+		}
+	}
+
+	private static void flushRecent() {
+		ConfigEntryList ce = ModConfig.getCommonConfig().getEntryList(ConfigKeys.EDITOR_RECENT_PROJECTS);
+		ce.clear();
+		recent.stream().filter(File::exists).map(File::getAbsolutePath).forEach(ce::add);
+	}
 
 	public EditorGui(IGui gui) {
 		super(gui);
@@ -171,7 +195,7 @@ public class EditorGui extends Frame {
 
 		mainPanel.addElement(new TreePanel(gui, this, width, height - 20, true));
 
-		ViewportPanel view = new ViewportPanel(gui, editor);
+		ViewportPanel view = new ViewportPanel(this, editor);
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
 		editor.displayViewport.add(view::setEnabled);
@@ -182,7 +206,7 @@ public class EditorGui extends Frame {
 		textureEditor.setBounds(new Box(0, 0, width, height - 20));
 		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.texture"), textureEditor));
 
-		ViewportPaintPanel viewT = new ViewportPaintPanel(gui, editor);
+		ViewportPaintPanel viewT = new ViewportPaintPanel(this, editor);
 		viewT.setBounds(new Box(0, 0, width - height / 2, height - 20));
 		textureEditor.addElement(viewT);
 		editor.cursorPos = viewT::getHoveredTexPos;
@@ -240,7 +264,7 @@ public class EditorGui extends Frame {
 			}
 		});
 
-		ViewportPanelAnim view = new ViewportPanelAnim(gui, editor);
+		ViewportPanelAnim view = new ViewportPanelAnim(this, editor);
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
 		editor.displayViewport.add(view::setEnabled);
@@ -268,7 +292,7 @@ public class EditorGui extends Frame {
 			newModelMenu.addButton(gui.i18nFormat("label.cpm.skin_type." + type.getName()), () -> newModel(type));
 		}
 
-		Button newTempl = newMenu.addButton(gui.i18nFormat("button.cpm.new.template"), () -> checkUnsaved(() -> {
+		Button newTempl = newMenu.addButton(gui.i18nFormat("button.cpm.new.template"), () -> checkUnsaved(new ConfirmPopup(this, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warnTemplate"), () -> {
 			this.editor.loadDefaultPlayerModel();
 			editor.templateSettings = new TemplateSettings(editor);
 			Generators.setupTemplateModel(editor);
@@ -276,7 +300,7 @@ public class EditorGui extends Frame {
 			skin.setImage(new Image(64, 64));
 			skin.markDirty();
 			this.editor.updateGui();
-		}));
+		}, null)));
 		newTempl.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.new.template")));
 
 		pp.addMenuButton(gui.i18nFormat("button.cpm.file.new"), newMenu);
@@ -313,6 +337,17 @@ public class EditorGui extends Frame {
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.test"), () -> {
 			if(TestIngameManager.openTestIngame(this, false))toReopen = editor;
+		});
+
+		pp.addMenuButton(gui.i18nFormat("button.cpm.openRecent"), () -> {
+			PopupMenu menu = new PopupMenu(gui, this);
+			for (int i = recent.size() - 1; i >= 0; i--) {
+				File f = recent.get(i);
+				if(f.exists()) {
+					menu.addButton(f.getName(), () -> checkUnsaved(() -> load(f))).setTooltip(new Tooltip(this, f.getAbsolutePath().replace('\\', '/')));
+				}
+			}
+			return menu;
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.exit"), gui::close);
@@ -360,7 +395,7 @@ public class EditorGui extends Frame {
 
 		Generators.generators.forEach(g -> {
 			Button btn = tools.addButton(gui.i18nFormat(g.name), () -> g.func.accept(this));
-			if(g.tooltip != null)btn.setTooltip(new Tooltip(this, gui.i18nFormat(g.tooltip)));
+			if(g.tooltip != null)btn.setTooltip(new Tooltip(this, g.tooltip.toString(gui)));
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.add_template"), new InputPopup(this, gui.i18nFormat("label.cpm.template_link_input"), gui.i18nFormat("label.cpm.template_link_input.desc"), link -> {
@@ -411,19 +446,19 @@ public class EditorGui extends Frame {
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.cubeEffects")).setBounds(new Box(5, 5, 0, 0)));
 
-		Checkbox boxGlow = pp.addCheckbox(gui.i18nFormat("label.cpm.glow"), editor::switchGlow);
+		Checkbox boxGlow = pp.addCheckbox(gui.i18nFormat("label.cpm.glow"), () -> editor.switchEffect(Effect.GLOW));
 		editor.setGlow.add(boxGlow::updateState);
 		boxGlow.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.glow")));
 
-		Checkbox boxSingleTex = pp.addCheckbox(gui.i18nFormat("label.cpm.singleTex"), editor::switchSingleTex);
+		Checkbox boxSingleTex = pp.addCheckbox(gui.i18nFormat("label.cpm.singleTex"), () -> editor.switchEffect(Effect.SINGLE_TEX));
 		editor.setSingleTex.add(boxSingleTex::updateState);
 		boxSingleTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.singleTex")));
 
-		Checkbox boxPfUV = pp.addCheckbox(gui.i18nFormat("label.cpm.perfaceUV"), editor::switchPerfaceUV);
+		Checkbox boxPfUV = pp.addCheckbox(gui.i18nFormat("label.cpm.perfaceUV"), () -> editor.switchEffect(Effect.PER_FACE_UV));
 		editor.setPerFaceUV.add(boxPfUV::updateState);
 		boxPfUV.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.perfaceUV")));
 
-		Checkbox boxReColor = pp.addCheckbox(gui.i18nFormat("label.cpm.recolor"), editor::switchReColorEffect);
+		Checkbox boxReColor = pp.addCheckbox(gui.i18nFormat("label.cpm.recolor"), () -> editor.switchEffect(Effect.RECOLOR));
 		editor.setReColor.add(boxReColor::updateState);
 		boxReColor.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.recolor")));
 
@@ -436,13 +471,17 @@ public class EditorGui extends Frame {
 		colorBtn.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.recolor.colorbtn")));
 		pp.add(colorBtn);
 
-		Checkbox boxHidden = pp.addCheckbox(gui.i18nFormat("label.cpm.hidden_effect"), editor::switchHide);
+		Checkbox boxHidden = pp.addCheckbox(gui.i18nFormat("label.cpm.hidden_effect"), () -> editor.switchEffect(Effect.HIDE));
 		editor.setHiddenEffect.add(boxHidden::updateState);
 		boxHidden.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.hidden_effect")));
 
-		Checkbox boxExtrude = pp.addCheckbox(gui.i18nFormat("label.cpm.extrude_effect"), editor::switchExtrude);
+		Checkbox boxExtrude = pp.addCheckbox(gui.i18nFormat("label.cpm.extrude_effect"), () -> editor.switchEffect(Effect.EXTRUDE));
 		editor.setExtrudeEffect.add(boxExtrude::updateState);
 		boxExtrude.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.extrude_effect")));
+
+		Checkbox boxCopyTransform = pp.addCheckbox(gui.i18nFormat("label.cpm.copyTransform"), () -> editor.switchEffect(Effect.COPY_TRANSFORM));
+		editor.setCopyTransformEffect.add(boxCopyTransform::updateState);
+		boxCopyTransform.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.copyTransform")));
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.modelEffects")).setBounds(new Box(5, 5, 0, 0)));
 
@@ -469,6 +508,10 @@ public class EditorGui extends Frame {
 		});
 		editor.updateGui.add(() -> removeArmorOffset.setSelected(editor.removeArmorOffset));
 		removeArmorOffset.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.removeArmorOffset")));
+
+		String fpText = gui.i18nFormat("tooltip.cpm.effect.setFpHandPos", new KeybindText("key.cpm.gestureMenu", "gestureMenu").toString(gui));
+		Button fpHand = pp.addButton(gui.i18nFormat("button.cpm.effect.setFpHandPos"), new MessagePopup(this, gui.i18nFormat("label.cpm.info"), fpText));
+		fpHand.setTooltip(new Tooltip(this, fpText));
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.textureEffects")).setBounds(new Box(5, 5, 0, 0)));
 
@@ -535,6 +578,21 @@ public class EditorGui extends Frame {
 		});
 		chxbxChat.setSelected(editor.displayChat);
 
+		Checkbox chxbxAdvScaling = pp.addCheckbox(gui.i18nFormat("label.cpm.display.advScaling"), b -> {
+			editor.displayAdvScaling = !b.isSelected();
+			b.setSelected(editor.displayAdvScaling);
+			editor.updateGui();
+		});
+		chxbxAdvScaling.setSelected(editor.displayAdvScaling);
+
+		Checkbox chxbxForceItemInAnim = pp.addCheckbox(gui.i18nFormat("label.cpm.display.forceItemInAnim"), b -> {
+			editor.forceHeldItemInAnim = !b.isSelected();
+			b.setSelected(editor.forceHeldItemInAnim);
+			editor.updateGui();
+		});
+		chxbxForceItemInAnim.setSelected(editor.forceHeldItemInAnim);
+		chxbxForceItemInAnim.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.forceItemInAnim")));
+
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
 
 		PopupMenu heldItemRight = new PopupMenu(gui, this);
@@ -595,31 +653,45 @@ public class EditorGui extends Frame {
 	}
 
 	private void load(File file) {
-		try {
-			editor.load(file);
-		} catch (Exception e) {
-			Log.warn("Error loading project file", e);
-			ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.load", e);
-			showError("load", e.toString());
-			editor.loadDefaultPlayerModel();
-			editor.updateGui();
-		}
+		editor.load(file).handleAsync((v, e) -> {
+			if(e != null) {
+				Log.warn("Error loading project file", e);
+				ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.load", e);
+				showError("load", e.toString());
+				editor.loadDefaultPlayerModel();
+				editor.updateGui();
+			}
+			if(recent.contains(file)) {
+				recent.remove(file);
+			}
+			while(recent.size() > 10)recent.remove(0);
+			recent.add(file);
+			flushRecent();
+			return null;
+		}, gui::executeLater);
 	}
 
 	private void saveProject(File file) {
-		try {
-			editor.save(file);
-		} catch (Exception e) {
-			Log.warn("Error saving project file", e);
-			ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.save", e);
-			showError("save", e.toString());
-			editor.setInfoMsg.accept(Pair.of(0, ""));
-		}
-		if(TestIngameManager.isTesting()) {
-			if(TestIngameManager.openTestIngame(this, true)) {
-				editor.setInfoMsg.accept(Pair.of(2000, gui.i18nFormat("tooltip.cpm.saveSuccess", file.getName()) + "\\" + gui.i18nFormat("label.cpm.test_model_exported")));
+		editor.save(file).handleAsync((v, e) -> {
+			if(e != null) {
+				Log.warn("Error saving project file", e);
+				ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.save", e);
+				showError("save", e.toString());
+				editor.setInfoMsg.accept(Pair.of(0, ""));
 			}
-		}
+			if(TestIngameManager.isTesting()) {
+				if(TestIngameManager.openTestIngame(this, true)) {
+					editor.setInfoMsg.accept(Pair.of(2000, gui.i18nFormat("tooltip.cpm.saveSuccess", file.getName()) + "\\" + gui.i18nFormat("label.cpm.test_model_exported")));
+				}
+			}
+			if(recent.contains(file)) {
+				recent.remove(file);
+			}
+			while(recent.size() > 10)recent.remove(0);
+			recent.add(file);
+			flushRecent();
+			return null;
+		}, gui::executeLater);
 	}
 
 	public void loadSkin(File file) {
@@ -646,30 +718,34 @@ public class EditorGui extends Frame {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		super.keyPressed(event);
 		if(!event.isConsumed()) {
-			if(gui.isCtrlDown()) {
-				if(event.matches("z")) {
-					editor.undo();
-					event.consume();
-				}
-				if(event.matches("y")) {
-					editor.redo();
-					event.consume();
-				}
-				if(event.matches("s")) {
-					save();
-				}
+			if(Keybinds.UNDO.isPressed(gui, event)) {
+				editor.undo();
+				event.consume();
+			}
+			if(Keybinds.REDO.isPressed(gui, event)) {
+				editor.redo();
+				event.consume();
+			}
+			if(Keybinds.SAVE.isPressed(gui, event)) {
+				save();
+				event.consume();
 			}
 			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
 				editor.restitchTextures();
 				editor.animations.forEach(EditorAnim::clearCache);
+				event.consume();
 			}
 		}
+		super.keyPressed(event);
 	}
 
 	public static int getRotateMouseButton() {
 		return ModConfig.getCommonConfig().getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2);
+	}
+
+	public static int getDragMouseButton() {
+		return ModConfig.getCommonConfig().getSetInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1);
 	}
 
 	public static boolean doOpenEditor() {
@@ -697,5 +773,9 @@ public class EditorGui extends Frame {
 	@Override
 	public boolean enableChat() {
 		return editor.displayChat;
+	}
+
+	public static Editor getActiveTestingEditor() {
+		return toReopen;
 	}
 }

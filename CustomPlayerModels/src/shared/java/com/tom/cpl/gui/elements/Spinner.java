@@ -18,6 +18,7 @@ public class Spinner extends GuiElement implements Focusable {
 	private TextField txtf;
 	private boolean txtfNeedsUpdate;
 	private String error, lastValue;
+
 	public Spinner(IGui gui) {
 		super(gui);
 		txtf = new TextField(gui);
@@ -132,5 +133,9 @@ public class Spinner extends GuiElement implements Focusable {
 	@Override
 	public void setFocused(boolean focused) {
 		txtf.setFocused(focused);
+	}
+
+	public void setBackgroundColor(int bgColor) {
+		txtf.setBackgroundColor(bgColor);
 	}
 }

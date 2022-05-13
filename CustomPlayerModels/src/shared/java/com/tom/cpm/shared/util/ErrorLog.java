@@ -18,7 +18,7 @@ public class ErrorLog {
 
 	@SuppressWarnings("unchecked")
 	public static List<LogEntry> collectErrors() {
-		List<Player<?, ?>> players = MinecraftClientAccess.get().getDefinitionLoader().getPlayers();
+		List<Player<?>> players = MinecraftClientAccess.get().getDefinitionLoader().getPlayers();
 		List<LogEntry> entries = players.stream().map(Player::getModelDefinition0).filter(d -> d != null && d.getError() != null).map(d -> {
 			Throwable err = d.getError();
 			if(err instanceof SafetyException)

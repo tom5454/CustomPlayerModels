@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.ItemSlot;
+import com.tom.cpm.shared.editor.CopyTransformEffect;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
@@ -72,6 +73,9 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 				elem.pos = new Vec3f(map.getMap("pos"), new Vec3f(0, 0, 0));
 				elem.rotation = new Vec3f(map.getMap("rotation"), new Vec3f(0, 0, 0));
 			}
+		});
+		Editor.walkElements(editor.elements, e -> {
+			if(e.copyTransform != null)e.copyTransform.load(editor);
 		});
 	}
 
@@ -149,6 +153,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		map.put("extrude", elem.extrude);
 		if(elem.faceUV != null)map.put("faceUV", elem.faceUV.toMap());
 		if(elem.itemRenderer != null)map.put("itemRenderer", elem.itemRenderer.slot.name().toLowerCase());
+		if(elem.copyTransform != null)map.put("copyTransform", elem.copyTransform.toMap());
 	}
 
 	protected void loadElement(ModelElement elem, JsonMap map, Editor editor) {
@@ -180,6 +185,10 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 					break;
 				}
 			}
+		}
+		if(map.containsKey("copyTransform")) {
+			elem.copyTransform = new CopyTransformEffect(elem);
+			elem.copyTransform.load(map.getMap("copyTransform"));
 		}
 	}
 

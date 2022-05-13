@@ -46,7 +46,7 @@ public class ServerHandler {
 				if(key.equals(setLayer)) {
 					try {
 						PlayerDataExt.setSkinLayer(pl, data.read());
-						sendToAllTracking.accept(pl, setLayer, writeLayerData(pl));
+						sendPacketToTracking(pl, setLayer, writeLayerData(pl));
 					} catch (IOException e) {
 					}
 				} else

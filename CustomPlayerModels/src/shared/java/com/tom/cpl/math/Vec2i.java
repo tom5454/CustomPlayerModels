@@ -28,6 +28,11 @@ public class Vec2i {
 		this.y = 0;
 	}
 
+	public Vec2i(Vec4f v) {
+		this.x = (int) v.x;
+		this.y = (int) v.y;
+	}
+
 	public Vec2i(JsonMap m, Vec2i def) {
 		this(def);
 		if(m == null)return;
@@ -64,7 +69,7 @@ public class Vec2i {
 
 	@Override
 	public String toString() {
-		return String.format("Vec2[%s, %s]", x, y);
+		return String.format("Vec2i[%s, %s]", x, y);
 	}
 
 	public Map<String, Object> toMap() {

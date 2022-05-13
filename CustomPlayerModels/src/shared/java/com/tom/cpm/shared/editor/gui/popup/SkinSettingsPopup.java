@@ -78,6 +78,11 @@ public class SkinSettingsPopup extends PopupPanel {
 					editor.action("delTexture").
 					updateValueOp(tex, tex.getImage(), tex.copyDefaultImg(), ETextures::setImage).
 					updateValueOp(tex, tex.isEdited(), false, ETextures::setEdited).
+					onAction(() -> {
+						editor.reloadSkin();
+						editor.restitchTextures();
+						editor.updateGui();
+					}).
 					execute();
 				}, null));
 			}
@@ -85,38 +90,40 @@ public class SkinSettingsPopup extends PopupPanel {
 		delSkin.setBounds(new Box(5, 30, 60, 20));
 		addElement(delSkin);
 
-		Label lblT = new Label(gui, gui.i18nFormat("label.cpm.sheetSize"));
-		lblT.setBounds(new Box(5, 80, 80, 18));
-		lblT.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.texture_sheet")));
-		addElement(lblT);
+		if(editor.displayAdvScaling) {
+			Label lblT = new Label(gui, gui.i18nFormat("label.cpm.sheetSize"));
+			lblT.setBounds(new Box(5, 80, 80, 18));
+			lblT.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.texture_sheet")));
+			addElement(lblT);
 
-		Label lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
-		lblTW.setBounds(new Box(5, 90, 40, 18));
-		Label lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
-		lblTH.setBounds(new Box(75, 90, 40, 18));
+			Label lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
+			lblTW.setBounds(new Box(5, 90, 40, 18));
+			Label lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
+			lblTH.setBounds(new Box(75, 90, 40, 18));
 
-		Spinner spinnerTW = new Spinner(gui);
-		Spinner spinnerTH = new Spinner(gui);
-		spinnerTW.setBounds(new Box(5, 100, 65, 18));
-		spinnerTH.setBounds(new Box(75, 100, 65, 18));
-		spinnerTW.setDp(0);
-		spinnerTH.setDp(0);
-		addElement(spinnerTW);
-		addElement(spinnerTH);
-		addElement(lblTW);
-		addElement(lblTH);
+			Spinner spinnerTW = new Spinner(gui);
+			Spinner spinnerTH = new Spinner(gui);
+			spinnerTW.setBounds(new Box(5, 100, 65, 18));
+			spinnerTH.setBounds(new Box(75, 100, 65, 18));
+			spinnerTW.setDp(0);
+			spinnerTH.setDp(0);
+			addElement(spinnerTW);
+			addElement(spinnerTH);
+			addElement(lblTW);
+			addElement(lblTH);
 
-		Runnable r = () -> {
-			if(editor.hasVanillaParts() && !shownWarning) {
-				shownWarning = true;
-				e.openPopup(new MessagePopup(e, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));
-			} else
-				editor.setTexSize((int) spinnerTW.getValue(), (int) spinnerTH.getValue());
-		};
-		spinnerTW.addChangeListener(r);
-		spinnerTH.addChangeListener(r);
-		spinnerTW.setValue(tex.provider.size.x);
-		spinnerTH.setValue(tex.provider.size.y);
+			Runnable r = () -> {
+				if(editor.hasVanillaParts() && !shownWarning) {
+					shownWarning = true;
+					e.openPopup(new MessagePopup(e, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));
+				} else
+					editor.setTexSize((int) spinnerTW.getValue(), (int) spinnerTH.getValue());
+			};
+			spinnerTW.addChangeListener(r);
+			spinnerTH.addChangeListener(r);
+			spinnerTW.setValue(tex.provider.size.x);
+			spinnerTH.setValue(tex.provider.size.y);
+		}
 
 		setBounds(new Box(0, 0, 210, 140));
 	}

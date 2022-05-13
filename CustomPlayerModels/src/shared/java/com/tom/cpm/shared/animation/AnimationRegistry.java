@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class AnimationRegistry {
 	private List<AnimatedTexture> animatedTextures = new ArrayList<>();
-	private Map<IPose, List<Animation>> animations = new HashMap<>();
+	private Map<IPose, List<IAnimation>> animations = new HashMap<>();
 	private Map<Integer, IPose> encodedToPose = new HashMap<>();
 	private Map<Integer, Gesture> encodedToGesture = new HashMap<>();
 	private Map<IPose, Integer> poseToEncoded = new HashMap<>();
@@ -18,7 +18,7 @@ public class AnimationRegistry {
 	private int blankGesture;
 	private int poseResetId;
 
-	public List<Animation> getPoseAnimations(IPose id) {
+	public List<IAnimation> getPoseAnimations(IPose id) {
 		return animations.getOrDefault(id, Collections.emptyList());
 	}
 
@@ -31,18 +31,18 @@ public class AnimationRegistry {
 	}
 
 	public static class Gesture {
-		public List<Animation> animation;
+		public List<IAnimation> animation;
 		public boolean isLoop;
 		public String name;
 
-		public Gesture(List<Animation> animation, String name, boolean isLoop) {
+		public Gesture(List<IAnimation> animation, String name, boolean isLoop) {
 			this.animation = animation;
 			this.name = name;
 			this.isLoop = isLoop;
 		}
 	}
 
-	public void register(IPose pose, Animation anim) {
+	public void register(IPose pose, IAnimation anim) {
 		animations.computeIfAbsent(pose, k -> new ArrayList<>()).add(anim);
 	}
 
@@ -106,7 +106,7 @@ public class AnimationRegistry {
 		}
 	}
 
-	public Map<IPose, List<Animation>> getAnimations() {
+	public Map<IPose, List<IAnimation>> getAnimations() {
 		return animations;
 	}
 

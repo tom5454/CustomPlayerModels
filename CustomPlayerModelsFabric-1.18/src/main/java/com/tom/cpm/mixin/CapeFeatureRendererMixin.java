@@ -40,7 +40,7 @@ public abstract class CapeFeatureRendererMixin extends FeatureRenderer<AbstractC
 	public void onRender(MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn,
 			AbstractClientPlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks,
 			float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		Player<?, ?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
@@ -52,7 +52,7 @@ public abstract class CapeFeatureRendererMixin extends FeatureRenderer<AbstractC
 					CustomPlayerModelsClient.mc.getPlayerRenderManager().rebindModel(getContextModel());
 					CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getContextModel(), mt, TextureSheetType.CAPE);
 					if(mt.getTexture() != null) {
-						VertexConsumer buffer = bufferIn.getBuffer(mt.getRenderLayer());
+						VertexConsumer buffer = bufferIn.getBuffer(mt.getRenderType());
 						CustomPlayerModelsClient.renderCape(matrixStackIn, buffer, packedLightIn, entitylivingbaseIn, partialTicks, getContextModel(), def);
 					}
 				}

@@ -8,6 +8,7 @@ import com.tom.cpm.shared.editor.project.IProject;
 import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.project.ProjectPartLoader;
 import com.tom.cpm.shared.editor.project.ProjectWriter;
+import com.tom.cpm.shared.model.PartPosition;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.util.ScalingOptions;
 
@@ -47,6 +48,30 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 			editor.scalingElem.rotation = new Vec3f(scaling.getMap("render_rotation"), new Vec3f());
 			editor.scalingElem.scale = new Vec3f(scaling.getMap("render_scale"), new Vec3f());
 		}
+		JsonMap fpHand = data.getMap("firstPersonHand");
+		if(fpHand != null) {
+			editor.leftHandPos = loadPartPos(fpHand, "left");
+			editor.rightHandPos = loadPartPos(fpHand, "right");
+		}
+	}
+
+	protected static PartPosition loadPartPos(JsonMap fpHand, String name) {
+		PartPosition p = new PartPosition();
+		JsonMap map = fpHand.getMap(name);
+		if(map != null) {
+			Vec3f pos = new Vec3f(map.getMap("position"), new Vec3f());
+			Vec3f rotation = new Vec3f(map.getMap("rotation"), new Vec3f());
+			Vec3f scale = new Vec3f(map.getMap("scale"), new Vec3f());
+			p.setRenderScale(pos, rotation, scale);
+		}
+		return p;
+	}
+
+	protected static void putPartPos(PartPosition pos, JsonMap fpHand, String name) {
+		JsonMap map = fpHand.putMap(name);
+		map.put("position", pos.getRPos().toMap());
+		map.put("rotation", pos.getRRotation().toMap());
+		map.put("scale", pos.getRScale().toMap());
 	}
 
 	@Override
@@ -64,6 +89,9 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 		scaling.put("render_position", editor.scalingElem.pos.toMap());
 		scaling.put("render_rotation", editor.scalingElem.rotation.toMap());
 		scaling.put("render_scale", editor.scalingElem.scale.toMap());
+		JsonMap fpHand = data.putMap("firstPersonHand");
+		putPartPos(editor.leftHandPos, fpHand, "left");
+		putPartPos(editor.rightHandPos, fpHand, "right");
 	}
 
 }

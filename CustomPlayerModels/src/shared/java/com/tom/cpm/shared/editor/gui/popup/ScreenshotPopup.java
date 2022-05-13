@@ -63,7 +63,7 @@ public class ScreenshotPopup extends PopupPanel {
 		private EditorGui e;
 
 		public DisplayPanel(EditorGui e, ViewportCamera cam) {
-			super(e.getGui());
+			super(e);
 			this.cam = cam;
 			this.def = new Def(e.getEditor());
 			this.e = e;
@@ -80,18 +80,13 @@ public class ScreenshotPopup extends PopupPanel {
 		}
 
 		@Override
-		public void preRender() {
+		public void preRender(MatrixStack stack, VBuffers buf) {
 			e.getEditor().preRender();
 		}
 
 		@Override
 		public ModelDefinition getDefinition() {
 			return def;
-		}
-
-		@Override
-		public boolean applyLighting() {
-			return true;
 		}
 	}
 

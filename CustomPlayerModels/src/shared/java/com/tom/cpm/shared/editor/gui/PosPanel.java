@@ -18,6 +18,7 @@ import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.SkinSettingsPopup;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
@@ -53,11 +54,15 @@ public class PosPanel extends Panel {
 			tabHandler.add(nameField);
 		}
 
-		addVec3("size", 40, v -> editor.setVec(v, VecType.SIZE), this, editor.setSize, 1, tabHandler);
-		addVec3("offset", 70, v -> editor.setVec(v, VecType.OFFSET), this, editor.setOffset, 2, tabHandler);
-		addVec3("rotation", 100, v -> editor.setVec(v, VecType.ROTATION), this, editor.setRot, 1, tabHandler);
-		addVec3("position", 130, v -> editor.setVec(v, VecType.POSITION), this, editor.setPosition, 2, tabHandler);
-		addVec3("scale", 160, v -> editor.setVec(v, VecType.SCALE), this, editor.setScale, 2, tabHandler);
+		addVec3("size", v -> editor.setVec(v, VecType.SIZE), this, editor.setSize, 1, tabHandler);
+		addVec3("offset", v -> editor.setVec(v, VecType.OFFSET), this, editor.setOffset, 2, tabHandler);
+		addVec3("rotation", v -> editor.setVec(v, VecType.ROTATION), this, editor.setRot, 1, tabHandler);
+		addVec3("position", v -> editor.setVec(v, VecType.POSITION), this, editor.setPosition, 2, tabHandler);
+		Panel sc =  addVec3("scale", v -> editor.setVec(v, VecType.SCALE), this, editor.setScale, 2, tabHandler);
+		editor.updateGui.add(() -> {
+			sc.setVisible(editor.displayAdvScaling);
+			layout.reflow();
+		});
 
 		{
 			Panel panel = new Panel(gui);
@@ -79,7 +84,7 @@ public class PosPanel extends Panel {
 
 			Checkbox box = new Checkbox(gui, gui.i18nFormat("label.cpm.mirror"));
 			box.setBounds(new Box(80, 10, 70, 18));
-			box.setAction(editor::switchMirror);
+			box.setAction(() -> editor.switchEffect(Effect.MIRROR));
 			editor.setMirror.add(box::updateState);
 			panel.addElement(box);
 		}
@@ -207,10 +212,10 @@ public class PosPanel extends Panel {
 		layout.reflow();
 	}
 
-	public static void addVec3(String name, int y, Consumer<Vec3f> consumer, Panel panelIn, Updater<Vec3f> updater, int dp, TabFocusHandler tabHandler) {
+	public static Panel addVec3(String name, Consumer<Vec3f> consumer, Panel panelIn, Updater<Vec3f> updater, int dp, TabFocusHandler tabHandler) {
 		IGui gui = panelIn.getGui();
 		Panel panel = new Panel(gui);
-		panel.setBounds(new Box(0, y, 170, 30));
+		panel.setBounds(new Box(0, 0, 170, 30));
 		panelIn.addElement(panel);
 
 		Spinner spinnerX = new Spinner(gui);
@@ -238,6 +243,10 @@ public class PosPanel extends Panel {
 		tabHandler.add(spinnerY);
 		tabHandler.add(spinnerZ);
 
+		spinnerX.setBackgroundColor(0xFFFF8888);
+		spinnerY.setBackgroundColor(0xFF88FF88);
+		spinnerZ.setBackgroundColor(0xFF8888FF);
+
 		updater.add(v -> {
 			boolean en = v != null;
 			spinnerX.setEnabled(en);
@@ -254,6 +263,7 @@ public class PosPanel extends Panel {
 				spinnerZ.setValue(0);
 			}
 		});
+		return panel;
 	}
 
 	public static enum ModeDisplayType {

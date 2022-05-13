@@ -15,8 +15,10 @@ import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.DirectBuffer;
 import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpl.render.VertexBuffer;
+import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.shared.retro.RetroGLAccess;
 
-public class RetroGL {
+public class RetroGL implements RetroGLAccess<ResourceLocation> {
 	private static final RenderStage lines = new RenderStage(true, false, false, () -> {
 		GlStateManager.disableDepth();
 		GlStateManager.disableTexture2D();
@@ -31,7 +33,8 @@ public class RetroGL {
 		GlStateManager.enableTexture2D();
 	}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 
-	public static RenderStage texture(ResourceLocation rl) {
+	@Override
+	public RenderStage texture(ResourceLocation rl) {
 		return new RenderStage(true, true, true, () -> {
 			bindTex(rl);
 		}, () -> {
@@ -39,7 +42,8 @@ public class RetroGL {
 	}
 
 	private static float lx, ly;
-	public static RenderStage eyes(ResourceLocation rl) {
+	@Override
+	public RenderStage eyes(ResourceLocation rl) {
 		return new RenderStage(true, true, true, () -> {
 			lx = OpenGlHelper.lastBrightnessX;
 			ly = OpenGlHelper.lastBrightnessY;
@@ -61,21 +65,14 @@ public class RetroGL {
 		}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
 	}
 
-	public static RenderStage linesNoDepth() {
+	@Override
+	public RenderStage linesNoDepth() {
 		return lines;
 	}
 
-	public static RenderStage color() {
+	@Override
+	public RenderStage color() {
 		return color;
-	}
-
-	public static RenderStage paint(ResourceLocation tex) {
-		return new RenderStage(true, true, true, () -> {
-			GlStateManager.disableLighting();
-			bindTex(tex);
-		}, () -> {
-			GlStateManager.enableLighting();
-		}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
 	}
 
 	private static void bindTex(ResourceLocation tex) {
@@ -88,7 +85,7 @@ public class RetroGL {
 		return new RetroBuffer(Tessellator.getInstance(), stage);
 	}
 
-	private static class RenderStage {
+	private static class RenderStage implements RetroLayer {
 		private boolean color, texture, normal;
 		private Runnable begin, end;
 		private int glMode;
@@ -150,5 +147,10 @@ public class RetroGL {
 
 	private static float val(float color) {
 		return color == -1 ? 1 : color;
+	}
+
+	@Override
+	public ResourceLocation getDynTexture() {
+		return DynTexture.getBoundLoc();
 	}
 }

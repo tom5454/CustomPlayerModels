@@ -1,6 +1,6 @@
 package com.tom.cpm.shared.gui.panel;
 
-import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MatrixStack;
@@ -12,8 +12,8 @@ public class ModelDisplayPanel extends ViewportPanelBase3d {
 	private IModelDisplayPanel skins;
 	private String loadingText;
 
-	public ModelDisplayPanel(IGui gui, IModelDisplayPanel skins) {
-		super(gui);
+	public ModelDisplayPanel(Frame frm, IModelDisplayPanel skins) {
+		super(frm);
 		this.skins = skins;
 	}
 
@@ -43,18 +43,13 @@ public class ModelDisplayPanel extends ViewportPanelBase3d {
 	}
 
 	@Override
-	public void preRender() {
+	public void preRender(MatrixStack stack, VBuffers buf) {
 		skins.preRender();
 	}
 
 	@Override
 	public ModelDefinition getDefinition() {
 		return skins.getSelectedDefinition();
-	}
-
-	@Override
-	public boolean applyLighting() {
-		return true;
 	}
 
 	public void setLoadingText(String loadingText) {

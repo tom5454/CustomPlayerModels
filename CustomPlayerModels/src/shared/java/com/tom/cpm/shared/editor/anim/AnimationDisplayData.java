@@ -54,6 +54,7 @@ public enum AnimationDisplayData {
 	FREEZING(VanillaPose.FREEZING, null, null, Type.LAYERS),
 	ON_LADDER(VanillaPose.ON_LADDER, null, null, Type.POSE),
 	CLIMBING_ON_LADDER(VanillaPose.CLIMBING_ON_LADDER, null, null, Type.POSE),
+	SPEAKING(VanillaPose.SPEAKING, null, null, Type.LAYERS),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;

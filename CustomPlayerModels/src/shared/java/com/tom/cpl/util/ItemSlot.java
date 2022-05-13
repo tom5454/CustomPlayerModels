@@ -7,7 +7,8 @@ public enum ItemSlot {
 	ANY_SLOT,
 	TOOL_SLOT,
 	LEFT_SHOULDER,
-	RIGHT_SHOULDER
+	RIGHT_SHOULDER,
+	API_SLOT,
 	;
 	public static final ItemSlot[] VALUES = values();
 	public static final ItemSlot[] SLOTS = {LEFT_HAND, RIGHT_HAND, HEAD};

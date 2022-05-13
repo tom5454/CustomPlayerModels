@@ -83,7 +83,7 @@ public abstract class ExportPopup extends PopupPanel {
 	private static enum ExportMode {
 		SKIN(Skin::new, ((Predicate<Editor>) ExportPopup::isTemplate).negate()),
 		MODEL(Model::new, ((Predicate<Editor>) ExportPopup::isTemplate).negate()),
-		B64(B64::new, ((Predicate<Editor>) ExportPopup::isTemplate).negate()),
+		B64(ExportPopup.B64::new, ((Predicate<Editor>) ExportPopup::isTemplate).negate()),
 		TEMPLATE(Template::new, ExportPopup::isTemplate),
 		;
 

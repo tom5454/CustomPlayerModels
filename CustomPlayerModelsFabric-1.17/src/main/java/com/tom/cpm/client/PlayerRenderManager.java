@@ -15,6 +15,7 @@ import net.minecraft.client.render.entity.model.ElytraEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.model.SkullEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
@@ -22,7 +23,6 @@ import net.minecraft.util.math.Matrix4f;
 import com.tom.cpl.math.MatrixStack.Entry;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
-import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.proxy.ModelPartOF;
@@ -45,7 +45,9 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			@Override
 			public <M> RedirectHolder<?, VertexConsumerProvider, ModelTexture, ModelPart> create(
 					M model, String arg) {
-				if(model instanceof PlayerEntityModel) {
+				if ("api".equals(arg) && model instanceof BipedEntityModel) {
+					return new RedirectHolderApi(PlayerRenderManager.this, (BipedEntityModel<LivingEntity>) model);
+				} else if(model instanceof PlayerEntityModel) {
 					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerEntityModel<AbstractClientPlayerEntity>) model);
 				} else if(model instanceof SkullEntityModel) {
 					return new RedirectHolderSkull(PlayerRenderManager.this, (SkullEntityModel) model);
@@ -92,12 +94,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 
 		@Override
 		public void setupRenderSystem(ModelTexture cbi, TextureSheetType tex) {
-			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(0));
-			renderTypes.put(RenderMode.DEFAULT, new NativeRenderType(cbi.getRenderLayer(), 0));
-			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderLayer.getEyes(cbi.getTexture()), 1));
-			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RenderLayer.getLines(), 2));
-			renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
-			renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(CustomRenderTypes.getEntityColorEyes(), 1));
+			CustomPlayerModelsClient.mc.renderBuilder.build(renderTypes, cbi);
 		}
 
 		@Override
@@ -135,6 +132,32 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			register(new Field<>(() -> model.jacket     , v -> model.jacket      = v, null));
 
 			register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
+		}
+	}
+
+	private static class RedirectHolderApi extends RDH {
+		private RedirectRenderer<ModelPart> bipedHead;
+
+		public RedirectHolderApi(PlayerRenderManager mngr, BipedEntityModel<LivingEntity> model) {
+			super(mngr, model);
+			bipedHead = registerHead(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+			register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			register(new Field<>(() -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
+
+			register(new Field<>(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(bipedHead);
+			if(model instanceof PlayerEntityModel) {
+				PlayerEntityModel<LivingEntity> mp = (PlayerEntityModel<LivingEntity>) model;
+				register(new Field<>(() -> mp.leftSleeve , v -> mp.leftSleeve  = v, null));
+				register(new Field<>(() -> mp.rightSleeve, v -> mp.rightSleeve = v, null));
+				register(new Field<>(() -> mp.leftPants  , v -> mp.leftPants   = v, null));
+				register(new Field<>(() -> mp.rightPants , v -> mp.rightPants  = v, null));
+				register(new Field<>(() -> mp.jacket     , v -> mp.jacket      = v, null));
+
+				register(new Field<>(() -> mp.cloak, v -> mp.cloak = v, RootModelType.CAPE));
+			}
 		}
 	}
 

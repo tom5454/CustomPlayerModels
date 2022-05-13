@@ -53,6 +53,7 @@ public enum VanillaPose implements IPose {
 	FREEZING,
 	ON_LADDER,
 	CLIMBING_ON_LADDER,
+	SPEAKING(s -> s.speakLevel),
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;

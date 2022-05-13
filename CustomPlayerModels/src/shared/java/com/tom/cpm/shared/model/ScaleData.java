@@ -3,13 +3,11 @@ package com.tom.cpm.shared.model;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.util.ScalingOptions;
 
-public class ScaleData {
+public class ScaleData extends PartPosition {
 	public static final ScaleData NULL = new ScaleData();
 	private Map<ScalingOptions, Float> scaling;
-	private Vec3f rPos = new Vec3f(), rRotation = new Vec3f(), rScale = new Vec3f();
 
 	@Deprecated
 	public ScaleData(float scale) {
@@ -30,24 +28,6 @@ public class ScaleData {
 		this.scaling.put(ScalingOptions.EYE_HEIGHT, eyeHeight);
 		this.scaling.put(ScalingOptions.HITBOX_WIDTH, hitboxW);
 		this.scaling.put(ScalingOptions.EYE_HEIGHT, hitboxH);
-	}
-
-	public void setRenderScale(Vec3f pos, Vec3f rotation, Vec3f scale) {
-		rPos = pos;
-		rRotation = rotation;
-		rScale = scale;
-	}
-
-	public Vec3f getRPos() {
-		return rPos;
-	}
-
-	public Vec3f getRRotation() {
-		return rRotation;
-	}
-
-	public Vec3f getRScale() {
-		return rScale;
 	}
 
 	public Map<ScalingOptions, Float> getScaling() {

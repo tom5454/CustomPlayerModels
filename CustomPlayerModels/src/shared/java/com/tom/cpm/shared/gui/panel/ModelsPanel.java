@@ -1,9 +1,12 @@
 package com.tom.cpm.shared.gui.panel;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.Frame;
@@ -33,6 +36,7 @@ import com.tom.cpm.shared.gui.SelectSkinPopup;
 import com.tom.cpm.shared.gui.SkinUploadPopup;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.gui.panel.ModelDisplayPanel.IModelDisplayPanel;
+import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.IOHelper.ImageBlock;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.SkinType;
@@ -117,16 +121,18 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		panel.setBackgroundColor(gui.getColors().panel_background & 0x00_ffffff | 0x80_000000);
 		addElement(list);
 
-		display = new ModelDisplayPanel(gui, this);
+		display = new ModelDisplayPanel(frm, this);
 		display.setLoadingText(gui.i18nFormat("label.cpm.loading"));
 		addElement(display);
 
 		set = new Button(gui, gui.i18nFormat("button.cpm.applySkin"), this::applySelected);
+		set.setEnabled(false);
 		addElement(set);
 
 		if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.OFFLINE) {
 			upload = new Button(gui, gui.i18nFormat("button.cpm.uploadSkin"), this::uploadSelected);
 			upload.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.uploadSkin")));
+			upload.setEnabled(false);
 			addElement(upload);
 
 			simpleSkin = new Button(gui, gui.i18nFormat("button.cpm.changeSkin"), () -> {
@@ -142,7 +148,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			addElement(simpleSkin);
 		}
 
-		Player<?, ?> player = MinecraftClientAccess.get().getCurrentClientPlayer();
+		Player<?> player = MinecraftClientAccess.get().getCurrentClientPlayer();
 		player.getDefinitionFuture().thenAccept(d -> {
 			if(selectedDef == null)selectedDef = d;
 			animHandler.clear();
@@ -194,6 +200,8 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 				selected = file.getFileName();
 				selectedDef = MinecraftClientAccess.get().getDefinitionLoader().loadModel(file.getDataBlock(), MinecraftClientAccess.get().getClientPlayer());
 				file.registerLocalCache(MinecraftClientAccess.get().getDefinitionLoader());
+				set.setEnabled(true);
+				upload.setEnabled(true);
 			});
 			addElement(select);
 
@@ -304,5 +312,25 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	@Override
 	public boolean doRender() {
 		return doRender;
+	}
+
+	public void filesDropped(List<File> files) {
+		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+		for (int i = 0; i < files.size(); i++) {
+			File model = files.get(i);
+			if(model.getName().endsWith(".cpmmodel")) {
+				File m = new File(modelsDir, model.getName());
+				Random r = new Random();
+				String name = model.getName();
+				name = name.substring(0, name.length() - 9);
+				while(m.exists()) {
+					m = new File(modelsDir, name + "_" + Integer.toHexString(r.nextInt()) + ".cpmmodel");
+				}
+				try(FileInputStream in = new FileInputStream(model);FileOutputStream out = new FileOutputStream(m)) {
+					IOHelper.copy(in, out);
+				} catch (IOException e) {
+				}
+			}
+		}
 	}
 }

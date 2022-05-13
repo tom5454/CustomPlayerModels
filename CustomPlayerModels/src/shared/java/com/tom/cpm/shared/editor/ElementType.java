@@ -30,9 +30,6 @@ public enum ElementType {
 
 				@Override
 				public ElementSelectMode getSelected() {
-					if(editor.renderPaint) {
-						return ElementSelectMode.PAINT_MODE;
-					}
 					if(editor.selectedElement == elem)return ElementSelectMode.SELECTED;
 					if(editor.selectedElement instanceof ArgElem && ((ArgElem) editor.selectedElement).elem == elem)
 						return ElementSelectMode.SEL_ONLY;

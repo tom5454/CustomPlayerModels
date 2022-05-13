@@ -67,19 +67,19 @@ public class GuiModelRenderManager extends ModelRenderManager<VBuffers, Viewport
 			super(mngr, model);
 
 			if(arg.equals(PLAYER)) {
-				register(new Field<>(    () -> model.head    , v -> model.head     = v, PlayerModelParts.HEAD));
-				register(new Field<>(           () -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+				register(new Field<>(() -> model.head    , v -> model.head     = v, PlayerModelParts.HEAD));
+				register(new Field<>(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
 				register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
-				register(new Field<>( () -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
-				register(new Field<>(           () -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
-				register(new Field<>(           () -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
+				register(new Field<>(() -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+				register(new Field<>(() -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
+				register(new Field<>(() -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
 			} else if(arg.equals(PlayerModelLayer.CAPE.name())) {
-				register(new Field<>(() -> model.cape        , v -> model.cape     = v, RootModelType.CAPE));
+				register(new Field<>(() -> model.cape    , v -> model.cape     = v, RootModelType.CAPE));
 			} else if(arg.equals(PlayerModelLayer.ELYTRA.name())) {
 				register(new Field<>(() -> model.elytraRight, v -> model.elytraRight = v, RootModelType.ELYTRA_RIGHT));
 				register(new Field<>(() -> model.elytraLeft,  v -> model.elytraLeft  = v, RootModelType.ELYTRA_LEFT));
 			} else if(arg.equals(PlayerModelLayer.HELMET.name())) {
-				register(new Field<>(() -> model.armorHelmet,     v -> model.armorHelmet     = v, RootModelType.ARMOR_HELMET));
+				register(new Field<>(() -> model.armorHelmet, v -> model.armorHelmet = v, RootModelType.ARMOR_HELMET));
 			} else if(arg.equals(PlayerModelLayer.BODY.name())) {
 				register(new Field<>(() -> model.armorBody,     v -> model.armorBody     = v, RootModelType.ARMOR_BODY));
 				register(new Field<>(() -> model.armorRightArm, v -> model.armorRightArm = v, RootModelType.ARMOR_RIGHT_ARM));
@@ -88,9 +88,9 @@ public class GuiModelRenderManager extends ModelRenderManager<VBuffers, Viewport
 				register(new Field<>(() -> model.armorRightFoot, v -> model.armorRightFoot = v, RootModelType.ARMOR_RIGHT_FOOT));
 				register(new Field<>(() -> model.armorLeftFoot,  v -> model.armorLeftFoot  = v, RootModelType.ARMOR_LEFT_FOOT));
 			} else if(arg.equals(PlayerModelLayer.LEGS.name())) {
-				register(new Field<>(() -> model.armorLeggingsBody,     v -> model.armorLeggingsBody     = v, RootModelType.ARMOR_LEGGINGS_BODY));
-				register(new Field<>(() -> model.armorRightLeg, v -> model.armorRightLeg = v, RootModelType.ARMOR_RIGHT_LEG));
-				register(new Field<>(() -> model.armorLeftLeg,  v -> model.armorLeftLeg  = v, RootModelType.ARMOR_LEFT_LEG));
+				register(new Field<>(() -> model.armorLeggingsBody, v -> model.armorLeggingsBody = v, RootModelType.ARMOR_LEGGINGS_BODY));
+				register(new Field<>(() -> model.armorRightLeg,     v -> model.armorRightLeg     = v, RootModelType.ARMOR_RIGHT_LEG));
+				register(new Field<>(() -> model.armorLeftLeg,      v -> model.armorLeftLeg      = v, RootModelType.ARMOR_LEFT_LEG));
 			} else {
 				throw new RuntimeException("Undefined argument: " + arg);
 			}
@@ -204,7 +204,7 @@ public class GuiModelRenderManager extends ModelRenderManager<VBuffers, Viewport
 		public void doRender0(RootModelElement elem, boolean doRender) {
 			MatrixStack stack = new MatrixStack();
 			stack.push();
-			holder.transform(stack, holder.def.getRenderPosition(), holder.def.getRenderRotation(), holder.def.getRenderScale());
+			holder.transform(stack, holder.def.getScale());
 			translateRotate(stack);
 			VBuffers buf = getVBuffers();
 			Vec4f color = getColor();
@@ -219,6 +219,10 @@ public class GuiModelRenderManager extends ModelRenderManager<VBuffers, Viewport
 				matrixStackIn.setLast(e);
 			} else
 				super.translateRotatePart(matrixStackIn);
+		}
+
+		public void renderParent(VertexBuffer buf) {
+			parent.render(new MatrixStack(), buf);
 		}
 	}
 }

@@ -29,16 +29,11 @@ public class CustomRenderTypes extends RenderLayer {
 		return LINES_NO_NEPTH;
 	}
 
-	public static RenderLayer getEntityColorTranslucentCull() {
+	public static RenderLayer getEntityColorTranslucent() {
 		return ENTITY_COLOR;
 	}
 
 	public static RenderLayer getEntityColorEyes() {
 		return ENTITY_COLOR_EYES;
-	}
-
-	public static RenderLayer getEntityTranslucentCullNoLight(Identifier texture) {
-		MultiPhaseParameters multiPhaseParameters = MultiPhaseParameters.builder().texture(new RenderPhase.Texture(texture, false, false)).transparency(TRANSLUCENT_TRANSPARENCY).diffuseLighting(DISABLE_DIFFUSE_LIGHTING).alpha(ONE_TENTH_ALPHA).lightmap(DISABLE_LIGHTMAP).overlay(DISABLE_OVERLAY_COLOR).build(true);
-		return of("cpm:entity_translucent_cull_nolight", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, 7, 256, true, true, multiPhaseParameters);
 	}
 }

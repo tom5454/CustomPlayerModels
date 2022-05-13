@@ -3,23 +3,31 @@ package com.tom.cpm.client;
 import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCustomizeSkin;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiSelectWorld;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
@@ -36,14 +44,15 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
-import com.google.common.collect.Iterables;
-
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
@@ -70,11 +79,7 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), EntityPlayer::getGameProfile);
-		manager.setGetSkullModel(profile -> {
-			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
-			if(property != null)return property.getValue();
-			return null;
-		});
+		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		Executor ex = minecraft::addScheduledTask;
 		netHandler.setExecutor(() -> ex);
@@ -92,15 +97,21 @@ public class ClientProxy extends CommonProxy {
 		netHandler.setDisplayText(f -> minecraft.ingameGUI.getChatGUI().printChatMessage(f.remap()));
 	}
 
+	@Override
+	public void apiInit() {
+		CustomPlayerModels.api.buildClient().voicePlayer(EntityPlayer.class).localModelApi(GameProfile::new).
+		renderApi(ModelBase.class, GameProfile.class).init();
+	}
+
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		manager.bindPlayer(event.entityPlayer, null);
-		manager.bindSkin(TextureSheetType.SKIN);
+		manager.bindPlayer(event.entityPlayer, null, event.renderer.getMainModel());
+		manager.bindSkin(event.renderer.getMainModel(), TextureSheetType.SKIN);
 	}
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		manager.unbindClear();
+		manager.unbindClear(event.renderer.getMainModel());
 	}
 
 	@SubscribeEvent
@@ -134,9 +145,9 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	public void renderArmor(ModelBase modelArmor, ModelBase modelLeggings,
-			EntityPlayer player) {
-		manager.bindArmor(player, null, modelArmor, 1);
-		manager.bindArmor(player, null, modelLeggings, 2);
+			ModelBiped player) {
+		manager.bindArmor(player, modelArmor, 1);
+		manager.bindArmor(player, modelLeggings, 2);
 		manager.bindSkin(modelArmor, TextureSheetType.ARMOR1);
 		manager.bindSkin(modelLeggings, TextureSheetType.ARMOR2);
 	}
@@ -181,6 +192,97 @@ public class ClientProxy extends CommonProxy {
 		if(evt.entity instanceof AbstractClientPlayer) {
 			if(!Player.isEnableNames())
 				evt.setCanceled(true);
+			if(Player.isEnableLoadingInfo()) {
+				FormatText st = INSTANCE.manager.getStatus(((AbstractClientPlayer) evt.entity).getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE);
+				if(st != null) {
+					double d0 = evt.entity.getDistanceSqToEntity(minecraft.getRenderViewEntity());
+					if (d0 < 32*32) {
+						GlStateManager.pushMatrix();
+						GlStateManager.translate(0, 0.125F, 0);
+						String str = ((IChatComponent) st.remap()).getFormattedText();
+						GlStateManager.alphaFunc(516, 0.1F);
+
+						if (evt.entity.isSneaking()) {
+							FontRenderer fontrenderer = minecraft.fontRendererObj;
+							GlStateManager.pushMatrix();
+							GlStateManager.translate((float)evt.x, (float)evt.y + evt.entity.height + 0.5F - (evt.entity.isChild() ? evt.entity.height / 2.0F : 0.0F), (float)evt.z);
+							GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+							GlStateManager.rotate(-minecraft.getRenderManager().playerViewY, 0.0F, 1.0F, 0.0F);
+							GlStateManager.rotate(minecraft.getRenderManager().playerViewX, 1.0F, 0.0F, 0.0F);
+							GlStateManager.scale(-0.02666667F / 2, -0.02666667F / 2, 0.02666667F / 2);
+							GlStateManager.translate(0.0F, 9.374999F, 0.0F);
+							GlStateManager.disableLighting();
+							GlStateManager.depthMask(false);
+							GlStateManager.enableBlend();
+							GlStateManager.disableTexture2D();
+							GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+							int i = fontrenderer.getStringWidth(str) / 2;
+							Tessellator tessellator = Tessellator.getInstance();
+							WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+							worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+							worldrenderer.pos(-i - 1, -1.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+							worldrenderer.pos(-i - 1, 8.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+							worldrenderer.pos(i + 1, 8.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+							worldrenderer.pos(i + 1, -1.0D, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+							tessellator.draw();
+							GlStateManager.enableTexture2D();
+							GlStateManager.depthMask(true);
+							fontrenderer.drawString(str, -fontrenderer.getStringWidth(str) / 2, 0, 553648127);
+							GlStateManager.enableLighting();
+							GlStateManager.disableBlend();
+							GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+							GlStateManager.popMatrix();
+						} else {
+							renderLivingLabel(evt.entity, str, evt.x, evt.y - (evt.entity.isChild() ? (double)(evt.entity.height / 2.0F) : 0.0D), evt.z, 64);
+						}
+					}
+					GlStateManager.popMatrix();
+				}
+			}
+		}
+	}
+
+	protected void renderLivingLabel(Entity entityIn, String str, double x, double y, double z, int maxDistance) {
+		double d0 = entityIn.getDistanceSqToEntity(minecraft.getRenderManager().livingPlayer);
+
+		if (d0 <= maxDistance * maxDistance) {
+			FontRenderer fontrenderer = minecraft.fontRendererObj;
+			float f = 1.6F;
+			float f1 = 0.016666668F * f / 2;
+			GlStateManager.pushMatrix();
+			GlStateManager.translate((float)x + 0.0F, (float)y + entityIn.height + 0.5F, (float)z);
+			GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+			GlStateManager.rotate(-minecraft.getRenderManager().playerViewY, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotate(minecraft.getRenderManager().playerViewX, 1.0F, 0.0F, 0.0F);
+			GlStateManager.scale(-f1, -f1, f1);
+			GlStateManager.disableLighting();
+			GlStateManager.depthMask(false);
+			GlStateManager.disableDepth();
+			GlStateManager.enableBlend();
+			GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+			Tessellator tessellator = Tessellator.getInstance();
+			WorldRenderer worldrenderer = tessellator.getWorldRenderer();
+			int i = 0;
+
+			if (str.equals("deadmau5"))i = -10;
+
+			int j = fontrenderer.getStringWidth(str) / 2;
+			GlStateManager.disableTexture2D();
+			worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR);
+			worldrenderer.pos(-j - 1, -1 + i, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+			worldrenderer.pos(-j - 1, 8 + i, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+			worldrenderer.pos(j + 1, 8 + i, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+			worldrenderer.pos(j + 1, -1 + i, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+			tessellator.draw();
+			GlStateManager.enableTexture2D();
+			fontrenderer.drawString(str, -fontrenderer.getStringWidth(str) / 2, i, 553648127);
+			GlStateManager.enableDepth();
+			GlStateManager.depthMask(true);
+			fontrenderer.drawString(str, -fontrenderer.getStringWidth(str) / 2, i, -1);
+			GlStateManager.enableLighting();
+			GlStateManager.disableBlend();
+			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+			GlStateManager.popMatrix();
 		}
 	}
 

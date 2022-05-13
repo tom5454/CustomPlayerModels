@@ -47,7 +47,7 @@ public class Image {
 		return h;
 	}
 
-	public static Image loadFrom(File f) throws IOException {
+	public static CompletableFuture<Image> loadFrom(File f) {
 		return ImageIO.read(f);
 	}
 

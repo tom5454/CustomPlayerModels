@@ -1,6 +1,7 @@
 package com.tom.cpl.gui.elements;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
@@ -36,6 +37,19 @@ public class PopupMenu extends PopupPanel {
 		int y = panel.elements.size() * 20;
 		Button btn = new Button(gui, name, null);
 		btn.setAction(() -> {
+			menu.display(x + getBounds().w, this.y + y - scroll.getScrollY());
+			menu.setOnClosed(this::close);
+		});
+		btn.setBounds(new Box(0, y, 80, 20));
+		panel.addElement(btn);
+		return btn;
+	}
+
+	public Button addMenuButton(String name, Supplier<PopupMenu> menuIn) {
+		int y = panel.elements.size() * 20;
+		Button btn = new Button(gui, name, null);
+		btn.setAction(() -> {
+			PopupMenu menu = menuIn.get();
 			menu.display(x + getBounds().w, this.y + y - scroll.getScrollY());
 			menu.setOnClosed(this::close);
 		});

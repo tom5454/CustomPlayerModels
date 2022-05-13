@@ -1,9 +1,13 @@
 package com.tom.cpm.client;
 
+import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -90,6 +94,7 @@ public class GuiImpl extends Screen implements IGui {
 		return false;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(matrixStack, 0);
@@ -300,6 +305,15 @@ public class GuiImpl extends Screen implements IGui {
 	}
 
 	@Override
+	public void onFilesDrop(List<Path> filesIn) {
+		try {
+			gui.filesDropped(filesIn.stream().map(Path::toFile).filter(File::exists).collect(Collectors.toList()));
+		} catch (Throwable e) {
+			onGuiException("Error processing mouse event", e, false);
+		}
+	}
+
+	@Override
 	public void displayError(String e) {
 		Screen p = parent;
 		parent = null;
@@ -325,7 +339,6 @@ public class GuiImpl extends Screen implements IGui {
 			onClose();
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture) {
 		x += getOffset().x;
@@ -339,7 +352,24 @@ public class GuiImpl extends Screen implements IGui {
 		RenderSystem.disableBlend();
 	}
 
-	@SuppressWarnings("deprecation")
+	@Override
+	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture, int color) {
+		x += getOffset().x;
+		y += getOffset().y;
+		float a = (color >> 24 & 255) / 255.0F;
+		float r = (color >> 16 & 255) / 255.0F;
+		float g = (color >> 8 & 255) / 255.0F;
+		float b = (color & 255) / 255.0F;
+		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShaderColor(r, g, b, a);
+		RenderSystem.setShaderTexture(0, new ResourceLocation("cpm", "textures/gui/" + texture + ".png"));
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		blit(matrixStack, x, y, u, v, w, h);
+		RenderSystem.disableBlend();
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
 	@Override
 	public void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2) {
 		x += getOffset().x;
@@ -492,6 +522,16 @@ public class GuiImpl extends Screen implements IGui {
 		public void setFocused(boolean focused) {
 			field.setFocus(focused);
 		}
+
+		@Override
+		public int getCursorPos() {
+			return field.getCursorPosition();
+		}
+
+		@Override
+		public void setCursorPos(int pos) {
+			field.setCursorPosition(pos);
+		}
 	}
 
 	@Override
@@ -541,7 +581,6 @@ public class GuiImpl extends Screen implements IGui {
 		return CODES;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void drawGradientBox(int x, int y, int w, int h, int topLeft, int topRight, int bottomLeft,
 			int bottomRight) {

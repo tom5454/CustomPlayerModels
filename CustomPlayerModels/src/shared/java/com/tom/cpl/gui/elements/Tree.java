@@ -1,6 +1,7 @@
 package com.tom.cpl.gui.elements;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,26 +86,41 @@ public class Tree<T> extends GuiElement {
 		if(txtc != 0) {
 			textColor = txtc;
 		}
+		int dropD = textColor;
 		if (event.isHovered(new Box(bounds.x, yp * 10, bounds.w, 10))) {
 			textColor = gui.getColors().button_text_hover;
 			Tooltip tt = handler.model.getTooltip(e.value);
 			if(tt != null)tt.set();
+			if(event.isHovered(new Box(bounds.x, yp * 10, 5 + e.depth * 5, 10))) {
+				dropD = textColor;
+			}
 		}
 		map.put(yp, e);
 		gui.drawText(x * 5 + 3, yp * 10, e.display, textColor);
 		e.depth = x;
 		if(e.showChildren) {
-			if(e != handler.root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 24, 8, "editor");
+			if(e != handler.root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 24, 8, "editor", dropD);
 			for (TreeElement<T> i : e.children) {
 				drawTree(event, x + 1, y, i);
 			}
 		} else {
-			if(e != handler.root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 24, 0, "editor");
+			if(e != handler.root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 24, 0, "editor", dropD);
 		}
 	}
 
 	public void updateTree() {
+		walk(handler.root);
 		if(sizeUpdate != null)sizeUpdate.accept(getSize());
+	}
+
+	private boolean walk(TreeElement<T> e) {
+		boolean r = handler.model.isSelected(e.value);
+		for (TreeElement<T> i : e.children) {
+			boolean w = walk(i);
+			e.showChildren |= w;
+			r |= w;
+		}
+		return r;
 	}
 
 	public void setSizeUpdate(Consumer<Vec2i> sizeUpdate) {
@@ -120,6 +136,7 @@ public class Tree<T> extends GuiElement {
 		protected abstract String getName(T elem);
 		protected abstract Tooltip getTooltip(T elem);
 		protected abstract void refresh(T elem);
+		protected abstract boolean isSelected(T elem);
 	}
 
 	public static class TreeHandler<T> {
@@ -179,5 +196,59 @@ public class Tree<T> extends GuiElement {
 				walkChildren(t, oldTree != null ? oldTree.children : null);
 			});
 		}
+	}
+
+	private TreeElement<T> find(T elem) {
+		return handler.find(Collections.singletonList(handler.root), elem);
+	}
+
+	private TreeElement<T> findParent(TreeElement<T> elem) {
+		if(elem == null)return null;
+		return walk(handler.root, elem);
+	}
+
+	private TreeElement<T> walk(TreeElement<T> e, TreeElement<T> toFind) {
+		for (TreeElement<T> i : e.children) {
+			if(i == toFind)return e;
+			TreeElement<T> d = walk(i, toFind);
+			if(d != null)return d;
+		}
+		return null;
+	}
+
+	public T findUp(T curr) {
+		TreeElement<T> p = findParent(find(curr));
+		if(p != null)return p.value;
+		return curr;
+	}
+
+	public T findDown(T curr) {
+		TreeElement<T> p = find(curr);
+		if(p != null && !p.children.isEmpty())return p.children.get(0).value;
+		return curr;
+	}
+
+	public T findNext(T curr) {
+		TreeElement<T> c = find(curr);
+		TreeElement<T> p = findParent(c);
+		if(c != null && p != null) {
+			int i = p.children.indexOf(c);
+			if(i != -1 && i + 1 < p.children.size()) {
+				return p.children.get(i + 1).value;
+			}
+		}
+		return curr;
+	}
+
+	public T findPrev(T curr) {
+		TreeElement<T> c = find(curr);
+		TreeElement<T> p = findParent(c);
+		if(c != null && p != null) {
+			int i = p.children.indexOf(c);
+			if(i > 0) {
+				return p.children.get(i - 1).value;
+			}
+		}
+		return curr;
 	}
 }

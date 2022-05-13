@@ -11,12 +11,12 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -27,7 +27,11 @@ import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(HumanoidArmorLayer.class)
-public class HumanoidArmorLayerMixin {
+public abstract class HumanoidArmorLayerMixin extends RenderLayer<LivingEntity, HumanoidModel<LivingEntity>> {
+
+	public HumanoidArmorLayerMixin(RenderLayerParent<LivingEntity, HumanoidModel<LivingEntity>> pRenderer) {
+		super(pRenderer);
+	}
 
 	private @Final @Shadow HumanoidModel<LivingEntity> innerModel;
 	private @Final @Shadow HumanoidModel<LivingEntity> outerModel;
@@ -36,8 +40,8 @@ public class HumanoidArmorLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 					+ "Lnet/minecraft/world/entity/LivingEntity;FFFFFF)V")
 	public void preRender(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.renderArmor(outerModel, innerModel, (Player) entitylivingbaseIn, bufferIn);
+		if(getParentModel() instanceof HumanoidModel) {
+			ClientProxy.INSTANCE.renderArmor(outerModel, innerModel, getParentModel());
 		}
 	}
 
@@ -45,10 +49,8 @@ public class HumanoidArmorLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 					+ "Lnet/minecraft/world/entity/LivingEntity;FFFFFF)V")
 	public void postRender(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		if(entitylivingbaseIn instanceof AbstractClientPlayer) {
-			ClientProxy.INSTANCE.manager.unbind(outerModel);
-			ClientProxy.INSTANCE.manager.unbind(innerModel);
-		}
+		ClientProxy.INSTANCE.manager.unbind(outerModel);
+		ClientProxy.INSTANCE.manager.unbind(innerModel);
 	}
 
 	@Inject(at = @At("HEAD"),

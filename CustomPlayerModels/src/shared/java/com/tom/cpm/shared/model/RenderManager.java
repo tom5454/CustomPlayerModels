@@ -5,6 +5,7 @@ import java.util.function.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -12,7 +13,7 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
 
 public class RenderManager<G, P, M, D> {
-	private Player<P, M> profile;
+	private Player<P> profile;
 	private final ModelRenderManager<D, ?, ?, M> renderManager;
 	private final ModelDefinitionLoader<G> loader;
 	private Function<P, G> getProfile;
@@ -29,32 +30,19 @@ public class RenderManager<G, P, M, D> {
 	@SuppressWarnings("unchecked")
 	public boolean tryBindModel(G gprofile, P player, D buffer, M toBind, String arg, String unique, AnimationMode mode) {
 		if(gprofile == null)gprofile = getProfile.apply(player);
-		Player<P, M> profile = (Player<P, M>) loader.loadPlayer(gprofile, unique);
+		Player<P> profile = (Player<P>) loader.loadPlayer(gprofile, unique);
 		if(profile == null)return false;
-		if(toBind == null)toBind = profile.getModel();
 		ModelDefinition def = profile.getModelDefinition();
 		if(def != null) {
 			this.profile = profile;
 			if(player != null)
-				profile.updateFromPlayer(player);
+				profile.updatePlayer(player);
 			renderManager.bindModel(toBind, arg, buffer, def, profile, mode);
 			renderManager.getAnimationEngine().handleAnimation(profile, mode);
 			return true;
 		}
 		renderManager.unbindModel(toBind);
 		return false;
-	}
-
-	public void unbindClear() {
-		if(profile != null) {
-			renderManager.unbindModel(profile.getModel());
-			profile = null;
-		}
-	}
-
-	public void unbindClearPlayer(P player) {
-		unbindPlayer(player);
-		clearBoundPlayer();
 	}
 
 	public void unbindClear(M model) {
@@ -66,24 +54,12 @@ public class RenderManager<G, P, M, D> {
 		renderManager.unbindModel(model);
 	}
 
-	@SuppressWarnings("unchecked")
-	public void unbindPlayer(P player) {
-		G gprofile = getProfile.apply(player);
-		Player<P, M> profile = (Player<P, M>) loader.loadPlayer(gprofile, ModelDefinitionLoader.PLAYER_UNIQUE);
-		if(profile == null)return;
-		renderManager.unbindModel(profile.getModel());
-	}
-
-	public void bindHand(P player, D buffer) {
-		tryBindModel(null, player, buffer, null, null, ModelDefinitionLoader.PLAYER_UNIQUE, AnimationMode.HAND);
-	}
-
 	public void bindHand(P player, D buffer, M model) {
 		tryBindModel(null, player, buffer, model, null, ModelDefinitionLoader.PLAYER_UNIQUE, AnimationMode.HAND);
 	}
 
 	public void bindSkull(G profile, D buffer, M model) {
-		Player<P, M> prev = this.profile;
+		Player<P> prev = this.profile;
 		String unique;
 		if(getSkullModel == null)unique = ModelDefinitionLoader.SKULL_UNIQUE;
 		else {
@@ -100,33 +76,23 @@ public class RenderManager<G, P, M, D> {
 		this.profile = prev;
 	}
 
-	public void bindPlayer(P player, D buffer) {
-		tryBindModel(null, player, buffer, null, null, ModelDefinitionLoader.PLAYER_UNIQUE, AnimationMode.PLAYER);
-	}
-
 	public void bindPlayer(P player, D buffer, M model) {
 		tryBindModel(null, player, buffer, model, null, ModelDefinitionLoader.PLAYER_UNIQUE, AnimationMode.PLAYER);
 	}
 
-	public void bindElytra(P player, D buffer, M model) {
-		tryBindModel(null, player, buffer, model, null, ModelDefinitionLoader.PLAYER_UNIQUE, AnimationMode.PLAYER);
+	public void bindArmor(M player, M model, int layer) {
+		renderManager.bindSubModel(player, model, "armor" + layer);
 	}
 
-	public void bindArmor(P player, D buffer, M model, int layer) {
-		tryBindModel(null, player, buffer, model, "armor" + layer, ModelDefinitionLoader.PLAYER_UNIQUE, AnimationMode.PLAYER);
+	public void bindElytra(M player, M model) {
+		renderManager.bindSubModel(player, model, null);
 	}
 
 	public void bindSkin(M model, TextureSheetType tex) {
 		renderManager.bindSkin(model, null, tex);
 	}
 
-	public void bindSkin(TextureSheetType tex) {
-		if(profile != null) {
-			bindSkin(profile.getModel(), tex);
-		}
-	}
-
-	public Player<P, M> getBoundPlayer() {
+	public Player<P> getBoundPlayer() {
 		return profile;
 	}
 
@@ -158,8 +124,16 @@ public class RenderManager<G, P, M, D> {
 	@SuppressWarnings("unchecked")
 	public void jump(P player) {
 		G gprofile = getProfile.apply(player);
-		Player<P, M> profile = (Player<P, M>) loader.loadPlayer(gprofile, ModelDefinitionLoader.PLAYER_UNIQUE);
+		Player<P> profile = (Player<P>) loader.loadPlayer(gprofile, ModelDefinitionLoader.PLAYER_UNIQUE);
 		if(profile == null)return;
 		profile.animState.jump();
+	}
+
+	@SuppressWarnings("unchecked")
+	public FormatText getStatus(G gprofile, String unique) {
+		Player<P> profile = (Player<P>) loader.loadPlayer(gprofile, unique);
+		if(profile == null)return null;
+		ModelDefinition def = profile.getModelDefinition0();
+		return def != null ? def.getStatus() : null;
 	}
 }

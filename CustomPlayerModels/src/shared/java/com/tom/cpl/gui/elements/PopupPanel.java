@@ -1,5 +1,8 @@
 package com.tom.cpl.gui.elements;
 
+import java.io.File;
+import java.util.List;
+
 import com.tom.cpl.gui.Frame.PopupLayer;
 import com.tom.cpl.gui.IGui;
 
@@ -38,5 +41,8 @@ public class PopupPanel extends Panel {
 
 	public String getTitle() {
 		return "";
+	}
+
+	public void filesDropped(List<File> files) {
 	}
 }

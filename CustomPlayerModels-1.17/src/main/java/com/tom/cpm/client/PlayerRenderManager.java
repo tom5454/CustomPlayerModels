@@ -23,7 +23,6 @@ import com.mojang.math.Matrix4f;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
-import com.tom.cpl.render.VBuffers.NativeRenderType;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.proxy.ModelPartOF;
@@ -93,12 +92,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 		@Override
 		public void setupRenderSystem(ModelTexture cbi, TextureSheetType tex) {
-			renderTypes.put(RenderMode.NORMAL, new NativeRenderType(0));
-			renderTypes.put(RenderMode.DEFAULT, new NativeRenderType(cbi.getRenderType(), 0));
-			renderTypes.put(RenderMode.GLOW, new NativeRenderType(RenderType.eyes(cbi.getTexture()), 1));
-			renderTypes.put(RenderMode.OUTLINE, new NativeRenderType(RenderType.lines(), 2));
-			renderTypes.put(RenderMode.COLOR, new NativeRenderType(CustomRenderTypes.getEntityColorTranslucentCull(), 0));
-			renderTypes.put(RenderMode.COLOR_GLOW, new NativeRenderType(CustomRenderTypes.getEntityColorEyes(), 1));
+			ClientProxy.mc.renderBuilder.build(renderTypes, cbi);
 		}
 
 		@Override

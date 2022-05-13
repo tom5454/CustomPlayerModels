@@ -5,10 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager.SkinTextureCallback;
 import net.minecraft.resources.ResourceLocation;
@@ -35,12 +32,14 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
-public class PlayerProfile extends Player<net.minecraft.world.entity.player.Player, Model> {
+public class PlayerProfile extends Player<net.minecraft.world.entity.player.Player> {
 	private final GameProfile profile;
 	private String skinType;
 
 	public PlayerProfile(GameProfile profile) {
-		this.profile = profile;
+		this.profile = new GameProfile(profile.getId(), profile.getName());
+		cloneProperties(profile.getProperties(), this.profile.getProperties());
+
 		if(profile.getId() != null)
 			this.skinType = DefaultPlayerSkin.getSkinModelName(profile.getId());
 	}
@@ -68,11 +67,6 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 			if (other.profile != null) return false;
 		} else if (!profile.equals(other.profile)) return false;
 		return true;
-	}
-
-	@Override
-	public PlayerModel<AbstractClientPlayer> getModel() {
-		return ((PlayerRenderer)Minecraft.getInstance().getEntityRenderDispatcher().getSkinMap().get(skinType == null ? "default" : skinType)).getModel();
 	}
 
 	@Override

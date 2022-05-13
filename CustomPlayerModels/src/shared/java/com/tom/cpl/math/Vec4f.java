@@ -9,11 +9,25 @@ public class Vec4f {
 	public Vec4f() {
 	}
 
+	public Vec4f(Vec3f v, float w) {
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
+		this.w = w;
+	}
+
 	public Vec4f(float x, float y, float z, float w) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.w = w;
+	}
+
+	public Vec4f(Vec4f v) {
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
+		this.w = v.w;
 	}
 
 	public void transform(Mat4f matrixIn) {

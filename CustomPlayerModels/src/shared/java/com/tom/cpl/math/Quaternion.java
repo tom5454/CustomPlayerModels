@@ -41,6 +41,45 @@ public class Quaternion {
 		this.w = f1 * f3 * f5 - f * f2 * f4;
 	}
 
+	public Quaternion(float x, float y, float z, RotationOrder order) {
+		x *= ((float)Math.PI / 180F);
+		y *= ((float)Math.PI / 180F);
+		z *= ((float)Math.PI / 180F);
+
+		float l = cos(0.5F * x);
+		float c = cos(0.5F * y);
+		float h = cos(0.5F * z);
+		float u = sin(0.5F * x);
+		float d = sin(0.5F * y);
+		float p = sin(0.5F * z);
+
+		switch (order) {
+		case XYZ:
+			this.x = u * c * h + l * d * p;
+			this.y = l * d * h - u * c * p;
+			this.z = l * c * p + u * d * h;
+			this.w = l * c * h - u * d * p;
+			break;
+
+		case ZXY:
+			this.x = u * c * h - l * d * p;
+			this.y = l * d * h + u * c * p;
+			this.z = l * c * p + u * d * h;
+			this.w = l * c * h - u * d * p;
+			break;
+
+		case ZYX:
+			this.x = u * c * h - l * d * p;
+			this.y = l * d * h + u * c * p;
+			this.z = l * c * p - u * d * h;
+			this.w = l * c * h + u * d * p;
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -118,5 +157,95 @@ public class Quaternion {
 
 	public <T> T map(Qmap<T> map) {
 		return map.apply(x, y, z, w);
+	}
+
+	public void mul(Quaternion other) {
+		float f = this.getX();
+		float f1 = this.getY();
+		float f2 = this.getZ();
+		float f3 = this.getW();
+		float f4 = other.getX();
+		float f5 = other.getY();
+		float f6 = other.getZ();
+		float f7 = other.getW();
+		this.x = f3 * f4 + f * f7 + f1 * f6 - f2 * f5;
+		this.y = f3 * f5 - f * f6 + f1 * f7 + f2 * f4;
+		this.z = f3 * f6 + f * f5 - f1 * f4 + f2 * f7;
+		this.w = f3 * f7 - f * f4 - f1 * f5 - f2 * f6;
+	}
+
+	public static Vec3f reorder(Vec3f in, RotationOrder orderIn, RotationOrder to) {
+		Mat4f m = new Mat4f(new Quaternion(in.x, in.y, in.z, orderIn));
+		float a = m.m02;
+		float c = m.m12;
+		float d = m.m22;
+		float s = m.m01;
+		float r = m.m00;
+		float u = m.m21;
+		float l = m.m11;
+		float h = m.m20;
+		float o = m.m10;
+		switch (to) {
+		case XYZ:
+		{
+			float x, y, z;
+			y = (float) Math.asin(MathHelper.clamp(a, -1, 1));
+			if(Math.abs(a) < .9999999) {
+				x = (float) Math.atan2(-c, d);
+				z = (float) Math.atan2(-s, r);
+			} else {
+				x = (float) Math.atan2(u, l);
+				z = 0;
+			}
+			x = (float) Math.toDegrees(x);
+			y = (float) Math.toDegrees(y);
+			z = (float) Math.toDegrees(z);
+			return new Vec3f(x, y, z);
+		}
+
+		case ZXY:
+		{
+			float x, y, z;
+			x = (float) Math.asin(MathHelper.clamp(u, -1, 1));
+			if(Math.abs(u) < .9999999) {
+				y = (float) Math.atan2(-h, d);
+				z = (float) Math.atan2(-s, l);
+			} else {
+				z = (float) Math.atan2(o, r);
+				y = 0;
+			}
+			x = (float) Math.toDegrees(x);
+			y = (float) Math.toDegrees(y);
+			z = (float) Math.toDegrees(z);
+			return new Vec3f(x, y, z);
+		}
+
+		case ZYX:
+		{
+			float x, y, z;
+			y = (float) Math.asin(-MathHelper.clamp(h, -1, 1));
+			if(Math.abs(h) < .9999999) {
+				x = (float) Math.atan2(u, d);
+				z = (float) Math.atan2(o, r);
+			} else {
+				z = (float) Math.atan2(-s, l);
+				x = 0;
+			}
+			x = (float) Math.toDegrees(x);
+			y = (float) Math.toDegrees(y);
+			z = (float) Math.toDegrees(z);
+			return new Vec3f(x, y, z);
+		}
+
+		default:
+			break;
+		}
+		return new Vec3f();
+	}
+
+	public static enum RotationOrder {
+		ZYX,
+		ZXY,
+		XYZ
 	}
 }

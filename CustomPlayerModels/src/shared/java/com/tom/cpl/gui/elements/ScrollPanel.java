@@ -56,7 +56,9 @@ public class ScrollPanel extends Panel {
 		gui.setupCut();
 		Box b = display.getBounds();
 		gui.setPosOffset(new Box(-xScroll, -yScroll, b.w, b.h));
-		display.draw(evt.offset(bounds.x - xScroll, bounds.y - yScroll), partialTicks);
+		MouseEvent de = evt;
+		if(!evt.isHovered(bounds))de = evt.cancelled();
+		display.draw(de.offset(bounds.x - xScroll, bounds.y - yScroll), partialTicks);
 		gui.popMatrix();
 		gui.pushMatrix();
 		gui.setPosOffset(bounds);

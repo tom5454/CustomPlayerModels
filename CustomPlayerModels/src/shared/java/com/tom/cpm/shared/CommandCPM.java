@@ -179,7 +179,33 @@ public class CommandCPM {
 					);
 			l.add(s);
 		}
+		LiteralCommandBuilder all = new LiteralCommandBuilder("all");
+		all.then(new LiteralCommandBuilder("enabled").
+				then(new RequiredCommandBuilder("target", ArgType.PLAYER).
+						then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
+								run(c -> setScalingEnAll(c, c.getArgument("target"), c.getArgument("enable")))
+								)
+						).
+				then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
+						run(c -> setScalingEnAll(c, null, c.getArgument("enable")))
+						)
+				);
+		l.add(all);
 		return l;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void setScalingEnAll(CommandCtx<?> context, Object player, boolean en) {
+		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
+		ConfigEntry e = ModConfig.getWorldConfig();
+		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
+		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
+		for(ScalingOptions o : ScalingOptions.VALUES) {
+			ConfigEntry ce = e.getEntry(o.name().toLowerCase());
+			ce.setBoolean(ConfigKeys.ENABLED, en);
+			context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + o.name().toLowerCase()), new FormatText("label.cpm.enableX", en)));
+		}
+		ModConfig.getWorldConfig().save();
 	}
 
 	@SuppressWarnings("unchecked")

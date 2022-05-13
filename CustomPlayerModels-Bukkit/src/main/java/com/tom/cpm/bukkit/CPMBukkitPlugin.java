@@ -12,9 +12,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.tom.cpl.config.ConfigEntry.ModConfigFile;
+import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.util.ILogger;
+import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.bukkit.Commands.CommandHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -28,6 +29,7 @@ public class CPMBukkitPlugin extends JavaPlugin {
 	public I18n i18n;
 	private BukkitLogger log;
 	private CommandHandler cmd;
+	private CPMApiManager api;
 
 	@Override
 	public void onDisable() {
@@ -64,6 +66,8 @@ public class CPMBukkitPlugin extends JavaPlugin {
 				};
 			}
 		}
+		api = new CPMApiManager();
+		api.buildCommon().init();
 		cmd = new CommandHandler(this);
 		MinecraftObjectHolder.setCommonObject(new MinecraftCommonAccess() {
 
@@ -90,6 +94,11 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			@Override
 			public TextRemapper<String> getTextRemapper() {
 				return new TextRemapper<>(i18n::format, Function.identity(), (a, b) -> a + b, null);
+			}
+
+			@Override
+			public CPMApiManager getApi() {
+				return api;
 			}
 		});
 		MinecraftObjectHolder.setServerObject(new MinecraftServerAccess() {

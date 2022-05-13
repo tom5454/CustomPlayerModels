@@ -7,6 +7,7 @@ public interface IElem {
 	Vec3f getPosition();
 	Vec3f getRotation();
 	Vec3f getColor();
+	Vec3f getScale();
 	boolean isVisible();
 
 	default float part(InterpolatorChannel i) {
@@ -20,6 +21,9 @@ public interface IElem {
 		case COLOR_R: return getColor().x;
 		case COLOR_G: return getColor().y;
 		case COLOR_B: return getColor().z;
+		case SCALE_X: return getScale().x;
+		case SCALE_Y: return getScale().y;
+		case SCALE_Z: return getScale().z;
 		default:
 			break;
 		}

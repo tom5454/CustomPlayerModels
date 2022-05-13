@@ -23,6 +23,7 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.config.SocialConfig;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.gui.panel.SocialPlayerPanel.SafetyPopup;
 import com.tom.cpm.shared.skin.TextureProvider;
@@ -59,7 +60,7 @@ public class SocialPanel extends Panel {
 			Panel inServer = new Panel(gui);
 			addTab("inServer", inServer, 0);
 
-			List<Player<?, ?>> loadedPlayers = MinecraftClientAccess.get().getDefinitionLoader().getPlayers();
+			List<Player<?>> loadedPlayers = MinecraftClientAccess.get().getDefinitionLoader().getPlayers();
 			Set<PlayerInServer> pls = loadedPlayers.stream().map(PlayerInServer::new).collect(Collectors.toSet());
 			MinecraftClientAccess.get().getPlayers().stream().map(PlayerInServer::new).forEach(pls::add);
 			List<PlayerInServer> players = pls.stream().filter(PlayerInServer::isOtherPlayer).distinct().
@@ -115,19 +116,22 @@ public class SocialPanel extends Panel {
 	private class PlayerInServer {
 		private Object gp;
 		private UUID uuid;
+		private String unique;
 
 		private PlayerInServer(Object gp) {
 			this.gp = gp;
 			uuid = MinecraftClientAccess.get().getDefinitionLoader().getGP_UUID(gp);
 			if(uuid == null)uuid = UUID.randomUUID();
+			unique = ModelDefinitionLoader.PLAYER_UNIQUE;
 		}
 
-		private PlayerInServer(Player<?, ?> pl) {
+		private PlayerInServer(Player<?> pl) {
 			this(pl.getGameProfile());
+			unique = pl.unique;
 		}
 
-		public Player<?, ?> getPlayer() {
-			return MinecraftClientAccess.get().getDefinitionLoader().loadPlayer(gp, "social_gui");
+		public Player<?> getPlayer() {
+			return MinecraftClientAccess.get().getDefinitionLoader().loadPlayer(gp, unique);
 		}
 
 		public UUID getUUID() {
@@ -152,7 +156,37 @@ public class SocialPanel extends Panel {
 		}
 
 		private Tooltip getTooltip() {
-			return new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerUUID", getName(), getUUID().toString()));
+			String type = "player";
+			if(unique != null) {
+				if(unique.equals(ModelDefinitionLoader.SKULL_UNIQUE) || unique.startsWith("skull_tex:"))type = "skull";
+				else if(unique.startsWith("model:"))type = "model";
+			}
+			return new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerUUID", getName(), getUUID().toString(),
+					gui.i18nFormat("label.cpm.modelLoadingType." + type)));
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((unique == null) ? 0 : unique.hashCode());
+			result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			PlayerInServer other = (PlayerInServer) obj;
+			if (unique == null) {
+				if (other.unique != null) return false;
+			} else if (!unique.equals(other.unique)) return false;
+			if (uuid == null) {
+				if (other.uuid != null) return false;
+			} else if (!uuid.equals(other.uuid)) return false;
+			return true;
 		}
 	}
 

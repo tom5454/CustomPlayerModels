@@ -11,6 +11,7 @@ import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRendererFactory.Context;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -20,12 +21,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.CustomPlayerModelsClient.PlayerNameTagRenderer;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(value = PlayerEntityRenderer.class, priority = 900)
-public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
+public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> implements PlayerNameTagRenderer<AbstractClientPlayerEntity> {
 
 	public PlayerRendererMixin(Context ctx, PlayerEntityModel<AbstractClientPlayerEntity> model, float shadowRadius) {
 		super(ctx, model, shadowRadius);
@@ -38,22 +41,22 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 
 	@Inject(at = @At("HEAD"), method = "render(Lnet/minecraft/client/network/AbstractClientPlayerEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V")
 	public void onRenderPre(AbstractClientPlayerEntity abstractClientPlayerEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.playerRenderPre(abstractClientPlayerEntity, vertexConsumerProvider);
+		CustomPlayerModelsClient.INSTANCE.playerRenderPre(abstractClientPlayerEntity, vertexConsumerProvider, getModel());
 	}
 
 	@Inject(at = @At("RETURN"), method = "render(Lnet/minecraft/client/network/AbstractClientPlayerEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V")
 	public void onRenderPost(AbstractClientPlayerEntity abstractClientPlayerEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.playerRenderPost();
+		CustomPlayerModelsClient.INSTANCE.playerRenderPost(getModel());
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderRightArm(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/network/AbstractClientPlayerEntity;)V")
 	public void onRenderRightArmPre(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.renderHand(vertexConsumers);
+		CustomPlayerModelsClient.INSTANCE.renderHand(vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderLeftArm(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/network/AbstractClientPlayerEntity;)V")
 	public void onRenderLeftArmPre(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.renderHand(vertexConsumers);
+		CustomPlayerModelsClient.INSTANCE.renderHand(vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("RETURN"), method = "renderRightArm(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/network/AbstractClientPlayerEntity;)V")
@@ -100,5 +103,18 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 	@Inject(at = @At("HEAD"), method = "renderLabelIfPresent(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/text/Text;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", cancellable = true)
 	public void onRenderName(AbstractClientPlayerEntity entityIn, Text displayNameIn, MatrixStack matrixStackIn, VertexConsumerProvider bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(!Player.isEnableNames())cbi.cancel();
+		if(Player.isEnableLoadingInfo())
+			CustomPlayerModelsClient.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
+	}
+
+	@Override
+	public void cpm$renderNameTag(AbstractClientPlayerEntity entityIn, Text displayNameIn, MatrixStack matrixStackIn,
+			VertexConsumerProvider bufferIn, int packedLightIn) {
+		super.renderLabelIfPresent(entityIn, displayNameIn, matrixStackIn, bufferIn, packedLightIn);
+	}
+
+	@Override
+	public EntityRenderDispatcher cpm$entityRenderDispatcher() {
+		return dispatcher;
 	}
 }

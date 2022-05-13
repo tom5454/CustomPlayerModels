@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.gui;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.ScrollPanel;
@@ -8,20 +9,23 @@ import com.tom.cpl.gui.elements.Tree;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.gui.Keybinds;
 
 public class TreePanel extends Panel {
+	private Tree<TreeElement> tree;
+	private Editor editor;
 
 	public TreePanel(IGui gui, EditorGui e, int width, int height, boolean enableMod) {
 		super(gui);
 		setBounds(new Box(width - 150, 0, 150, height));
 		setBackgroundColor(gui.getColors().panel_background);
-		Editor editor = e.getEditor();
+		editor = e.getEditor();
 
 		ScrollPanel treePanel = new ScrollPanel(gui);
 		treePanel.setBounds(new Box(0, 0, 150, height - 30));
 		addElement(treePanel);
 
-		Tree<TreeElement> tree = new Tree<>(e, editor.treeHandler);
+		tree = new Tree<>(e, editor.treeHandler);
 		editor.updateGui.add(tree::updateTree);
 
 		Panel tp = new Panel(gui);
@@ -61,4 +65,36 @@ public class TreePanel extends Panel {
 		});
 	}
 
+	@Override
+	public void keyPressed(KeyboardEvent event) {
+		super.keyPressed(event);
+		if(!event.isConsumed()) {
+			if(Keybinds.TREE_UP.isPressed(gui, event) && editor.selectedElement != null) {
+				editor.selectedElement = tree.findUp(editor.selectedElement);
+				editor.updateGui();
+				event.consume();
+			}
+			if(Keybinds.TREE_PREV.isPressed(gui, event) && editor.selectedElement != null) {
+				editor.selectedElement = tree.findPrev(editor.selectedElement);
+				editor.updateGui();
+				event.consume();
+			}
+			if(Keybinds.TREE_DOWN.isPressed(gui, event)) {
+				if(editor.selectedElement == null)
+					editor.selectedElement = editor.elements.get(0);
+				else
+					editor.selectedElement = tree.findDown(editor.selectedElement);
+				editor.updateGui();
+				event.consume();
+			}
+			if(Keybinds.TREE_NEXT.isPressed(gui, event)) {
+				if(editor.selectedElement == null)
+					editor.selectedElement = editor.elements.get(0);
+				else
+					editor.selectedElement = tree.findNext(editor.selectedElement);
+				editor.updateGui();
+				event.consume();
+			}
+		}
+	}
 }

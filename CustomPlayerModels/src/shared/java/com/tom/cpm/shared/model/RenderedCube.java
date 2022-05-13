@@ -18,6 +18,7 @@ public class RenderedCube implements IModelComponent {
 	public Vec3f offset;
 	public Vec3f rotation;
 	public Vec3f pos;
+	public Vec3f renderScale;
 	public Mesh renderObject;
 	public boolean display = true;
 	public boolean useDynamic = false;
@@ -51,6 +52,7 @@ public class RenderedCube implements IModelComponent {
 		if(cube.offset != null)this.offset = new Vec3f(cube.offset);
 		if(cube.rotation != null)this.rotation = new Vec3f(cube.rotation);
 		if(cube.pos != null)this.pos = new Vec3f(cube.pos);
+		this.renderScale = new Vec3f(1, 1, 1);
 		this.color = recolor || cube.texSize == 0 ? cube.rgb : 0xffffff;
 		this.display = !hidden;
 	}
@@ -103,7 +105,6 @@ public class RenderedCube implements IModelComponent {
 
 	@Override
 	public void setRotation(boolean add, float x, float y, float z) {
-		//System.out.println(this + ".setRotation(" + add + ", " + x + ", " + y + ", " + z + ")");
 		if(add) {
 			rotation.x += x;
 			rotation.y += y;
@@ -122,12 +123,10 @@ public class RenderedCube implements IModelComponent {
 
 	@Override
 	public void setColor(float r, float g, float b) {
-		//System.out.println(this + ".setColor(" + r + ", " + g + ", " + b + ")");
 		if(recolor || cube.texSize == 0) {
 			color = (MathHelper.clamp((int) r, 0, 255) << 16) |
 					(MathHelper.clamp((int) g, 0, 255) << 8)  |
 					MathHelper.clamp((int) b, 0, 255);
-			//System.out.println(r + " " + g + " " + b + " " + Integer.toHexString(color));
 		}
 	}
 
@@ -165,7 +164,6 @@ public class RenderedCube implements IModelComponent {
 		SELECTED(true, true),
 		SEL_CHILDREN(true, true),
 		SEL_ONLY(true, true),
-		PAINT_MODE(false, false),
 		;
 		private boolean renderOutline, applyColor;
 
@@ -180,6 +178,24 @@ public class RenderedCube implements IModelComponent {
 
 		public boolean applyColor() {
 			return applyColor;
+		}
+	}
+
+	@Override
+	public Vec3f getRenderScale() {
+		return renderScale;
+	}
+
+	@Override
+	public void setRenderScale(boolean add, float x, float y, float z) {
+		if(add) {
+			if(x != 0)renderScale.x *= x;
+			if(y != 0)renderScale.y *= y;
+			if(z != 0)renderScale.z *= z;
+		} else {
+			if(x != 0)renderScale.x = x;
+			if(y != 0)renderScale.y = y;
+			if(z != 0)renderScale.z = z;
 		}
 	}
 }

@@ -37,7 +37,9 @@ import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.effects.EffectColor;
+import com.tom.cpm.shared.effects.EffectCopyTransform;
 import com.tom.cpm.shared.effects.EffectExtrude;
+import com.tom.cpm.shared.effects.EffectFirstPersonHandPos;
 import com.tom.cpm.shared.effects.EffectGlow;
 import com.tom.cpm.shared.effects.EffectHide;
 import com.tom.cpm.shared.effects.EffectHideSkull;
@@ -223,6 +225,9 @@ public class Exporter {
 				if(el.itemRenderer != null) {
 					otherParts.add(new ModelPartRenderEffect(new EffectRenderItem(el.id, el.itemRenderer.slot, el.itemRenderer.slotID)));
 				}
+				if(el.copyTransform != null) {
+					otherParts.add(new ModelPartRenderEffect(new EffectCopyTransform(el.copyTransform.from.id, el.id, el.copyTransform.toShort())));
+				}
 			}
 		});
 		for (ModelElement el : e.elements) {
@@ -240,10 +245,12 @@ public class Exporter {
 			otherParts.add(new ModelPartAnimation(e));
 		}
 		e.textures.forEach((type, tex) -> {
-			if(type != TextureSheetType.SKIN)
-				otherParts.add(new ModelPartTexture(e, type));
-			if(!tex.animatedTexs.isEmpty() && type.editable)
-				tex.animatedTexs.forEach(at -> otherParts.add(new ModelPartAnimatedTexture(type, at)));
+			if(type.editable) {
+				if(type != TextureSheetType.SKIN)
+					otherParts.add(new ModelPartTexture(e, type));
+				if(!tex.animatedTexs.isEmpty())
+					tex.animatedTexs.forEach(at -> otherParts.add(new ModelPartAnimatedTexture(type, at)));
+			}
 		});
 		for (EditorTemplate et : e.templates) {
 			otherParts.add(new ModelPartTemplate(et));
@@ -255,6 +262,8 @@ public class Exporter {
 		}
 		if(!e.hideHeadIfSkull)otherParts.add(new ModelPartRenderEffect(new EffectHideSkull(e.hideHeadIfSkull)));
 		if(e.removeArmorOffset)otherParts.add(new ModelPartRenderEffect(new EffectRemoveArmorOffset(e.removeArmorOffset)));
+		if(e.leftHandPos.isChanged() || e.rightHandPos.isChanged())
+			otherParts.add(new ModelPartRenderEffect(new EffectFirstPersonHandPos(e.leftHandPos, e.rightHandPos)));
 
 		if(e.description != null) {
 			switch (e.description.copyProtection) {

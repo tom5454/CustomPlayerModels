@@ -18,20 +18,15 @@ public class CustomRenderTypes extends RenderType {
 		super(nameIn, formatIn, drawModeIn, bufferSizeIn, useDelegateIn, needsSortingIn, setupTaskIn, clearTaskIn);
 	}
 
-	public static RenderType getLinesNoDepth() {
+	public static RenderType linesNoDepth() {
 		return LINES_NO_NEPTH;
 	}
 
-	public static RenderType getEntityColorTranslucentCull() {
+	public static RenderType entityColorTranslucent() {
 		return ENTITY_COLOR;
 	}
 
-	public static RenderType getEntityColorEyes() {
+	public static RenderType entityColorEyes() {
 		return ENTITY_COLOR_EYES;
-	}
-
-	public static RenderType getEntityTranslucentCullNoLight(ResourceLocation locationIn) {
-		RenderType.State rendertype$state = RenderType.State.builder().setTextureState(new RenderState.TextureState(locationIn, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(NO_DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setLightmapState(NO_LIGHTMAP).setOverlayState(NO_OVERLAY).createCompositeState(true);
-		return create("cpm:entity_translucent_cull_nolight", DefaultVertexFormats.NEW_ENTITY, 7, 256, true, true, rendertype$state);
 	}
 }

@@ -4,7 +4,10 @@ import java.util.EnumMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.google.common.collect.Multimap;
+
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.animation.AnimationState;
@@ -15,7 +18,7 @@ import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
-public abstract class Player<P, M> {
+public abstract class Player<P> {
 	private static boolean enableRendering = true;
 	private static boolean enableNames = true;
 
@@ -29,6 +32,7 @@ public abstract class Player<P, M> {
 
 	public boolean forcedSkin;
 	public boolean sentEventSubs;
+	public String unique;
 
 	public PlayerTextureLoader getTextures() {
 		if(textures == null) {
@@ -42,13 +46,18 @@ public abstract class Player<P, M> {
 	protected abstract PlayerTextureLoader initTextures();
 	public abstract String getName();
 	public abstract UUID getUUID();
-	public abstract M getModel();
 	public abstract void updateFromPlayer(P player);
 	public abstract Object getGameProfile();
 	public abstract void updateFromModel(Object model);
 
+	public void updatePlayer(P player) {
+		updateFromPlayer(player);
+		animState.speakLevel = (float) MinecraftCommonAccess.get().getApi().clientApi().getVoiceProviders().stream().
+				mapToDouble(f -> f.apply(player)).max().orElse(0);
+	}
+
 	public void setModelDefinition(CompletableFuture<ModelDefinition> definition) {
-		this.definition = definition;
+		this.definition = definition.exceptionally(e -> new ModelDefinition(e, this));
 	}
 
 	public ModelDefinition getModelDefinition0() {
@@ -96,6 +105,10 @@ public abstract class Player<P, M> {
 		Player.enableNames = enableNames;
 	}
 
+	public static boolean isEnableLoadingInfo() {
+		return ModConfig.getCommonConfig().getBoolean(ConfigKeys.SHOW_LOADING_INFO, true);
+	}
+
 	public void cleanup() {
 		ModelDefinition def = getModelDefinition0();
 		if(def != null)def.cleanup();
@@ -110,6 +123,14 @@ public abstract class Player<P, M> {
 		if(!sentEventSubs && def != null) {
 			sentEventSubs = true;
 			MinecraftClientAccess.get().getNetHandler().sendEventSubs(def);
+		}
+	}
+
+	public static <P> void cloneProperties(Multimap<String, P> from, Multimap<String, P> to) {
+		try {
+			if(from.containsKey("textures"))
+				to.putAll("textures", from.get("textures"));
+		} catch (Exception e) {
 		}
 	}
 }

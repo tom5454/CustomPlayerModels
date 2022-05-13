@@ -27,6 +27,7 @@ import com.mojang.authlib.GameProfile;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.render.RenderTypeBuilder;
 import com.tom.cpl.util.AWTImageIO;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
@@ -36,12 +37,14 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.retro.RetroGLAccess.RetroLayer;
 import com.tom.cpm.shared.util.MojangAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
 	private final Minecraft mc;
 	private final PlayerRenderManager prm;
 	private final ModelDefinitionLoader<GameProfile> loader;
+	private final RenderTypeBuilder<ResourceLocation, RetroLayer> renderBuilder = RenderTypeBuilder.setupRetro(new RetroGL());
 
 	public MinecraftObject(Minecraft mc) {
 		this.mc = mc;
@@ -203,5 +206,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public Proxy getProxy() {
 		return mc.getProxy();
+	}
+
+	@Override
+	public RenderTypeBuilder<?, ?> getRenderBuilder() {
+		return renderBuilder;
 	}
 }

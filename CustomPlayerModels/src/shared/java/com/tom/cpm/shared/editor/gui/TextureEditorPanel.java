@@ -13,6 +13,7 @@ import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.EditorTool;
 import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
 
@@ -87,6 +88,7 @@ public class TextureEditorPanel extends GuiElement {
 			break;
 			case PEN:
 			case RUBBER:
+			case COLOR_PICKER:
 			{
 				Vec2i p2 = editor.cursorPos.get();
 				Vec2i p = p2 != null ? p2 : p1;
@@ -145,8 +147,9 @@ public class TextureEditorPanel extends GuiElement {
 					case PEN:
 					case RUBBER:
 					case FILL:
+					case COLOR_PICKER:
 					{
-						if(gui.isCtrlDown()) {
+						if(gui.isCtrlDown() || editor.drawMode == EditorTool.COLOR_PICKER) {
 							editor.penColor = provider.getImage().getRGB(px, py);
 							editor.setPenColor.accept(editor.penColor);
 							dragging = false;
@@ -267,8 +270,6 @@ public class TextureEditorPanel extends GuiElement {
 		zoom += zv;
 		float niw = provider.getImage().getWidth() * zoom;
 		float nih = provider.getImage().getHeight() * zoom;
-		//offX -= (bounds.w / 2 - x - offX - bounds.x) * zv / 2;
-		//offY -= (bounds.h / 2 - y - offY - bounds.y) * zv / 2;
 		offX -= ((niw - iw) / 2) * MathHelper.clamp(Math.abs(1-(offX / (bounds.w / 2))), 0, 1);
 		offY -= ((nih - ih) / 2) * MathHelper.clamp(Math.abs(1-(offY / (bounds.h / 2))), 0, 1);
 		offX = MathHelper.clamp(offX, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.w - 10);

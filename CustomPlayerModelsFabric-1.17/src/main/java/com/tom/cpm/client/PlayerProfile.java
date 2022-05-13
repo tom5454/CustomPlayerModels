@@ -6,9 +6,6 @@ import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.Model;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.PlayerModelPart;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.texture.PlayerSkinProvider.SkinTextureAvailableCallback;
@@ -36,7 +33,7 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
-public class PlayerProfile extends Player<PlayerEntity, Model> {
+public class PlayerProfile extends Player<PlayerEntity> {
 	private final GameProfile profile;
 	private String skinType;
 
@@ -69,11 +66,6 @@ public class PlayerProfile extends Player<PlayerEntity, Model> {
 			if (other.profile != null) return false;
 		} else if (!profile.equals(other.profile)) return false;
 		return true;
-	}
-
-	@Override
-	public PlayerEntityModel<AbstractClientPlayerEntity> getModel() {
-		return ((PlayerEntityRenderer) MinecraftClient.getInstance().getEntityRenderDispatcher().modelRenderers.get(skinType == null ? "default" : skinType)).getModel();
 	}
 
 	@Override

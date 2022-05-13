@@ -19,6 +19,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -42,21 +43,26 @@ public class Generators {
 	public static List<Generators> generators = new ArrayList<>();
 
 	static {
-		generators.add(new Generators("button.cpm.tools.convert_model_custom", "tooltip.cpm.tools.convert_model_custom", eg -> convertModel(eg.getEditor())));
-		generators.add(new Generators("button.cpm.tools.add_skin_layer2", null, eg -> addSkinLayer(eg.getEditor())));
-		generators.add(new Generators("button.cpm.tools.convert2template", null, Generators::convertTemplate));
-		generators.add(new Generators("button.cpm.tools.fillUV", null, Generators::fillUV));
-		generators.add(new Generators("button.cpm.tools.safetyLevel", null, Generators::checkSafetyLevel));
-		generators.add(new Generators("button.cpm.tools.mirror", null, Generators::mirrorElement));
+		register("button.cpm.tools.convert_model_custom", "tooltip.cpm.tools.convert_model_custom", eg -> convertModel(eg.getEditor()));
+		register("button.cpm.tools.add_skin_layer2", null, eg -> addSkinLayer(eg.getEditor()));
+		register("button.cpm.tools.convert2template", null, Generators::convertTemplate);
+		register("button.cpm.tools.fillUV", null, Generators::fillUV);
+		register("button.cpm.tools.safetyLevel", null, Generators::checkSafetyLevel);
+		register("button.cpm.tools.mirror", null, Generators::mirrorElement);
 	}
 
-	public String name, tooltip;
+	public String name;
+	public FormatText tooltip;
 	public Consumer<EditorGui> func;
 
-	public Generators(String name, String tooltip, Consumer<EditorGui> func) {
+	public Generators(String name, FormatText tooltip, Consumer<EditorGui> func) {
 		this.name = name;
 		this.tooltip = tooltip;
 		this.func = func;
+	}
+
+	private static void register(String name, String tooltip, Consumer<EditorGui> func) {
+		generators.add(new Generators(name, tooltip == null ? null : new FormatText(tooltip), func));
 	}
 
 	private static void addSkinLayer(Editor e) {
@@ -148,7 +154,9 @@ public class Generators {
 				if(editor.file == null)
 					setupTemplate(editor);
 				else
-					eg.openPopup(new ConfirmPopup(eg, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warn_c2t"), () -> setupTemplate(editor), null));
+					eg.openPopup(new ConfirmPopup(eg, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warnTemplate"),
+							new ConfirmPopup(eg, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warn_c2t"), () -> setupTemplate(editor), null),
+							null));
 			}
 		}
 	}
@@ -255,14 +263,14 @@ public class Generators {
 				tex.markDirty();
 				tex.setEdited(tx.texType == null && tx.editable);
 				if(tx.texType != null) {
-					Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
+					Player<?> profile = MinecraftClientAccess.get().getClientPlayer();
 					profile.getTextures().load().thenRun(() -> loadTexture(tex, profile, tx.texType));
 				}
 			}
 		});
 	}
 
-	private static void loadTexture(ETextures tex, Player<?, ?> profile, TextureType type) {
+	private static void loadTexture(ETextures tex, Player<?> profile, TextureType type) {
 		CompletableFuture<Image> img = profile.getTextures().getTexture(type);
 		img.thenAccept(s -> {
 			if(!tex.isEdited()) {

@@ -4,16 +4,16 @@ import com.tom.cpm.shared.animation.interpolator.Interpolator;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
 
-public class Animation {
+public class Animation implements IAnimation {
 	private final IModelComponent[] componentIDs;
 	private final Interpolator[][] psfs;
 	private final Boolean[][] show;
 	private boolean add;
 
-	protected final int duration;
+	private final int duration;
 	private final int frames;
 
-	public final int priority;
+	private final int priority;
 
 	/**
 	 *
@@ -51,7 +51,8 @@ public class Animation {
 		}
 	}
 
-	protected void animate(long millis, ModelDefinition def) {
+	@Override
+	public void animate(long millis, ModelDefinition def) {
 		if(frames == 0)return;
 		float step = (float) millis % duration / duration * frames;
 		for (int componentId = 0; componentId < componentIDs.length; componentId++) {
@@ -69,10 +70,24 @@ public class Animation {
 					getValue(componentId, InterpolatorChannel.COLOR_G, step),
 					getValue(componentId, InterpolatorChannel.COLOR_B, step));
 			component.setVisible(show[componentId][(int) step]);
+			component.setRenderScale(add,
+					getValue(componentId, InterpolatorChannel.SCALE_X, step),
+					getValue(componentId, InterpolatorChannel.SCALE_Y, step),
+					getValue(componentId, InterpolatorChannel.SCALE_Z, step));
 		}
 	}
 
 	private float getValue(int component, InterpolatorChannel attribute, double time) {
 		return (float) psfs[component][attribute.channelID()].applyAsDouble(time);
+	}
+
+	@Override
+	public int getDuration() {
+		return duration;
+	}
+
+	@Override
+	public int getPriority() {
+		return priority;
 	}
 }

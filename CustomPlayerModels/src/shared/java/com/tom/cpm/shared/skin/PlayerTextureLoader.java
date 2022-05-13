@@ -1,7 +1,6 @@
 package com.tom.cpm.shared.skin;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -42,13 +41,7 @@ public abstract class PlayerTextureLoader {
 
 		private CompletableFuture<Image> get0() {
 			if(MinecraftObjectHolder.DEBUGGING && new File(type.name().toLowerCase() + "_test.png").exists()) {
-				return CompletableFuture.supplyAsync(() -> {
-					try {
-						return Image.loadFrom(new File(type.name().toLowerCase() + "_test.png"));
-					} catch (IOException e) {
-						return null;
-					}
-				});
+				return Image.loadFrom(new File(type.name().toLowerCase() + "_test.png"));
 			}
 			if(url == null)return null;
 			return cache.getUnchecked(url).thenApply(postProcessor).exceptionally(e -> null);

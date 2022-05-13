@@ -39,15 +39,15 @@ import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.editor.actions.Action;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
-import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.anim.AnimationType;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
-import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.RenderUtil;
@@ -65,69 +65,71 @@ import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
 import com.tom.cpm.shared.gui.ViewportCamera;
-import com.tom.cpm.shared.model.PartValues;
+import com.tom.cpm.shared.model.PartPosition;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 import com.tom.cpm.shared.model.render.RenderMode;
-import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class Editor {
 	public UpdaterRegistry updaterReg = new UpdaterRegistry();
-	public Updater<Vec3f> setOffset = updaterReg.create();
-	public Updater<Vec3f> setRot = updaterReg.create();
-	public Updater<Vec3f> setPosition = updaterReg.create();
-	public Updater<Vec3f> setSize = updaterReg.create();
-	public Updater<Vec3f> setScale = updaterReg.create();
-	public Updater<Float> setMCScale = updaterReg.create();
-	public Updater<Boolean> setMirror = updaterReg.create();
-	public Updater<String> updateName = updaterReg.create();
-	public Updater<String> setModeBtn = updaterReg.create();
-	public Updater<ModeDisplayType> setModePanel = updaterReg.create();
-	public Updater<Vec3i> setTexturePanel = updaterReg.create();
-	public Updater<Boolean> setVis = updaterReg.create();
-	public Updater<Boolean> setDelEn = updaterReg.create();
-	public Updater<Boolean> setAddEn = updaterReg.create();
+	public Updater<Vec3f> setOffset = updaterReg.create(null);
+	public Updater<Vec3f> setRot = updaterReg.create(null);
+	public Updater<Vec3f> setPosition = updaterReg.create(null);
+	public Updater<Vec3f> setSize = updaterReg.create(null);
+	public Updater<Vec3f> setScale = updaterReg.create(null);
+	public Updater<Float> setMCScale = updaterReg.create(null);
+	public Updater<Boolean> setMirror = updaterReg.create(null);
+	public Updater<String> updateName = updaterReg.create(null);
+	public Updater<String> setModeBtn = updaterReg.create(null);
+	public Updater<ModeDisplayType> setModePanel = updaterReg.create(ModeDisplayType.NULL);
+	public Updater<Vec3i> setTexturePanel = updaterReg.create(null);
+	public Updater<Boolean> setVis = updaterReg.create(false);
+	public Updater<Boolean> setDelEn = updaterReg.create(false);
+	public Updater<Boolean> setAddEn = updaterReg.create(false);
+	public Updater<Boolean> setGlow = updaterReg.create(null);
+	public Updater<Integer> setPartColor = updaterReg.create(null);
+	public Updater<Boolean> setReColor = updaterReg.create(null);
+	public Updater<Integer> setAnimFrame = updaterReg.create(null);
+	public Updater<Vec3f> setAnimPos = updaterReg.create(null);
+	public Updater<Vec3f> setAnimRot = updaterReg.create(null);
+	public Updater<Vec3f> setAnimScale = updaterReg.create(null);
+	public Updater<Boolean> setFrameAddEn = updaterReg.create(false);
+	public Updater<Boolean> setAnimDelEn = updaterReg.create(false);
+	public Updater<Boolean> setFrameDelEn = updaterReg.create(false);
+	public Updater<Integer> setAnimDuration = updaterReg.create(null);
+	public Updater<Integer> setAnimColor = updaterReg.create(null);
+	public Updater<Boolean> setAnimShow = updaterReg.create(null);
+	public Updater<Boolean> setAnimPlayEn = updaterReg.create(false);
+	public Updater<Boolean> setHiddenEffect = updaterReg.create(null);
+	public Updater<Boolean> setSingleTex = updaterReg.create(null);
+	public Updater<Boolean> setPerFaceUV = updaterReg.create(null);
+	public Updater<Boolean> setExtrudeEffect = updaterReg.create(null);
+	public Updater<Integer> setAnimPriority = updaterReg.create(null);
+	public Updater<Boolean> displayViewport = updaterReg.create(true);
+	public Updater<Boolean> setEnAddAnimTex = updaterReg.create(false);
+	public Updater<Boolean> setCopyTransformEffect = updaterReg.create(null);
+
+	public Updater<Integer> setPenColor = updaterReg.create();
 	public Updater<String> setNameDisplay = updaterReg.create();
 	public Updater<Void> updateGui = updaterReg.create();
 	public Updater<String> setUndo = updaterReg.create();
 	public Updater<String> setRedo = updaterReg.create();
-	public Updater<Boolean> setGlow = updaterReg.create();
-	public Updater<Integer> setPenColor = updaterReg.create();
-	public Updater<Integer> setPartColor = updaterReg.create();
-	public Updater<Boolean> setReColor = updaterReg.create();
-	public Updater<Integer> setAnimFrame = updaterReg.create();
-	public Updater<Vec3f> setAnimPos = updaterReg.create();
-	public Updater<Vec3f> setAnimRot = updaterReg.create();
-	public Updater<Boolean> setFrameAddEn = updaterReg.create();
-	public Updater<Boolean> setAnimDelEn = updaterReg.create();
-	public Updater<Boolean> setFrameDelEn = updaterReg.create();
-	public Updater<Integer> setAnimDuration = updaterReg.create();
-	public Updater<Integer> setAnimColor = updaterReg.create();
-	public Updater<Boolean> setAnimShow = updaterReg.create();
-	public Updater<Boolean> setAnimPlayEn = updaterReg.create();
-	public Updater<EditorAnim> setSelAnim = updaterReg.create();
-	public Updater<Boolean> setHiddenEffect = updaterReg.create();
-	public Updater<Boolean> setSingleTex = updaterReg.create();
-	public Updater<Boolean> setPerFaceUV = updaterReg.create();
-	public Updater<Boolean> setExtrudeEffect = updaterReg.create();
 	public Updater<Boolean> setSkinEdited = updaterReg.create();
 	public Updater<String> setReload = updaterReg.create();
 	public Updater<Boolean> setAnimPlay = updaterReg.create();
-	public Updater<Integer> setAnimPriority = updaterReg.create();
-	public Updater<Void> gestureFinished = updaterReg.create();
-	public Updater<Boolean> displayViewport = updaterReg.create();
+	public Updater<EditorAnim> setSelAnim = updaterReg.create();
 	public Updater<Float> setValue = updaterReg.create();
 	public Updater<EditorTool> setTool = updaterReg.create();
 	public Updater<Vec4f> setFaceUVs = updaterReg.create();
 	public Updater<Rot> setFaceRot = updaterReg.create();
 	public Updater<Boolean> setAutoUV = updaterReg.create();
-	public Updater<Boolean> setEnAddAnimTex = updaterReg.create();
+	public Updater<Void> gestureFinished = updaterReg.create();
 	public Updater<Pair<Integer, String>> setInfoMsg = updaterReg.create();
 	public TreeHandler<TreeElement> treeHandler = new TreeHandler<>(new ModelTree(this));
 
@@ -142,6 +144,8 @@ public class Editor {
 	public boolean playAnimatedTex = true;
 	public boolean drawParrots = false;
 	public boolean displayChat = true;
+	public boolean displayAdvScaling = ModConfig.getCommonConfig().getBoolean(ConfigKeys.ADV_SCALING_SETTINGS, false);
+	public boolean forceHeldItemInAnim = false;
 	public EnumMap<ItemSlot, DisplayItem> handDisplay = new EnumMap<>(ItemSlot.class);
 	public Set<PlayerModelLayer> modelDisplayLayers = new HashSet<>();
 	public float animTestSlider;
@@ -152,7 +156,6 @@ public class Editor {
 	public ViewportCamera camera = new ViewportCamera();
 	private Stack<Action> undoQueue = new Stack<>();
 	private Stack<Action> redoQueue = new Stack<>();
-	public boolean renderPaint;
 	public boolean renderBase = true;
 	public boolean applyAnim;
 	public boolean playFullAnim;
@@ -172,6 +175,7 @@ public class Editor {
 	public IPose renderedPose;
 	public List<EditorAnim> animations = new ArrayList<>();
 	public List<EditorTemplate> templates = new ArrayList<>();
+	public PartPosition leftHandPos = new PartPosition(), rightHandPos = new PartPosition();
 	public TemplateSettings templateSettings;
 	public TexturesElement texElem = new TexturesElement(this);
 	public SkinType skinType;
@@ -250,28 +254,8 @@ public class Editor {
 		if(selectedElement != null)selectedElement.switchVis();
 	}
 
-	public void switchMirror() {
-		if(selectedElement != null)selectedElement.switchEffect(Effect.MIRROR);
-	}
-
-	public void switchGlow() {
-		if(selectedElement != null)selectedElement.switchEffect(Effect.GLOW);
-	}
-
-	public void switchSingleTex() {
-		if(selectedElement != null)selectedElement.switchEffect(Effect.SINGLE_TEX);
-	}
-
-	public void switchPerfaceUV() {
-		if(selectedElement != null)selectedElement.switchEffect(Effect.PER_FACE_UV);
-	}
-
-	public void switchHide() {
-		if(selectedElement != null)selectedElement.switchEffect(Effect.HIDE);
-	}
-
-	public void switchExtrude() {
-		if(selectedElement != null)selectedElement.switchEffect(Effect.EXTRUDE);
+	public void switchEffect(Effect e) {
+		if(selectedElement != null)selectedElement.switchEffect(e);
 	}
 
 	public void setTexSize(int x, int y) {
@@ -284,10 +268,6 @@ public class Editor {
 			onRun(texs::restitchTexture).
 			execute();
 		}
-	}
-
-	public void switchReColorEffect() {
-		if(selectedElement != null)selectedElement.switchEffect(Effect.RECOLOR);
 	}
 
 	public void drawPixel(int x, int y, boolean isSkin) {
@@ -311,7 +291,8 @@ public class Editor {
 				Image img = texs.getImage();
 				if(x < 0 || y < 0 || x >= img.getWidth() || y >= img.getHeight())return;
 				int old = img.getRGB(x, y);
-				if((old & 0xffffff) == penColor)return;
+				int fillColor = penColor | (alphaValue << 24);
+				if(old == fillColor)return;
 				if(!texs.isEdited())setSkinEdited.accept(true);
 				Set<Vec2i> pixels = new HashSet<>();
 				Stack<Vec2i> nextPixels = new Stack<>();
@@ -320,7 +301,7 @@ public class Editor {
 					Vec2i p = nextPixels.pop();
 					if(pixels.contains(p) || p.x < 0 || p.y < 0 || p.x >= img.getWidth() || p.y >= img.getHeight())continue;
 					int color = img.getRGB(p.x, p.y);
-					if(color == old) {
+					if(color == old || ((old & 0xff000000) == 0) && ((color & 0xff000000) == 0)) {
 						if(box != null && onlyDrawOnSelected) {
 							if(!box.isInBounds(p.x, p.y))continue;
 						}
@@ -331,9 +312,8 @@ public class Editor {
 						nextPixels.add(new Vec2i(p.x, p.y + 1));
 					}
 				}
-				int color = penColor | (alphaValue << 24);
 				action("bucketFill").
-				onRun(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, color))).
+				onRun(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, fillColor))).
 				onUndo(() -> pixels.forEach(p -> texs.setRGB(p.x, p.y, old))).
 				onAction(texs::refreshTexture).
 				execute();
@@ -381,97 +361,18 @@ public class Editor {
 	}
 
 	public void updateGui() {
-		setOffset.accept(null);
-		setRot.accept(null);
-		setPosition.accept(null);
-		setSize.accept(null);
-		setScale.accept(null);
-		setMCScale.accept(null);
-		setMirror.accept(null);
-		updateName.accept(null);
-		setModeBtn.accept(null);
-		setModePanel.accept(ModeDisplayType.NULL);
-		setTexturePanel.accept(null);
-		setVis.accept(null);
-		setDelEn.accept(false);
-		setAddEn.accept(false);
-		setGlow.accept(null);
-		setPartColor.accept(null);
-		setReColor.accept(null);
-		setAnimPos.accept(null);
-		setAnimRot.accept(null);
-		setAnimFrame.accept(null);
-		setAnimDelEn.accept(false);
-		setFrameAddEn.accept(false);
-		setFrameDelEn.accept(false);
-		setAnimDuration.accept(null);
-		setAnimColor.accept(null);
-		setAnimShow.accept(null);
-		setAnimPlayEn.accept(false);
-		setHiddenEffect.accept(null);
-		setSingleTex.accept(null);
-		setExtrudeEffect.accept(null);
-		setPerFaceUV.accept(null);
-		setVis.accept(false);
-		setAnimPriority.accept(null);
-		displayViewport.accept(true);
-		setEnAddAnimTex.accept(false);
+		updaterReg.setDefault();
 		applyScaling = false;
 
 		if(templateSettings != null) {
 			templateSettings.templateArgs.forEach(TemplateArgHandler::applyToModel);
 		}
 		templates.forEach(EditorTemplate::applyToModel);
-		if(selectedElement != null) {
-			selectedElement.updateGui();
-		}
+		if(selectedElement != null)selectedElement.updateGui();
 		setNameDisplay.accept((file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : file.getName()) + (dirty ? "*" : ""));
 		setUndo.accept(undoQueue.empty() ? null : undoQueue.peek().getName());
 		setRedo.accept(redoQueue.empty() ? null : redoQueue.peek().getName());
-		if(selectedAnim != null) {
-			AnimFrame selFrm = selectedAnim.getSelectedFrame();
-			if(selFrm != null) {
-				ModelElement selectedElement = getSelectedElement();
-				setAnimFrame.accept(selectedAnim.getFrames().indexOf(selFrm));
-				if(selectedElement != null) {
-					IElem dt = selFrm.getData(selectedElement);
-					if(dt == null) {
-						if(selectedAnim.add) {
-							setAnimPos.accept(new Vec3f());
-							setAnimRot.accept(new Vec3f());
-						} else if(selectedElement.type == ElementType.ROOT_PART){
-							PartValues val = ((VanillaModelPart)selectedElement.typeData).getDefaultSize(skinType);
-							setAnimPos.accept(val.getPos());
-							setAnimRot.accept(new Vec3f());
-						} else {
-							setAnimPos.accept(selectedElement.pos);
-							setAnimRot.accept(selectedElement.rotation);
-						}
-						if(!selectedElement.texture || selectedElement.recolor) {
-							setAnimColor.accept(selectedElement.rgb);
-						}
-						if(selectedElement.type != ElementType.ROOT_PART && selectedElement.itemRenderer == null)
-							setAnimShow.accept(!selectedElement.hidden);
-					} else {
-						if(!selectedElement.texture || selectedElement.recolor) {
-							Vec3f c = dt.getColor();
-							setAnimColor.accept((((int) c.x) << 16) | (((int) c.y) << 8) | ((int) c.z));
-						}
-						setAnimPos.accept(dt.getPosition());
-						setAnimRot.accept(dt.getRotation());
-						if(selectedElement.type != ElementType.ROOT_PART && selectedElement.itemRenderer == null)
-							setAnimShow.accept(dt.isVisible());
-					}
-				}
-				setFrameDelEn.accept(true);
-			}
-			setFrameAddEn.accept(true);
-			setAnimDelEn.accept(true);
-			if(!(selectedAnim.pose instanceof VanillaPose && ((VanillaPose)selectedAnim.pose).hasStateGetter()))
-				setAnimDuration.accept(selectedAnim.duration);
-			setAnimPlayEn.accept(selectedAnim.getFrames().size() > 1);
-			setAnimPriority.accept(selectedAnim.priority);
-		}
+		if(selectedAnim != null)selectedAnim.updateGui();
 		setSelAnim.accept(selectedAnim);
 		ETextures tex = getTextureProvider();
 		setSkinEdited.accept(tex != null ? tex.isEdited() : false);
@@ -493,6 +394,8 @@ public class Editor {
 		textures.put(TextureSheetType.SKIN, skinTex);
 		undoQueue.clear();
 		redoQueue.clear();
+		leftHandPos = new PartPosition();
+		rightHandPos = new PartPosition();
 		skinType = MinecraftClientAccess.get().getSkinType();
 		Image skin = skinType.getSkinTexture();
 		this.vanillaSkin = skin;
@@ -511,7 +414,7 @@ public class Editor {
 		removeArmorOffset = true;
 		hideHeadIfSkull = true;
 		storeIDgen = new StoreIDGen();
-		Player<?, ?> profile = MinecraftClientAccess.get().getClientPlayer();
+		Player<?> profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.getTextures().load().thenRun(() -> {
 			if(!customSkinType)skinType = profile.getSkinType();
 			CompletableFuture<Image> img = profile.getTextures().getTexture(TextureType.SKIN);
@@ -537,9 +440,10 @@ public class Editor {
 	}
 
 	public void preRender() {
-		definition.itemTransforms.clear();
+		definition.preRender();
 		elements.forEach(ModelElement::preRender);
 		applyAnimations();
+		elements.forEach(ModelElement::postRender);
 		if(playAnimatedTex)textures.values().forEach(ETextures::updateAnim);
 	}
 
@@ -570,45 +474,63 @@ public class Editor {
 		}
 	}
 
-	private void save0(File file) throws IOException {
-		ProjectIO.saveProject(this, project);
-		project.save(file);
+	private CompletableFuture<Void> save0(File file) {
+		try {
+			ProjectIO.saveProject(this, project);
+		} catch (IOException e) {
+			CompletableFuture<Void> f = new CompletableFuture<>();
+			f.completeExceptionally(e);
+			return f;
+		}
+		return project.save(file);
 	}
 
-	public void save(File file) throws IOException {
+	public CompletableFuture<Void> save(File file) {
 		setInfoMsg.accept(Pair.of(200000, gui().i18nFormat("tooltip.cpm.saving", file.getName())));
-		save0(file);
-		this.file = file;
-		dirty = false;
-		autoSaveDirty = false;
-		setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.saveSuccess", file.getName())));
-		updateGui();
+		return save0(file).thenRun(() -> {
+			this.file = file;
+			dirty = false;
+			autoSaveDirty = false;
+			setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.saveSuccess", file.getName())));
+			updateGui();
+		});
 	}
 
-	public void load(File file) throws IOException {
+	public CompletableFuture<Void> load(File file) {
 		loadDefaultPlayerModel();
-		project.load(file);
-		ProjectIO.loadProject(this, project);
-		this.file = file;
-		restitchTextures();
-		updateGui();
+		return project.load(file).thenCompose(v -> {
+			try {
+				ProjectIO.loadProject(this, project);
+			} catch (Exception e) {
+				System.out.println("Err:" + e);
+				CompletableFuture<Void> f = new CompletableFuture<>();
+				f.completeExceptionally(e);
+				return f;
+			}
+			this.file = file;
+			restitchTextures();
+			updateGui();
+			return CompletableFuture.completedFuture(null);
+		});
 	}
 
 	public void reloadSkin() {
 		ETextures tex = getTextureProvider();
 		if(tex != null && tex.file != null) {
-			try {
-				Image img = Image.loadFrom(tex.file);
-				if(img.getWidth() > 512 || img.getHeight() > 512)
-					throw new IOException(frame.getGui().i18nFormat("label.cpm.tex_size_too_big", 512));
+			Image.loadFrom(tex.file).thenAccept(img -> {
+				if(img.getWidth() > 8192 || img.getHeight() > 8192) {
+					frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", frame.getGui().i18nFormat("label.cpm.tex_size_too_big", 8192))));
+					return;
+				}
 				tex.setImage(img);
 				tex.setEdited(true);
 				setSkinEdited.accept(true);
 				tex.restitchTexture();
-			} catch (IOException e) {
+			}).exceptionally(e -> {
 				Log.error("Failed to load image", e);
 				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
-			}
+				return null;
+			});
 		}
 	}
 
@@ -709,6 +631,12 @@ public class Editor {
 	public void setAnimPos(Vec3f v) {
 		if(selectedAnim != null) {
 			selectedAnim.setPosition(v);
+		}
+	}
+
+	public void setAnimScale(Vec3f v) {
+		if(selectedAnim != null) {
+			selectedAnim.setScale(v);
 		}
 	}
 
@@ -894,13 +822,15 @@ public class Editor {
 			File file = new File(autosaves, String.format("autosave-%1$tY%1$tm%1$td-%1$tH%1$tM%1$tS-", System.currentTimeMillis()) + (this.file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : this.file.getName()));
 			Log.info("Editor autosave: " + file.getName());
 			setInfoMsg.accept(Pair.of(5000, gui().i18nFormat("tooltip.cpm.autosaving", file.getName())));
-			try {
-				save0(file);
-				setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.autoSaveSuccess", file.getName())));
-			} catch (Exception e) {
-				frame.getGui().onGuiException("Failed to autosave", e, false);
-			}
 			autoSaveDirty = false;
+			save0(file).handleAsync((v, e) -> {
+				if(e != null) {
+					frame.getGui().onGuiException("Failed to autosave", e, false);
+				} else {
+					setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.autoSaveSuccess", file.getName())));
+				}
+				return null;
+			}, gui()::executeLater);
 		}
 	}
 

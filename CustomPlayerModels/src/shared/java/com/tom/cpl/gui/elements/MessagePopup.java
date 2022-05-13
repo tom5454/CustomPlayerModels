@@ -9,10 +9,14 @@ public class MessagePopup extends PopupPanel implements Runnable {
 	private Frame frame;
 
 	public MessagePopup(Frame frame, String title, String text) {
+		this(frame, title, text, frame.gui.i18nFormat("button.cpm.ok"));
+	}
+
+	public MessagePopup(Frame frame, String title, String text, String closeBtn) {
 		super(frame.getGui());
 		this.frame = frame;
 		this.title = title;
-		String[] lines = text.split("\\\\");
+		String[] lines = gui.wordWrap(text, frame.getBounds().w - 200).split("\\\\");
 
 		int wm = 180;
 
@@ -27,7 +31,7 @@ public class MessagePopup extends PopupPanel implements Runnable {
 		}
 		setBounds(new Box(0, 0, wm + 20, 45 + lines.length * 10));
 
-		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), this::close);
+		Button ok = new Button(gui, closeBtn, this::close);
 		ok.setBounds(new Box(wm / 2 - 10, 20 + lines.length * 10, 40, 20));
 		addElement(ok);
 	}

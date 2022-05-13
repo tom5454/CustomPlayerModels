@@ -7,7 +7,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.ResourceLocation;
 
-public class ModelTexture {
+import com.tom.cpl.render.RenderTypeBuilder.TextureHandler;
+
+public class ModelTexture implements TextureHandler<ResourceLocation, RenderType> {
 	private CallbackInfoReturnable<ResourceLocation> texture;
 	private Function<ResourceLocation, RenderType> renderType;
 
@@ -37,14 +39,17 @@ public class ModelTexture {
 		this(tex, PlayerRenderManager.entity);
 	}
 
+	@Override
 	public ResourceLocation getTexture() {
 		return texture.getReturnValue();
 	}
 
+	@Override
 	public void setTexture(ResourceLocation texture) {
 		this.texture.setReturnValue(texture);
 	}
 
+	@Override
 	public RenderType getRenderType() {
 		return renderType.apply(getTexture());
 	}

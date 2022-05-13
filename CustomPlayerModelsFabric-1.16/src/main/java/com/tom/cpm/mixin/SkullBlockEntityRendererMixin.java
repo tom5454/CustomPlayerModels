@@ -48,7 +48,7 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 		SkullEntityModel model = MODELS.get(skullType);
 		ModelTexture mt = new ModelTexture(resLoc);
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
-		return mt.getRenderLayer();
+		return mt.getRenderType();
 	}
 
 	@Redirect(at = @At(
@@ -63,7 +63,7 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 		SkullEntityModel model = MODELS.get(skullType);
 		ModelTexture mt = new ModelTexture(resLoc);
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
-		return mt.getRenderLayer();
+		return mt.getRenderType();
 	}
 
 	@Inject(at = @At("HEAD"),

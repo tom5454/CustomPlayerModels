@@ -17,8 +17,10 @@ import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.Animation;
 import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
 import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.IAnimation;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.animation.IPose;
+import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -140,6 +142,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				}
 				rd.pos = new Vec3f[count][];
 				rd.rot = new Vec3f[count][];
+				rd.scale = new Vec3f[count][];
 				rd.color = new Vec3f[count][];
 				rd.show = new Boolean[count][];
 				rd.frames = frames;
@@ -176,6 +179,20 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd.it = block.readEnum(InterpolatorType.VALUES);
 			}
 			break;
+
+			case ANIMATION_DATA_SCALE:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				int cid = block.read();
+				rd.scale[cid] = new Vec3f[rd.frames];
+				for(int i = 0;i<rd.frames;i++) {
+					rd.scale[cid][i] = block.readVec6b();
+				}
+			}
+			break;
+
 			default:
 				break;
 			}
@@ -215,6 +232,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.components = new int[cs];
 			rd.pos = new Vec3f[cs][];
 			rd.rot = new Vec3f[cs][];
+			rd.scale = new Vec3f[cs][];
 			rd.color = new Vec3f[cs][];
 			rd.show = new Boolean[cs][];
 			rd.loop = ea.loop;
@@ -238,6 +256,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				if(frames.stream().anyMatch(f -> f.hasVisChanges(elem))) {
 					rd.show[i] = new Boolean[fc];
 					fillArray(rd.show[i], frames, elem, IElem::isVisible, ea.add, !elem.hidden);
+				}
+				if(frames.stream().anyMatch(f -> f.hasScaleChanges(elem))) {
+					rd.scale[i] = new Vec3f[fc];
+					fillArray(rd.scale[i], frames, elem, IElem::getScale, ea.add, new Vec3f(1, 1, 1));
 				}
 			}
 		});
@@ -369,6 +391,16 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 						}
 					}
 				}
+				if(dt.scale[i] != null) {
+					dout.writeEnum(Type.ANIMATION_DATA_SCALE);
+					try(IOHelper d = dout.writeNextBlock()) {
+						d.write(id);
+						d.write(i);
+						for(int f = 0;f<dt.frames;f++) {
+							d.writeVec6b(dt.scale[i][f]);
+						}
+					}
+				}
 			}
 			if(dt.priority != 0) {
 				dout.writeEnum(Type.ANIMATION_DATA_EXTRA);
@@ -400,10 +432,11 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			for (int i = 0; i < comp.length; i++) {
 				comp[i] = def.getElementById(rd.components[i]);
 			}
-			float[][][] data = new float[rd.components.length][9][rd.frames];
+			float[][][] data = new float[rd.components.length][InterpolatorChannel.VALUES.length][rd.frames];
 			for (int i = 0; i < comp.length; i++) {
 				Vec3f[] pos = rd.pos[i];
 				Vec3f[] rot = rd.rot[i];
+				Vec3f[] scale = rd.scale[i];
 				Vec3f[] color = rd.color[i];
 				float[][] dt = data[i];
 				IModelComponent c = comp[i];
@@ -435,6 +468,15 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 						dt[7][f] = ((c.getRGB() & 0x00ff00) >> 8);
 						dt[8][f] = c.getRGB() & 0x0000ff;
 					}
+					if(scale != null) {
+						dt[9 ][f] = scale[f].x;
+						dt[10][f] = scale[f].y;
+						dt[11][f] = scale[f].z;
+					} else if(!rd.add) {
+						dt[9 ][f] = 1;
+						dt[10][f] = 1;
+						dt[11][f] = 1;
+					}
 				}
 				if(rd.show[i] == null) {
 					rd.show[i] = new Boolean[rd.frames];
@@ -444,13 +486,13 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			if(rd.dynamicProgress())rd.duration = VanillaPose.DYNAMIC_DURATION_DIV;
 			rd.anim = new Animation(comp, data, rd.show, rd.duration, rd.priority, rd.add, rd.it);
 		});
-		Map<String, List<Animation>> gestures = new HashMap<>();
+		Map<String, List<IAnimation>> gestures = new HashMap<>();
 		parsedData.values().forEach(rd -> {
 			if(rd.pose instanceof VanillaPose) {
 				def.getAnimations().register(rd.pose, rd.anim);
 			} else if(rd.name != null) {
 				gestures.computeIfAbsent(rd.name, k -> {
-					List<Animation> l = new ArrayList<>();
+					List<IAnimation> l = new ArrayList<>();
 					Gesture g = new Gesture(l, rd.name, rd.loop);
 					def.getAnimations().register(g);
 					if(rd.gid != -1)
@@ -496,6 +538,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		CTRL_IDS,
 		ANIMATION_DATA_EXTRA,
 		ANIMATION_DATA_INTERPOLATION,
+		ANIMATION_DATA_SCALE,
 		;
 		public static final Type[] VALUES = values();
 	}
@@ -507,6 +550,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		private int[] components;
 		private Vec3f[][] pos;
 		private Vec3f[][] rot;
+		private Vec3f[][] scale;
 		private Vec3f[][] color;
 		private Boolean[][] show;
 		private int frames, duration;

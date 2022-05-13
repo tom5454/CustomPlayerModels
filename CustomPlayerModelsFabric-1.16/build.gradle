@@ -5,7 +5,8 @@ plugins {
 
 repositories {
 maven { url 'https://jitpack.io' }
-jcenter()
+maven { url "https://maven.shedaniel.me/" }
+maven { url "https://maven.terraformersmc.com/releases/"}
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -24,14 +25,14 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	modImplementation("io.github.prospector:modmenu:1.14.9+build.13") {
+	modImplementation("com.terraformersmc:modmenu:1.16.22") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
 	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api:5.8.7"){
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modRuntime("me.shedaniel:RoughlyEnoughItems:5.8.7"){
+    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems:5.8.7"){
         exclude(group: "net.fabricmc.fabric-api")
     }
     modImplementation ('com.github.Virtuoel:Pehkui:3.1.0'){
@@ -41,8 +42,8 @@ dependencies {
     compileOnly files("of.jar")
 }
 
-minecraft {
-	accessWidener = file("src/main/resources/cpm.accesswidener")
+loom {
+	accessWidenerPath = file("src/main/resources/cpm.accesswidener")
 }
 
 sourceSets {

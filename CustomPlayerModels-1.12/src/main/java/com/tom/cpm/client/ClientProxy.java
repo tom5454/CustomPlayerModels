@@ -6,14 +6,19 @@ import java.util.concurrent.Executor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCustomizeSkin;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelElytra;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -23,6 +28,7 @@ import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.ITextComponent;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -38,13 +44,14 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
-import com.google.common.collect.Iterables;
-
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CommonProxy;
+import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
@@ -70,11 +77,7 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), EntityPlayer::getGameProfile);
-		manager.setGetSkullModel(profile -> {
-			Property property = Iterables.getFirst(profile.getProperties().get("cpm:model"), null);
-			if(property != null)return property.getValue();
-			return null;
-		});
+		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		Executor ex = minecraft::addScheduledTask;
 		netHandler.setExecutor(() -> ex);
@@ -92,15 +95,21 @@ public class ClientProxy extends CommonProxy {
 		netHandler.setDisplayText(f -> minecraft.ingameGUI.addChatMessage(ChatType.SYSTEM, f.remap()));
 	}
 
+	@Override
+	public void apiInit() {
+		CustomPlayerModels.api.buildClient().voicePlayer(EntityPlayer.class).localModelApi(GameProfile::new).
+		renderApi(ModelBase.class, GameProfile.class).init();
+	}
+
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		manager.bindPlayer(event.getEntityPlayer(), null);
-		manager.bindSkin(TextureSheetType.SKIN);
+		manager.bindPlayer(event.getEntityPlayer(), null, event.getRenderer().getMainModel());
+		manager.bindSkin(event.getRenderer().getMainModel(), TextureSheetType.SKIN);
 	}
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
-		manager.unbindClear();
+		manager.unbindClear(event.getRenderer().getMainModel());
 	}
 
 	@SubscribeEvent
@@ -133,15 +142,15 @@ public class ClientProxy extends CommonProxy {
 		manager.bindSkin(skullModel, TextureSheetType.SKIN);
 	}
 
-	public void renderElytra(EntityPlayer player, ModelElytra model) {
-		manager.bindElytra(player, null, model);
+	public void renderElytra(ModelBiped player, ModelElytra model) {
+		manager.bindElytra(player, model);
 		manager.bindSkin(model, TextureSheetType.ELYTRA);
 	}
 
 	public void renderArmor(ModelBase modelArmor, ModelBase modelLeggings,
-			EntityPlayer player) {
-		manager.bindArmor(player, null, modelArmor, 1);
-		manager.bindArmor(player, null, modelLeggings, 2);
+			ModelBiped player) {
+		manager.bindArmor(player, modelArmor, 1);
+		manager.bindArmor(player, modelLeggings, 2);
 		manager.bindSkin(modelArmor, TextureSheetType.ARMOR1);
 		manager.bindSkin(modelLeggings, TextureSheetType.ARMOR2);
 	}
@@ -182,7 +191,77 @@ public class ClientProxy extends CommonProxy {
 		if(evt.getEntity() instanceof AbstractClientPlayer) {
 			if(!Player.isEnableNames())
 				evt.setCanceled(true);
+			if(Player.isEnableLoadingInfo()) {
+				FormatText st = INSTANCE.manager.getStatus(((AbstractClientPlayer) evt.getEntity()).getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE);
+				if(st != null) {
+					double d0 = evt.getEntity().getDistanceSq(minecraft.getRenderViewEntity());
+					if (d0 < 32*32) {
+						GlStateManager.pushMatrix();
+						GlStateManager.translate(0, 0.25F, 0);
+						String str = ((ITextComponent) st.remap()).getFormattedText();
+						renderLivingLabel(evt.getEntity(), str, evt.getX(), evt.getY(), evt.getZ(), 64);
+						GlStateManager.popMatrix();
+					}
+				}
+			}
 		}
+	}
+
+	protected void renderLivingLabel(Entity entityIn, String str, double x, double y, double z, int maxDistance) {
+		double d0 = entityIn.getDistanceSq(minecraft.getRenderManager().renderViewEntity);
+
+		if (d0 <= maxDistance * maxDistance) {
+			boolean flag = entityIn.isSneaking();
+			float f = minecraft.getRenderManager().playerViewY;
+			float f1 = minecraft.getRenderManager().playerViewX;
+			boolean flag1 = minecraft.getRenderManager().options.thirdPersonView == 2;
+			float f2 = entityIn.height + 0.5F - (flag ? 0.25F : 0.0F);
+			int i = "deadmau5".equals(str) ? -10 : 10;
+			drawNameplate(minecraft.fontRenderer, str, (float)x, (float)y + f2, (float)z, i, f, f1, flag1, flag);
+		}
+	}
+
+	public static void drawNameplate(FontRenderer fontRendererIn, String str, float x, float y, float z, int verticalShift, float viewerYaw, float viewerPitch, boolean isThirdPersonFrontal, boolean isSneaking) {
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(x, y, z);
+		GlStateManager.glNormal3f(0.0F, 1.0F, 0.0F);
+		GlStateManager.rotate(-viewerYaw, 0.0F, 1.0F, 0.0F);
+		GlStateManager.rotate((isThirdPersonFrontal ? -1 : 1) * viewerPitch, 1.0F, 0.0F, 0.0F);
+		GlStateManager.scale(-0.025F / 2, -0.025F / 2, 0.025F / 2);
+		GlStateManager.disableLighting();
+		GlStateManager.depthMask(false);
+
+		if (!isSneaking)
+		{
+			GlStateManager.disableDepth();
+		}
+
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		int i = fontRendererIn.getStringWidth(str) / 2;
+		GlStateManager.disableTexture2D();
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder bufferbuilder = tessellator.getBuffer();
+		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		bufferbuilder.pos(-i - 1, -1 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+		bufferbuilder.pos(-i - 1, 8 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+		bufferbuilder.pos(i + 1, 8 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+		bufferbuilder.pos(i + 1, -1 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+		tessellator.draw();
+		GlStateManager.enableTexture2D();
+
+		if (!isSneaking)
+		{
+			fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, 553648127);
+			GlStateManager.enableDepth();
+		}
+
+		GlStateManager.depthMask(true);
+		fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, isSneaking ? 553648127 : -1);
+		GlStateManager.enableLighting();
+		GlStateManager.disableBlend();
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+		GlStateManager.popMatrix();
 	}
 
 	public static class Button extends GuiButton {

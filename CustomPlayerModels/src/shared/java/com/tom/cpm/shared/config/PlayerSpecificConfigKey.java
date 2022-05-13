@@ -145,7 +145,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 			}
 
 			@Override
-			public void checkFor(Player<?, ?> player, BlockReason err) throws SafetyException {
+			public void checkFor(Player<?> player, BlockReason err) throws SafetyException {
 				checkFor(player, v -> v, err);
 			}
 
@@ -220,7 +220,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 			}
 
 			@Override
-			public void checkFor(Player<?, ?> player, Integer w, BlockReason err) throws SafetyException {
+			public void checkFor(Player<?> player, Integer w, BlockReason err) throws SafetyException {
 				checkFor(player, o -> w <= o, err);
 			}
 
@@ -263,16 +263,16 @@ public abstract class PlayerSpecificConfigKey<V> {
 		}
 	}
 
-	public void checkFor(Player<?, ?> player, Predicate<V> check, BlockReason err) throws SafetyException {
+	public void checkFor(Player<?> player, Predicate<V> check, BlockReason err) throws SafetyException {
 		if(player.isClientPlayer())return;
 		if(!check.test(getValueFor(player)))throw new SafetyException(err);
 	}
 
-	public void checkFor(Player<?, ?> player, V v, BlockReason err) throws SafetyException {
+	public void checkFor(Player<?> player, V v, BlockReason err) throws SafetyException {
 		throw new SafetyException(err);
 	}
 
-	public void checkFor(Player<?, ?> player, BlockReason err) throws SafetyException {
+	public void checkFor(Player<?> player, BlockReason err) throws SafetyException {
 		throw new SafetyException(err);
 	}
 
@@ -316,7 +316,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 		return defValue.get(KeyGroup.GLOBAL);
 	}
 
-	public V getValueFor(Player<?, ?> player) {
+	public V getValueFor(Player<?> player) {
 		String uuid = null;
 		if(player != null) {
 			uuid = player.getUUID().toString();

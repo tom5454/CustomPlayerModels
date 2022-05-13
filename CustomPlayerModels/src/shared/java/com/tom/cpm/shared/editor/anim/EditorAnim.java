@@ -15,9 +15,13 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.Interpolator;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.gui.AnimPanel.IAnim;
+import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.model.PartValues;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class EditorAnim implements IAnim {
 	private List<ModelElement> components;
@@ -89,6 +93,11 @@ public class EditorAnim implements IAnim {
 					getValue(component, InterpolatorChannel.COLOR_G, step),
 					getValue(component, InterpolatorChannel.COLOR_B, step));
 			component.rc.setVisible(frames.get((int) step).getVisible(component));
+			component.rc.setRenderScale(add,
+					getValue(component, InterpolatorChannel.SCALE_X, step),
+					getValue(component, InterpolatorChannel.SCALE_Y, step),
+					getValue(component, InterpolatorChannel.SCALE_Z, step)
+					);
 		}
 	}
 
@@ -103,6 +112,14 @@ public class EditorAnim implements IAnim {
 	public void setRotation(Vec3f v) {
 		if(currentFrame != null && editor.getSelectedElement() != null) {
 			currentFrame.setRot(editor.getSelectedElement(), v);
+		}
+		components = null;
+		psfs = null;
+	}
+
+	public void setScale(Vec3f v) {
+		if(currentFrame != null && editor.getSelectedElement() != null) {
+			currentFrame.setScale(editor.getSelectedElement(), v);
 		}
 		components = null;
 		psfs = null;
@@ -228,5 +245,69 @@ public class EditorAnim implements IAnim {
 		if(i == -1)return displayName;
 		if(i == 0)return "";
 		return displayName.substring(0, i);
+	}
+
+	public void updateGui() {
+		AnimFrame selFrm = this.getSelectedFrame();
+		if(selFrm != null) {
+			ModelElement selectedElement = editor.getSelectedElement();
+			editor.setAnimFrame.accept(this.getFrames().indexOf(selFrm));
+			if(selectedElement != null) {
+				IElem dt = selFrm.getData(selectedElement);
+				if(dt == null) {
+					if(this.add) {
+						editor.setAnimPos.accept(new Vec3f());
+						editor.setAnimRot.accept(new Vec3f());
+						if(selectedElement.type != ElementType.ROOT_PART)
+							editor.setAnimScale.accept(new Vec3f(1, 1, 1));
+					} else if(selectedElement.type == ElementType.ROOT_PART){
+						PartValues val = ((VanillaModelPart)selectedElement.typeData).getDefaultSize(editor.skinType);
+						editor.setAnimPos.accept(val.getPos());
+						editor.setAnimRot.accept(new Vec3f());
+						editor.setAnimScale.accept(null);
+					} else {
+						editor.setAnimPos.accept(selectedElement.pos);
+						editor.setAnimRot.accept(selectedElement.rotation);
+						editor.setAnimScale.accept(new Vec3f(1, 1, 1));
+					}
+					if(!selectedElement.texture || selectedElement.recolor) {
+						editor.setAnimColor.accept(selectedElement.rgb);
+					}
+					if(selectedElement.type != ElementType.ROOT_PART)
+						editor.setAnimShow.accept(!selectedElement.hidden);
+				} else {
+					if(!selectedElement.texture || selectedElement.recolor) {
+						Vec3f c = dt.getColor();
+						editor.setAnimColor.accept((((int) c.x) << 16) | (((int) c.y) << 8) | ((int) c.z));
+					}
+					editor.setAnimPos.accept(dt.getPosition());
+					editor.setAnimRot.accept(dt.getRotation());
+					if(selectedElement.type != ElementType.ROOT_PART) {
+						editor.setAnimScale.accept(dt.getScale());
+						editor.setAnimShow.accept(dt.isVisible());
+					}
+				}
+			}
+			editor.setFrameDelEn.accept(true);
+		}
+		editor.setFrameAddEn.accept(true);
+		editor.setAnimDelEn.accept(true);
+		if(!(this.pose instanceof VanillaPose && ((VanillaPose)this.pose).hasStateGetter()))
+			editor.setAnimDuration.accept(this.duration);
+		editor.setAnimPlayEn.accept(this.getFrames().size() > 1);
+		editor.setAnimPriority.accept(this.priority);
+	}
+
+	public void beginDrag() {
+		ModelElement sel = editor.getSelectedElement();
+		if(currentFrame != null && sel != null)currentFrame.beginDrag(sel);
+	}
+
+	public void endDrag() {
+		if(currentFrame != null)currentFrame.endDrag();
+	}
+
+	public void dragVal(VecType type, Vec3f vec) {
+		if(currentFrame != null)currentFrame.dragVal(type, vec);
 	}
 }

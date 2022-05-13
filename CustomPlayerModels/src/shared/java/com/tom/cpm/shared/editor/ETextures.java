@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.model.PlayerModelParts;
+import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.util.TextureStitcher;
 
 public class ETextures implements TreeElement {
@@ -170,6 +174,7 @@ public class ETextures implements TreeElement {
 	@Override
 	public void updateGui() {
 		e.setEnAddAnimTex.accept(type.editable);
+		e.setDelEn.accept(true);
 	}
 
 	@Override
@@ -201,5 +206,30 @@ public class ETextures implements TreeElement {
 
 	public int getMaxSize() {
 		return Math.max(provider.getImage().getWidth(), provider.getImage().getHeight());
+	}
+
+	@Override
+	public void delete() {
+		if(e.elements.stream().anyMatch(e -> e.type == ElementType.ROOT_PART && getTextureSheet((VanillaModelPart) e.typeData) == type)) {
+			e.frame.openPopup(new ConfirmPopup(e.frame, e.gui().i18nFormat("label.cpm.confirm"), e.gui().i18nFormat("label.cpm.resetTextureSheet"), () ->  {
+				e.action("delTexture").
+				updateValueOp(this, this.getImage(), this.copyDefaultImg(), ETextures::setImage).
+				updateValueOp(this, this.isEdited(), false, ETextures::setEdited).
+				execute();
+			}, null, e.gui().i18nFormat("button.cpm.resetTexture")));
+		} else {
+			e.frame.openPopup(new ConfirmPopup(e.frame, e.gui().i18nFormat("label.cpm.confirm"), e.gui().i18nFormat("label.cpm.removeTextureSheet"), () -> {
+				e.action("remove", "label.cpm.textureSheet").removeFromMap(e.textures, type, this).execute();
+			}, null));
+		}
+	}
+
+	private static TextureSheetType getTextureSheet(VanillaModelPart part) {
+		if(part instanceof PlayerModelParts)return TextureSheetType.SKIN;
+		else if(part instanceof RootModelType) {
+			RootGroups gr = RootGroups.getGroup((RootModelType) part);
+			return gr.getTexSheet((RootModelType) part);
+		}
+		return TextureSheetType.SKIN;
 	}
 }

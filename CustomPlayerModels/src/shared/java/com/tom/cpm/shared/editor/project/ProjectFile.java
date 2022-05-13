@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -91,60 +92,74 @@ public class ProjectFile implements IProject {
 		};
 	}
 
-	public void load(File file) throws IOException {
-		root = new Entry();
-		root.children = new HashMap<>();
-		byte[] buffer = new byte[1024];
-		try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
-			ZipEntry ze = zis.getNextEntry();
-			while(ze != null){
-				String fileName = ze.getName();
+	public CompletableFuture<Void> load(File file) {
+		try {
+			root = new Entry();
+			root.children = new HashMap<>();
+			byte[] buffer = new byte[1024];
+			try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
+				ZipEntry ze = zis.getNextEntry();
+				while(ze != null){
+					String fileName = ze.getName();
 
-				if(fileName.endsWith("/"))fileName = fileName.substring(0, fileName.length() - 1);
+					if(fileName.endsWith("/"))fileName = fileName.substring(0, fileName.length() - 1);
 
-				Entry e = root;
-				for(String nm : fileName.split("/")) {
-					e = e.children.computeIfAbsent(nm, k -> new Entry());
-				}
-
-				if(ze.isDirectory()){
-					e.children = new HashMap<>();
-				}else{
-					ByteArrayOutputStream fos = new ByteArrayOutputStream();
-					int len;
-					while ((len = zis.read(buffer)) > 0) {
-						fos.write(buffer, 0, len);
+					Entry e = root;
+					for(String nm : fileName.split("/")) {
+						e = e.children.computeIfAbsent(nm, k -> new Entry());
 					}
-					e.data = fos.toByteArray();
-				}
-				ze = zis.getNextEntry();
-			}
 
-			zis.closeEntry();
+					if(ze.isDirectory()){
+						e.children = new HashMap<>();
+					}else{
+						ByteArrayOutputStream fos = new ByteArrayOutputStream();
+						int len;
+						while ((len = zis.read(buffer)) > 0) {
+							fos.write(buffer, 0, len);
+						}
+						e.data = fos.toByteArray();
+					}
+					ze = zis.getNextEntry();
+				}
+
+				zis.closeEntry();
+			}
+		} catch (IOException e) {
+			CompletableFuture<Void> f = new CompletableFuture<>();
+			f.completeExceptionally(e);
+			return f;
 		}
+		return CompletableFuture.completedFuture(null);
 	}
 
-	public void save(File file) throws IOException {
-		Deque<ZEntry> queue = new LinkedList<>();
-		queue.push(new ZEntry(root, ""));
-		ZEntry directory;
-		try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(file))) {
-			while (!queue.isEmpty()) {
-				directory = queue.pop();
-				for (java.util.Map.Entry<String, Entry> e : directory.entry.children.entrySet()) {
-					String path = directory.path + "/" + e.getKey();
-					if(e.getValue().children != null) {
-						queue.push(new ZEntry(e.getValue(), path));
-						zout.putNextEntry(new ZipEntry(path.substring(1) + "/"));
-					} else {
-						zout.putNextEntry(new ZipEntry(path.substring(1)));
-						zout.write(e.getValue().data);
-						zout.closeEntry();
+	public CompletableFuture<Void> save(File file) {
+		try {
+			Deque<ZEntry> queue = new LinkedList<>();
+			queue.push(new ZEntry(root, ""));
+			ZEntry directory;
+			try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(file))) {
+				while (!queue.isEmpty()) {
+					directory = queue.pop();
+					for (java.util.Map.Entry<String, Entry> e : directory.entry.children.entrySet()) {
+						String path = directory.path + "/" + e.getKey();
+						if(e.getValue().children != null) {
+							queue.push(new ZEntry(e.getValue(), path));
+							zout.putNextEntry(new ZipEntry(path.substring(1) + "/"));
+						} else {
+							zout.putNextEntry(new ZipEntry(path.substring(1)));
+							zout.write(e.getValue().data);
+							zout.closeEntry();
+						}
 					}
 				}
+				zout.closeEntry();
 			}
-			zout.closeEntry();
+		} catch (IOException e) {
+			CompletableFuture<Void> f = new CompletableFuture<>();
+			f.completeExceptionally(e);
+			return f;
 		}
+		return CompletableFuture.completedFuture(null);
 	}
 
 	private static class Entry {
