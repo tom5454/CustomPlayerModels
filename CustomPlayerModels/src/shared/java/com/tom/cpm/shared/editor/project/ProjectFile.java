@@ -106,6 +106,7 @@ public class ProjectFile implements IProject {
 
 					Entry e = root;
 					for(String nm : fileName.split("/")) {
+						if(e.children == null)e.children = new HashMap<>();
 						e = e.children.computeIfAbsent(nm, k -> new Entry());
 					}
 

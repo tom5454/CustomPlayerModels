@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
@@ -28,12 +28,11 @@ import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 
 public class PerfaceUVPanel extends Panel {
 
-	public PerfaceUVPanel(IGui gui, EditorGui e, TabFocusHandler tabHandler) {
-		super(gui);
+	public PerfaceUVPanel(Frame frm, Editor editor, TabFocusHandler tabHandler) {
+		super(frm.getGui());
 		setBounds(new Box(0, 0, 170, 95));
-		Editor editor = e.getEditor();
 
-		DropDownBox<NamedElement<Direction>> faces = new DropDownBox<>(e, Arrays.stream(Direction.VALUES).
+		DropDownBox<NamedElement<Direction>> faces = new DropDownBox<>(frm, Arrays.stream(Direction.VALUES).
 				map(d -> new NamedElement<>(d, dir -> gui.i18nFormat("label.cpm.dir." + dir.name().toLowerCase()))).
 				collect(Collectors.toList()));
 		faces.setBounds(new Box(5, 0, 160, 20));
@@ -105,7 +104,7 @@ public class PerfaceUVPanel extends Panel {
 		});
 
 		NameMapper<Rot> rotMap = new NameMapper<>(Rot.VALUES, rot -> gui.i18nFormat("label.cpm.rot." + rot.name().toLowerCase()));
-		DropDownBox<NamedElement<Rot>> rots = new DropDownBox<>(e, new ArrayList<>(rotMap.asList()));
+		DropDownBox<NamedElement<Rot>> rots = new DropDownBox<>(frm, new ArrayList<>(rotMap.asList()));
 		rotMap.setSetter(rots::setSelected);
 		rots.setBounds(new Box(5, 45, 80, 20));
 		rots.setAction(() -> {
@@ -152,7 +151,7 @@ public class PerfaceUVPanel extends Panel {
 			}
 		});
 		delBtn.setBounds(new Box(70, 70, 18, 18));
-		delBtn.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.deleteFace")));
+		delBtn.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.deleteFace")));
 		addElement(delBtn);
 
 		Button toAllUVs = new Button(gui, gui.i18nFormat("button.cpm.toAllFaces"), () -> {
@@ -171,7 +170,7 @@ public class PerfaceUVPanel extends Panel {
 			}
 		});
 		toAllUVs.setBounds(new Box(92, 70, 70, 18));
-		toAllUVs.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.toAllFaces")));
+		toAllUVs.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.toAllFaces")));
 		addElement(toAllUVs);
 	}
 

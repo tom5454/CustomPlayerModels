@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.function.Consumer;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.math.Box;
@@ -149,6 +150,10 @@ public interface IGui {
 	}
 
 	default String wordWrap(String in, int w) {
+		return wordWrap(in, w, this::textWidth);
+	}
+
+	public static String wordWrap(String in, int w, ToIntFunction<String> width) {
 		List<String> text = new ArrayList<>();
 		int splitStart = 0;
 		int space = -1;
@@ -156,7 +161,7 @@ public interface IGui {
 			char c = in.charAt(i);
 			if(c == ' ' || c == '\\') {
 				String s = in.substring(splitStart, i);
-				int lw = textWidth(s);
+				int lw = width.applyAsInt(s);
 				if(lw > w) {
 					if(splitStart == space + 1) {
 						text.add(s);

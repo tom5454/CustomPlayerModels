@@ -24,6 +24,10 @@ public class ModelFile {
 		}
 	}
 
+	public static ModelFile load(InputStream fin) throws IOException {
+		return load("unnamed", fin);
+	}
+
 	public static ModelFile load(String name, InputStream fin) throws IOException {
 		if(fin.read() != ModelDefinitionLoader.HEADER)throw new IOException("Magic number mismatch");
 		ChecksumInputStream cis = new ChecksumInputStream(fin);

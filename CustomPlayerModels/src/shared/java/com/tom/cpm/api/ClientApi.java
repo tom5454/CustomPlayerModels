@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,23 +27,15 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
-import com.tom.cpm.shared.util.Log;
 
-public class ClientApi implements IClientAPI {
-	private Map<Clazz, Class<?>> classes = new EnumMap<>(Clazz.class);
+public class ClientApi extends SharedApi implements IClientAPI {
 	private List<ToFloatFunction<Object>> voice = new ArrayList<>();
 	private TextureHandlerFactory<?, ?> textureHandlerFactory;
 	private BiFunction<UUID, String, ?> gameProfileFactory;
-	private ICPMPlugin initingPlugin;
 
-	public void callInit(ICPMPlugin plugin) {
-		initingPlugin = plugin;
-		try {
-			plugin.initClient(this);
-		} catch (Throwable e) {
-			Log.error("Plugin init error, modid: " + plugin.getOwnerModId(), e);
-		}
-		initingPlugin = null;
+	@Override
+	protected void callInit0(ICPMPlugin plugin) {
+		plugin.initClient(this);
 	}
 
 	protected ClientApi() {
@@ -55,15 +46,6 @@ public class ClientApi implements IClientAPI {
 	public <T> void registerVoice(Class<T> clazz, Function<T, Float> getVoiceLevel) {
 		if(checkClass(clazz, Clazz.PLAYER))return;
 		voice.add(p -> getVoiceLevel.apply((T) p));
-	}
-
-	private boolean checkClass(Class<?> clazz, Clazz clz) {
-		if(classes.containsKey(clz)) {
-			if(!classes.get(clz).isAssignableFrom(clazz)) {
-				throw new IllegalArgumentException("Class " + clazz + " is not valid for " + clz);
-			} else
-				return false;
-		} else return true;
 	}
 
 	public static class ApiBuilder {
@@ -108,15 +90,6 @@ public class ClientApi implements IClientAPI {
 		}
 	}
 
-	public static enum Clazz {
-		PLAYER,
-		MODEL,
-		RESOURCE_LOCATION,
-		RENDER_TYPE,
-		MULTI_BUFFER_SOURCE,
-		GAME_PROFILE,
-	}
-
 	private class PlayerRendererImpl<M, RL, RT, MBS, GP> implements PlayerRenderer<M, RL, RT, MBS, GP> {
 		private M model;
 		private List<M> subModels = new ArrayList<>();
@@ -143,6 +116,11 @@ public class ClientApi implements IClientAPI {
 		@Override
 		public RT getDefaultRenderType() {
 			return renderTypeFactory.apply(defaultTexture);
+		}
+
+		@Override
+		public RL getDefaultTexture() {
+			return defaultTexture;
 		}
 
 		@Override

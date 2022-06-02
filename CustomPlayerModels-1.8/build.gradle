@@ -59,7 +59,7 @@ dependencies {
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+	compile "com.mojang:brigadier:1.0.18"
 }
 
 sourceSets {

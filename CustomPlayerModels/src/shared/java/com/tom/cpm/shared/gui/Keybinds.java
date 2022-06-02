@@ -21,9 +21,12 @@ public class Keybinds {
 	public static final Keybind TREE_UP = new Keybind("tree_up", c -> c.KEY_LEFT);
 	public static final Keybind TREE_DOWN = new Keybind("tree_down", c -> c.KEY_RIGHT);
 	public static final Keybind NEW_PART = new Keybind("new_part", "n", Keybind.CTRL);
+	public static final Keybind TOGGLE_GIZMO = new Keybind("toggleGizmo", "g");
 
-	public static final Object[] KEYBINDS = new Object[] {ZOOM_IN_CAMERA, ZOOM_OUT_CAMERA, RESET_CAMERA, "editor",
-			OFFSET, ROTATION, POSITION, SIZE, SAVE, UNDO, REDO, NEW_PART, DELETE,
+	public static final Object MOUSE_MARKER = new Object();
+
+	public static final Object[] KEYBINDS = new Object[] {"3dView", ZOOM_IN_CAMERA, ZOOM_OUT_CAMERA, RESET_CAMERA, "editor",
+			MOUSE_MARKER, OFFSET, ROTATION, POSITION, SIZE, SAVE, UNDO, REDO, NEW_PART, DELETE, TOGGLE_GIZMO,
 			"treeNav", TREE_PREV, TREE_NEXT, TREE_UP, TREE_DOWN};
 
 }

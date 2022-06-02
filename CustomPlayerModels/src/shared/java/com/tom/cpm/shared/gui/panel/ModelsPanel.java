@@ -201,7 +201,8 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 				selectedDef = MinecraftClientAccess.get().getDefinitionLoader().loadModel(file.getDataBlock(), MinecraftClientAccess.get().getClientPlayer());
 				file.registerLocalCache(MinecraftClientAccess.get().getDefinitionLoader());
 				set.setEnabled(true);
-				upload.setEnabled(true);
+				if(upload != null)
+					upload.setEnabled(true);
 			});
 			addElement(select);
 

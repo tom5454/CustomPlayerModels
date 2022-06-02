@@ -196,6 +196,10 @@ public class Tree<T> extends GuiElement {
 				walkChildren(t, oldTree != null ? oldTree.children : null);
 			});
 		}
+
+		public TreeModel<T> getModel() {
+			return model;
+		}
 	}
 
 	private TreeElement<T> find(T elem) {

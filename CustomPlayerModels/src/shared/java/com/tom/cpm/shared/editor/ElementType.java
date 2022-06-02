@@ -30,7 +30,7 @@ public enum ElementType {
 
 				@Override
 				public ElementSelectMode getSelected() {
-					if(editor.selectedElement == elem)return ElementSelectMode.SELECTED;
+					if(editor.selectedElement != null && editor.selectedElement.isSelected(editor, elem))return ElementSelectMode.SELECTED;
 					if(editor.selectedElement instanceof ArgElem && ((ArgElem) editor.selectedElement).elem == elem)
 						return ElementSelectMode.SEL_ONLY;
 					if(elem.parent != null) {
@@ -76,7 +76,7 @@ public enum ElementType {
 
 				@Override
 				public ElementSelectMode getSelected() {
-					if(editor.selectedElement == elem)return ElementSelectMode.SELECTED;
+					if(editor.selectedElement != null && editor.selectedElement.isSelected(editor, elem))return ElementSelectMode.SELECTED;
 					if(elem.parent != null) {
 						ElementSelectMode ps = elem.parent.rc.getSelected();
 						if(ps == ElementSelectMode.SEL_CHILDREN || ps == ElementSelectMode.SELECTED)

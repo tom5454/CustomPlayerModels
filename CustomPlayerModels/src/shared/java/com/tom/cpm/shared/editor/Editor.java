@@ -49,7 +49,7 @@ import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.anim.AnimationType;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.EditorGui;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
+import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.RenderUtil;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.project.ProjectFile;
@@ -146,6 +146,7 @@ public class Editor {
 	public boolean displayChat = true;
 	public boolean displayAdvScaling = ModConfig.getCommonConfig().getBoolean(ConfigKeys.ADV_SCALING_SETTINGS, false);
 	public boolean forceHeldItemInAnim = false;
+	public boolean displayGizmo = true;
 	public EnumMap<ItemSlot, DisplayItem> handDisplay = new EnumMap<>(ItemSlot.class);
 	public Set<PlayerModelLayer> modelDisplayLayers = new HashSet<>();
 	public float animTestSlider;
@@ -163,7 +164,7 @@ public class Editor {
 	public boolean applyScaling;
 	public boolean drawBoundingBox;
 	public long playStartTime, gestureStartTime;
-	public StoreIDGen storeIDgen;
+	private StoreIDGen storeIDgen;
 	public AnimationEncodingData animEnc;
 
 	public Frame frame;
@@ -476,6 +477,7 @@ public class Editor {
 
 	private CompletableFuture<Void> save0(File file) {
 		try {
+			walkElements(elements, storeIDgen::setID);
 			ProjectIO.saveProject(this, project);
 		} catch (IOException e) {
 			CompletableFuture<Void> f = new CompletableFuture<>();

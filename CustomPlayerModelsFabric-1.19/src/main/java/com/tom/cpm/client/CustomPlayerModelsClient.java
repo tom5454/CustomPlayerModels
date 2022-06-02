@@ -31,8 +31,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.MessageType;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -83,7 +83,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 				return;
 
 			if(KeyBindings.gestureMenuBinding.wasPressed()) {
-				client.setScreen(new GuiImpl(GestureGui::new, null));
+				client.setScreen(new Gui(GestureGui::new, null));
 			}
 
 			if(KeyBindings.renderToggleBinding.wasPressed()) {
@@ -135,7 +135,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public void initGui(Screen screen) {
 		if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				screen instanceof SkinOptionsScreen) {
-			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().setScreen(new GuiImpl(EditorGui::new, screen)));
+			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().setScreen(new Gui(EditorGui::new, screen)));
 			((IScreen)screen).cpm$addDrawableChild(btn);
 		}
 	}

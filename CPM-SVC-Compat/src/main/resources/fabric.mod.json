@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "cpmsvcc",
+  "version": "${version}",
+  "name": "CPM SVC Compat",
+  "description": "A Customizable Player Models, Simple Voice Chat compat mod.",
+  "authors": [
+    "tom5454"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
+    "sources": "https://github.com/tom5454/CustomPlayerModels"
+  },
+  "license": "MIT",
+  "icon": "assets/cpmsvcc/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "cpmapi": [
+      "com.tom.cpmsvcc.platform.fabric.CPMSVCPlugin"
+    ],
+    "voicechat": [
+      "com.tom.cpmsvcc.CPMVoicechatPlugin"
+    ]
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+	"voicechat": ">=1.16.5-${voicechat_dependency}",
+	"cpm": "*"
+  }
+}

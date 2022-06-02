@@ -1,0 +1,38 @@
+modLoader="javafml"
+loaderVersion="[31,)"
+license="MIT"
+[[mods]]
+modId="cpmsvcc"
+version="${mod_version}"
+displayName="CPM SVC Compat"
+logoFile="assets/cpmsvcc/icon.png"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/custom-player-models" #optional
+credits="tom5454"
+authors="tom5454"
+description='''
+A Customizable Player Models, Simple Voice Chat compat mod.
+'''
+[[dependencies.cpmsvcc]]
+    modId="forge"
+    mandatory=true
+    versionRange="[31,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cpmsvcc]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.16.5,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cpmsvcc]]
+    modId="voicechat"
+    mandatory=true
+    versionRange="[1.16.5-${voicechat_dependency},)"
+    ordering="AFTER"
+    side="BOTH"
+[[dependencies.cpmsvcc]]
+    modId="cpm"
+    mandatory=true
+    versionRange="*"
+    ordering="NONE"
+    side="BOTH"

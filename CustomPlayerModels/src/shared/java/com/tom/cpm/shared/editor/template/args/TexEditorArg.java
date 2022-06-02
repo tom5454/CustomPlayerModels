@@ -12,7 +12,7 @@ import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
+import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;

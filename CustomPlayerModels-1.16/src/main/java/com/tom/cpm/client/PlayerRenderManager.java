@@ -1,5 +1,6 @@
 package com.tom.cpm.client;
 
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -282,6 +283,12 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 				multiplyStacks(e, stack);
 			} else
 				super.translateAndRotate(stack);
+		}
+
+		@Override
+		public ModelBox getRandomCube(Random pRandom) {
+			if(parent != null)return parent.getRandomCube(pRandom);
+			return super.getRandomCube(pRandom);
 		}
 	}
 

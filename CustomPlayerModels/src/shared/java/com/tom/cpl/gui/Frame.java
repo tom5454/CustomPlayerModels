@@ -14,19 +14,22 @@ import com.tom.cpl.math.Box;
 public abstract class Frame extends Panel {
 	protected PopupPanels popup;
 	protected Tooltip tooltipBox;
+	private KeybindHandler keybindHandler;
 
 	public Frame(IGui gui) {
 		super(gui);
 		popup = new PopupPanels();
+		keybindHandler = new KeybindHandler(gui);
 	}
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
 		super.keyPressed(event);
-		if(!event.isConsumed() && event.matches(gui.getKeyCodes().KEY_ESCAPE)) {
+		if(event.matches(gui.getKeyCodes().KEY_ESCAPE)) {
 			gui.close();
 			event.consume();
 		}
+		keybindHandler.keyEvent(event);
 	}
 
 	public final void init(int width, int height) {
@@ -230,7 +233,7 @@ public abstract class Frame extends Panel {
 		@Override
 		public void keyPressed(KeyboardEvent event) {
 			super.keyPressed(event);
-			if(!event.isConsumed() && event.matches(gui.getKeyCodes().KEY_ESCAPE)) {
+			if(event.matches(gui.getKeyCodes().KEY_ESCAPE)) {
 				if(popup.onEscape()) {
 					event.consume();
 				}
@@ -271,5 +274,9 @@ public abstract class Frame extends Panel {
 
 	public void filesDropped(List<File> files) {
 		popup.filesDropped(files);
+	}
+
+	public KeybindHandler getKeybindHandler() {
+		return keybindHandler;
 	}
 }

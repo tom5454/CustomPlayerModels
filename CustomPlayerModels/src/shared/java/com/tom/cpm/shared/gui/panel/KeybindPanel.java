@@ -1,4 +1,4 @@
-package com.tom.cpm.shared.gui;
+package com.tom.cpm.shared.gui.panel;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.Frame;
@@ -7,6 +7,7 @@ import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.config.Keybind;
+import com.tom.cpm.shared.gui.KeybindPopup;
 
 public class KeybindPanel extends Panel {
 	private Keybind kb;
@@ -31,7 +32,7 @@ public class KeybindPanel extends Panel {
 		addElement(btn);
 		updateButton();
 
-		Button btnR = new Button(gui, "Reset", () -> {
+		Button btnR = new Button(gui, gui.i18nFormat("button.cpm.settings.reset"), () -> {
 			kb.resetKey(ce);
 			updateButton();
 		});

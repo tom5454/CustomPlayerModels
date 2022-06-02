@@ -12,7 +12,7 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.render.RenderTickCounter;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
-import com.tom.cpm.client.GuiImpl;
+import com.tom.cpm.client.Gui;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 
 @Mixin(MinecraftClient.class)
@@ -31,13 +31,13 @@ public abstract class MinecraftClientMixin {
 
 	@Inject(at = @At("HEAD"), method = "setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", cancellable = true)
 	public void onSetScreen(Screen screen, CallbackInfo cbi) {
-		if(screen == null && currentScreen instanceof GuiImpl.Overlay) {
+		if(screen == null && currentScreen instanceof Gui.Overlay) {
 			cbi.cancel();
-			setScreen(((GuiImpl.Overlay)currentScreen).getGui());
+			setScreen(((Gui.Overlay)currentScreen).getGui());
 		}
 		if(screen instanceof TitleScreen && EditorGui.doOpenEditor()) {
 			cbi.cancel();
-			setScreen(new GuiImpl(EditorGui::new, screen));
+			setScreen(new Gui(EditorGui::new, screen));
 		}
 	}
 }

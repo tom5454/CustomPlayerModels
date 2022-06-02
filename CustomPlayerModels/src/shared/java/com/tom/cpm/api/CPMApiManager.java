@@ -3,11 +3,12 @@ package com.tom.cpm.api;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CPMApiManager {
+public class CPMApiManager implements CPMPluginRegistry {
 	private List<ICPMPlugin> plugins = new ArrayList<>();
 	protected ClientApi client;
 	protected CommonApi common;
 
+	@Override
 	public void register(ICPMPlugin plugin) {
 		plugins.add(plugin);
 	}
@@ -27,6 +28,10 @@ public class CPMApiManager {
 
 	public ClientApi clientApi() {
 		return client;
+	}
+
+	public CommonApi commonApi() {
+		return common;
 	}
 
 	protected void initClient() {

@@ -13,6 +13,8 @@ import com.tom.cpl.render.OptionalBuffer;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VertexBuffer;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.model.Cube;
@@ -97,35 +99,38 @@ public class EditorDefinition extends ModelDefinition {
 	}
 
 	public void render(RedirectPartRenderer renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube) {
-		Mesh mesh = cube.renderObject;
-		EditorRenderer.Bounds b = new EditorRenderer.Bounds();
-		b.elem = (ModelElement) cube.getCube();
-		BoxBuilder builder = TriangleBoundingBox.builder();
-		if(mesh != null) {
-			mesh.draw(stack, builder, 0, 0, 0, 0);
-		} else {
-			if(b.elem.type == ElementType.ROOT_PART && cube.doDisplay()) {
-				renderer.renderParent(builder);
-			}
-		}
-		b.bb = builder.build();
-		addBounds(b);
 		drawSelect(cube, stack, buf, renderTypes);
-		Cube c = cube.getCube();
-		if(c.size == null || c.size.x != 0 || c.size.y != 0 || c.size.z != 0 || c.mcScale != 0) {
-			OptionalBuffer vb = new OptionalBuffer(buf.getBuffer(renderTypes, RenderMode.OUTLINE));
-			b.drawHover = vb;
-			BoxRender.drawBoundingBox(
-					stack, vb,
-					cube.getBounds(),
-					1, 0, 0, 1
-					);
+		if(cube.getCube() instanceof ModelElement) {
+			Mesh mesh = cube.renderObject;
+			ModelElement me = (ModelElement) cube.getCube();
+			EditorRenderer.Bounds b = new EditorRenderer.Bounds();
+			b.elem = me;
+			BoxBuilder builder = TriangleBoundingBox.builder();
+			if(mesh != null) {
+				mesh.draw(stack, builder, 0, 0, 0, 0);
+			} else {
+				if(me.type == ElementType.ROOT_PART && cube.doDisplay()) {
+					renderer.renderParent(builder);
+				}
+			}
+			b.bb = builder.build();
+			addBounds(b);
+			Cube c = cube.getCube();
+			if(c.size == null || c.size.x != 0 || c.size.y != 0 || c.size.z != 0 || c.mcScale != 0) {
+				OptionalBuffer vb = new OptionalBuffer(buf.getBuffer(renderTypes, RenderMode.OUTLINE));
+				b.drawHover = vb;
+				BoxRender.drawBoundingBox(
+						stack, vb,
+						cube.getBounds(),
+						1, 0, 0, 1
+						);
+			}
 		}
 	}
 
 	public void drawSelect(RenderedCube cube, MatrixStack matrixStackIn, VBuffers bufferIn, RenderTypes<RenderMode> renderTypes) {
 		ElementSelectMode sel = cube.getSelected();
-		if(sel.isRenderOutline()) {
+		if(cube.getCube() == editor.selectedElement) {
 			boolean s = sel == ElementSelectMode.SELECTED;
 			if(s)BoxRender.drawOrigin(matrixStackIn, bufferIn.getBuffer(renderTypes, RenderMode.OUTLINE), 0, 0, 0, 1);
 			Cube c = cube.getCube();
@@ -135,8 +140,12 @@ public class EditorDefinition extends ModelDefinition {
 						cube.getBounds(),
 						s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
 						);
-			if(renderingPanel != null) {
+			if(renderingPanel != null && editor.displayGizmo) {
 				if(s && c.offset != null && c.size != null && renderingPanel.draggingVec != null) {
+					float gAlpha = ModConfig.getCommonConfig().getFloat(ConfigKeys.EDITOR_GIZMO_ALPHA, 1f);
+					float sc = 128f / (ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_GIZMO_SCALE, true) ? renderingPanel.getCamera().camDist : 128);
+					float scW = Math.max(0.1f, Math.min(1, ModConfig.getCommonConfig().getFloat(ConfigKeys.EDITOR_GIZMO_SIZE, 1) * sc));
+					float scL = Math.max(0.1f, Math.min(1, ModConfig.getCommonConfig().getFloat(ConfigKeys.EDITOR_GIZMO_LENGTH, 1) * sc)) * 16;
 					EditorRenderer.drawDrag(matrixStackIn, bufferIn.getBuffer(renderTypes, RenderMode.OUTLINE), renderingPanel.draggingVec,
 							(bt, bb) -> {
 								EditorRenderer.Bounds b = new EditorRenderer.Bounds();
@@ -148,7 +157,7 @@ public class EditorDefinition extends ModelDefinition {
 								OptionalBuffer vb2 = new OptionalBuffer(bufferIn.getBuffer(renderTypes, RenderMode.OUTLINE));
 								b.drawHover = () -> {vb1.run();vb2.run();};
 								return new VertexBuffer[] {vb1, vb2};
-							}, cube, renderingPanel.oldValue == null ? null : renderingPanel.oldValue[0]);
+							}, cube, renderingPanel.oldValue == null ? null : renderingPanel.oldValue[0], scW, scL, gAlpha);
 				}
 				if(renderingPanel.draggingElement == cube.getCube() && renderingPanel.draggingVec != null) {
 					EditorRenderer.Bounds b = new EditorRenderer.Bounds();

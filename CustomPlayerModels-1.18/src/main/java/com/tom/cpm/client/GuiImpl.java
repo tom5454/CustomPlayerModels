@@ -14,12 +14,13 @@ import org.lwjgl.glfw.GLFW;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -317,18 +318,45 @@ public class GuiImpl extends Screen implements IGui {
 	public void displayError(String e) {
 		Screen p = parent;
 		parent = null;
-		Minecraft.getInstance().setScreen(new ErrorScreen(new TextComponent("Custom Player Models"), new TranslatableComponent("error.cpm.crash", e)) {
-			private Screen parent = p;
+		Minecraft.getInstance().setScreen(new CrashScreen(e, p));
+	}
 
-			@Override
-			public void onClose() {
-				if(parent != null) {
-					Screen p = parent;
-					parent = null;
-					minecraft.setScreen(p);
-				}
+	private static class CrashScreen extends Screen {
+		private String error;
+		private Screen parent;
+
+		public CrashScreen(String error, Screen p) {
+			super(new TextComponent("Error"));
+			this.error = error;
+			parent = p;
+		}
+
+		@Override
+		public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+			this.renderBackground(matrixStack);
+			String[] txt = I18n.get("error.cpm.crash", error).split("\\\\");
+			for (int i = 0; i < txt.length; i++) {
+				drawCenteredString(matrixStack, this.font, txt[i], this.width / 2, 15 + i * 10, 16777215);
 			}
-		});
+			super.render(matrixStack, mouseX, mouseY, partialTicks);
+		}
+
+		@Override
+		protected void init() {
+			super.init();
+			this.addRenderableWidget(new Button(this.width / 2 - 100, 140, 200, 20, CommonComponents.GUI_BACK, (p_213034_1_) -> {
+				this.minecraft.setScreen((Screen)null);
+			}));
+		}
+
+		@Override
+		public void onClose() {
+			if(parent != null) {
+				Screen p = parent;
+				parent = null;
+				minecraft.setScreen(p);
+			}
+		}
 	}
 
 	@Override
@@ -531,6 +559,16 @@ public class GuiImpl extends Screen implements IGui {
 		@Override
 		public void setCursorPos(int pos) {
 			field.setCursorPosition(pos);
+		}
+
+		@Override
+		public void setSelectionPos(int pos) {
+			field.setHighlightPos(pos);
+		}
+
+		@Override
+		public int getSelectionPos() {
+			return field.highlightPos;
 		}
 	}
 

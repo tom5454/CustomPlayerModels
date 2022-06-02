@@ -457,6 +457,13 @@ public class NetHandler<RL, P, NET> {
 		pd.save(getID(pl));
 	}
 
+	public void setSkin(P pl, byte[] skin, boolean force) {
+		PlayerData pd = getSNetH(pl).cpm$getEncodedModelData();
+		pd.setModel(skin, force, false);
+		sendPacketToTracking(pl, setSkin, writeSkinData(pd, pl));
+		pd.save(getID(pl));
+	}
+
 	public void setScale(ScaleData scl) {
 		if(hasModClient() && serverCaps.contains(ServerCaps.SCALING)) {
 			try {

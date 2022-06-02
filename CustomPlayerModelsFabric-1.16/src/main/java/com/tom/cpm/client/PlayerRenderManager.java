@@ -1,5 +1,6 @@
 package com.tom.cpm.client;
 
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -278,6 +279,12 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 				multiplyStacks(e, matrix);
 			} else
 				super.rotate(matrix);
+		}
+
+		@Override
+		public Cuboid getRandomCuboid(Random random) {
+			if(parent != null)return parent.getRandomCuboid(random);
+			return super.getRandomCuboid(random);
 		}
 	}
 

@@ -60,12 +60,13 @@ public class FirstPersonHandPosGui extends Frame {
 		p.addElement(new Label(gui, gui.i18nFormat("label.cpm.firstPersonHand.offset_" + name)).setBounds(new Box(0, 0, 100, 10)));
 
 		TabFocusHandler tabHandler = new TabFocusHandler(gui);
-		addElement(tabHandler);
 		FlowLayout layout = new FlowLayout(p, 4, 1);
 
 		addPart("rotation", p, tabHandler, 1, pp, pp2, PartPosition::getRRotation, PartPosition::setRRotation);
 		addPart("position", p, tabHandler, 2, pp, pp2, PartPosition::getRPos, PartPosition::setRPos);
 		addPart("scale", p, tabHandler, 2, pp, pp2, PartPosition::getRScale, PartPosition::setRScale);
+
+		addElement(tabHandler);
 
 		layout.reflow();
 	}

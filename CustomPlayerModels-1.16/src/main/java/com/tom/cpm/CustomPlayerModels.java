@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
@@ -83,7 +84,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 			}
 		});
 		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
-		api.buildCommon().init();
+		api.buildCommon().player(PlayerEntity.class).init();
 		proxy.apiInit();
 	}
 

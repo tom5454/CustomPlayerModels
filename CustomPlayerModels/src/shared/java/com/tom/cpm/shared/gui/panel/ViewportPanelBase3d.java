@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.Set;
 
 import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.KeybindHandler;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Mat3f;
@@ -44,6 +45,7 @@ import com.tom.cpm.shared.util.PlayerModelLayer;
 public abstract class ViewportPanelBase3d extends Panel3d {
 	public static final GuiModelRenderManager manager = new GuiModelRenderManager();
 	protected static final EnumMap<SkinType, VanillaPlayerModel> models = new EnumMap<>(SkinType.class);
+	protected static final VanillaPlayerModel defaultModel;
 	protected static final ParrotModel parrot = new ParrotModel();
 	protected static final ShieldModel shield = new ShieldModel();
 	protected static final BlockModel block = new BlockModel();
@@ -84,6 +86,8 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		for (SkinType t : SkinType.VANILLA_TYPES) {
 			models.put(t, new VanillaPlayerModel(t));
 		}
+		defaultModel = models.get(SkinType.DEFAULT);
+		models.put(SkinType.UNKNOWN, defaultModel);
 		itemModels.put(DisplayItem.BLOCK, new IItemModel[] {block});
 		itemModels.put(DisplayItem.SHIELD, new IItemModel[] {shield});
 		itemModels.put(DisplayItem.TRIDENT, new IItemModel[] {trident});
@@ -115,6 +119,7 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 
 		ModelDefinition def = getDefinition();
 		VanillaPlayerModel p = models.get(def.getSkinType());
+		if(p == null)p = defaultModel;
 		VBuffers rp = buf.replay();
 
 		preRender(stack, rp);
@@ -381,18 +386,10 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		if(!event.isConsumed()) {
-			if(Keybinds.ZOOM_IN_CAMERA.isPressed(gui, event)) {
-				zoom(1);
-				event.consume();
-			} else if(Keybinds.ZOOM_OUT_CAMERA.isPressed(gui, event)) {
-				zoom(-1);
-				event.consume();
-			} else if(Keybinds.RESET_CAMERA.isPressed(gui, event)) {
-				getCamera().reset();
-				event.consume();
-			}
-		}
+		KeybindHandler h = gui.getFrame().getKeybindHandler();
+		h.registerKeybind(Keybinds.ZOOM_IN_CAMERA, () -> zoom(1));
+		h.registerKeybind(Keybinds.ZOOM_OUT_CAMERA, () -> zoom(-1));
+		h.registerKeybind(Keybinds.RESET_CAMERA, () -> getCamera().reset());
 		super.keyPressed(event);
 	}
 }

@@ -1,34 +1,17 @@
 package com.tom.cpm.api;
 
-import java.util.EnumMap;
-import java.util.Map;
+import com.tom.cpm.shared.MinecraftServerAccess;
+import com.tom.cpm.shared.io.ModelFile;
+import com.tom.cpm.shared.network.NetHandler;
 
-import com.tom.cpm.shared.util.Log;
+public class CommonApi extends SharedApi implements ICommonAPI {
 
-public class CommonApi implements ICommonAPI {
-	private Map<Clazz, Class<?>> classes = new EnumMap<>(Clazz.class);
-	private ICPMPlugin initingPlugin;
-
-	public void callInit(ICPMPlugin plugin) {
-		initingPlugin = plugin;
-		try {
-			plugin.initCommon(this);
-		} catch (Throwable e) {
-			Log.error("Plugin init error, modid: " + plugin.getOwnerModId(), e);
-		}
-		initingPlugin = null;
+	@Override
+	protected void callInit0(ICPMPlugin plugin) {
+		plugin.initCommon(this);
 	}
 
 	protected CommonApi() {
-	}
-
-	private boolean checkClass(Class<?> clazz, Clazz clz) {
-		if(classes.containsKey(clz)) {
-			if(!classes.get(clz).isAssignableFrom(clazz)) {
-				throw new IllegalArgumentException("Class " + clazz + " is not valid for " + clz);
-			} else
-				return false;
-		} else return true;
 	}
 
 	public static class ApiBuilder {
@@ -39,11 +22,45 @@ public class CommonApi implements ICommonAPI {
 			api.common = new CommonApi();
 		}
 
+		public ApiBuilder player(Class<?> player) {
+			api.common.classes.put(Clazz.PLAYER, player);
+			return this;
+		}
+
 		public void init() {
 			api.initCommon();
 		}
 	}
 
-	public static enum Clazz {
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> void setPlayerModel(Class<P> playerClass, P player, String b64, boolean forced, boolean persistent) {
+		if(checkClass(playerClass, Clazz.PLAYER))return;
+		NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
+		h.setSkin(player, b64, forced, persistent);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> void setPlayerModel(Class<P> playerClass, P player, ModelFile model, boolean forced) {
+		if(checkClass(playerClass, Clazz.PLAYER))return;
+		NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
+		h.setSkin(player, model.getDataBlock(), forced);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> void resetPlayerModel(Class<P> playerClass, P player) {
+		if(checkClass(playerClass, Clazz.PLAYER))return;
+		NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
+		h.setSkin(player, null, false, true);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> void playerJumped(Class<P> playerClass, P player) {
+		if(checkClass(playerClass, Clazz.PLAYER))return;
+		NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
+		h.onJump(player);
 	}
 }

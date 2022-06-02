@@ -35,4 +35,14 @@ public class ElementGroup<S, P> implements Consumer<S> {
 	public boolean containsKey(S key) {
 		return map.containsKey(key);
 	}
+
+	public Set<P> get(S key) {
+		return map.get(key);
+	}
+
+	public P getFirst(S key) {
+		Set<P> s = get(key);
+		if(s == null || s.isEmpty())return null;
+		return s.iterator().next();
+	}
 }

@@ -40,7 +40,15 @@ public class ConfigKeys {
 	public static final String SHOW_LOADING_INFO = "showLoadingInfo";
 	public static final String ADV_SCALING_SETTINGS = "advScalingSettings";
 	public static final String EDITOR_DRAG_MOUSE_BUTTON = "editorDragMouseButton";
+	public static final String EDITOR_MENU_MOUSE_BUTTON = "editorMenuMouseButton";
+	public static final String EDITOR_SELECT_MOUSE_BUTTON = "editorSelectMouseButton";
 	public static final String EDITOR_RECENT_PROJECTS = "editorRecentProjects";
+	public static final String EDITOR_GIZMO_ALPHA = "editorGizmoAlpha";
+	public static final String EDITOR_UV_AREA_ALPHA = "editorUVAreaAlpha";
+	public static final String EDITOR_UV_AREA_ALL_ALPHA = "editorUVAreaAllAlpha";
+	public static final String EDITOR_GIZMO_SIZE = "editorGizmoSize";
+	public static final String EDITOR_GIZMO_LENGTH = "editorGizmoLength";
+	public static final String EDITOR_GIZMO_SCALE = "editorGizmoScale";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

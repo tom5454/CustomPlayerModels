@@ -12,6 +12,7 @@ import com.tom.cpl.math.TriangleBoundingBox;
 import com.tom.cpl.math.TriangleBoundingBox.BoxBuilder;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.render.VertexBuffer;
+import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.RenderedCube;
@@ -23,7 +24,7 @@ public class EditorRenderer {
 		public TriangleBoundingBox bb;
 		public Runnable drawHover;
 		public boolean isHovered;
-		public ModelElement elem;
+		public TreeElement elem;
 		public BoundType type = BoundType.CLICK;
 	}
 
@@ -38,7 +39,7 @@ public class EditorRenderer {
 		DRAG_PANE,
 	}
 
-	public static void drawDragArrows(MatrixStack matrixStackIn, VertexBuffer bufferIn, BiFunction<EditorRenderer.BoundType, BoxBuilder, VertexBuffer[]> boxConsumer, float x, float y, float z, float len, float size) {
+	public static void drawDragArrows(MatrixStack matrixStackIn, VertexBuffer bufferIn, BiFunction<EditorRenderer.BoundType, BoxBuilder, VertexBuffer[]> boxConsumer, float x, float y, float z, float len, float size, float alpha) {
 		float m = 1 / 16f;
 		BoxBuilder builderX = TriangleBoundingBox.builder();
 		BoxBuilder builderY = TriangleBoundingBox.builder();
@@ -46,13 +47,13 @@ public class EditorRenderer {
 		BoundingBox bx = new BoundingBox(x,        y - size, z - size, x + len,  y + size, z + size).mul(m);
 		BoundingBox by = new BoundingBox(x - size, y,        z - size, x + size, y + len,  z + size).mul(m);
 		BoundingBox bz = new BoundingBox(x - size, y - size, z,        x + size, y + size, z + len ).mul(m);
-		fillBoundingBox(matrixStackIn, builderX, bx, 1, 0, 0, 1);
-		fillBoundingBox(matrixStackIn, builderY, by, 0, 1, 0, 1);
-		fillBoundingBox(matrixStackIn, builderZ, bz, 0, 0, 1, 1);
+		fillBoundingBox(matrixStackIn, builderX, bx, 1, 0, 0, alpha);
+		fillBoundingBox(matrixStackIn, builderY, by, 0, 1, 0, alpha);
+		fillBoundingBox(matrixStackIn, builderZ, bz, 0, 0, 1, alpha);
 
-		float f1 = len - 2 / 3f;
-		float f2 = len - 1 / 3f;
-		float f3 = len - 1;
+		float f1 = len - (2*size) / 3f;
+		float f2 = len - size / 3f;
+		float f3 = len - size;
 		float f4 = len;
 		float s1 = size / 3;
 		float s2 = s1 * 2;
@@ -68,46 +69,46 @@ public class EditorRenderer {
 		BoundingBox bz3 = new BoundingBox(x - s3, y - s3, z + f3, x + s3, y + s3, z + f1).mul(m);
 
 		VertexBuffer[] xb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_X, builderX);
-		drawBoundingBox(matrixStackIn, bufferIn, bx1, 0.5f, 0, 0, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bx2, 0.5f, 0, 0, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bx3, 0.5f, 0, 0, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, bx1, 0.5f, 0, 0, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bx2, 0.5f, 0, 0, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bx3, 0.5f, 0, 0, alpha);
 
-		drawBoundingBox(matrixStackIn, xb[1], bx1, 1, 0, 0, 1);
-		drawBoundingBox(matrixStackIn, xb[1], bx2, 1, 0, 0, 1);
-		drawBoundingBox(matrixStackIn, xb[1], bx3, 1, 0, 0, 1);
+		drawBoundingBox(matrixStackIn, xb[1], bx1, 1, 0, 0, alpha);
+		drawBoundingBox(matrixStackIn, xb[1], bx2, 1, 0, 0, alpha);
+		drawBoundingBox(matrixStackIn, xb[1], bx3, 1, 0, 0, alpha);
 
-		fillBoundingBox(matrixStackIn, xb[0], bx1, 1, 0, 0, 1);
-		fillBoundingBox(matrixStackIn, xb[0], bx2, 1, 0, 0, 1);
-		fillBoundingBox(matrixStackIn, xb[0], bx3, 1, 0, 0, 1);
+		fillBoundingBox(matrixStackIn, xb[0], bx1, 1, 0, 0, alpha);
+		fillBoundingBox(matrixStackIn, xb[0], bx2, 1, 0, 0, alpha);
+		fillBoundingBox(matrixStackIn, xb[0], bx3, 1, 0, 0, alpha);
 
 		VertexBuffer[] yb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_Y, builderY);
-		drawBoundingBox(matrixStackIn, bufferIn, by1, 0, 0.5f, 0, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, by2, 0, 0.5f, 0, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, by3, 0, 0.5f, 0, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, by1, 0, 0.5f, 0, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, by2, 0, 0.5f, 0, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, by3, 0, 0.5f, 0, alpha);
 
-		drawBoundingBox(matrixStackIn, yb[1], by1, 0, 1, 0, 1);
-		drawBoundingBox(matrixStackIn, yb[1], by2, 0, 1, 0, 1);
-		drawBoundingBox(matrixStackIn, yb[1], by3, 0, 1, 0, 1);
+		drawBoundingBox(matrixStackIn, yb[1], by1, 0, 1, 0, alpha);
+		drawBoundingBox(matrixStackIn, yb[1], by2, 0, 1, 0, alpha);
+		drawBoundingBox(matrixStackIn, yb[1], by3, 0, 1, 0, alpha);
 
-		fillBoundingBox(matrixStackIn, yb[0], by1, 0, 1, 0, 1);
-		fillBoundingBox(matrixStackIn, yb[0], by2, 0, 1, 0, 1);
-		fillBoundingBox(matrixStackIn, yb[0], by3, 0, 1, 0, 1);
+		fillBoundingBox(matrixStackIn, yb[0], by1, 0, 1, 0, alpha);
+		fillBoundingBox(matrixStackIn, yb[0], by2, 0, 1, 0, alpha);
+		fillBoundingBox(matrixStackIn, yb[0], by3, 0, 1, 0, alpha);
 
 		VertexBuffer[] zb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_Z, builderZ);
-		drawBoundingBox(matrixStackIn, bufferIn, bz1, 0, 0, 1, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bz2, 0, 0, 1, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bz3, 0, 0, 1, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, bz1, 0, 0, 0.5f, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bz2, 0, 0, 0.5f, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bz3, 0, 0, 0.5f, alpha);
 
-		drawBoundingBox(matrixStackIn, zb[1], bz1, 0, 0, 0.5f, 1);
-		drawBoundingBox(matrixStackIn, zb[1], bz2, 0, 0, 0.5f, 1);
-		drawBoundingBox(matrixStackIn, zb[1], bz3, 0, 0, 0.5f, 1);
+		drawBoundingBox(matrixStackIn, zb[1], bz1, 0, 0, 1, alpha);
+		drawBoundingBox(matrixStackIn, zb[1], bz2, 0, 0, 1, alpha);
+		drawBoundingBox(matrixStackIn, zb[1], bz3, 0, 0, 1, alpha);
 
-		fillBoundingBox(matrixStackIn, zb[0], bz1, 0, 0, 1, 1);
-		fillBoundingBox(matrixStackIn, zb[0], bz2, 0, 0, 1, 1);
-		fillBoundingBox(matrixStackIn, zb[0], bz3, 0, 0, 1, 1);
+		fillBoundingBox(matrixStackIn, zb[0], bz1, 0, 0, 1, alpha);
+		fillBoundingBox(matrixStackIn, zb[0], bz2, 0, 0, 1, alpha);
+		fillBoundingBox(matrixStackIn, zb[0], bz3, 0, 0, 1, alpha);
 	}
 
-	public static void drawDragBoxes(MatrixStack matrixStackIn, VertexBuffer bufferIn, BiFunction<EditorRenderer.BoundType, BoxBuilder, VertexBuffer[]> boxConsumer, float x, float y, float z, float len, float size) {
+	public static void drawDragBoxes(MatrixStack matrixStackIn, VertexBuffer bufferIn, BiFunction<EditorRenderer.BoundType, BoxBuilder, VertexBuffer[]> boxConsumer, float x, float y, float z, float len, float size, float alpha) {
 		float m = 1 / 16f;
 		BoxBuilder builderPX = TriangleBoundingBox.builder();
 		BoxBuilder builderPY = TriangleBoundingBox.builder();
@@ -121,14 +122,14 @@ public class EditorRenderer {
 		BoundingBox bnx = new BoundingBox(x,        y - size, z - size, x - len,  y + size, z + size).mul(m);
 		BoundingBox bny = new BoundingBox(x - size, y,        z - size, x + size, y - len,  z + size).mul(m);
 		BoundingBox bnz = new BoundingBox(x - size, y - size, z,        x + size, y + size, z - len ).mul(m);
-		fillBoundingBox(matrixStackIn, builderPX, bpx, 1, 0, 0, 1);
-		fillBoundingBox(matrixStackIn, builderPY, bpy, 0, 1, 0, 1);
-		fillBoundingBox(matrixStackIn, builderPZ, bpz, 0, 0, 1, 1);
-		fillBoundingBox(matrixStackIn, builderNX, bnx, 1, 0, 0, 1);
-		fillBoundingBox(matrixStackIn, builderNY, bny, 0, 1, 0, 1);
-		fillBoundingBox(matrixStackIn, builderNZ, bnz, 0, 0, 1, 1);
+		fillBoundingBox(matrixStackIn, builderPX, bpx, 1, 0, 0, alpha);
+		fillBoundingBox(matrixStackIn, builderPY, bpy, 0, 1, 0, alpha);
+		fillBoundingBox(matrixStackIn, builderPZ, bpz, 0, 0, 1, alpha);
+		fillBoundingBox(matrixStackIn, builderNX, bnx, 1, 0, 0, alpha);
+		fillBoundingBox(matrixStackIn, builderNY, bny, 0, 1, 0, alpha);
+		fillBoundingBox(matrixStackIn, builderNZ, bnz, 0, 0, 1, alpha);
 
-		float f1 = len - 1 / 3f;
+		float f1 = len - size / 3f;
 		float f2 = len;
 		float s1 = size / 3;
 		float s2 = size;
@@ -146,64 +147,64 @@ public class EditorRenderer {
 		BoundingBox bnz2 = new BoundingBox(x - s2, y - s2, z - f1, x + s2, y + s2, z - f2).mul(m);
 
 		VertexBuffer[] pxb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_X, builderPX);
-		drawBoundingBox(matrixStackIn, bufferIn, bpx1, 0.5f, 0, 0, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bpx2, 0.5f, 0, 0, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, bpx1, 0.5f, 0, 0, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bpx2, 0.5f, 0, 0, alpha);
 
-		drawBoundingBox(matrixStackIn, pxb[1], bpx1, 1, 0, 0, 1);
-		drawBoundingBox(matrixStackIn, pxb[1], bpx2, 1, 0, 0, 1);
+		drawBoundingBox(matrixStackIn, pxb[1], bpx1, 1, 0, 0, alpha);
+		drawBoundingBox(matrixStackIn, pxb[1], bpx2, 1, 0, 0, alpha);
 
-		fillBoundingBox(matrixStackIn, pxb[0], bpx1, 1, 0, 0, 1);
-		fillBoundingBox(matrixStackIn, pxb[0], bpx2, 1, 0, 0, 1);
+		fillBoundingBox(matrixStackIn, pxb[0], bpx1, 1, 0, 0, alpha);
+		fillBoundingBox(matrixStackIn, pxb[0], bpx2, 1, 0, 0, alpha);
 
 		VertexBuffer[] pyb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_Y, builderPY);
-		drawBoundingBox(matrixStackIn, bufferIn, bpy1, 0, 0.5f, 0, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bpy2, 0, 0.5f, 0, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, bpy1, 0, 0.5f, 0, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bpy2, 0, 0.5f, 0, alpha);
 
-		drawBoundingBox(matrixStackIn, pyb[1], bpy1, 0, 1, 0, 1);
-		drawBoundingBox(matrixStackIn, pyb[1], bpy2, 0, 1, 0, 1);
+		drawBoundingBox(matrixStackIn, pyb[1], bpy1, 0, 1, 0, alpha);
+		drawBoundingBox(matrixStackIn, pyb[1], bpy2, 0, 1, 0, alpha);
 
-		fillBoundingBox(matrixStackIn, pyb[0], bpy1, 0, 1, 0, 1);
-		fillBoundingBox(matrixStackIn, pyb[0], bpy2, 0, 1, 0, 1);
+		fillBoundingBox(matrixStackIn, pyb[0], bpy1, 0, 1, 0, alpha);
+		fillBoundingBox(matrixStackIn, pyb[0], bpy2, 0, 1, 0, alpha);
 
 		VertexBuffer[] pzb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_Z, builderPZ);
-		drawBoundingBox(matrixStackIn, bufferIn, bpz1, 0, 0, 0.5f, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bpz2, 0, 0, 0.5f, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, bpz1, 0, 0, 0.5f, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bpz2, 0, 0, 0.5f, alpha);
 
-		drawBoundingBox(matrixStackIn, pzb[1], bpz1, 0, 0, 1, 1);
-		drawBoundingBox(matrixStackIn, pzb[1], bpz2, 0, 0, 1, 1);
+		drawBoundingBox(matrixStackIn, pzb[1], bpz1, 0, 0, 1, alpha);
+		drawBoundingBox(matrixStackIn, pzb[1], bpz2, 0, 0, 1, alpha);
 
-		fillBoundingBox(matrixStackIn, pzb[0], bpz1, 0, 0, 1, 1);
-		fillBoundingBox(matrixStackIn, pzb[0], bpz2, 0, 0, 1, 1);
+		fillBoundingBox(matrixStackIn, pzb[0], bpz1, 0, 0, 1, alpha);
+		fillBoundingBox(matrixStackIn, pzb[0], bpz2, 0, 0, 1, alpha);
 
 		VertexBuffer[] nxb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_NX, builderNX);
-		drawBoundingBox(matrixStackIn, bufferIn, bnx1, 0.5f, 0, 0, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bnx2, 0.5f, 0, 0, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, bnx1, 0.5f, 0, 0, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bnx2, 0.5f, 0, 0, alpha);
 
-		drawBoundingBox(matrixStackIn, nxb[1], bnx1, 1, 0, 0, 1);
-		drawBoundingBox(matrixStackIn, nxb[1], bnx2, 1, 0, 0, 1);
+		drawBoundingBox(matrixStackIn, nxb[1], bnx1, 1, 0, 0, alpha);
+		drawBoundingBox(matrixStackIn, nxb[1], bnx2, 1, 0, 0, alpha);
 
-		fillBoundingBox(matrixStackIn, nxb[0], bnx1, 1, 0, 0, 1);
-		fillBoundingBox(matrixStackIn, nxb[0], bnx2, 1, 0, 0, 1);
+		fillBoundingBox(matrixStackIn, nxb[0], bnx1, 1, 0, 0, alpha);
+		fillBoundingBox(matrixStackIn, nxb[0], bnx2, 1, 0, 0, alpha);
 
 		VertexBuffer[] nyb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_NY, builderNY);
-		drawBoundingBox(matrixStackIn, bufferIn, bny1, 0, 1, 0, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bny2, 0, 1, 0, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, bny1, 0, 0.5f, 0, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bny2, 0, 0.5f, 0, alpha);
 
-		drawBoundingBox(matrixStackIn, nyb[1], bny1, 0, 0.5f, 0, 1);
-		drawBoundingBox(matrixStackIn, nyb[1], bny2, 0, 0.5f, 0, 1);
+		drawBoundingBox(matrixStackIn, nyb[1], bny1, 0, 1, 0, alpha);
+		drawBoundingBox(matrixStackIn, nyb[1], bny2, 0, 1, 0, alpha);
 
-		fillBoundingBox(matrixStackIn, nyb[0], bny1, 0, 1, 0, 1);
-		fillBoundingBox(matrixStackIn, nyb[0], bny2, 0, 1, 0, 1);
+		fillBoundingBox(matrixStackIn, nyb[0], bny1, 0, 1, 0, alpha);
+		fillBoundingBox(matrixStackIn, nyb[0], bny2, 0, 1, 0, alpha);
 
 		VertexBuffer[] nzb = boxConsumer.apply(EditorRenderer.BoundType.DRAG_NZ, builderNZ);
-		drawBoundingBox(matrixStackIn, bufferIn, bnz1, 0, 0, 0.5f, 1);
-		drawBoundingBox(matrixStackIn, bufferIn, bnz2, 0, 0, 0.5f, 1);
+		drawBoundingBox(matrixStackIn, bufferIn, bnz1, 0, 0, 0.5f, alpha);
+		drawBoundingBox(matrixStackIn, bufferIn, bnz2, 0, 0, 0.5f, alpha);
 
-		drawBoundingBox(matrixStackIn, nzb[1], bnz1, 0, 0, 1, 1);
-		drawBoundingBox(matrixStackIn, nzb[1], bnz2, 0, 0, 1, 1);
+		drawBoundingBox(matrixStackIn, nzb[1], bnz1, 0, 0, 1, alpha);
+		drawBoundingBox(matrixStackIn, nzb[1], bnz2, 0, 0, 1, alpha);
 
-		fillBoundingBox(matrixStackIn, nzb[0], bnz1, 0, 0, 1, 1);
-		fillBoundingBox(matrixStackIn, nzb[0], bnz2, 0, 0, 1, 1);
+		fillBoundingBox(matrixStackIn, nzb[0], bnz1, 0, 0, 1, alpha);
+		fillBoundingBox(matrixStackIn, nzb[0], bnz2, 0, 0, 1, alpha);
 	}
 
 	public static BoxBuilder drawDragPane(MatrixStack matrixStackIn, VertexBuffer bufferIn, EditorRenderer.BoundType type, VecType v, RenderedCube rc, float size, Vec3f old) {
@@ -390,7 +391,7 @@ public class EditorRenderer {
 		return b;
 	}
 
-	public static void drawDrag(MatrixStack matrixStackIn, VertexBuffer buffer, VecType dragType, BiFunction<EditorRenderer.BoundType, BoxBuilder, VertexBuffer[]> boxConsumer, RenderedCube rc, Vec3f old) {
+	public static void drawDrag(MatrixStack matrixStackIn, VertexBuffer buffer, VecType dragType, BiFunction<EditorRenderer.BoundType, BoxBuilder, VertexBuffer[]> boxConsumer, RenderedCube rc, Vec3f old, float sizeW, float sizeL, float alpha) {
 		Cube c = rc.getCube();
 		switch (dragType) {
 		case OFFSET:
@@ -398,14 +399,14 @@ public class EditorRenderer {
 					(c.offset.x + c.size.x / 2),
 					(c.offset.y + c.size.y / 2),
 					(c.offset.z + c.size.z / 2),
-					16, 1);
+					sizeL, sizeW, alpha);
 			break;
 
 		case POSITION:
 		{
 			MatrixStack f = matrixStackIn.fork();
 			f.pop();
-			drawDragArrows(f, buffer, boxConsumer, rc.pos.x, rc.pos.y, rc.pos.z, 16, 1);
+			drawDragArrows(f, buffer, boxConsumer, rc.pos.x, rc.pos.y, rc.pos.z, sizeL, sizeW, alpha);
 		}
 		break;
 
@@ -416,14 +417,14 @@ public class EditorRenderer {
 			f.push();
 			if(old == null)ModelRenderManager.RedirectRenderer.translateRotate(rc, f);
 			else ModelRenderManager.RedirectRenderer.translateRotate(rc.pos.x, rc.pos.y, rc.pos.z, (float) Math.toRadians(old.x), (float) Math.toRadians(old.y), (float) Math.toRadians(old.z), f);
-			drawRotation(f, buffer, boxConsumer, rc, Vec3f.POSITIVE_X, EditorRenderer.BoundType.DRAG_X);
+			drawRotation(f, buffer, boxConsumer, rc, Vec3f.POSITIVE_X, EditorRenderer.BoundType.DRAG_X, sizeW, alpha);
 			f.push();
 			f.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90));
-			drawRotation(f, buffer, boxConsumer, rc, Vec3f.POSITIVE_Z, EditorRenderer.BoundType.DRAG_Z);
+			drawRotation(f, buffer, boxConsumer, rc, Vec3f.POSITIVE_Z, EditorRenderer.BoundType.DRAG_Z, sizeW, alpha);
 			f.pop();
 			f.push();
 			f.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(90));
-			drawRotation(f, buffer, boxConsumer, rc, Vec3f.POSITIVE_Y, EditorRenderer.BoundType.DRAG_Y);
+			drawRotation(f, buffer, boxConsumer, rc, Vec3f.POSITIVE_Y, EditorRenderer.BoundType.DRAG_Y, sizeW, alpha);
 			f.pop();
 			f.pop();
 		}
@@ -437,7 +438,7 @@ public class EditorRenderer {
 					(c.offset.x + c.size.x / 2),
 					(c.offset.y + c.size.y / 2),
 					(c.offset.z + c.size.z / 2),
-					16, 1);
+					sizeL, sizeW, alpha);
 			break;
 
 		case TEXTURE:
@@ -447,23 +448,23 @@ public class EditorRenderer {
 		}
 	}
 
-	private static void drawRotation(MatrixStack f, VertexBuffer buffer, BiFunction<BoundType, BoxBuilder, VertexBuffer[]> boxConsumer, RenderedCube rc, Vec3f color, EditorRenderer.BoundType type) {
-		BoundingBox bbs = BoundingBox.create(-1 / 32f, -17 / 32f, -3 / 32f, 1 / 16f, 1 / 16f, 3 / 16f);
-		BoundingBox bbd = BoundingBox.create(-1 / 128f, -8 / 16f, -3 / 32f, 1 / 64f, 1 / 64f, 3 / 16f);
+	private static void drawRotation(MatrixStack f, VertexBuffer buffer, BiFunction<BoundType, BoxBuilder, VertexBuffer[]> boxConsumer, RenderedCube rc, Vec3f color, EditorRenderer.BoundType type, float size, float alpha) {
+		BoundingBox bbs = BoundingBox.create(-1 / 32f, -17 / 32f, -3 / 32f, 1 / 16f, 1 / 16f, 3 / 16f).mul(size);
+		BoundingBox bbd = BoundingBox.create(-1 / 128f, -8 / 16f, -3 / 32f, 1 / 64f, 1 / 64f, 3 / 16f).mul(size);
 		BoxBuilder b = TriangleBoundingBox.builder();
 		for(int i = 0;i<18;i++) {
 			f.push();
 			f.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(i * 20));
-			drawBoundingBox(f, buffer, bbd, color.x * 0.7f, color.y * 0.7f, color.z * 0.7f, 1);
-			fillBoundingBox(f, b, bbs, color.x, color.y, color.z, 1);
+			drawBoundingBox(f, buffer, bbd, color.x * 0.7f, color.y * 0.7f, color.z * 0.7f, alpha);
+			fillBoundingBox(f, b, bbs, color.x, color.y, color.z, alpha);
 			f.pop();
 		}
 		VertexBuffer[] xb = boxConsumer.apply(type, b);
 		for(int i = 0;i<18;i++) {
 			f.push();
 			f.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(i * 20));
-			drawBoundingBox(f, xb[1], bbd, color.x, color.y, color.z, 1);
-			fillBoundingBox(f, xb[0], bbd, color.x, color.y, color.z, 1);
+			drawBoundingBox(f, xb[1], bbd, color.x, color.y, color.z, alpha);
+			fillBoundingBox(f, xb[0], bbd, color.x, color.y, color.z, alpha);
 			f.pop();
 		}
 	}

@@ -19,7 +19,6 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Effect;
-import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.SkinSettingsPopup;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 
@@ -29,7 +28,6 @@ public class PosPanel extends Panel {
 	public PosPanel(IGui gui, EditorGui e) {
 		super(gui);
 		tabHandler = new TabFocusHandler(gui);
-		addElement(tabHandler);
 		Editor editor = e.getEditor();
 		setBounds(new Box(0, 0, 170, 475));
 		setBackgroundColor(gui.getColors().panel_background);
@@ -88,95 +86,15 @@ public class PosPanel extends Panel {
 			editor.setMirror.add(box::updateState);
 			panel.addElement(box);
 		}
-		ElementGroup<ModeDisplayType, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
-		editor.setModePanel.add(group);
-		editor.setModePanel.add(layout);
 		{
-			Button modeBtn = new Button(gui, gui.i18nFormat("button.cpm.mode"), editor::switchMode);
-			modeBtn.setBounds(new Box(5, 0, 160, 16));
-			editor.setModeBtn.add(b -> {
-				if(b == null) {
-					modeBtn.setEnabled(false);
-					modeBtn.setText(gui.i18nFormat("button.cpm.mode"));
-				} else {
-					modeBtn.setEnabled(true);
-					modeBtn.setText(b);
-				}
-			});
-			addElement(modeBtn);
-			group.addElement(ModeDisplayType.NULL, modeBtn);
-			group.addElement(ModeDisplayType.COLOR, modeBtn);
-			group.addElement(ModeDisplayType.TEX, modeBtn);
-		}
-		{
-			Panel panel = new Panel(gui);
-			addElement(panel);
-			panel.setBounds(new Box(0, 0, 170, 30));
-
-			Spinner spinnerU = new Spinner(gui);
-			Spinner spinnerV = new Spinner(gui);
-			Spinner spinnerT = new Spinner(gui);
-			Label lblU = new Label(gui, "U:");
-			lblU.setBounds(new Box(5, 0, 50, 18));
-			Label lblV = new Label(gui, "V:");
-			lblV.setBounds(new Box(60, 0, 50, 18));
-			Label lblT = new Label(gui, gui.i18nFormat("label.cpm.texSize"));
-			lblT.setBounds(new Box(115, 0, 50, 18));
-
-			spinnerU.setBounds(new Box(5, 10, 50, 18));
-			spinnerV.setBounds(new Box(60, 10, 50, 18));
-			spinnerT.setBounds(new Box(115, 10, 50, 18));
-			spinnerU.setDp(0);
-			spinnerV.setDp(0);
-			spinnerT.setDp(0);
-			group.addElement(ModeDisplayType.TEX, panel);
-
-			Runnable r = () -> editor.setVec(new Vec3f(spinnerU.getValue(), spinnerV.getValue(), spinnerT.getValue()), VecType.TEXTURE);
-			spinnerU.addChangeListener(r);
-			spinnerV.addChangeListener(r);
-			spinnerT.addChangeListener(r);
-
-			tabHandler.add(spinnerU);
-			tabHandler.add(spinnerV);
-			tabHandler.add(spinnerT);
-
-			editor.setTexturePanel.add(v -> {
-				if(v != null) {
-					spinnerU.setValue(v.x);
-					spinnerV.setValue(v.y);
-					spinnerT.setValue(v.z);
-				}
-			});
-			panel.addElement(spinnerU);
-			panel.addElement(spinnerV);
-			panel.addElement(spinnerT);
-			panel.addElement(lblU);
-			panel.addElement(lblV);
-			panel.addElement(lblT);
-		}
-		{
-			ColorButton colorBtn = new ColorButton(gui, e, editor::setColor);
-			addElement(colorBtn);
-			editor.setPartColor.add(c -> {
-				if(c != null)colorBtn.setColor(c);
-			});
-			colorBtn.setBounds(new Box(5, 20, 160, 16));
-			group.addElement(ModeDisplayType.COLOR, colorBtn);
-		}
-		{
-			Spinner spinnerS = new Spinner(gui);
-			spinnerS.setBounds(new Box(5, 30, 150, 18));
-			spinnerS.setDp(2);
-			group.addElement(ModeDisplayType.VALUE, spinnerS);
-			spinnerS.addChangeListener(() -> editor.setValue(spinnerS.getValue()));
-			editor.setValue.add(spinnerS::setValue);
-			addElement(spinnerS);
-			tabHandler.add(spinnerS);
-		}
-		{
-			PerfaceUVPanel panel = new PerfaceUVPanel(gui, e, tabHandler);
-			group.addElement(ModeDisplayType.TEX_FACE, panel);
-			addElement(panel);
+			ElementGroup<ModeDisplayType, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
+			editor.setModePanel.add(group);
+			editor.setModePanel.add(layout);
+			for (ModeDisplayType mdt : ModeDisplayType.VALUES) {
+				Panel p = mdt.factory.apply(e, editor, tabHandler);
+				addElement(p);
+				group.addElement(mdt, p);
+			}
 		}
 		{
 			String skinLbl = gui.i18nFormat("label.cpm.skin");
@@ -210,6 +128,7 @@ public class PosPanel extends Panel {
 			});
 		}
 		layout.reflow();
+		addElement(tabHandler);
 	}
 
 	public static Panel addVec3(String name, Consumer<Vec3f> consumer, Panel panelIn, Updater<Vec3f> updater, int dp, TabFocusHandler tabHandler) {
@@ -264,9 +183,5 @@ public class PosPanel extends Panel {
 			}
 		});
 		return panel;
-	}
-
-	public static enum ModeDisplayType {
-		NULL, COLOR, TEX, VALUE, TEX_FACE
 	}
 }

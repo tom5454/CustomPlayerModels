@@ -104,6 +104,13 @@ public class ModelDefinitionLoader<GP> {
 		LOADERS.put("git", new GistResourceLoader());
 		LOADERS.put("gh", new GithubRepoResourceLoader());
 		LOADERS.put("p", new PasteResourceLoader());
+		LOADERS.put("local", new ResourceLoader() {
+
+			@Override
+			public byte[] loadResource(String path, ResourceEncoding enc, ModelDefinition def) throws IOException {
+				throw new IOException("Test in-game model");
+			}
+		});
 	}
 	private Image template;
 	public static final int HEADER = 0x53;

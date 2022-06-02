@@ -45,7 +45,7 @@ public abstract interface TreeElement {
 			int bg = val.bgColor();
 			if(bg != 0)return bg;
 			if(moveElem != null && moveElem == val)return e.gui().getColors().move_background;
-			if(e.selectedElement == val)return e.colors().select_background;
+			if(isSelected(val))return e.colors().select_background;
 			return 0;
 		}
 
@@ -57,29 +57,35 @@ public abstract interface TreeElement {
 		@Override
 		protected void onClick(MouseEvent evt, TreeElement elem) {
 			if(evt.btn == 1 && elem != null) {
-				PopupMenu popup = new PopupMenu(e.gui(), e.frame);
-				if(elem.canMove() || (moveElem != null && elem.canAccept(moveElem))) {
-					String btnTxt;
-					if(moveElem != null) {
-						if(moveElem == elem)btnTxt = e.gui().i18nFormat("button.cpm.tree.cancelMove");
-						else btnTxt = e.gui().i18nFormat("button.cpm.tree.put");
-					} else btnTxt = e.gui().i18nFormat("button.cpm.tree.move");
-					popup.addButton(btnTxt, () -> {
-						if(moveElem != null) {
-							if(moveElem != elem)
-								elem.accept(moveElem);
-							moveElem = null;
-						} else moveElem = elem;
-					});
-				}
-				elem.populatePopup(popup);
-				if(popup.getY() > 0) {
-					Vec2i p = evt.getPos();
-					popup.display(p.x, p.y);
-				}
+				displayPopup(evt, elem);
 			} else {
-				if(elem != null)elem.onClick(evt);
-				e.selectedElement = elem;
+				if(elem != null)
+					elem.onClick(e, evt);
+				else
+					e.selectedElement = null;
+			}
+		}
+
+		public void displayPopup(MouseEvent evt, TreeElement elem) {
+			PopupMenu popup = new PopupMenu(e.gui(), e.frame);
+			if(elem.canMove() || (moveElem != null && elem.canAccept(moveElem))) {
+				String btnTxt;
+				if(moveElem != null) {
+					if(moveElem == elem)btnTxt = e.gui().i18nFormat("button.cpm.tree.cancelMove");
+					else btnTxt = e.gui().i18nFormat("button.cpm.tree.put");
+				} else btnTxt = e.gui().i18nFormat("button.cpm.tree.move");
+				popup.addButton(btnTxt, () -> {
+					if(moveElem != null) {
+						if(moveElem != elem)
+							elem.accept(moveElem);
+						moveElem = null;
+					} else moveElem = elem;
+				});
+			}
+			elem.populatePopup(popup);
+			if(popup.getY() > 0) {
+				Vec2i p = evt.getPos();
+				popup.display(p.x, p.y);
 			}
 		}
 
@@ -101,8 +107,16 @@ public abstract interface TreeElement {
 
 		@Override
 		protected boolean isSelected(TreeElement elem) {
-			return e.selectedElement == elem;
+			return e.selectedElement != null && e.selectedElement.isSelected(e, elem);
 		}
+	}
+
+	public default void onClick(Editor e, MouseEvent evt) {
+		e.selectedElement = this;
+	}
+
+	public default boolean isSelected(Editor e, TreeElement other) {
+		return e.selectedElement == other;
 	}
 
 	public String getName();
@@ -112,7 +126,6 @@ public abstract interface TreeElement {
 	public default boolean canAccept(TreeElement elem) { return false; }
 	public default boolean canMove() { return false; }
 	public default void getTreeElements(Consumer<TreeElement> c) {}
-	public default void onClick(MouseEvent evt) {}
 	public default void populatePopup(PopupMenu popup) {}
 	public default Tooltip getTooltip() { return null; }
 
@@ -145,4 +158,6 @@ public abstract interface TreeElement {
 	public default void switchEffect(Effect effect) {}
 	public default float getValue() { return 0; }
 	public default void setValue(float value) {}
+	public default void setVecTemp(VecType type, Vec3f vec) {}
+	public default Vec3f getVec(VecType type) {return Vec3f.ZERO;}
 }

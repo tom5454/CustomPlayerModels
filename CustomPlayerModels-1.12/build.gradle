@@ -112,6 +112,7 @@ dependencies {
   	compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.28-17:api")
   	// at runtime, use the full TOP jar
   	runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.28-17")*/
+  	compileOnly "com.mojang:brigadier:1.0.18" //dummy
 }
 
 sourceSets {
@@ -167,6 +168,15 @@ processResources
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
 }
 
 publishing {

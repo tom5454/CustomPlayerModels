@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'fabric-loom' version '0.11-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -26,17 +26,17 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	modImplementation("com.terraformersmc:modmenu:3.0.1") {
+	modImplementation("com.terraformersmc:modmenu:4.0.0-beta.2") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	//modImplementation ('com.github.Virtuoel:Pehkui:3.1.0')
+	modImplementation ('com.github.Virtuoel:Pehkui:3.3.0')
 	
 	compileOnly files("of.jar")
 }
 
-minecraft {
-	accessWidener = file("src/main/resources/cpm.accesswidener")
+loom {
+	accessWidenerPath = file("src/main/resources/cpm.accesswidener")
 }
 
 sourceSets {

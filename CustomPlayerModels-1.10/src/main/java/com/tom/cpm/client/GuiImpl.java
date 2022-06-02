@@ -416,6 +416,16 @@ public class GuiImpl extends GuiScreen implements IGui {
 		public void setCursorPos(int pos) {
 			field.setCursorPosition(pos);
 		}
+
+		@Override
+		public void setSelectionPos(int pos) {
+			field.setSelectionPos(pos);
+		}
+
+		@Override
+		public int getSelectionPos() {
+			return field.selectionEnd;
+		}
 	}
 
 	@Override

@@ -13,10 +13,10 @@ public class KeyboardEvent extends GuiEvent {
 	}
 
 	public boolean matches(int keyCode) {
-		return this.keyCode == keyCode;
+		return !isConsumed() && this.keyCode == keyCode;
 	}
 
 	public boolean matches(String keyName) {
-		return this.keyName != null && this.keyName.equalsIgnoreCase(keyName);
+		return !isConsumed() && this.keyName != null && this.keyName.equalsIgnoreCase(keyName);
 	}
 }

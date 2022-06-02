@@ -19,6 +19,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.random.Random;
 
 import com.tom.cpl.math.MatrixStack.Entry;
 import com.tom.cpl.math.Vec4f;
@@ -281,6 +282,12 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 				multiplyStacks(e, matrix);
 			} else
 				super.rotate(matrix);
+		}
+
+		@Override
+		public Cuboid getRandomCuboid(Random random) {
+			if(parent != null)return parent.getRandomCuboid(random);
+			return super.getRandomCuboid(random);
 		}
 	}
 

@@ -12,6 +12,7 @@ import java.util.function.UnaryOperator;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.hash.Hashing;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -20,11 +21,13 @@ import com.tom.cpm.shared.util.LegacySkinConverter;
 public abstract class PlayerTextureLoader {
 	private static final LoadingCache<String, CompletableFuture<Image>> cache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).build(CacheLoader.from(Image::download));
 	private Map<TextureType, Texture> textures = new ConcurrentHashMap<>();
+	private final File skinsDirectory;
 
 	private static class Texture {
 		private final TextureType type;
 		private CompletableFuture<Image> skinFuture;
 		private String url;
+		private File cachedFile;
 		private UnaryOperator<Image> postProcessor;
 
 		public Texture(TextureType type) {
@@ -44,6 +47,8 @@ public abstract class PlayerTextureLoader {
 				return Image.loadFrom(new File(type.name().toLowerCase() + "_test.png"));
 			}
 			if(url == null)return null;
+			if(cachedFile != null && cachedFile.isFile())
+				return Image.loadFrom(cachedFile).exceptionally(e -> null);
 			return cache.getUnchecked(url).thenApply(postProcessor).exceptionally(e -> null);
 		}
 	}
@@ -59,19 +64,47 @@ public abstract class PlayerTextureLoader {
 		return loadFuture;
 	}
 
+	public PlayerTextureLoader() {
+		this.skinsDirectory = null;
+	}
+
+	public PlayerTextureLoader(File skinsDirectory) {
+		this.skinsDirectory = skinsDirectory;
+	}
+
 	protected abstract CompletableFuture<Void> load0();
 
 	protected void defineTexture(TextureType type, String url) {
 		textures.computeIfAbsent(type, Texture::new).url = url;
 	}
 
+	protected void defineTexture(TextureType type, String url, String hash) {
+		Texture tx = textures.computeIfAbsent(type, Texture::new);
+		tx.url = url;
+		if(skinsDirectory != null) {
+			String s = Hashing.sha1().hashUnencodedChars(hash).toString();
+			File file1 = new File(this.skinsDirectory, s.length() > 2 ? s.substring(0, 2) : "xx");
+			tx.cachedFile = new File(file1, s);
+		}
+	}
+
 	protected <Ty extends Enum<Ty>> void defineTexture(Ty type, String url) {
 		defineTexture(TextureType.valueOf(type.name()), url);
+	}
+
+	protected <Ty extends Enum<Ty>> void defineTexture(Ty type, String url, String hash) {
+		defineTexture(TextureType.valueOf(type.name()), url, hash);
 	}
 
 	protected <Ty extends Enum<Ty>, Tx> void defineAll(Map<Ty, Tx> map, Function<Tx, String> toURL) {
 		for(Entry<Ty, Tx> e : map.entrySet()) {
 			defineTexture(TextureType.valueOf(e.getKey().name()), toURL.apply(e.getValue()));
+		}
+	}
+
+	protected <Ty extends Enum<Ty>, Tx> void defineAll(Map<Ty, Tx> map, Function<Tx, String> toURL, Function<Tx, String> toHash) {
+		for(Entry<Ty, Tx> e : map.entrySet()) {
+			defineTexture(TextureType.valueOf(e.getKey().name()), toURL.apply(e.getValue()), toHash.apply(e.getValue()));
 		}
 	}
 

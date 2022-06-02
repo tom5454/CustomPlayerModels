@@ -38,3 +38,7 @@ accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket da
 accessible method net/minecraft/util/WorldSavePath <init> (Ljava/lang/String;)V
 
 accessible field net/minecraft/network/ClientConnection channel Lio/netty/channel/Channel;
+
+accessible field net/minecraft/client/gui/widget/TextFieldWidget selectionEnd I
+
+accessible field net/minecraft/client/texture/PlayerSkinProvider skinCacheDir Ljava/io/File;

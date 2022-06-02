@@ -15,6 +15,7 @@ import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
+import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.InputPopup;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.MessagePopup;
@@ -24,7 +25,9 @@ import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.ButtonGroup;
+import com.tom.cpl.gui.util.ElementGroup;
 import com.tom.cpl.gui.util.HorizontalLayout;
+import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.text.KeybindText;
@@ -53,6 +56,7 @@ import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.gui.Keybinds;
+import com.tom.cpm.shared.gui.KeybindsPopup;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.paste.PastePopup;
@@ -222,6 +226,32 @@ public class EditorGui extends Frame {
 		textureEditor.addElement(treePanel);
 
 		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - treeW, height / 2));
+
+		Panel uvPanel = new Panel(gui);
+		uvPanel.setBounds(new Box(0, height, 170, 0));
+		uvPanel.setBackgroundColor(gui.getColors().panel_background);
+		ElementGroup<ModeDisplayType, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
+		editor.setModePanel.add(group);
+		editor.setModePanel.add(mdt -> {
+			uvPanel.setVisible(mdt != ModeDisplayType.NULL);
+			if(mdt != ModeDisplayType.NULL) {
+				int h = group.getFirst(mdt).getBounds().h + 5;
+				uvPanel.setBounds(new Box(0, height - 20 - h, 175, h));
+			}
+		});
+		TabFocusHandler tabHandler = new TabFocusHandler(gui);
+		Panel panel = new Panel(gui);
+		panel.setBounds(new Box(0, 5, 170, 100));
+		for (ModeDisplayType mdt : ModeDisplayType.VALUES) {
+			if(mdt != ModeDisplayType.NULL) {
+				Panel p = mdt.factory.apply(this, editor, tabHandler);
+				panel.addElement(p);
+				group.addElement(mdt, p);
+			}
+		}
+		uvPanel.addElement(panel);
+		uvPanel.addElement(tabHandler);
+		textureEditor.addElement(uvPanel);
 	}
 
 	private void initAnimPanel(int width, int height) {
@@ -432,7 +462,8 @@ public class EditorGui extends Frame {
 
 		pp.addButton(gui.i18nFormat("button.cpm.models"), () -> openPopup(new ModelsPopup(this)));
 
-		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(this, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
+		//pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(new MessagePopup(this, gui.i18nFormat("button.cpm.edit.controls"), gui.i18nFormat("label.cpm.controls.text"))));
+		pp.addButton(gui.i18nFormat("button.cpm.edit.controls"), () -> openPopup(KeybindsPopup.create(this)));
 
 		pp.addButton(gui.i18nFormat("tab.cpm.social.errorLog"), () -> openPopup(new ErrorLogPopup(this)));
 
@@ -593,6 +624,13 @@ public class EditorGui extends Frame {
 		chxbxForceItemInAnim.setSelected(editor.forceHeldItemInAnim);
 		chxbxForceItemInAnim.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.forceItemInAnim")));
 
+		Checkbox chxbxDisplayGizmo = pp.addCheckbox(gui.i18nFormat("label.cpm.display.displayGizmo"), b -> {
+			editor.displayGizmo = !b.isSelected();
+			b.setSelected(editor.displayGizmo);
+		});
+		chxbxDisplayGizmo.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.displayGizmo", Keybinds.TOGGLE_GIZMO.getSetKey(gui))));
+		editor.updateGui.add(() -> chxbxDisplayGizmo.setSelected(editor.displayGizmo));
+
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
 
 		PopupMenu heldItemRight = new PopupMenu(gui, this);
@@ -718,19 +756,14 @@ public class EditorGui extends Frame {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
+		getKeybindHandler().registerKeybind(Keybinds.UNDO, editor::undo);
+		getKeybindHandler().registerKeybind(Keybinds.REDO, editor::redo);
+		getKeybindHandler().registerKeybind(Keybinds.SAVE, this::save);
+		getKeybindHandler().registerKeybind(Keybinds.TOGGLE_GIZMO, () -> {
+			editor.displayGizmo = !editor.displayGizmo;
+			editor.updateGui();
+		});
 		if(!event.isConsumed()) {
-			if(Keybinds.UNDO.isPressed(gui, event)) {
-				editor.undo();
-				event.consume();
-			}
-			if(Keybinds.REDO.isPressed(gui, event)) {
-				editor.redo();
-				event.consume();
-			}
-			if(Keybinds.SAVE.isPressed(gui, event)) {
-				save();
-				event.consume();
-			}
 			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
 				editor.restitchTextures();
 				editor.animations.forEach(EditorAnim::clearCache);
@@ -746,6 +779,14 @@ public class EditorGui extends Frame {
 
 	public static int getDragMouseButton() {
 		return ModConfig.getCommonConfig().getSetInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1);
+	}
+
+	public static int getSelectMouseButton() {
+		return ModConfig.getCommonConfig().getSetInt(ConfigKeys.EDITOR_SELECT_MOUSE_BUTTON, 0);
+	}
+
+	public static int getMenuMouseButton() {
+		return ModConfig.getCommonConfig().getSetInt(ConfigKeys.EDITOR_MENU_MOUSE_BUTTON, 1);
 	}
 
 	public static boolean doOpenEditor() {

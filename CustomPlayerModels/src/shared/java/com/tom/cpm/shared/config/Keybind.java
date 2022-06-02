@@ -42,6 +42,7 @@ public class Keybind {
 	}
 
 	public boolean isPressed(IGui gui, KeyboardEvent evt) {
+		if(evt.isConsumed())return false;
 		ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
 		if(isPressed0(gui, ce, evt)) {
 			int modKeys = ce.getInt(key + ".mod", defMod);
@@ -67,6 +68,10 @@ public class Keybind {
 			else return evt.matches(k);
 		}
 		return evt.matches(id);
+	}
+
+	public int getMod() {
+		return ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS).getInt(key + ".mod", defMod);
 	}
 
 	public void setKey(ConfigEntry config, KeyboardEvent evt, int mod) {
@@ -95,6 +100,10 @@ public class Keybind {
 		return "label.cpm.keybind." + key;
 	}
 
+	public String getSetKey(IGui gui) {
+		return getSetKey(ModConfig.getCommonConfig(), gui);
+	}
+
 	public String getSetKey(ConfigEntry ce, IGui gui) {
 		ce = ce.getEntry(ConfigKeys.KEYBINDS);
 		String key = getSetKey0(ce, gui);
@@ -102,9 +111,9 @@ public class Keybind {
 		int modKeys = ce.getInt(this.key + ".mod", defMod);
 		if(modKeys < 1)
 			return key;
-		if((modKeys & ALT) != 0)key = "Alt + " + key;
-		if((modKeys & SHIFT) != 0)key = "Shift + " + key;
-		if((modKeys & CTRL) != 0)key = "Ctrl + " + key;
+		if((modKeys & ALT) != 0)key = gui.i18nFormat("label.cpm.keybind.mod.alt", key);
+		if((modKeys & SHIFT) != 0)key = gui.i18nFormat("label.cpm.keybind.mod.shift", key);
+		if((modKeys & CTRL) != 0)key = gui.i18nFormat("label.cpm.keybind.mod.ctrl", key);
 		return key;
 	}
 

@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
@@ -68,7 +69,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 			}
 		});
 		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
-		api.buildCommon().init();
+		api.buildCommon().player(EntityPlayer.class).init();
 		proxy.apiInit();
 	}
 

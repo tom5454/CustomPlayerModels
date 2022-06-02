@@ -168,7 +168,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public void openGui(Function<IGui, Frame> creator) {
-		mc.setScreen(new GuiImpl(creator, mc.currentScreen));
+		mc.setScreen(new Gui(creator, mc.currentScreen));
 	}
 
 	@Override

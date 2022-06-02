@@ -38,7 +38,6 @@ public class AnimPanel extends Panel {
 	public AnimPanel(IGui gui, EditorGui e) {
 		super(gui);
 		tabHandler = new TabFocusHandler(gui);
-		addElement(tabHandler);
 		editor = e.getEditor();
 		setBounds(new Box(0, 0, 170, 330));
 		setBackgroundColor(gui.getColors().panel_background);
@@ -221,6 +220,7 @@ public class AnimPanel extends Panel {
 		tabHandler.add(animPriority);
 
 		layout.reflow();
+		addElement(tabHandler);
 	}
 
 	public static interface IAnim {

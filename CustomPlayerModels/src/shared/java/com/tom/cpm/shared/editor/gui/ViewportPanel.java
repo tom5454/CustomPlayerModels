@@ -1,13 +1,17 @@
 package com.tom.cpm.shared.editor.gui;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.KeybindHandler;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.ButtonIconToggle;
+import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.ElementGroup;
 import com.tom.cpl.math.Box;
@@ -36,6 +40,8 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorRenderer;
 import com.tom.cpm.shared.editor.EditorRenderer.BoundType;
 import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.gui.Keybinds;
 import com.tom.cpm.shared.gui.ViewportCamera;
@@ -50,14 +56,14 @@ import com.tom.cpm.shared.util.PlayerModelLayer;
 public class ViewportPanel extends ViewportPanelBase3d {
 	protected Editor editor;
 	private TextureProvider debugTexture;
-	public ModelElement draggingElement;
+	public TreeElement draggingElement;
 	public EditorRenderer.BoundType draggingType;
 	public Vec3f[] oldValue;
 	private ElementGroup<VecType, ButtonIconToggle> dragGroup;
 	public VecType draggingVec;
 	public Vec2f draggingClickOffset;
 	public Mat4f modelView;
-	public int dragged;
+	public int dragged, dragged2;
 
 	public ViewportPanel(Frame frm, Editor editor) {
 		super(frm);
@@ -84,6 +90,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 		renderModel(stack, buf, partialTicks);
 		VBuffers rp = buf.replay();
 		editor.render(stack, rp, this);
+		rp.finishAll();
 
 		editor.definition.renderingPanel = null;
 	}
@@ -106,6 +113,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
+		gui.drawText(0, -10, "a", 0xffffffff);//For some reason this fixes #221
 		if(MinecraftObjectHolder.DEBUGGING && gui.isCtrlDown()) {
 			Vec2i ws = get3dSize();
 			if(debugTexture == null)debugTexture = new TextureProvider();
@@ -291,7 +299,18 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public void mouseClick(MouseEvent event) {
-		if(event.btn == 0 && event.isHovered(bounds)) {
+		if(!elements.isEmpty()) {
+			List<GuiElement> elements = new ArrayList<>(this.elements);
+			for (int i = elements.size()-1; i >= 0; i--) {
+				GuiElement guiElement = elements.get(i);
+				if(guiElement.isVisible()) {
+					guiElement.mouseClick(event.offset(getBounds()));
+				}
+			}
+		}
+		if(isMenu(event.btn) && event.isHovered(bounds)) {
+			dragged2 = 1;
+		} else if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds)) {
 			EditorRenderer.Bounds hovered = editor.definition.bounds.stream().filter(b -> b.isHovered && b.type != EditorRenderer.BoundType.DRAG_PANE).sorted(Comparator.comparingInt(b -> -b.type.ordinal())).findFirst().orElse(null);
 			if(hovered != null) {
 				dragged = 1;
@@ -303,7 +322,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 					else
 						oldValue = new Vec3f[] {getVec(draggingVec)};
 				}
-				editor.selectedElement = hovered.elem;
+				hovered.elem.onClick(editor, event);
 				event.consume();
 			} else {
 				dragged = -1;
@@ -311,7 +330,8 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			editor.updateGui();
 		}
 		super.mouseClick(event);
-		if(event.btn == 0 && !enableDrag && dragged == -1 && event.isConsumed())dragged = 0;
+		if(event.btn == EditorGui.getSelectMouseButton() && !enableDrag && dragged == -1 && event.isConsumed())dragged = 0;
+		if(isMenu(event.btn) && event.isHovered(bounds))event.consume();
 	}
 
 	protected Vec3f getVec(VecType type) {
@@ -325,7 +345,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public void mouseDrag(MouseEvent event) {
-		if(event.btn == 0 && event.isHovered(bounds)) {
+		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds)) {
 			if(dragged > 0) {
 				dragged = 2;
 				EditorRenderer.Bounds hovered = editor.definition.bounds.stream().filter(b -> b.isHovered && b.type == EditorRenderer.BoundType.DRAG_PANE).findFirst().orElse(null);
@@ -339,12 +359,16 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				dragged = -2;
 			}
 		}
+		if(isMenu(event.btn) && event.isHovered(bounds) && dragged2 > 0) {
+			dragged2 = 2;
+		}
 		super.mouseDrag(event);
+		if(isMenu(event.btn) && event.isHovered(bounds))event.consume();
 	}
 
 	@Override
 	public void mouseRelease(MouseEvent event) {
-		if(event.btn == 0 && event.isHovered(bounds) && dragged < 0) {
+		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds) && dragged < 0) {
 			if(dragged == -1 && editor.getSelectedElement() != null) {
 				editor.selectedElement = null;
 				editor.updateGui();
@@ -352,7 +376,15 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			}
 			dragged = 0;
 		}
-		if(event.btn == 0 && event.isHovered(bounds) && dragged > 0) {
+		if(isMenu(event.btn) && event.isHovered(bounds) && dragged2 == 1) {
+			dragged2 = 0;
+			event.consume();
+			ModelElement elem = editor.getSelectedElement();
+			if(elem != null) {
+				((ModelTree) editor.treeHandler.getModel()).displayPopup(event, elem);
+			}
+		}
+		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds) && dragged > 0) {
 			EditorRenderer.Bounds hovered = editor.definition.bounds.stream().filter(b -> b.isHovered && b.type == EditorRenderer.BoundType.DRAG_PANE).findFirst().orElse(null);
 			dragged = 0;
 			event.consume();
@@ -460,28 +492,14 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
+		KeybindHandler h = editor.frame.getKeybindHandler();
+		h.registerKeybind(Keybinds.POSITION, () -> setVec(VecType.POSITION));
+		h.registerKeybind(Keybinds.OFFSET, () -> setVec(VecType.OFFSET));
+		h.registerKeybind(Keybinds.SIZE, () -> setVec(VecType.SIZE));
+		h.registerKeybind(Keybinds.ROTATION, () -> setVec(VecType.ROTATION));
+		h.registerKeybind(Keybinds.DELETE, editor::deleteSel);
+		h.registerKeybind(Keybinds.NEW_PART, editor::addNew);
 		super.keyPressed(event);
-		if(!event.isConsumed()) {
-			if(Keybinds.POSITION.isPressed(gui, event)) {
-				setVec(VecType.POSITION);
-				event.consume();
-			} else if(Keybinds.OFFSET.isPressed(gui, event)) {
-				setVec(VecType.OFFSET);
-				event.consume();
-			} else if(Keybinds.SIZE.isPressed(gui, event)) {
-				setVec(VecType.SIZE);
-				event.consume();
-			} else if(Keybinds.ROTATION.isPressed(gui, event)) {
-				setVec(VecType.ROTATION);
-				event.consume();
-			} else if(Keybinds.DELETE.isPressed(gui, event)) {
-				editor.deleteSel();
-				event.consume();
-			} else if(Keybinds.NEW_PART.isPressed(gui, event)) {
-				editor.addNew();
-				event.consume();
-			}
-		}
 	}
 
 	@Override
@@ -493,6 +511,11 @@ public class ViewportPanel extends ViewportPanelBase3d {
 	protected boolean isDrag(int btn) {
 		int d = EditorGui.getDragMouseButton();
 		return d == -1 ? gui.isShiftDown() : d == btn;
+	}
+
+	protected boolean isMenu(int btn) {
+		int d = EditorGui.getMenuMouseButton();
+		return d == -1 ? gui.isAltDown() && btn == EditorGui.getSelectMouseButton() : d == btn;
 	}
 
 	protected VecType[] getVecTypes() {

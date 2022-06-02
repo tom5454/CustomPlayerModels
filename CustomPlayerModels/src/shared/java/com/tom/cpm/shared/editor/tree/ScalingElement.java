@@ -10,7 +10,7 @@ import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
+import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.util.ScalingOptions;
 
 public class ScalingElement implements TreeElement {

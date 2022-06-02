@@ -83,7 +83,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 				return;
 
 			if(KeyBindings.gestureMenuBinding.wasPressed()) {
-				client.setScreen(new GuiImpl(GestureGui::new, null));
+				client.setScreen(new Gui(GestureGui::new, null));
 			}
 
 			if(KeyBindings.renderToggleBinding.wasPressed()) {
@@ -128,7 +128,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public void initGui(Screen screen) {
 		if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				screen instanceof SkinOptionsScreen) {
-			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().setScreen(new GuiImpl(EditorGui::new, screen)));
+			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().setScreen(new Gui(EditorGui::new, screen)));
 			((IScreen)screen).cpm$addDrawableChild(btn);
 		}
 	}

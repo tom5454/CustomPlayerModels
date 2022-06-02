@@ -10,12 +10,16 @@ import java.util.function.Function;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
+import com.tom.cpm.api.CPMPluginRegistry;
+import com.tom.cpm.api.ICPMPlugin;
 import com.tom.cpm.bukkit.Commands.CommandHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -67,7 +71,15 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			}
 		}
 		api = new CPMApiManager();
-		api.buildCommon().init();
+		api.buildCommon().player(Player.class).init();
+		getServer().getServicesManager().register(CPMPluginRegistry.class, new CPMPluginRegistry() {
+
+			@Override
+			public void register(ICPMPlugin plugin) {
+				api.register(plugin);
+				api.commonApi().callInit(plugin);
+			}
+		}, this, ServicePriority.Normal);
 		cmd = new CommandHandler(this);
 		MinecraftObjectHolder.setCommonObject(new MinecraftCommonAccess() {
 

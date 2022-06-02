@@ -26,7 +26,7 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 	}
 	@Override
 	public void keyPressed(KeyboardEvent evt) {
-		if(evt.matches(gui.getKeyCodes().KEY_ENTER) || evt.matches(gui.getKeyCodes().KEY_KP_ENTER)) {
+		if(field.isFocused() && (evt.matches(gui.getKeyCodes().KEY_ENTER) || evt.matches(gui.getKeyCodes().KEY_KP_ENTER))) {
 			setFocused(false);
 			evt.consume();
 		}
@@ -50,6 +50,10 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 		void setFocused(boolean focused);
 		int getCursorPos();
 		void setCursorPos(int pos);
+		default int getSelectionPos() {
+			return -1;
+		}
+		default void setSelectionPos(int pos) {}
 	}
 
 	public String getText() {
@@ -95,5 +99,18 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 
 	public void setCursorPos(int pos) {
 		field.setCursorPos(pos);
+	}
+
+	public int getSelectionPos() {
+		return field.getSelectionPos();
+	}
+
+	public void setSelectionPos(int pos) {
+		field.setSelectionPos(pos);
+	}
+
+	public void setSelectionPos(int start, int end) {
+		field.setCursorPos(end);
+		field.setSelectionPos(start);
 	}
 }

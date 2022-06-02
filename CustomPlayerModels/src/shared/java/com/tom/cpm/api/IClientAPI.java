@@ -15,7 +15,7 @@ import com.tom.cpm.shared.retro.RetroPlayerRendererImpl;
  *
  * The referenced minecraft class names are for official mappings, check the wiki for other mappings.
  * */
-public interface IClientAPI {
+public interface IClientAPI extends ISharedAPI {
 
 	/**
 	 * Register a voice level provider.
@@ -84,6 +84,7 @@ public interface IClientAPI {
 		void setRenderModel(M model);
 		void setRenderType(Function<RL, RT> renderTypeFactory);
 		RT getDefaultRenderType();
+		RL getDefaultTexture();
 		RT getRenderTypeForSubModel(M model);
 		AnimationState getAnimationState();
 		void preRender(MBS buffers, AnimationMode renderMode);

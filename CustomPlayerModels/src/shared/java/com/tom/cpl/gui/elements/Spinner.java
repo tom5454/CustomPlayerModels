@@ -133,6 +133,8 @@ public class Spinner extends GuiElement implements Focusable {
 	@Override
 	public void setFocused(boolean focused) {
 		txtf.setFocused(focused);
+		if(focused && enabled)txtf.setSelectionPos(0, txtf.getText().length());
+		else txtf.setSelectionPos(0, 0);
 	}
 
 	public void setBackgroundColor(int bgColor) {

@@ -160,24 +160,19 @@ public class RenderedCube implements IModelComponent {
 	}
 
 	public static enum ElementSelectMode {
-		NULL(false, true),
-		SELECTED(true, true),
-		SEL_CHILDREN(true, true),
-		SEL_ONLY(true, true),
+		NULL(false),
+		SELECTED(true),
+		SEL_CHILDREN(true),
+		SEL_ONLY(true),
 		;
-		private boolean renderOutline, applyColor;
+		private boolean renderOutline;
 
-		private ElementSelectMode(boolean renderOutline, boolean applyColor) {
+		private ElementSelectMode(boolean renderOutline) {
 			this.renderOutline = renderOutline;
-			this.applyColor = applyColor;
 		}
 
 		public boolean isRenderOutline() {
 			return renderOutline;
-		}
-
-		public boolean applyColor() {
-			return applyColor;
 		}
 	}
 

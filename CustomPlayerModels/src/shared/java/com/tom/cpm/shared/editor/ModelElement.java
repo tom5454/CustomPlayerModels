@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Tooltip;
@@ -15,7 +16,7 @@ import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.IElem;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
+import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
 import com.tom.cpm.shared.editor.gui.popup.CopyTransformSettingsPopup;
 import com.tom.cpm.shared.editor.tree.TreeElement;
@@ -283,7 +284,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
 		if(showInEditor || editor.selectedElement == this)
-			TextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys, editor.selectedElement == this ? 0xcc : 0x55);
+			TextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys, TextureDisplay.getAlphaForBox(editor.selectedElement == this));
 	}
 
 	@Override
@@ -539,5 +540,22 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	private boolean canDup() {
 		return itemRenderer == null;
+	}
+
+	@Override
+	public void onClick(Editor e, MouseEvent evt) {
+		if(e.gui().isCtrlDown()) {
+			if(e.selectedElement instanceof MultiSelector) {
+				if(((MultiSelector)e.selectedElement).add(this))e.selectedElement = null;
+			} else if(e.getSelectedElement() == null)e.selectedElement = this;
+			else {
+				MultiSelector ms = new MultiSelector(e);
+				ms.add(e.getSelectedElement());
+				ms.add(this);
+				e.selectedElement = ms;
+			}
+		} else {
+			e.selectedElement = this;
+		}
 	}
 }

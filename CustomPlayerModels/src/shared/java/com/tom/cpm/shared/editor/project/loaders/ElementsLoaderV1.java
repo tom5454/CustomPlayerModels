@@ -96,7 +96,6 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 			map.put("rotation", elem.rotation.toMap());
 			map.put("dup", elem.duplicated);
 			if(elem.duplicated || elem.typeData instanceof RootModelType) {
-				editor.storeIDgen.setID(elem);
 				map.put("storeID", elem.storeID);
 			}
 		}
@@ -122,7 +121,6 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 			JsonMap map = lst.addMap();
 
 			saveElement(elem, map, editor);
-			editor.storeIDgen.setID(elem);
 			map.put("storeID", elem.storeID);
 
 			if(!elem.children.isEmpty()) {

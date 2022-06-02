@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
+import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.TemplateArg;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.model.Cube;

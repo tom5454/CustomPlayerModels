@@ -330,7 +330,7 @@ public class GuiImpl extends Screen implements IGui {
 		@Override
 		public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 			this.renderBackground(matrixStack);
-			String[] txt = I18n.get("error.cpm.crash", error).split("\\\\");
+			String[] txt = IGui.wordWrap(I18n.get("error.cpm.crash", error), width - 200, font::width).split("\\\\");
 			for (int i = 0; i < txt.length; i++) {
 				drawCenteredString(matrixStack, this.font, txt[i], this.width / 2, 15 + i * 10, 16777215);
 			}
@@ -555,6 +555,16 @@ public class GuiImpl extends Screen implements IGui {
 		@Override
 		public void setCursorPos(int pos) {
 			field.setCursorPosition(pos);
+		}
+
+		@Override
+		public void setSelectionPos(int pos) {
+			field.setHighlightPos(pos);
+		}
+
+		@Override
+		public int getSelectionPos() {
+			return field.highlightPos;
 		}
 	}
 

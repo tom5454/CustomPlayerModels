@@ -3,7 +3,6 @@ package com.tom.cpm.client;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
@@ -21,6 +20,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
+import com.tom.cpl.util.TriConsumer;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
@@ -62,12 +62,12 @@ public class PlayerProfile extends Player<EntityPlayer> {
 
 	@Override
 	protected PlayerTextureLoader initTextures() {
-		return new PlayerTextureLoader() {
+		return new PlayerTextureLoader(Minecraft.getMinecraft().func_152342_ad().field_152796_d) {
 
 			@Override
 			protected CompletableFuture<Void> load0() {
 				Map<Type, MinecraftProfileTexture> map = Minecraft.getMinecraft().func_152342_ad().func_152788_a(profile);
-				defineAll(map, MinecraftProfileTexture::getUrl);
+				defineAll(map, MinecraftProfileTexture::getUrl, MinecraftProfileTexture::getHash);
 				if (map.containsKey(Type.SKIN)) {
 					return CompletableFuture.completedFuture(null);
 				}
@@ -80,9 +80,9 @@ public class PlayerProfile extends Player<EntityPlayer> {
 
 	public class SkinCB implements SkinManager.SkinAvailableCallback {
 		private final CompletableFuture<Void> cf;
-		private final BiConsumer<Type, String> define;
+		private final TriConsumer<Type, String, String> define;
 
-		public SkinCB(CompletableFuture<Void> cf, BiConsumer<Type, String> define) {
+		public SkinCB(CompletableFuture<Void> cf, TriConsumer<Type, String, String> define) {
 			this.cf = cf;
 			this.define = define;
 		}
@@ -92,7 +92,7 @@ public class PlayerProfile extends Player<EntityPlayer> {
 
 		//Called from CPMASMClientHooks.loadSkinHook 1.8+ implementation
 		public void skinAvailable(Type typeIn, ResourceLocation location, MinecraftProfileTexture profileTexture) {
-			define.accept(typeIn, profileTexture.getUrl());
+			define.accept(typeIn, profileTexture.getUrl(), profileTexture.getHash());
 			switch (typeIn) {
 			case SKIN:
 				ClientProxy.mc.getDefinitionLoader().execute(() -> Minecraft.getMinecraft().func_152344_a(() -> cf.complete(null)));

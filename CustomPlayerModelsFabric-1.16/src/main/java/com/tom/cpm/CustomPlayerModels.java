@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.SharedConstants;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.KeybindText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
@@ -72,7 +73,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 		});
 		LOG.info("Customizable Player Models Initialized");
 		LOG.info(api.getPluginStatus());
-		api.buildCommon().init();
+		api.buildCommon().player(PlayerEntity.class).init();
 	}
 
 	@Override

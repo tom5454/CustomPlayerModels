@@ -21,6 +21,7 @@ import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.ScrollPanel;
+import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.gui.util.HorizontalLayout;
@@ -97,32 +98,6 @@ public class SettingsPanel extends Panel {
 
 			makeCheckbox(editor, ConfigKeys.TITLE_SCREEN_BUTTON, true);
 
-			Button buttonRMB = new Button(gui, gui.i18nFormat("button.cpm.config.rotateButton", getRotateBtn()), null);
-			Button buttonDMB = new Button(gui, gui.i18nFormat("button.cpm.config.dragButton", getDragBtn()), null);
-
-			buttonRMB.setAction(() -> {
-				int b = ce.getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2) - 1;
-				int d = ce.getSetInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1);
-				if(b < 0)b = 2;
-				if(b == d)ce.setInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1);
-				ce.setInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, b);
-				buttonRMB.setText(gui.i18nFormat("button.cpm.config.rotateButton", getRotateBtn()));
-				buttonDMB.setText(gui.i18nFormat("button.cpm.config.dragButton", getDragBtn()));
-			});
-			buttonRMB.setBounds(new Box(5, 0, 250, 20));
-			editor.addElement(buttonRMB);
-
-			buttonDMB.setAction(() -> {
-				int b = ce.getSetInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1) - 1;
-				int r = ce.getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2);
-				if(b < -1)b = 2;
-				if(b == r)b--;
-				ce.setInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, b);
-				buttonDMB.setText(gui.i18nFormat("button.cpm.config.dragButton", getDragBtn()));
-			});
-			buttonDMB.setBounds(new Box(5, 0, 250, 20));
-			editor.addElement(buttonDMB);
-
 			if(gui.getMaxScale() != -1) {
 				Button guiScale = new Button(gui, gui.i18nFormat("button.cpm.config.scale", getScale()), null);
 				guiScale.setAction(() -> {
@@ -157,6 +132,14 @@ public class SettingsPanel extends Panel {
 			buttonPosMode.setBounds(new Box(5, 0, 250, 20));
 			//editor.addElement(buttonPosMode);
 			updatePosModeBtn();
+
+			addAlphaSlider(editor, ConfigKeys.EDITOR_GIZMO_ALPHA, 255);
+			addAlphaSlider(editor, ConfigKeys.EDITOR_UV_AREA_ALPHA, 0xcc);
+			addAlphaSlider(editor, ConfigKeys.EDITOR_UV_AREA_ALL_ALPHA, 0x55);
+
+			makeCheckbox(editor, ConfigKeys.EDITOR_GIZMO_SCALE, true);
+			addScaleSlider(editor, ConfigKeys.EDITOR_GIZMO_SIZE, 1, 0.1f, 0.2f, 2);
+			addScaleSlider(editor, ConfigKeys.EDITOR_GIZMO_LENGTH, 1, 0.1f, 0.2f, 2);
 
 			MinecraftClientAccess.get().populatePlatformSettings("editor", editor);
 
@@ -212,6 +195,66 @@ public class SettingsPanel extends Panel {
 
 		String v = gui.i18nFormat("label.cpm.runtimeVersion", PlatformFeature.getVersion());
 		addElement(new Label(gui, v).setBounds(new Box(width - gui.textWidth(v) - 3, height - 11, 0, 0)));
+	}
+
+	private void addAlphaSlider(Panel panel, String key, int def) {
+		Panel p = new Panel(gui);
+		p.setBounds(new Box(0, 0, 320, 20));
+		panel.addElement(p);
+
+		Slider alphaSlider = new Slider(gui, formatAlphaSlider(key, def));
+		alphaSlider.setSteps(1 / 255f);
+		alphaSlider.setBounds(new Box(5, 0, 250, 20));
+		alphaSlider.setAction(() -> {
+			ce.setFloat(key, alphaSlider.getValue());
+			alphaSlider.setText(formatAlphaSlider(key, def));
+		});
+		alphaSlider.setValue(ce.getSetFloat(key, def / 255f));
+		alphaSlider.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.config." + key)));
+		p.addElement(alphaSlider);
+
+		Button btnR = new Button(gui, gui.i18nFormat("button.cpm.settings.reset"), () -> {
+			ce.setFloat(key, def / 255f);
+			alphaSlider.setValue(def / 255f);
+			alphaSlider.setText(formatAlphaSlider(key, def));
+		});
+		btnR.setBounds(new Box(260, 0, 60, 20));
+		p.addElement(btnR);
+	}
+
+	private void addScaleSlider(Panel panel, String key, float def, float div, float min, float max) {
+		Panel p = new Panel(gui);
+		p.setBounds(new Box(0, 0, 320, 20));
+		panel.addElement(p);
+
+		Slider scaleSlider = new Slider(gui, formatScaleSlider(key, def));
+		scaleSlider.setSteps(1 / ((max - min) / div));
+		scaleSlider.setBounds(new Box(5, 0, 250, 20));
+		scaleSlider.setAction(() -> {
+			ce.setFloat(key, scaleSlider.getValue() * (max - min) + min);
+			scaleSlider.setText(formatScaleSlider(key, def));
+		});
+		scaleSlider.setValue((ce.getSetFloat(key, def) - min) / (max - min));
+		scaleSlider.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.config." + key)));
+		p.addElement(scaleSlider);
+
+		Button btnR = new Button(gui, gui.i18nFormat("button.cpm.settings.reset"), () -> {
+			ce.setFloat(key, def);
+			scaleSlider.setValue((def - min) / (max - min));
+			scaleSlider.setText(formatScaleSlider(key, def));
+		});
+		btnR.setBounds(new Box(260, 0, 60, 20));
+		p.addElement(btnR);
+	}
+
+	private String formatAlphaSlider(String key, int def) {
+		float v = ce.getFloat(key, def / 255f);
+		return gui.i18nFormat("label.cpm.config." + key, (int) (v * 255));
+	}
+
+	private String formatScaleSlider(String key, float def) {
+		float v = ce.getFloat(key, def);
+		return gui.i18nFormat("label.cpm.config." + key, v);
 	}
 
 	private void makeCheckbox(Panel panel, String key, boolean def) {
@@ -296,16 +339,6 @@ public class SettingsPanel extends Panel {
 	private String getScale() {
 		int scale = ce.getInt(ConfigKeys.EDITOR_SCALE, -1);
 		return scale == -1 ? gui.i18nFormat("button.cpm.config.scale.vanilla") : scale == 0 ? gui.i18nFormat("button.cpm.config.scale.auto") : Integer.toString(scale);
-	}
-
-	private String getRotateBtn() {
-		return gui.i18nFormat("button.cpm.config.rotateButton." + ce.getInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2));
-	}
-
-	private String getDragBtn() {
-		int d = ce.getInt(ConfigKeys.EDITOR_DRAG_MOUSE_BUTTON, -1);
-		if(d == -1)return gui.i18nFormat("button.cpm.config.dragButton.shift", getRotateBtn());
-		else return gui.i18nFormat("button.cpm.config.rotateButton." + d);
 	}
 
 	private void updatePosModeBtn() {

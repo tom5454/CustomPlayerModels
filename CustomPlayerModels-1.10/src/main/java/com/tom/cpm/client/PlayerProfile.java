@@ -132,12 +132,12 @@ public class PlayerProfile extends Player<EntityPlayer> {
 
 	@Override
 	protected PlayerTextureLoader initTextures() {
-		return new PlayerTextureLoader() {
+		return new PlayerTextureLoader(Minecraft.getMinecraft().getSkinManager().skinCacheDir) {
 
 			@Override
 			protected CompletableFuture<Void> load0() {
 				Map<Type, MinecraftProfileTexture> map = Minecraft.getMinecraft().getSkinManager().loadSkinFromCache(profile);
-				defineAll(map, MinecraftProfileTexture::getUrl);
+				defineAll(map, MinecraftProfileTexture::getUrl, MinecraftProfileTexture::getHash);
 				if (map.containsKey(Type.SKIN)) {
 					MinecraftProfileTexture tex = map.get(Type.SKIN);
 					skinType = tex.getMetadata("model");
@@ -152,7 +152,7 @@ public class PlayerProfile extends Player<EntityPlayer> {
 
 					@Override
 					public void skinAvailable(Type typeIn, ResourceLocation location, MinecraftProfileTexture profileTexture) {
-						defineTexture(typeIn, profileTexture.getUrl());
+						defineTexture(typeIn, profileTexture.getUrl(), profileTexture.getHash());
 						switch (typeIn) {
 						case SKIN:
 							skinType = profileTexture.getMetadata("model");

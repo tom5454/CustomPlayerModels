@@ -8,6 +8,8 @@ import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.ElementType;
@@ -54,6 +56,10 @@ public class TextureDisplay extends GuiElement {
 		} else if(editor.selectedElement != null) {
 			editor.selectedElement.drawTexture(gui, x, y, xs, ys);
 		}
+	}
+
+	public static int getAlphaForBox(boolean selected) {
+		return (int) (ModConfig.getCommonConfig().getSetFloat(selected ? ConfigKeys.EDITOR_UV_AREA_ALPHA : ConfigKeys.EDITOR_UV_AREA_ALPHA, (selected ? 0xcc : 0x55) / 255f) * 0xff);
 	}
 
 	public static void drawBoxTextureOverlay(IGui gui, ModelElement element, int x, int y, float xs, float ys, int alpha) {

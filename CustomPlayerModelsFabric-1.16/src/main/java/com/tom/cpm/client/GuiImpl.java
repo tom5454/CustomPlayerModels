@@ -454,6 +454,16 @@ public class GuiImpl extends Screen implements IGui {
 		public void setCursorPos(int pos) {
 			field.setCursor(pos);
 		}
+
+		@Override
+		public void setSelectionPos(int pos) {
+			field.setSelectionEnd(pos);
+		}
+
+		@Override
+		public int getSelectionPos() {
+			return field.selectionEnd;
+		}
 	}
 
 	@Override

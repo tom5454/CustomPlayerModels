@@ -18,7 +18,7 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimatedTexture;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.gui.PosPanel.ModeDisplayType;
+import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.model.TextureSheetType;

@@ -70,7 +70,6 @@ public class CopyTransformEffect {
 	public Map<String, Object> toMap() {
 		Map<String, Object> r = new HashMap<>();
 		if(from != null) {
-			from.editor.storeIDgen.setID(from);
 			r.put("storeID", from.storeID);
 			r.put("px", copyPX);
 			r.put("py", copyPY);
