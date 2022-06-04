@@ -160,4 +160,5 @@ public abstract interface TreeElement {
 	public default void setValue(float value) {}
 	public default void setVecTemp(VecType type, Vec3f vec) {}
 	public default Vec3f getVec(VecType type) {return Vec3f.ZERO;}
+	public default boolean canEditVec(VecType type) {return false;}
 }

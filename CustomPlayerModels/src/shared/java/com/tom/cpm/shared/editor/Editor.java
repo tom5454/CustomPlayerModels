@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -164,7 +165,6 @@ public class Editor {
 	public boolean applyScaling;
 	public boolean drawBoundingBox;
 	public long playStartTime, gestureStartTime;
-	private StoreIDGen storeIDgen;
 	public AnimationEncodingData animEnc;
 
 	public Frame frame;
@@ -414,7 +414,6 @@ public class Editor {
 		scalingElem.reset();
 		removeArmorOffset = true;
 		hideHeadIfSkull = true;
-		storeIDgen = new StoreIDGen();
 		Player<?> profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.getTextures().load().thenRun(() -> {
 			if(!customSkinType)skinType = profile.getSkinType();
@@ -477,6 +476,7 @@ public class Editor {
 
 	private CompletableFuture<Void> save0(File file) {
 		try {
+			StoreIDGen storeIDgen = new StoreIDGen();
 			walkElements(elements, storeIDgen::setID);
 			ProjectIO.saveProject(this, project);
 		} catch (IOException e) {
@@ -617,15 +617,6 @@ public class Editor {
 
 	public void setAnimRot(Vec3f v) {
 		if(selectedAnim != null) {
-			if(v.x < 0 || v.x > 360 || v.y < 0 || v.y > 360 || v.z < 0 || v.z > 360) {
-				while(v.x < 0)  v.x += 360;
-				while(v.x > 360)v.x -= 360;
-				while(v.y < 0)  v.y += 360;
-				while(v.y > 360)v.y -= 360;
-				while(v.z < 0)  v.z += 360;
-				while(v.z > 360)v.z -= 360;
-				setAnimRot.accept(v);
-			}
 			selectedAnim.setRotation(v);
 		}
 	}
@@ -645,14 +636,15 @@ public class Editor {
 	public void addNewAnim(IPose pose, String displayName, boolean add, boolean loop, InterpolatorType it) {
 		String fname = null;
 		AnimationType type;
+		UUID newId = UUID.randomUUID();
 		if(pose instanceof VanillaPose) {
-			fname = "v_" + ((VanillaPose)pose).name().toLowerCase() + "_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+			fname = "v_" + ((VanillaPose)pose).name().toLowerCase() + "_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
 			type = AnimationType.POSE;
 		} else if(pose != null) {
-			fname = "c_" + ((CustomPose) pose).getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+			fname = "c_" + ((CustomPose) pose).getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
 			type = AnimationType.POSE;
 		} else {
-			fname = "g_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+			fname = "g_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
 			type = AnimationType.GESTURE;
 		}
 		EditorAnim anim = new EditorAnim(this, fname, type, true);
@@ -671,14 +663,15 @@ public class Editor {
 		if(selectedAnim != null) {
 			String fname = null;
 			AnimationType type;
+			UUID newId = UUID.randomUUID();
 			if(pose instanceof VanillaPose) {
-				fname = "v_" + ((VanillaPose)pose).name().toLowerCase() + "_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+				fname = "v_" + ((VanillaPose)pose).name().toLowerCase() + "_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
 				type = AnimationType.POSE;
 			} else if(pose != null) {
-				fname = "c_" + ((CustomPose) pose).getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+				fname = "c_" + ((CustomPose) pose).getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
 				type = AnimationType.POSE;
 			} else {
-				fname = "g_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + (storeIDgen.newId() % 10000) + ".json";
+				fname = "g_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
 				type = AnimationType.GESTURE;
 			}
 			action("edit", "action.cpm.anim").

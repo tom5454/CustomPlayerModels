@@ -248,7 +248,7 @@ public class EditorRenderer {
 		float vx = value.x / 16f;
 		float vy = value.y / 16f;
 		float vz = value.z / 16f;
-		float m = 1;
+		float m = 4;
 		float l = size / 16f;
 		float s = size / 16f * m;
 		float u = size * m;
@@ -332,7 +332,7 @@ public class EditorRenderer {
 		float vx = value.x / 16f;
 		float vy = value.y / 16f;
 		float vz = value.z / 16f;
-		float m = 1;
+		float m = 4;
 		float l = size / 16f;
 		float s = size / 16f * m;
 		float u = size * m;

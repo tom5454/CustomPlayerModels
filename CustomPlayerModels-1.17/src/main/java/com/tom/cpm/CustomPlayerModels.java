@@ -12,6 +12,7 @@ import net.minecraft.network.chat.KeybindComponent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -83,7 +84,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 			}
 		});
 		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
-		api.buildCommon().init();
+		api.buildCommon().player(Player.class).init();
 		proxy.apiInit();
 	}
 

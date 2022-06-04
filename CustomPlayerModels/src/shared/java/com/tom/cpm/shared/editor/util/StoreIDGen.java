@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.ModelElement;
 
 public class StoreIDGen {
@@ -11,15 +12,17 @@ public class StoreIDGen {
 	private Set<Long> genValues = new HashSet<>();
 
 	public void setID(ModelElement elem) {
-		if(elem.storeID != 0) {
-			if(genValues.contains(elem.storeID)) {
-				elem.storeID = 0;
-			} else {
-				genValues.add(elem.storeID);
+		if(elem.type != ElementType.ROOT_PART) {
+			if(elem.storeID != 0) {
+				if(genValues.contains(elem.storeID)) {
+					elem.storeID = 0;
+				} else {
+					genValues.add(elem.storeID);
+				}
 			}
-		}
-		if(elem.storeID == 0) {
-			elem.storeID = newId();
+			if(elem.storeID == 0) {
+				elem.storeID = newId();
+			}
 		}
 	}
 

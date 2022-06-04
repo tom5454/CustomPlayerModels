@@ -320,7 +320,7 @@ public class FileChooserPopup extends PopupPanel {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		if(event.matches(gui.getKeyCodes().KEY_ENTER)) {
+		if(event.matches(gui.getKeyCodes().KEY_ENTER) || event.matches(gui.getKeyCodes().KEY_KP_ENTER)) {
 			accept();
 			event.consume();
 		}

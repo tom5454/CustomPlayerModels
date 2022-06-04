@@ -219,6 +219,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		}
 	}
 
+	@Override
 	public Vec3f getVec(VecType v) {
 		switch (v) {
 		case OFFSET:
@@ -237,6 +238,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		}
 	}
 
+	@Override
 	public void setVecTemp(VecType vt, Vec3f v) {
 		switch (vt) {
 		case OFFSET:
@@ -557,5 +559,11 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		} else {
 			e.selectedElement = this;
 		}
+	}
+
+	@Override
+	public boolean canEditVec(VecType type) {
+		if(this.type == ElementType.ROOT_PART)return type == VecType.POSITION || type == VecType.ROTATION;
+		else return true;
 	}
 }

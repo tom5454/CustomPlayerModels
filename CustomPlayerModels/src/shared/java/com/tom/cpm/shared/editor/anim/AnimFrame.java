@@ -168,7 +168,7 @@ public class AnimFrame {
 			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
-		ab.updateValueOp(dt, dt.pos, v, (a, b) -> a.pos = b);
+		ab.updateValueOp(dt, dt.pos, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.pos = b, anim.editor.setAnimPos);
 		ab.execute();
 	}
 
@@ -179,7 +179,7 @@ public class AnimFrame {
 			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
-		ab.updateValueOp(dt, dt.rot, v, (a, b) -> a.rot = b);
+		ab.updateValueOp(dt, dt.rot, v, 0, 360, true, (a, b) -> a.rot = b, anim.editor.setAnimRot);
 		ab.execute();
 	}
 
@@ -190,7 +190,7 @@ public class AnimFrame {
 			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
-		ab.updateValueOp(dt, dt.scale, v, (a, b) -> a.scale = b);
+		ab.updateValueOp(dt, dt.scale, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.scale = b, anim.editor.setAnimScale);
 		ab.execute();
 	}
 

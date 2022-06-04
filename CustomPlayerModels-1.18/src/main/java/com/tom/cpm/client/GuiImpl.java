@@ -50,7 +50,6 @@ import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.gui.panel.Panel3d;
@@ -123,7 +122,7 @@ public class GuiImpl extends Screen implements IGui {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 800);
 			try {
-				Method m = ForgeIngameGui.class.getDeclaredMethod("renderChat", int.class, int.class, MatrixStack.class);
+				Method m = ForgeIngameGui.class.getDeclaredMethod("renderChat", int.class, int.class, PoseStack.class);
 				m.setAccessible(true);
 				m.invoke(minecraft.gui, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight(), matrixStack);
 			} catch (Throwable e) {
