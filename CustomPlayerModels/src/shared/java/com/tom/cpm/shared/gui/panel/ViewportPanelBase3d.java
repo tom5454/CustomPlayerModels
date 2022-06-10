@@ -66,6 +66,10 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 	protected static final ItemRenderTransform[] itemTransform = new ItemRenderTransform[] {
 			new ItemRenderTransform(new Vec3f(0, 3, 1), new Vec3f(0, 0, 0), new Vec3f(0.55F, 0.55F, 0.55F))
 	};
+	protected static final ItemRenderTransform[] goatHornTransform = new ItemRenderTransform[] {
+			new ItemRenderTransform(new Vec3f(-1, 2, 2), new Vec3f(0, -125, 0), new Vec3f(0.5F, 0.5F, 0.5F)),
+			new ItemRenderTransform(new Vec3f( 1, 2, 2), new Vec3f(0,  125, 0), new Vec3f(0.5F, 0.5F, 0.5F))
+	};
 	protected static final ItemModel sword = new ItemModel("sword", swordTransform);
 	protected static final ItemModel food = new ItemModel("food", itemTransform);
 	protected static final IItemModel[] bow = new IItemModel[] {
@@ -80,6 +84,7 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 			new ItemModel("crossbow_pulling_2", crossbowTransform)
 	};
 	protected static final SpyglassModel spyglass = new SpyglassModel();
+	protected static final ItemModel goatHorn = new ItemModel("goat_horn", goatHornTransform);
 	protected static final EnumMap<DisplayItem, IItemModel[]> itemModels = new EnumMap<>(DisplayItem.class);
 
 	static {
@@ -97,6 +102,7 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		itemModels.put(DisplayItem.BOW, bow);
 		itemModels.put(DisplayItem.CROSSBOW, crossbow);
 		itemModels.put(DisplayItem.SPYGLASS, new IItemModel[] {spyglass});
+		itemModels.put(DisplayItem.GOAT_HORN, new IItemModel[] {goatHorn});
 	}
 
 	protected int mx, my;

@@ -15,6 +15,7 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
@@ -49,6 +50,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public boolean hidden;
 	public boolean templateElement, generated;
 	public boolean duplicated;
+	public boolean disableVanillaAnim;
 	public PerFaceUV faceUV;
 	public ItemRenderer itemRenderer;
 	public Tooltip tooltip;
@@ -135,6 +137,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		if(hidden)name = editor.gui().i18nFormat("label.cpm.tree.hidden", name);
 		if(copyTransform != null)name = editor.gui().i18nFormat("label.cpm.copyTransformFlag", name);
 		if(duplicated)name = editor.gui().i18nFormat("label.cpm.tree.duplicated", name);
+		if(disableVanillaAnim)name = editor.gui().i18nFormat("label.cpm.tree.disableVanillaAnim", name);
 		return name;
 	}
 
@@ -359,6 +362,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setRot.accept(this.rotation);
 			editor.setHiddenEffect.accept(this.hidden);
 			editor.setDelEn.accept(this.duplicated || this.typeData instanceof RootModelType);
+			editor.setDisableVanillaEffect.accept(disableVanillaAnim);
 			break;
 
 		default:
@@ -379,11 +383,12 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public void delete() {
 		if(templateElement)return;
-		if(type == ElementType.NORMAL) {
-			editor.action("remove", "action.cpm.cube").removeFromList(parent.children, this).onRun(() -> editor.selectedElement = null).execute();
-			editor.updateGui();
-		} else if(duplicated || typeData instanceof RootModelType) {
-			editor.action("remove", "action.cpm.root").removeFromList(editor.elements, this).onRun(() -> editor.selectedElement = null).execute();
+		if(type == ElementType.NORMAL || duplicated || typeData instanceof RootModelType) {
+			ActionBuilder ab = editor.action("remove", "action.cpm.cube").removeFromList(parent.children, this).
+					onRun(() -> editor.selectedElement = null);
+			editor.animations.stream().flatMap(a -> a.getFrames().stream()).forEach(f -> f.clearSelectedData(ab, this));
+			ab.onRun(() -> editor.animations.forEach(EditorAnim::clearCache));
+			ab.execute();
 			editor.updateGui();
 		}
 	}
@@ -452,6 +457,14 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.updateGui();
 			if(copyTransform != null)
 				editor.frame.openPopup(new CopyTransformSettingsPopup(editor.frame, editor, copyTransform));
+			break;
+
+		case DISABLE_VANILLA_ANIM:
+			if(type == ElementType.ROOT_PART) {
+				editor.action("switch", "label.cpm.disableVanillaAnim").
+				updateValueOp(this, this.disableVanillaAnim, !this.disableVanillaAnim, (a, b) -> a.disableVanillaAnim = b).execute();
+				editor.updateGui();
+			}
 			break;
 
 		default:

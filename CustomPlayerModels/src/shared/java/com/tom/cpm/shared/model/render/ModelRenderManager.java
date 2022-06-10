@@ -265,6 +265,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				float rz = mngr.rz.apply(tp);
 				elems.setRootPosAndRot(px, py, pz, rx, ry, rz);
 			}
+			def.getAnimations().applyCopy();
 		}
 
 		protected RedirectRenderer<P> register(Field<P> f) {

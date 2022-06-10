@@ -193,4 +193,12 @@ public class RenderedCube implements IModelComponent {
 			if(z != 0)renderScale.z = z;
 		}
 	}
+
+	public Vec3f getTransformPosition() {
+		return getPosition();
+	}
+
+	public Vec3f getTransformRotation() {
+		return getRotation();
+	}
 }

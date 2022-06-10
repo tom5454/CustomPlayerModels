@@ -21,9 +21,11 @@ import com.tom.cpm.shared.paste.PastePopup;
 public class OverflowPopup extends PopupPanel {
 	private HorizontalLayout topPanel;
 	private TabbedPanelManager tabs;
+	private String reason;
 
-	public OverflowPopup(EditorGui frm, String text, Consumer<Link> ok) {
+	public OverflowPopup(EditorGui frm, String text, String reason, Consumer<Link> ok) {
 		super(frm.getGui());
+		this.reason = reason;
 
 		setBounds(new Box(0, 0, 260, 140));
 
@@ -41,7 +43,7 @@ public class OverflowPopup extends PopupPanel {
 			Panel paste = new Panel(gui);
 			addTab("paste", paste, 5);
 
-			Label lbl1 = new Label(gui, gui.i18nFormat("label.cpm.skinOverflow"));
+			Label lbl1 = new Label(gui, gui.i18nFormat("label.cpm." + reason + "Overflow"));
 			lbl1.setBounds(new Box(5, 0, 0, 0));
 			paste.addElement(lbl1);
 
@@ -70,7 +72,7 @@ public class OverflowPopup extends PopupPanel {
 			Panel gist = new Panel(gui);
 			addTab("gist", gist, 5);
 
-			Label lbl1 = new Label(gui, gui.i18nFormat("label.cpm.skinOverflow"));
+			Label lbl1 = new Label(gui, gui.i18nFormat("label.cpm." + reason + "Overflow"));
 			lbl1.setBounds(new Box(5, 0, 0, 0));
 			gist.addElement(lbl1);
 
@@ -145,7 +147,7 @@ public class OverflowPopup extends PopupPanel {
 
 	@Override
 	public String getTitle() {
-		return gui.i18nFormat("label.cpm.exportSkin");
+		return gui.i18nFormat("label.cpm.export" + Character.toUpperCase(reason.charAt(0)) + reason.substring(1));
 	}
 
 	public void addTab(String name, Panel panel, int topPadding) {

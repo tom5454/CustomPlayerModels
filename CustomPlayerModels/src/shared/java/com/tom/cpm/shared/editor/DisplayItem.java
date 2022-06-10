@@ -13,7 +13,7 @@ public enum DisplayItem {
 	SHIELD(ArmPose.BLOCK, false),
 	FOOD(ArmPose.ITEM, false),
 	SPYGLASS(ArmPose.SPYGLASS, false),
-
+	GOAT_HORN(ArmPose.TOOT_HORN, false),
 	;
 	public static final DisplayItem[] VALUES = values();
 

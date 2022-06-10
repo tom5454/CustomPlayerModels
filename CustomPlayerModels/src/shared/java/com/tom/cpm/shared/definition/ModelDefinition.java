@@ -12,6 +12,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.google.common.util.concurrent.UncheckedExecutionException;
+
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
@@ -99,8 +101,6 @@ public class ModelDefinition {
 		ModelDefinitionLoader.THREAD_POOL.execute(() -> {
 			try {
 				resolveAll();
-			} catch (SafetyException e) {
-				setModelBlocked(e);
 			} catch (Throwable e) {
 				setError(e);
 			}
@@ -416,13 +416,6 @@ public class ModelDefinition {
 		key.checkFor(playerObj, check, err);
 	}
 
-	public void setModelBlocked(SafetyException ex) {
-		cleanup();
-		resolveState = ModelLoadingState.SAFETY_BLOCKED;
-		error = ex;
-		clear();
-	}
-
 	public ItemTransform getTransform(ItemSlot slot) {
 		return itemTransforms.keySet().stream().filter(s -> s.slot == slot).findFirst().map(this::getTransform).orElse(null);
 	}
@@ -457,9 +450,9 @@ public class ModelDefinition {
 		CLEANED_UP
 	}
 
-	public SafetyException getSafetyEx() {
+	public BlockReason getBlockReason() {
 		if(error instanceof SafetyException)
-			return (SafetyException) error;
+			return ((SafetyException) error).getBlockReason();
 		return null;
 	}
 
@@ -469,7 +462,12 @@ public class ModelDefinition {
 
 	public void setError(Throwable ex) {
 		cleanup();
-		resolveState = ModelLoadingState.ERRORRED;
+		if(ex instanceof ExecutionException || ex instanceof UncheckedExecutionException)
+			ex = ex.getCause();
+		if(ex instanceof SafetyException)
+			resolveState = ModelLoadingState.SAFETY_BLOCKED;
+		else
+			resolveState = ModelLoadingState.ERRORRED;
 		error = ex;
 		if(!(ex instanceof IOException))
 			Log.error("Failed to load model", ex);
@@ -492,6 +490,7 @@ public class ModelDefinition {
 		case RESOLVING:
 			return new FormatText("label.cpm.loading");
 		case SAFETY_BLOCKED:
+			if(getBlockReason() == BlockReason.BLOCK_LIST)return null;
 			return new FormatText("label.cpm.safetyBlocked");
 		case LOADED:
 		case CLEANED_UP:

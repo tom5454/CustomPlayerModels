@@ -10,6 +10,7 @@ public class RootModelElement extends RenderedCube {
 	public Vec3f posN, rotN, defPos, defRot;
 	private ModelDefinition def;
 	private boolean rotAdd, posAdd;
+	public boolean disableVanilla;
 
 	public RootModelElement(VanillaModelPart part, ModelDefinition def) {
 		this.part = part;
@@ -60,22 +61,44 @@ public class RootModelElement extends RenderedCube {
 	}
 
 	public void setPosAndRot(float px, float py, float pz, float rx, float ry, float rz) {
-		defPos.x = px + posN.x;
-		defPos.y = py + posN.y;
-		defPos.z = pz + posN.z;
-		defRot.x = rx + rotN.x;
-		defRot.y = ry + rotN.y;
-		defRot.z = rz + rotN.z;
+		if(!disableVanilla) {
+			defPos.x = px + posN.x;
+			defPos.y = py + posN.y;
+			defPos.z = pz + posN.z;
+			defRot.x = rx + rotN.x;
+			defRot.y = ry + rotN.y;
+			defRot.z = rz + rotN.z;
+		} else {
+			PartValues v = part.getDefaultSize(def.getSkinType());
+			Vec3f p = v.getPos();
+			defPos.x = p.x + posN.x;
+			defPos.y = p.y + posN.y;
+			defPos.z = p.z + posN.z;
+			defRot.x = rotN.x;
+			defRot.y = rotN.y;
+			defRot.z = rotN.z;
+		}
 	}
 
 	public void setPosAndRot(PartRoot cpy) {
-		RootModelElement e = cpy.getMainRoot();
-		defPos.x = e.defPos.x - e.posN.x + posN.x;
-		defPos.y = e.defPos.y - e.posN.y + posN.y;
-		defPos.z = e.defPos.z - e.posN.z + posN.z;
-		defRot.x = e.defRot.x - e.rotN.x + rotN.x;
-		defRot.y = e.defRot.y - e.rotN.y + rotN.y;
-		defRot.z = e.defRot.z - e.rotN.z + rotN.z;
+		if(!disableVanilla) {
+			RootModelElement e = cpy.getMainRoot();
+			defPos.x = e.defPos.x - e.posN.x + posN.x;
+			defPos.y = e.defPos.y - e.posN.y + posN.y;
+			defPos.z = e.defPos.z - e.posN.z + posN.z;
+			defRot.x = e.defRot.x - e.rotN.x + rotN.x;
+			defRot.y = e.defRot.y - e.rotN.y + rotN.y;
+			defRot.z = e.defRot.z - e.rotN.z + rotN.z;
+		} else {
+			PartValues v = part.getDefaultSize(def.getSkinType());
+			Vec3f p = v.getPos();
+			defPos.x = p.x + posN.x;
+			defPos.y = p.y + posN.y;
+			defPos.z = p.z + posN.z;
+			defRot.x = rotN.x;
+			defRot.y = rotN.y;
+			defRot.z = rotN.z;
+		}
 	}
 
 	@Override
@@ -113,5 +136,15 @@ public class RootModelElement extends RenderedCube {
 	@Override
 	public Vec3f getRenderScale() {
 		return new Vec3f(1, 1, 1);
+	}
+
+	@Override
+	public Vec3f getTransformPosition() {
+		return getPos();
+	}
+
+	@Override
+	public Vec3f getTransformRotation() {
+		return getRot();
 	}
 }

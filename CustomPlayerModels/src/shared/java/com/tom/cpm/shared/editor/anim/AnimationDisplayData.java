@@ -55,6 +55,8 @@ public enum AnimationDisplayData {
 	ON_LADDER(VanillaPose.ON_LADDER, null, null, Type.POSE),
 	CLIMBING_ON_LADDER(VanillaPose.CLIMBING_ON_LADDER, null, null, Type.POSE),
 	SPEAKING(VanillaPose.SPEAKING, null, null, Type.LAYERS),
+	TOOT_HORN_LEFT(VanillaPose.TOOT_HORN_LEFT, ItemSlot.LEFT_HAND, DisplayItem.GOAT_HORN, Type.HAND),
+	TOOT_HORN_RIGHT(VanillaPose.TOOT_HORN_RIGHT, ItemSlot.RIGHT_HAND, DisplayItem.GOAT_HORN, Type.HAND),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;

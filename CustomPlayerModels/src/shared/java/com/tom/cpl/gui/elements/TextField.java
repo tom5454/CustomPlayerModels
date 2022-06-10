@@ -26,7 +26,7 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 	}
 	@Override
 	public void keyPressed(KeyboardEvent evt) {
-		if(field.isFocused() && (evt.matches(gui.getKeyCodes().KEY_ENTER) || evt.matches(gui.getKeyCodes().KEY_KP_ENTER))) {
+		if(field.isFocused() && (evt.matches(gui.getKeyCodes().KEY_ENTER) || evt.matches(gui.getKeyCodes().KEY_KP_ENTER) || evt.matches(gui.getKeyCodes().KEY_ESCAPE))) {
 			setFocused(false);
 			evt.consume();
 		}

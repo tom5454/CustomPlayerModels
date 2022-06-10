@@ -275,8 +275,8 @@ public class AnimFrame {
 		from.components.forEach((e, dt) -> components.put(e, new FrameData(dt)));
 	}
 
-	public void clearSelectedData(ModelElement me) {
-		components.remove(me);
+	public void clearSelectedData(ActionBuilder ab, ModelElement me) {
+		ab.removeFromMap(components, me);
 	}
 
 	public static float[] toArray(EditorAnim anim, ModelElement elem, InterpolatorChannel channel) {

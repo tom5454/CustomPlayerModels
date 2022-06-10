@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.tom.cpm.shared.model.CopyTransform;
+
 public class AnimationRegistry {
 	private List<AnimatedTexture> animatedTextures = new ArrayList<>();
 	private Map<IPose, List<IAnimation>> animations = new HashMap<>();
@@ -15,6 +17,7 @@ public class AnimationRegistry {
 	private Map<Gesture, Integer> gestureToEncoded = new HashMap<>();
 	private Map<String, Gesture> gestures = new HashMap<>();
 	private Map<String, CustomPose> customPoses = new HashMap<>();
+	private List<CopyTransform> copyTransforms = new ArrayList<>();
 	private int blankGesture;
 	private int poseResetId;
 
@@ -112,5 +115,13 @@ public class AnimationRegistry {
 
 	public boolean hasPoseAnimations(VanillaPose pose) {
 		return !getPoseAnimations(pose).isEmpty();
+	}
+
+	public void addCopy(CopyTransform ct) {
+		copyTransforms.add(ct);
+	}
+
+	public void applyCopy() {
+		copyTransforms.forEach(CopyTransform::apply);
 	}
 }

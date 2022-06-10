@@ -7,7 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
@@ -51,7 +51,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 			MinecraftObjectHolder.setServerObject(null);
 		});
 		ServerTickEvents.END_SERVER_TICK.register(s -> ServerHandler.netHandler.tick());
-		CommandRegistrationCallback.EVENT.register((d, isD) -> {
+		CommandRegistrationCallback.EVENT.register((d, a, e) -> {
 			new Command(d);
 		});
 		EntityTrackingEvents.START_TRACKING.register(ServerHandler::onTrackingStart);

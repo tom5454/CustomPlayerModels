@@ -115,6 +115,7 @@ public class Editor {
 	public Updater<Boolean> displayViewport = updaterReg.create(true);
 	public Updater<Boolean> setEnAddAnimTex = updaterReg.create(false);
 	public Updater<Boolean> setCopyTransformEffect = updaterReg.create(null);
+	public Updater<Boolean> setDisableVanillaEffect = updaterReg.create(null);
 
 	public Updater<Integer> setPenColor = updaterReg.create();
 	public Updater<String> setNameDisplay = updaterReg.create();

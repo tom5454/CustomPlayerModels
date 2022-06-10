@@ -103,6 +103,7 @@ public enum ElementType {
 			e.posN = new Vec3f(elem.pos);
 			e.rotN = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
 			e.reset();
+			e.disableVanilla = elem.disableVanillaAnim;
 		}
 	}),
 	;

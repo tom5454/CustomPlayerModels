@@ -218,7 +218,7 @@ public class EditorRenderer {
 		{
 			MatrixStack f = matrixStackIn.fork();
 			f.pop();
-			return drawDragPane(f, bufferIn, type, Vec3f.ZERO, rc.pos, size, true);
+			return drawDragPane(f, bufferIn, type, Vec3f.ZERO, rc.getTransformPosition(), size, true);
 		}
 
 		case ROTATION:
@@ -226,7 +226,8 @@ public class EditorRenderer {
 			MatrixStack f = matrixStackIn.fork();
 			f.pop();
 			f.push();
-			ModelRenderManager.RedirectRenderer.translateRotate(rc.pos.x, rc.pos.y, rc.pos.z, (float) Math.toRadians(old.x), (float) Math.toRadians(old.y), (float) Math.toRadians(old.z), f);
+			Vec3f pos = rc.getTransformPosition();
+			ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, (float) Math.toRadians(old.x), (float) Math.toRadians(old.y), (float) Math.toRadians(old.z), f);
 			return drawRotationDragPane(f, bufferIn, type, Vec3f.ZERO, new Vec3f(), size, true);
 		}
 
@@ -406,7 +407,8 @@ public class EditorRenderer {
 		{
 			MatrixStack f = matrixStackIn.fork();
 			f.pop();
-			drawDragArrows(f, buffer, boxConsumer, rc.pos.x, rc.pos.y, rc.pos.z, sizeL, sizeW, alpha);
+			Vec3f pos = rc.getTransformPosition();
+			drawDragArrows(f, buffer, boxConsumer, pos.x, pos.y, pos.z, sizeL, sizeW, alpha);
 		}
 		break;
 
@@ -415,8 +417,10 @@ public class EditorRenderer {
 			MatrixStack f = matrixStackIn.fork();
 			f.pop();
 			f.push();
-			if(old == null)ModelRenderManager.RedirectRenderer.translateRotate(rc, f);
-			else ModelRenderManager.RedirectRenderer.translateRotate(rc.pos.x, rc.pos.y, rc.pos.z, (float) Math.toRadians(old.x), (float) Math.toRadians(old.y), (float) Math.toRadians(old.z), f);
+			Vec3f pos = rc.getTransformPosition();
+			Vec3f rot = rc.getCube().rotation;
+			if(old == null)ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, (float) Math.toRadians(rot.x), (float) Math.toRadians(rot.y), (float) Math.toRadians(rot.z), f);
+			else ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, (float) Math.toRadians(old.x), (float) Math.toRadians(old.y), (float) Math.toRadians(old.z), f);
 			drawRotation(f, buffer, boxConsumer, rc, Vec3f.POSITIVE_X, EditorRenderer.BoundType.DRAG_X, sizeW, alpha);
 			f.push();
 			f.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90));

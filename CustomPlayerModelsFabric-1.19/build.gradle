@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.11-SNAPSHOT'
+	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -26,11 +26,13 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	modImplementation("com.terraformersmc:modmenu:4.0.0-beta.2") {
+	modImplementation("com.terraformersmc:modmenu:4.0.0") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.3.0')
+	modImplementation ('com.github.Virtuoel:Pehkui:3.3.2') {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
 	
 	compileOnly files("of.jar")
 }

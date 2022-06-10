@@ -173,6 +173,10 @@ public class PlayerModelSetup {
 			player.leftArm.xRot = MathHelper.clamp(player.head.xRot - 1.9198622F - (player.crouching ? 0.2617994F : 0.0F), -2.4F, 3.3F);
 			player.leftArm.yRot = player.head.yRot + 0.2617994F;
 			break;
+		case TOOT_HORN:
+			player.leftArm.xRot = MathHelper.clamp(player.head.xRot, -1.2F, 1.2F) - 1.4835298F;
+			player.leftArm.yRot = player.head.yRot + ((float)Math.PI / 6F);
+			break;
 		}
 
 	}
@@ -209,6 +213,10 @@ public class PlayerModelSetup {
 		case SPYGLASS:
 			player.rightArm.xRot = MathHelper.clamp(player.head.xRot - 1.9198622F - (player.crouching ? 0.2617994F : 0.0F), -2.4F, 3.3F);
 			player.rightArm.yRot = player.head.yRot - 0.2617994F;
+			break;
+		case TOOT_HORN:
+			player.rightArm.xRot = MathHelper.clamp(player.head.xRot, -1.2F, 1.2F) - 1.4835298F;
+			player.rightArm.yRot = player.head.yRot - ((float)Math.PI / 6F);
 			break;
 		}
 
@@ -277,7 +285,8 @@ public class PlayerModelSetup {
 		THROW_SPEAR(false),
 		CROSSBOW_CHARGE(true),
 		CROSSBOW_HOLD(true),
-		SPYGLASS(false)
+		SPYGLASS(false),
+		TOOT_HORN(false),
 		;
 
 		public static final ArmPose[] VALUES = values();

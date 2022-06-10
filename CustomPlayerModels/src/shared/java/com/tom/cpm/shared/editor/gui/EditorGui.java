@@ -514,6 +514,10 @@ public class EditorGui extends Frame {
 		editor.setCopyTransformEffect.add(boxCopyTransform::updateState);
 		boxCopyTransform.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.copyTransform")));
 
+		Checkbox boxDisableVanilla = pp.addCheckbox(gui.i18nFormat("label.cpm.disableVanillaAnim"), () -> editor.switchEffect(Effect.DISABLE_VANILLA_ANIM));
+		editor.setDisableVanillaEffect.add(boxDisableVanilla::updateState);
+		boxDisableVanilla.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.disableVanillaAnim")));
+
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.modelEffects")).setBounds(new Box(5, 5, 0, 0)));
 
 		Checkbox chxbxScale = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.scaling"), () -> {

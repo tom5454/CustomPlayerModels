@@ -53,13 +53,13 @@ public class CopyTransformEffect {
 	public void apply() {
 		if(from != null) {
 			to.rc.setPosition(false,
-					copyPX ? from.rc.getPosition().x : to.rc.getPosition().x,
-							copyPY ? from.rc.getPosition().y : to.rc.getPosition().y,
-									copyPZ ? from.rc.getPosition().z : to.rc.getPosition().z);
+					copyPX ? from.rc.getTransformPosition().x : to.rc.getTransformPosition().x,
+							copyPY ? from.rc.getTransformPosition().y : to.rc.getTransformPosition().y,
+									copyPZ ? from.rc.getTransformPosition().z : to.rc.getTransformPosition().z);
 			to.rc.setRotation(false,
-					copyRX ? from.rc.getRotation().x : to.rc.getRotation().x,
-							copyRY ? from.rc.getRotation().y : to.rc.getRotation().y,
-									copyRZ ? from.rc.getRotation().z : to.rc.getRotation().z);
+					copyRX ? from.rc.getTransformRotation().x : to.rc.getTransformRotation().x,
+							copyRY ? from.rc.getTransformRotation().y : to.rc.getTransformRotation().y,
+									copyRZ ? from.rc.getTransformRotation().z : to.rc.getTransformRotation().z);
 			to.rc.setRenderScale(false,
 					copySX ? from.rc.getRenderScale().x : to.rc.getRenderScale().x,
 							copySY ? from.rc.getRenderScale().y : to.rc.getRenderScale().y,

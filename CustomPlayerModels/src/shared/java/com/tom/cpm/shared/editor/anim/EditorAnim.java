@@ -135,7 +135,9 @@ public class EditorAnim implements IAnim {
 
 	public void clearSelectedData() {
 		if(currentFrame != null && editor.getSelectedElement() != null) {
-			currentFrame.clearSelectedData(editor.getSelectedElement());
+			ActionBuilder ab = editor.action("clearAnim");
+			currentFrame.clearSelectedData(ab, editor.getSelectedElement());
+			ab.execute();
 		}
 		components = null;
 		psfs = null;

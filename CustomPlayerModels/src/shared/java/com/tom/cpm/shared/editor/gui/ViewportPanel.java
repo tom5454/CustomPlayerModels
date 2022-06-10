@@ -150,7 +150,6 @@ public class ViewportPanel extends ViewportPanelBase3d {
 	@Override
 	public void preRender(MatrixStack stack, VBuffers buf) {
 		editor.preRender();
-		modelView = new Mat4f(stack.getLast().getMatrix());
 	}
 
 	@Override
@@ -276,6 +275,8 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				break;
 			}
 		});
+
+		modelView = new Mat4f(matrixstack.getLast().getMatrix());
 	}
 
 	protected Hand poseModel0(VanillaPlayerModel p, MatrixStack matrixstack, float partialTicks) {
@@ -391,12 +392,17 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			if(draggingElement != null && draggingVec != null) {
 				if(hovered != null) {
 					Vec3f[] n = makeDragVec(hovered);
+					setVec(draggingVec, oldValue[0], true);
 					setVec(draggingVec, n[0], false);
-					if(n.length > 1)setVec(VecType.OFFSET, n[1], false);
+					if(n.length > 1) {
+						setVec(VecType.OFFSET, oldValue[1], true);
+						setVec(VecType.OFFSET, n[1], false);
+					}
 				} else {
 					setVec(draggingVec, oldValue[0], true);
 					if(oldValue.length > 1)setVec(VecType.OFFSET, oldValue[1], true);
 				}
+				editor.updateGui();
 			}
 			draggingElement = null;
 			draggingType = null;

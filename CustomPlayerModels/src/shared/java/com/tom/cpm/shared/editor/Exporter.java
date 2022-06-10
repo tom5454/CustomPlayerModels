@@ -24,6 +24,7 @@ import com.google.gson.GsonBuilder;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.Link;
@@ -38,6 +39,7 @@ import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.effects.EffectColor;
 import com.tom.cpm.shared.effects.EffectCopyTransform;
+import com.tom.cpm.shared.effects.EffectDisableVanilla;
 import com.tom.cpm.shared.effects.EffectExtrude;
 import com.tom.cpm.shared.effects.EffectFirstPersonHandPos;
 import com.tom.cpm.shared.effects.EffectGlow;
@@ -86,22 +88,13 @@ public class Exporter {
 	public static final Gson sgson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
 	public static void exportSkin(Editor e, EditorGui gui, File f, boolean forceOut) {
-		if(e.vanillaSkin == null) {
-			gui.openPopup(new MessagePopup(gui, "Unknown Error", "Couldn't load vanilla skin"));
-			return;
-		}
-		if(e.vanillaSkin.getWidth() != 64 || e.vanillaSkin.getHeight() != 64) {
-			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.vanillaSkinSize")));
-			return;
-		}
-		Image img = new Image(e.vanillaSkin);
-		exportSkin0(e, gui, new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getDefinitionLoader().getTemplate(), e.skinType.getChannel()), () -> {
+		exportSkin(e, gui, img -> {
 			img.storeTo(f);
 			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
-		}, (d, c) -> handleOverflow(d, c, gui)), forceOut);
+		}, forceOut);
 	}
 
-	public static void exportSkin(Editor e, EditorGui gui, Consumer<Image> out, boolean forceOut) {
+	public static void exportSkin(Editor e, EditorGui gui, ThrowingConsumer<Image, IOException> out, boolean forceOut) {
 		if(e.vanillaSkin == null) {
 			gui.openPopup(new MessagePopup(gui, "Unknown Error", "Couldn't load vanilla skin"));
 			return;
@@ -113,7 +106,7 @@ public class Exporter {
 		Image img = new Image(e.vanillaSkin);
 		exportSkin0(e, gui,
 				new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getDefinitionLoader().getTemplate(), e.skinType.getChannel()),
-						() -> out.accept(img), (d, c) -> handleOverflow(d, c, gui)), forceOut);
+						() -> out.accept(img), (d, c) -> handleOverflow(d, c, "skin", gui)), forceOut);
 	}
 
 	public static void exportB64(Editor e, EditorGui gui, Consumer<String> b64Out, boolean forceOut) {
@@ -123,7 +116,7 @@ public class Exporter {
 			size[0] = 0;
 			return new BAOS(buffer, size);
 		}, () -> b64Out.accept(Base64.getEncoder().encodeToString(Arrays.copyOf(buffer, size[0]))),
-				(d, c) -> handleOverflow(d, c, gui)), forceOut);
+				(d, c) -> handleOverflow(d, c, "b64", gui)), forceOut);
 	}
 
 	public static void exportUpdate(Editor e, EditorGui gui, Link linkToUpdate) {
@@ -164,7 +157,7 @@ public class Exporter {
 		}, (d, c) -> handleOverflow(d, l -> {
 			wr.setOverflow(d, l);
 			c.accept(l);
-		}, gui)), false);
+		}, "model", gui)), false);
 	}
 
 	public static boolean exportTempModel(Editor e, EditorGui gui) {
@@ -238,6 +231,9 @@ public class Exporter {
 				} else if(el.typeData instanceof RootModelType){
 					if(el.hidden)otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));
 					otherParts.add(new ModelPartRoot(el.id, (RootModelType) el.typeData));
+				}
+				if(el.disableVanillaAnim) {
+					otherParts.add(new ModelPartRenderEffect(new EffectDisableVanilla(el.id)));
 				}
 			}
 		}
@@ -450,10 +446,10 @@ public class Exporter {
 		return true;
 	}
 
-	private static void handleOverflow(byte[] data, Consumer<Link> linkC, EditorGui gui) {
+	private static void handleOverflow(byte[] data, Consumer<Link> linkC, String reason, EditorGui gui) {
 		String b64 = Base64.getEncoder().encodeToString(data);
 		Log.info(b64);
-		gui.openPopup(new OverflowPopup(gui, b64, linkC));
+		gui.openPopup(new OverflowPopup(gui, b64, reason, linkC));
 	}
 
 	public static class ExportException extends RuntimeException {

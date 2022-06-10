@@ -54,6 +54,8 @@ public enum VanillaPose implements IPose {
 	ON_LADDER,
 	CLIMBING_ON_LADDER,
 	SPEAKING(s -> s.speakLevel),
+	TOOT_HORN_LEFT,
+	TOOT_HORN_RIGHT,
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;

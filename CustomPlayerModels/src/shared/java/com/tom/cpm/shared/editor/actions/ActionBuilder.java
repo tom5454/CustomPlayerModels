@@ -116,6 +116,13 @@ public class ActionBuilder extends Action {
 		return this;
 	}
 
+	public <K, V> ActionBuilder removeFromMap(Map<K, V> map, K key) {
+		V value = map.get(key);
+		if(value != null)
+			actions.add(MapAction.remove(map, key, value));
+		return this;
+	}
+
 	public <T> ActionBuilder update(Consumer<T> updater, T value) {
 		actions.add(new RunnableAction(() -> updater.accept(value), null));
 		return this;

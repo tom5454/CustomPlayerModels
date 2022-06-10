@@ -119,6 +119,8 @@ public class AnimationState {
 			return left ? VanillaPose.SPYGLASS_LEFT : VanillaPose.SPYGLASS_RIGHT;
 		case THROW_SPEAR:
 			return left ? VanillaPose.TRIDENT_LEFT : VanillaPose.TRIDENT_RIGHT;
+		case TOOT_HORN:
+			return left ? VanillaPose.TOOT_HORN_LEFT : VanillaPose.TOOT_HORN_RIGHT;
 		default:
 			break;
 		}

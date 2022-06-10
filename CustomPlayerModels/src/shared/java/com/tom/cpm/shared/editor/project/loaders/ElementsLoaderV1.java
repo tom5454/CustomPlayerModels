@@ -72,6 +72,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 				}
 				elem.pos = new Vec3f(map.getMap("pos"), new Vec3f(0, 0, 0));
 				elem.rotation = new Vec3f(map.getMap("rotation"), new Vec3f(0, 0, 0));
+				elem.disableVanillaAnim = map.getBoolean("disableVanillaAnim", false);
 			}
 		});
 		Editor.walkElements(editor.elements, e -> {
@@ -95,6 +96,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 			map.put("pos", elem.pos.toMap());
 			map.put("rotation", elem.rotation.toMap());
 			map.put("dup", elem.duplicated);
+			map.put("disableVanillaAnim", elem.disableVanillaAnim);
 			if(elem.duplicated || elem.typeData instanceof RootModelType) {
 				map.put("storeID", elem.storeID);
 			}

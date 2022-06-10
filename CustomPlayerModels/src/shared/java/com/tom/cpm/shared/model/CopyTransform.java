@@ -1,9 +1,8 @@
 package com.tom.cpm.shared.model;
 
-import com.tom.cpm.shared.animation.IAnimation;
-import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpl.math.Vec3f;
 
-public class CopyTransform implements IAnimation {
+public class CopyTransform {
 	private final RenderedCube from;
 	private final RenderedCube to;
 	private final boolean copyPX;
@@ -30,29 +29,15 @@ public class CopyTransform implements IAnimation {
 		copySZ = (copy & (1 << 8)) != 0;
 	}
 
-	@Override
-	public int getDuration() {
-		return 1;
-	}
-
-	@Override
-	public int getPriority() {
-		return 100;
-	}
-
-	@Override
-	public void animate(long millis, ModelDefinition def) {
-		to.setPosition(false,
-				copyPX ? from.getPosition().x : to.getPosition().x,
-						copyPY ? from.getPosition().y : to.getPosition().y,
-								copyPZ ? from.getPosition().z : to.getPosition().z);
-		to.setRotation(false,
-				copyRX ? from.getRotation().x : to.getRotation().x,
-						copyRY ? from.getRotation().y : to.getRotation().y,
-								copyRZ ? from.getRotation().z : to.getRotation().z);
-		to.setRenderScale(false,
-				copySX ? from.getRenderScale().x : to.getRenderScale().x,
-						copySY ? from.getRenderScale().y : to.getRenderScale().y,
-								copySZ ? from.getRenderScale().z : to.getRenderScale().z);
+	public void apply() {
+		Vec3f pf = from.getTransformPosition();
+		Vec3f pt = to.getTransformPosition();
+		Vec3f rf = from.getTransformRotation();
+		Vec3f rt = to.getTransformRotation();
+		Vec3f sf = from.getRenderScale();
+		Vec3f st = to.getRenderScale();
+		to.setPosition(false, copyPX ? pf.x : pt.x, copyPY ? pf.y : pt.y, copyPZ ? pf.z : pt.z);
+		to.setRotation(false, copyRX ? rf.x : rt.x, copyRY ? rf.y : rt.y, copyRZ ? rf.z : rt.z);
+		to.setRenderScale(false, copySX ? sf.x : st.x, copySY ? sf.y : st.y, copySZ ? sf.z : st.z);
 	}
 }

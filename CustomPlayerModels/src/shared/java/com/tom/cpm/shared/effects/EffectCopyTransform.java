@@ -2,7 +2,6 @@ package com.tom.cpm.shared.effects;
 
 import java.io.IOException;
 
-import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.CopyTransform;
@@ -40,8 +39,7 @@ public class EffectCopyTransform implements IRenderEffect {
 		RenderedCube from = def.getElementById(this.from);
 		RenderedCube to = def.getElementById(this.to);
 		if(from != null && to != null) {
-			CopyTransform ct = new CopyTransform(from, to, copy);
-			def.getAnimations().register(VanillaPose.GLOBAL, ct);
+			def.getAnimations().addCopy(new CopyTransform(from, to, copy));
 		}
 	}
 

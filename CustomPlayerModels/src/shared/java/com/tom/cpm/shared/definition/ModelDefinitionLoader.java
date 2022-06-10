@@ -184,8 +184,6 @@ public class ModelDefinitionLoader<GP> {
 			def.setParts(parts);
 			def.validate();
 			Log.debug(def);
-		} catch (SafetyException e) {
-			def.setModelBlocked(e);
 		} catch (Throwable e) {
 			def.setError(e);
 		}

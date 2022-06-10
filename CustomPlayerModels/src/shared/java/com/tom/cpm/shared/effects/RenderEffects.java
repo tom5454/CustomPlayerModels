@@ -19,6 +19,7 @@ public enum RenderEffects {
 	SCALING(EffectScaling::new),
 	COPY_TRANSFORM(EffectCopyTransform::new),
 	FIRST_PERSON_HAND(EffectFirstPersonHandPos::new),
+	DISABLE_VANILLA(EffectDisableVanilla::new),
 	;
 	public static final RenderEffects[] VALUES = values();
 	private Supplier<IRenderEffect> factory;
