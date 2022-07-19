@@ -8,10 +8,12 @@ import org.apache.logging.log4j.Logger;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentKeybind;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
+import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
@@ -26,6 +28,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.text.TextRemapper;
+import com.tom.cpl.text.TextStyle;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
@@ -35,9 +38,11 @@ import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
+import com.tom.cpm.shared.util.IVersionCheck;
+import com.tom.cpm.shared.util.VersionCheck;
 
 @Mod(modid = CustomPlayerModels.ID, acceptableRemoteVersions = "*",
-updateJSON = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json",
+updateJSON = MinecraftObjectHolder.VERSION_CHECK_URL,
 guiFactory = "com.tom.cpm.Config")
 public class CustomPlayerModels implements MinecraftCommonAccess {
 	public static final String ID = "customplayermodels";
@@ -112,17 +117,42 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	}
 
 	@Override
-	public String getPlatformVersionString() {
-		return "Minecraft 1.12.2 (" + FMLCommonHandler.instance().getModName() + ") " + Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
+	public String getMCVersion() {
+		return "1.12.2";
+	}
+
+	@Override
+	public String getMCBrand() {
+		return "(" + FMLCommonHandler.instance().getModName() + ")";
+	}
+
+	@Override
+	public String getModVersion() {
+		return Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
 	}
 
 	@Override
 	public TextRemapper<ITextComponent> getTextRemapper() {
-		return new TextRemapper<>(TextComponentTranslation::new, TextComponentString::new, ITextComponent::appendSibling, TextComponentKeybind::new);
+		return new TextRemapper<>(TextComponentTranslation::new, TextComponentString::new, ITextComponent::appendSibling, TextComponentKeybind::new,
+				CustomPlayerModels::styleText);
+	}
+
+	private static ITextComponent styleText(ITextComponent in, TextStyle style) {
+		Style s = new Style();
+		s.setBold(style.bold);
+		s.setItalic(style.italic);
+		s.setUnderlined(style.underline);
+		s.setStrikethrough(style.strikethrough);
+		return in.setStyle(s);
 	}
 
 	@Override
 	public CPMApiManager getApi() {
 		return api;
+	}
+
+	@Override
+	public IVersionCheck getVersionCheck() {
+		return VersionCheck.get(() -> ForgeVersion.getResult(Loader.instance().getIndexedModList().get(CustomPlayerModels.ID)).changes);
 	}
 }

@@ -293,12 +293,17 @@ public class TriangleBoundingBox {
 	}
 
 	public static class BoxBuilder implements VertexBuffer {
-		private List<Vertex[]> quads = new ArrayList<>();
-		private Vertex current = new Vertex();
+		private Vertex current;
 		private Vertex[] currentArray = new Vertex[4];
-		private int currentV;
+		private int nextV;
+		private TriangleBoundingBox b = new TriangleBoundingBox();
 
 		private BoxBuilder() {
+			for (int i = 0; i < currentArray.length; i++) {
+				currentArray[i] = new Vertex();
+			}
+			current = currentArray[0];
+			nextV++;
 		}
 
 		@Override
@@ -328,13 +333,22 @@ public class TriangleBoundingBox {
 
 		@Override
 		public void endVertex() {
-			currentArray[currentV++] = current;
-			current = new Vertex();
-			if(currentV > 3) {
-				quads.add(currentArray);
-				currentArray = new Vertex[4];
-				currentV = 0;
+			if(nextV > 3) {
+				Vec3f v0 = new Vec3f(currentArray[0].x, currentArray[0].y, currentArray[0].z);
+				Vec3f v1 = new Vec3f(currentArray[1].x, currentArray[1].y, currentArray[1].z);
+				Vec3f v2 = new Vec3f(currentArray[2].x, currentArray[2].y, currentArray[2].z);
+				Vec3f v3 = new Vec3f(currentArray[3].x, currentArray[3].y, currentArray[3].z);
+
+				Vec2f t0 = new Vec2f(currentArray[0].u, currentArray[0].v);
+				Vec2f t1 = new Vec2f(currentArray[1].u, currentArray[1].v);
+				Vec2f t2 = new Vec2f(currentArray[2].u, currentArray[2].v);
+				Vec2f t3 = new Vec2f(currentArray[3].u, currentArray[3].v);
+
+				b.triangles.add(b.new Triangle(v0, v1, v2, t0, t1, t2));
+				b.triangles.add(b.new Triangle(v0, v2, v3, t0, t2, t3));
+				nextV = 0;
 			}
+			current = currentArray[nextV++];
 		}
 
 		@Override
@@ -350,22 +364,7 @@ public class TriangleBoundingBox {
 		}
 
 		public TriangleBoundingBox build(boolean noCull) {
-			TriangleBoundingBox b = new TriangleBoundingBox();
 			b.noCull = noCull;
-			for (Vertex[] v : quads) {
-				Vec3f v0 = new Vec3f(v[0].x, v[0].y, v[0].z);
-				Vec3f v1 = new Vec3f(v[1].x, v[1].y, v[1].z);
-				Vec3f v2 = new Vec3f(v[2].x, v[2].y, v[2].z);
-				Vec3f v3 = new Vec3f(v[3].x, v[3].y, v[3].z);
-
-				Vec2f t0 = new Vec2f(v[0].u, v[0].v);
-				Vec2f t1 = new Vec2f(v[1].u, v[1].v);
-				Vec2f t2 = new Vec2f(v[2].u, v[2].v);
-				Vec2f t3 = new Vec2f(v[3].u, v[3].v);
-
-				b.triangles.add(b.new Triangle(v0, v1, v2, t0, t1, t2));
-				b.triangles.add(b.new Triangle(v0, v2, v3, t0, t2, t3));
-			}
 			return b;
 		}
 	}

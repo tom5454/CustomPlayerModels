@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.SkinCustomizationScreen;
@@ -22,10 +21,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -33,12 +32,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 
-import net.minecraftforge.client.ConfigGuiHandler;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.event.ScreenOpenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -54,7 +52,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import com.tom.cpl.text.FormatText;
-import com.tom.cpm.CommonProxy;
+import com.tom.cpl.text.IText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -70,26 +68,22 @@ import com.tom.cpm.shared.util.Log;
 
 import io.netty.buffer.Unpooled;
 
-public class ClientProxy extends CommonProxy {
+public class CustomPlayerModelsClient {
 	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
 	public static boolean optifineLoaded;
-	public static ClientProxy INSTANCE = null;
+	public static final CustomPlayerModelsClient INSTANCE = new CustomPlayerModelsClient();
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public RenderManager<GameProfile, net.minecraft.world.entity.player.Player, Model, MultiBufferSource> manager;
 	public NetHandler<ResourceLocation, net.minecraft.world.entity.player.Player, ClientPacketListener> netHandler;
 
-	@Override
 	public void init() {
-		super.init();
-		INSTANCE = this;
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
 		MinecraftForge.EVENT_BUS.register(this);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders);
-		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), net.minecraft.world.entity.player.Player::getGameProfile);
 		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(ResourceLocation::new);
@@ -105,12 +99,17 @@ public class ClientProxy extends CommonProxy {
 		});
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
-		netHandler.setDisplayText(f -> minecraft.gui.handleChat(ChatType.SYSTEM, f.remap(), Util.NIL_UUID));
-		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
+		netHandler.setDisplayText(this::onMessage);
+		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
-	@Override
-	public void apiInit() {
+	private void onMessage(IText f) {
+		Registry<ChatType> registry = minecraft.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+		ChatType messageType = registry.get(ChatType.SYSTEM);
+		minecraft.gui.handleSystemChat(messageType, f.remap());
+	}
+
+	public static void apiInit() {
 		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class).
 		renderApi(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class, ModelTexture::new).
 		localModelApi(GameProfile::new).init();
@@ -118,7 +117,7 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
-		manager.bindPlayer(event.getPlayer(), event.getMultiBufferSource(), event.getRenderer().getModel());
+		manager.bindPlayer(event.getEntity(), event.getMultiBufferSource(), event.getRenderer().getModel());
 	}
 
 	@SubscribeEvent
@@ -127,7 +126,7 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@SubscribeEvent
-	public void initGui(ScreenEvent.InitScreenEvent.Post evt) {
+	public void initGui(ScreenEvent.Init.Post evt) {
 		if((evt.getScreen() instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
 				evt.getScreen() instanceof SkinCustomizationScreen) {
 			Button btn = new Button(0, 0, () -> Minecraft.getInstance().setScreen(new GuiImpl(EditorGui::new, evt.getScreen())));
@@ -185,12 +184,12 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@SubscribeEvent
-	public void openGui(ScreenOpenEvent openGui) {
+	public void openGui(ScreenEvent.Opening openGui) {
 		if(openGui.getScreen() == null && minecraft.screen instanceof GuiImpl.Overlay) {
-			openGui.setScreen(((GuiImpl.Overlay) minecraft.screen).getGui());
+			openGui.setNewScreen(((GuiImpl.Overlay) minecraft.screen).getGui());
 		}
 		if(openGui.getScreen() instanceof TitleScreen && EditorGui.doOpenEditor()) {
-			openGui.setScreen(new GuiImpl(EditorGui::new, openGui.getScreen()));
+			openGui.setNewScreen(new GuiImpl(EditorGui::new, openGui.getScreen()));
 		}
 	}
 
@@ -208,13 +207,13 @@ public class ClientProxy extends CommonProxy {
 	public static class Button extends net.minecraft.client.gui.components.Button {
 
 		public Button(int x, int y, Runnable r) {
-			super(x, y, 100, 20, new TranslatableComponent("button.cpm.open_editor"), b -> r.run());
+			super(x, y, 100, 20, Component.translatable("button.cpm.open_editor"), b -> r.run());
 		}
 
 	}
 
 	@SubscribeEvent
-	public void onLogout(ClientPlayerNetworkEvent.LoggedOutEvent evt) {
+	public void onLogout(ClientPlayerNetworkEvent.LoggingOut evt) {
 		mc.onLogOut();
 	}
 

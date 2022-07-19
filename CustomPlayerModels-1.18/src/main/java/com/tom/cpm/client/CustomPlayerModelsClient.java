@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
+import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.SkinCustomizationScreen;
@@ -21,10 +22,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -53,10 +54,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import com.tom.cpl.text.FormatText;
-import com.tom.cpl.text.IText;
-import com.tom.cpm.CommonProxy;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
+import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -70,23 +70,22 @@ import com.tom.cpm.shared.util.Log;
 
 import io.netty.buffer.Unpooled;
 
-public class ClientProxy extends CommonProxy {
+public class CustomPlayerModelsClient {
 	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
-	public static boolean optifineLoaded;
-	public static ClientProxy INSTANCE = null;
+	public static boolean optifineLoaded, vrLoaded;
+	public static final CustomPlayerModelsClient INSTANCE = new CustomPlayerModelsClient();
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public RenderManager<GameProfile, net.minecraft.world.entity.player.Player, Model, MultiBufferSource> manager;
 	public NetHandler<ResourceLocation, net.minecraft.world.entity.player.Player, ClientPacketListener> netHandler;
 
-	@Override
 	public void init() {
-		super.init();
-		INSTANCE = this;
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();
+		vrLoaded = VRDetector.doApply();
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
+		if(vrLoaded)Log.info("ViveCraft detected, enabling ViveCraft compatibility");
 		MinecraftForge.EVENT_BUS.register(this);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders);
 		KeyBindings.init();
@@ -105,18 +104,11 @@ public class ClientProxy extends CommonProxy {
 		});
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
-		netHandler.setDisplayText(this::onMessage);
+		netHandler.setDisplayText(f -> minecraft.gui.handleChat(ChatType.SYSTEM, f.remap(), Util.NIL_UUID));
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
-	private void onMessage(IText f) {
-		Registry<ChatType> registry = minecraft.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-		ChatType messageType = registry.get(ChatType.SYSTEM);
-		minecraft.gui.handleSystemChat(messageType, f.remap());
-	}
-
-	@Override
-	public void apiInit() {
+	public static void apiInit() {
 		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class).
 		renderApi(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class, ModelTexture::new).
 		localModelApi(GameProfile::new).init();
@@ -214,7 +206,7 @@ public class ClientProxy extends CommonProxy {
 	public static class Button extends net.minecraft.client.gui.components.Button {
 
 		public Button(int x, int y, Runnable r) {
-			super(x, y, 100, 20, Component.translatable("button.cpm.open_editor"), b -> r.run());
+			super(x, y, 100, 20, new TranslatableComponent("button.cpm.open_editor"), b -> r.run());
 		}
 
 	}

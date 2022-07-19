@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.function.Function;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -105,12 +104,27 @@ public class CPMBukkitPlugin extends JavaPlugin {
 
 			@Override
 			public TextRemapper<String> getTextRemapper() {
-				return new TextRemapper<>(i18n::format, Function.identity(), (a, b) -> a + b, null);
+				return TextRemapper.stringMapper(i18n::format);
 			}
 
 			@Override
 			public CPMApiManager getApi() {
 				return api;
+			}
+
+			@Override
+			public String getMCVersion() {
+				return "bukkit";
+			}
+
+			@Override
+			public String getMCBrand() {
+				return "Bukkit (" + getServer().getVersion() + "/" + getServer().getBukkitVersion() + ")";
+			}
+
+			@Override
+			public String getModVersion() {
+				return getDescription().getVersion();
 			}
 		});
 		MinecraftObjectHolder.setServerObject(new MinecraftServerAccess() {

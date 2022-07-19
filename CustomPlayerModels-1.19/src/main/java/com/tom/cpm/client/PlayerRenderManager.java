@@ -95,7 +95,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 		@Override
 		public void setupRenderSystem(ModelTexture cbi, TextureSheetType tex) {
-			ClientProxy.mc.renderBuilder.build(renderTypes, cbi);
+			CustomPlayerModelsClient.mc.renderBuilder.build(renderTypes, cbi);
 		}
 
 		@Override

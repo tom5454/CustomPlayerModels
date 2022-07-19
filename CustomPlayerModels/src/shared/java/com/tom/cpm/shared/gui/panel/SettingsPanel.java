@@ -86,6 +86,8 @@ public class SettingsPanel extends Panel {
 			kbButton.setBounds(new Box(5, 0, 150, 20));
 			general.addElement(kbButton);
 
+			makeCheckbox(general, ConfigKeys.WIKI_OFFLINE_MODE, false);
+
 			MinecraftClientAccess.get().populatePlatformSettings("general", general);
 
 			layout.reflow();
@@ -103,7 +105,7 @@ public class SettingsPanel extends Panel {
 				guiScale.setAction(() -> {
 					int scale = ce.getInt(ConfigKeys.EDITOR_SCALE, -1) + 1;
 					if(scale >= gui.getMaxScale()) {
-						scale = -1;
+						scale = gui.canScaleVanilla() ? -1 : 0;
 					}
 					ce.setInt(ConfigKeys.EDITOR_SCALE, scale);
 					if(popup != null) {
@@ -337,7 +339,7 @@ public class SettingsPanel extends Panel {
 	}
 
 	private String getScale() {
-		int scale = ce.getInt(ConfigKeys.EDITOR_SCALE, -1);
+		int scale = ce.getInt(ConfigKeys.EDITOR_SCALE, gui.canScaleVanilla() ? -1 : 0);
 		return scale == -1 ? gui.i18nFormat("button.cpm.config.scale.vanilla") : scale == 0 ? gui.i18nFormat("button.cpm.config.scale.auto") : Integer.toString(scale);
 	}
 
@@ -400,13 +402,13 @@ public class SettingsPanel extends Panel {
 		ButtonIcon delBtn = new ButtonIcon(gui, "editor", 14, 16, () -> {
 			E elem = playerList.getSelected();
 			if(elem != null) {
-				frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.confirmDel"), () -> {
+				ConfirmPopup.confirm(frm, gui.i18nFormat("label.cpm.confirmDel"), () -> {
 					entries.remove(elem);
 					ce.clearValue(getKey.apply(elem));
 					scpS.setVisible(false);
 					playerList.setWidth(w);
 					playerList.refreshList();
-				}, null));
+				});
 			}
 		});
 		delBtn.setBounds(new Box(30, panel.getBounds().h - 25, 18, 18));

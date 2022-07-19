@@ -18,6 +18,7 @@ import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
 
+import com.tom.cpl.util.NettyByteBufInputStream;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -26,8 +27,6 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.network.NetH;
-
-import io.netty.buffer.ByteBufInputStream;
 
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
@@ -72,7 +71,7 @@ public class CPMASMClientHooks {
 
 	public static boolean onClientPacket(S3FPacketCustomPayload pckt, NetHandlerPlayClient handler) {
 		if(pckt.getChannelName().startsWith(MinecraftObjectHolder.NETWORK_ID)) {
-			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.getChannelName()), new ByteBufInputStream(pckt.getBufferData()), (NetH) handler);
+			ClientProxy.INSTANCE.netHandler.receiveClient(new ResourceLocation(pckt.getChannelName()), new NettyByteBufInputStream(pckt.getBufferData()), (NetH) handler);
 			return true;
 		}
 		return false;

@@ -56,7 +56,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.google.common.collect.Iterables;
 
 import com.tom.cpl.text.FormatText;
-import com.tom.cpm.CommonProxy;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -72,19 +71,16 @@ import com.tom.cpm.shared.util.Log;
 
 import io.netty.buffer.Unpooled;
 
-public class ClientProxy extends CommonProxy {
+public class CustomPlayerModelsClient {
 	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
 	public static boolean optifineLoaded;
-	public static ClientProxy INSTANCE = null;
+	public static final CustomPlayerModelsClient INSTANCE = new CustomPlayerModelsClient();
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public RenderManager<GameProfile, net.minecraft.world.entity.player.Player, Model, MultiBufferSource> manager;
 	public NetHandler<ResourceLocation, net.minecraft.world.entity.player.Player, ClientPacketListener> netHandler;
 
-	@Override
 	public void init() {
-		super.init();
-		INSTANCE = this;
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();
@@ -115,7 +111,6 @@ public class ClientProxy extends CommonProxy {
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
-	@Override
 	public void apiInit() {
 		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class).
 		renderApi(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class, ModelTexture::new).

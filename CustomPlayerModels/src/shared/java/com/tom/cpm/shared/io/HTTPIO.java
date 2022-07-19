@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +22,8 @@ public class HTTPIO {
 
 	public static HttpURLConnection createUrlConnection(final URL url, boolean noCache) throws IOException {
 		Log.debug("Opening connection to " + url);
-		final HttpURLConnection connection = (HttpURLConnection) url.openConnection(MinecraftClientAccess.get().getProxy());
+		MinecraftClientAccess mca = MinecraftClientAccess.get();
+		final HttpURLConnection connection = (HttpURLConnection) url.openConnection(mca != null ? mca.getProxy() : Proxy.NO_PROXY);
 		connection.setConnectTimeout(15000);
 		connection.setReadTimeout(15000);
 		connection.setRequestProperty("User-Agent", userAgent.replace('$', '?'));

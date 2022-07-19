@@ -12,9 +12,16 @@ import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 
 public class ViewportPaintPanel extends ViewportPanel {
 	private int dragging;
+	private boolean hovered;
 
 	public ViewportPaintPanel(Frame frm, Editor editor) {
 		super(frm, editor);
+	}
+
+	@Override
+	public void draw(MouseEvent event, float partialTicks) {
+		hovered = event.isHovered(bounds);
+		super.draw(event, partialTicks);
 	}
 
 	public Vec2i getHoveredTexPos() {
@@ -28,7 +35,7 @@ public class ViewportPaintPanel extends ViewportPanel {
 
 	@Override
 	public void mouseClick(MouseEvent event) {
-		if(event.isHovered(bounds) && event.btn == 0 && editor.drawMode != EditorTool.SELECT) {
+		if(event.isHovered(bounds) && event.btn == 0 && editor.drawMode != EditorTool.SELECT && editor.definition.bounds.stream().anyMatch(b -> b.isHovered && b.type != EditorRenderer.BoundType.DRAG_PANE)) {
 			dragging = 1;
 			Vec2i v = getHoveredTexPos();
 			if(v != null) {
@@ -81,5 +88,10 @@ public class ViewportPaintPanel extends ViewportPanel {
 	@Override
 	protected VecType[] getVecTypes() {
 		return new VecType[0];
+	}
+
+	@Override
+	protected boolean keysCanControlCamera() {
+		return hovered;
 	}
 }

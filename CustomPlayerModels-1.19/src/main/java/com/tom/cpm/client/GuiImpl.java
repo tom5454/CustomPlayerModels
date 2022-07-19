@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -25,7 +26,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.ChatVisiblity;
 
-import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.fml.ModList;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -50,6 +51,7 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.text.IText;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 
@@ -121,7 +123,7 @@ public class GuiImpl extends Screen implements IGui {
 			matrixStack.pushPose();
 			matrixStack.translate(0, 0, 800);
 			try {
-				Method m = ForgeIngameGui.class.getDeclaredMethod("renderChat", int.class, int.class, PoseStack.class);
+				Method m = ForgeGui.class.getDeclaredMethod("renderChat", int.class, int.class, PoseStack.class);
 				m.setAccessible(true);
 				m.invoke(minecraft.gui, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight(), matrixStack);
 			} catch (Throwable e) {
@@ -717,5 +719,26 @@ public class GuiImpl extends Screen implements IGui {
 		} catch (Throwable e) {
 			onGuiException("Error in tick gui", e, true);
 		}
+	}
+
+	@Override
+	public void drawFormattedText(float x, float y, IText text, int color, float scale) {
+		x += getOffset().x;
+		y += getOffset().y;
+		matrixStack.pushPose();
+		matrixStack.translate(x, y, 50);
+		matrixStack.scale(scale, scale, scale);
+		font.draw(matrixStack, text.<Component>remap(), 0, 0, color);
+		matrixStack.popPose();
+	}
+
+	@Override
+	public int textWidthFormatted(IText text) {
+		return font.width(text.<Component>remap().getVisualOrderText());
+	}
+
+	@Override
+	public void openURL0(String url) {
+		Util.getPlatform().openUri(url);
 	}
 }

@@ -140,4 +140,9 @@ public class Spinner extends GuiElement implements Focusable {
 	public void setBackgroundColor(int bgColor) {
 		txtf.setBackgroundColor(bgColor);
 	}
+
+	@Override
+	public boolean isSelectable() {
+		return visible && enabled;
+	}
 }

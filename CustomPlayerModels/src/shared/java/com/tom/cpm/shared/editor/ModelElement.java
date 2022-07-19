@@ -169,6 +169,10 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		return type == ElementType.NORMAL;
 	}
 
+	public void markDirty() {
+		rc.updateObject = true;
+	}
+
 	@Override
 	public void setVec(Vec3f v, VecType object) {
 		if(type == ElementType.ROOT_PART && generated && object == VecType.POSITION && !movePopupShown) {
@@ -180,12 +184,14 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			v.round(10);
 			editor.action("set", "label.cpm.size").
 			updateValueOp(this, this.size, v, 0, 25, false, (a, b) -> a.size = b, editor.setSize).
+			onRun(this::markDirty).
 			execute();
 			break;
 
 		case OFFSET:
 			editor.action("set", "label.cpm.offset").
 			updateValueOp(this, this.offset, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.offset = b, editor.setOffset).
+			onRun(this::markDirty).
 			execute();
 			break;
 
@@ -204,6 +210,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		case SCALE:
 			editor.action("set", "label.cpm.scale").
 			updateValueOp(this, this.scale, v, 0, 25, false, (a, b) -> a.scale = b, editor.setScale).
+			onRun(this::markDirty).
 			execute();
 			break;
 
@@ -213,6 +220,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			updateValueOp(this, this.u, (int) v.x, 0, Integer.MAX_VALUE, (a, b) -> a.u = b, __ -> editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize))).
 			updateValueOp(this, this.v, (int) v.y, 0, Integer.MAX_VALUE, (a, b) -> a.v = b, __ -> editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize))).
 			updateValueOp(this, this.textureSize, (int) v.z, 0, 64, (a, b) -> a.textureSize = b, __ -> editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize))).
+			onRun(this::markDirty).
 			execute();
 		}
 		break;
@@ -248,6 +256,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			ActionBuilder.limitVec(v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false);
 			offset = v;
 			editor.setOffset.accept(offset);
+			markDirty();
 			break;
 		case POSITION:
 			ActionBuilder.limitVec(v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false);
@@ -263,12 +272,14 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			ActionBuilder.limitVec(v, 0, 25, false);
 			scale = v;
 			editor.setScale.accept(scale);
+			markDirty();
 			break;
 		case SIZE:
 			ActionBuilder.limitVec(v, 0, 25, false);
 			v.round(10);
 			size = v;
 			editor.setSize.accept(size);
+			markDirty();
 			break;
 		case TEXTURE:
 		default:
@@ -307,7 +318,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void modeSwitch() {
-		editor.action("switch", "action.cpm.cubeMode").updateValueOp(this, this.texture, !this.texture, (a, b) -> a.texture = b).execute();
+		editor.action("switch", "action.cpm.cubeMode").updateValueOp(this, this.texture, !this.texture, (a, b) -> a.texture = b).
+		onRun(this::markDirty).execute();
 		editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
 		editor.setModePanel.accept(texture ? ModeDisplayType.TEX : ModeDisplayType.COLOR);
 		editor.setTexturePanel.accept(this.texture ? new Vec3i(this.u, this.v, this.textureSize) : new Vec3i(this.rgb, 0, 0));
@@ -384,7 +396,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void delete() {
 		if(templateElement)return;
 		if(type == ElementType.NORMAL || duplicated || typeData instanceof RootModelType) {
-			ActionBuilder ab = editor.action("remove", "action.cpm.cube").removeFromList(parent.children, this).
+			List<ModelElement> lst = type == ElementType.NORMAL ? parent.children : editor.elements;
+			ActionBuilder ab = editor.action("remove", "action.cpm.cube").removeFromList(lst, this).
 					onRun(() -> editor.selectedElement = null);
 			editor.animations.stream().flatMap(a -> a.getFrames().stream()).forEach(f -> f.clearSelectedData(ab, this));
 			ab.onRun(() -> editor.animations.forEach(EditorAnim::clearCache));
@@ -395,12 +408,12 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void setElemColor(int color) {
-		editor.action("set", "action.cpm.color").updateValueOp(this, rgb, color, (a, b) -> a.rgb = b, editor.setPartColor).execute();
+		editor.action("set", "action.cpm.color").updateValueOp(this, rgb, color, (a, b) -> a.rgb = b, editor.setPartColor).onRun(this::markDirty).execute();
 	}
 
 	@Override
 	public void setMCScale(float value) {
-		editor.action("set", "label.cpm.mcScale").updateValueOp(this, mcScale, value, -7f, 7f, (a, b) -> a.mcScale = b, editor.setMCScale).execute();
+		editor.action("set", "label.cpm.mcScale").updateValueOp(this, mcScale, value, -7f, 7f, (a, b) -> a.mcScale = b, editor.setMCScale).onRun(this::markDirty).execute();
 	}
 
 	@Override
@@ -422,12 +435,12 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			break;
 
 		case MIRROR:
-			editor.action("switch", "label.cpm.mirror").updateValueOp(this, this.mirror, !this.mirror, (a, b) -> a.mirror = b, editor.setMirror).execute();
+			editor.action("switch", "label.cpm.mirror").updateValueOp(this, this.mirror, !this.mirror, (a, b) -> a.mirror = b, editor.setMirror).onRun(this::markDirty).execute();
 			break;
 
 		case RECOLOR:
 			editor.action("switch", "label.cpm.recolor").
-			updateValueOp(this, this.recolor, !this.recolor, (a, b) -> a.recolor = b, editor.setReColor).execute();
+			updateValueOp(this, this.recolor, !this.recolor, (a, b) -> a.recolor = b, editor.setReColor).onRun(this::markDirty).execute();
 			if(!this.texture || this.recolor)
 				editor.setPartColor.accept(this.rgb);
 			else
@@ -435,18 +448,18 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			break;
 
 		case SINGLE_TEX:
-			editor.action("switch", "label.cpm.singleTex").updateValueOp(this, this.singleTex, !this.singleTex, (a, b) -> a.singleTex = b, editor.setSingleTex).execute();
+			editor.action("switch", "label.cpm.singleTex").updateValueOp(this, this.singleTex, !this.singleTex, (a, b) -> a.singleTex = b, editor.setSingleTex).onRun(this::markDirty).execute();
 			break;
 
 		case EXTRUDE:
-			editor.action("switch", "label.cpm.extrude_effect").updateValueOp(this, this.extrude, !this.extrude, (a, b) -> a.extrude = b, editor.setExtrudeEffect).execute();
+			editor.action("switch", "label.cpm.extrude_effect").updateValueOp(this, this.extrude, !this.extrude, (a, b) -> a.extrude = b, editor.setExtrudeEffect).onRun(this::markDirty).execute();
 			break;
 
 		case PER_FACE_UV:
 			editor.action("switch", "label.cpm.perfaceUV").updateValueOp(this, this.texture, true, (a, b) -> a.texture = b).
 			update(editor.setModePanel, ModeDisplayType.TEX_FACE).
 			updateValueOp(this, this.faceUV, faceUV == null ? new PerFaceUV(this) : null, (a, b) -> a.faceUV = b, v -> editor.setPerFaceUV.accept(v != null)).
-			execute();
+			onRun(this::markDirty).execute();
 			editor.updateGui();
 			break;
 

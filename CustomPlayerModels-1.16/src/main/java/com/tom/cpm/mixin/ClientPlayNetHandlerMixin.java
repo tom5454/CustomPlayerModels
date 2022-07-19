@@ -8,11 +8,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpl.util.NettyByteBufInputStream;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.network.NetH;
-
-import io.netty.buffer.ByteBufInputStream;
 
 @Mixin(ClientPlayNetHandler.class)
 public class ClientPlayNetHandlerMixin implements NetH {
@@ -31,7 +30,7 @@ public class ClientPlayNetHandlerMixin implements NetH {
 	@Inject(at = @At("HEAD"), method = "handleCustomPayload(Lnet/minecraft/network/play/server/SCustomPayloadPlayPacket;)V", cancellable = true)
 	public void onHandleCustomPayload(SCustomPayloadPlayPacket packet, CallbackInfo cbi) {
 		if(packet.getName().getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
-			ClientProxy.INSTANCE.netHandler.receiveClient(packet.getName(), new ByteBufInputStream(packet.getInternalData()), this);
+			CustomPlayerModelsClient.INSTANCE.netHandler.receiveClient(packet.getName(), new NettyByteBufInputStream(packet.getInternalData()), this);
 			cbi.cancel();
 		}
 	}

@@ -20,8 +20,8 @@ public class RenderedCube implements IModelComponent {
 	public Vec3f pos;
 	public Vec3f renderScale;
 	public Mesh renderObject;
+	public boolean updateObject;
 	public boolean display = true;
-	public boolean useDynamic = false;
 	public int color;
 
 	//Render Effect Glow

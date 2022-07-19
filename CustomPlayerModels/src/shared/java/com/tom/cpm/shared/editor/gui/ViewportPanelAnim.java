@@ -199,4 +199,9 @@ public class ViewportPanelAnim extends ViewportPanel {
 			editor.selectedAnim.endDrag();
 		}
 	}
+
+	@Override
+	public boolean canEdit() {
+		return editor.selectedAnim != null && super.canEdit();
+	}
 }

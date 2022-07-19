@@ -11,14 +11,15 @@ import com.tom.cpm.shared.editor.gui.ModeDisplayType.ModePanel;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 
 public class UVPanel extends ModePanel {
+	private Spinner spinnerU, spinnerV, spinnerT;
 
 	public UVPanel(Frame frm, Editor editor, TabFocusHandler tabHandler) {
 		super(frm, editor, tabHandler);
 		setBounds(new Box(0, 0, 170, 57));
 
-		Spinner spinnerU = new Spinner(gui);
-		Spinner spinnerV = new Spinner(gui);
-		Spinner spinnerT = new Spinner(gui);
+		spinnerU = new Spinner(gui);
+		spinnerV = new Spinner(gui);
+		spinnerT = new Spinner(gui);
 		Label lblU = new Label(gui, "U:");
 		lblU.setBounds(new Box(5, 25, 50, 18));
 		Label lblV = new Label(gui, "V:");
@@ -57,4 +58,11 @@ public class UVPanel extends ModePanel {
 		addElement(lblT);
 	}
 
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		spinnerU.setVisible(visible);
+		spinnerV.setVisible(visible);
+		spinnerT.setVisible(visible);
+	}
 }

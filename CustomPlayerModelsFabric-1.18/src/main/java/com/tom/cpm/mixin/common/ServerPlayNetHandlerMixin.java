@@ -11,13 +11,12 @@ import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 
+import com.tom.cpl.util.NettyByteBufInputStream;
 import com.tom.cpm.common.IServerNetHandler;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
-
-import io.netty.buffer.ByteBufInputStream;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public class ServerPlayNetHandlerMixin implements ServerNetH, IServerNetHandler {
@@ -40,7 +39,7 @@ public class ServerPlayNetHandlerMixin implements ServerNetH, IServerNetHandler 
 	@Inject(at = @At("HEAD"), method = "onCustomPayload(Lnet/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket;)V", cancellable = true)
 	public void onProcessCustomPayload(CustomPayloadC2SPacket packet, CallbackInfo cbi) {
 		if(packet.channel.getNamespace().equals(MinecraftObjectHolder.NETWORK_ID)) {
-			ServerHandler.netHandler.receiveServer(packet.channel, new ByteBufInputStream(packet.data), this);
+			ServerHandler.netHandler.receiveServer(packet.channel, new NettyByteBufInputStream(packet.data), this);
 			cbi.cancel();
 		}
 	}

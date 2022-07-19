@@ -10,7 +10,7 @@ import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 
-import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.client.settings.KeyConflictContext;
 
@@ -23,14 +23,15 @@ public class KeyBindings implements IKeybind {
 	private static KeyConflictCtx conflictCtx = new KeyConflictCtx();
 	public static KeyMapping gestureMenuBinding, renderToggleBinding;
 	public static Map<Integer, KeyMapping> quickAccess = new HashMap<>();
-	public static void init() {
+
+	public static void init(RegisterKeyMappingsEvent evt) {
 		gestureMenuBinding = new KeyMapping("key.cpm.gestureMenu", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_G), "key.cpm.category");
 		renderToggleBinding = new KeyMapping("key.cpm.renderToggle", KeyConflictContext.IN_GAME, InputConstants.UNKNOWN, "key.cpm.category");
-		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu"));
-		kbs.add(new KeyBindings(renderToggleBinding, "renderToggle"));
+		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu", evt));
+		kbs.add(new KeyBindings(renderToggleBinding, "renderToggle", evt));
 
 		for(int i = 1;i<=6;i++)
-			createQA(i);
+			createQA(i, evt);
 	}
 
 	private static class KeyConflictCtx implements IKeyConflictContext {
@@ -47,9 +48,9 @@ public class KeyBindings implements IKeybind {
 		}
 	}
 
-	private static void createQA(int id) {
+	private static void createQA(int id, RegisterKeyMappingsEvent evt) {
 		KeyMapping kb = new KeyMapping("key.cpm.qa_" + id, conflictCtx, InputConstants.UNKNOWN, "key.cpm.category");
-		kbs.add(new KeyBindings(kb, "qa_" + id));
+		kbs.add(new KeyBindings(kb, "qa_" + id, evt));
 		quickAccess.put(id, kb);
 	}
 
@@ -57,10 +58,10 @@ public class KeyBindings implements IKeybind {
 	private final KeyMapping kb;
 	private final String name;
 
-	private KeyBindings(KeyMapping kb, String name) {
+	private KeyBindings(KeyMapping kb, String name, RegisterKeyMappingsEvent evt) {
 		this.kb = kb;
 		this.name = name;
-		ClientRegistry.registerKeyBinding(kb);
+		evt.register(kb);
 	}
 
 	@Override

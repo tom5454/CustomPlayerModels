@@ -1,6 +1,7 @@
 package com.tom.cpm;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.function.Supplier;
 
@@ -10,14 +11,17 @@ import org.apache.logging.log4j.Logger;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.KeybindComponent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -30,15 +34,18 @@ import net.minecraftforge.versions.forge.ForgeVersion;
 
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.text.TextRemapper;
+import com.tom.cpl.text.TextStyle;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
+import com.tom.cpm.shared.util.IVersionCheck;
+import com.tom.cpm.shared.util.VersionCheck;
 
 @Mod("cpm")
 public class CustomPlayerModels implements MinecraftCommonAccess {
@@ -56,11 +63,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	public static final Logger LOG = LogManager.getLogger("CPM");
 	public static final ILogger log = new Log4JLogger(LOG);
 
-	public static CommonProxy proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
 	public static CPMApiManager api;
 
 	private void doClientStuff(final FMLClientSetupEvent event) {
-		proxy.init();
+		CustomPlayerModelsClient.INSTANCE.init();
 	}
 
 	private ModConfigFile cfg;
@@ -85,7 +91,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		});
 		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
 		api.buildCommon().player(Player.class).init();
-		proxy.apiInit();
+		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> CustomPlayerModelsClient.INSTANCE.apiInit());
 	}
 
 	@Override
@@ -120,18 +126,37 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	}
 
 	@Override
-	public String getPlatformVersionString() {
-		String modVer = ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
-		return "Minecraft " + SharedConstants.getCurrentVersion().getName() + " (forge/" + ForgeVersion.getVersion() + ") " + modVer;
+	public String getMCVersion() {
+		return SharedConstants.getCurrentVersion().getName();
+	}
+
+	@Override
+	public String getMCBrand() {
+		return "(forge/" + ForgeVersion.getVersion() + ")";
+	}
+
+	@Override
+	public String getModVersion() {
+		return ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
 	}
 
 	@Override
 	public TextRemapper<MutableComponent> getTextRemapper() {
-		return new TextRemapper<>(TranslatableComponent::new, TextComponent::new, MutableComponent::append, KeybindComponent::new);
+		return new TextRemapper<>(TranslatableComponent::new, TextComponent::new, MutableComponent::append, KeybindComponent::new,
+				CustomPlayerModels::styleText);
+	}
+
+	private static MutableComponent styleText(MutableComponent in, TextStyle style) {
+		return in.withStyle(Style.EMPTY.withBold(style.bold).withItalic(style.italic).withUnderlined(style.underline).withStrikethrough(style.strikethrough));
 	}
 
 	@Override
 	public CPMApiManager getApi() {
 		return api;
+	}
+
+	@Override
+	public IVersionCheck getVersionCheck() {
+		return VersionCheck.get(() -> ModList.get().getModContainerById("cpm").map(c -> VersionChecker.getResult(c.getModInfo()).changes()).orElse(Collections.emptyMap()));
 	}
 }

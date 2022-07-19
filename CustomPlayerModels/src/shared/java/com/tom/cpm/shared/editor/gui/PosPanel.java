@@ -133,9 +133,6 @@ public class PosPanel extends Panel {
 
 	public static Panel addVec3(String name, Consumer<Vec3f> consumer, Panel panelIn, Updater<Vec3f> updater, int dp, TabFocusHandler tabHandler) {
 		IGui gui = panelIn.getGui();
-		Panel panel = new Panel(gui);
-		panel.setBounds(new Box(0, 0, 170, 30));
-		panelIn.addElement(panel);
 
 		Spinner spinnerX = new Spinner(gui);
 		Spinner spinnerY = new Spinner(gui);
@@ -152,6 +149,19 @@ public class PosPanel extends Panel {
 		spinnerX.addChangeListener(r);
 		spinnerY.addChangeListener(r);
 		spinnerZ.addChangeListener(r);
+
+		Panel panel = new Panel(gui) {
+
+			@Override
+			public void setVisible(boolean visible) {
+				super.setVisible(visible);
+				spinnerX.setVisible(visible);
+				spinnerY.setVisible(visible);
+				spinnerZ.setVisible(visible);
+			}
+		};
+		panel.setBounds(new Box(0, 0, 170, 30));
+		panelIn.addElement(panel);
 
 		panel.addElement(new Label(gui, gui.i18nFormat("label.cpm." + name)).setBounds(new Box(5, 0, 0, 0)));
 		panel.addElement(spinnerX);

@@ -24,4 +24,7 @@ public class UIColors {
 	public int move_background      = 0xff000000;
 	public int select_background    = 0xff6666ff;
 	public int anim_part_background = 0xff006600;
+
+	public int link_normal          = 0xff6699ff;
+	public int link_hover           = 0xffffff66;
 }

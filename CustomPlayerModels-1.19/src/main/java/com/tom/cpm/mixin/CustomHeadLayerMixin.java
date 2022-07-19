@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.SkullBlock;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.RefHolder;
 
 @Mixin(CustomHeadLayer.class)
@@ -40,7 +40,7 @@ public class CustomHeadLayerMixin {
 	public void onRender(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, LivingEntity livingEntity, float f, float g, float h, float j, float k, float l, CallbackInfo ci, ItemStack stack, Item item, boolean flag, float f1, GameProfile gameProfile, SkullBlock.Type skullType, SkullModelBase model) {
 		RefHolder.CPM_MODELS = skullModels;
 		if(skullType == SkullBlock.Types.PLAYER && gameProfile != null) {
-			ClientProxy.INSTANCE.renderSkull(model, gameProfile, vertexConsumerProvider);
+			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, vertexConsumerProvider);
 		}
 	}
 }

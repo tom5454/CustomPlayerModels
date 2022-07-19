@@ -27,6 +27,7 @@ import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 
 public class PerfaceUVPanel extends Panel {
+	private Spinner spinnerSU, spinnerSV, spinnerEU, spinnerEV;
 
 	public PerfaceUVPanel(Frame frm, Editor editor, TabFocusHandler tabHandler) {
 		super(frm.getGui());
@@ -42,10 +43,10 @@ public class PerfaceUVPanel extends Panel {
 		});
 		addElement(faces);
 
-		Spinner spinnerSU = new Spinner(gui);
-		Spinner spinnerSV = new Spinner(gui);
-		Spinner spinnerEU = new Spinner(gui);
-		Spinner spinnerEV = new Spinner(gui);
+		spinnerSU = new Spinner(gui);
+		spinnerSV = new Spinner(gui);
+		spinnerEU = new Spinner(gui);
+		spinnerEV = new Spinner(gui);
 
 		spinnerSU.setBounds(new Box(5, 25, 35, 18));
 		spinnerSV.setBounds(new Box(45, 25, 35, 18));
@@ -172,6 +173,15 @@ public class PerfaceUVPanel extends Panel {
 		toAllUVs.setBounds(new Box(92, 70, 70, 18));
 		toAllUVs.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.toAllFaces")));
 		addElement(toAllUVs);
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		spinnerSU.setVisible(visible);
+		spinnerSV.setVisible(visible);
+		spinnerEU.setVisible(visible);
+		spinnerEV.setVisible(visible);
 	}
 
 	private static Face getFace(Editor editor, ActionBuilder ab) {

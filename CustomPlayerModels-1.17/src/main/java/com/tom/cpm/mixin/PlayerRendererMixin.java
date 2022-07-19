@@ -21,8 +21,8 @@ import net.minecraft.resources.ResourceLocation;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import com.tom.cpm.client.ClientProxy;
-import com.tom.cpm.client.ClientProxy.PlayerNameTagRenderer;
+import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.CustomPlayerModelsClient.PlayerNameTagRenderer;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -42,7 +42,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 			},
 			cancellable = true)
 	public void onGetEntityTexture(AbstractClientPlayer entity, CallbackInfoReturnable<ResourceLocation> cbi) {
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(getModel(), new ModelTexture(cbi), TextureSheetType.SKIN);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getModel(), new ModelTexture(cbi), TextureSheetType.SKIN);
 	}
 
 	@Redirect(at =
@@ -62,29 +62,29 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 
 	@Inject(at = @At("HEAD"), method = "renderRightHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderRightArmPre(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.renderHand(vertexConsumers, getModel());
+		CustomPlayerModelsClient.INSTANCE.renderHand(vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderLeftHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderLeftArmPre(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.renderHand(vertexConsumers, getModel());
+		CustomPlayerModelsClient.INSTANCE.renderHand(vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("RETURN"), method = "renderRightHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderRightArmPost(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.manager.unbindClear(getModel());
+		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
 	}
 
 	@Inject(at = @At("RETURN"), method = "renderLeftHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderLeftArmPost(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.manager.unbindClear(getModel());
+		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderNameTag(Lnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/network/chat/Component;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", cancellable = true)
 	public void onRenderName(AbstractClientPlayer entityIn, Component displayNameIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(!Player.isEnableNames())cbi.cancel();
 		if(Player.isEnableLoadingInfo())
-			ClientProxy.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
+			CustomPlayerModelsClient.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
 	}
 
 	@Redirect(at =
@@ -100,7 +100,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 					require = 0
 			)
 	public RenderType getArmLayer(ResourceLocation loc, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, AbstractClientPlayer playerIn, ModelPart rendererArmIn, ModelPart rendererArmwearIn) {
-		return ClientProxy.mc.getPlayerRenderManager().isBound(getModel()) ? RenderType.entityTranslucent(getTextureLocation(playerIn)) : RenderType.entitySolid(getTextureLocation(playerIn));
+		return CustomPlayerModelsClient.mc.getPlayerRenderManager().isBound(getModel()) ? RenderType.entityTranslucent(getTextureLocation(playerIn)) : RenderType.entitySolid(getTextureLocation(playerIn));
 	}
 
 	@Override

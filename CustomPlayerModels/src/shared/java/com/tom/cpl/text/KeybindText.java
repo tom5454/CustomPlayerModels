@@ -8,7 +8,7 @@ import com.tom.cpl.gui.IKeybind;
 import com.tom.cpm.shared.MinecraftClientAccess;
 
 public class KeybindText implements IText {
-	private String name, fallback;
+	private final String name, fallback;
 
 	public KeybindText(String name, String fallback) {
 		this.name = name;

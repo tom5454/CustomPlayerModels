@@ -80,7 +80,7 @@ public class AnimPanel extends Panel {
 		newAnimBtn.setBounds(new Box(5, 0, 18, 18));
 		p.addElement(newAnimBtn);
 
-		ButtonIcon delAnimBtn = new ButtonIcon(gui, "editor", 14, 16, new ConfirmPopup(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnim, null));
+		ButtonIcon delAnimBtn = new ButtonIcon(gui, "editor", 14, 16, ConfirmPopup.confirmHandler(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnim));
 		delAnimBtn.setBounds(new Box(25, 0, 18, 18));
 		p.addElement(delAnimBtn);
 		editor.setAnimDelEn.add(delAnimBtn::setEnabled);
@@ -131,7 +131,7 @@ public class AnimPanel extends Panel {
 		p.addElement(newFrmBtn);
 		editor.setFrameAddEn.add(newFrmBtn::setEnabled);
 
-		ButtonIcon delFrmBtn = new ButtonIcon(gui, "editor", 14, 16, new ConfirmPopup(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimFrame, null));
+		ButtonIcon delFrmBtn = new ButtonIcon(gui, "editor", 14, 16, ConfirmPopup.confirmHandler(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimFrame));
 		delFrmBtn.setBounds(new Box(25, 0, 18, 18));
 		p.addElement(delFrmBtn);
 		editor.setFrameDelEn.add(delFrmBtn::setEnabled);
@@ -166,7 +166,7 @@ public class AnimPanel extends Panel {
 		duration.addChangeListener(() -> editor.setAnimDuration((int) duration.getValue()));
 		tabHandler.add(duration);
 
-		Button clearAnimData = new Button(gui, gui.i18nFormat("button.cpm.clearAnimData"), new ConfirmPopup(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimPartData, null));
+		Button clearAnimData = new Button(gui, gui.i18nFormat("button.cpm.clearAnimData"), ConfirmPopup.confirmHandler(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimPartData));
 		clearAnimData.setBounds(new Box(110, 10, 55, 18));
 		clearAnimData.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.clearAnimData")));
 		p.addElement(clearAnimData);

@@ -9,12 +9,14 @@ import org.apache.logging.log4j.Logger;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
 import net.minecraft.util.IChatComponent;
 
 import net.minecraftforge.common.MinecraftForge;
 
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.text.TextRemapper;
+import com.tom.cpl.text.TextStyle;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
@@ -112,13 +114,33 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	}
 
 	@Override
-	public String getPlatformVersionString() {
-		return "Minecraft 1.7.10 (" + FMLCommonHandler.instance().getModName() + ") " + Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
+	public String getMCVersion() {
+		return "1.7.10";
+	}
+
+	@Override
+	public String getMCBrand() {
+		return "(" + FMLCommonHandler.instance().getModName() + ")";
+	}
+
+	@Override
+	public String getModVersion() {
+		return Loader.instance().getIndexedModList().get(CustomPlayerModels.ID).getDisplayVersion();
 	}
 
 	@Override
 	public TextRemapper<IChatComponent> getTextRemapper() {
-		return new TextRemapper<>(ChatComponentTranslation::new, ChatComponentText::new, IChatComponent::appendSibling, null);
+		return new TextRemapper<>(ChatComponentTranslation::new, ChatComponentText::new, IChatComponent::appendSibling, null,
+				CustomPlayerModels::styleText);
+	}
+
+	private static IChatComponent styleText(IChatComponent in, TextStyle style) {
+		ChatStyle s = new ChatStyle();
+		s.setBold(style.bold);
+		s.setItalic(style.italic);
+		s.setUnderlined(style.underline);
+		s.setStrikethrough(style.strikethrough);
+		return in.setChatStyle(s);
 	}
 
 	@Override

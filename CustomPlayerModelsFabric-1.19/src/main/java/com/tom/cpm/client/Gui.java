@@ -30,6 +30,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -48,6 +49,7 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.text.IText;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 
@@ -655,6 +657,27 @@ public class Gui extends Screen {
 				closeListener.accept(Gui.this::close);
 			} else
 				Gui.this.close();
+		}
+
+		@Override
+		public void drawFormattedText(float x, float y, IText text, int color, float scale) {
+			x += getOffset().x;
+			y += getOffset().y;
+			matrixStack.push();
+			matrixStack.translate(x, y, 50);
+			matrixStack.scale(scale, scale, scale);
+			textRenderer.draw(matrixStack, text.<Text>remap(), 0, 0, color);
+			matrixStack.pop();
+		}
+
+		@Override
+		public int textWidthFormatted(IText text) {
+			return textRenderer.getWidth(text.<Text>remap().asOrderedText());
+		}
+
+		@Override
+		public void openURL0(String url) {
+			Util.getOperatingSystem().open(url);
 		}
 	}
 

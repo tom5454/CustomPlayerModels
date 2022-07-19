@@ -42,7 +42,6 @@ public enum ElementType {
 				}
 			};
 			elem.rc.children = new ListView<>(elem.children, m -> m.rc);
-			elem.rc.useDynamic = true;
 		}
 
 		@Override

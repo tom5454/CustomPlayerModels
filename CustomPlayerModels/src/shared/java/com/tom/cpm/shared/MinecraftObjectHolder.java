@@ -11,9 +11,11 @@ public class MinecraftObjectHolder {
 
 	public static final boolean DEBUGGING = System.getProperty("cpm.debug", "false").equals("true");
 	public static final String NETWORK_ID = "cpm_net";
+	public static final String VERSION_CHECK_URL = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json";
 
 	public static void setClientObject(MinecraftClientAccess clientObject) {
 		MinecraftObjectHolder.clientObject = clientObject;
+		commonObject.getVersionCheck();//Begin version check
 	}
 
 	public static void setCommonObject(MinecraftCommonAccess commonObject) {

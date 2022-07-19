@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.player.LocalPlayer;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 
 @Mixin(LocalPlayer.class)
 public class LocalPlayerMixin {
@@ -16,6 +16,6 @@ public class LocalPlayerMixin {
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/player/LocalPlayer;noPhysics:Z", opcode = Opcodes.GETFIELD),
 			method = "aiStep()V")
 	public void onAiStep(CallbackInfo cbi) {
-		ClientProxy.INSTANCE.updateJump();
+		CustomPlayerModelsClient.INSTANCE.updateJump();
 	}
 }

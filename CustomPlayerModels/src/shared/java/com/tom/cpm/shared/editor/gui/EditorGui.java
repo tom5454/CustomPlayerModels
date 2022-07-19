@@ -34,8 +34,10 @@ import com.tom.cpl.text.KeybindText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
+import com.tom.cpm.externals.org.apache.maven.artifact.versioning.ComparableVersion;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
+import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -46,13 +48,15 @@ import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.Generators;
 import com.tom.cpm.shared.editor.RootGroups;
 import com.tom.cpm.shared.editor.TestIngameManager;
-import com.tom.cpm.shared.editor.anim.EditorAnim;
+import com.tom.cpm.shared.editor.gui.popup.ChangelogPopup;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.DescPopup;
 import com.tom.cpm.shared.editor.gui.popup.ErrorLogPopup;
 import com.tom.cpm.shared.editor.gui.popup.ExportPopup;
+import com.tom.cpm.shared.editor.gui.popup.FirstStartPopup;
 import com.tom.cpm.shared.editor.gui.popup.ModelsPopup;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
+import com.tom.cpm.shared.editor.gui.popup.WikiBrowserPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.gui.Keybinds;
@@ -74,6 +78,9 @@ public class EditorGui extends Frame {
 	private Editor editor;
 	private static boolean smallGuiWarning = true;
 	private static boolean notSupportedWarning = true;
+	private static boolean showFirstStart;
+	private static String showChangelog;
+	private static boolean showNewVersionPopup;
 	private Tooltip msgTooltip;
 	private long tooltipTime;
 
@@ -86,12 +93,25 @@ public class EditorGui extends Frame {
 				recent.add(f);
 			}
 		}
+		String last = ModConfig.getCommonConfig().getString(ConfigKeys.EDITOR_LAST_VERSION, null);
+		if(last == null)showFirstStart = true;
+		else {
+			ComparableVersion l = new ComparableVersion(last);
+			ComparableVersion c = new ComparableVersion(MinecraftCommonAccess.get().getModVersion());
+			if(c.compareTo(l) > 0)showChangelog = last;
+			else {
+				showNewVersionPopup = MinecraftCommonAccess.get().getVersionCheck().isOutdated();
+			}
+		}
+		ModConfig.getCommonConfig().setString(ConfigKeys.EDITOR_LAST_VERSION, MinecraftCommonAccess.get().getModVersion());
+		ModConfig.getCommonConfig().save();
 	}
 
 	private static void flushRecent() {
 		ConfigEntryList ce = ModConfig.getCommonConfig().getEntryList(ConfigKeys.EDITOR_RECENT_PROJECTS);
 		ce.clear();
 		recent.stream().filter(File::exists).map(File::getAbsolutePath).forEach(ce::add);
+		ModConfig.getCommonConfig().save();
 	}
 
 	public EditorGui(IGui gui) {
@@ -181,10 +201,27 @@ public class EditorGui extends Frame {
 		}
 		notSupportedWarning = false;
 
+		if(showFirstStart) {
+			openPopup(new FirstStartPopup(gui));
+			showFirstStart = false;
+		}
+
+		if(showChangelog != null) {
+			openPopup(new ChangelogPopup(gui, showChangelog));
+			showChangelog = null;
+		}
+
+		if(showNewVersionPopup) {
+			openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.changelog.newVersion.title"), gui.i18nFormat("label.cpm.changelog.newVersion.desc")));
+			showNewVersionPopup = false;
+		}
+
 		editor.setInfoMsg.add(p -> {
 			msgTooltip = new Tooltip(this, gui.wordWrap(p.getValue(), width));
 			tooltipTime = System.currentTimeMillis() + p.getKey();
 		});
+
+		MinecraftClientAccess.get().populatePlatformSettings("editor", this);
 	}
 
 	private void initModelPanel(int width, int height) {
@@ -381,6 +418,8 @@ public class EditorGui extends Frame {
 		});
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.exit"), gui::close);
+
+		MinecraftClientAccess.get().populatePlatformSettings("filePopup", pp);
 	}
 
 	private void save() {
@@ -468,6 +507,10 @@ public class EditorGui extends Frame {
 		pp.addButton(gui.i18nFormat("tab.cpm.social.errorLog"), () -> openPopup(new ErrorLogPopup(this)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.pastes"), () -> new PastePopup(this).open());
+
+		pp.addButton(gui.i18nFormat("label.cpm.wiki.title"), () -> openPopup(new WikiBrowserPopup(gui)));
+
+		pp.addButton(gui.i18nFormat("label.cpm.changelog.title"), () -> openPopup(new ChangelogPopup(gui, null)));
 	}
 
 	private void initEffectMenu() {
@@ -700,6 +743,7 @@ public class EditorGui extends Frame {
 				Log.warn("Error loading project file", e);
 				ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.load", e);
 				showError("load", e.toString());
+				editor.setInfoMsg.accept(Pair.of(0, ""));
 				editor.loadDefaultPlayerModel();
 				editor.updateGui();
 			}
@@ -769,8 +813,7 @@ public class EditorGui extends Frame {
 		});
 		if(!event.isConsumed()) {
 			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
-				editor.restitchTextures();
-				editor.animations.forEach(EditorAnim::clearCache);
+				editor.refreshCaches();
 				event.consume();
 			}
 		}

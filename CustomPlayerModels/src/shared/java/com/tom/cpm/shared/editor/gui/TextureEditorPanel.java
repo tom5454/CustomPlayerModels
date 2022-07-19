@@ -25,12 +25,19 @@ public class TextureEditorPanel extends GuiElement {
 	private Editor editor;
 	public Supplier<Vec2i> cursorPos;
 	private Vec2i mouseCursorPos = new Vec2i();
-	private Vec2i moveStart = new Vec2i();
+	private Vec2i moveStart;
 
 	public TextureEditorPanel(IGui gui, Editor editor, int zoom) {
 		super(gui);
 		this.editor = editor;
 		this.zoom = 0;
+		int dark = gui.getColors().button_border;
+		int light = gui.getColors().button_disabled;
+		editor.textureEditorBg.getImage().setRGB(0, 0, dark);
+		editor.textureEditorBg.getImage().setRGB(1, 0, light);
+		editor.textureEditorBg.getImage().setRGB(0, 1, light);
+		editor.textureEditorBg.getImage().setRGB(1, 1, dark);
+		editor.textureEditorBg.texture.markDirty();
 	}
 
 	@Override
@@ -46,28 +53,16 @@ public class TextureEditorPanel extends GuiElement {
 
 		ETextures provider = editor.getTextureProvider();
 		if(provider != null) {
-			provider.provider.bind();
 			if(zoom == 0) {
 				zoom = bounds.h / (float) provider.getImage().getWidth();
 			}
 			int rw = (int) (zoom * provider.getImage().getWidth());
 			int rh = (int) (zoom * provider.getImage().getHeight());
 
-			{
-				int chkW = Math.min(bounds.w, offX + rw);
-				int chkH = Math.min(bounds.h, offY + rh);
-				for(int x = offX;x<chkW;x+= 8) {
-					for(int y = offY;y<chkH;y+= 8) {
-						if(x + 8 < 0 || y + 8 < 0 || x - 8 > bounds.w || y - 8 > bounds.w)continue;
-						int w = Math.min(8, chkW - x);
-						int h = Math.min(8, chkH - y);
-						if(((x - offX) / 8 + (y - offY) / 8) % 2 == 0)
-							gui.drawBox(x, y, w, h, gui.getColors().button_border);
-						else
-							gui.drawBox(x, y, w, h, gui.getColors().button_disabled);
-					}
-				}
-			}
+			editor.textureEditorBg.bind();
+			gui.drawTexture(offX, offY, rw, rh, 0, 0, rw / 8f, rh / 8f);
+
+			provider.provider.bind();
 			gui.drawTexture(offX, offY, rw, rh, 0, 0, 1, 1);
 			int imgX = (int) ((event.x - offX - bounds.x) / zoom);
 			int imgY = (int) ((event.y - offY - bounds.y) / zoom);
@@ -78,7 +73,7 @@ public class TextureEditorPanel extends GuiElement {
 			{
 				if(p1 != null) {
 					ModelElement e = getElementUnderMouse(p1.x, p1.y);
-					if(dragging)e = editor.getSelectedElement();
+					if(dragging && moveStart != null)e = editor.getSelectedElement();
 					if(e != null) {
 						Box b = e.getTextureBox();
 						gui.drawRectangle(b.x * zoom + offX, b.y * zoom + offY, b.w * zoom, b.h * zoom, 0xff000000);
@@ -139,7 +134,9 @@ public class TextureEditorPanel extends GuiElement {
 			lastMy = y;
 			dragging = true;
 			ETextures provider = editor.getTextureProvider();
-			if(btn == 0) {
+			int r = EditorGui.getRotateMouseButton();
+			if(r == 0 ? gui.isShiftDown() : btn == r) {
+			} else if(btn == 0) {
 				int px = (int) ((x - offX - bounds.x) / zoom);
 				int py = (int) ((y - offY - bounds.y) / zoom);
 				if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
@@ -165,6 +162,7 @@ public class TextureEditorPanel extends GuiElement {
 						ModelElement me = getElementUnderMouse(px, py);
 						editor.selectedElement = me;
 						if(me != null) {
+							moveStart = new Vec2i();
 							moveStart.x = me.u;
 							moveStart.y = me.v;
 						}
@@ -189,7 +187,8 @@ public class TextureEditorPanel extends GuiElement {
 				int dy = y - lastMy;
 				ETextures provider = editor.getTextureProvider();
 
-				if(btn == EditorGui.getRotateMouseButton()) {
+				int r = EditorGui.getRotateMouseButton();
+				if(r == 0 ? gui.isShiftDown() : btn == r) {
 					offX += dx;
 					offY += dy;
 					offX = MathHelper.clamp(offX, (int) (-provider.getImage().getWidth() * zoom + 10), bounds.w - 10);
@@ -208,7 +207,7 @@ public class TextureEditorPanel extends GuiElement {
 						case MOVE_UV:
 						{
 							ModelElement me = editor.getSelectedElement();
-							if(me != null) {
+							if(me != null && moveStart != null) {
 								int xoff = px - dragX;
 								int yoff = py - dragY;
 								if(Math.abs(xoff) >= me.textureSize)dragX = px;
@@ -245,7 +244,7 @@ public class TextureEditorPanel extends GuiElement {
 			case MOVE_UV:
 			{
 				ModelElement me = editor.getSelectedElement();
-				if(me != null) {
+				if(me != null && moveStart != null) {
 					editor.action("move", "action.cpm.texUV").updateValueOp(me, new Vec2i(moveStart), new Vec2i(me.u, me.v), (a, b) -> {
 						a.u = b.x;
 						a.v = b.y;

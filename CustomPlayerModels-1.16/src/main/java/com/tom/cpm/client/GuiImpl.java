@@ -26,7 +26,9 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ChatVisibility;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SharedConstants;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -49,6 +51,7 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.text.IText;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 
@@ -727,5 +730,26 @@ public class GuiImpl extends Screen implements IGui {
 		} catch (Throwable e) {
 			onGuiException("Error in tick gui", e, true);
 		}
+	}
+
+	@Override
+	public void drawFormattedText(float x, float y, IText text, int color, float scale) {
+		x += getOffset().x;
+		y += getOffset().y;
+		matrixStack.pushPose();
+		matrixStack.translate(x, y, 50);
+		matrixStack.scale(scale, scale, scale);
+		font.draw(matrixStack, text.<ITextComponent>remap(), 0, 0, color);
+		matrixStack.popPose();
+	}
+
+	@Override
+	public int textWidthFormatted(IText text) {
+		return font.width(text.<ITextComponent>remap().getVisualOrderText());
+	}
+
+	@Override
+	public void openURL0(String url) {
+		Util.getPlatform().openUri(url);
 	}
 }

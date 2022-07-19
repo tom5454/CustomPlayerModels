@@ -63,18 +63,25 @@ public enum ModeDisplayType {
 	}
 
 	public static class ValuePanel extends Panel {
+		private Spinner spinnerS;
 
 		public ValuePanel(Frame frm, Editor editor, TabFocusHandler tabHandler) {
 			super(frm.getGui());
 			setBounds(new Box(0, 0, 170, 20));
 
-			Spinner spinnerS = new Spinner(gui);
+			spinnerS = new Spinner(gui);
 			spinnerS.setBounds(new Box(5, 0, 160, 18));
 			spinnerS.setDp(2);
 			spinnerS.addChangeListener(() -> editor.setValue(spinnerS.getValue()));
 			editor.setValue.add(spinnerS::setValue);
 			addElement(spinnerS);
 			tabHandler.add(spinnerS);
+		}
+
+		@Override
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			spinnerS.setVisible(visible);
 		}
 	}
 }

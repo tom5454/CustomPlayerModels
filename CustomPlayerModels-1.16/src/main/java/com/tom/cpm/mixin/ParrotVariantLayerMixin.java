@@ -12,7 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpl.util.ItemSlot;
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -25,7 +25,7 @@ public class ParrotVariantLayerMixin {
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/entity/player/PlayerEntity;FFFFZ)V")
 	public void onRenderPre(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, PlayerEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float netHeadYaw, float headPitch, boolean leftShoulderIn, CallbackInfo cbi) {
 		matrixStackIn.pushPose();
-		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null) {

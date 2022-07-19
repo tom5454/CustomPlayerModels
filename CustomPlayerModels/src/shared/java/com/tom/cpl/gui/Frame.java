@@ -38,6 +38,11 @@ public abstract class Frame extends Panel {
 		initFrame(width, height);
 		elements.remove(popup);
 		addElement(popup);
+		popup.getElements().forEach(e -> {
+			if(e instanceof PopupLayer) {
+				((PopupLayer)e).onInit();
+			}
+		});
 	}
 
 	public void draw(int mouseX, int mouseY, float partialTicks) {
@@ -174,8 +179,17 @@ public abstract class Frame extends Panel {
 			addElement(panel);
 			panel.setLayer(this);
 
+			setPopupPosition();
+		}
+
+		public void onInit() {
+			popup.onInit();
+			setPopupPosition();
+		}
+
+		private void setPopupPosition() {
 			Box pb = popup.getBounds();
-			if(!panel.hasDecoration()) {
+			if(!popup.hasDecoration()) {
 				setBounds(new Box(pb.x, pb.y, pb.w, pb.h));
 				popup.setBounds(new Box(0, 0, pb.w, pb.h));
 			} else {
@@ -255,6 +269,10 @@ public abstract class Frame extends Panel {
 				return true;
 			}
 			return false;
+		}
+
+		public void updateTitle() {
+			title.setText(popup.getTitle());
 		}
 	}
 

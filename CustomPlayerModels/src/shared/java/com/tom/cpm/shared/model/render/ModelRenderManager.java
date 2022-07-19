@@ -495,9 +495,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						g *= ((cube.color & 0x00ff00) >> 8 ) / 255f;
 						b *= ( cube.color & 0x0000ff       ) / 255f;
 					}
-					if(cube.useDynamic || cube.renderObject == null) {
+					if(cube.updateObject || cube.renderObject == null) {
 						if(cube.renderObject != null)cube.renderObject.free();
 						cube.renderObject = createBox(cube, holder);
+						cube.updateObject = false;
 					}
 					Mesh mesh = cube.renderObject;
 					VertexBuffer buffer = buf.getBuffer(holder.renderTypes, mesh.getLayer());

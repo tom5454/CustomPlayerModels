@@ -392,10 +392,16 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		KeybindHandler h = gui.getFrame().getKeybindHandler();
-		h.registerKeybind(Keybinds.ZOOM_IN_CAMERA, () -> zoom(1));
-		h.registerKeybind(Keybinds.ZOOM_OUT_CAMERA, () -> zoom(-1));
-		h.registerKeybind(Keybinds.RESET_CAMERA, () -> getCamera().reset());
+		if(keysCanControlCamera()) {
+			KeybindHandler h = gui.getFrame().getKeybindHandler();
+			h.registerKeybind(Keybinds.ZOOM_IN_CAMERA, () -> zoom(1));
+			h.registerKeybind(Keybinds.ZOOM_OUT_CAMERA, () -> zoom(-1));
+			h.registerKeybind(Keybinds.RESET_CAMERA, () -> getCamera().reset());
+		}
 		super.keyPressed(event);
+	}
+
+	protected boolean keysCanControlCamera() {
+		return true;
 	}
 }

@@ -21,7 +21,7 @@ import net.minecraft.util.ResourceLocation;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -41,7 +41,7 @@ public abstract class ElytraLayerMixin extends LayerRenderer<LivingEntity, Entit
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void preRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
 		if(getParentModel() instanceof BipedModel) {
-			ClientProxy.INSTANCE.renderElytra((BipedModel<LivingEntity>) getParentModel(), elytraModel);
+			CustomPlayerModelsClient.INSTANCE.renderElytra((BipedModel<LivingEntity>) getParentModel(), elytraModel);
 		}
 	}
 
@@ -51,7 +51,7 @@ public abstract class ElytraLayerMixin extends LayerRenderer<LivingEntity, Entit
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void postRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.manager.unbind(elytraModel);
+		CustomPlayerModelsClient.INSTANCE.manager.unbind(elytraModel);
 	}
 
 	@Redirect(at = @At(
@@ -65,7 +65,7 @@ public abstract class ElytraLayerMixin extends LayerRenderer<LivingEntity, Entit
 	private RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
 		if(getParentModel() instanceof BipedModel) {
 			ModelTexture mt = new ModelTexture(resLoc, PlayerRenderManager.armor);
-			ClientProxy.mc.getPlayerRenderManager().bindSkin(elytraModel, mt, TextureSheetType.ELYTRA);
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(elytraModel, mt, TextureSheetType.ELYTRA);
 			return mt.getRenderType();
 		}
 		return RenderType.armorCutoutNoCull(resLoc);

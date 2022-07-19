@@ -1,20 +1,32 @@
 package com.tom.cpl.gui;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
+
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.text.IText;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.util.ErrorLog;
 import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.Log;
 
 public interface IGui {
+	public static final Set<String> ALLOWED_PROTOCOLS = Sets.newHashSet("http", "https");
+
 	void drawBox(int x, int y, int w, int h, int color);
 	void drawGradientBox(int x, int y, int w, int h, int topLeft, int topRight, int bottomLeft, int bottomRight);
 	void drawText(int x, int y, String text, int color);
@@ -39,6 +51,9 @@ public interface IGui {
 	int getMaxScale();
 	CtxStack getStack();
 	void displayError(String msg);
+	void drawFormattedText(float x, float y, IText text, int color, float scale);
+	int textWidthFormatted(IText text);
+	void openURL0(String uri);
 
 	default void drawBox(float x, float y, float w, float h, int color) {
 		drawBox((int) x, (int) y, (int) w, (int) h, color);
@@ -186,5 +201,41 @@ public interface IGui {
 	default void drawText(int x, int y, String text, int bgColor, int color) {
 		drawBox(x, y, textWidth(text), 10, bgColor);
 		drawText(x, y + 1, text, color);
+	}
+
+	default boolean canScaleVanilla() {
+		return true;
+	}
+
+	default void openURL(String url) {
+		try {
+			URI uri = new URI(url);
+			String s = uri.getScheme();
+			if (s == null) {
+				throw new URISyntaxException(url, "Missing protocol");
+			}
+
+			if (!ALLOWED_PROTOCOLS.contains(s.toLowerCase(Locale.ROOT))) {
+				throw new URISyntaxException(url, "Unsupported protocol: " + s.toLowerCase(Locale.ROOT));
+			}
+
+			ConfirmPopup p = new ConfirmPopup(getFrame(), i18nFormat("label.cpm.openURL.title"), i18nFormat("label.cpm.openURL.text", url), () -> {
+				openURL0(url);
+			}, null);
+			GuiElement cancel = p.getElements().remove(p.getElements().size() - 1);
+			String c = i18nFormat("button.cpm.copy");
+			Button copy = new Button(this, c, () -> {
+				setClipboardText(url);
+				p.close();
+			});
+			copy.setBounds(new Box(cancel.getBounds().x, cancel.getBounds().y, 25 + textWidth(c), 20));
+			cancel.setBounds(new Box(cancel.getBounds().x + copy.getBounds().w + 5, cancel.getBounds().y, cancel.getBounds().w, cancel.getBounds().h));
+			p.addElement(copy);
+			p.addElement(cancel);
+
+			getFrame().openPopup(p);
+		} catch (URISyntaxException urisyntaxexception) {
+			Log.error("Can't open url for " + url, urisyntaxexception);
+		}
 	}
 }

@@ -534,4 +534,8 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			dragGroup.accept(vt);
 		}
 	}
+
+	public boolean canEdit() {
+		return editor.selectedElement.canEditVec(draggingVec);
+	}
 }

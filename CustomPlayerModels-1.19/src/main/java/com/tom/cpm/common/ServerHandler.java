@@ -25,6 +25,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -53,9 +54,9 @@ public class ServerHandler {
 		});
 		netHandler.setSendChat(ServerHandler::sendMessage);
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
-		/*if(ModList.get().isLoaded("pehkui")) {
+		if(ModList.get().isLoaded("pehkui")) {
 			netHandler.setScaler(new PehkuiInterface());
-		}*/
+		}
 		netHandler.setGetNet(spe -> spe.connection);
 		netHandler.setGetPlayer(net -> net.player);
 		netHandler.setGetPlayerId(ServerPlayer::getId);
@@ -72,16 +73,16 @@ public class ServerHandler {
 
 	@SubscribeEvent
 	public void onPlayerJoin(PlayerLoggedInEvent evt) {
-		netHandler.onJoin((ServerPlayer) evt.getPlayer());
+		netHandler.onJoin((ServerPlayer) evt.getEntity());
 	}
 
 	@SubscribeEvent
 	public void onTrackingStart(PlayerEvent.StartTracking evt) {
-		ServerGamePacketListenerImpl handler = ((ServerPlayer)evt.getPlayer()).connection;
+		ServerGamePacketListenerImpl handler = ((ServerPlayer)evt.getEntity()).connection;
 		NetH h = (NetH) handler;
 		if(h.cpm$hasMod()) {
 			if(evt.getTarget() instanceof Player) {
-				netHandler.sendPlayerData((ServerPlayer) evt.getTarget(), (ServerPlayer) evt.getPlayer());
+				netHandler.sendPlayerData((ServerPlayer) evt.getTarget(), (ServerPlayer) evt.getEntity());
 			}
 		}
 	}
@@ -95,7 +96,7 @@ public class ServerHandler {
 	@SubscribeEvent
 	public void onRespawn(PlayerRespawnEvent evt) {
 		if(!evt.isEndConquered()) {
-			netHandler.onRespawn((ServerPlayer) evt.getPlayer());
+			netHandler.onRespawn((ServerPlayer) evt.getEntity());
 		}
 	}
 
@@ -108,8 +109,8 @@ public class ServerHandler {
 
 	@SubscribeEvent
 	public void onJump(LivingJumpEvent evt) {
-		if(evt.getEntityLiving() instanceof ServerPlayer) {
-			netHandler.onJump((ServerPlayer) evt.getEntityLiving());
+		if(evt.getEntity() instanceof ServerPlayer) {
+			netHandler.onJump((ServerPlayer) evt.getEntity());
 		}
 	}
 

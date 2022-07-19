@@ -113,4 +113,9 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 		field.setCursorPos(end);
 		field.setSelectionPos(start);
 	}
+
+	@Override
+	public boolean isSelectable() {
+		return visible && enabled;
+	}
 }

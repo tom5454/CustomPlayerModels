@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.SkullBlock;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.RefHolder;
 
 @Mixin(BlockEntityWithoutLevelRenderer.class)
@@ -41,7 +41,7 @@ public class BlockEntityWithoutLevelRendererMixin {
 	public void onRender(ItemStack stack, ItemTransforms.TransformType arg1, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int arg5, CallbackInfo ci, Item item, Block block, GameProfile gameProfile, SkullBlock.Type skullType, SkullModelBase model) {
 		RefHolder.CPM_MODELS = skullModels;
 		if(skullType == SkullBlock.Types.PLAYER && gameProfile != null) {
-			ClientProxy.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
+			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
 		}
 	}
 
@@ -59,7 +59,7 @@ public class BlockEntityWithoutLevelRendererMixin {
 	public void onRenderOF(ItemStack stack, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int arg5, CallbackInfo ci, Item item, Block block, GameProfile gameProfile, SkullBlock.Type skullType, SkullModelBase model) {
 		RefHolder.CPM_MODELS = skullModels;
 		if(skullType == SkullBlock.Types.PLAYER && gameProfile != null) {
-			ClientProxy.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
+			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
 		}
 	}
 }

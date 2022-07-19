@@ -20,7 +20,7 @@ import net.minecraft.world.item.Items;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -40,20 +40,20 @@ public abstract class CapeLayerMixin extends RenderLayer<AbstractClientPlayer, P
 	public void onRender(PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn,
 			AbstractClientPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks,
 			float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null && def.hasRoot(RootModelType.CAPE)) {
 				ItemStack chestplate = entitylivingbaseIn.getItemBySlot(EquipmentSlot.CHEST);
 				if(!entitylivingbaseIn.isInvisible() && entitylivingbaseIn.isModelPartShown(PlayerModelPart.CAPE) && chestplate.getItem() != Items.ELYTRA) {
 					ResourceLocation defLoc = entitylivingbaseIn.getCloakTextureLocation();
-					if(defLoc == null)defLoc = ClientProxy.DEFAULT_CAPE;
+					if(defLoc == null)defLoc = CustomPlayerModelsClient.DEFAULT_CAPE;
 					ModelTexture mt = new ModelTexture(defLoc);
-					ClientProxy.mc.getPlayerRenderManager().rebindModel(getParentModel());
-					ClientProxy.mc.getPlayerRenderManager().bindSkin(getParentModel(), mt, TextureSheetType.CAPE);
+					CustomPlayerModelsClient.mc.getPlayerRenderManager().rebindModel(getParentModel());
+					CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getParentModel(), mt, TextureSheetType.CAPE);
 					if(mt.getTexture() != null) {
 						VertexConsumer buffer = bufferIn.getBuffer(mt.getRenderType());
-						ClientProxy.renderCape(matrixStackIn, buffer, packedLightIn, entitylivingbaseIn, partialTicks, getParentModel(), def);
+						CustomPlayerModelsClient.renderCape(matrixStackIn, buffer, packedLightIn, entitylivingbaseIn, partialTicks, getParentModel(), def);
 					}
 				}
 				cbi.cancel();

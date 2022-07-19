@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Base64;
 
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -26,7 +25,7 @@ public abstract class HttpResourceLoader implements ResourceLoader {
 
 	protected byte[] loadResource(URL url, ResourceEncoding enc, ModelDefinition def) throws IOException {
 		InputStream web = null;
-		URLConnection connection = null;
+		HttpURLConnection connection = null;
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			connection = HTTPIO.createUrlConnection(url, false);
@@ -53,7 +52,7 @@ public abstract class HttpResourceLoader implements ResourceLoader {
 				throw new IOException("Unsupported file encoding");
 			}
 		} finally {
-			if(connection != null && connection instanceof HttpURLConnection)((HttpURLConnection)connection).disconnect();
+			if(connection != null)connection.disconnect();
 			if(web != null)
 				try {
 					web.close();

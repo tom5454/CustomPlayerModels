@@ -93,10 +93,10 @@ public class FileChooserPopup extends PopupPanel {
 					}
 				}
 				if(selected.exists()) {
-					frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.overwrite"), gui.i18nFormat("label.cpm.overwrite"), () -> {
+					ConfirmPopup.confirm(frm, gui.i18nFormat("label.cpm.overwrite"), gui.i18nFormat("label.cpm.overwrite"), () -> {
 						close();
 						accept.run();
-					}, () -> frm.openPopup(this)));
+					});
 				} else {
 					close();
 					accept.run();

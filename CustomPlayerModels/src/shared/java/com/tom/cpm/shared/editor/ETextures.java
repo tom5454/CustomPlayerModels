@@ -211,16 +211,16 @@ public class ETextures implements TreeElement {
 	@Override
 	public void delete() {
 		if(e.elements.stream().anyMatch(e -> e.type == ElementType.ROOT_PART && getTextureSheet((VanillaModelPart) e.typeData) == type)) {
-			e.frame.openPopup(new ConfirmPopup(e.frame, e.gui().i18nFormat("label.cpm.confirm"), e.gui().i18nFormat("label.cpm.resetTextureSheet"), () ->  {
+			ConfirmPopup.confirm(e.frame, e.gui().i18nFormat("label.cpm.confirm"), e.gui().i18nFormat("label.cpm.resetTextureSheet"), () ->  {
 				e.action("delTexture").
 				updateValueOp(this, this.getImage(), this.copyDefaultImg(), ETextures::setImage).
 				updateValueOp(this, this.isEdited(), false, ETextures::setEdited).
 				execute();
-			}, null, e.gui().i18nFormat("button.cpm.resetTexture")));
+			}, e.gui().i18nFormat("button.cpm.resetTexture"));
 		} else {
-			e.frame.openPopup(new ConfirmPopup(e.frame, e.gui().i18nFormat("label.cpm.confirm"), e.gui().i18nFormat("label.cpm.removeTextureSheet"), () -> {
+			ConfirmPopup.confirm(e.frame, e.gui().i18nFormat("label.cpm.confirm"), e.gui().i18nFormat("label.cpm.removeTextureSheet"), () -> {
 				e.action("remove", "label.cpm.textureSheet").removeFromMap(e.textures, type, this).execute();
-			}, null));
+			});
 		}
 	}
 

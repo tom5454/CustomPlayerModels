@@ -45,4 +45,12 @@ public class PopupPanel extends Panel {
 
 	public void filesDropped(List<File> files) {
 	}
+
+	public void updateTitle() {
+		if(layer != null)
+			layer.updateTitle();
+	}
+
+	public void onInit() {
+	}
 }

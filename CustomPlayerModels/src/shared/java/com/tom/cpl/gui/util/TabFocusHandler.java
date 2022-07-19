@@ -22,7 +22,7 @@ public class TabFocusHandler extends GuiElement {
 	public interface Focusable {
 		boolean isFocused();
 		void setFocused(boolean focused);
-		boolean isVisible();
+		boolean isSelectable();
 	}
 
 	public boolean add(Focusable e) {
@@ -36,7 +36,7 @@ public class TabFocusHandler extends GuiElement {
 	@Override
 	public void keyPressed(KeyboardEvent e) {
 		if(e.matches(gui.getKeyCodes().KEY_TAB)) {
-			List<Focusable> fc = focusables.stream().filter(Focusable::isVisible).collect(Collectors.toList());
+			List<Focusable> fc = focusables.stream().filter(Focusable::isSelectable).collect(Collectors.toList());
 			int id = -1;
 			for (int i = 0; i < fc.size(); i++) {
 				Focusable f = fc.get(i);

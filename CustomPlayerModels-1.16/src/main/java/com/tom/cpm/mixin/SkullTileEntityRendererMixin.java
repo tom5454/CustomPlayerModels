@@ -26,7 +26,7 @@ import net.minecraft.util.ResourceLocation;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.model.TextureSheetType;
 
@@ -48,7 +48,7 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 	private static RenderType onGetRenderType(ResourceLocation resLoc, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn) {
 		GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
 		ModelTexture mt = new ModelTexture(resLoc);
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
 		return mt.getRenderType();
 	}
 
@@ -63,7 +63,7 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 	private static RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn) {
 		GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
 		ModelTexture mt = new ModelTexture(resLoc);
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
 		return mt.getRenderType();
 	}
 
@@ -74,7 +74,7 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 	private static void onRenderPre(@Nullable Direction directionIn, float p_228879_1_, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, CallbackInfo cbi) {
 		if (skullType == SkullBlock.Types.PLAYER && gameProfileIn != null) {
 			GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
-			ClientProxy.INSTANCE.renderSkull(model, gameProfileIn, buffer);
+			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfileIn, buffer);
 		}
 	}
 
@@ -85,7 +85,7 @@ public abstract class SkullTileEntityRendererMixin extends TileEntityRenderer<Sk
 	private static void onRenderPost(@Nullable Direction directionIn, float p_228879_1_, SkullBlock.ISkullType skullType, @Nullable GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, CallbackInfo cbi) {
 		if (skullType == SkullBlock.Types.PLAYER && gameProfileIn != null) {
 			GenericHeadModel model = MODEL_BY_TYPE.get(skullType);
-			ClientProxy.INSTANCE.manager.unbind(model);
+			CustomPlayerModelsClient.INSTANCE.manager.unbind(model);
 		}
 	}
 }

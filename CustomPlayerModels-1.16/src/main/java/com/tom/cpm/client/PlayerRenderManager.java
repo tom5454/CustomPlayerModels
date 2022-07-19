@@ -47,7 +47,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 					M model, String arg) {
 				if("api".equals(arg) && model instanceof BipedModel) {
 					return new RedirectHolderApi(PlayerRenderManager.this, (BipedModel<LivingEntity>) model);
-				} else if(ClientProxy.vrLoaded && VRPlayerRenderer.isVRPlayer(model)) {
+				} else if(CustomPlayerModelsClient.vrLoaded && VRPlayerRenderer.isVRPlayer(model)) {
 					return VRPlayerRenderer.createVRPlayer(PlayerRenderManager.this, model);
 				} else if(model instanceof PlayerModel) {
 					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<LivingEntity>) model);
@@ -69,7 +69,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 			public RedirectRenderer<ModelRenderer> create(Model model,
 					RedirectHolder<Model, ?, ModelTexture, ModelRenderer> access,
 					Supplier<ModelRenderer> modelPart, VanillaModelPart part) {
-				return ClientProxy.optifineLoaded ?
+				return CustomPlayerModelsClient.optifineLoaded ?
 						new RedirectRendererOF((RDH) access, modelPart, part) :
 							new RedirectModelRendererVanilla((RDH) access, modelPart, part);
 			}
@@ -98,7 +98,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 
 		@Override
 		public void setupRenderSystem(ModelTexture cbi, TextureSheetType tex) {
-			ClientProxy.mc.renderBuilder.build(renderTypes, cbi);
+			CustomPlayerModelsClient.mc.renderBuilder.build(renderTypes, cbi);
 		}
 
 		@Override

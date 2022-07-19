@@ -17,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -36,15 +36,15 @@ public abstract class BipedArmorLayerMixin extends LayerRenderer<LivingEntity, B
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void preRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.renderArmor(outerModel, innerModel, getParentModel());
+		CustomPlayerModelsClient.INSTANCE.renderArmor(outerModel, innerModel, getParentModel());
 	}
 
 	@Inject(at = @At("RETURN"),
 			method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 					+ "Lnet/minecraft/entity/LivingEntity;FFFFFF)V")
 	public void postRender(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, LivingEntity entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.manager.unbind(outerModel);
-		ClientProxy.INSTANCE.manager.unbind(innerModel);
+		CustomPlayerModelsClient.INSTANCE.manager.unbind(outerModel);
+		CustomPlayerModelsClient.INSTANCE.manager.unbind(innerModel);
 	}
 
 	@Inject(at = @At("HEAD"),
@@ -53,6 +53,6 @@ public abstract class BipedArmorLayerMixin extends LayerRenderer<LivingEntity, B
 					"func_241738_a_(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I"
 							+ "ZLnet/minecraft/client/renderer/entity/model/BipedModel;FFFLnet/minecraft/util/ResourceLocation;)V"}, remap = false)
 	private void preRender(MatrixStack p_241738_1_, IRenderTypeBuffer p_241738_2_, int p_241738_3_, boolean p_241738_5_, BipedModel<LivingEntity> model, float p_241738_8_, float p_241738_9_, float p_241738_10_, ResourceLocation resLoc, CallbackInfo cbi) {
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
 }

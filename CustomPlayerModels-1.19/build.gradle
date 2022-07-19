@@ -155,7 +155,7 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.19-41.0.16'
+    minecraft 'net.minecraftforge:forge:1.19-41.0.94'
 
     // Mixin annotation processor - generates the refmap
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
@@ -173,7 +173,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     compileOnly files("of.jar")
     
-    //compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.3.0-1.18.2-forge")
+    compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.3.3-1.19-forge")
 }
 
 sourceSets {

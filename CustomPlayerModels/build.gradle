@@ -3,7 +3,7 @@ plugins {
 }
 
 version = project.mod_version
-group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = 'com.tom.cpm' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'CustomPlayerModels-API'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -19,6 +19,7 @@ dependencies {
     implementation "com.google.code.gson:gson:2.8.5"
     implementation "com.google.guava:guava:21.0"
     compileOnly "com.mojang:brigadier:1.0.18"
+    compileOnly "io.netty:netty-all:4.1.25.Final"
 }
 
 sourceSets {
@@ -30,6 +31,15 @@ sourceSets {
 			srcDir "src/shared/resources"
 		}
 	}
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

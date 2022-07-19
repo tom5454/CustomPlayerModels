@@ -8,8 +8,8 @@ import java.util.Map;
 import com.tom.cpl.gui.IGui;
 
 public class FormatText implements IText {
-	private String key;
-	private Object[] args;
+	private final String key;
+	private final Object[] args;
 
 	public FormatText(String text, Object... args) {
 		this.key = text;

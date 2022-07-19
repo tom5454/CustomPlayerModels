@@ -49,7 +49,6 @@ import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.anim.AnimationType;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
-import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.RenderUtil;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
@@ -73,6 +72,7 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 import com.tom.cpm.shared.model.render.RenderMode;
+import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.PlayerModelLayer;
@@ -189,6 +189,7 @@ public class Editor {
 	public long lastEdit;
 	public EditorDefinition definition;
 	public Map<TextureSheetType, ETextures> textures = new HashMap<>();
+	public TextureProvider textureEditorBg = new TextureProvider(new Image(2, 2), new Vec2i(2, 2));
 	public File file;
 	public ProjectFile project = new ProjectFile();
 	public int exportSize;
@@ -198,7 +199,7 @@ public class Editor {
 		textures.put(TextureSheetType.SKIN, new ETextures(this, TextureSheetType.SKIN, stitcher -> templates.forEach(e -> e.stitch(stitcher))));
 	}
 
-	public void setGui(EditorGui gui) {
+	public void setGui(Frame gui) {
 		this.frame = gui;
 	}
 
@@ -500,6 +501,7 @@ public class Editor {
 	}
 
 	public CompletableFuture<Void> load(File file) {
+		setInfoMsg.accept(Pair.of(200000, gui().i18nFormat("tooltip.cpm.loading", file.getName())));
 		loadDefaultPlayerModel();
 		return project.load(file).thenCompose(v -> {
 			try {
@@ -513,6 +515,7 @@ public class Editor {
 			this.file = file;
 			restitchTextures();
 			updateGui();
+			setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.loadSuccess", file.getName())));
 			return CompletableFuture.completedFuture(null);
 		});
 	}
@@ -801,6 +804,7 @@ public class Editor {
 	public void free() {
 		textures.values().forEach(ETextures::free);
 		definition.cleanup();
+		textureEditorBg.free();
 	}
 
 	public void restitchTextures() {
@@ -878,5 +882,11 @@ public class Editor {
 				updateGui();
 			}
 		}
+	}
+
+	public void refreshCaches() {
+		restitchTextures();
+		animations.forEach(EditorAnim::clearCache);
+		walkElements(elements, ModelElement::markDirty);
 	}
 }

@@ -12,7 +12,7 @@ import net.optifine.player.PlayerItemModel;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.model.TextureSheetType;
 
@@ -28,7 +28,7 @@ public class PlayerItemModelMixin_OF {
 					+ "Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;II)V")
 	public ResourceLocation getPlayerSkin(AbstractClientPlayerEntity pe, BipedModel modelBiped, AbstractClientPlayerEntity player, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, int packedOverlayIn) {
 		ModelTexture mt = new ModelTexture(player.getSkinTextureLocation());
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(modelBiped, mt, TextureSheetType.SKIN);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(modelBiped, mt, TextureSheetType.SKIN);
 		return mt.getTexture();
 	}
 }

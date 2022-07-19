@@ -21,24 +21,15 @@ public class ScrollPanel extends Panel {
 	public void mouseWheel(MouseEvent event) {
 		display.mouseWheel(event.offset(bounds).offset(-xScroll, -yScroll));
 		if(!event.isConsumed() && event.isInBounds(bounds)) {
-			float overflowX = bounds.w / (float) display.getBounds().w;
-			float overflowY = bounds.h / (float) display.getBounds().h;
-			int xe = -1;
-			int ye = -1;
-			if(overflowY < 1) {
-				xe = 3;
-			}
-			if(overflowX < 1) {
-				ye = 3;
-			}
 			if(gui.isShiftDown()) {
 				int newScroll = xScroll - event.btn * 5;
-				xScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().w - bounds.w + xe, 0));
+				setScrollX(newScroll);
+				if(bounds.w / (float) display.getBounds().w < 1)event.consume();
 			} else {
 				int newScroll = yScroll - event.btn * 5;
-				yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h + ye, 0));
+				setScrollY(newScroll);
+				if(bounds.h / (float) display.getBounds().h < 1)event.consume();
 			}
-			event.consume();
 		}
 	}
 
@@ -120,22 +111,12 @@ public class ScrollPanel extends Panel {
 	@Override
 	public void mouseDrag(MouseEvent event) {
 		if(enableDrag != 0) {
-			float overflowX = bounds.w / (float) display.getBounds().w;
-			float overflowY = bounds.h / (float) display.getBounds().h;
-			int xe = -1;
-			int ye = -1;
-			if(overflowY < 1) {
-				xe = 3;
-			}
-			if(overflowX < 1) {
-				ye = 3;
-			}
 			switch (enableDrag) {
 			case 1:
 			{
 				int drag = (int) ((event.y - dragY) / (float) bounds.h * display.getBounds().h);
 				int newScroll = yScOld + drag;
-				yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h + ye, 0));
+				setScrollY(newScroll);
 			}
 			break;
 
@@ -143,7 +124,7 @@ public class ScrollPanel extends Panel {
 			{
 				int drag = (int) ((event.x - dragX) / (float) bounds.w * display.getBounds().w);
 				int newScroll = xScOld + drag;
-				xScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().w - bounds.w + xe, 0));
+				setScrollX(newScroll);
 			}
 			break;
 
@@ -174,12 +155,22 @@ public class ScrollPanel extends Panel {
 		this.scrollBarSide = scrollBarSide;
 	}
 
-	public void setScrollX(int xScroll) {
-		this.xScroll = xScroll;
+	public void setScrollX(int newScroll) {
+		float overflowY = bounds.h / (float) display.getBounds().h;
+		int xe = -1;
+		if(overflowY < 1) {
+			xe = 3;
+		}
+		xScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().w - bounds.w + xe, 0));
 	}
 
-	public void setScrollY(int yScroll) {
-		this.yScroll = yScroll;
+	public void setScrollY(int newScroll) {
+		float overflowX = bounds.w / (float) display.getBounds().w;
+		int ye = -1;
+		if(overflowX < 1) {
+			ye = 3;
+		}
+		yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h + ye, 0));
 	}
 
 	public int getScrollX() {

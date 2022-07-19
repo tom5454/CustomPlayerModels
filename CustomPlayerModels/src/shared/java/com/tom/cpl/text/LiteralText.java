@@ -6,7 +6,7 @@ import java.util.Map;
 import com.tom.cpl.gui.IGui;
 
 public class LiteralText implements IText {
-	private String value;
+	private final String value;
 
 	public LiteralText(String value) {
 		this.value = value;

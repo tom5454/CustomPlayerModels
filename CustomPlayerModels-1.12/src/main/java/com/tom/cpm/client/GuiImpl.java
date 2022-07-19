@@ -2,6 +2,7 @@ package com.tom.cpm.client;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -25,6 +26,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.fml.common.Loader;
@@ -42,9 +44,11 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.text.IText;
 import com.tom.cpl.util.AWTChooser;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.shared.gui.panel.Panel3d;
+import com.tom.cpm.shared.util.Log;
 
 public class GuiImpl extends GuiScreen implements IGui {
 	private static final KeyCodes CODES = new LWJGLKeyCodes();
@@ -577,6 +581,34 @@ public class GuiImpl extends GuiScreen implements IGui {
 			gui.tick();
 		} catch (Throwable e) {
 			onGuiException("Error in tick gui", e, true);
+		}
+	}
+
+	@Override
+	public void drawFormattedText(float x, float y, IText text, int color, float scale) {
+		x += getOffset().x;
+		y += getOffset().y;
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(x, y, 0);
+		GlStateManager.scale(scale, scale, scale);
+		fontRenderer.drawString(text.<ITextComponent>remap().getFormattedText(), 0, 0, color);
+		GlStateManager.popMatrix();
+	}
+
+	@Override
+	public int textWidthFormatted(IText text) {
+		return fontRenderer.getStringWidth(text.<ITextComponent>remap().getFormattedText());
+	}
+
+	@Override
+	public void openURL0(String url) {
+		try {
+			Class<?> oclass = Class.forName("java.awt.Desktop");
+			Object object = oclass.getMethod("getDesktop").invoke((Object)null);
+			oclass.getMethod("browse", URI.class).invoke(object, new URI(url));
+		} catch (Throwable throwable1) {
+			Throwable throwable = throwable1.getCause();
+			Log.error("Couldn't open link: " + (throwable == null ? "<UNKNOWN>" : throwable.getMessage()));
 		}
 	}
 }

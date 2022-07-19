@@ -183,7 +183,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public NetHandler<?, ?, ?> getNetHandler() {
-		return ClientProxy.INSTANCE.netHandler;
+		return CustomPlayerModelsClient.INSTANCE.netHandler;
 	}
 
 	@Override

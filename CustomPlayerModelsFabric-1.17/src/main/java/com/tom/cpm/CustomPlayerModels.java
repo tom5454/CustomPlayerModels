@@ -18,10 +18,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.KeybindText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.TranslatableText;
 
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.text.TextRemapper;
+import com.tom.cpl.text.TextStyle;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
@@ -31,6 +33,8 @@ import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
+import com.tom.cpm.shared.util.IVersionCheck;
+import com.tom.cpm.shared.util.VersionCheck;
 
 public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer {
 	private ModConfigFile config;
@@ -93,21 +97,39 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 	}
 
 	@Override
-	public String getPlatformVersionString() {
-		String modVer = FabricLoader.getInstance().getModContainer("cpm").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
+	public String getMCVersion() {
+		return SharedConstants.getGameVersion().getName();
+	}
+
+	@Override
+	public String getMCBrand() {
 		String fVer = FabricLoader.getInstance().getModContainer("fabric").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
 		String lVer = FabricLoader.getInstance().getModContainer("fabricloader").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
-		String s = "Minecraft " + SharedConstants.getGameVersion().getName() + " (fabric/" + lVer + "/" + fVer + ") " + modVer;
-		return s;
+		return "(fabric/" + lVer + "/" + fVer + ")";
+	}
+
+	@Override
+	public String getModVersion() {
+		return FabricLoader.getInstance().getModContainer("cpm").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
 	}
 
 	@Override
 	public TextRemapper<MutableText> getTextRemapper() {
-		return new TextRemapper<>(TranslatableText::new, LiteralText::new, MutableText::append, KeybindText::new);
+		return new TextRemapper<>(TranslatableText::new, LiteralText::new, MutableText::append, KeybindText::new,
+				CustomPlayerModels::styleText);
+	}
+
+	private static MutableText styleText(MutableText in, TextStyle style) {
+		return in.setStyle(Style.EMPTY.withBold(style.bold).withItalic(style.italic).withUnderline(style.underline).withStrikethrough(style.strikethrough));
 	}
 
 	@Override
 	public CPMApiManager getApi() {
 		return api;
+	}
+
+	@Override
+	public IVersionCheck getVersionCheck() {
+		return VersionCheck.get(getMCVersion() + "-fabric", getModVersion());
 	}
 }

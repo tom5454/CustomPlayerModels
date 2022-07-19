@@ -24,9 +24,11 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -192,7 +194,7 @@ public class ClientProxy extends CommonProxy {
 		if(evt.entity instanceof AbstractClientPlayer) {
 			if(!Player.isEnableNames())
 				evt.setCanceled(true);
-			if(Player.isEnableLoadingInfo()) {
+			if(Player.isEnableLoadingInfo() && canRenderName(evt.entity)) {
 				FormatText st = INSTANCE.manager.getStatus(((AbstractClientPlayer) evt.entity).getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE);
 				if(st != null) {
 					double d0 = evt.entity.getDistanceSqToEntity(minecraft.getRenderViewEntity());
@@ -240,6 +242,34 @@ public class ClientProxy extends CommonProxy {
 				}
 			}
 		}
+	}
+
+	protected boolean canRenderName(EntityLivingBase entity) {
+		EntityPlayerSP entityplayersp = Minecraft.getMinecraft().thePlayer;
+
+		if (entity instanceof EntityPlayer && entity != entityplayersp) {
+			Team team = entity.getTeam();
+			Team team1 = entityplayersp.getTeam();
+
+			if (team != null) {
+				Team.EnumVisible team$enumvisible = team.getNameTagVisibility();
+
+				switch (team$enumvisible) {
+				case ALWAYS:
+					return true;
+				case NEVER:
+					return false;
+				case HIDE_FOR_OTHER_TEAMS:
+					return team1 == null || team.isSameTeam(team1);
+				case HIDE_FOR_OWN_TEAM:
+					return team1 == null || !team.isSameTeam(team1);
+				default:
+					return true;
+				}
+			}
+		}
+
+		return Minecraft.isGuiEnabled() && !entity.isInvisibleToPlayer(entityplayersp) && entity.riddenByEntity == null;
 	}
 
 	protected void renderLivingLabel(Entity entityIn, String str, double x, double y, double z, int maxDistance) {

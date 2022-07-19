@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.client.RefHolder;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -46,7 +46,7 @@ public class SkullBlockRendererMixin {
 		RefHolder.CPM_MODELS = modelByType;
 		GameProfile gameProfile = skullBlockEntity.getOwnerProfile();
 		if(skullType == SkullBlock.Types.PLAYER && gameProfile != null) {
-			ClientProxy.INSTANCE.renderSkull(model, gameProfile, buffer);
+			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, buffer);
 		}
 	}
 
@@ -62,7 +62,7 @@ public class SkullBlockRendererMixin {
 		SkullModelBase model = RefHolder.CPM_MODELS.get(skullType);
 		RefHolder.CPM_MODELS = null;
 		ModelTexture mt = new ModelTexture(resLoc);
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
 		return mt.getRenderType();
 	}
 
@@ -78,7 +78,7 @@ public class SkullBlockRendererMixin {
 		SkullModelBase model = RefHolder.CPM_MODELS.get(skullType);
 		RefHolder.CPM_MODELS = null;
 		ModelTexture mt = new ModelTexture(resLoc);
-		ClientProxy.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
 		return mt.getRenderType();
 	}
 
@@ -87,6 +87,6 @@ public class SkullBlockRendererMixin {
 					+ "Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 					+ "Lnet/minecraft/client/model/SkullModelBase;Lnet/minecraft/client/renderer/RenderType;)V")
 	private static void renderSkullPost(Direction direction, float yaw, float animationProgress, PoseStack matrices, MultiBufferSource vertexConsumers, int light, SkullModelBase model, RenderType renderLayer, CallbackInfo cbi) {
-		ClientProxy.INSTANCE.manager.unbind(model);
+		CustomPlayerModelsClient.INSTANCE.manager.unbind(model);
 	}
 }

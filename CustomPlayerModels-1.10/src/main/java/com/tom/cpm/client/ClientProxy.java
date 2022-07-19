@@ -26,6 +26,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -196,7 +197,7 @@ public class ClientProxy extends CommonProxy {
 		if(evt.getEntity() instanceof AbstractClientPlayer) {
 			if(!Player.isEnableNames())
 				evt.setCanceled(true);
-			if(Player.isEnableLoadingInfo()) {
+			if(Player.isEnableLoadingInfo() && canRenderName(evt.getEntity())) {
 				FormatText st = INSTANCE.manager.getStatus(((AbstractClientPlayer) evt.getEntity()).getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE);
 				if(st != null) {
 					double d0 = evt.getEntity().getDistanceSqToEntity(minecraft.getRenderViewEntity());
@@ -210,6 +211,35 @@ public class ClientProxy extends CommonProxy {
 				}
 			}
 		}
+	}
+
+	protected boolean canRenderName(Entity entity) {
+		EntityPlayerSP entityplayersp = Minecraft.getMinecraft().thePlayer;
+		boolean flag = !entity.isInvisibleToPlayer(entityplayersp);
+
+		if (entity != entityplayersp) {
+			Team team = entity.getTeam();
+			Team team1 = entityplayersp.getTeam();
+
+			if (team != null) {
+				Team.EnumVisible team$enumvisible = team.getNameTagVisibility();
+
+				switch (team$enumvisible) {
+				case ALWAYS:
+					return flag;
+				case NEVER:
+					return false;
+				case HIDE_FOR_OTHER_TEAMS:
+					return team1 == null ? flag : team.isSameTeam(team1) && (team.getSeeFriendlyInvisiblesEnabled() || flag);
+				case HIDE_FOR_OWN_TEAM:
+					return team1 == null ? flag : !team.isSameTeam(team1) && flag;
+				default:
+					return true;
+				}
+			}
+		}
+
+		return Minecraft.isGuiEnabled() && flag && !entity.isBeingRidden();
 	}
 
 	protected void renderLivingLabel(Entity entityIn, String str, double x, double y, double z, int maxDistance) {

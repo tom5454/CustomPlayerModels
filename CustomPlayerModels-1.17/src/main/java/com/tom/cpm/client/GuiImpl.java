@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
@@ -20,6 +21,7 @@ import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -50,6 +52,7 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.text.IText;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 
@@ -691,5 +694,26 @@ public class GuiImpl extends Screen implements IGui {
 		} catch (Throwable e) {
 			onGuiException("Error in tick gui", e, true);
 		}
+	}
+
+	@Override
+	public void drawFormattedText(float x, float y, IText text, int color, float scale) {
+		x += getOffset().x;
+		y += getOffset().y;
+		matrixStack.pushPose();
+		matrixStack.translate(x, y, 50);
+		matrixStack.scale(scale, scale, scale);
+		font.draw(matrixStack, text.<Component>remap(), 0, 0, color);
+		matrixStack.popPose();
+	}
+
+	@Override
+	public int textWidthFormatted(IText text) {
+		return font.width(text.<Component>remap().getVisualOrderText());
+	}
+
+	@Override
+	public void openURL0(String url) {
+		Util.getPlatform().openUri(url);
 	}
 }

@@ -191,7 +191,7 @@ public class ClientProxy extends CommonProxy {
 		if(evt.entity instanceof AbstractClientPlayer) {
 			if(!Player.isEnableNames())
 				evt.setCanceled(true);
-			if(Player.isEnableLoadingInfo()) {
+			if(Player.isEnableLoadingInfo() && canRenderName(evt.entity)) {
 				FormatText st = INSTANCE.manager.getStatus(((AbstractClientPlayer) evt.entity).getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE);
 				if(st != null) {
 					float f = 1.6F;
@@ -241,6 +241,10 @@ public class ClientProxy extends CommonProxy {
 				}
 			}
 		}
+	}
+
+	protected boolean canRenderName(EntityLivingBase p_110813_1_) {
+		return Minecraft.isGuiEnabled() && !p_110813_1_.isInvisibleToPlayer(Minecraft.getMinecraft().thePlayer) && p_110813_1_.riddenByEntity == null;
 	}
 
 	protected void renderLivingLabel(EntityLivingBase p_96449_1_, double p_96449_2_, double p_96449_4_, double p_96449_6_, String p_96449_8_, float p_96449_9_, double p_96449_10_) {

@@ -69,4 +69,47 @@ public class ConfirmPopup extends PopupPanel implements Runnable {
 	public String getTitle() {
 		return title;
 	}
+
+	private static Runnable action(ConfirmPopup p, Runnable ok) {
+		return () -> {
+			if(p.getGui().isShiftDown())ok.run();
+			else p.run();
+		};
+	}
+
+	public static Runnable confirmHandler(Frame frame, String title, String msg, Runnable ok, Runnable cancel, String okTxt, String cancelTxt) {
+		ConfirmPopup p = new ConfirmPopup(frame, title, msg, ok, cancel, okTxt, cancelTxt);
+		return action(p, ok);
+	}
+
+	public static Runnable confirmHandler(Frame frame, String title, String msg, Runnable ok, String okTxt) {
+		ConfirmPopup p = new ConfirmPopup(frame, title, msg, ok, null, okTxt);
+		return action(p, ok);
+	}
+
+	public static Runnable confirmHandler(Frame frame, String title, String msg, Runnable ok) {
+		ConfirmPopup p = new ConfirmPopup(frame, title, msg, ok, null);
+		return action(p, ok);
+	}
+
+	public static Runnable confirmHandler(Frame frame, String msg, Runnable ok) {
+		ConfirmPopup p = new ConfirmPopup(frame, msg, ok, null);
+		return action(p, ok);
+	}
+
+	public static void confirm(Frame frame, String title, String msg, Runnable ok, Runnable cancel, String okTxt, String cancelTxt) {
+		confirmHandler(frame, title, msg, ok, cancel, okTxt, cancelTxt).run();
+	}
+
+	public static void confirm(Frame frame, String title, String msg, Runnable ok, String okTxt) {
+		confirmHandler(frame, title, msg, ok, okTxt).run();
+	}
+
+	public static void confirm(Frame frame, String title, String msg, Runnable ok) {
+		confirmHandler(frame, title, msg, ok).run();
+	}
+
+	public static void confirm(Frame frame, String msg, Runnable ok) {
+		confirmHandler(frame, msg, ok).run();
+	}
 }
