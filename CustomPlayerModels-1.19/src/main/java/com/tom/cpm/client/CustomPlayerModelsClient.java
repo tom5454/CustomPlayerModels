@@ -109,8 +109,7 @@ public class CustomPlayerModelsClient {
 
 	private void onMessage(IText f) {
 		Registry<ChatType> registry = minecraft.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-		ChatType messageType = registry.get(ChatType.SYSTEM);
-		minecraft.gui.handleSystemChat(messageType, f.remap());
+		minecraft.gui.getChat().addMessage(f.remap());
 	}
 
 	public static void apiInit() {

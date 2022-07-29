@@ -32,12 +32,10 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.message.MessageType;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -119,9 +117,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 
 	private void onMessage(IText f) {
 		MinecraftClient mc = MinecraftClient.getInstance();
-		Registry<MessageType> registry = mc.world.getRegistryManager().get(Registry.MESSAGE_TYPE_KEY);
-		MessageType messageType = registry.get(MessageType.SYSTEM);
-		mc.inGameHud.onGameMessage(messageType, f.remap());
+		mc.inGameHud.getChatHud().addMessage(f.remap());
 	}
 
 	public void playerRenderPre(AbstractClientPlayerEntity player, VertexConsumerProvider buffer, PlayerEntityModel model) {

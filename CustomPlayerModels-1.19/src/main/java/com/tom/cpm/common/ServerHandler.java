@@ -3,9 +3,8 @@ package com.tom.cpm.common;
 import java.util.function.Predicate;
 
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
@@ -35,8 +34,6 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
 	public static NetHandler<ResourceLocation, ServerPlayer, ServerGamePacketListenerImpl> netHandler;
@@ -66,9 +63,7 @@ public class ServerHandler {
 	}
 
 	private static void sendMessage(ServerPlayer p, IText m) {
-		Registry<ChatType> registry = p.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-		int id = registry.getId(registry.get(ChatType.SYSTEM));
-		p.connection.send(new ClientboundSystemChatPacket(m.remap(), id));
+		p.connection.send(new ClientboundSystemChatPacket(m.remap(), false));
 	}
 
 	@SubscribeEvent
@@ -118,7 +113,7 @@ public class ServerHandler {
 		return ((NetH)spe.connection).cpm$hasMod();
 	}
 
-	public static void sendToAllTrackingAndSelf(ServerPlayer ent, Packet<?> pckt, Predicate<ServerPlayer> test, GenericFutureListener<? extends Future<? super Void>> future) {
+	public static void sendToAllTrackingAndSelf(ServerPlayer ent, Packet<?> pckt, Predicate<ServerPlayer> test, PacketSendListener future) {
 		ChunkMap.TrackedEntity tr = ((ServerLevel)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
 		if(tr != null) {
 			for (ServerPlayerConnection p : tr.seenBy) {

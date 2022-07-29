@@ -3,11 +3,11 @@ package com.tom.cpm.common;
 import java.util.function.Predicate;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.class_7648;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.message.MessageType;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -16,7 +16,6 @@ import net.minecraft.server.world.EntityTrackingListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage.EntityTracker;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import com.tom.cpl.text.IText;
 import com.tom.cpm.MinecraftServerObject;
@@ -24,8 +23,6 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
 	public static NetHandler<Identifier, ServerPlayerEntity, ServerPlayNetworkHandler> netHandler;
@@ -55,9 +52,7 @@ public class ServerHandler {
 	}
 
 	private static void sendMessage(ServerPlayerEntity p, IText m) {
-		Registry<MessageType> registry = p.world.getRegistryManager().get(Registry.MESSAGE_TYPE_KEY);
-		int id = registry.getRawId(registry.get(MessageType.CHAT));
-		p.networkHandler.sendPacket(new GameMessageS2CPacket(m.remap(), id));
+		p.networkHandler.sendPacket(new GameMessageS2CPacket(m.remap(), false));
 	}
 
 	public static void onPlayerJoin(ServerPlayerEntity spe) {
@@ -79,7 +74,7 @@ public class ServerHandler {
 	}
 
 
-	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, Packet<?> pckt, Predicate<ServerPlayerEntity> test, GenericFutureListener<? extends Future<? super Void>> future) {
+	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, Packet<?> pckt, Predicate<ServerPlayerEntity> test, class_7648 future) {
 		EntityTracker tr = ((ServerWorld)ent.world).getChunkManager().threadedAnvilChunkStorage.entityTrackers.get(ent.getId());
 		if(tr != null) {
 			for (EntityTrackingListener p : tr.listeners) {
