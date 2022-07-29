@@ -110,6 +110,7 @@ public class NetHandler<RL, P, NET> {
 
 	private List<ConfigChangeRequest<?, ?>> recommendedSettingChanges = new ArrayList<>();
 	private EnumSet<ServerCaps> serverCaps = EnumSet.noneOf(ServerCaps.class);
+	private boolean scalingWarning;
 
 	public NetHandler(BiFunction<String, String, RL> keyFactory) {
 		helloPacket = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, HELLO);
@@ -202,18 +203,36 @@ public class NetHandler<RL, P, NET> {
 				NBTTagCompound tag = pb.readNBT();
 				executor.apply(from).execute(() -> {
 					PlayerData pd = net.cpm$getEncodedModelData();
+					List<ScalingOptions> blocked = new ArrayList<>();
 					for(Entry<ScalingOptions, BiConsumer<P, Float>> e : scaleSetters.entrySet()) {
 						float oldV = pd.scale.getOrDefault(e.getKey(), 1F);
-						float newV = tag.getFloat(e.getKey().getNetKey());
+						float selNewV = tag.getFloat(e.getKey().getNetKey());
+						float newV = selNewV;
 						Pair<Float, Float> l = getScalingLimits(e.getKey(), getID(pl));
 						newV = newV == 0 || l == null ? 1F : MathHelper.clamp(newV, l.getKey(), l.getValue());
-						Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
+						Log.info("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
 						if(newV != oldV) {
 							e.getValue().accept(pl, newV);
 							pd.scale.put(e.getKey(), newV);
 						}
+						if(newV != selNewV && selNewV != 0) {
+							blocked.add(e.getKey());
+						}
 					}
 					pd.save(getID(pl));
+					NBTTagCompound ret = new NBTTagCompound();
+					if(!blocked.isEmpty()) {
+						NBTTagList list = new NBTTagList();
+						blocked.forEach(sc -> list.appendTag(new NBTTagString(sc.getNetKey())));
+						ret.setTag(SCALING, list);
+					}
+					try {
+						IOHelper pb2 = new IOHelper();
+						pb2.writeNBT(ret);
+						sendPacketTo(from, setScale, pb2.toBytes());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				});
 			} else if(key.equals(subEvent)) {
 				IOHelper pb = new IOHelper(data);
@@ -379,6 +398,15 @@ public class NetHandler<RL, P, NET> {
 							pl.animState.receiveEvent(tag, pl.isClientPlayer());
 						}
 					});
+				} else if(key.equals(setScale)) {
+					IOHelper pb = new IOHelper(data);
+					NBTTagCompound tag = pb.readNBT();
+					executor.apply(from).execute(() -> {
+						if(tag.hasKey(SCALING) && !scalingWarning) {
+							displayText.accept(new FormatText("chat.cpm.scalingBlocked"));
+							scalingWarning = true;
+						}
+					});
 				}
 			}
 		} catch (Throwable e) {
@@ -529,6 +557,7 @@ public class NetHandler<RL, P, NET> {
 	public void onLogOut() {
 		recommendedSettingChanges.clear();
 		serverCaps.clear();
+		scalingWarning = false;
 	}
 
 	public void sendEventSubs(ModelDefinition def) {
@@ -726,7 +755,7 @@ public class NetHandler<RL, P, NET> {
 			if(pl.hasEntry(opt)) {
 				pl = pl.getEntry(opt);
 				if(pl.hasEntry(key))
-					return getter.apply(g, key, def);
+					return getter.apply(pl, key, def);
 			}
 		}
 		g = g.getEntry(opt);

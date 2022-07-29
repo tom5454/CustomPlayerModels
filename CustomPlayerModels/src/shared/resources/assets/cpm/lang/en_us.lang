@@ -1,3 +1,6 @@
+# =====================================================
+# Auto-generated file DO NOT EDIT! See template jsons in the Localization folder of the GitHub Repo.
+# =====================================================
 
 button.cpm.open_editor=Open Skin Editor
 button.cpm.mode.color=Mode: Color
@@ -140,13 +143,11 @@ button.cpm.config.menuButton=Context Menu Button: %s
 button.cpm.config.selectButton=Select Button: %s
 button.cpm.openWikiSidebar=ToC >
 button.cpm.openWikiExt=Open in Browser
-
 button.cpm.root_group.cape=Cape
 button.cpm.root_group.elytra=Elytra
 button.cpm.root_group.armor=Armor
 button.cpm.root_group.itemHoldPos=Held Item Position
 button.cpm.root_group.parrots=Shoulder Parrots
-
 tooltip.cpm.export.as_skin=Export Model as a skin file.\Works on vanilla servers
 tooltip.cpm.export.as_b64=Export Model as a Base64 String.\! This option is for map developers and server owners !\! You probably want to export as skin or model instead of Base64. !\Can be loaded with \'/cpm setskin [-f | -t] <player> <base64_string>'\ command ingame if server-side mod is loaded and you are an op.
 tooltip.cpm.export.as_template=Export Model as a template.\Templates can be imported into other projects.
@@ -272,7 +273,13 @@ tooltip.cpm.loading=Loading project...
 tooltip.cpm.loadSuccess=Loaded project: %s
 tooltip.cpm.failedToLoadImage=Failed to load image: %s
 tooltip.cpm.config.wikiOfflineMode=Use offline wiki, may be outdated!
-
+tooltip.cpm.config.editorGizmoAlpha=Gizmo transparency
+tooltip.cpm.config.editorUVAreaAlpha=Selected UV Area Overlay transparency
+tooltip.cpm.config.editorUVAreaAllAlpha=Not selected UV Area Overlay transparency
+tooltip.cpm.config.editorGizmoScale=Scale the Gizmo to your current zoom.
+tooltip.cpm.config.editorGizmoSize=Gizmo width multiplier
+tooltip.cpm.config.editorGizmoLength=Gizmo length multiplier
+tooltip.cpm.config.editorAutosaveTime=Time interval between auto-saves.\Set it to -1 to disable.
 tab.cpm.model=Model
 tab.cpm.texture=Texture
 tab.cpm.animation=Animations
@@ -291,7 +298,6 @@ tab.cpm.social.blocked=Blocked Players
 tab.cpm.social.errorLog=Error Log
 tab.cpm.export.paste=Upload Paste
 tab.cpm.export.gist=Upload Gist
-
 label.cpm.position=Position
 label.cpm.size=Size
 label.cpm.rotation=Rotation
@@ -327,7 +333,7 @@ label.cpm.anim_pose=Pose: %s
 label.cpm.anim_gesture=Gesture: %s
 label.cpm.no_animation=No Animation
 label.cpm.confirmDel=Confirm Delete?
-label.cpm.anim_frame_x=Frame: %d
+label.cpm.anim_frame_x=Frame: %s
 label.cpm.anim_frame_none=No Animation
 label.cpm.duration=Duration (ms):
 label.cpm.visible=Visible
@@ -335,7 +341,7 @@ label.cpm.anim_additive=Additive
 label.cpm.anim_loop=Loop
 label.cpm.new_anim_pose=New Custom Pose
 label.cpm.new_anim_gesture=New Gesture
-label.cpm.quick_key_bound=Quick Access %d: %s
+label.cpm.quick_key_bound=Quick Access %s: %s
 label.cpm.key_unbound=Unbound
 label.cpm.nothing_here=Nothing Here
 label.cpm.display.player_tpose=T-Pose
@@ -368,7 +374,7 @@ label.cpm.export_success.desc=Model successfully exported as: %s
 label.cpm.result.base64_model=Base64 Model
 label.cpm.result.base64_model.desc=Can be loaded with '/cpm setskin <player> <base64_string>' ingame.
 label.cpm.delSkin=Delete Custom Skin?
-label.cpm.tex_size_too_big=Texture size too big!\Max size: %1$dx%1$d
+label.cpm.tex_size_too_big=Texture size too big!\Max size: %1$sx%1$s
 label.cpm.skin_has_vanilla_parts=Model still has vanilla skin parts enabled.\Changing this setting won't have an affect on them.\Use Edit/Convert vanilla parts to convert them to custom parts.
 label.cpm.template_name=Template (%s)
 label.cpm.template_link_input=Template Link
@@ -420,7 +426,6 @@ label.cpm.test_model_exported=Test model exported, close the editor to test it.
 label.cpm.screenshotPopup=Set Icon
 label.cpm.loading=Loading...
 label.cpm.skinForced=Your skin was force set by the server operators.
-label.cpm.controls.text=Camera:\Hold the Middle mouse button to rotate the view.\Hold Shift+Middle mouse button to pan the view.\Can be changed to right click in Edit/Settings.\Number fields:\Shift to change by 0.1\Image Editor:\Ctrl+click to pick hovered color.
 label.cpm.animationSettings.new=New Animation
 label.cpm.animationSettings.edit=Edit Animation
 label.cpm.effect.scaling=Scaling
@@ -439,7 +444,7 @@ label.cpm.export.upload.desc=Exports then uploads the exported skin to minecraft
 label.cpm.addSkinToFolder=Add skin to list?
 label.cpm.modelNotSkinCompatible=Model file is not skin compatible
 label.cpm.convertFail=Failed to convert model to skin
-label.cpm.brushSize=Brush Size: %dpx
+label.cpm.brushSize=Brush Size: %spx
 label.cpm.uploading.connecting=Connecting to minecraft.net...
 label.cpm.uploading.authFail=Failed to connect to minecraft.net\Please use your minecraft launcher, or minecraft.net\to upload the skin.
 label.cpm.filechooser.waitingForNative=Waiting for System File Chooser Popup.
@@ -651,7 +656,7 @@ label.cpm.changelog.newVersion.desc=New version available!\See changelog under E
 label.cpm.openURL.title=Open URL
 label.cpm.openURL.text=Are you sure you want to open the following website?\%s\Never open links that you don't trust!
 label.cpm.config.wikiOfflineMode=Wiki Offline Mode
-
+label.cpm.config.editorAutosaveTime=Auto-save interval: %ss
 label.cpm.paste.connecting.title=Connecting...
 label.cpm.paste.connecting.message=Connecting to paste site...
 label.cpm.paste.listing=Refreshing files list...
@@ -661,7 +666,6 @@ label.cpm.paste.uploading=Uploading paste
 label.cpm.paste.name=Paste Name:
 label.cpm.paste.updatedModel=Successfully updated model
 label.cpm.paste.error=Error connecting to paste site\%s
-
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body
 label.cpm.elem.left_arm=Left Arm
@@ -685,7 +689,6 @@ label.cpm.elem.item.right_hand=Right Hand Item
 label.cpm.elem.item.head=Head Item
 label.cpm.elem.item.left_shoulder=Left Shoulder
 label.cpm.elem.item.right_shoulder=Right Shoulder
-
 label.cpm.pose.standing=Standing
 label.cpm.pose.walking=Walking
 label.cpm.pose.running=Running
@@ -737,7 +740,6 @@ label.cpm.pose.climbing_on_ladder=Climbing on Ladder
 label.cpm.pose.speaking=Speaking
 label.cpm.pose.toot_horn_left=Tooting Goat Horn Left
 label.cpm.pose.toot_horn_right=Tooting Goat Horn Right
-
 label.cpm.dir.up=Up
 label.cpm.dir.down=Down
 label.cpm.dir.north=North
@@ -748,18 +750,15 @@ label.cpm.rot.rot_0=Rotation: 0
 label.cpm.rot.rot_90=Rotation: 90
 label.cpm.rot.rot_180=Rotation: 180
 label.cpm.rot.rot_270=Rotation: 270
-
 label.cpm.skin_type.default=Default (Steve)
 label.cpm.skin_type.slim=Slim (Alex)
 label.cpm.skin_type.unknown=Unknown
-
 label.cpm.block_reason.block_list=Player is blocked
 label.cpm.block_reason.link_owerflow=Link file too big
 label.cpm.block_reason.config_disabled=Model loading disabled
 label.cpm.block_reason.too_many_cubes=Too many cubes
 label.cpm.block_reason.texture_overflow=Texture too big
 label.cpm.block_reason.uuid_lock=Locked by UUID lock
-
 error.cpm.crash=A Customizable Player Models gui has crashed.\Please create a bug report on GitHub with your minecraft log attached.\Error: %s
 error.cpm.too_many_animations=Too many custom animations\for current Skin Layer settings.\Edit Skin layer settings under the 'Animation' tabs.
 error.cpm.custom_anims_not_supported=The current Skin Layer settings doesn't support\custom poses and gestures.\Please enable at least 2 layers for encoding\in Skin Layer settings under the 'Animation' tabs.
@@ -770,7 +769,6 @@ error.cpm.templateExportAsSkin=Template Project cannot be exported as a skin.
 error.cpm.projectNotTemplate=This project is not a template\Use Edit/Convert to Template
 error.cpm.vanillaSkinSize=Invalid vanilla skin size, must be 64x64
 error.cpm.paste.unknownNetworkError=Unknown network error, while connecting to the paste site.\%s
-
 error.paste.unknown=Unknown paste server error
 error.paste.outOfSpace=Out of space on the paste site.\Try clearing unused pastes using 'Edit/Pastes' menu.
 error.paste.fileNameTooLong=File name too long
@@ -778,9 +776,7 @@ error.paste.noSession=No session
 error.paste.invalidSession=Invalid session
 error.paste.authFail=Failed to connect to paste site:\%s
 error.paste.parseError=Corrupted response from server
-
 narrator.cpm.field=Text Field
-
 key.cpm.category=Custom Player Models
 key.cpm.gestureMenu=Gestures Menu
 key.cpm.renderToggle=Toggle Rendering
@@ -790,7 +786,6 @@ key.cpm.qa_3=Quick Access 3
 key.cpm.qa_4=Quick Access 4
 key.cpm.qa_5=Quick Access 5
 key.cpm.qa_6=Quick Access 6
-
 commands.cpm.setskin.success=Set %s's skin
 commands.cpm.setskin.success.force=Force set %s's skin
 commands.cpm.usage=Usage: set: cpm setskin [-f|-t] <player> <base64_string> or reset: cpm setskin -r <player>
@@ -800,11 +795,10 @@ commands.cpm.safety.profile.custom=Custom
 commands.cpm.kickWOMod=Kick players without the mod
 commands.cpm.kickWOMod.msg=Kick message
 commands.cpm.numberOutOfBounds=Entered numbers out of bounds
-
 chat.cpm.skinForced=Can't change skin. Your skin was force set by the operators of the server.
-chat.cpm.serverSafetySettings=The server has recommended safety settings. Open the Gestures menu [%s] to edit the safety settings.
+chat.cpm.serverSafetySettings=[CPM] The server has recommended safety settings. Open the Gestures menu [%s] to edit the safety settings.
 chat.cpm.serverRequiresCPM=The server requires CPM to be installed and communication enabled. Currently the 'Disable server communication' setting is set to 'true', and you will be kicked from the server. Open the Gestures menu [%s] to edit the settings. 
-
+chat.cpm.scalingBlocked=[CPM] Some scaling settings were blocked, ask an admin to enable scaling.
 action.cpm.switch=Switch %s
 action.cpm.set=Set %s
 action.cpm.add=Add %s
@@ -840,7 +834,6 @@ action.cpm.autoUV=Auto UV
 action.cpm.itemHold=Item Hold Location
 action.cpm.animTex=Animated Texture
 action.cpm.clearAnim=Clear Animation
-
 label.cpm.mouse.0=Left Mouse Button
 label.cpm.mouse.1=Right Mouse Button
 label.cpm.mouse.2=Middle Mouse Button
@@ -873,7 +866,6 @@ label.cpm.key.enter=Enter
 label.cpm.key.keypad.enter=Keypad Enter
 label.cpm.key.delete=Delete
 label.cpm.key.end=End
-label.cpm.key.enter=Enter
 label.cpm.key.backspace=Backspace
 label.cpm.key.home=Home
 label.cpm.key.insert=Insert

@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
 
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -38,7 +37,6 @@ import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
 import com.tom.cpm.client.CustomPlayerModelsClient;
-import com.tom.cpm.client.KeyBindings;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -55,7 +53,8 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeybinds);
+
+		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> CustomPlayerModelsClient::preInit);
 
 		MinecraftForge.EVENT_BUS.register(this);
 		MinecraftForge.EVENT_BUS.register(new ServerHandler());
@@ -68,10 +67,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		CustomPlayerModelsClient.INSTANCE.init();
-	}
-
-	private void registerKeybinds(RegisterKeyMappingsEvent evt) {
-		KeyBindings.init(evt);
 	}
 
 	private ModConfigFile cfg;

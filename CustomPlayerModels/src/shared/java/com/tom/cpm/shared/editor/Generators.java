@@ -327,6 +327,6 @@ public class Generators {
 		v.z = 360 - v.z;
 		b.updateValueOp(e, e.rotation, v, (a, c) -> a.rotation = c);
 		e.children.forEach(p -> mirror(p, b));
-		b.onRun(() -> e.markDirty());
+		b.onAction(() -> e.markDirty());
 	}
 }

@@ -143,6 +143,14 @@ public class SettingsPanel extends Panel {
 			addScaleSlider(editor, ConfigKeys.EDITOR_GIZMO_SIZE, 1, 0.1f, 0.2f, 2);
 			addScaleSlider(editor, ConfigKeys.EDITOR_GIZMO_LENGTH, 1, 0.1f, 0.2f, 2);
 
+			Slider autoSaveSlider = addScaleSlider(editor, ConfigKeys.EDITOR_AUTOSAVE_TIME, 5 * 60, 15f, -1f, 15 * 60);
+			autoSaveSlider.setSteps(v -> {
+				float val = v * (15 * 60 + 1) - 1;
+				int rv = Math.round(val / 15) * 15;
+				if(rv <= 0)rv = -1;
+				return (rv + 1f) / (15 * 60 + 1);
+			});
+
 			MinecraftClientAccess.get().populatePlatformSettings("editor", editor);
 
 			editorLayout.reflow();
@@ -224,7 +232,7 @@ public class SettingsPanel extends Panel {
 		p.addElement(btnR);
 	}
 
-	private void addScaleSlider(Panel panel, String key, float def, float div, float min, float max) {
+	private Slider addScaleSlider(Panel panel, String key, float def, float div, float min, float max) {
 		Panel p = new Panel(gui);
 		p.setBounds(new Box(0, 0, 320, 20));
 		panel.addElement(p);
@@ -247,6 +255,7 @@ public class SettingsPanel extends Panel {
 		});
 		btnR.setBounds(new Box(260, 0, 60, 20));
 		p.addElement(btnR);
+		return scaleSlider;
 	}
 
 	private String formatAlphaSlider(String key, int def) {
@@ -256,7 +265,7 @@ public class SettingsPanel extends Panel {
 
 	private String formatScaleSlider(String key, float def) {
 		float v = ce.getFloat(key, def);
-		return gui.i18nFormat("label.cpm.config." + key, v);
+		return gui.i18nFormat("label.cpm.config." + key, String.format("%.1f", v));
 	}
 
 	private void makeCheckbox(Panel panel, String key, boolean def) {

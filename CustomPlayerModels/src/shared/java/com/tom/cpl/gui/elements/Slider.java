@@ -1,5 +1,6 @@
 package com.tom.cpl.gui.elements;
 
+import com.tom.cpl.function.FloatUnaryOperator;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.MathHelper;
@@ -9,7 +10,7 @@ public class Slider extends GuiElement {
 	private Runnable action;
 	private boolean enableDrag;
 	protected float v;
-	protected float steps;
+	protected FloatUnaryOperator steps;
 	protected Tooltip tooltip;
 	public Slider(IGui gui, String name) {
 		super(gui);
@@ -55,8 +56,8 @@ public class Slider extends GuiElement {
 	public boolean mouseDrag(int x, int y, int btn) {
 		if(enableDrag) {
 			v = (x - bounds.x) / (float) bounds.w;
-			if(steps != 0)v = Math.round(v / steps) * steps;
-			v = (float) MathHelper.clamp(v, 0, 1);
+			if(steps != null)v = steps.apply(v);
+			v = MathHelper.clamp(v, 0, 1);
 			if(action != null)action.run();
 			return true;
 		}
@@ -80,6 +81,13 @@ public class Slider extends GuiElement {
 	}
 
 	public void setSteps(float steps) {
+		if(steps != 0) {
+			this.steps = v -> Math.round(v / steps) * steps;
+		} else
+			this.steps = null;
+	}
+
+	public void setSteps(FloatUnaryOperator steps) {
 		this.steps = steps;
 	}
 

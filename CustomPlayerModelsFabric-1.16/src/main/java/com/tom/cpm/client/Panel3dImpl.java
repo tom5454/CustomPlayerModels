@@ -96,7 +96,7 @@ public class Panel3dImpl extends Panel3dNative {
 
 	@Override
 	public Image takeScreenshot(Vec2i size) {
-		GuiImpl gui = (GuiImpl) panel.getGui();
+		GuiImpl gui = panel.getGui().getNativeGui();
 		int dw = mc.getWindow().getWidth();
 		int dh = mc.getWindow().getHeight();
 		float multiplierX = dw / (float)gui.width;

@@ -77,6 +77,10 @@ public class CustomPlayerModelsClient {
 	public RenderManager<GameProfile, net.minecraft.world.entity.player.Player, Model, MultiBufferSource> manager;
 	public NetHandler<ResourceLocation, net.minecraft.world.entity.player.Player, ClientPacketListener> netHandler;
 
+	public static void preInit() {
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(KeyBindings::init);
+	}
+
 	public void init() {
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);

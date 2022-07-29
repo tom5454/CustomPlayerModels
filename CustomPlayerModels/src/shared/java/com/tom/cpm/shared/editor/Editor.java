@@ -268,7 +268,7 @@ public class Editor {
 			action("set", "action.cpm.texSize").
 			updateValueOp(tex, tex.size.x, x, (a, b) -> a.size.x = b).
 			updateValueOp(tex, tex.size.y, y, (a, b) -> a.size.y = b).
-			onRun(texs::restitchTexture).
+			onAction(texs::restitchTexture).
 			execute();
 		}
 	}
@@ -815,7 +815,8 @@ public class Editor {
 	}
 
 	public void tick() {
-		if(autoSaveDirty && lastEdit + 5*60*1000 < System.currentTimeMillis()) {
+		int autosave = ModConfig.getCommonConfig().getInt(ConfigKeys.EDITOR_AUTOSAVE_TIME, 5 * 60);
+		if(autoSaveDirty && autosave > 0 && lastEdit + autosave * 1000 < System.currentTimeMillis()) {
 			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 			File autosaves = new File(modelsDir, "autosaves");
 			autosaves.mkdirs();

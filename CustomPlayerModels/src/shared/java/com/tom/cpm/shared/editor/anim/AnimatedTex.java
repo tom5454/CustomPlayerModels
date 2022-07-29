@@ -171,6 +171,11 @@ public class AnimatedTex implements TreeElement {
 		public Tooltip getTooltip() {
 			return new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.tree.at." + name));
 		}
+
+		protected void markDirty() {
+			editor.textures.get(sheet).refreshTexture();
+			lastFrame = -1;
+		}
 	}
 
 	private class TexElem extends OptionElem {
@@ -196,7 +201,9 @@ public class AnimatedTex implements TreeElement {
 				vec.y = (int) v.y;
 				editor.action("set", "label.cpm.tree.at." + name).
 				updateValueOp(vec, vec.x, (int) v.x, (a, b) -> a.x = b).
-				updateValueOp(vec, vec.y, (int) v.y, (a, b) -> a.y = b).execute();
+				updateValueOp(vec, vec.y, (int) v.y, (a, b) -> a.y = b).
+				onAction(this::markDirty).
+				execute();
 			}
 		}
 	}
@@ -221,7 +228,9 @@ public class AnimatedTex implements TreeElement {
 		public void setValue(float value) {
 			set.accept((int) value);
 			editor.action("set", "label.cpm.tree.at." + name).
-			updateValueOp(set, get.getAsInt(), (int) value, IntConsumer::accept).execute();
+			updateValueOp(set, get.getAsInt(), (int) value, IntConsumer::accept).
+			onAction(this::markDirty).
+			execute();
 		}
 	}
 
@@ -244,8 +253,9 @@ public class AnimatedTex implements TreeElement {
 		public void modeSwitch() {
 			editor.action("set", "label.cpm.tree.at." + name).
 			updateValueOp(set, get.getAsBoolean(), !get.getAsBoolean(), Consumer::accept).
+			onAction(this::markDirty).
+			onAction(this::updateGui).
 			execute();
-			updateGui();
 		}
 	}
 }

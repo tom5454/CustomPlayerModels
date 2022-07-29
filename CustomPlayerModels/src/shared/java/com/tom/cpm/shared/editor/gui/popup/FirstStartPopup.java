@@ -24,8 +24,12 @@ public class FirstStartPopup extends PopupPanel {
 
 			@Override
 			public void browse(String url) {
-				if(loaded)gui.getFrame().openPopup(new WikiBrowserPopup(gui, url));
-				else super.browse(url);
+				if(loaded) {
+					if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/wiki"))
+						gui.getFrame().openPopup(new WikiBrowserPopup(gui, url));
+					else
+						gui.openURL(url);
+				} else super.browse(url);
 			}
 		};
 		addElement(mdr.setBounds(new Box(5, 5, 100, 100)));

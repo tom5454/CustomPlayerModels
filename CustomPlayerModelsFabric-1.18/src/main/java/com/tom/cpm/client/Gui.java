@@ -682,6 +682,11 @@ public class Gui extends Screen {
 		public void openURL0(String url) {
 			Util.getOperatingSystem().open(url);
 		}
+
+		@Override
+		public <T> T getNativeGui() {
+			return (T) Gui.this;
+		}
 	}
 
 	@Override

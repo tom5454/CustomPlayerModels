@@ -51,6 +51,7 @@ public class ConfigKeys {
 	public static final String EDITOR_GIZMO_SCALE = "editorGizmoScale";
 	public static final String EDITOR_LAST_VERSION = "editorLastVersion";
 	public static final String WIKI_OFFLINE_MODE = "wikiOfflineMode";
+	public static final String EDITOR_AUTOSAVE_TIME = "editorAutosaveTime";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

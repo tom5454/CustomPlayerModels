@@ -238,4 +238,8 @@ public interface IGui {
 			Log.error("Can't open url for " + url, urisyntaxexception);
 		}
 	}
+
+	default <T> T getNativeGui() {
+		return (T) this;
+	}
 }

@@ -72,8 +72,15 @@ public class AnimatedTexture {
 		else
 			ay += sy * frame;
 		for(int x = 0;x<sx;x++) {
-			for(int y = 0;y<sy;y++) {
-				dest.setRGB(x + uvx, y + uvy, img.getRGB(x + ax, y + ay));
+			int x1 = x + ax;
+			int x2 = x + uvx;
+			if (x1 >= 0 && x1 < img.getWidth() && x2 >= 0 && x2 < dest.getWidth()) {
+				for(int y = 0;y<sy;y++) {
+					int y1 = y + ay;
+					int y2 = y + uvy;
+					if (y1 >= 0 && y1 < img.getHeight() && y2 >= 0 && y2 < dest.getHeight())
+						dest.setRGB(x2, y2, img.getRGB(x1, y1));
+				}
 			}
 		}
 	}
@@ -93,13 +100,23 @@ public class AnimatedTexture {
 			ays = ayIn + sy * ((frame + 1) % frms);
 		}
 		for(int x = 0;x<sx;x++) {
-			for(int y = 0;y<sy;y++) {
-				int first = img.getRGB(x + axf, y + ayf);
-				int second = img.getRGB(x + axs, y + ays);
-				int r = mix(subfrm, first >> 16 & 255, second >> 16 & 255);
-				int g = mix(subfrm, first >> 8 & 255, second >> 8 & 255);
-				int b = mix(subfrm, first & 255, second & 255);
-				dest.setRGB(x + uvx, y + uvy, first & -16777216 | r << 16 | g << 8 | b);
+			int xf = x + axf;
+			int xs = x + axs;
+			int x2 = x + uvx;
+			if (xf >= 0 && xf < img.getWidth() && xs >= 0 && xs < img.getWidth() && x2 >= 0 && x2 < dest.getWidth()) {
+				for(int y = 0;y<sy;y++) {
+					int yf = y + ayf;
+					int ys = y + ays;
+					int y2 = y + uvy;
+					if (yf >= 0 && yf < img.getHeight() && ys >= 0 && ys < img.getHeight() && y2 >= 0 && y2 < dest.getHeight()) {
+						int first = img.getRGB(xf, yf);
+						int second = img.getRGB(xs, ys);
+						int r = mix(subfrm, first >> 16 & 255, second >> 16 & 255);
+						int g = mix(subfrm, first >> 8 & 255, second >> 8 & 255);
+						int b = mix(subfrm, first & 255, second & 255);
+						dest.setRGB(x2, y2, first & -16777216 | r << 16 | g << 8 | b);
+					}
+				}
 			}
 		}
 	}
