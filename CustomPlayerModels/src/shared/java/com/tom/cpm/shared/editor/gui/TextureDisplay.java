@@ -51,7 +51,7 @@ public class TextureDisplay extends GuiElement {
 			Editor.walkElements(editor.elements, e -> {
 				if(e.getTexture() == provider) {
 					e.drawTexture(gui, x, y, xs, ys);
-					if (editor.selectedElement.isSelected(editor, e) && drawSettings) {
+					if (editor.selectedElement != null && editor.selectedElement.isSelected(editor, e) && drawSettings) {
 						e.getSettingsElements().forEach(e2 -> e2.drawTexture(gui, x, y, xs, ys));
 					}
 				}
