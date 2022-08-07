@@ -319,8 +319,7 @@ public class ModelDefinitionLoader<GP> {
 					try(SkinDataInputStream in = new SkinDataInputStream(skin, template, player.getSkinType().getChannel())) {
 						IOHelper ioh = new IOHelper();
 						IOHelper.copy(in, ioh.getDout());
-						if(ioh.read() != HEADER)return false;
-						ioh.reset();
+						if(ioh.flip().read() != HEADER)return false;
 						storeModel(name, desc, icon, ioh.toBytes());
 						return true;
 					} catch (IOException e) {

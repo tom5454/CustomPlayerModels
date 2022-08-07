@@ -447,13 +447,13 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 	}
 
 	public String toB64() throws IOException {
-		if(baos == null)throw new IOException("Not a byte array backed io handler");
-		return Base64.getEncoder().encodeToString(baos.toByteArray());
+		if(baos == null && dataIn == null)throw new IOException("Not a byte array backed io handler");
+		return Base64.getEncoder().encodeToString(dataIn != null ? dataIn : baos.toByteArray());
 	}
 
 	public byte[] toBytes() throws IOException {
-		if(baos == null)throw new IOException("Not a byte array backed io handler");
-		return baos.toByteArray();
+		if(baos == null && dataIn == null)throw new IOException("Not a byte array backed io handler");
+		return dataIn != null ? dataIn : baos.toByteArray();
 	}
 
 	public IOHelper flip() throws IOException {

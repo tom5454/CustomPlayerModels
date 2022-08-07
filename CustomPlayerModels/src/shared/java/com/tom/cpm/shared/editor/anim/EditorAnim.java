@@ -47,7 +47,7 @@ public class EditorAnim implements IAnim {
 	}
 
 	private void calculateSplines() {
-		components = frames.stream().flatMap(AnimFrame::getAllElements).distinct().collect(Collectors.toList());
+		components = frames.stream().flatMap(AnimFrame::getAllElementsFiltered).distinct().collect(Collectors.toList());
 
 		psfs = new Interpolator[components.size()][InterpolatorChannel.VALUES.length];
 
@@ -133,10 +133,13 @@ public class EditorAnim implements IAnim {
 		psfs = null;
 	}
 
-	public void clearSelectedData() {
+	public void clearSelectedData(boolean all) {
 		if(currentFrame != null && editor.getSelectedElement() != null) {
 			ActionBuilder ab = editor.action("clearAnim");
-			currentFrame.clearSelectedData(ab, editor.getSelectedElement());
+			if(all) {
+				frames.forEach(f -> f.clearSelectedData(ab, editor.getSelectedElement()));
+			} else
+				currentFrame.clearSelectedData(ab, editor.getSelectedElement());
 			ab.execute();
 		}
 		components = null;
@@ -264,8 +267,8 @@ public class EditorAnim implements IAnim {
 							editor.setAnimScale.accept(new Vec3f(1, 1, 1));
 					} else if(selectedElement.type == ElementType.ROOT_PART){
 						PartValues val = ((VanillaModelPart)selectedElement.typeData).getDefaultSize(editor.skinType);
-						editor.setAnimPos.accept(val.getPos());
-						editor.setAnimRot.accept(new Vec3f());
+						editor.setAnimPos.accept(val.getPos().add(selectedElement.pos));
+						editor.setAnimRot.accept(selectedElement.rotation);
 						editor.setAnimScale.accept(null);
 					} else {
 						editor.setAnimPos.accept(selectedElement.pos);

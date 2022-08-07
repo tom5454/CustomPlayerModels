@@ -1,8 +1,6 @@
 package com.tom.cpm.shared.editor.gui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.elements.Button;
@@ -33,14 +31,15 @@ public class PerfaceUVPanel extends Panel {
 		super(frm.getGui());
 		setBounds(new Box(0, 0, 170, 95));
 
-		DropDownBox<NamedElement<Direction>> faces = new DropDownBox<>(frm, Arrays.stream(Direction.VALUES).
-				map(d -> new NamedElement<>(d, dir -> gui.i18nFormat("label.cpm.dir." + dir.name().toLowerCase()))).
-				collect(Collectors.toList()));
+		NameMapper<Direction> dirMap = new NameMapper<>(Direction.VALUES, dir -> gui.i18nFormat("label.cpm.dir." + dir.name().toLowerCase()));
+		DropDownBox<NamedElement<Direction>> faces = new DropDownBox<>(frm, dirMap.asList());
 		faces.setBounds(new Box(5, 0, 160, 20));
+		dirMap.setSetter(faces::setSelected);
 		faces.setAction(() -> {
-			editor.perfaceFaceDir = faces.getSelected().getElem();
+			editor.perfaceFaceDir.accept(faces.getSelected().getElem());
 			editor.updateGui();
 		});
+		editor.perfaceFaceDir.add(dirMap::setValue);
 		addElement(faces);
 
 		spinnerSU = new Spinner(gui);
@@ -64,10 +63,11 @@ public class PerfaceUVPanel extends Panel {
 				Face f = getFace(editor, ab);
 				Vec4f v = new Vec4f(spinnerSU.getValue(), spinnerSV.getValue(), spinnerEU.getValue(), spinnerEV.getValue());
 				if(f.autoUV) {
-					autoUV(v, editor.perfaceFaceDir, el.size);
+					autoUV(v, editor.perfaceFaceDir.get(), el.size);
 					editor.setFaceUVs.accept(v);
 				}
 				ab.updateValueOp(f, f.getVec(), v, Face::set);
+				ab.onAction(el::markDirty);
 				ab.execute();
 			}
 		};
@@ -79,6 +79,7 @@ public class PerfaceUVPanel extends Panel {
 				Vec4f v = new Vec4f(spinnerSU.getValue(), spinnerSV.getValue(), spinnerEU.getValue(), spinnerEV.getValue());
 				ab.updateValueOp(f, f.getVec(), v, Face::set);
 				ab.updateValueOp(f, f.autoUV, false, (a, b) -> a.autoUV = b);
+				ab.onAction(el::markDirty);
 				ab.execute();
 			}
 		};
@@ -114,6 +115,7 @@ public class PerfaceUVPanel extends Panel {
 				ActionBuilder ab = editor.action("rotateUV");
 				Face f = getFace(editor, ab);
 				ab.updateValueOp(f, f.rotation, rots.getSelected().getElem(), (a, b) -> a.rotation = b);
+				ab.onAction(el::markDirty);
 				ab.execute();
 			}
 		});
@@ -130,10 +132,11 @@ public class PerfaceUVPanel extends Panel {
 				ab.updateValueOp(f, f.autoUV, autoUV.isSelected(), (a, b) -> a.autoUV = b);
 				if(!f.autoUV) {
 					Vec4f v = f.getVec();
-					autoUV(v, editor.perfaceFaceDir, el.size);
+					autoUV(v, editor.perfaceFaceDir.get(), el.size);
 					ab.updateValueOp(f, f.getVec(), v, Face::set);
 					editor.setFaceUVs.accept(v);
 				}
+				ab.onAction(el::markDirty);
 				ab.execute();
 			}
 		});
@@ -144,9 +147,9 @@ public class PerfaceUVPanel extends Panel {
 		ButtonIcon delBtn = new ButtonIcon(gui, "editor", 14, 16, () -> {
 			ModelElement el = editor.getSelectedElement();
 			if(el != null && el.faceUV != null) {
-				Face f = el.faceUV.faces.get(editor.perfaceFaceDir);
+				Face f = el.faceUV.faces.get(editor.perfaceFaceDir.get());
 				if(f != null) {
-					editor.action("deleteFace").removeFromMap(el.faceUV.faces, editor.perfaceFaceDir, f).execute();
+					editor.action("deleteFace").removeFromMap(el.faceUV.faces, editor.perfaceFaceDir.get(), f).onAction(el::markDirty).execute();
 					editor.updateGui();
 				}
 			}
@@ -158,13 +161,14 @@ public class PerfaceUVPanel extends Panel {
 		Button toAllUVs = new Button(gui, gui.i18nFormat("button.cpm.toAllFaces"), () -> {
 			ModelElement el = editor.getSelectedElement();
 			if(el != null && el.faceUV != null) {
-				Face f = el.faceUV.faces.get(editor.perfaceFaceDir);
+				Face f = el.faceUV.faces.get(editor.perfaceFaceDir.get());
 				if(f != null) {
 					ActionBuilder ab = editor.action("toAllFaces");
 					for(Direction d : Direction.VALUES) {
-						if(d == editor.perfaceFaceDir)continue;
+						if(d == editor.perfaceFaceDir.get())continue;
 						ab.addToMap(el.faceUV.faces, d, new Face(f));
 					}
+					ab.onAction(el::markDirty);
 					ab.execute();
 					editor.updateGui();
 				}
@@ -186,10 +190,10 @@ public class PerfaceUVPanel extends Panel {
 
 	private static Face getFace(Editor editor, ActionBuilder ab) {
 		ModelElement el = editor.getSelectedElement();
-		Face f = el.faceUV.faces.get(editor.perfaceFaceDir);
+		Face f = el.faceUV.faces.get(editor.perfaceFaceDir.get());
 		if(f == null) {
 			f = new Face();
-			ab.addToMap(el.faceUV.faces, editor.perfaceFaceDir, f);
+			ab.addToMap(el.faceUV.faces, editor.perfaceFaceDir.get(), f);
 		}
 		return f;
 	}

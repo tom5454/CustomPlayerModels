@@ -35,11 +35,11 @@ public class ViewportPaintPanel extends ViewportPanel {
 
 	@Override
 	public void mouseClick(MouseEvent event) {
-		if(event.isHovered(bounds) && event.btn == 0 && editor.drawMode != EditorTool.SELECT && editor.definition.bounds.stream().anyMatch(b -> b.isHovered && b.type != EditorRenderer.BoundType.DRAG_PANE)) {
+		if(event.isHovered(bounds) && event.btn == 0 && editor.drawMode.get() != EditorTool.SELECT && editor.definition.bounds.stream().anyMatch(b -> b.isHovered && b.type != EditorRenderer.BoundType.DRAG_PANE)) {
 			dragging = 1;
 			Vec2i v = getHoveredTexPos();
 			if(v != null) {
-				if(gui.isCtrlDown() || editor.drawMode == EditorTool.COLOR_PICKER) {
+				if(gui.isCtrlDown() || editor.drawMode.get() == EditorTool.COLOR_PICKER) {
 					ETextures tex = editor.getTextureProvider();
 					if(tex != null) {
 						editor.penColor = tex.getImage().getRGB(v.x, v.y);

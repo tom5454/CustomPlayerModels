@@ -1,12 +1,9 @@
 package com.tom.cpm.common;
 
-import java.util.function.Predicate;
-
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCustomPayload;
@@ -34,7 +31,7 @@ public class ServerHandler {
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setGetPlayerUUID(EntityPlayerMP::getUniqueID);
-		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new SPacketCustomPayload(rl.toString(), pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SPacketCustomPayload(rl.toString(), pb), ServerHandler::hasMod));
+		netHandler.setSendPacket2(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new SPacketCustomPayload(rl.toString(), pb)), ent -> ((WorldServer)ent.world).getEntityTracker().getTrackingPlayers(ent));
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTrackerEntry tr : ((WorldServer)p.world).getEntityTracker().entries) {
 				if(tr.getTrackedEntity() instanceof EntityPlayer && tr.trackingPlayers.contains(p)) {
@@ -79,19 +76,5 @@ public class ServerHandler {
 		if(evt.getEntityLiving() instanceof EntityPlayerMP) {
 			netHandler.onJump((EntityPlayerMP) evt.getEntityLiving());
 		}
-	}
-
-	public static boolean hasMod(EntityPlayerMP spe) {
-		return ((ServerNetH)spe.connection).cpm$hasMod();
-	}
-
-	public static void sendToAllTrackingAndSelf(EntityPlayerMP ent, Packet<?> pckt, Predicate<EntityPlayerMP> test) {
-		for (EntityPlayer pl : ((WorldServer)ent.world).getEntityTracker().getTrackingPlayers(ent)) {
-			EntityPlayerMP p = (EntityPlayerMP) pl;
-			if(test.test(p)) {
-				p.connection.sendPacket(pckt);
-			}
-		}
-		ent.connection.sendPacket(pckt);
 	}
 }

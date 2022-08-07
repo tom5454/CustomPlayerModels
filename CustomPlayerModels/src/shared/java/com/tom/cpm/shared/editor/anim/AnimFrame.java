@@ -38,8 +38,8 @@ public class AnimFrame {
 			if(!anim.add) {
 				if(comp.type == ElementType.ROOT_PART) {
 					PartValues val = ((VanillaModelPart) comp.typeData).getDefaultSize(anim.editor.skinType);
-					pos = val.getPos();
-					rot = new Vec3f();
+					pos = val.getPos().add(comp.pos);
+					rot = new Vec3f(comp.rotation);
 					scale = new Vec3f(1, 1, 1);
 				} else {
 					pos = new Vec3f(comp.pos);
@@ -93,15 +93,21 @@ public class AnimFrame {
 		}
 
 		private void apply() {
-			comp.rc.setRotation(anim.add,
-					(float) Math.toRadians(rot.x),
-					(float) Math.toRadians(rot.y),
-					(float) Math.toRadians(rot.z)
-					);
-			comp.rc.setPosition(anim.add, pos.x, pos.y, pos.z);
-			comp.rc.setColor(color.x, color.y, color.z);
-			comp.rc.setRenderScale(anim.add, scale.x, scale.y, scale.z);
-			comp.rc.display = show;
+			if(hasChanges()) {
+				comp.rc.setRotation(anim.add,
+						(float) Math.toRadians(rot.x),
+						(float) Math.toRadians(rot.y),
+						(float) Math.toRadians(rot.z)
+						);
+				comp.rc.setPosition(anim.add, pos.x, pos.y, pos.z);
+
+				if(hasColorChanges())
+					comp.rc.setColor(color.x, color.y, color.z);
+				if(hasScaleChanges())
+					comp.rc.setRenderScale(anim.add, scale.x, scale.y, scale.z);
+				if(hasVisChanges())
+					comp.rc.display = show;
+			}
 		}
 
 		public boolean hasChanges() {
@@ -115,6 +121,22 @@ public class AnimFrame {
 				return Math.abs(pos.x - comp.pos.x) > 0.01f || Math.abs(pos.y - comp.pos.y) > 0.01f || Math.abs(pos.z - comp.pos.z) > 0.01f;
 			}
 		}
+
+		/* This is the intended code, but breaks older models. TODO switch to this in format cleanup
+		public boolean hasPosChanges() {
+			if(anim.add) {
+				return Math.abs(pos.x) > 0.01f || Math.abs(pos.y) > 0.01f || Math.abs(pos.z) > 0.01f;
+			} else {
+				Vec3f d;
+				if(comp.type == ElementType.ROOT_PART) {
+					PartValues val = ((VanillaModelPart) comp.typeData).getDefaultSize(anim.editor.skinType);
+					d = val.getPos().add(comp.pos);
+				} else {
+					d = comp.pos;
+				}
+				return Math.abs(pos.x - d.x) > 0.01f || Math.abs(pos.y - d.y) > 0.01f || Math.abs(pos.z - d.z) > 0.01f;
+			}
+		}*/
 
 		public boolean hasRotChanges() {
 			if(anim.add) {

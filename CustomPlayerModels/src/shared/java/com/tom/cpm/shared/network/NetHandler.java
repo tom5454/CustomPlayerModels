@@ -210,7 +210,7 @@ public class NetHandler<RL, P, NET> {
 						float newV = selNewV;
 						Pair<Float, Float> l = getScalingLimits(e.getKey(), getID(pl));
 						newV = newV == 0 || l == null ? 1F : MathHelper.clamp(newV, l.getKey(), l.getValue());
-						Log.info("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
+						Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
 						if(newV != oldV) {
 							e.getValue().accept(pl, newV);
 							pd.scale.put(e.getKey(), newV);
@@ -636,9 +636,21 @@ public class NetHandler<RL, P, NET> {
 		this.sendToAllTracking = (a, b, c) -> sendToAllTracking.accept(a, b, wrapper.apply(c));
 	}
 
-	public <PB, PCK> void setSendPacket(Function<byte[], PB> wrapper, BiFunction<RL, PB, PCK> makePacket, BiConsumer<NET, PCK> sendPacket, BiConsumer<P, Consumer<NET>> forEachTracking) {
-		this.sendPacket = (a, b, c) -> sendPacket.accept(a, makePacket.apply(b, wrapper.apply(c)));
-		this.sendToAllTracking = (a, b, c) -> forEachTracking.accept(a, n -> sendPacket.accept(n, makePacket.apply(b, wrapper.apply(c))));
+	private void sendPacketServer(P to, RL pck, byte[] data) {
+		NET n = getNet.apply(to);
+		if(n instanceof ServerNetH && ((ServerNetH)n).cpm$hasMod()) {
+			sendPacket.accept(n, pck, data);
+		}
+	}
+
+	public <PB, EP> void setSendPacket2(Function<byte[], PB> wrapper, TriConsumer<NET, RL, PB> sendPacket, Function<P, Collection<EP>> forEachTracking) {
+		this.sendPacket = (a, b, c) -> sendPacket.accept(a, b, wrapper.apply(c));
+		this.sendToAllTracking = (p, rl, d) -> {
+			for (EP t : forEachTracking.apply(p)) {
+				sendPacketServer((P) t, rl, d);
+			}
+			sendPacketServer(p, rl, d);
+		};
 	}
 
 	public void setSendPacket(TriConsumer<NET, RL, byte[]> sendPacket, TriConsumer<P, RL, byte[]> sendToAllTracking) {

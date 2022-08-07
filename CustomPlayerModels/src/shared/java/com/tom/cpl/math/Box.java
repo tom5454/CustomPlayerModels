@@ -33,4 +33,12 @@ public class Box {
 		int f4 = Math.min(this.y + h, other.y + other.h);
 		return new Box(f0, f1, f3 - f0, f4 - f1);
 	}
+
+	public Box union(Box other) {
+		int f0 = Math.min(this.x, other.x);
+		int f1 = Math.min(this.y, other.y);
+		int f3 = Math.max(this.x + w, other.x + other.w);
+		int f4 = Math.max(this.y + h, other.y + other.h);
+		return new Box(f0, f1, f3 - f0, f4 - f1);
+	}
 }

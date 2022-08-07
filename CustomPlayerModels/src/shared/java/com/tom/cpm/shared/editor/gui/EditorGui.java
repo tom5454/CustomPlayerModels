@@ -38,6 +38,7 @@ import com.tom.cpm.externals.org.apache.maven.artifact.versioning.ComparableVers
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.MinecraftCommonAccess;
+import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -95,7 +96,7 @@ public class EditorGui extends Frame {
 		}
 		String last = ModConfig.getCommonConfig().getString(ConfigKeys.EDITOR_LAST_VERSION, null);
 		if(last == null)showFirstStart = true;
-		else {
+		else if(!MinecraftObjectHolder.DEBUGGING) {
 			ComparableVersion l = new ComparableVersion(last);
 			ComparableVersion c = new ComparableVersion(MinecraftCommonAccess.get().getModVersion());
 			if(c.compareTo(l) > 0)showChangelog = last;
@@ -603,52 +604,26 @@ public class EditorGui extends Frame {
 		int x = topPanel.getX();
 		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.display"), () -> pp.display(x, 20)));
 
-		Checkbox chxbxBase = pp.addCheckbox(gui.i18nFormat("label.cpm.display.drawBase"), b -> {
-			editor.renderBase = !b.isSelected();
-			b.setSelected(editor.renderBase);
-		});
-		chxbxBase.setSelected(editor.renderBase);
+		editor.renderBase.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawBase"));
 
-		Checkbox chxbxTpose = pp.addCheckbox(gui.i18nFormat("label.cpm.display.player_tpose"), b -> {
-			editor.playerTpose = !b.isSelected();
-			b.setSelected(editor.playerTpose);
-		});
-		chxbxTpose.setSelected(editor.playerTpose);
+		editor.playerTpose.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.player_tpose"));
 
-		Checkbox chxbxAllUVs = pp.addCheckbox(gui.i18nFormat("label.cpm.display.allUVs"), b -> {
-			editor.drawAllUVs = !b.isSelected();
-			b.setSelected(editor.drawAllUVs);
-		});
-		chxbxAllUVs.setSelected(editor.drawAllUVs);
+		editor.drawAllUVs.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.allUVs"));
 
-		Checkbox chxbxFilterDraw = pp.addCheckbox(gui.i18nFormat("label.cpm.display.onlyDrawOnSelected"), b -> {
-			editor.onlyDrawOnSelected = !b.isSelected();
-			b.setSelected(editor.onlyDrawOnSelected);
-		});
-		chxbxFilterDraw.setSelected(editor.onlyDrawOnSelected);
+		Checkbox chxbxFilterDraw = editor.onlyDrawOnSelected.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.onlyDrawOnSelected"));
 		chxbxFilterDraw.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.onlyDrawOnSelected")));
 
-		Checkbox chxbxVanillaAnims = pp.addCheckbox(gui.i18nFormat("label.cpm.display.playVanillaAnims"), b -> {
-			editor.playVanillaAnims = !b.isSelected();
-			b.setSelected(editor.playVanillaAnims);
-		});
-		chxbxVanillaAnims.setSelected(editor.playVanillaAnims);
+		Checkbox chxbxVanillaAnims = editor.playVanillaAnims.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.playVanillaAnims"));
 		chxbxVanillaAnims.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playVanillaAnims")));
 
-		Checkbox chxbxAnimatedTex = pp.addCheckbox(gui.i18nFormat("label.cpm.display.playAnimatedTex"), b -> {
-			editor.playAnimatedTex = !b.isSelected();
-			b.setSelected(editor.playAnimatedTex);
-			if(!editor.playAnimatedTex)
+		Checkbox chxbxAnimatedTex = editor.playAnimatedTex.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.playAnimatedTex"));
+		editor.playAnimatedTex.add(() -> {
+			if(!editor.playAnimatedTex.get())
 				editor.textures.values().forEach(ETextures::refreshTexture);
 		});
-		chxbxAnimatedTex.setSelected(editor.playAnimatedTex);
 		chxbxAnimatedTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playAnimatedTex")));
 
-		Checkbox chxbxBoundingBox = pp.addCheckbox(gui.i18nFormat("label.cpm.display.drawBoundingBox"), b -> {
-			editor.drawBoundingBox = !b.isSelected();
-			b.setSelected(editor.drawBoundingBox);
-		});
-		chxbxBoundingBox.setSelected(editor.drawBoundingBox);
+		editor.drawBoundingBox.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawBoundingBox"));
 
 		Checkbox chxbxChat = pp.addCheckbox(gui.i18nFormat("label.cpm.display.displayChat"), b -> {
 			editor.displayChat = !b.isSelected();
@@ -663,20 +638,13 @@ public class EditorGui extends Frame {
 		});
 		chxbxAdvScaling.setSelected(editor.displayAdvScaling);
 
-		Checkbox chxbxForceItemInAnim = pp.addCheckbox(gui.i18nFormat("label.cpm.display.forceItemInAnim"), b -> {
-			editor.forceHeldItemInAnim = !b.isSelected();
-			b.setSelected(editor.forceHeldItemInAnim);
-			editor.updateGui();
-		});
-		chxbxForceItemInAnim.setSelected(editor.forceHeldItemInAnim);
+		Checkbox chxbxForceItemInAnim = editor.forceHeldItemInAnim.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.forceItemInAnim"));
+		editor.forceHeldItemInAnim.add(editor::updateGui);
 		chxbxForceItemInAnim.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.forceItemInAnim")));
 
-		Checkbox chxbxDisplayGizmo = pp.addCheckbox(gui.i18nFormat("label.cpm.display.displayGizmo"), b -> {
-			editor.displayGizmo = !b.isSelected();
-			b.setSelected(editor.displayGizmo);
-		});
+		Checkbox chxbxDisplayGizmo = editor.displayGizmo.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.displayGizmo"));
+		editor.displayGizmo.add(editor::updateGui);
 		chxbxDisplayGizmo.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.displayGizmo", Keybinds.TOGGLE_GIZMO.getSetKey(gui))));
-		editor.updateGui.add(() -> chxbxDisplayGizmo.setSelected(editor.displayGizmo));
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
 
@@ -712,11 +680,7 @@ public class EditorGui extends Frame {
 
 		addLayerToggle(pp, PlayerModelLayer.ELYTRA);
 
-		Checkbox chxbxParrots = pp.addCheckbox(gui.i18nFormat("label.cpm.display.drawParrots"), b -> {
-			editor.drawParrots = !b.isSelected();
-			b.setSelected(editor.drawParrots);
-		});
-		chxbxParrots.setSelected(editor.drawParrots);
+		editor.drawParrots.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawParrots"));
 	}
 
 	private void addLayerToggle(PopupMenu pp, PlayerModelLayer layer) {
@@ -807,10 +771,7 @@ public class EditorGui extends Frame {
 		getKeybindHandler().registerKeybind(Keybinds.UNDO, editor::undo);
 		getKeybindHandler().registerKeybind(Keybinds.REDO, editor::redo);
 		getKeybindHandler().registerKeybind(Keybinds.SAVE, this::save);
-		getKeybindHandler().registerKeybind(Keybinds.TOGGLE_GIZMO, () -> {
-			editor.displayGizmo = !editor.displayGizmo;
-			editor.updateGui();
-		});
+		getKeybindHandler().registerKeybind(Keybinds.TOGGLE_GIZMO, editor.displayGizmo::toggle);
 		if(!event.isConsumed()) {
 			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
 				editor.refreshCaches();

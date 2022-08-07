@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
@@ -100,14 +99,19 @@ public class MultiSelector implements TreeElement {
 	public void setMCScale(float scale) {
 	}
 
+	@Override
 	public Vec3f getVec(VecType type) {
+		if(type == VecType.TEXTURE) {
+			Vec3i uv = getVecUV();
+			return new Vec3f(uv.x, uv.y, uv.z);
+		}
 		return elements.stream().map(e -> getVec(e, type)).reduce(new Vec3f(), Vec3f::add).mul(1f / elements.size());
 	}
 
 	public Vec3i getVecUV() {
-		Vec2i uv = elements.stream().map(e -> new Vec2i(e.u, e.v)).
-				reduce(new Vec2i(Integer.MAX_VALUE, Integer.MAX_VALUE), (a, b) -> new Vec2i(Math.min(a.x, b.x), Math.min(a.y, b.y)));
-		return new Vec3i(uv.x, uv.y, 0);
+		Vec3i uv = elements.stream().map(e -> new Vec3i(e.u, e.v, e.textureSize)).
+				reduce(new Vec3i(Integer.MAX_VALUE, Integer.MAX_VALUE, 256), (a, b) -> new Vec3i(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z)));
+		return new Vec3i(uv.x, uv.y, uv.z);
 	}
 
 	public Vec3f getVec(ModelElement e, VecType type) {
@@ -137,11 +141,25 @@ public class MultiSelector implements TreeElement {
 
 	@Override
 	public Box getTextureBox() {
-		return elements.stream().map(ModelElement::getTextureBox).filter(e -> e != null).reduce(new Box(0, 0, 0, 0), Box::intersect);
+		return elements.stream().map(ModelElement::getTextureBox).filter(e -> e != null).reduce(null, (a, b) -> a == null ? b : (b == null ? a : a.union(b)));
 	}
 
 	@Override
 	public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
 		elements.forEach(e -> TextureDisplay.drawBoxTextureOverlay(gui, e, x, y, xs, ys, TextureDisplay.getAlphaForBox(true)));
+	}
+
+	@Override
+	public void setVecTemp(VecType object, Vec3f v) {
+		if(object == VecType.TEXTURE) {
+			Vec3i uv = getVecUV();
+			float uOff = v.x - uv.x;
+			float vOff = v.y - uv.y;
+			elements.forEach(e -> e.setVecTemp(object, new Vec3f(e.u + uOff, e.v + vOff, e.textureSize)));
+		} else {
+			Vec3f s = getVec(object);
+			Vec3f off = v.sub(s);
+			elements.forEach(e -> e.setVecTemp(object, getVec(e, object).add(off)));
+		}
 	}
 }

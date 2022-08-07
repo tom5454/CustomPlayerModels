@@ -1,14 +1,22 @@
 package com.tom.cpm.shared.model.render;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.util.Direction;
+import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.EditorTool;
 import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.project.JsonMap;
+import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
+import com.tom.cpm.shared.editor.util.UVResizableArea;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class PerFaceUV {
@@ -76,6 +84,7 @@ public class PerFaceUV {
 		public int sx, sy, ex, ey;
 		public Rot rotation = Rot.ROT_0;
 		public boolean autoUV;
+		private UVArea controlElems;
 
 		public Face() {}
 
@@ -224,5 +233,69 @@ public class PerFaceUV {
 		Face f = faces.get(key);
 		if(f == null)return false;
 		else return f.autoUV;
+	}
+
+	public List<TreeSettingElement> getDragBoxes(Editor editor, ModelElement parent) {
+		List<TreeSettingElement> l = new ArrayList<>();
+		List<TreeSettingElement> sel = new ArrayList<>();
+		boolean show = editor.drawMode.get() == EditorTool.MOVE_UV;
+		for(Direction d : Direction.VALUES) {
+			Face f = faces.get(d);
+			if(f == null)continue;
+			if(f.controlElems == null) {
+				f.controlElems = new UVArea(editor, parent, d, f);
+			}
+			if(show && d == editor.perfaceFaceDir.get()) {
+				sel.addAll(f.controlElems.elements);
+			} else {
+				l.add(f.controlElems.face);
+			}
+		}
+		sel.addAll(l);
+		return sel;
+	}
+
+	private static class UVArea extends UVResizableArea {
+		private Face f;
+		private Direction d;
+
+		public UVArea(Editor editor, ModelElement parent, Direction d, Face f) {
+			super(editor, parent);
+			this.f = f;
+			this.d = d;
+		}
+
+		@Override
+		protected Area getArea() {
+			return new Area(f.sx, f.sy, f.ex, f.ey);
+		}
+
+		@Override
+		protected void setArea(Area area, boolean moveOnly) {
+			ActionBuilder ab = editor.action("set", "action.cpm.texUV");
+			Vec4f v = new Vec4f(area.sx, area.sy, area.ex, area.ey);
+			ab.updateValueOp(f, f.getVec(), v, Face::set);
+			if(!moveOnly)ab.updateValueOp(f, f.autoUV, false, (a, b) -> a.autoUV = b);
+			ab.onAction(((ModelElement)parent)::markDirty);
+			ab.execute();
+		}
+
+		@Override
+		protected void setAreaTemp(Area area) {
+			f.set(new Vec4f(area.sx, area.sy, area.ex, area.ey));
+			((ModelElement) parent).markDirty();
+		}
+
+		@Override
+		protected FaceArea face() {
+			return new FaceArea(editor, parent) {
+
+				@Override
+				public void onClick(Editor e, MouseEvent evt) {
+					super.onClick(e, evt);
+					e.perfaceFaceDir.accept(d);
+				}
+			};
+		}
 	}
 }

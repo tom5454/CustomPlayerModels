@@ -449,7 +449,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 						dt[0][f] = c.getPosition().x;
 						dt[1][f] = c.getPosition().y;
 						dt[2][f] = c.getPosition().z;
-					}
+					}//TODO special case for root parts
 					if(rot != null) {
 						dt[3][f] = rot[f].x;
 						dt[4][f] = rot[f].y;

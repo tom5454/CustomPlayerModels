@@ -33,7 +33,7 @@ public class AnimPanel extends Panel {
 	private Editor editor;
 	private ListPicker<IAnim> animSel;
 	private TabFocusHandler tabHandler;
-	private Button prevFrm, nextFrm;
+	private Button prevFrm, nextFrm, clearAnimData;
 
 	public AnimPanel(IGui gui, EditorGui e) {
 		super(gui);
@@ -166,7 +166,10 @@ public class AnimPanel extends Panel {
 		duration.addChangeListener(() -> editor.setAnimDuration((int) duration.getValue()));
 		tabHandler.add(duration);
 
-		Button clearAnimData = new Button(gui, gui.i18nFormat("button.cpm.clearAnimData"), ConfirmPopup.confirmHandler(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimPartData));
+		clearAnimData = new Button(gui, gui.i18nFormat("button.cpm.clearAnimData"), () -> {
+			boolean all = gui.isCtrlDown();
+			ConfirmPopup.confirm(e, gui.i18nFormat("label.cpm.confirmDel"), () -> editor.delSelectedAnimPartData(all));
+		});
 		clearAnimData.setBounds(new Box(110, 10, 55, 18));
 		clearAnimData.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.clearAnimData")));
 		p.addElement(clearAnimData);
@@ -176,6 +179,7 @@ public class AnimPanel extends Panel {
 		Panel sc = PosPanel.addVec3("render_scale", v -> editor.setAnimScale(v), this, editor.setAnimScale, 2, tabHandler);
 		editor.updateGui.add(() -> {
 			sc.setVisible(editor.displayAdvScaling);
+			clearAnimData.setEnabled(editor.getSelectedElement() != null && editor.selectedAnim != null && editor.selectedAnim.getSelectedFrame() != null);
 			layout.reflow();
 		});
 
@@ -264,9 +268,11 @@ public class AnimPanel extends Panel {
 		if(gui.isCtrlDown()) {
 			prevFrm.setText("<<");
 			nextFrm.setText(">>");
+			clearAnimData.setText(gui.i18nFormat("button.cpm.clearAnimDataAll"));
 		} else {
 			prevFrm.setText("<");
 			nextFrm.setText(">");
+			clearAnimData.setText(gui.i18nFormat("button.cpm.clearAnimData"));
 		}
 		super.draw(event, partialTicks);
 	}

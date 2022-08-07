@@ -135,6 +135,8 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			register(new Field<>(() -> model.bipedLeftArm,  v -> model.bipedLeftArm  = v, RootModelType.ARMOR_LEFT_ARM));
 			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, RootModelType.ARMOR_RIGHT_FOOT));
 			register(new Field<>(() -> model.bipedLeftLeg,  v -> model.bipedLeftLeg  = v, RootModelType.ARMOR_LEFT_FOOT));
+
+			register(new Field<>(() -> model.bipedHeadwear, v -> model.bipedHeadwear = v, null));
 		}
 
 	}

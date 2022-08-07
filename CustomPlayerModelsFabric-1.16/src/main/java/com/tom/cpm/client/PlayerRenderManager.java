@@ -195,6 +195,8 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			register(new Field<>(() -> model.leftArm,   v -> model.leftArm   = v, RootModelType.ARMOR_LEFT_ARM));
 			register(new Field<>(() -> model.rightLeg,  v -> model.rightLeg  = v, RootModelType.ARMOR_RIGHT_FOOT));
 			register(new Field<>(() -> model.leftLeg,   v -> model.leftLeg   = v, RootModelType.ARMOR_LEFT_FOOT));
+
+			register(new Field<>(() -> model.hat        , v -> model.hat         = v, null));
 		}
 
 	}

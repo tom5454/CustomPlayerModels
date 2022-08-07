@@ -86,6 +86,7 @@ public class NewSkinPopup extends PopupPanel {
 				updateValueOp(tex, tex.provider.size, size, (a, b) -> a.provider.size = b).
 				updateValueOp(tex, oldImg, newImage, ETextures::setImage).
 				onAction(tex::restitchTexture).
+				onAction(editor::markElementsDirty).
 				execute();
 				editor.updateGui();
 				if(editor.hasVanillaParts() && (size.x != 64 || size.y != 64)) {

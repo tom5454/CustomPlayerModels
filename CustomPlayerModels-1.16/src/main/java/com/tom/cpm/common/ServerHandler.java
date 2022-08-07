@@ -1,11 +1,10 @@
 package com.tom.cpm.common;
 
-import java.util.function.Predicate;
+import java.util.Collections;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SChatPacket;
@@ -33,8 +32,6 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
 	public static NetHandler<ResourceLocation, ServerPlayerEntity, ServerPlayNetHandler> netHandler;
@@ -42,7 +39,13 @@ public class ServerHandler {
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUUID);
-		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new SCustomPayloadPlayPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new SCustomPayloadPlayPacket(rl, pb), ServerHandler::hasMod, null));
+		netHandler.setSendPacket2(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new SCustomPayloadPlayPacket(rl, pb)), ent -> {
+			EntityTracker tr = ((ServerWorld)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
+			if(tr != null) {
+				return tr.seenBy;
+			}
+			return Collections.emptyList();
+		});
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTracker tr : ((ServerWorld)p.level).getChunkSource().chunkMap.entityMap.values()) {
 				if(tr.entity instanceof PlayerEntity && tr.seenBy.contains(p)) {
@@ -104,21 +107,5 @@ public class ServerHandler {
 		if(evt.getEntityLiving() instanceof ServerPlayerEntity) {
 			netHandler.onJump((ServerPlayerEntity) evt.getEntityLiving());
 		}
-	}
-
-	public static boolean hasMod(ServerPlayerEntity spe) {
-		return ((NetH)spe.connection).cpm$hasMod();
-	}
-
-	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, IPacket<?> pckt, Predicate<ServerPlayerEntity> test, GenericFutureListener<? extends Future<? super Void>> future) {
-		EntityTracker tr = ((ServerWorld)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
-		if(tr != null) {
-			for (ServerPlayerEntity p : tr.seenBy) {
-				if(test.test(p)) {
-					p.connection.send(pckt, future);
-				}
-			}
-		}
-		ent.connection.send(pckt, future);
 	}
 }

@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
@@ -21,6 +22,7 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.util.UVResizableArea;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 public class AnimatedTex implements TreeElement {
@@ -32,6 +34,8 @@ public class AnimatedTex implements TreeElement {
 	public int frameCount;
 	public boolean anX, interpolate;
 	private final TextureSheetType sheet;
+	private TexElemDrag startDrag;
+	private RegionSize region;
 
 	public AnimatedTex(Editor editor, TextureSheetType sheet, JsonMap map) {
 		this(editor, sheet);
@@ -51,9 +55,22 @@ public class AnimatedTex implements TreeElement {
 		uvSize = new Vec2i();
 		animStart = new Vec2i();
 		options = new ArrayList<>();
-		options.add(new TexElem("start", () -> uvStart));
+		startDrag = new TexElemDrag("start", () -> uvStart, () -> uvSize) {
+
+			@Override
+			public List<TreeSettingElement> getSettingsElements() {
+				return region.elements;
+			}
+
+			@Override
+			public Box getTextureBox() {
+				return null;
+			}
+		};
+		region = new RegionSize();
+		options.add(startDrag);
 		options.add(new TexElem("size", () -> uvSize));
-		options.add(new TexElem("from", () -> animStart));
+		options.add(new TexElemDrag("from", () -> animStart, () -> new Vec2i(uvSize.x * (anX ? frameCount : 1), uvSize.y * (anX ? 1 : frameCount))));
 		options.add(new ValElem("frameTime", () -> frameTime, v -> frameTime = v));
 		options.add(new ValElem("frameCount", () -> frameCount, v -> frameCount = v));
 		options.add(new BoolElem("anX", () -> anX, v -> anX = v));
@@ -145,6 +162,18 @@ public class AnimatedTex implements TreeElement {
 		editor.setDelEn.accept(true);
 	}
 
+	protected void markDirty() {
+		editor.textures.get(sheet).refreshTexture();
+		lastFrame = -1;
+	}
+
+	public static void applyAnims(TreeElement sel, Consumer<TreeElement> c) {
+		if(sel instanceof AnimatedTex)sel.getTreeElements(c);
+		else if(sel instanceof OptionElem) {
+			((OptionElem) sel).outer().getTreeElements(c);
+		}
+	}
+
 	private class OptionElem implements TreeElement {
 		protected String name;
 
@@ -172,14 +201,13 @@ public class AnimatedTex implements TreeElement {
 			return new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.tree.at." + name));
 		}
 
-		protected void markDirty() {
-			editor.textures.get(sheet).refreshTexture();
-			lastFrame = -1;
+		protected AnimatedTex outer() {
+			return AnimatedTex.this;
 		}
 	}
 
 	private class TexElem extends OptionElem {
-		private Supplier<Vec2i> vec;
+		protected Supplier<Vec2i> vec;
 
 		public TexElem(String name, Supplier<Vec2i> vec) {
 			super(name);
@@ -197,14 +225,42 @@ public class AnimatedTex implements TreeElement {
 		public void setVec(Vec3f v, VecType object) {
 			if(object == VecType.TEXTURE) {
 				Vec2i vec = this.vec.get();
-				vec.x = (int) v.x;
-				vec.y = (int) v.y;
 				editor.action("set", "label.cpm.tree.at." + name).
 				updateValueOp(vec, vec.x, (int) v.x, (a, b) -> a.x = b).
 				updateValueOp(vec, vec.y, (int) v.y, (a, b) -> a.y = b).
-				onAction(this::markDirty).
+				onAction(AnimatedTex.this::markDirty).
 				execute();
 			}
+		}
+	}
+
+	private class TexElemDrag extends TexElem {
+		private Supplier<Vec2i> vecSize;
+
+		public TexElemDrag(String name, Supplier<Vec2i> vec, Supplier<Vec2i> vecSize) {
+			super(name, vec);
+			this.vecSize = vecSize;
+		}
+
+		@Override
+		public Box getTextureBox() {
+			Vec2i vec = this.vec.get();
+			Vec2i size = this.vecSize.get();
+			return new Box(vec.x, vec.y, size.x, size.y);
+		}
+
+		@Override
+		public Vec3f getVec(VecType type) {
+			Vec2i vec = this.vec.get();
+			if(type == VecType.TEXTURE)return new Vec3f(vec.x, vec.y, 1);
+			return Vec3f.ZERO;
+		}
+
+		@Override
+		public void setVecTemp(VecType type, Vec3f v) {
+			Vec2i vec = this.vec.get();
+			vec.x = (int) v.x;
+			vec.y = (int) v.y;
 		}
 	}
 
@@ -229,7 +285,7 @@ public class AnimatedTex implements TreeElement {
 			set.accept((int) value);
 			editor.action("set", "label.cpm.tree.at." + name).
 			updateValueOp(set, get.getAsInt(), (int) value, IntConsumer::accept).
-			onAction(this::markDirty).
+			onAction(AnimatedTex.this::markDirty).
 			execute();
 		}
 	}
@@ -253,9 +309,49 @@ public class AnimatedTex implements TreeElement {
 		public void modeSwitch() {
 			editor.action("set", "label.cpm.tree.at." + name).
 			updateValueOp(set, get.getAsBoolean(), !get.getAsBoolean(), Consumer::accept).
-			onAction(this::markDirty).
+			onAction(AnimatedTex.this::markDirty).
 			onAction(this::updateGui).
 			execute();
+		}
+	}
+
+	private class RegionSize extends UVResizableArea {
+
+		public RegionSize() {
+			super(AnimatedTex.this.editor, AnimatedTex.this.startDrag);
+		}
+
+		@Override
+		protected Area getArea() {
+			return new Area(uvStart.x, uvStart.y, uvStart.x + uvSize.x, uvStart.y + uvSize.y);
+		}
+
+		@Override
+		protected void setArea(Area v, boolean moveOnly) {
+			int sx = Math.min(v.sx, v.ex);
+			int sy = Math.min(v.sy, v.ey);
+			int ex = Math.max(v.sx, v.ex);
+			int ey = Math.max(v.sy, v.ey);
+			editor.action("set", "label.cpm.tree.at.start").
+			updateValueOp(uvStart, uvStart.x, sx, (a, b) -> a.x = b).
+			updateValueOp(uvStart, uvStart.y, sy, (a, b) -> a.y = b).
+			updateValueOp(uvSize, uvSize.x, ex - sx, (a, b) -> a.x = b).
+			updateValueOp(uvSize, uvSize.y, ey - sy, (a, b) -> a.y = b).
+			onAction(AnimatedTex.this::markDirty).
+			execute();
+		}
+
+		@Override
+		protected void setAreaTemp(Area v) {
+			int sx = Math.min(v.sx, v.ex);
+			int sy = Math.min(v.sy, v.ey);
+			int ex = Math.max(v.sx, v.ex);
+			int ey = Math.max(v.sy, v.ey);
+			uvStart.x = sx;
+			uvStart.y = sy;
+			uvSize.x = ex - sx;
+			uvSize.y = ey - sy;
+			editor.textures.get(sheet).refreshTexture();
 		}
 	}
 }

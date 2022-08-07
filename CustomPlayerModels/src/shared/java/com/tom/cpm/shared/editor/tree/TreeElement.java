@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.editor.tree;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
@@ -147,6 +149,7 @@ public abstract interface TreeElement {
 	public default void drawTexture(IGui gui, int x, int y, float xs, float ys) {}
 	public default ETextures getTexture() { return null; }
 	public default Box getTextureBox() { return null; }
+	public default List<TreeSettingElement> getSettingsElements() { return Collections.emptyList(); }
 	public default void modeSwitch() {}
 	public default void updateGui() {}
 	public default void onRefreshTree() {}
@@ -161,4 +164,28 @@ public abstract interface TreeElement {
 	public default void setVecTemp(VecType type, Vec3f vec) {}
 	public default Vec3f getVec(VecType type) {return Vec3f.ZERO;}
 	public default boolean canEditVec(VecType type) {return false;}
+
+	public static interface TreeSettingElement extends TreeElement {
+		TreeElement getParent();
+
+		@Override
+		default String getName() {
+			return "";
+		}
+
+		@Override
+		default ETextures getTexture() {
+			return getParent().getTexture();
+		}
+
+		@Override
+		default boolean isSelected(Editor e, TreeElement other) {
+			return other == getParent();
+		}
+
+		@Override
+		default void drawTexture(IGui gui, int x, int y, float xs, float ys) {
+			getParent().drawTexture(gui, x, y, xs, ys);
+		}
+	}
 }

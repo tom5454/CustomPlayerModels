@@ -2,29 +2,31 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "homepage-fabric": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
   "promos": {
-    "1.12.2-latest": "0.4.5a",
+    "1.12.2-latest": "0.4.6a",
     "1.16.4-latest": "0.4.3a",
-    "1.16.5-latest": "0.4.5a",
-    "1.8.9-latest": "0.4.5a",
-    "1.7.10-latest": "0.4.5a",
+    "1.16.5-latest": "0.4.6a",
+    "1.8.9-latest": "0.4.6a",
+    "1.7.10-latest": "0.4.6a",
     "1.15.2-latest": "0.0.17d",
     "1.16.4-fabric-latest": "0.4.3a",
-    "1.16.5-fabric-latest": "0.4.5a",
+    "1.16.5-fabric-latest": "0.4.6a",
     "1.17-fabric-latest": "0.4.3a",
-    "bukkit-latest": "0.4.5a",
-    "1.17.1-fabric-latest": "0.4.5a",
-    "1.17.1-latest": "0.4.5a",
+    "bukkit-latest": "0.4.6a",
+    "1.17.1-fabric-latest": "0.4.6a",
+    "1.17.1-latest": "0.4.6a",
     "1.18-latest": "0.4.0a",
     "1.18.1-latest": "0.4.0a",
     "1.18-fabric-latest": "0.4.1a",
     "1.18.1-fabric-latest": "0.4.1a",
-    "1.10.2-latest": "0.4.5a",
-    "1.18.2-latest": "0.4.5a",
-    "1.18.2-fabric-latest": "0.4.5a",
+    "1.10.2-latest": "0.4.6a",
+    "1.18.2-latest": "0.4.6a",
+    "1.18.2-fabric-latest": "0.4.6a",
     "1.19-latest": "0.4.5a",
     "1.19-fabric-latest": "0.4.5a",
-    "1.19.1-latest": "0.4.5b",
-    "1.19.1-fabric-latest": "0.4.5b"
+    "1.19.1-latest": "0.4.6a",
+    "1.19.1-fabric-latest": "0.4.6a",
+    "1.19.2-latest": "0.4.6a",
+    "1.19.2-fabric-latest": "0.4.6a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -67,7 +69,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.16.4": {
     "0.0.5a": "First release",
@@ -159,7 +162,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.16.4-fabric": {
     "0.0.5a": "First release",
@@ -247,7 +251,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.17-fabric": {
     "0.0.5a": "First release",
@@ -334,7 +339,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.7.10": {
     "0.0.5a": "First release",
@@ -376,7 +382,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.15.2": {
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
@@ -431,7 +438,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.17.1-fabric": {
     "0.0.0": "1.17-fabric",
@@ -451,7 +459,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.17.1": {
     "0.0.0": "1.16.5",
@@ -466,7 +475,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.18": {
     "0.0.0": "1.17.1",
@@ -505,7 +515,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.18.2": {
     "0.0.0": "1.18.1",
@@ -514,7 +525,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.18.2-fabric": {
     "0.0.0": "1.18.1-fabric",
@@ -523,7 +535,8 @@
     "0.4.2a": "Fixed root part animations not saving correctly (Closes #232)\nAdded limit to animation editor spinners (#231)\nFixed dragging bugging out at large offsets\nFixed chat not rendering in 1.18.2 forge in the editor\nFixed child parts not rendering outline",
     "0.4.3a": "Added Disable Vanilla Animations Effect\nPorted to 1.19\nAdded animations for using Goat Horns\n\nFixed some root part animations still not saving correctly (#235)\nFixed copy transform not copying vanilla transforms (head movement)\nFixed undo not working after using the gizmo (#237)\nFixed gizmo not being in the correct place while editing some animations",
     "0.4.4a": "Added vivecraft support for 1.18 (tested with 3-r1)\nAdded wiki reader into the editor\nAdded a first start guide and wiki reader\nUpdated forge 1.19 to 41.0.94 (Closes #247)\nAdded: hold shift to skip confirm popups\n\nFixed duplicated root parts can\u0027t be deleted\nSmall performance optimizations in the editor\nFixed models not loading/log-spam in LAN worlds (Closes #246)\nFixed model loading errors showing for invisible players\nFixed mouse not working in the texture editor with some settings",
-    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
+    "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.19": {
     "0.0.0": "1.18.2",
@@ -538,11 +551,21 @@
     "0.4.5a": "Updated translations (#252)\nAdded: auto-save interval setting\n\nFixed links opening the Wiki Viewer on the First Start Guide\nFixed missing translations on some config tooltips\nFixed crash with 1.19 forge servers\nFixed screenshot not working in fabric (Closes #253)\nFixed some changes not updating the editor (Closes #250)\nFixed crash with animated textures\nFixed scaling not working in some cases (Closes #257, #202)"
   },
   "1.19.1": {
-	"0.0.0": "1.19",
-    "0.4.5b": "Updated to 1.19.1 (Closes #256, Closes #258)"
+    "0.0.0": "1.19",
+    "0.4.5b": "Updated to 1.19.1 (Closes #256, Closes #258)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   },
   "1.19.1-fabric": {
-	"0.0.0": "1.19-fabric",
-    "0.4.5b": "Updated to 1.19.1 (Closes #256, Closes #258)"
+    "0.0.0": "1.19-fabric",
+    "0.4.5b": "Updated to 1.19.1 (Closes #256, Closes #258)",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
+  },
+  "1.19.2": {
+	"0.0.0": "1.19.1",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
+  },
+  "1.19.2-fabric": {
+	"0.0.0": "1.19.1-fabric",
+    "0.4.6a": "Added moving per-face UVs and Animated Textures with Move UV tool\nAdded clear all function to the Clear button under Animations\n\nFixed cloning not working in some cases\nFixed non-additive animations not displaying correctly in the Editor in rare cases\nFixed some changes not updating the editor (Closes #263)\nFixed multi-selection not working with Move UV tool\nFixed LAN not working on some versions (Closes #260)\nDisabled vanilla helmet 2nd layers (Closes #189)\nFixed rendering issue with Quark on 1.12.2 (Closes #244)"
   }
 }

@@ -21,7 +21,9 @@ import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.UIColors;
 import com.tom.cpl.gui.UpdaterRegistry;
+import com.tom.cpl.gui.UpdaterRegistry.BooleanUpdater;
 import com.tom.cpl.gui.UpdaterRegistry.Updater;
+import com.tom.cpl.gui.UpdaterRegistry.UpdaterWithValue;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Tree.TreeHandler;
 import com.tom.cpl.math.Box;
@@ -61,6 +63,7 @@ import com.tom.cpm.shared.editor.tree.ScalingElement;
 import com.tom.cpm.shared.editor.tree.TexturesElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
+import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
@@ -127,7 +130,6 @@ public class Editor {
 	public Updater<Boolean> setAnimPlay = updaterReg.create();
 	public Updater<EditorAnim> setSelAnim = updaterReg.create();
 	public Updater<Float> setValue = updaterReg.create();
-	public Updater<EditorTool> setTool = updaterReg.create();
 	public Updater<Vec4f> setFaceUVs = updaterReg.create();
 	public Updater<Rot> setFaceRot = updaterReg.create();
 	public Updater<Boolean> setAutoUV = updaterReg.create();
@@ -137,34 +139,34 @@ public class Editor {
 
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
-	public EditorTool drawMode = EditorTool.PEN;
+	public UpdaterWithValue<EditorTool> drawMode = updaterReg.createValue(EditorTool.PEN);
 	public int brushSize = 1;
 	public int alphaValue = 255;
-	public boolean drawAllUVs = false;
-	public boolean onlyDrawOnSelected = true;
-	public boolean playVanillaAnims = true;
-	public boolean playAnimatedTex = true;
-	public boolean drawParrots = false;
+	public BooleanUpdater drawAllUVs = updaterReg.createBool(false);
+	public BooleanUpdater onlyDrawOnSelected = updaterReg.createBool(true);
+	public BooleanUpdater playVanillaAnims = updaterReg.createBool(true);
+	public BooleanUpdater playAnimatedTex = updaterReg.createBool(true);
+	public BooleanUpdater drawParrots = updaterReg.createBool(false);
 	public boolean displayChat = true;
 	public boolean displayAdvScaling = ModConfig.getCommonConfig().getBoolean(ConfigKeys.ADV_SCALING_SETTINGS, false);
-	public boolean forceHeldItemInAnim = false;
-	public boolean displayGizmo = true;
+	public BooleanUpdater forceHeldItemInAnim = updaterReg.createBool(false);
+	public BooleanUpdater displayGizmo = updaterReg.createBool(true);
 	public EnumMap<ItemSlot, DisplayItem> handDisplay = new EnumMap<>(ItemSlot.class);
 	public Set<PlayerModelLayer> modelDisplayLayers = new HashSet<>();
 	public float animTestSlider;
 	public Set<VanillaPose> testPoses = EnumSet.noneOf(VanillaPose.class);
 	public ScalingElement scalingElem = new ScalingElement(this);
-	public Direction perfaceFaceDir = Direction.UP;
+	public UpdaterWithValue<Direction> perfaceFaceDir = updaterReg.createValue(Direction.UP);
 
 	public ViewportCamera camera = new ViewportCamera();
 	private Stack<Action> undoQueue = new Stack<>();
 	private Stack<Action> redoQueue = new Stack<>();
-	public boolean renderBase = true;
+	public BooleanUpdater renderBase = updaterReg.createBool(true);
 	public boolean applyAnim;
 	public boolean playFullAnim;
-	public boolean playerTpose;
+	public BooleanUpdater playerTpose = updaterReg.createBool(false);
 	public boolean applyScaling;
-	public boolean drawBoundingBox;
+	public BooleanUpdater drawBoundingBox = updaterReg.createBool(false);
 	public long playStartTime, gestureStartTime;
 	public AnimationEncodingData animEnc;
 
@@ -269,12 +271,13 @@ public class Editor {
 			updateValueOp(tex, tex.size.x, x, (a, b) -> a.size.x = b).
 			updateValueOp(tex, tex.size.y, y, (a, b) -> a.size.y = b).
 			onAction(texs::restitchTexture).
+			onAction(this::markElementsDirty).
 			execute();
 		}
 	}
 
 	public void drawPixel(int x, int y, boolean isSkin) {
-		switch (drawMode) {
+		switch (drawMode.get()) {
 		case PEN:
 			setPixel(x, y, penColor | (alphaValue << 24));
 			break;
@@ -288,7 +291,7 @@ public class Editor {
 			ETextures texs = getTextureProvider();
 			if(texs != null && texs.isEditable()) {
 				Box box = selectedElement != null ? selectedElement.getTextureBox() : null;
-				if(box != null && onlyDrawOnSelected) {
+				if(box != null && onlyDrawOnSelected.get()) {
 					if(!box.isInBounds(x, y))return;
 				}
 				Image img = texs.getImage();
@@ -305,7 +308,7 @@ public class Editor {
 					if(pixels.contains(p) || p.x < 0 || p.y < 0 || p.x >= img.getWidth() || p.y >= img.getHeight())continue;
 					int color = img.getRGB(p.x, p.y);
 					if(color == old || ((old & 0xff000000) == 0) && ((color & 0xff000000) == 0)) {
-						if(box != null && onlyDrawOnSelected) {
+						if(box != null && onlyDrawOnSelected.get()) {
 							if(!box.isInBounds(p.x, p.y))continue;
 						}
 						pixels.add(p);
@@ -333,7 +336,7 @@ public class Editor {
 		ETextures texs = getTextureProvider();
 		if(texs != null && texs.isEditable()) {
 			Box box = selectedElement != null ? selectedElement.getTextureBox() : null;
-			if(box != null && onlyDrawOnSelected) {
+			if(box != null && onlyDrawOnSelected.get()) {
 				if(!box.isInBounds(x, y))return;
 			}
 			Image img = texs.getImage();
@@ -446,7 +449,7 @@ public class Editor {
 		elements.forEach(ModelElement::preRender);
 		applyAnimations();
 		elements.forEach(ModelElement::postRender);
-		if(playAnimatedTex)textures.values().forEach(ETextures::updateAnim);
+		if(playAnimatedTex.get())textures.values().forEach(ETextures::updateAnim);
 	}
 
 	public void applyAnimations() {
@@ -750,9 +753,9 @@ public class Editor {
 		}
 	}
 
-	public void delSelectedAnimPartData() {
+	public void delSelectedAnimPartData(boolean all) {
 		if(selectedAnim != null) {
-			selectedAnim.clearSelectedData();
+			selectedAnim.clearSelectedData(all);
 			updateGui();
 		}
 	}
@@ -798,6 +801,11 @@ public class Editor {
 	}
 
 	public ModelElement getSelectedElement() {
+		if(selectedElement instanceof TreeSettingElement) {
+			TreeSettingElement e = (TreeSettingElement) selectedElement;
+			if(e.getParent() instanceof ModelElement)return (ModelElement) e.getParent();
+			else return null;
+		}
 		return selectedElement instanceof ModelElement ? (ModelElement) selectedElement : null;
 	}
 
@@ -853,7 +861,7 @@ public class Editor {
 	}
 
 	public void render(MatrixStack stack, VBuffers buf, ViewportPanel panel) {
-		if(drawBoundingBox) {
+		if(drawBoundingBox.get()) {
 			RenderUtil.renderBounds(stack, buf.getBuffer(panel.getRenderTypes(), RenderMode.OUTLINE), getRenderedPose(), applyScaling, scalingElem);
 		}
 	}
@@ -888,6 +896,10 @@ public class Editor {
 	public void refreshCaches() {
 		restitchTextures();
 		animations.forEach(EditorAnim::clearCache);
+		markElementsDirty();
+	}
+
+	public void markElementsDirty() {
 		walkElements(elements, ModelElement::markDirty);
 	}
 }

@@ -39,22 +39,28 @@ public class TextureDisplay extends GuiElement {
 			gui.drawTexture(0, 0, bounds.w, bounds.h, 0, 0, 1, 1);
 			float x = bounds.w / (float) provider.provider.size.x;
 			float y = bounds.h / (float) provider.provider.size.y;
-			drawBoxTextureOverlay(gui, editor, 0, 0, x, y);
+			drawBoxTextureOverlay(gui, editor, 0, 0, x, y, false);
 			gui.popMatrix();
 			gui.setupCut();
 		}
 	}
 
-	public static void drawBoxTextureOverlay(IGui gui, Editor editor, int x, int y, float xs, float ys) {
-		if(editor.drawAllUVs) {
+	public static void drawBoxTextureOverlay(IGui gui, Editor editor, int x, int y, float xs, float ys, boolean drawSettings) {
+		if(editor.drawAllUVs.get()) {
 			ETextures provider = editor.getTextureProvider();
 			Editor.walkElements(editor.elements, e -> {
 				if(e.getTexture() == provider) {
 					e.drawTexture(gui, x, y, xs, ys);
+					if (editor.selectedElement.isSelected(editor, e) && drawSettings) {
+						e.getSettingsElements().forEach(e2 -> e2.drawTexture(gui, x, y, xs, ys));
+					}
 				}
 			});
 		} else if(editor.selectedElement != null) {
 			editor.selectedElement.drawTexture(gui, x, y, xs, ys);
+			if (drawSettings) {
+				editor.selectedElement.getSettingsElements().forEach(e -> e.drawTexture(gui, x, y, xs, ys));
+			}
 		}
 	}
 
@@ -69,8 +75,8 @@ public class TextureDisplay extends GuiElement {
 				Box bx = element.getTextureBox();
 				gui.drawBox(x + bx.x * xs, y + bx.y * ys, bx.w * xs, bx.h * ys, 0xffffff | a);
 			} else if(element.faceUV != null) {
-				if(element.faceUV.contains(element.editor.perfaceFaceDir)) {
-					Vec4f vec = element.faceUV.getVec(element.editor.perfaceFaceDir);
+				if(element.faceUV.contains(element.editor.perfaceFaceDir.get())) {
+					Vec4f vec = element.faceUV.getVec(element.editor.perfaceFaceDir.get());
 					float su = Math.min(vec.x, vec.z);
 					float sv = Math.min(vec.y, vec.w);
 					float eu = Math.max(vec.x, vec.z);

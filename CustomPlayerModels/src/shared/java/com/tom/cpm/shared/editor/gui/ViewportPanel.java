@@ -85,7 +85,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
-		if(editor.renderBase)renderBase(stack, buf);
+		if(editor.renderBase.get())renderBase(stack, buf);
 		editor.definition.renderingPanel = this;
 		renderModel(stack, buf, partialTicks);
 		VBuffers rp = buf.replay();
@@ -208,13 +208,13 @@ public class ViewportPanel extends ViewportPanelBase3d {
 		Hand hand = poseModel0(p, matrixstack, partialTicks);
 		PlayerModelSetup.setRotationAngles(p, 0, 0, hand, false);
 
-		if(!editor.applyAnim && editor.playerTpose) {
+		if(!editor.applyAnim && editor.playerTpose.get()) {
 			p.rightArm.zRot = (float) Math.toRadians(90);
 			p.leftArm.zRot = (float) Math.toRadians(-90);
 		}
 
 		float lsa = 0.75f;
-		float ls = editor.playVanillaAnims || editor.selectedAnim == null ? MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTicks() * 0.2f - 1.5f * (1.0F - partialTicks) : 1;
+		float ls = editor.playVanillaAnims.get() || editor.selectedAnim == null ? MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTicks() * 0.2f - 1.5f * (1.0F - partialTicks) : 1;
 
 		editor.applyRenderPoseForAnim(pose -> {
 			switch (pose) {
@@ -295,7 +295,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	protected int drawParrots() {
-		return editor.drawParrots ? 3 : 0;
+		return editor.drawParrots.get() ? 3 : 0;
 	}
 
 	@Override

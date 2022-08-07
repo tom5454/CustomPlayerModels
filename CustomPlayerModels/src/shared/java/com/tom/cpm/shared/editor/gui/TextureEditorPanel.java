@@ -2,6 +2,7 @@ package com.tom.cpm.shared.editor.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.tom.cpl.gui.IGui;
@@ -11,11 +12,17 @@ import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTool;
 import com.tom.cpm.shared.editor.ElementType;
-import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.anim.AnimatedTex;
+import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
+import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.util.UVResizableArea;
 
 public class TextureEditorPanel extends GuiElement {
 	private int lastMx, lastMy;
@@ -66,17 +73,20 @@ public class TextureEditorPanel extends GuiElement {
 			gui.drawTexture(offX, offY, rw, rh, 0, 0, 1, 1);
 			int imgX = (int) ((event.x - offX - bounds.x) / zoom);
 			int imgY = (int) ((event.y - offY - bounds.y) / zoom);
-			TextureDisplay.drawBoxTextureOverlay(gui, editor, offX, offY, zoom, zoom);
+			TextureDisplay.drawBoxTextureOverlay(gui, editor, offX, offY, zoom, zoom, true);
 			Vec2i p1 = event.isHovered(bounds) && imgX >= 0 && imgY >= 0 && imgX < provider.getImage().getWidth() && imgY < provider.getImage().getHeight() ? new Vec2i(imgX, imgY) : null;
-			switch (editor.drawMode) {
+			switch (editor.drawMode.get()) {
 			case MOVE_UV:
 			{
 				if(p1 != null) {
-					ModelElement e = getElementUnderMouse(p1.x, p1.y);
+					TreeElement e = getElementUnderMouse(event);
 					if(dragging && moveStart != null)e = editor.getSelectedElement();
 					if(e != null) {
 						Box b = e.getTextureBox();
-						gui.drawRectangle(b.x * zoom + offX, b.y * zoom + offY, b.w * zoom, b.h * zoom, 0xff000000);
+						if(b != null) {
+							Vec4f s = UVResizableArea.expandBox(b, zoom);
+							gui.drawRectangle(s.x * zoom + offX, s.y * zoom + offY, s.z * zoom, s.w * zoom, 0xff000000);
+						}
 					}
 				}
 			}
@@ -105,17 +115,30 @@ public class TextureEditorPanel extends GuiElement {
 		gui.popMatrix();
 	}
 
-	private ModelElement getElementUnderMouse(int x, int y) {
-		List<ModelElement> elems = new ArrayList<>();
+	private TreeElement getElementUnderMouse(MouseEvent event) {
+		float x = (event.x - offX - bounds.x) / zoom;
+		float y = (event.y - offY - bounds.y) / zoom;
+		List<TreeElement> elems = new ArrayList<>();
+		walkElements(e -> {
+			if(UVResizableArea.isHovered(e.getTextureBox(), x, y, zoom))elems.add(e);
+		});
+		if(elems.contains(editor.selectedElement))return editor.selectedElement;
+		return !elems.isEmpty() ? elems.get(0) : null;
+	}
+
+	private void walkElements(Consumer<TreeElement> c) {
+		if(editor.selectedElement != null) {
+			if(editor.getSelectedElement() == null || editor.getSelectedElement().type == ElementType.NORMAL) {
+				c.accept(editor.selectedElement);
+				editor.selectedElement.getSettingsElements().forEach(c);
+				AnimatedTex.applyAnims(editor.selectedElement, c);
+			}
+		}
 		Editor.walkElements(editor.elements, e -> {
 			if(e.type != ElementType.NORMAL)return;
-			Box b = e.getTextureBox();
-			if(b != null && b.isInBounds(x, y)) {
-				elems.add(e);
-			}
+			c.accept(e);
+			e.getSettingsElements().forEach(c);
 		});
-		if(elems.contains(editor.selectedElement))return editor.getSelectedElement();
-		return !elems.isEmpty() ? elems.get(0) : null;
 	}
 
 	@Override
@@ -128,25 +151,25 @@ public class TextureEditorPanel extends GuiElement {
 	}
 
 	@Override
-	public boolean mouseClick(int x, int y, int btn) {
-		if(bounds.isInBounds(x, y)) {
-			lastMx = x;
-			lastMy = y;
+	public void mouseClick(MouseEvent event) {
+		if(event.isHovered(bounds)) {
+			lastMx = event.x;
+			lastMy = event.y;
 			dragging = true;
 			ETextures provider = editor.getTextureProvider();
 			int r = EditorGui.getRotateMouseButton();
-			if(r == 0 ? gui.isShiftDown() : btn == r) {
-			} else if(btn == 0) {
-				int px = (int) ((x - offX - bounds.x) / zoom);
-				int py = (int) ((y - offY - bounds.y) / zoom);
+			if(r == 0 ? gui.isShiftDown() : event.btn == r) {
+			} else if(event.btn == 0) {
+				int px = (int) ((event.x - offX - bounds.x) / zoom);
+				int py = (int) ((event.y - offY - bounds.y) / zoom);
 				if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
-					switch (editor.drawMode) {
+					switch (editor.drawMode.get()) {
 					case PEN:
 					case RUBBER:
 					case FILL:
 					case COLOR_PICKER:
 					{
-						if(gui.isCtrlDown() || editor.drawMode == EditorTool.COLOR_PICKER) {
+						if(gui.isCtrlDown() || editor.drawMode.get() == EditorTool.COLOR_PICKER) {
 							editor.penColor = provider.getImage().getRGB(px, py);
 							editor.setPenColor.accept(editor.penColor);
 							dragging = false;
@@ -159,13 +182,15 @@ public class TextureEditorPanel extends GuiElement {
 					{
 						dragX = px;
 						dragY = py;
-						ModelElement me = getElementUnderMouse(px, py);
-						editor.selectedElement = me;
+						TreeElement me = getElementUnderMouse(event);
 						if(me != null) {
+							me.onClick(editor, event);
 							moveStart = new Vec2i();
-							moveStart.x = me.u;
-							moveStart.y = me.v;
-						}
+							Vec3f uv = me.getVec(VecType.TEXTURE);
+							moveStart.x = (int) uv.x;
+							moveStart.y = (int) uv.y;
+						} else editor.selectedElement = null;
+						editor.updateGui();
 					}
 					break;
 
@@ -174,9 +199,8 @@ public class TextureEditorPanel extends GuiElement {
 					}
 				}
 			}
-			return true;
+			event.consume();
 		}
-		return false;
 	}
 
 	@Override
@@ -197,7 +221,7 @@ public class TextureEditorPanel extends GuiElement {
 					int px = (int) ((x - offX - bounds.x) / zoom);
 					int py = (int) ((y - offY - bounds.y) / zoom);
 					if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
-						switch (editor.drawMode) {
+						switch (editor.drawMode.get()) {
 						case PEN:
 						case RUBBER:
 						case FILL:
@@ -206,18 +230,16 @@ public class TextureEditorPanel extends GuiElement {
 
 						case MOVE_UV:
 						{
-							ModelElement me = editor.getSelectedElement();
+							TreeElement me = editor.selectedElement;
 							if(me != null && moveStart != null) {
 								int xoff = px - dragX;
 								int yoff = py - dragY;
-								if(Math.abs(xoff) >= me.textureSize)dragX = px;
-								if(Math.abs(yoff) >= me.textureSize)dragY = py;
-								me.u = MathHelper.clamp(me.u + xoff / me.textureSize, 0, provider.provider.size.x);
-								me.v = MathHelper.clamp(me.v + yoff / me.textureSize, 0, provider.provider.size.y);
-								if(xoff > 0 || yoff > 0) {
-									editor.updateGui();
-									editor.markDirty();
-								}
+								Vec3f uv = me.getVec(VecType.TEXTURE);
+								if(Math.abs(xoff) >= uv.z)dragX = px;
+								if(Math.abs(yoff) >= uv.z)dragY = py;
+								uv.x = MathHelper.clamp(uv.x + xoff / (int) uv.z, 0, provider.provider.size.x);
+								uv.y = MathHelper.clamp(uv.y + yoff / (int) uv.z, 0, provider.provider.size.y);
+								me.setVecTemp(VecType.TEXTURE, uv);
 							}
 						}
 						break;
@@ -240,15 +262,18 @@ public class TextureEditorPanel extends GuiElement {
 	public boolean mouseRelease(int x, int y, int btn) {
 		if(bounds.isInBounds(x, y) || dragging) {
 			dragging = false;
-			switch (editor.drawMode) {
+			switch (editor.drawMode.get()) {
 			case MOVE_UV:
 			{
-				ModelElement me = editor.getSelectedElement();
+				TreeElement me = editor.selectedElement;
 				if(me != null && moveStart != null) {
-					editor.action("move", "action.cpm.texUV").updateValueOp(me, new Vec2i(moveStart), new Vec2i(me.u, me.v), (a, b) -> {
-						a.u = b.x;
-						a.v = b.y;
-					}).execute();
+					Vec3f uv = me.getVec(VecType.TEXTURE);
+					me.setVecTemp(VecType.TEXTURE, new Vec3f(moveStart.x, moveStart.y, uv.z));
+					me.setVec(uv, VecType.TEXTURE);
+					moveStart = null;
+					if(me instanceof TreeSettingElement)
+						editor.selectedElement = ((TreeSettingElement)me).getParent();
+					editor.updateGui();
 				}
 			}
 			break;

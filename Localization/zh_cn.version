@@ -885,5 +885,6 @@
   "label.cpm.key.print.screen": "Print Screen",
   "tooltip.cpm.config.editorAutosaveTime": "Time interval between auto-saves.\\Set it to -1 to disable.",
   "label.cpm.config.editorAutosaveTime": "Auto-save interval: %ss",
-  "chat.cpm.scalingBlocked": "[CPM] Some scaling settings were blocked, ask an admin to enable scaling."
+  "chat.cpm.scalingBlocked": "[CPM] Some scaling settings were blocked, ask an admin to enable scaling.",
+  "button.cpm.clearAnimDataAll": "Clear All"
 }

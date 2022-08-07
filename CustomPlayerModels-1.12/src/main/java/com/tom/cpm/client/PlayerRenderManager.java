@@ -1,5 +1,7 @@
 package com.tom.cpm.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import net.minecraft.client.model.ModelBase;
@@ -149,6 +151,8 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			register(new Field<>(() -> model.bipedLeftArm,  v -> model.bipedLeftArm  = v, RootModelType.ARMOR_LEFT_ARM));
 			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, RootModelType.ARMOR_RIGHT_FOOT));
 			register(new Field<>(() -> model.bipedLeftLeg,  v -> model.bipedLeftLeg  = v, RootModelType.ARMOR_LEFT_FOOT));
+
+			register(new Field<>(() -> model.bipedHeadwear    , v -> model.bipedHeadwear     = v, null));
 		}
 
 	}
@@ -169,6 +173,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 		public RDH(ModelRenderManager<Void, Void, ModelRenderer, ModelBase> mngr, ModelBase model) {
 			super(mngr, model);
+			model.boxList = new QuarkList(model.boxList);
 		}
 	}
 
@@ -270,5 +275,20 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 
 	public static void multiplyStacks(MatrixStack.Entry e) {
 		e.getMatrix().multiplyNative(GlStateManager::multMatrix);
+	}
+
+	//Fix: vazkii.quark.vanity.client.emotes.ModelAccessor.getEarsModel java.lang.ArrayIndexOutOfBoundsException: -3 #244
+	public static class QuarkList extends ArrayList<ModelRenderer> {
+		private static final long serialVersionUID = -1148099045785217885L;
+
+		public QuarkList(List<ModelRenderer> l) {
+			super(l);
+		}
+
+		@Override
+		public int indexOf(Object o) {
+			if(o instanceof RedirectModelRenderer)return super.indexOf(((RedirectModelRenderer) o).getParent());
+			return super.indexOf(o);
+		}
 	}
 }

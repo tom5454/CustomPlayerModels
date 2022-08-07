@@ -1,12 +1,9 @@
 package com.tom.cpm.common;
 
-import java.util.function.Predicate;
-
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
@@ -32,7 +29,7 @@ public class ServerHandler {
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setGetPlayerUUID(EntityPlayerMP::getUniqueID);
-		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new S3FPacketCustomPayload(rl.toString(), pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new S3FPacketCustomPayload(rl.toString(), pb), ServerHandler::hasMod));
+		netHandler.setSendPacket2(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new S3FPacketCustomPayload(rl.toString(), pb)), ent -> ((WorldServer)ent.worldObj).getEntityTracker().getTrackingPlayers(ent));
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTrackerEntry tr : ((WorldServer)p.worldObj).getEntityTracker().trackedEntities) {
 				if(tr.trackedEntity instanceof EntityPlayer && tr.trackingPlayers.contains(p)) {
@@ -77,19 +74,5 @@ public class ServerHandler {
 		if(evt.entityLiving instanceof EntityPlayerMP) {
 			netHandler.onJump((EntityPlayerMP) evt.entityLiving);
 		}
-	}
-
-	public static boolean hasMod(EntityPlayerMP spe) {
-		return ((ServerNetH)spe.playerNetServerHandler).cpm$hasMod();
-	}
-
-	public static void sendToAllTrackingAndSelf(EntityPlayerMP ent, Packet<?> pckt, Predicate<EntityPlayerMP> test) {
-		for (EntityPlayer pl : ((WorldServer)ent.worldObj).getEntityTracker().getTrackingPlayers(ent)) {
-			EntityPlayerMP p = (EntityPlayerMP) pl;
-			if(test.test(p)) {
-				p.playerNetServerHandler.sendPacket(pckt);
-			}
-		}
-		ent.playerNetServerHandler.sendPacket(pckt);
 	}
 }

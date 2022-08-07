@@ -134,11 +134,12 @@ public class DescPopup extends PopupPanel {
 		super.draw(event, partialTicks);
 
 		if(icon.getImage() != null) {
-			gui.drawBox(bounds.x + bounds.w - 136, bounds.y + 14, 130, 130, gui.getColors().color_picker_border);
-			gui.drawBox(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0xffffffff);
+			int y = 55;
+			gui.drawBox(bounds.x + bounds.w - 136, bounds.y + y, 130, 130, gui.getColors().color_picker_border);
+			gui.drawBox(bounds.x + bounds.w - 135, bounds.y + y + 1, 128, 128, 0xffffffff);
 
 			icon.bind();
-			gui.drawTexture(bounds.x + bounds.w - 135, bounds.y + 15, 128, 128, 0, 0, 1, 1);
+			gui.drawTexture(bounds.x + bounds.w - 135, bounds.y + y + 1, 128, 128, 0, 0, 1, 1);
 		}
 	}
 

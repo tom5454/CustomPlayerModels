@@ -58,16 +58,13 @@ public class DrawToolsPanel extends Panel {
 		int tx = 0;
 		int ty = 0;
 		for(EditorTool tool : EditorTool.VALUES) {
-			ButtonIcon button = new ButtonIcon(gui, "editor", tool.ordinal() * 16, 32, () -> {
-				editor.drawMode = tool;
-				editor.setTool.accept(tool);
-			});
+			ButtonIcon button = new ButtonIcon(gui, "editor", tool.ordinal() * 16, 32, () -> editor.drawMode.accept(tool));
 			if(25 * (tx + 1) > w) {
 				tx = 0;
 				ty++;
 			}
 			button.setBounds(new Box(5 + 25 * (tx++), ty * 25, 20, 20));
-			editor.setTool.add(tool.setEnabled(button));
+			editor.drawMode.add(tool.setEnabled(button));
 			toolsPanel.addElement(button);
 		}
 
@@ -76,7 +73,7 @@ public class DrawToolsPanel extends Panel {
 
 		{
 			ElementGroup<EditorTool, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
-			editor.setTool.add(group);
+			editor.drawMode.add(group);
 
 			Slider sizeSlider = new Slider(gui, gui.i18nFormat("label.cpm.brushSize", editor.brushSize));
 			group.addElement(EditorTool.PEN, sizeSlider);
@@ -100,8 +97,6 @@ public class DrawToolsPanel extends Panel {
 			alphaSlider.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.brushAlpha")));
 			panel.addElement(alphaSlider);
 		}
-
-		editor.setTool.accept(editor.drawMode);
 
 		layout.reflow();
 	}

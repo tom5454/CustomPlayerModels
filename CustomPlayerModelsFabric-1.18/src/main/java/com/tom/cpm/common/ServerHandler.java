@@ -1,18 +1,16 @@
 package com.tom.cpm.common;
 
-import java.util.function.Predicate;
+import java.util.Collections;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.MessageType;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.EntityTrackingListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.server.world.ThreadedAnvilChunkStorage.EntityTracker;
 import net.minecraft.util.Identifier;
@@ -23,8 +21,6 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
 import io.netty.buffer.Unpooled;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 public class ServerHandler {
 	public static NetHandler<Identifier, ServerPlayerEntity, ServerPlayNetworkHandler> netHandler;
@@ -32,7 +28,13 @@ public class ServerHandler {
 	static {
 		netHandler = new NetHandler<>(Identifier::new);
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUuid);
-		netHandler.setSendPacket(d -> new PacketByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), (spe, rl, pb) -> sendToAllTrackingAndSelf(spe, new CustomPayloadS2CPacket(rl, pb), ServerHandler::hasMod, null));
+		netHandler.setSendPacket2(d -> new PacketByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new CustomPayloadS2CPacket(rl, pb)), ent -> {
+			EntityTracker tr = ((ServerWorld)ent.world).getChunkManager().threadedAnvilChunkStorage.entityTrackers.get(ent.getId());
+			if(tr != null) {
+				return tr.listeners;
+			}
+			return Collections.emptyList();
+		});
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTracker tr : ((ServerWorld)p.world).getChunkManager().threadedAnvilChunkStorage.entityTrackers.values()) {
 				if(tr.entity instanceof PlayerEntity && tr.listeners.contains(p.networkHandler)) {
@@ -65,23 +67,6 @@ public class ServerHandler {
 				netHandler.sendPlayerData((ServerPlayerEntity) target, spe);
 			}
 		}
-	}
-
-	public static boolean hasMod(ServerPlayerEntity spe) {
-		return ((NetH)spe.networkHandler).cpm$hasMod();
-	}
-
-
-	public static void sendToAllTrackingAndSelf(ServerPlayerEntity ent, Packet<?> pckt, Predicate<ServerPlayerEntity> test, GenericFutureListener<? extends Future<? super Void>> future) {
-		EntityTracker tr = ((ServerWorld)ent.world).getChunkManager().threadedAnvilChunkStorage.entityTrackers.get(ent.getId());
-		if(tr != null) {
-			for (EntityTrackingListener p : tr.listeners) {
-				if(test.test(p.getPlayer())) {
-					p.getPlayer().networkHandler.sendPacket(pckt, future);
-				}
-			}
-		}
-		ent.networkHandler.sendPacket(pckt, future);
 	}
 
 	public static void jump(Object player) {

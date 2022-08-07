@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -244,6 +245,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		case SIZE:
 			return new Vec3f(size);
 		case TEXTURE:
+			return new Vec3f(this.u, this.v, textureSize);
 		default:
 			return null;
 		}
@@ -258,22 +260,26 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setOffset.accept(offset);
 			markDirty();
 			break;
+
 		case POSITION:
 			ActionBuilder.limitVec(v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false);
 			pos = v;
 			editor.setPosition.accept(pos);
 			break;
+
 		case ROTATION:
 			ActionBuilder.limitVec(v, 0, 360, true);
 			rotation = v;
 			editor.setRot.accept(rotation);
 			break;
+
 		case SCALE:
 			ActionBuilder.limitVec(v, 0, 25, false);
 			scale = v;
 			editor.setScale.accept(scale);
 			markDirty();
 			break;
+
 		case SIZE:
 			ActionBuilder.limitVec(v, 0, 25, false);
 			v.round(10);
@@ -281,7 +287,15 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setSize.accept(size);
 			markDirty();
 			break;
+
 		case TEXTURE:
+			this.u = Math.max((int) v.x, 0);
+			this.v = Math.max((int) v.y, 0);
+			textureSize = Math.max((int) v.z, 1);
+			editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize));
+			markDirty();
+			break;
+
 		default:
 			break;
 		}
@@ -360,11 +374,13 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 					editor.setSingleTex.accept(this.singleTex);
 					editor.setExtrudeEffect.accept(this.extrude);
 				} else {
-					editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir));
-					editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir));
-					editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir));
+					editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir.get()));
+					editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir.get()));
+					editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir.get()));
+					editor.setSingleTex.accept(null);
 				}
 				if(!singleTex)editor.setPerFaceUV.accept(this.faceUV != null);
+				else editor.setPerFaceUV.accept(null);
 				editor.updateName.accept(this.name);
 			}
 			break;
@@ -521,6 +537,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			int txS = Math.max(dx, Math.max(dy, dz));
 			return new Box(u * textureSize, v * textureSize, txS * textureSize, txS * textureSize);
 		}
+		if(faceUV != null)return null;
 		return new Box(u * textureSize, v * textureSize, 2 * (dx + dz) * textureSize, (dz + dy) * textureSize);
 	}
 
@@ -591,5 +608,10 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public boolean canEditVec(VecType type) {
 		if(this.type == ElementType.ROOT_PART)return type == VecType.POSITION || type == VecType.ROTATION;
 		else return true;
+	}
+
+	@Override
+	public List<TreeSettingElement> getSettingsElements() {
+		return faceUV != null ? faceUV.getDragBoxes(editor, this) : Collections.emptyList();
 	}
 }

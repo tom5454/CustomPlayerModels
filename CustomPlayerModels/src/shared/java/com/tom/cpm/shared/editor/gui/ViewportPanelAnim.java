@@ -53,7 +53,7 @@ public class ViewportPanelAnim extends ViewportPanel {
 					return dt.item;
 				}
 			}
-			if(!editor.forceHeldItemInAnim)return DisplayItem.NONE;
+			if(!editor.forceHeldItemInAnim.get())return DisplayItem.NONE;
 		} else if(anims != null) {
 			return anims.stream().filter(p -> p.slot == hand).map(p -> p.item).filter(p -> p != null).findFirst().orElse(DisplayItem.NONE);
 		}
@@ -125,7 +125,7 @@ public class ViewportPanelAnim extends ViewportPanel {
 
 	@Override
 	protected int drawParrots() {
-		int r = editor.forceHeldItemInAnim ? super.drawParrots() : 0;
+		int r = editor.forceHeldItemInAnim.get() ? super.drawParrots() : 0;
 		if(anims != null) {
 			if(anims.contains(AnimationDisplayData.PARROT_LEFT))r |= 1;
 			if(anims.contains(AnimationDisplayData.PARROT_RIGHT))r |= 2;

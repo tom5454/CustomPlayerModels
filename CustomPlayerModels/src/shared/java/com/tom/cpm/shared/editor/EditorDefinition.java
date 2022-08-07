@@ -111,7 +111,7 @@ public class EditorDefinition extends ModelDefinition {
 						s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
 						);
 		}
-		if(cube.getCube() instanceof ModelElement && editor.displayGizmo) {
+		if(cube.getCube() instanceof ModelElement && editor.displayGizmo.get()) {
 			Mesh mesh = cube.renderObject;
 			ModelElement me = (ModelElement) cube.getCube();
 			EditorRenderer.Bounds b = new EditorRenderer.Bounds();
@@ -145,7 +145,7 @@ public class EditorDefinition extends ModelDefinition {
 	}
 
 	private void drawGizmo(RenderedCube cube, MatrixStack matrixStackIn, VBuffers bufferIn, RenderTypes<RenderMode> renderTypes) {
-		if(renderingPanel != null && renderingPanel.draggingVec != null && editor.displayGizmo && cube.getCube() == editor.selectedElement && renderingPanel.canEdit()) {
+		if(renderingPanel != null && renderingPanel.draggingVec != null && editor.displayGizmo.get() && cube.getCube() == editor.selectedElement && renderingPanel.canEdit()) {
 			float gAlpha = ModConfig.getCommonConfig().getFloat(ConfigKeys.EDITOR_GIZMO_ALPHA, 1f);
 			float sc = 128f / (ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_GIZMO_SCALE, true) ? renderingPanel.getCamera().camDist : 128);
 			float scW = Math.max(0.1f, Math.min(1, ModConfig.getCommonConfig().getFloat(ConfigKeys.EDITOR_GIZMO_SIZE, 1) * sc));
