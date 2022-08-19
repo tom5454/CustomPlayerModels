@@ -631,9 +631,22 @@ public class NetHandler<RL, P, NET> {
 		this.getPlayerUUID = getPlayerUUID;
 	}
 
-	public <PB> void setSendPacket(Function<byte[], PB> wrapper, TriConsumer<NET, RL, PB> sendPacket, TriConsumer<P, RL, PB> sendToAllTracking) {
+	public <PB> void setSendPacketDirect(Function<byte[], PB> wrapper, TriConsumer<NET, RL, PB> sendPacket, TriConsumer<P, RL, PB> sendToAllTracking) {
 		this.sendPacket = (a, b, c) -> sendPacket.accept(a, b, wrapper.apply(c));
 		this.sendToAllTracking = (a, b, c) -> sendToAllTracking.accept(a, b, wrapper.apply(c));
+	}
+
+	public void setSendPacketDirect(TriConsumer<NET, RL, byte[]> sendPacket, TriConsumer<P, RL, byte[]> sendToAllTracking) {
+		this.sendPacket = sendPacket;
+		this.sendToAllTracking = sendToAllTracking;
+	}
+
+	public <PB> void setSendPacketClient(Function<byte[], PB> wrapper, TriConsumer<NET, RL, PB> sendPacket) {
+		this.sendPacket = (a, b, c) -> sendPacket.accept(a, b, wrapper.apply(c));
+	}
+
+	public void setSendPacketClient(TriConsumer<NET, RL, byte[]> sendPacket) {
+		this.sendPacket = sendPacket;
 	}
 
 	private void sendPacketServer(P to, RL pck, byte[] data) {
@@ -643,19 +656,14 @@ public class NetHandler<RL, P, NET> {
 		}
 	}
 
-	public <PB, EP> void setSendPacket2(Function<byte[], PB> wrapper, TriConsumer<NET, RL, PB> sendPacket, Function<P, Collection<EP>> forEachTracking) {
+	public <PB, C> void setSendPacketServer(Function<byte[], PB> wrapper, TriConsumer<NET, RL, PB> sendPacket, Function<P, Collection<C>> forEachTracking, Function<C, P> toPlayer) {
 		this.sendPacket = (a, b, c) -> sendPacket.accept(a, b, wrapper.apply(c));
 		this.sendToAllTracking = (p, rl, d) -> {
-			for (EP t : forEachTracking.apply(p)) {
-				sendPacketServer((P) t, rl, d);
+			for (C t : forEachTracking.apply(p)) {
+				sendPacketServer(toPlayer.apply(t), rl, d);
 			}
 			sendPacketServer(p, rl, d);
 		};
-	}
-
-	public void setSendPacket(TriConsumer<NET, RL, byte[]> sendPacket, TriConsumer<P, RL, byte[]> sendToAllTracking) {
-		this.sendPacket = sendPacket;
-		this.sendToAllTracking = sendToAllTracking;
 	}
 
 	public void setFindTracking(BiConsumer<P, Consumer<P>> findTracking) {

@@ -10,6 +10,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.tileentity.SkullTileEntityRenderer;
@@ -74,10 +75,10 @@ public class Panel3dImpl extends Panel3dNative {
 			matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
 			RenderSystem.enableDepthTest();
 
-			IRenderTypeBuffer bufs = mc.renderBuffers().bufferSource();
+			IRenderTypeBuffer.Impl bufs = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
 			int light = LightTexture.pack(15, 15);
 			panel.render(new com.tom.cpl.math.MatrixStack(), new VBuffers(rt -> new VBuffer(bufs.getBuffer(rt.getNativeType()), light, OverlayTexture.NO_OVERLAY, matrixstack)), partialTicks);
-			mc.renderBuffers().bufferSource().endBatch();
+			bufs.endBatch();
 		} finally {
 			RenderSystem.disableDepthTest();
 			RenderSystem.popMatrix();

@@ -33,7 +33,7 @@ public class Network implements PluginMessageListener, Listener {
 		this.plugin = plugin;
 		try {
 			netHandler = new NetHandler<>((k, v) -> k + ":" + v);
-			netHandler.setSendPacket((pl, pck, dt) -> pl.owner.sendPluginMessage(plugin, pck, dt), this::sendToAllTrackingAndSelf);
+			netHandler.setSendPacketDirect((pl, pck, dt) -> pl.owner.sendPluginMessage(plugin, pck, dt), this::sendToAllTrackingAndSelf);
 			netHandler.setGetPlayerUUID(Player::getUniqueId);
 			netHandler.setFindTracking((p, c) -> getPlayersWithin(p, 64, c));
 			netHandler.setSendChat((pl, msg) -> pl.sendMessage(msg.<String>remap()));

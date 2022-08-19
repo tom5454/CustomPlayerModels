@@ -5,12 +5,12 @@ import java.util.Collections;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.player.Player;
 
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -26,7 +26,6 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 
 import com.mojang.brigadier.CommandDispatcher;
 
-import com.tom.cpl.text.IText;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
@@ -38,13 +37,13 @@ public class ServerHandler {
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setGetPlayerUUID(ServerPlayer::getUUID);
-		netHandler.setSendPacket2(d -> new FriendlyByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new ClientboundCustomPayloadPacket(rl, pb)), ent -> {
+		netHandler.setSendPacketServer(d -> new FriendlyByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new ClientboundCustomPayloadPacket(rl, pb)), ent -> {
 			ChunkMap.TrackedEntity tr = ((ServerLevel)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
 			if(tr != null) {
 				return tr.seenBy;
 			}
 			return Collections.emptyList();
-		});
+		}, ServerPlayerConnection::getPlayer);
 		netHandler.setFindTracking((p, f) -> {
 			for(ChunkMap.TrackedEntity tr : ((ServerLevel)p.level).getChunkSource().chunkMap.entityMap.values()) {
 				if(tr.entity instanceof Player && tr.seenBy.contains(p.connection)) {
@@ -52,7 +51,7 @@ public class ServerHandler {
 				}
 			}
 		});
-		netHandler.setSendChat(ServerHandler::sendMessage);
+		netHandler.setSendChat((p, m) -> p.displayClientMessage(m.remap(), false));
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
 		if(ModList.get().isLoaded("pehkui")) {
 			netHandler.setScaler(new PehkuiInterface());
@@ -63,10 +62,6 @@ public class ServerHandler {
 		netHandler.setGetOnlinePlayers(() -> ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers());
 		netHandler.setKickPlayer((p, m) -> p.connection.disconnect(m.remap()));
 		netHandler.setGetPlayerAnimGetters(p -> p.fallDistance, p -> p.getAbilities().flying);
-	}
-
-	private static void sendMessage(ServerPlayer p, IText m) {
-		p.connection.send(new ClientboundSystemChatPacket(m.remap(), false));
 	}
 
 	@SubscribeEvent

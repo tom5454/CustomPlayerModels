@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
@@ -74,10 +76,10 @@ public class Panel3dImpl extends Panel3dNative {
 			matrixstack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
 			RenderSystem.enableDepthTest();
 
-			BufferSource bufs = mc.renderBuffers().bufferSource();
+			BufferSource bufs = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 			int light = LightTexture.pack(15, 15);
 			panel.render(new com.tom.cpl.math.MatrixStack(), new VBuffers(rt -> new VBuffer(bufs.getBuffer(rt.getNativeType()), light, OverlayTexture.NO_OVERLAY, matrixstack)), partialTicks);
-			mc.renderBuffers().bufferSource().endBatch();
+			bufs.endBatch();
 		} finally {
 			RenderSystem.disableDepthTest();
 			matrixStack = RenderSystem.getModelViewStack();

@@ -87,6 +87,6 @@ public class SkullBlockRendererMixin {
 					+ "Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 					+ "Lnet/minecraft/client/model/SkullModelBase;Lnet/minecraft/client/renderer/RenderType;)V")
 	private static void renderSkullPost(Direction direction, float yaw, float animationProgress, PoseStack matrices, MultiBufferSource vertexConsumers, int light, SkullModelBase model, RenderType renderLayer, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.manager.unbind(model);
+		CustomPlayerModelsClient.INSTANCE.renderSkullPost(vertexConsumers, model);
 	}
 }

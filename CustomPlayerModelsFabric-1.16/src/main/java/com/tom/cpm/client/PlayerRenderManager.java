@@ -28,8 +28,8 @@ import com.tom.cpm.client.optifine.RedirectRendererOF;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.BatchedBuffers;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
-import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 
@@ -91,6 +91,7 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 				ModelRenderManager<VertexConsumerProvider, ModelTexture, ModelPart, Model> mngr,
 				Model model) {
 			super(mngr, model);
+			batch = new BatchedBuffers<>(this, VertexConsumerProvider::getBuffer);
 		}
 
 		@Override
@@ -316,9 +317,10 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 			this.green           = green          ;
 			this.blue            = blue           ;
 			this.alpha           = alpha          ;
-			this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn), new VBuffer(bufferIn, packedLightIn, packedOverlayIn, matrixStackIn));
+			this.buffers = holder.nextBatch(() -> new VBufferOut(packedLightIn, packedOverlayIn, matrixStackIn), bufferIn);
+			//this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn), new VBuffer(bufferIn, packedLightIn, packedOverlayIn, matrixStackIn));
 			render();
-			holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.DEFAULT).getNativeType());
+			//holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.DEFAULT).getNativeType());
 			this.matrixStackIn = null;
 			this.bufferIn = null;
 		}

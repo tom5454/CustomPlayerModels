@@ -184,6 +184,7 @@ public class ClientApi extends SharedApi implements IClientAPI {
 		@Override
 		public void postRender() {
 			ModelRenderManager<MBS, ?, ?, M> mngr = (ModelRenderManager<MBS, ?, ?, M>) MinecraftClientAccess.get().getPlayerRenderManager();
+			mngr.flushBatch(model, "api");
 			mngr.unbindModel(model);
 			subModels.forEach(mngr::unbindModel);
 			subModels.clear();

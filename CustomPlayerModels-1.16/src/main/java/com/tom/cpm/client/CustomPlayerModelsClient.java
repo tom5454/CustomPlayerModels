@@ -24,9 +24,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -86,7 +84,7 @@ public class CustomPlayerModelsClient {
 		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setExecutor(() -> minecraft);
-		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new CCustomPayloadPacket(rl, pb)), null);
+		netHandler.setSendPacketClient(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new CCustomPayloadPacket(rl, pb)));
 		netHandler.setPlayerToLoader(PlayerEntity::getGameProfile);
 		netHandler.setGetPlayerById(id -> {
 			Entity ent = Minecraft.getInstance().level.getEntity(id);
@@ -97,7 +95,7 @@ public class CustomPlayerModelsClient {
 		});
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).connection);
-		netHandler.setDisplayText(f -> minecraft.gui.handleChat(ChatType.SYSTEM, f.remap(), Util.NIL_UUID));
+		netHandler.setDisplayText(f -> minecraft.player.displayClientMessage(f.remap(), false));
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, scr) -> new GuiImpl(SettingsGui::new, scr));
 	}
 
@@ -114,6 +112,8 @@ public class CustomPlayerModelsClient {
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
+		IRenderTypeBuffer buffer = event.getBuffers();
+		if(buffer instanceof IRenderTypeBuffer.Impl)((IRenderTypeBuffer.Impl)buffer).endBatch();
 		manager.unbindClear(event.getRenderer().getModel());
 	}
 
@@ -129,8 +129,18 @@ public class CustomPlayerModelsClient {
 		manager.bindHand(Minecraft.getInstance().player, buffer, model);
 	}
 
+	public void renderHandPost(IRenderTypeBuffer buffer, BipedModel model) {
+		if(buffer instanceof IRenderTypeBuffer.Impl)((IRenderTypeBuffer.Impl)buffer).endBatch();
+		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(model);
+	}
+
 	public void renderSkull(Model skullModel, GameProfile profile, IRenderTypeBuffer buffer) {
 		manager.bindSkull(profile, buffer, skullModel);
+	}
+
+	public void renderSkullPost(IRenderTypeBuffer buffer, Model model) {
+		if(buffer instanceof IRenderTypeBuffer.Impl)((IRenderTypeBuffer.Impl)buffer).endBatch();
+		CustomPlayerModelsClient.INSTANCE.manager.unbindFlush(model);
 	}
 
 	public void renderElytra(BipedModel<LivingEntity> player, ElytraModel<LivingEntity> model) {

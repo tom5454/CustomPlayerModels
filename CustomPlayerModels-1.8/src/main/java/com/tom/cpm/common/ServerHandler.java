@@ -29,7 +29,7 @@ public class ServerHandler {
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setGetPlayerUUID(EntityPlayerMP::getUniqueID);
-		netHandler.setSendPacket2(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new S3FPacketCustomPayload(rl.toString(), pb)), ent -> ((WorldServer)ent.worldObj).getEntityTracker().getTrackingPlayers(ent));
+		netHandler.setSendPacketServer(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new S3FPacketCustomPayload(rl.toString(), pb)), ent -> ((WorldServer)ent.worldObj).getEntityTracker().getTrackingPlayers(ent), e -> (EntityPlayerMP) e);
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTrackerEntry tr : ((WorldServer)p.worldObj).getEntityTracker().trackedEntities) {
 				if(tr.trackedEntity instanceof EntityPlayer && tr.trackingPlayers.contains(p)) {

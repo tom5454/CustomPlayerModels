@@ -10,15 +10,13 @@ import net.optifine.entity.model.anim.ModelUpdater;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.client.PlayerRenderManager.RDH;
 import com.tom.cpm.client.PlayerRenderManager.RedirectModelRendererBase;
-import com.tom.cpm.client.VBuffer;
+import com.tom.cpm.client.VBufferOut;
 import com.tom.cpm.client.optifine.proxy.IRenderTypeBufferOF;
 import com.tom.cpm.client.optifine.proxy.IVertexBuilderOF;
 import com.tom.cpm.client.optifine.proxy.ModelRendererOF;
 import com.tom.cpm.client.optifine.proxy.WorldRendererOF;
-import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class RedirectRendererOF extends RedirectModelRendererBase implements ModelRendererOF {
@@ -61,9 +59,10 @@ public class RedirectRendererOF extends RedirectModelRendererBase implements Mod
 		this.green           = green          ;
 		this.blue            = blue           ;
 		this.alpha           = alpha          ;
-		this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn), new VBuffer(bufferIn, packedLightIn, packedOverlayIn, matrixStackIn));
+		this.buffers = holder.nextBatch(() -> new VBufferOut(packedLightIn, packedOverlayIn, matrixStackIn), bufferIn);
+		//this.buffers = new VBuffers(rt -> new VBuffer(holder.addDt.getBuffer(rt.getNativeType()), packedLightIn, packedOverlayIn, matrixStackIn), new VBuffer(bufferIn, packedLightIn, packedOverlayIn, matrixStackIn));
 		render();
-		holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.DEFAULT).getNativeType());
+		//holder.addDt.getBuffer(holder.renderTypes.get(RenderMode.DEFAULT).getNativeType());
 		if (lastRenderType != null)
 			renderTypeBuffer.getBuffer(lastRenderType);
 		this.matrixStackIn = null;

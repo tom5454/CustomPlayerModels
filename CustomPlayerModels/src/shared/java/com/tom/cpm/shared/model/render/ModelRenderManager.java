@@ -31,6 +31,7 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.BatchedBuffers.BufferOutput;
 import com.tom.cpm.shared.model.render.GuiModelRenderManager.RedirectPartRenderer;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.ErrorLog;
@@ -89,7 +90,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 	public void bindSubModel(MB mainModel, MB subModel, String arg) {
 		RedirectHolder<MB, D, S, P> h = holders.get(mainModel);
 		if(h != null && h.swappedIn) {
-			bindModel(subModel, arg, h.addDt, h.def, h.playerObj, h.mode);
+			getHolderSafe(subModel, arg, s -> s.swapIn(h), true);
 		}
 	}
 
@@ -141,6 +142,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		if(h != null)func.accept(h);
 	}
 
+	public void flushBatch(MB model, String arg) {
+		getHolderSafe(model, arg, RedirectHolder::flushBatch, false);
+	}
+
 	public void copyModelForArmor(P from, P to) {
 		this.posSet.set(to, this.px.apply(from), this.py.apply(from), this.pz.apply(from));
 		this.rotSet.set(to, this.rx.apply(from), this.ry.apply(from), this.rz.apply(from));
@@ -165,6 +170,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public AnimationMode mode;
 		public RenderTypes<RenderMode> renderTypes;
 		private boolean loggedWarning;
+		private RedirectHolder<M, D, S, P> parent;
+		public BatchedBuffers<D, ?, ?> batch;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
 			this.model = model;
@@ -173,6 +180,11 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			redirectRenderers = new ArrayList<>();
 			partData = new HashMap<>();
 			renderTypes = new RenderTypes<>(RenderMode.class);
+		}
+
+		public void swapIn(RedirectHolder<M, D, S, P> h) {
+			swapIn(h.def, h.addDt, h.playerObj, h.mode);
+			parent = h;
 		}
 
 		public final void swapIn(ModelDefinition def, D addDt, Player<?> playerObj, AnimationMode mode) {
@@ -198,6 +210,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			preRenderSetup = false;
 			this.renderTypes.clear();
 			this.playerObj = null;
+			parent = null;
 			if(!swappedIn)return;
 			swapOut0();
 			for (int i = 0; i < modelFields.size(); i++) {
@@ -327,6 +340,15 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				if(sz < 0.1F || sz > 10)sz = 1;
 				stack.scale(sx, sy, sz);
 			}
+		}
+
+		public <V> VBuffers nextBatch(Supplier<BufferOutput<V>> prepBuffer, V def) {
+			RedirectHolder<M, D, S, P> h = parent != null ? parent : this;
+			return ((BatchedBuffers<D, ?, V>) h.batch).nextBatch(prepBuffer, def);
+		}
+
+		public void flushBatch() {
+			if(batch != null)batch.flush();
 		}
 	}
 
@@ -520,9 +542,12 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			holder.setupTransform(stack, this, false);
 			if(doRender) {
 				Vec4f color = getColor();
-				VBuffers buf = getVBuffers().replay();
+				VBuffers bufIn = getVBuffers();
+				VBuffers buf;
+				if(!bufIn.isBatched())buf = bufIn.replay();
+				else buf = bufIn;
 				render(elem, stack, buf, color.x, color.y, color.z, color.w, doRender, true);
-				buf.finishAll();
+				if(!bufIn.isBatched())buf.finishAll();
 			} else {
 				render(elem, stack, null, 1, 1, 1, 1, doRender, true);
 			}

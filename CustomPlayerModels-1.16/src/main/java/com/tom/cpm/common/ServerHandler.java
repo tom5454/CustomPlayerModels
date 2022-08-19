@@ -1,17 +1,15 @@
 package com.tom.cpm.common;
 
 import java.util.Collections;
+import java.util.function.Function;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.ServerPlayNetHandler;
-import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ChatType;
 import net.minecraft.world.server.ChunkManager.EntityTracker;
 import net.minecraft.world.server.ServerWorld;
 
@@ -39,13 +37,13 @@ public class ServerHandler {
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUUID);
-		netHandler.setSendPacket2(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new SCustomPayloadPlayPacket(rl, pb)), ent -> {
+		netHandler.setSendPacketServer(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new SCustomPayloadPlayPacket(rl, pb)), ent -> {
 			EntityTracker tr = ((ServerWorld)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
 			if(tr != null) {
 				return tr.seenBy;
 			}
 			return Collections.emptyList();
-		});
+		}, Function.identity());
 		netHandler.setFindTracking((p, f) -> {
 			for(EntityTracker tr : ((ServerWorld)p.level).getChunkSource().chunkMap.entityMap.values()) {
 				if(tr.entity instanceof PlayerEntity && tr.seenBy.contains(p)) {
@@ -53,7 +51,7 @@ public class ServerHandler {
 				}
 			}
 		});
-		netHandler.setSendChat((p, m) -> p.connection.send(new SChatPacket(m.remap(), ChatType.SYSTEM, Util.NIL_UUID)));
+		netHandler.setSendChat((p, m) -> p.displayClientMessage(m.remap(), false));
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
 		if(ModList.get().isLoaded("pehkui")) {
 			netHandler.setScaler(new PehkuiInterface());

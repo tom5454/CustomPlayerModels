@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -21,6 +22,7 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.VertexConsumerProvider.Immediate;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.ElytraEntityModel;
@@ -30,13 +32,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.MessageType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 
 import com.mojang.authlib.GameProfile;
@@ -53,6 +53,7 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.util.Log;
 
 import io.netty.buffer.Unpooled;
 
@@ -60,7 +61,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public static final Identifier DEFAULT_CAPE = new Identifier("cpm:textures/template/cape.png");
 	public static MinecraftObject mc;
 	public static CustomPlayerModelsClient INSTANCE;
-	public static boolean optifineLoaded;
+	public static boolean optifineLoaded, irisLoaded;
 	public RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
 	public NetHandler<Identifier, PlayerEntity, ClientPlayNetworkHandler> netHandler;
 
@@ -70,6 +71,9 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		INSTANCE = this;
 		mc = new MinecraftObject(MinecraftClient.getInstance());
 		optifineLoaded = OFDetector.doApply();
+		irisLoaded = FabricLoader.getInstance().isModLoaded("iris");
+		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
+		if(irisLoaded)Log.info("Iris detected, enabling iris compatibility");
 		ClientTickEvents.START_CLIENT_TICK.register(cl -> {
 			if(!cl.isPaused())
 				mc.getPlayerRenderManager().getAnimationEngine().tick();
@@ -97,7 +101,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(Identifier::new);
 		netHandler.setExecutor(MinecraftClient::getInstance);
-		netHandler.setSendPacket(d -> new PacketByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new CustomPayloadC2SPacket(rl, pb)), null);
+		netHandler.setSendPacketClient(d -> new PacketByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.sendPacket(new CustomPayloadC2SPacket(rl, pb)));
 		netHandler.setPlayerToLoader(PlayerEntity::getGameProfile);
 		netHandler.setGetPlayerById(id -> {
 			Entity ent = MinecraftClient.getInstance().world.getEntityById(id);
@@ -108,7 +112,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		});
 		netHandler.setGetClient(() -> MinecraftClient.getInstance().player);
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).networkHandler);
-		netHandler.setDisplayText(f -> MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.SYSTEM, f.remap(), Util.NIL_UUID));
+		netHandler.setDisplayText(t -> MinecraftClient.getInstance().player.sendMessage(t.remap(), false));
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
 		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class).localModelApi(GameProfile::new).
 		renderApi(Model.class, Identifier.class, RenderLayer.class, VertexConsumerProvider.class, GameProfile.class, ModelTexture::new).init();
@@ -118,7 +122,8 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		manager.bindPlayer(player, buffer, model);
 	}
 
-	public void playerRenderPost(PlayerEntityModel model) {
+	public void playerRenderPost(VertexConsumerProvider buffer, PlayerEntityModel model) {
+		if(buffer instanceof Immediate)((Immediate)buffer).draw();
 		manager.unbindClear(model);
 	}
 
@@ -135,10 +140,19 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		manager.bindHand(MinecraftClient.getInstance().player, buffer, model);
 	}
 
+	public void renderHandPost(VertexConsumerProvider vertexConsumers, PlayerEntityModel model) {
+		if(vertexConsumers instanceof Immediate)((Immediate)vertexConsumers).draw();
+		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(model);
+	}
+
 	public void renderSkull(Model skullModel, GameProfile profile, VertexConsumerProvider buffer) {
 		manager.bindSkull(profile, buffer, skullModel);
 	}
 
+	public void renderSkullPost(VertexConsumerProvider vertexConsumers, Model model) {
+		if(vertexConsumers instanceof Immediate)((Immediate)vertexConsumers).draw();
+		CustomPlayerModelsClient.INSTANCE.manager.unbindFlush(model);
+	}
 
 	public void renderElytra(BipedEntityModel<LivingEntity> player, ElytraEntityModel<LivingEntity> model) {
 		manager.bindElytra(player, model);

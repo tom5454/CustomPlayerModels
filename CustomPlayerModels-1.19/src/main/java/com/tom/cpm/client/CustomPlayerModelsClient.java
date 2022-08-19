@@ -17,13 +17,12 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -52,7 +51,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import com.tom.cpl.text.FormatText;
-import com.tom.cpl.text.IText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -92,7 +90,7 @@ public class CustomPlayerModelsClient {
 		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setExecutor(() -> minecraft);
-		netHandler.setSendPacket(d -> new FriendlyByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new ServerboundCustomPayloadPacket(rl, pb)), null);
+		netHandler.setSendPacketClient(d -> new FriendlyByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new ServerboundCustomPayloadPacket(rl, pb)));
 		netHandler.setPlayerToLoader(net.minecraft.world.entity.player.Player::getGameProfile);
 		netHandler.setGetPlayerById(id -> {
 			Entity ent = Minecraft.getInstance().level.getEntity(id);
@@ -103,13 +101,8 @@ public class CustomPlayerModelsClient {
 		});
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
-		netHandler.setDisplayText(this::onMessage);
+		netHandler.setDisplayText(t -> minecraft.player.displayClientMessage(t.remap(), false));
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
-	}
-
-	private void onMessage(IText f) {
-		Registry<ChatType> registry = minecraft.level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
-		minecraft.gui.getChat().addMessage(f.remap());
 	}
 
 	public static void apiInit() {
@@ -125,6 +118,8 @@ public class CustomPlayerModelsClient {
 
 	@SubscribeEvent
 	public void playerRenderPost(RenderPlayerEvent.Post event) {
+		MultiBufferSource buffer = event.getMultiBufferSource();
+		if(buffer instanceof MultiBufferSource.BufferSource b)b.endBatch();
 		manager.unbindClear(event.getRenderer().getModel());
 	}
 
@@ -142,8 +137,18 @@ public class CustomPlayerModelsClient {
 		manager.bindHand(Minecraft.getInstance().player, buffer, model);
 	}
 
+	public void renderHandPost(MultiBufferSource buffer, HumanoidModel model) {
+		if(buffer instanceof BufferSource i)i.endBatch();
+		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(model);
+	}
+
 	public void renderSkull(Model skullModel, GameProfile profile, MultiBufferSource buffer) {
 		manager.bindSkull(profile, buffer, skullModel);
+	}
+
+	public void renderSkullPost(MultiBufferSource buffer, Model model) {
+		if(buffer instanceof BufferSource i)i.endBatch();
+		CustomPlayerModelsClient.INSTANCE.manager.unbindFlush(model);
 	}
 
 	public void renderElytra(HumanoidModel<LivingEntity> player, ElytraModel<LivingEntity> model) {

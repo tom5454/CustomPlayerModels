@@ -84,7 +84,7 @@ public abstract class SkullBlockEntityRendererMixin extends BlockEntityRenderer<
 	private static void onRenderPost(Direction directionIn, float p_228879_1_, SkullBlock.SkullType skullType, GameProfile gameProfileIn, float animationProgress, MatrixStack matrixStackIn, VertexConsumerProvider buffer, int combinedLight, CallbackInfo cbi) {
 		if (skullType == SkullBlock.Type.PLAYER && gameProfileIn != null) {
 			SkullEntityModel model = MODELS.get(skullType);
-			CustomPlayerModelsClient.INSTANCE.manager.unbind(model);
+			CustomPlayerModelsClient.INSTANCE.renderSkullPost(buffer, model);
 		}
 	}
 }

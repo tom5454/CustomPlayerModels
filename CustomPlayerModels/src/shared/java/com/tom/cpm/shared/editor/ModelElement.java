@@ -3,6 +3,7 @@ package com.tom.cpm.shared.editor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
@@ -563,6 +564,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		} else if(type == ElementType.ROOT_PART) {
 			ModelElement elem = new ModelElement(editor, ElementType.ROOT_PART, typeData, editor.gui());
 			elem.duplicated = true;
+			elem.storeID = Math.abs(new Random().nextLong());
 			editor.action("duplicate").addToList(editor.elements, elem).onUndo(() -> editor.selectedElement = null).execute();
 			editor.selectedElement = elem;
 			editor.updateGui();

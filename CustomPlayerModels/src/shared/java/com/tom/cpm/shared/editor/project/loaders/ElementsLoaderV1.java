@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.project.loaders;
 
 import java.io.IOException;
+import java.util.Random;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.ItemSlot;
@@ -13,6 +14,7 @@ import com.tom.cpm.shared.editor.project.JsonList;
 import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.project.ProjectPartLoader;
 import com.tom.cpm.shared.editor.project.ProjectWriter;
+import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.PerFaceUV;
@@ -51,11 +53,15 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 					if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
 						elem = new ModelElement(editor, ElementType.ROOT_PART, e.typeData, editor.gui());
 						elem.duplicated = true;
+						elem.storeID = map.getLong("storeID", 0);
+						if(e.typeData instanceof PlayerModelParts && elem.storeID == ((PlayerModelParts)e.typeData).ordinal()) {
+							//Fix duplicated parts broken storeID
+							elem.storeID = Math.abs(new Random().nextLong());
+						}
 						editor.elements.add(elem);
 						break;
 					}
 				}
-				elem.storeID = map.getLong("storeID", 0);
 			} else {
 				for (ModelElement e : editor.elements) {
 					if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {

@@ -2,17 +2,15 @@ package com.tom.cpm.common;
 
 import java.util.Collections;
 
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.player.Player;
 
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -39,13 +37,13 @@ public class ServerHandler {
 	static {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		netHandler.setGetPlayerUUID(ServerPlayer::getUUID);
-		netHandler.setSendPacket2(d -> new FriendlyByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new ClientboundCustomPayloadPacket(rl, pb)), ent -> {
+		netHandler.setSendPacketServer(d -> new FriendlyByteBuf(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new ClientboundCustomPayloadPacket(rl, pb)), ent -> {
 			ChunkMap.TrackedEntity tr = ((ServerLevel)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
 			if(tr != null) {
 				return tr.seenBy;
 			}
 			return Collections.emptyList();
-		});
+		}, ServerPlayerConnection::getPlayer);
 		netHandler.setFindTracking((p, f) -> {
 			for(ChunkMap.TrackedEntity tr : ((ServerLevel)p.level).getChunkSource().chunkMap.entityMap.values()) {
 				if(tr.entity instanceof Player && tr.seenBy.contains(p.connection)) {
@@ -53,7 +51,7 @@ public class ServerHandler {
 				}
 			}
 		});
-		netHandler.setSendChat((p, m) -> p.connection.send(new ClientboundChatPacket(m.remap(), ChatType.SYSTEM, Util.NIL_UUID)));
+		netHandler.setSendChat((p, m) -> p.displayClientMessage(m.remap(), false));
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
 		if(ModList.get().isLoaded("pehkui")) {
 			netHandler.setScaler(new PehkuiInterface());

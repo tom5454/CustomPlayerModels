@@ -46,12 +46,17 @@ public class RenderManager<G, P, M, D> {
 	}
 
 	public void unbindClear(M model) {
-		unbind(model);
+		unbindFlush(model);
 		clearBoundPlayer();
 	}
 
 	public void unbind(M model) {
 		renderManager.unbindModel(model);
+	}
+
+	public void unbindFlush(M model) {
+		renderManager.flushBatch(model, null);
+		unbind(model);
 	}
 
 	public void bindHand(P player, D buffer, M model) {

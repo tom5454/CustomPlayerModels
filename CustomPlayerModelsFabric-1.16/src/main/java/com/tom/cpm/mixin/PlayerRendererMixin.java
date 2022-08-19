@@ -46,7 +46,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 
 	@Inject(at = @At("RETURN"), method = "render(Lnet/minecraft/client/network/AbstractClientPlayerEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V")
 	public void onRenderPost(AbstractClientPlayerEntity abstractClientPlayerEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.playerRenderPost(getModel());
+		CustomPlayerModelsClient.INSTANCE.playerRenderPost(vertexConsumerProvider, getModel());
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderRightArm(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/network/AbstractClientPlayerEntity;)V")
@@ -61,12 +61,12 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 
 	@Inject(at = @At("RETURN"), method = "renderRightArm(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/network/AbstractClientPlayerEntity;)V")
 	public void onRenderRightArmPost(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
+		CustomPlayerModelsClient.INSTANCE.renderHandPost(vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("RETURN"), method = "renderLeftArm(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/network/AbstractClientPlayerEntity;)V")
 	public void onRenderLeftArmPost(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
+		CustomPlayerModelsClient.INSTANCE.renderHandPost(vertexConsumers, getModel());
 	}
 
 	@Redirect(at =

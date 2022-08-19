@@ -88,6 +88,6 @@ public abstract class SkullBlockEntityRendererMixin {
 					+ "Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I"
 					+ "Lnet/minecraft/client/render/block/entity/SkullBlockEntityModel;Lnet/minecraft/client/render/RenderLayer;)V")
 	private static void renderSkullPost(Direction direction, float yaw, float animationProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, SkullBlockEntityModel model, RenderLayer renderLayer, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.manager.unbind(model);
+		CustomPlayerModelsClient.INSTANCE.renderSkullPost(vertexConsumers, model);
 	}
 }

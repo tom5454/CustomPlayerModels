@@ -13,6 +13,7 @@ public class VBuffers {
 	private Function<NativeRenderType, VertexBuffer> bufferFactory;
 	private Map<NativeRenderType, VertexBuffer> buffers = new HashMap<>();
 	private VertexBuffer normalBuffer;
+	private boolean batched;
 
 	public VBuffers(Function<NativeRenderType, VertexBuffer> bufferFactory, VertexBuffer normalBuffer) {
 		this.bufferFactory = bufferFactory;
@@ -70,11 +71,11 @@ public class VBuffers {
 	}
 
 	public VBuffers replay() {
-		return new VBuffers(rt -> new ReplayBuffer(() -> getBuffer(rt)), normalBuffer);
+		return new VBuffers(rt -> new ReplayBuffer(() -> getBuffer(rt)), normalBuffer).setBatched(true);
 	}
 
 	public VBuffers normal(VertexBuffer normal) {
-		return new VBuffers(this::getBuffer, normal);
+		return new VBuffers(this::getBuffer, normal).setBatched(batched);
 	}
 
 	private static class VBuf extends WrappedBuffer {
@@ -94,11 +95,20 @@ public class VBuffers {
 	}
 
 	public VBuffers map(UnaryOperator<VertexBuffer> map) {
-		return new VBuffers(rt -> map.apply(getBuffer(rt)), normalBuffer != null ? map.apply(normalBuffer) : null);
+		return new VBuffers(rt -> map.apply(getBuffer(rt)), normalBuffer != null ? map.apply(normalBuffer) : null).setBatched(batched);
 	}
 
 	public VBuffers transform(MatrixStack stack) {
 		MatrixStack.Entry e = stack.storeLast();
 		return map(b -> new TransformedBuffer(b, e));
+	}
+
+	public boolean isBatched() {
+		return batched;
+	}
+
+	public VBuffers setBatched(boolean batched) {
+		this.batched = batched;
+		return this;
 	}
 }

@@ -85,7 +85,7 @@ public class ClientProxy extends CommonProxy {
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		Executor ex = minecraft::addScheduledTask;
 		netHandler.setExecutor(() -> ex);
-		netHandler.setSendPacket(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.addToSendQueue(new C17PacketCustomPayload(rl.toString(), pb)), null);
+		netHandler.setSendPacketClient(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.addToSendQueue(new C17PacketCustomPayload(rl.toString(), pb)));
 		netHandler.setPlayerToLoader(EntityPlayer::getGameProfile);
 		netHandler.setGetPlayerById(id -> {
 			Entity ent = Minecraft.getMinecraft().theWorld.getEntityByID(id);
