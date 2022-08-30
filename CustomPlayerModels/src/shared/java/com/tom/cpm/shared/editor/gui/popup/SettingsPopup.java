@@ -17,10 +17,13 @@ public class SettingsPopup extends PopupPanel {
 		super(frm.getGui());
 		this.frm = frm;
 
-		panel = new SettingsPanel(frm, this, 400, 300, this::close);
+		int w = Math.min(frm.getBounds().w / 4 * 3, 400);
+		int h = Math.min(frm.getBounds().h / 4 * 3, 300);
+
+		panel = new SettingsPanel(frm, this, w, h, this::close);
 		addElement(panel);
 
-		setBounds(new Box(0, 0, 400, 300));
+		setBounds(new Box(0, 0, w, h));
 	}
 
 	@Override

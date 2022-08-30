@@ -56,6 +56,8 @@ public enum VanillaPose implements IPose {
 	SPEAKING(s -> s.speakLevel),
 	TOOT_HORN_LEFT,
 	TOOT_HORN_RIGHT,
+	IN_GUI,
+	FIRST_PERSON_MOD,
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;

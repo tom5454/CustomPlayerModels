@@ -10,7 +10,6 @@
   ],
   "client": [
     "PlayerRendererMixin",
-    "ScreenMixin",
     "MinecraftClientMixin",
     "SkullBlockEntityRendererMixin",
     "ClientPlayNetHandlerMixin",

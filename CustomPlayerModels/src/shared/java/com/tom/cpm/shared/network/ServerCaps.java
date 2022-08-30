@@ -7,6 +7,7 @@ public enum ServerCaps {
 	MODEL_EVENT_SUBS,
 	THIRD_PERSON,
 	ATTRIBUTE_SCALE,
+	GESTURES,
 	;
 	public static final ServerCaps[] VALUES = values();
 }

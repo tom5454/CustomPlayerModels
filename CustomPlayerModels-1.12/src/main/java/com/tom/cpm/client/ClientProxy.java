@@ -1,6 +1,5 @@
 package com.tom.cpm.client;
 
-import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
 import net.minecraft.client.Minecraft;
@@ -20,11 +19,12 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -33,6 +33,7 @@ import net.minecraft.util.text.ITextComponent;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.PlayerSPPushOutOfBlocksEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
@@ -140,6 +141,16 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
+	@SubscribeEvent
+	public void drawGuiPre(DrawScreenEvent.Pre evt) {
+		PlayerProfile.inGui = true;
+	}
+
+	@SubscribeEvent
+	public void drawGuiPost(DrawScreenEvent.Post evt) {
+		PlayerProfile.inGui = false;
+	}
+
 	public void renderSkull(ModelBase skullModel, GameProfile profile) {
 		manager.bindSkull(profile, null, skullModel);
 		manager.bindSkin(skullModel, TextureSheetType.SKIN);
@@ -182,11 +193,7 @@ public class ClientProxy extends CommonProxy {
 			Player.setEnableRendering(!Player.isEnableRendering());
 		}
 
-		for (Entry<Integer, KeyBinding> e : KeyBindings.quickAccess.entrySet()) {
-			if(e.getValue().isPressed()) {
-				mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
-			}
-		}
+		mc.getPlayerRenderManager().getAnimationEngine().updateKeys(KeyBindings.quickAccess);
 	}
 
 	@SubscribeEvent
@@ -199,10 +206,15 @@ public class ClientProxy extends CommonProxy {
 				if(st != null) {
 					double d0 = evt.getEntity().getDistanceSq(minecraft.getRenderViewEntity());
 					if (d0 < 32*32) {
+						Scoreboard scoreboard = ((EntityPlayer) evt.getEntity()).getWorldScoreboard();
+						ScoreObjective scoreobjective = scoreboard.getObjectiveInDisplaySlot(2);
+						double y = evt.getY();
+						if (scoreobjective != null)
+							y += evt.getRenderer().getFontRendererFromRenderManager().FONT_HEIGHT * 1.15F * 0.025F;
 						GlStateManager.pushMatrix();
 						GlStateManager.translate(0, 0.25F, 0);
 						String str = ((ITextComponent) st.remap()).getFormattedText();
-						renderLivingLabel(evt.getEntity(), str, evt.getX(), evt.getY(), evt.getZ(), 64);
+						renderLivingLabel(evt.getEntity(), str, evt.getX(), y, evt.getZ(), 64);
 						GlStateManager.popMatrix();
 					}
 				}

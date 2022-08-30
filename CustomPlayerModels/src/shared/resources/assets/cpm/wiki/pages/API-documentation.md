@@ -137,18 +137,18 @@ else
 ### Voice animation
 Register a voice level supplier.  
 `IClientAPI:registerVoice(Player.class, player -> voiceLevel);`  
-[Player.class](#client-player-class)
+[Player.class](#client-playerclass)
 
 ### Rendering API
 Create a player renderer to render CPM models on any Humanoid Entity.  
 `PlayerRenderer<Model, ResourceLocation, RenderType, MultiBufferSource, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class)`  
 For 1.12 and lower use:  
 `RetroPlayerRenderer<Model, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, GameProfile.class);`  
-[Model.class](#client-model-class)  
-[ResourceLocation.class](#client-resourcelocation-class)  
-[RenderType.class](#client-rendertype-class)  
-[MultiBufferSource.class](#client-multibuffersource-class)  
-[GameProfile.class](#client-gameprofile-class)  
+[Model.class](#client-modelclass)  
+[ResourceLocation.class](#client-resourcelocationclass)  
+[RenderType.class](#client-rendertypeclass)  
+[MultiBufferSource.class](#client-multibuffersourceclass)  
+[GameProfile.class](#client-gameprofileclass)  
 
 #### Rendering an Entity with CPM model
 1. Using the renderer set the GameProfile or LocalModel before rendering.  
@@ -280,12 +280,12 @@ Create a ModelFile using `ModelFile.load(file);` or `ModelFile.load(inputstream)
 or  
 `ICommonAPI.resetPlayerModel(Player.class, playerObj);`  
 clear the server set model  
-[Player.class](#common-player-class)  
+[Player.class](#common-playerclass)  
 
 ### Jump (0.4.1+)
 Play the jump animation on for a player.  
 `ICommonAPI.playerJumped(Player.class, playerObj);`  
-[Player.class](#common-player-class)
+[Player.class](#common-playerclass)
 
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  

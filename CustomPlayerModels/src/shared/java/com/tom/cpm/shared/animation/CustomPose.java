@@ -1,8 +1,9 @@
 package com.tom.cpm.shared.animation;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpm.shared.MinecraftClientAccess;
 
-public class CustomPose implements IPose {
+public class CustomPose implements IPose, IManualGesture {
 	private String name;
 	public CustomPose(String name) {
 		this.name = name;
@@ -13,6 +14,7 @@ public class CustomPose implements IPose {
 		return name;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -27,5 +29,15 @@ public class CustomPose implements IPose {
 	@Override
 	public String toString() {
 		return "Custom Pose: " + name;
+	}
+
+	@Override
+	public String getGestureId() {
+		return "p" + name;
+	}
+
+	@Override
+	public void play(AnimationRegistry reg) {
+		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setCustomPose(reg, this);
 	}
 }

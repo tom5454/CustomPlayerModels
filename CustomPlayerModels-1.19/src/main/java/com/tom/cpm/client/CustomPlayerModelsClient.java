@@ -2,10 +2,8 @@ package com.tom.cpm.client;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.SkinCustomizationScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -184,11 +182,7 @@ public class CustomPlayerModelsClient {
 			Player.setEnableRendering(!Player.isEnableRendering());
 		}
 
-		for (Entry<Integer, KeyMapping> e : KeyBindings.quickAccess.entrySet()) {
-			if(e.getValue().consumeClick()) {
-				mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
-			}
-		}
+		mc.getPlayerRenderManager().getAnimationEngine().updateKeys(KeyBindings.quickAccess);
 	}
 
 	@SubscribeEvent
@@ -199,6 +193,16 @@ public class CustomPlayerModelsClient {
 		if(openGui.getScreen() instanceof TitleScreen && EditorGui.doOpenEditor()) {
 			openGui.setNewScreen(new GuiImpl(EditorGui::new, openGui.getScreen()));
 		}
+	}
+
+	@SubscribeEvent
+	public void drawGuiPre(ScreenEvent.Render.Pre evt) {
+		PlayerProfile.inGui = true;
+	}
+
+	@SubscribeEvent
+	public void drawGuiPost(ScreenEvent.Render.Post evt) {
+		PlayerProfile.inGui = false;
 	}
 
 	private void registerShaders(RegisterShadersEvent evt) {

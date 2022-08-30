@@ -76,11 +76,14 @@ public class ListPicker<T> extends GuiElement {
 		protected Popup() {
 			super(ListPicker.this.gui);
 
-			ListPanel<T> list = new ListPanel<>(gui, values, 200, 300);
+			int w = Math.min(frame.getBounds().w / 4 * 3, 210);
+			int h = Math.min(frame.getBounds().h / 4 * 3, 335);
+
+			ListPanel<T> list = new ListPanel<>(gui, values, w - 10, h - 35);
 			if(listLoader != null)
 				listLoader.accept(list);
 			list.setSelected(getSelected());
-			list.setBounds(new Box(5, 5, 200, 300));
+			list.setBounds(new Box(5, 5, w - 10, h - 35));
 			addElement(list);
 
 			Button btn = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
@@ -89,10 +92,10 @@ public class ListPicker<T> extends GuiElement {
 				if(action != null)
 					action.run();
 			});
-			btn.setBounds(new Box(5, 310, 60, 20));
+			btn.setBounds(new Box(5, h - 25, 60, 20));
 			addElement(btn);
 
-			setBounds(new Box(0, 0, 210, 335));
+			setBounds(new Box(0, 0, w, h));
 		}
 
 		@Override

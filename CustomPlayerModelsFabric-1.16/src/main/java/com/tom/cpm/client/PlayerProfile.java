@@ -1,9 +1,13 @@
 package com.tom.cpm.client;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BooleanSupplier;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.entity.PlayerModelPart;
@@ -34,6 +38,27 @@ import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public class PlayerProfile extends Player<PlayerEntity> {
+	public static boolean inGui;
+	public static BooleanSupplier inFirstPerson;
+	static {
+		inFirstPerson = () -> false;
+		if(FabricLoader.getInstance().isModLoaded("firstperson")) {
+			try {
+				MethodHandle h = MethodHandles.lookup().unreflectGetter(Class.forName("dev.tr7zw.firstperson.FirstPersonModelCore").getDeclaredField("isRenderingPlayer"));
+				inFirstPerson = () -> {
+					try {
+						return (boolean) h.invoke();
+					} catch (Throwable e) {
+						inFirstPerson = () -> false;
+						return false;
+					}
+				};
+				inFirstPerson.getAsBoolean();
+			} catch (Throwable e) {
+			}
+		}
+	}
+
 	private final GameProfile profile;
 	private String skinType;
 
@@ -180,6 +205,8 @@ public class PlayerProfile extends Player<PlayerEntity> {
 		animState.hurtTime = player.hurtTime;
 		animState.isOnLadder = player.isClimbing();
 		animState.isBurning = player.isOnFire();
+		animState.inGui = inGui;
+		animState.firstPersonMod = inFirstPerson.getAsBoolean();
 
 		if(player.getActiveItem().getItem() instanceof CrossbowItem) {
 			float f = CrossbowItem.getPullTime(player.getActiveItem());

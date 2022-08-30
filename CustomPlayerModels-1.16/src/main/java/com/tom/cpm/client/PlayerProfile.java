@@ -1,8 +1,11 @@
 package com.tom.cpm.client;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BooleanSupplier;
 
 import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.Minecraft;
@@ -20,6 +23,8 @@ import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
+import net.minecraftforge.fml.ModList;
+
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
@@ -34,6 +39,27 @@ import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public class PlayerProfile extends Player<PlayerEntity> {
+	public static boolean inGui;
+	public static BooleanSupplier inFirstPerson;
+	static {
+		inFirstPerson = () -> false;
+		if(ModList.get().isLoaded("firstpersonmod")) {
+			try {
+				MethodHandle h = MethodHandles.lookup().unreflectGetter(Class.forName("dev.tr7zw.firstperson.FirstPersonModelCore").getDeclaredField("isRenderingPlayer"));
+				inFirstPerson = () -> {
+					try {
+						return (boolean) h.invoke();
+					} catch (Throwable e) {
+						inFirstPerson = () -> false;
+						return false;
+					}
+				};
+				inFirstPerson.getAsBoolean();
+			} catch (Throwable e) {
+			}
+		}
+	}
+
 	private final GameProfile profile;
 	private String skinType;
 
@@ -137,6 +163,8 @@ public class PlayerProfile extends Player<PlayerEntity> {
 		animState.hurtTime = player.hurtTime;
 		animState.isOnLadder = player.onClimbable();
 		animState.isBurning = player.displayFireAnimation();
+		animState.inGui = inGui;
+		animState.firstPersonMod = inFirstPerson.getAsBoolean();
 
 		if(player.getUseItem().getItem() instanceof CrossbowItem) {
 			float f = CrossbowItem.getChargeDuration(player.getUseItem());

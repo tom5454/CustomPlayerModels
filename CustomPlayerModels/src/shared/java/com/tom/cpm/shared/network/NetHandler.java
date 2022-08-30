@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.network;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,60 +24,48 @@ import java.util.function.ToIntFunction;
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.function.TriFunction;
-import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.nbt.NBTTag;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.nbt.NBTTagList;
 import com.tom.cpl.nbt.NBTTagString;
-import com.tom.cpl.text.FormatText;
 import com.tom.cpl.text.IText;
-import com.tom.cpl.text.KeybindText;
 import com.tom.cpl.text.LiteralText;
 import com.tom.cpl.util.Pair;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpl.util.TriConsumer;
-import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.VanillaPose;
-import com.tom.cpm.shared.config.BuiltInSafetyProfiles;
 import com.tom.cpm.shared.config.ConfigChangeRequest;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
-import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.config.PlayerData;
-import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
-import com.tom.cpm.shared.config.PlayerSpecificConfigKey.KeyGroup;
-import com.tom.cpm.shared.config.SocialConfig;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
+import com.tom.cpm.shared.network.packet.GestureC2S;
+import com.tom.cpm.shared.network.packet.GetSkinS2C;
+import com.tom.cpm.shared.network.packet.HelloC2S;
+import com.tom.cpm.shared.network.packet.HelloS2C;
+import com.tom.cpm.shared.network.packet.ReceiveEventS2C;
+import com.tom.cpm.shared.network.packet.RecommendSafetyS2C;
+import com.tom.cpm.shared.network.packet.ScaleInfoS2C;
+import com.tom.cpm.shared.network.packet.SetScaleC2S;
+import com.tom.cpm.shared.network.packet.SetSkinC2S;
+import com.tom.cpm.shared.network.packet.SetSkinS2C;
+import com.tom.cpm.shared.network.packet.SubEventC2S;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.ScalingOptions;
 
-@SuppressWarnings("resource")
 public class NetHandler<RL, P, NET> {
 	public static final String GET_SKIN = "get_skin";
 	public static final String SET_SKIN = "set_skin";
 	public static final String HELLO = "hello";
-	public static final String SKIN_LAYERS = "layer";
 	public static final String SET_SCALE = "set_scl";
 	public static final String RECOMMEND_SAFETY = "rec_sfy";
 	public static final String SUBSCRIBE_EVENT = "sub_evt";
 	public static final String RECEIVE_EVENT = "rec_evt";
-
-	public static final String FORCED_TAG = "forced";
-	public static final String DATA_TAG = "data";
-	public static final String PROFILE_TAG = "profile";
-	public static final String PROFILE_DATA = "data";
-	public static final String SERVER_CAPS = "caps";
-	public static final String EVENT_LIST = "eventList";
-	public static final String KICK_TIME = "kickTime";
-	public static final String SCALING = "scaling";
-
-	public static final FormatText FORCED_CHAT_MSG = new FormatText("chat.cpm.skinForced");
+	public static final String GESTURE = "gesture";
 
 	protected Function<P, UUID> getPlayerUUID;
 	private TriConsumer<NET, RL, byte[]> sendPacket;
@@ -99,62 +86,73 @@ public class NetHandler<RL, P, NET> {
 	protected Predicate<P> getIsCreativeFlying;
 	protected Map<ScalingOptions, BiConsumer<P, Float>> scaleSetters = new EnumMap<>(ScalingOptions.class);
 
-	public final RL helloPacket;
-	public final RL setSkin;
-	public final RL getSkin;
-	public final RL setLayer;
-	public final RL setScale;
-	public final RL recommendSafety;
-	public final RL subEvent;
-	public final RL receiveEvent;
-
 	private List<ConfigChangeRequest<?, ?>> recommendedSettingChanges = new ArrayList<>();
 	private EnumSet<ServerCaps> serverCaps = EnumSet.noneOf(ServerCaps.class);
 	private boolean scalingWarning;
 
+	protected Map<RL, Supplier<IPacket>> packetS2C = new HashMap<>(), packetC2S = new HashMap<>();
+	protected Map<Class<? extends IPacket>, RL> packetLookup = new HashMap<>();
+	private BiFunction<String, String, RL> keyFactory;
+
 	public NetHandler(BiFunction<String, String, RL> keyFactory) {
-		helloPacket = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, HELLO);
-		setSkin = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, SET_SKIN);
-		getSkin = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, GET_SKIN);
-		setLayer = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, SKIN_LAYERS);
-		setScale = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, SET_SCALE);
-		recommendSafety = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, RECOMMEND_SAFETY);
-		subEvent = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, SUBSCRIBE_EVENT);
-		receiveEvent = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, RECEIVE_EVENT);
+		this.keyFactory = keyFactory;
+
+		register(packetC2S, HELLO, HelloC2S.class, HelloC2S::new);
+		register(packetS2C, HELLO, HelloS2C.class, HelloS2C::new);
+
+		register(packetC2S, SET_SKIN, SetSkinC2S.class, SetSkinC2S::new);
+		register(packetS2C, SET_SKIN, SetSkinS2C.class, SetSkinS2C::new);
+
+		register(packetS2C, GET_SKIN, GetSkinS2C.class, GetSkinS2C::new);
+
+		register(packetC2S, SET_SCALE, SetScaleC2S.class, SetScaleC2S::new);
+		register(packetS2C, SET_SCALE, ScaleInfoS2C.class, ScaleInfoS2C::new);
+
+		register(packetS2C, RECOMMEND_SAFETY, RecommendSafetyS2C.class, RecommendSafetyS2C::new);
+
+		register(packetC2S, SUBSCRIBE_EVENT, SubEventC2S.class, SubEventC2S::new);
+
+		register(packetS2C, RECEIVE_EVENT, ReceiveEventS2C.class, ReceiveEventS2C::new);
+
+		register(packetC2S, GESTURE, GestureC2S.class, GestureC2S::new);
 	}
 
+	@SuppressWarnings("unchecked")
+	protected <PCKT extends IPacket> void register(Map<RL, Supplier<IPacket>> map, String name, Class<PCKT> clazz, Supplier<PCKT> factory) {
+		RL key = keyFactory.apply(MinecraftObjectHolder.NETWORK_ID, name);
+		map.put(key, (Supplier<IPacket>) factory);
+		packetLookup.put(clazz, key);
+	}
+
+	@SuppressWarnings("unchecked")
 	public void onJoin(P player) {
-		try {
-			IOHelper pb = new IOHelper();
-			NBTTagCompound data = new NBTTagCompound();
-			int kickTimer = ModConfig.getWorldConfig().getInt(ConfigKeys.KICK_PLAYERS_WITHOUT_MOD, 0);
-			data.setInteger(KICK_TIME, kickTimer);
-			data.setTag(SERVER_CAPS, writeCaps());
+		NBTTagCompound data = new NBTTagCompound();
+		int kickTimer = ModConfig.getWorldConfig().getInt(ConfigKeys.KICK_PLAYERS_WITHOUT_MOD, 0);
+		data.setInteger(NetworkUtil.KICK_TIME, kickTimer);
+		data.setTag(NetworkUtil.SERVER_CAPS, writeCaps());
 
-			PlayerData pd = newData();
-			getSNetH(player).cpm$setEncodedModelData(pd);
-			pd.load(getID(player));
+		ServerNetH net = getSNetH(player);
+		PlayerData pd = newData();
+		net.cpm$setEncodedModelData(pd);
+		pd.load(getID(player));
 
-			NBTTagCompound scaling = new NBTTagCompound();
-			data.setTag(SCALING, scaling);
-			for(ScalingOptions o : scaleSetters.keySet()) {
-				float v = pd.scale.getOrDefault(o, 1F);
-				if(v != 1) {
-					scaling.setFloat(o.getNetKey(), v);
-				}
+		NBTTagCompound scaling = new NBTTagCompound();
+		data.setTag(NetworkUtil.SCALING, scaling);
+		for(ScalingOptions o : scaleSetters.keySet()) {
+			float v = pd.scale.getOrDefault(o, 1F);
+			if(v != 1) {
+				scaling.setFloat(o.getNetKey(), v);
 			}
-
-			pb.writeNBT(data);
-			sendPacketTo(getNet.apply(player), helloPacket, pb.toBytes());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
+
+		sendPacketTo0((NET) net, new HelloS2C(data));
 	}
 
 	private NBTTag writeCaps() {
 		NBTTagCompound data = new NBTTagCompound();
 		scaleSetters.keySet().stream().map(ScalingOptions::getCaps).filter(e -> e != null).distinct().forEach(c -> setCap(data, c));
 		setCap(data, ServerCaps.MODEL_EVENT_SUBS);
+		setCap(data, ServerCaps.GESTURES);
 		return data;
 	}
 
@@ -166,255 +164,29 @@ public class NetHandler<RL, P, NET> {
 		return new PlayerData();
 	}
 
-	@SuppressWarnings("unchecked")
 	public void receiveServer(RL key, InputStream data, ServerNetH net) {
-		try {
-			NET from = (NET) net;
-			P pl = getPlayer.apply(from);
-			if(key.equals(helloPacket)) {
-				executor.apply(from).execute(() -> {
-					net.cpm$setHasMod(true);
-					findTracking.accept(pl, p -> sendPlayerData(p, pl));
-					PlayerData pd = net.cpm$getEncodedModelData();
-					if(pd.canChangeModel()) {
-						sendPacketTo(from, getSkin, new byte[] {0});
-					} else {
-						sendPacketTo(from, setSkin, writeSkinData(pd, pl));
-					}
-					if(ModConfig.getWorldConfig().getBoolean(ConfigKeys.RECOMMEND_SAFETY_SETTINGS, false)) {
-						sendSafetySettings(from);
-					}
-				});
-			} else if(key.equals(setSkin)) {
-				PlayerData pd = net.cpm$getEncodedModelData();
-				if(pd.canChangeModel()) {
-					IOHelper pb = new IOHelper(data);
-					NBTTagCompound tag = pb.readNBT();
-					executor.apply(from).execute(() -> {
-						pd.setModel(tag.hasKey(DATA_TAG) ? tag.getByteArray(DATA_TAG) : null, false, false);
-						sendPacketToTracking(pl, setSkin, writeSkinData(pd, pl));
-						pd.save(getID(pl));
-					});
-				} else {
-					sendChat.accept(pl, FORCED_CHAT_MSG);
-				}
-			} else if(key.equals(setScale)) {
-				IOHelper pb = new IOHelper(data);
-				NBTTagCompound tag = pb.readNBT();
-				executor.apply(from).execute(() -> {
-					PlayerData pd = net.cpm$getEncodedModelData();
-					List<ScalingOptions> blocked = new ArrayList<>();
-					for(Entry<ScalingOptions, BiConsumer<P, Float>> e : scaleSetters.entrySet()) {
-						float oldV = pd.scale.getOrDefault(e.getKey(), 1F);
-						float selNewV = tag.getFloat(e.getKey().getNetKey());
-						float newV = selNewV;
-						Pair<Float, Float> l = getScalingLimits(e.getKey(), getID(pl));
-						newV = newV == 0 || l == null ? 1F : MathHelper.clamp(newV, l.getKey(), l.getValue());
-						Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
-						if(newV != oldV) {
-							e.getValue().accept(pl, newV);
-							pd.scale.put(e.getKey(), newV);
-						}
-						if(newV != selNewV && selNewV != 0) {
-							blocked.add(e.getKey());
-						}
-					}
-					pd.save(getID(pl));
-					NBTTagCompound ret = new NBTTagCompound();
-					if(!blocked.isEmpty()) {
-						NBTTagList list = new NBTTagList();
-						blocked.forEach(sc -> list.appendTag(new NBTTagString(sc.getNetKey())));
-						ret.setTag(SCALING, list);
-					}
-					try {
-						IOHelper pb2 = new IOHelper();
-						pb2.writeNBT(ret);
-						sendPacketTo(from, setScale, pb2.toBytes());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				});
-			} else if(key.equals(subEvent)) {
-				IOHelper pb = new IOHelper(data);
-				NBTTagCompound tag = pb.readNBT();
-				PlayerData pd = net.cpm$getEncodedModelData();
-				pd.eventSubs.clear();
-				NBTTagList list = tag.getTagList(EVENT_LIST, NBTTag.TAG_STRING);
-				for (int i = 0;i<list.tagCount();i++) {
-					ModelEventType type = ModelEventType.of(list.getStringTagAt(i));
-					if(type != null)pd.eventSubs.add(type);
-				}
-			}
-		} catch (Throwable e) {
-			Log.error("Exception while processing cpm packet: " + key, e);
-		}
+		processPacket(packetC2S, key, data, net);
 	}
 
-	private void sendSafetySettings(NET to) {
-		BuiltInSafetyProfiles profile = BuiltInSafetyProfiles.get(ModConfig.getWorldConfig().getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase()));
-		if(profile != null) {
-			NBTTagCompound tag = new NBTTagCompound();
-			tag.setString(PROFILE_TAG, profile.name().toLowerCase());
-			if(profile == BuiltInSafetyProfiles.CUSTOM) {
-				Map<String, Object> map = new HashMap<>();
-				ConfigEntry main = ModConfig.getWorldConfig().getEntry(ConfigKeys.SAFETY_SETTINGS);
-				ConfigEntry ce = new ConfigEntry(map, () -> {});
-				for(PlayerSpecificConfigKey<?> key : ConfigKeys.SAFETY_KEYS) {
-					Object v = key.getValue(main, KeyGroup.GLOBAL);
-					sendSafetySettings$setValue(ce, key, v);
-				}
-				tag.setString(PROFILE_DATA, MinecraftObjectHolder.gson.toJson(map));
-			}
-			try {
-				IOHelper pb = new IOHelper();
-				pb.writeNBT(tag);
-				sendPacketTo(to, recommendSafety, pb.toBytes());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> void sendSafetySettings$setValue(ConfigEntry ce, PlayerSpecificConfigKey<T> key, Object value) {
-		key.setValue(ce, (T) value);
-	}
-
-	@SuppressWarnings("unchecked")
 	public void receiveClient(RL key, InputStream data, NetH net) {
+		processPacket(packetS2C, key, data, net);
+	}
+
+	private void processPacket(Map<RL, Supplier<IPacket>> map, RL key, InputStream data, NetH net) {
 		try {
-			NET from = (NET) net;
-			if(key.equals(helloPacket)) {
-				IOHelper pb = new IOHelper(data);
-				NBTTagCompound tag = pb.readNBT();
-				NBTTagCompound scaling = tag.getCompoundTag(SCALING);
-				Map<ScalingOptions, Float> scalingMap = new EnumMap<>(ScalingOptions.class);
-				for(ScalingOptions o : ScalingOptions.VALUES) {
-					float v = scaling.getFloat(o.getNetKey());
-					scalingMap.put(o, v);
-				}
-				executor.apply(from).execute(() -> {
-					handleServerCaps(tag.getCompoundTag(SERVER_CAPS));
-					String server = MinecraftClientAccess.get().getConnectedServer();
-					ConfigEntry cc = ModConfig.getCommonConfig();
-					ConfigEntry ss = cc.getEntry(ConfigKeys.SERVER_SETTINGS);
-					if(server != null && ss.hasEntry(server)) {
-						if(ss.getEntry(server).getBoolean(ConfigKeys.DISABLE_NETWORK, false)) {
-							int kickTime = tag.getInteger(KICK_TIME);
-							if(kickTime > 0) {
-								recommendedSettingChanges.clear();
-								recommendedSettingChanges.add(new ConfigChangeRequest<>(ConfigKeys.DISABLE_NETWORK, true, false));
-								displayText.accept(new FormatText("chat.cpm.serverRequiresCPM", new KeybindText("key.cpm.gestureMenu", "gestureMenu")));
-							}
-							return;
-						}
-					}
-					net.cpm$setHasMod(true);
-					MinecraftClientAccess.get().getDefinitionLoader().clearServerData();
-					sendPacketTo(from, helloPacket, new byte[] {0});
-					MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setServerScaling(scalingMap);
-				});
-			} else if(net.cpm$hasMod()) {
-				if(key.equals(setSkin)) {
-					IOHelper pb = new IOHelper(data);
-					int plid = pb.readVarInt();
-					NBTTagCompound tag = pb.readNBT();
-					executor.apply(from).execute(() -> {
-						P player = getPlayerById.apply(plid);
-						if(player != null) {
-							MinecraftClientAccess.get().getDefinitionLoader().setModel(playerToLoader.apply(player), tag.hasKey(DATA_TAG) ? tag.getByteArray(DATA_TAG) : null, tag.getBoolean(FORCED_TAG));
-						}
-					});
-				} else if(key.equals(getSkin)) {
-					sendSkinData(from);
-				} else if(key.equals(recommendSafety)) {
-					IOHelper pb = new IOHelper(data);
-					NBTTagCompound tag = pb.readNBT();
-					executor.apply(from).execute(() -> {
-						String server = MinecraftClientAccess.get().getConnectedServer();
-						ConfigEntry cc = ModConfig.getCommonConfig();
-						ConfigEntry ss = cc.getEntry(ConfigKeys.SERVER_SETTINGS);
-						if(server != null && ss.hasEntry(server)) {
-							if(ss.getEntry(server).getBoolean(ConfigKeys.IGNORE_SAFETY_RECOMMENDATIONS, false))return;
-						}
-
-						BuiltInSafetyProfiles netProfile = BuiltInSafetyProfiles.get(tag.getString(PROFILE_TAG));
-
-						ConfigEntry ce = null;
-						if(netProfile == BuiltInSafetyProfiles.CUSTOM) {
-							try {
-								Map<String, Object> map = (Map<String, Object>) MinecraftObjectHolder.gson.fromJson(tag.getString(PROFILE_DATA), Object.class);
-								ce = new ConfigEntry(map, () -> {});
-							} catch (Exception e) {
-								return;
-							}
-						}
-
-						recommendedSettingChanges.clear();
-						for(PlayerSpecificConfigKey<?> k : ConfigKeys.SAFETY_KEYS) {
-							Object rv = ce != null ? k.getValue(ce, KeyGroup.GLOBAL) : k.getValue(netProfile);
-							Object sv = k.getValueFor(server, null, cc);
-							if(!rv.equals(sv)) {
-								recommendedSettingChanges.add(new ConfigChangeRequest<>(k, sv, rv));
-							}
-						}
-						if(!recommendedSettingChanges.isEmpty()) {
-							ConfigEntry gs = cc.getEntry(ConfigKeys.GLOBAL_SETTINGS);
-							String[] spf = gs.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase()).split(":", 2);
-							BuiltInSafetyProfiles profile = SocialConfig.getProfile(spf);
-
-							if(server != null && ss.hasEntry(server)) {
-								ConfigEntry e = ss.getEntry(server);
-								if(e.hasEntry(ConfigKeys.SAFETY_PROFILE)) {
-									spf = e.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase()).split(":", 2);
-									profile = SocialConfig.getProfile(spf);
-								}
-							}
-
-							String old;
-							if(profile == BuiltInSafetyProfiles.CUSTOM) {
-								old = "custom:" + spf[1];
-							} else {
-								old = profile.name().toLowerCase();
-							}
-
-							if(netProfile == BuiltInSafetyProfiles.CUSTOM) {
-								recommendedSettingChanges.add(new ConfigChangeRequest<>(ConfigKeys.SAFETY_PROFILE, old, "custom:import-" + server));
-							} else {
-								recommendedSettingChanges.add(new ConfigChangeRequest<>(ConfigKeys.SAFETY_PROFILE, old, netProfile.name().toLowerCase()));
-							}
-
-							displayText.accept(new FormatText("chat.cpm.serverSafetySettings", new KeybindText("key.cpm.gestureMenu", "gestureMenu")));
-						}
-					});
-				} else if(key.equals(receiveEvent)) {
-					IOHelper pb = new IOHelper(data);
-					int plid = pb.readVarInt();
-					NBTTagCompound tag = pb.readNBT();
-					executor.apply(from).execute(() -> {
-						P player = getPlayerById.apply(plid);
-						if(player != null) {
-							Player<?> pl = MinecraftClientAccess.get().getDefinitionLoader().loadPlayer(playerToLoader.apply(player), ModelDefinitionLoader.PLAYER_UNIQUE);
-							pl.animState.receiveEvent(tag, pl.isClientPlayer());
-						}
-					});
-				} else if(key.equals(setScale)) {
-					IOHelper pb = new IOHelper(data);
-					NBTTagCompound tag = pb.readNBT();
-					executor.apply(from).execute(() -> {
-						if(tag.hasKey(SCALING) && !scalingWarning) {
-							displayText.accept(new FormatText("chat.cpm.scalingBlocked"));
-							scalingWarning = true;
-						}
-					});
-				}
+			Supplier<IPacket> factory = map.get(key);
+			if(factory != null) {
+				IPacket pckt = factory.get();
+				IOHelper h = new IOHelper(data);
+				pckt.read(h);
+				pckt.handleRaw(this, net);
 			}
 		} catch (Throwable e) {
 			Log.error("Exception while processing cpm packet: " + key, e);
 		}
 	}
 
-	private void handleServerCaps(NBTTagCompound tag) {
+	public void handleServerCaps(NBTTagCompound tag) {
 		serverCaps.clear();
 		for(ServerCaps c : ServerCaps.VALUES) {
 			if(tag.getBoolean(c.name().toLowerCase())) {
@@ -425,89 +197,37 @@ public class NetHandler<RL, P, NET> {
 
 	public void sendSkinData() {
 		if(hasModClient())
-			sendSkinData(getClientNet());
-	}
-
-	private void sendSkinData(NET pl) {
-		String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
-		if(model != null) {
-			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
-			try {
-				ModelFile file = ModelFile.load(new File(modelsDir, model));
-				IOHelper pb = new IOHelper();
-				NBTTagCompound data = new NBTTagCompound();
-				data.setByteArray(DATA_TAG, file.getDataBlock());
-				pb.writeNBT(data);
-				file.registerLocalCache(MinecraftClientAccess.get().getDefinitionLoader());
-				sendPacketTo(pl, setSkin, pb.toBytes());
-			} catch (IOException e) {
-			}
-		} else {
-			try {
-				IOHelper pb = new IOHelper();
-				NBTTagCompound data = new NBTTagCompound();
-				pb.writeNBT(data);
-				sendPacketTo(pl, setSkin, pb.toBytes());
-			} catch (IOException e) {
-			}
-		}
-	}
-
-	public void sendPlayerData(P target, P to) {
-		PlayerData dt = getSNetH(target).cpm$getEncodedModelData();
-		if(dt == null)return;
-		sendPacketTo(getNet.apply(to), setSkin, writeSkinData(dt, target));
-	}
-
-	private byte[] writeSkinData(PlayerData dt, P target) {
-		try {
-			IOHelper pb = new IOHelper();
-			pb.writeVarInt(getPlayerId.applyAsInt(target));
-			NBTTagCompound data = new NBTTagCompound();
-			if(dt.data != null) {
-				data.setBoolean(FORCED_TAG, dt.forced);
-				data.setByteArray(DATA_TAG, dt.data);
-			}
-			pb.writeNBT(data);
-			return pb.toBytes();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+			NetworkUtil.sendSkinDataToServer(this);
 	}
 
 	public void setSkin(P pl, String skin, boolean force, boolean save) {
-		PlayerData pd = getSNetH(pl).cpm$getEncodedModelData();
+		ServerNetH h = getSNetH(pl);
+		PlayerData pd = h.cpm$getEncodedModelData();
 		pd.setModel(skin, force, save);
 		if(skin == null) {
-			sendPacketTo(getNet.apply(pl), getSkin, new byte[] {0});
+			sendPacketTo(h, new GetSkinS2C());
 		}
-		sendPacketToTracking(pl, setSkin, writeSkinData(pd, pl));
+		sendPacketToTracking(pl, NetworkUtil.writeSkinData(this, pd, pl));
 		pd.save(getID(pl));
 	}
 
 	public void setSkin(P pl, byte[] skin, boolean force) {
 		PlayerData pd = getSNetH(pl).cpm$getEncodedModelData();
 		pd.setModel(skin, force, false);
-		sendPacketToTracking(pl, setSkin, writeSkinData(pd, pl));
+		sendPacketToTracking(pl, NetworkUtil.writeSkinData(this, pd, pl));
 		pd.save(getID(pl));
 	}
 
 	public void setScale(ScaleData scl) {
 		if(hasModClient() && serverCaps.contains(ServerCaps.SCALING)) {
-			try {
-				if(scl == null)scl = ScaleData.NULL;
-				NBTTagCompound nbt = new NBTTagCompound();
-				for(Entry<ScalingOptions, Float> e : scl.getScaling().entrySet()) {
-					if(serverCaps.contains(e.getKey().getCaps())) {
-						nbt.setFloat(e.getKey().getNetKey(), e.getValue());
-					}
+			if(scl == null)scl = ScaleData.NULL;
+			NBTTagCompound nbt = new NBTTagCompound();
+			for(Entry<ScalingOptions, Float> e : scl.getScaling().entrySet()) {
+				if(serverCaps.contains(e.getKey().getCaps())) {
+					nbt.setFloat(e.getKey().getNetKey(), e.getValue());
 				}
-				IOHelper pb = new IOHelper();
-				pb.writeNBT(nbt);
-				sendPacketToServer(setScale, pb.toBytes());
-			} catch (IOException e) {
-				throw new RuntimeException(e);
 			}
+			sendPacketToServer(new SetScaleC2S(nbt));
 		}
 	}
 
@@ -537,13 +257,7 @@ public class NetHandler<RL, P, NET> {
 				if(dt.eventSubs.contains(ModelEventType.FALLING))evt.setFloat(ModelEventType.FALLING.getName(), getFallDistance.apply(p));
 				if(dt.eventSubs.contains(ModelEventType.CREATIVE_FLYING))evt.setBoolean(ModelEventType.CREATIVE_FLYING.getName(), getIsCreativeFlying.test(p));
 				if(evt.tagCount() > 0) {
-					IOHelper h = new IOHelper();
-					try {
-						h.writeVarInt(getPlayerId.applyAsInt(p));
-						h.writeNBT(evt);
-						sendPacketToTracking(p, receiveEvent, h.toBytes());
-					} catch (IOException e) {
-					}
+					sendPacketToTracking(p, new ReceiveEventS2C(getPlayerId.applyAsInt(p), evt));
 				}
 			}
 		}
@@ -564,17 +278,16 @@ public class NetHandler<RL, P, NET> {
 		if(serverCaps.contains(ServerCaps.MODEL_EVENT_SUBS)) {
 			NBTTagCompound tag = new NBTTagCompound();
 			NBTTagList list = new NBTTagList();
-			tag.setTag(EVENT_LIST, list);
+			tag.setTag(NetworkUtil.EVENT_LIST, list);
 			def.getAnimations().getAnimations().keySet().stream().filter(e -> e instanceof VanillaPose).
 			map(ModelEventType::getType).filter(e -> e != null).distinct().map(ModelEventType::getName).
 			map(NBTTagString::new).forEach(list::appendTag);
-			IOHelper h = new IOHelper();
-			try {
-				h.writeNBT(tag);
-				sendPacketToServer(subEvent, h.toBytes());
-			} catch (IOException e) {
-			}
+			sendPacketToServer(new SubEventC2S(tag));
 		}
+	}
+
+	public boolean hasServerCap(ServerCaps cap) {
+		return hasModClient() && serverCaps.contains(cap);
 	}
 
 	public void onJump(P p) {
@@ -583,44 +296,29 @@ public class NetHandler<RL, P, NET> {
 		if(dt != null && dt.eventSubs.contains(ModelEventType.JUMPING)) {
 			NBTTagCompound evt = new NBTTagCompound();
 			evt.setBoolean(ModelEventType.JUMPING.getName(), true);
-			IOHelper h = new IOHelper();
-			try {
-				h.writeVarInt(getPlayerId.applyAsInt(p));
-				h.writeNBT(evt);
-				sendPacketToTracking(p, receiveEvent, h.toBytes());
-			} catch (IOException e) {
-			}
+			sendPacketToTracking(p, new ReceiveEventS2C(getPlayerId.applyAsInt(p), evt));
 		}
-	}
-
-	protected void sendPacketTo(NET net, RL rl, byte[] dt) {
-		if(dt.length == 0)new Throwable("Empty packet sending: " + rl).printStackTrace();
-		sendPacket.accept(net, rl, dt);
-	}
-
-	protected void sendPacketToServer(RL rl, byte[] dt) {
-		sendPacketTo(getClientNet(), rl, dt);
-	}
-
-	protected void sendPacketToTracking(P p, RL rl, byte[] dt) {
-		if(dt.length == 0)new Throwable("Empty packet sending: " + rl).printStackTrace();
-		sendToAllTracking.accept(p, rl, dt);
 	}
 
 	public String getID(P pl) {
 		return getPlayerUUID.apply(pl).toString();
 	}
 
-	public P getClient() {
-		return getClient.get();
-	}
-
 	public NET getClientNet() {
-		return getNet.apply(getClient());
+		return getNet.apply(getClient.get());
 	}
 
-	private ServerNetH getSNetH(P player) {
+	public ServerNetH getSNetH(P player) {
 		return (ServerNetH) getNet.apply(player);
+	}
+
+	public void sendPlayerData(P target, P to) {
+		NetworkUtil.sendPlayerData(this, target, to);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void execute(NetH net, Runnable task) {
+		executor.apply((NET) net).execute(task);
 	}
 
 	public List<ConfigChangeRequest<?, ?>> getRecommendedSettingChanges() {
@@ -724,17 +422,15 @@ public class NetHandler<RL, P, NET> {
 	}
 
 	public <E extends Throwable> void registerOut(ThrowingConsumer<RL, E> reg) throws E {
-		reg.accept(helloPacket);
-		reg.accept(setSkin);
-		reg.accept(getSkin);
-		reg.accept(recommendSafety);
-		reg.accept(receiveEvent);
+		for (RL e : packetS2C.keySet()) {
+			reg.accept(e);
+		}
 	}
 
 	public <E extends Throwable> void registerIn(ThrowingConsumer<RL, E> reg) throws E {
-		reg.accept(helloPacket);
-		reg.accept(setSkin);
-		reg.accept(subEvent);
+		for (RL e : packetC2S.keySet()) {
+			reg.accept(e);
+		}
 	}
 
 	public <K> void setScaler(ScalerInterface<P, K> intf) {
@@ -780,5 +476,87 @@ public class NetHandler<RL, P, NET> {
 		}
 		g = g.getEntry(opt);
 		return getter.apply(g, key, def);
+	}
+
+	@SuppressWarnings("unchecked")
+	public P getPlayer(ServerNetH net) {
+		return getPlayer.apply((NET) net);
+	}
+
+	public void forEachTracking(P pl, Consumer<P> cons) {
+		findTracking.accept(pl, cons);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void sendPacketTo(ServerNetH net, IPacket packet) {
+		if(!net.cpm$hasMod())return;
+		sendPacketTo0((NET) net, packet);
+	}
+
+	public void sendPacketToServer(IPacket packet) {
+		if(!hasModClient())return;
+		sendPacketTo0(getClientNet(), packet);
+	}
+
+	private void sendPacketTo0(NET net, IPacket packet) {
+		RL id = packetLookup.get(packet.getClass());
+		if(id == null)return;
+		byte[] data;
+		try {
+			data = packet2byte(packet);
+		} catch (IOException e) {
+			return;
+		}
+		sendPacket.accept(net, id, data);
+	}
+
+	public void sendPacketToTracking(P player, IPacket packet) {
+		RL id = packetLookup.get(packet.getClass());
+		if(id == null)return;
+		byte[] data;
+		try {
+			data = packet2byte(packet);
+		} catch (IOException e) {
+			return;
+		}
+		sendToAllTracking.accept(player, id, data);
+	}
+
+	private byte[] packet2byte(IPacket pckt) throws IOException {
+		IOHelper h = new IOHelper();
+		pckt.write(h);
+		return h.toBytes();
+	}
+
+	public int getPlayerId(P target) {
+		return getPlayerId.applyAsInt(target);
+	}
+
+	public void sendChat(P player, IText chatMsg) {
+		sendChat.accept(player, chatMsg);
+	}
+
+	public Map<ScalingOptions, BiConsumer<P, Float>> getScaleSetters() {
+		return scaleSetters;
+	}
+
+	public void displayText(IText text) {
+		displayText.accept(text);
+	}
+
+	public P getPlayerById(int entityId) {
+		return getPlayerById.apply(entityId);
+	}
+
+	public Object getLoaderId(P player) {
+		return playerToLoader.apply(player);
+	}
+
+	public void setScalingWarning() {
+		this.scalingWarning = true;
+	}
+
+	public boolean hasScalingWarning() {
+		return scalingWarning;
 	}
 }

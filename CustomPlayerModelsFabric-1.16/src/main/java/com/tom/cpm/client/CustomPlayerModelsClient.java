@@ -1,23 +1,18 @@
 package com.tom.cpm.client;
 
-import java.util.List;
-import java.util.Map.Entry;
-
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.option.SkinOptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -91,10 +86,14 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 				Player.setEnableRendering(!Player.isEnableRendering());
 			}
 
-			for (Entry<Integer, KeyBinding> e : KeyBindings.quickAccess.entrySet()) {
-				if(e.getValue().wasPressed()) {
-					mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
-				}
+			mc.getPlayerRenderManager().getAnimationEngine().updateKeys(KeyBindings.quickAccess);
+		});
+		ScreenEvents.AFTER_INIT.register((mc, screen, sw, sh) -> {
+			ScreenEvents.beforeRender(screen).register((_1, _2, _3, _4, _5) -> PlayerProfile.inGui = true);
+			ScreenEvents.afterRender(screen).register((_1, _2, _3, _4, _5) -> PlayerProfile.inGui = false);
+			if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
+					screen instanceof SkinOptionsScreen) {
+				Screens.getButtons(screen).add(new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen))));
 			}
 		});
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerEntity::getGameProfile);
@@ -125,15 +124,6 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	public void playerRenderPost(VertexConsumerProvider buffer, PlayerEntityModel model) {
 		if(buffer instanceof Immediate)((Immediate)buffer).draw();
 		manager.unbindClear(model);
-	}
-
-	public void initGui(Screen screen, List<Element> children, List<ClickableWidget> buttons) {
-		if((screen instanceof TitleScreen && ModConfig.getCommonConfig().getSetBoolean(ConfigKeys.TITLE_SCREEN_BUTTON, true)) ||
-				screen instanceof SkinOptionsScreen) {
-			Button btn = new Button(0, 0, () -> MinecraftClient.getInstance().openScreen(new GuiImpl(EditorGui::new, screen)));
-			buttons.add(btn);
-			children.add(btn);
-		}
 	}
 
 	public void renderHand(VertexConsumerProvider buffer, PlayerEntityModel model) {

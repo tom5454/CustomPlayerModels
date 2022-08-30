@@ -263,6 +263,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		protected void bindFirstSetup() {
 			if(playerObj != null)playerObj.updateFromModel(model);
+			def.itemTransforms.clear();
 			for (int i = 0; i < redirectRenderers.size(); i++) {
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();
@@ -499,7 +500,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					}
 					matrixStackIn.translate(c.offset.x / 16f, c.offset.y / 16f, c.offset.z / 16f);
 					matrixStackIn.scale(c.scale.x, c.scale.y, c.scale.z);
-					holder.def.storeTransform(cube.itemRenderer, matrixStackIn, !doRenderRoot || (doRenderElems && cube.display));
+					holder.def.storeTransform(cube.itemRenderer, matrixStackIn, (!doRenderRoot || doRenderElems) && cube.display);
 					matrixStackIn.pop();
 					continue;
 				}

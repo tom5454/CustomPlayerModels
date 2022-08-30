@@ -4,6 +4,7 @@ public class SafetyException extends RuntimeException {
 	private BlockReason blockReason;
 
 	public SafetyException(BlockReason blockReason) {
+		super(blockReason.name());
 		this.blockReason = blockReason;
 	}
 

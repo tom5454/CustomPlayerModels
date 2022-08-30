@@ -12,17 +12,22 @@ import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.DropDownBox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
@@ -41,6 +46,8 @@ public class AnimTestPanel extends Panel {
 	private DropDownPanel<VanillaPose> otherHandRight;
 	private List<DropDownPanel<VanillaPose>> poseBoxes;
 	private Checkbox chbxLeftParrot, chbxRightParrot;
+	private PopupMenu customLayers;
+	private Set<String> enabledLayers = new HashSet<>();
 
 	public AnimTestPanel(IGui gui, EditorGui e) {
 		super(gui);
@@ -56,6 +63,7 @@ public class AnimTestPanel extends Panel {
 		editor.updateGui.add(() -> {
 			poses.clear();
 			gestures.clear();
+			customLayers = new PopupMenu(gui, e);
 			gestures.add(new NamedElement<>(null, k -> gui.i18nFormat("label.cpm.no_gesture")));
 			for (VanillaPose p : VanillaPose.VALUES) {
 				if(p == VanillaPose.CUSTOM || p == VanillaPose.GLOBAL)continue;
@@ -64,6 +72,7 @@ public class AnimTestPanel extends Panel {
 					poses.add(new NamedElement<IPose>(p, this::poseToString));
 			}
 			Set<String> addedGestures = new HashSet<>();
+			Set<String> addedLayers = new HashSet<>();
 			Set<String> addedPoses = new HashSet<>();
 			editor.animations.forEach(a -> {
 				if(a.isCustom()) {
@@ -73,14 +82,44 @@ public class AnimTestPanel extends Panel {
 							addedPoses.add(name);
 							poses.add(new NamedElement<>(a.pose, k -> name));
 						}
+					} else if(a.isLayer()) {
+						String id = a.getId();
+						String name = a.getDisplayGroup();
+						if(!addedLayers.contains(id)) {
+							addedLayers.add(id);
+							if(a.displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
+								Slider progressSlider = new Slider(gui, name + ": 0");
+								progressSlider.setBounds(new Box(0, 0, 160, 20));
+								progressSlider.setValue(editor.animTestSliders.getOrDefault(id, 0f));
+								progressSlider.setAction(() -> {
+									progressSlider.setText(name + ": " + ((int) (progressSlider.getValue() * 100)));
+									editor.animTestSliders.put(id, progressSlider.getValue());
+								});
+								customLayers.add(progressSlider);
+							} else {
+								customLayers.addCheckbox(name, b -> {
+									if(enabledLayers.contains(id)) {
+										enabledLayers.remove(id);
+									} else {
+										enabledLayers.add(id);
+									}
+									b.setSelected(enabledLayers.contains(id));
+								}).setSelected(enabledLayers.contains(id));
+							}
+						}
 					} else {
-						if(!addedGestures.contains(a.getId())) {
-							addedGestures.add(a.getId());
-							gestures.add(new NamedElement<>(a.getId(), k -> k));
+						String id = a.getId();
+						String name = a.getDisplayGroup();
+						if(!addedGestures.contains(id)) {
+							addedGestures.add(id);
+							gestures.add(new NamedElement<>(id, k -> name));
 						}
 					}
 				}
 			});
+			if(addedLayers.isEmpty()) {
+				customLayers.add(new Label(gui, gui.i18nFormat("label.cpm.no_elements")).setBounds(new Box(5, 5, 0, 0)));
+			}
 		});
 
 		poseSel = createDropDown("label.cpm.pose", poses);
@@ -122,10 +161,10 @@ public class AnimTestPanel extends Panel {
 		progressSlider = new Slider(gui, gui.i18nFormat("label.cpm.animProgress", 0));
 		progressSlider.setVisible(false);
 		progressSlider.setBounds(new Box(5, 0, 160, 20));
-		progressSlider.setValue(editor.animTestSlider);
+		progressSlider.setValue(editor.animTestSliders.getOrDefault("__pose", 0f));
 		progressSlider.setAction(() -> {
 			progressSlider.setText(gui.i18nFormat("label.cpm.animProgress", (int) (progressSlider.getValue() * 100)));
-			editor.animTestSlider = progressSlider.getValue();
+			editor.animTestSliders.put("__pose", progressSlider.getValue());
 		});
 		addElement(progressSlider);
 
@@ -176,6 +215,25 @@ public class AnimTestPanel extends Panel {
 		chbxRightParrot.setBounds(new Box(5, 0, 160, 20));
 		chbxRightParrot.setAction(() -> chbxRightParrot.setSelected(!chbxRightParrot.isSelected()));
 		addElement(chbxRightParrot);
+
+		Panel layersPanel = new Panel(gui);
+		layersPanel.setBounds(new Box(5, 0, 160, 20));
+		layersPanel.addElement(new Label(gui, gui.i18nFormat("label.cpm.customLayers")).setBounds(new Box(0, 6, 0, 0)));
+
+		Button layersDropDown = new ButtonIcon(gui, "editor", 24, 8, null) {
+
+			@Override
+			public void mouseClick(MouseEvent evt) {
+				if(evt.isHovered(bounds)) {
+					Vec2i p = evt.getPos();
+					customLayers.display(p.x - evt.x, p.y - evt.y + bounds.h + bounds.y, 160);
+					evt.consume();
+				}
+			}
+		};
+		layersDropDown.setBounds(new Box(140, 4, 12, 12));
+		layersPanel.addElement(layersDropDown);
+		addElement(layersPanel);
 
 		layout.reflow();
 
@@ -241,7 +299,7 @@ public class AnimTestPanel extends Panel {
 		NamedElement<String> gesture = gestureSel.getSelected();
 		if(gesture != null && gesture.getElem() != null) {
 			for (EditorAnim anim : editor.animations) {
-				if(anim.isCustom() && anim.pose == null && anim.getId().equals(gesture.getElem())) {
+				if(anim.isCustom() && anim.pose == null && !anim.isLayer() && anim.getId().equals(gesture.getElem())) {
 					editor.animsToPlay.add(anim);
 				}
 			}
@@ -254,6 +312,18 @@ public class AnimTestPanel extends Panel {
 		});
 		if(chbxLeftParrot.isSelected())handlePose(VanillaPose.PARROT_LEFT);
 		if(chbxRightParrot.isSelected())handlePose(VanillaPose.PARROT_RIGHT);
+		enabledLayers.forEach(l -> {
+			for (EditorAnim anim : editor.animations) {
+				if(anim.isCustom() && anim.pose == null && anim.isLayer() && anim.getId().equals(l)) {
+					editor.animsToPlay.add(anim);
+				}
+			}
+		});
+		for (EditorAnim anim : editor.animations) {
+			if(anim.isCustom() && anim.pose == null && anim.isLayer() && anim.displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
+				editor.animsToPlay.add(anim);
+			}
+		}
 	}
 
 	private void handlePose(VanillaPose p) {

@@ -57,6 +57,8 @@ public enum AnimationDisplayData {
 	SPEAKING(VanillaPose.SPEAKING, null, null, Type.LAYERS),
 	TOOT_HORN_LEFT(VanillaPose.TOOT_HORN_LEFT, ItemSlot.LEFT_HAND, DisplayItem.GOAT_HORN, Type.HAND),
 	TOOT_HORN_RIGHT(VanillaPose.TOOT_HORN_RIGHT, ItemSlot.RIGHT_HAND, DisplayItem.GOAT_HORN, Type.HAND),
+	IN_GUI(VanillaPose.IN_GUI, null, null, Type.LAYERS),
+	FIRST_PERSON_MOD(VanillaPose.FIRST_PERSON_MOD, null, null, Type.LAYERS),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;

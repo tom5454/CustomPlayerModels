@@ -2,10 +2,8 @@ package com.tom.cpm.client;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.SkinCustomizationScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -35,6 +33,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -110,7 +109,7 @@ public class CustomPlayerModelsClient {
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
-	public void apiInit() {
+	public static void apiInit() {
 		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class).
 		renderApi(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class, ModelTexture::new).
 		localModelApi(GameProfile::new).init();
@@ -189,11 +188,7 @@ public class CustomPlayerModelsClient {
 			Player.setEnableRendering(!Player.isEnableRendering());
 		}
 
-		for (Entry<Integer, KeyMapping> e : KeyBindings.quickAccess.entrySet()) {
-			if(e.getValue().consumeClick()) {
-				mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
-			}
-		}
+		mc.getPlayerRenderManager().getAnimationEngine().updateKeys(KeyBindings.quickAccess);
 	}
 
 	@SubscribeEvent
@@ -204,6 +199,16 @@ public class CustomPlayerModelsClient {
 		if(openGui.getGui() instanceof TitleScreen && EditorGui.doOpenEditor()) {
 			openGui.setGui(new GuiImpl(EditorGui::new, openGui.getGui()));
 		}
+	}
+
+	@SubscribeEvent
+	public void drawGuiPre(DrawScreenEvent.Pre evt) {
+		PlayerProfile.inGui = true;
+	}
+
+	@SubscribeEvent
+	public void drawGuiPost(DrawScreenEvent.Post evt) {
+		PlayerProfile.inGui = false;
 	}
 
 	private void registerShaders(RegisterShadersEvent evt) {

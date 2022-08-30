@@ -469,7 +469,7 @@ public class ModelDefinition {
 		else
 			resolveState = ModelLoadingState.ERRORRED;
 		error = ex;
-		if(!(ex instanceof IOException))
+		if(!(ex instanceof IOException || ex instanceof SafetyException))
 			Log.error("Failed to load model", ex);
 		clear();
 	}

@@ -20,7 +20,7 @@ public class ColorButton extends Button {
 	private int color;
 	public ColorButton(IGui gui, Frame frame, IntConsumer action) {
 		super(gui, "", null);
-		this.action = () -> frame.openPopup(new ColorPopup(gui));
+		this.action = () -> frame.openPopup(new ColorPopup(frame));
 		this.actionColor = action;
 	}
 
@@ -67,8 +67,10 @@ public class ColorButton extends Button {
 
 		private TextField hexField;
 
-		public ColorPopup(IGui gui) {
-			super(gui);
+		public ColorPopup(Frame frm) {
+			super(frm.getGui());
+
+			boolean small = frm.getBounds().h < 320;
 
 			sliderR = new SliderGradient(gui);
 			sliderG = new SliderGradient(gui);
@@ -97,23 +99,23 @@ public class ColorButton extends Button {
 			spinnerB.setValue(b);
 			updateColorRGB_spinner();
 
-			sliderR.setBounds(new Box(5, 120, 100, 20));
-			sliderG.setBounds(new Box(5, 150, 100, 20));
-			sliderB.setBounds(new Box(5, 180, 100, 20));
+			sliderR.setBounds(new Box(5, small ? 30 : 120, 100, 20));
+			sliderG.setBounds(new Box(5, small ? 60 : 150, 100, 20));
+			sliderB.setBounds(new Box(5, small ? 90 : 180, 100, 20));
 
 			sliderH.setBounds(new Box(5, 30, 100, 20));
 			sliderS.setBounds(new Box(5, 60, 100, 20));
 			sliderV.setBounds(new Box(5, 90, 100, 20));
 
-			spinnerR.setBounds(new Box(110, 120, 40, 20));
-			spinnerG.setBounds(new Box(110, 150, 40, 20));
-			spinnerB.setBounds(new Box(110, 180, 40, 20));
+			spinnerR.setBounds(new Box(110, small ? 30 : 120, 40, 20));
+			spinnerG.setBounds(new Box(110, small ? 60 : 150, 40, 20));
+			spinnerB.setBounds(new Box(110, small ? 90 : 180, 40, 20));
 
 			spinnerH.setBounds(new Box(110, 30,  40, 20));
 			spinnerS.setBounds(new Box(110, 60,  40, 20));
 			spinnerV.setBounds(new Box(110, 90,  40, 20));
 
-			hexField.setBounds(new Box(5, 210, 100, 20));
+			hexField.setBounds(new Box(5, small ? 120 : 210, 100, 20));
 
 			spinnerR.setDp(0);
 			spinnerG.setDp(0);
@@ -149,13 +151,15 @@ public class ColorButton extends Button {
 			addElement(spinnerG);
 			addElement(spinnerB);
 
-			addElement(sliderH);
-			addElement(sliderS);
-			addElement(sliderV);
+			if(!small) {
+				addElement(sliderH);
+				addElement(sliderS);
+				addElement(sliderV);
 
-			addElement(spinnerH);
-			addElement(spinnerS);
-			addElement(spinnerV);
+				addElement(spinnerH);
+				addElement(spinnerS);
+				addElement(spinnerV);
+			}
 
 			addElement(hexField);
 
@@ -167,18 +171,18 @@ public class ColorButton extends Button {
 				actionColor.accept(color);
 				close();
 			});
-			ok.setBounds(new Box(5, 265, 100, 16));
+			ok.setBounds(new Box(5, small ? 175 : 265, 100, 16));
 			addElement(ok);
 
 			for(int i = 0;i<6;i++) {
 				int c = i < colorCache.size() ? colorCache.get(colorCache.size() - i - 1) : 0xffffffff;
 				ColorButton btn = new ColorButton(gui, () -> loadColor(c));
 				btn.setColor(c);
-				btn.setBounds(new Box(5 + i * 25, 240, 20, 16));
+				btn.setBounds(new Box(5 + i * 25, small ? 150 : 240, 20, 16));
 				addElement(btn);
 			}
 
-			setBounds(new Box(0, 0, 160, 290));
+			setBounds(new Box(0, 0, 160, small ? 200 : 290));
 			updateDisplayText();
 		}
 

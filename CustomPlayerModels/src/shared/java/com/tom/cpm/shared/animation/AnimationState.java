@@ -8,6 +8,7 @@ import com.tom.cpl.util.HandAnimation;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.network.ModelEventType;
+import com.tom.cpm.shared.network.NetworkUtil;
 
 public class AnimationState {
 	public int encodedState;
@@ -20,7 +21,8 @@ public class AnimationState {
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
 	public ArmPose leftArm = ArmPose.EMPTY, rightArm = ArmPose.EMPTY;
 	public HandAnimation usingAnimation = HandAnimation.NONE;
-	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing;
+	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing, inGui, firstPersonMod;
+	public byte[] gestureData;
 
 	public void resetPlayer() {
 		sleeping = false;
@@ -99,6 +101,8 @@ public class AnimationState {
 		if(isBurning)h.accept(VanillaPose.ON_FIRE);
 		if(isFreezing)h.accept(VanillaPose.FREEZING);
 		if(speakLevel > 0.1F)h.accept(VanillaPose.SPEAKING);
+		if(inGui)h.accept(VanillaPose.IN_GUI);
+		if(firstPersonMod)h.accept(VanillaPose.FIRST_PERSON_MOD);
 	}
 
 	private static VanillaPose getArmPose(ArmPose pose, boolean left) {
@@ -133,6 +137,7 @@ public class AnimationState {
 			if(tag.hasKey(ModelEventType.CREATIVE_FLYING.getName()))creativeFlyingServer = tag.getBoolean(ModelEventType.CREATIVE_FLYING.getName());
 			if(tag.hasKey(ModelEventType.JUMPING.getName()))jumping = tag.getBoolean(ModelEventType.JUMPING.getName()) ? MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime() : 0;
 		}
+		if(tag.hasKey(NetworkUtil.GESTURE))gestureData = tag.getByteArray(NetworkUtil.GESTURE);
 	}
 
 	public void jump() {

@@ -110,7 +110,7 @@ public class MarkdownParser {
 					String h = lnt.replaceAll("^#+", "").trim();
 					sb.append(h);
 					Line line = parseLine(sb, scl, prefix);
-					headerLines.put(line, h.replaceAll("[^a-zA-Z0-9]", "-").toLowerCase());
+					headerLines.put(line, h.replaceAll("[^a-zA-Z0-9_\\-\\s]", "").replaceAll("[\\s\\-]", "-").toLowerCase());
 
 					if(scl > 1.3f)lines.add(new HorizontalLine());
 					else lines.add(new EmptyLine(4));

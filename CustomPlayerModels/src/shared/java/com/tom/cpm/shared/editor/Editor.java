@@ -153,7 +153,7 @@ public class Editor {
 	public BooleanUpdater displayGizmo = updaterReg.createBool(true);
 	public EnumMap<ItemSlot, DisplayItem> handDisplay = new EnumMap<>(ItemSlot.class);
 	public Set<PlayerModelLayer> modelDisplayLayers = new HashSet<>();
-	public float animTestSlider;
+	public Map<String, Float> animTestSliders = new HashMap<>();
 	public Set<VanillaPose> testPoses = EnumSet.noneOf(VanillaPose.class);
 	public ScalingElement scalingElem = new ScalingElement(this);
 	public UpdaterWithValue<Direction> perfaceFaceDir = updaterReg.createValue(Direction.UP);

@@ -88,6 +88,8 @@ public class SettingsPanel extends Panel {
 
 			makeCheckbox(general, ConfigKeys.WIKI_OFFLINE_MODE, false);
 
+			makeCheckbox(general, ConfigKeys.GESTURE_AUTO_RESET, true);
+
 			MinecraftClientAccess.get().populatePlatformSettings("general", general);
 
 			layout.reflow();
@@ -128,7 +130,7 @@ public class SettingsPanel extends Panel {
 
 			buttonPosMode = new Button(gui, "", null);
 			buttonPosMode.setAction(() -> {
-				ce.setBoolean(ConfigKeys.EDITOR_POSITION_MODE, !ce.getSetBoolean(ConfigKeys.EDITOR_POSITION_MODE, false));
+				ce.setBoolean(ConfigKeys.EDITOR_POSITION_MODE, !ce.getBoolean(ConfigKeys.EDITOR_POSITION_MODE, false));
 				updatePosModeBtn();
 			});
 			buttonPosMode.setBounds(new Box(5, 0, 250, 20));
@@ -219,7 +221,7 @@ public class SettingsPanel extends Panel {
 			ce.setFloat(key, alphaSlider.getValue());
 			alphaSlider.setText(formatAlphaSlider(key, def));
 		});
-		alphaSlider.setValue(ce.getSetFloat(key, def / 255f));
+		alphaSlider.setValue(ce.getFloat(key, def / 255f));
 		alphaSlider.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.config." + key)));
 		p.addElement(alphaSlider);
 
@@ -244,7 +246,7 @@ public class SettingsPanel extends Panel {
 			ce.setFloat(key, scaleSlider.getValue() * (max - min) + min);
 			scaleSlider.setText(formatScaleSlider(key, def));
 		});
-		scaleSlider.setValue((ce.getSetFloat(key, def) - min) / (max - min));
+		scaleSlider.setValue((ce.getFloat(key, def) - min) / (max - min));
 		scaleSlider.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.config." + key)));
 		p.addElement(scaleSlider);
 
@@ -270,7 +272,7 @@ public class SettingsPanel extends Panel {
 
 	private void makeCheckbox(Panel panel, String key, boolean def) {
 		Checkbox chxbx = new Checkbox(gui, gui.i18nFormat("label.cpm.config." + key));
-		chxbx.setSelected(ce.getSetBoolean(key, def));
+		chxbx.setSelected(ce.getBoolean(key, def));
 		chxbx.setAction(() -> {
 			boolean b = !ce.getBoolean(key, def);
 			chxbx.setSelected(b);

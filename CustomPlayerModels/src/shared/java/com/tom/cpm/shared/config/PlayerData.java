@@ -15,6 +15,7 @@ public class PlayerData {
 	public boolean forced, save;
 	public Map<ScalingOptions, Float> scale = new EnumMap<>(ScalingOptions.class);
 	public EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
+	public byte[] gestureData = new byte[0];
 
 	public PlayerData() {
 	}

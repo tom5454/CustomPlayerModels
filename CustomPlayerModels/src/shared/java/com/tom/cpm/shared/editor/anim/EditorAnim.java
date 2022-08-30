@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.animation.VanillaPose;
@@ -73,10 +74,20 @@ public class EditorAnim implements IAnim {
 	public void applyPlay(long millis) {
 		if(components == null || psfs == null)calculateSplines();
 		float step;
+		boolean remap = false;
 		if(pose != null && pose instanceof VanillaPose && ((VanillaPose)pose).hasStateGetter()) {
-			int dd = (int) (editor.animTestSlider * VanillaPose.DYNAMIC_DURATION_MUL);
-			step = (float) dd % VanillaPose.DYNAMIC_DURATION_DIV / VanillaPose.DYNAMIC_DURATION_DIV * frames.size();
+			step = editor.animTestSliders.getOrDefault("__pose", 0f);
+			remap = true;
+		} else if(displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
+			step = editor.animTestSliders.getOrDefault(getId(), 0f);
+			remap = true;
 		} else step = (float) millis % duration / duration * frames.size();
+
+		if(remap) {
+			int dd = (int) (step * VanillaPose.DYNAMIC_DURATION_MUL);
+			step = (float) dd % VanillaPose.DYNAMIC_DURATION_DIV / VanillaPose.DYNAMIC_DURATION_DIV * frames.size();
+		}
+
 		for (int i = 0; i < components.size(); i++) {
 			ModelElement component = components.get(i);
 			component.rc.setRotation(add,
@@ -179,8 +190,9 @@ public class EditorAnim implements IAnim {
 
 	@Override
 	public String toString() {
-		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), displayName));
-		return editor.gui().i18nFormat("label.cpm.anim_gesture", displayName);
+		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), getDisplayName()));
+		else if(isLayer())return editor.gui().i18nFormat("label.cpm.anim_layer", getDisplayName());
+		return editor.gui().i18nFormat("label.cpm.anim_gesture", getDisplayName());
 	}
 
 	public AnimFrame getSelectedFrame() {
@@ -246,10 +258,22 @@ public class EditorAnim implements IAnim {
 	}
 
 	public String getId() {
-		int i = displayName.indexOf('#');
-		if(i == -1)return displayName;
+		String nm = displayName;
+		int i = nm.indexOf('#');
+		if(i == -1)return nm;
 		if(i == 0)return "";
-		return displayName.substring(0, i);
+		return nm.substring(0, i);
+	}
+
+	public String getDisplayGroup() {
+		String nm = getDisplayName();
+		int i = nm.indexOf('#');
+		if(i == -1)return nm;
+		if(i == 0)return "";
+		nm = nm.substring(0, i);
+		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), nm));
+		else if(isLayer())return editor.gui().i18nFormat("label.cpm.anim_layer", nm);
+		return editor.gui().i18nFormat("label.cpm.anim_gesture", nm);
 	}
 
 	public void updateGui() {
@@ -314,5 +338,15 @@ public class EditorAnim implements IAnim {
 
 	public void dragVal(VecType type, Vec3f vec) {
 		if(currentFrame != null)currentFrame.dragVal(type, vec);
+	}
+
+	public String getDisplayName() {
+		if(displayName.startsWith(Gesture.LAYER_PREFIX))return displayName.substring(Gesture.LAYER_PREFIX.length());
+		if(displayName.startsWith(Gesture.VALUE_LAYER_PREFIX))return displayName.substring(Gesture.VALUE_LAYER_PREFIX.length());
+		return displayName;
+	}
+
+	public boolean isLayer() {
+		return displayName.startsWith(Gesture.LAYER_PREFIX) || displayName.startsWith(Gesture.VALUE_LAYER_PREFIX);
 	}
 }

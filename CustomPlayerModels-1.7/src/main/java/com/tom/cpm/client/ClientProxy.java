@@ -1,8 +1,5 @@
 package com.tom.cpm.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
 import org.lwjgl.opengl.GL11;
@@ -21,17 +18,18 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -42,6 +40,7 @@ import com.mojang.authlib.properties.Property;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.common.NetHandlerExt;
 import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -50,10 +49,8 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
-import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.RenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
-import com.tom.cpm.shared.network.NetHandler;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -66,7 +63,7 @@ public class ClientProxy extends CommonProxy {
 	private Minecraft minecraft;
 	public static ClientProxy INSTANCE;
 	public RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
-	public NetH netHandler;
+	public NetHandlerExt<EntityPlayer, NetHandlerPlayClient> netHandler;
 
 	@Override
 	public void init() {
@@ -80,7 +77,7 @@ public class ClientProxy extends CommonProxy {
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), EntityPlayer::getGameProfile);
 		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
-		netHandler = new NetH();
+		netHandler = new NetHandlerExt<>();
 		Executor ex = minecraft::func_152344_a;
 		netHandler.setExecutor(() -> ex);
 		netHandler.setSendPacketClient((c, rl, pb) -> c.addToSendQueue(new C17PacketCustomPayload(rl.toString(), pb)));
@@ -146,6 +143,16 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
+	@SubscribeEvent
+	public void drawGuiPre(DrawScreenEvent.Pre evt) {
+		PlayerProfile.inGui = true;
+	}
+
+	@SubscribeEvent
+	public void drawGuiPost(DrawScreenEvent.Post evt) {
+		PlayerProfile.inGui = false;
+	}
+
 	public void renderSkull(ModelBase skullModel, GameProfile profile) {
 		manager.bindSkull(profile, null, skullModel);
 		manager.bindSkin(skullModel, TextureSheetType.SKIN);
@@ -179,11 +186,7 @@ public class ClientProxy extends CommonProxy {
 			Player.setEnableRendering(!Player.isEnableRendering());
 		}
 
-		for (Entry<Integer, KeyBinding> e : KeyBindings.quickAccess.entrySet()) {
-			if(e.getValue().isPressed()) {
-				mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
-			}
-		}
+		mc.getPlayerRenderManager().getAnimationEngine().updateKeys(KeyBindings.quickAccess);
 	}
 
 	@SubscribeEvent
@@ -199,6 +202,11 @@ public class ClientProxy extends CommonProxy {
 					double d3 = evt.entity.getDistanceSqToEntity(net.minecraft.client.renderer.entity.RenderManager.instance.livingPlayer);
 
 					if (d3 < 32*32) {
+						Scoreboard scoreboard = ((EntityPlayer) evt.entity).getWorldScoreboard();
+						ScoreObjective scoreobjective = scoreboard.func_96539_a(2);
+						double y = evt.y;
+						if (scoreobjective != null)
+							y += evt.renderer.getFontRendererFromRenderManager().FONT_HEIGHT * 1.15F * 0.025F;
 						GL11.glPushMatrix();
 						GL11.glTranslated(0, 0.125F, 0);
 						String s = ((IChatComponent) st.remap()).getFormattedText();
@@ -206,7 +214,7 @@ public class ClientProxy extends CommonProxy {
 						if (evt.entity.isSneaking()) {
 							FontRenderer fontrenderer = minecraft.fontRenderer;
 							GL11.glPushMatrix();
-							GL11.glTranslatef((float)evt.x + 0.0F, (float)evt.y + evt.entity.height + 0.5F, (float)evt.z);
+							GL11.glTranslatef((float)evt.x + 0.0F, (float)y + evt.entity.height + 0.5F, (float)evt.z);
 							GL11.glNormal3f(0.0F, 1.0F, 0.0F);
 							GL11.glRotatef(-net.minecraft.client.renderer.entity.RenderManager.instance.playerViewY, 0.0F, 1.0F, 0.0F);
 							GL11.glRotatef(net.minecraft.client.renderer.entity.RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
@@ -234,7 +242,7 @@ public class ClientProxy extends CommonProxy {
 							GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 							GL11.glPopMatrix();
 						} else {
-							this.renderLivingLabel(evt.entity, evt.x, evt.y, evt.z, s, f1, d3);
+							this.renderLivingLabel(evt.entity, evt.x, y, evt.z, s, f1, d3);
 						}
 						GL11.glPopMatrix();
 					}
@@ -306,38 +314,6 @@ public class ClientProxy extends CommonProxy {
 
 	public void onLogout() {
 		mc.onLogOut();
-	}
-
-	public static class NetH extends NetHandler<ResourceLocation, EntityPlayer, NetHandlerPlayClient> {
-
-		public NetH() {
-			super(ResourceLocation::new);
-		}
-
-		@Override
-		public void receiveClient(ResourceLocation key, InputStream data, com.tom.cpm.shared.network.NetH net) {
-			if(key.equals(setLayer)) {
-				try {
-					IOHelper h = new IOHelper(data);
-					int entId = h.readVarInt();
-					int layer = h.readByte();
-					Minecraft.getMinecraft().func_152344_a(() -> {
-						Entity ent = Minecraft.getMinecraft().theWorld.getEntityByID(entId);
-						if(ent instanceof EntityPlayer) {
-							PlayerProfile profile = (PlayerProfile) ClientProxy.mc.getDefinitionLoader().loadPlayer(((EntityPlayer) ent).getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE);
-							profile.encGesture = layer;
-						}
-					});
-				} catch(IOException e) {}
-			} else
-				super.receiveClient(key, data, net);
-		}
-
-		public void sendLayer(int value) {
-			if(hasModClient()) {
-				sendPacketToServer(setLayer, new byte[] {(byte) value});
-			}
-		}
 	}
 
 	//Copy from RenderPlayer.renderEquippedItems

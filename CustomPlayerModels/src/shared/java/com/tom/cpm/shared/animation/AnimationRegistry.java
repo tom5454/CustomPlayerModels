@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import com.tom.cpm.shared.model.CopyTransform;
 
@@ -15,6 +16,7 @@ public class AnimationRegistry {
 	private Map<Integer, Gesture> encodedToGesture = new HashMap<>();
 	private Map<IPose, Integer> poseToEncoded = new HashMap<>();
 	private Map<Gesture, Integer> gestureToEncoded = new HashMap<>();
+	private Map<Gesture, Integer> layerToId = new HashMap<>();
 	private Map<String, Gesture> gestures = new HashMap<>();
 	private Map<String, CustomPose> customPoses = new HashMap<>();
 	private List<CopyTransform> copyTransforms = new ArrayList<>();
@@ -33,18 +35,6 @@ public class AnimationRegistry {
 		return encodedToGesture.get(gesture);
 	}
 
-	public static class Gesture {
-		public List<IAnimation> animation;
-		public boolean isLoop;
-		public String name;
-
-		public Gesture(List<IAnimation> animation, String name, boolean isLoop) {
-			this.animation = animation;
-			this.name = name;
-			this.isLoop = isLoop;
-		}
-	}
-
 	public void register(IPose pose, IAnimation anim) {
 		animations.computeIfAbsent(pose, k -> new ArrayList<>()).add(anim);
 	}
@@ -60,6 +50,8 @@ public class AnimationRegistry {
 
 	public void register(Gesture gesture) {
 		gestures.put(gesture.name, gesture);
+		if(gesture.name.startsWith(Gesture.LAYER_PREFIX) || gesture.name.startsWith(Gesture.VALUE_LAYER_PREFIX))
+			layerToId.put(gesture, layerToId.size() + 2);
 	}
 
 	public void register(int gid, Gesture gesture) {
@@ -69,6 +61,10 @@ public class AnimationRegistry {
 
 	public int getEncoded(Gesture g) {
 		return gestureToEncoded.getOrDefault(g, -1);
+	}
+
+	public int getLayerId(Gesture g) {
+		return layerToId.getOrDefault(g, -1);
 	}
 
 	public int getEncoded(CustomPose pose) {
@@ -123,5 +119,13 @@ public class AnimationRegistry {
 
 	public void applyCopy() {
 		copyTransforms.forEach(CopyTransform::apply);
+	}
+
+	public int getLayerCount() {
+		return 2 + layerToId.size();
+	}
+
+	public void forEachLayer(BiConsumer<Gesture, Integer> g) {
+		layerToId.forEach(g);
 	}
 }

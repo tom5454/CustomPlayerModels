@@ -15,8 +15,8 @@ public class VBufferOut implements BufferOutput<VertexConsumer> {
 	public VBufferOut(int light, int overlay, MatrixStack matrixStackIn) {
 		this.light = light;
 		this.overlay = overlay;
-		mat4 = matrixStackIn.peek().getModel();
-		mat3 = matrixStackIn.peek().getNormal();
+		mat4 = new Matrix4f(matrixStackIn.peek().getModel());
+		mat3 = new Matrix3f(matrixStackIn.peek().getNormal());
 	}
 
 	@Override

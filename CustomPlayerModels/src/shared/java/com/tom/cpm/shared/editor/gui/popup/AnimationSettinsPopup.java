@@ -17,6 +17,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
@@ -49,9 +50,19 @@ public class AnimationSettinsPopup extends PopupPanel {
 		ats.add(typePose);
 		AnimType typeGesture = new AnimType("gesture", true);
 		ats.add(typeGesture);
+		AnimType typeLayer = new AnimType("layer", false);
+		ats.add(typeLayer);
+		AnimType typeValue = new AnimType("value", false);
+		ats.add(typeValue);
 		if(edit && editor.selectedAnim != null && sel == null) {
-			if(editor.selectedAnim.pose == null)sel = typeGesture;
-			else sel = typePose;
+			if(editor.selectedAnim.pose == null) {
+				if(editor.selectedAnim.displayName.startsWith(Gesture.LAYER_PREFIX))
+					sel = typeLayer;
+				else if(editor.selectedAnim.displayName.startsWith(Gesture.VALUE_LAYER_PREFIX))
+					sel = typeValue;
+				else
+					sel = typeGesture;
+			} else sel = typePose;
 		}
 
 		ListPicker<AnimType> typeDd = new ListPicker<>(editor.frame, ats);
@@ -79,7 +90,7 @@ public class AnimationSettinsPopup extends PopupPanel {
 		this.addElement(new Label(gui, gui.i18nFormat("label.cpm.name")).setBounds(new Box(5, 70, 0, 0)));
 
 		TextField nameField = new TextField(gui);
-		if(edit && editor.selectedAnim != null)nameField.setText(editor.selectedAnim.displayName);
+		if(edit && editor.selectedAnim != null)nameField.setText(editor.selectedAnim.getDisplayName());
 		nameField.setBounds(new Box(5, 80, 190, 20));
 		this.addElement(nameField);
 
@@ -110,14 +121,20 @@ public class AnimationSettinsPopup extends PopupPanel {
 		});
 
 		Button okBtn = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
+			String name = nameField.getText();
+			AnimType at = typeDd.getSelected();
+			IPose pose = at.pose == null && at.option.equals("pose") ? new CustomPose(name) : at.pose;
+			if(at.pose == null) {
+				if(at.option.equals("layer")) {
+					name = Gesture.LAYER_PREFIX + name;
+				} else if(at.option.equals("value")) {
+					name = Gesture.VALUE_LAYER_PREFIX + name;
+				}
+			}
 			if(edit) {
-				AnimType at = typeDd.getSelected();
-				IPose pose = at.pose == null && at.option.equals("pose") ? new CustomPose(nameField.getText()) : at.pose;
-				editor.editAnim(pose, nameField.getText(), boxAdd.isSelected(), at.loop && boxLoop.isSelected(), intBox.getSelected().getElem());
+				editor.editAnim(pose, name, boxAdd.isSelected(), at.loop && boxLoop.isSelected(), intBox.getSelected().getElem());
 			} else {
-				AnimType at = typeDd.getSelected();
-				IPose pose = at.pose == null && at.option.equals("pose") ? new CustomPose(nameField.getText()) : at.pose;
-				editor.addNewAnim(pose, nameField.getText(), boxAdd.isSelected(), at.loop && boxLoop.isSelected(), intBox.getSelected().getElem());
+				editor.addNewAnim(pose, name, boxAdd.isSelected(), at.loop && boxLoop.isSelected(), intBox.getSelected().getElem());
 			}
 			this.close();
 		});

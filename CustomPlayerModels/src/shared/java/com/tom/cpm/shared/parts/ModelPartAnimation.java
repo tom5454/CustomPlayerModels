@@ -15,8 +15,8 @@ import java.util.function.Function;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.Animation;
-import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
 import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IAnimation;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.animation.IPose;

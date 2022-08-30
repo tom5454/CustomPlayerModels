@@ -13,14 +13,16 @@ import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.ScrollPanel;
+import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.animation.AnimationRegistry.Gesture;
-import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.Gesture;
+import com.tom.cpm.shared.animation.IManualGesture;
 import com.tom.cpm.shared.config.ConfigChangeRequest;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -31,14 +33,16 @@ import com.tom.cpm.shared.editor.TestIngameManager;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.FirstPersonHandPosGui;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.network.ServerCaps;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.Log;
 
 public class GestureGui extends Frame {
 	private GestureButton hoveredBtn;
-	private Panel panel;
+	private Panel panel, contentPanel;
 	private int tickCounter;
-	private Tooltip qaTip;
+	private ModelDefinition def;
+	private ModelLoadingState state;
 
 	public GestureGui(IGui gui) {
 		super(gui);
@@ -53,7 +57,7 @@ public class GestureGui extends Frame {
 	public void keyPressed(KeyboardEvent event) {
 		if(hoveredBtn != null) {
 			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
-			String hoveredID = hoveredBtn.pose != null ? "p" + hoveredBtn.pose.getName() : "g" + hoveredBtn.gesture.name;
+			String hoveredID = hoveredBtn.gesture.getGestureId();
 			String keybindPressed = null;
 			List<String> dup = new ArrayList<>();
 			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
@@ -70,6 +74,7 @@ public class GestureGui extends Frame {
 			}
 			if(keybindPressed != null) {
 				ce.setString(keybindPressed, hoveredID);
+				ce.setString(keybindPressed + "_mode", !hoveredBtn.layer && gui.isCtrlDown() ? "hold" : "press");
 				for (String k : dup) {
 					ce.setString(k, "");
 				}
@@ -103,19 +108,75 @@ public class GestureGui extends Frame {
 
 	@Override
 	public void initFrame(int width, int height) {
-		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition0();
+		contentPanel = new Panel(gui);
+		contentPanel.setBounds(new Box(0, 0, width, height));
+		def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition0();
+		initContent(contentPanel);
+		addElement(contentPanel);
+	}
+
+	private void initContent(Panel p) {
+		int width = p.getBounds().w;
+		int height = p.getBounds().h;
 		Log.debug(def);
+		if(def != null)
+			this.state = def.getResolveState();
 		ServerStatus status = MinecraftClientAccess.get().getServerSideStatus();
 		if(status == ServerStatus.OFFLINE) {
 			String str = "How did you get here?";
 			Label lbl = new Label(gui, str);
 			lbl.setBounds(new Box(width / 2 - gui.textWidth(str) / 2, height / 2 - 4, 0, 0));
-			addElement(lbl);
+			p.addElement(lbl);
 			return;
 		}
-		qaTip = new Tooltip(this, gui.i18nFormat("tooltip.cpm.gestureQuickAccess"));
+		List<String> keys = new ArrayList<>();
+		{
+			int i = 0;
+			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
+				if(kb.getName().startsWith("qa")) {
+					i++;
+					String k = kb.getBoundKey();
+					if(k.isEmpty())k = gui.i18nFormat("label.cpm.key_unbound");
+					keys.add(gui.i18nFormat("label.cpm.quick_key_bound", i, k));
+				}
+			}
+			i++;
+			keys.add(gui.i18nFormat("label.cpm.quick_key_info"));
+		}
+		if((bounds.w - 360) / 2 > 100) {
+			String tt = gui.i18nFormat("tooltip.cpm.gestureQuickAccess");
+			Panel qk = new Panel(gui);
+			int i = 0;
+			int mw = 0;
+			for (String k : keys) {
+				i++;
+				qk.addElement(new Label(gui, k).setBounds(new Box(0, i * 10, 0, 10)));
+				mw = Math.max(gui.textWidth(k), mw);
+			}
+			i++;
+			qk.setBounds(new Box(10, 0, 200, i * 10));
+
+			Label lbl = new Label(gui, "");
+			lbl.setTooltip(new Tooltip(this, tt));
+			qk.addElement(lbl.setBounds(new Box(0, 0, 200, i * 10)));
+			p.addElement(qk);
+		} else {
+			StringBuilder tt = new StringBuilder();
+			for (String key : keys) {
+				tt.append(key);
+				tt.append('\\');
+			}
+
+			tt.append(gui.i18nFormat("label.cpm.quick_key_info"));
+			tt.append("\\\\");
+			tt.append(gui.i18nFormat("tooltip.cpm.gestureQuickAccess"));
+			String text = gui.i18nFormat("label.cpm.quick_key_short");
+			Label lbl = new Label(gui, text);
+			lbl.setTooltip(new Tooltip(this, tt.toString()));
+			p.addElement(lbl.setBounds(new Box(10, 10, gui.textWidth(text), 10)));
+		}
 		int h;
-		if(def != null && def.getResolveState() == ModelLoadingState.LOADED && status != ServerStatus.UNAVAILABLE) {
+		if(def != null && this.state == ModelLoadingState.LOADED && status != ServerStatus.UNAVAILABLE) {
 			int[] id = new int[] {0};
 			panel = new Panel(gui);
 			def.getAnimations().getGestures().forEach((nm, g) -> panel.addElement(new GestureButton(g, id[0]++)));
@@ -124,16 +185,26 @@ public class GestureGui extends Frame {
 				String str = gui.i18nFormat("label.cpm.nothing_here");
 				Label lbl = new Label(gui, str);
 				lbl.setBounds(new Box(width / 2 - gui.textWidth(str) / 2, height / 2 - 4, 0, 0));
-				addElement(lbl);
+				p.addElement(lbl);
 				h = 10;
 			} else {
 				h = (id[0] / 4 + 1) * 40;
-				panel.setBounds(new Box(width / 2 - 180, height / 2 - h / 2, 360, h));
-				addElement(panel);
+
+				if(h < height - 150) {
+					panel.setBounds(new Box(width / 2 - 180, height / 2 - h / 2, 360, h));
+					p.addElement(panel);
+				} else {
+					panel.setBounds(new Box(0, 0, 360, h));
+					ScrollPanel scp = new ScrollPanel(gui);
+					h = height - 120;
+					scp.setBounds(new Box(width / 2 - 180, 60, 363, height - 150));
+					scp.setDisplay(panel);
+					p.addElement(scp);
+				}
 			}
-		} else if(def != null && (def.getResolveState() == ModelLoadingState.ERRORRED || def.getResolveState() == ModelLoadingState.SAFETY_BLOCKED)) {
+		} else if(def != null && (this.state == ModelLoadingState.ERRORRED || this.state == ModelLoadingState.SAFETY_BLOCKED)) {
 			String txt = "";
-			switch (def.getResolveState()) {
+			switch (this.state) {
 			case ERRORRED:
 				txt = gui.i18nFormat("label.cpm.errorLoadingModel", def.getError().toString());
 				break;
@@ -145,34 +216,34 @@ public class GestureGui extends Frame {
 			default:
 				break;
 			}
-			addElement(new Label(gui, txt).setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4, 0, 0)));
+			p.addElement(new Label(gui, txt).setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4, 0, 0)));
 			txt = gui.i18nFormat("label.cpm.checkErrorLog");
-			addElement(new Label(gui, txt).setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4 + 10, 0, 0)));
+			p.addElement(new Label(gui, txt).setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4 + 10, 0, 0)));
 			h = 20;
 		} else if(status == ServerStatus.UNAVAILABLE) {
 			String str = gui.i18nFormat("label.cpm.feature_unavailable");
 			Label lbl = new Label(gui, str);
 			lbl.setBounds(new Box(width / 2 - gui.textWidth(str) / 2, height / 2 - 4, 0, 0));
-			addElement(lbl);
+			p.addElement(lbl);
 			h = 10;
 		} else {
 			String str = gui.i18nFormat("label.cpm.nothing_here");
 			Label lbl = new Label(gui, str);
 			lbl.setBounds(new Box(width / 2 - gui.textWidth(str) / 2, height / 2 - 4, 0, 0));
-			addElement(lbl);
+			p.addElement(lbl);
 			h = 10;
 		}
 
 		Panel btnPanel = new Panel(gui);
 		btnPanel.setBounds(new Box(width / 2 - 180, height / 2 - h / 2 - 30, 360, 20));
-		addElement(btnPanel);
+		p.addElement(btnPanel);
 
 		if(status != ServerStatus.UNAVAILABLE) {
-			Button btnRstG = new Button(gui, gui.i18nFormat("button.cpm.anim_reset_gesture"), () -> setGesture(null));
+			Button btnRstG = new Button(gui, gui.i18nFormat("button.cpm.anim_reset_gesture"), this::clearGesture);
 			btnRstG.setBounds(new Box(0, 0, 100, 20));
 			btnPanel.addElement(btnRstG);
 
-			Button btnRstP = new Button(gui, gui.i18nFormat("button.cpm.anim_reset_pose"), () -> setPose(null));
+			Button btnRstP = new Button(gui, gui.i18nFormat("button.cpm.anim_reset_pose"), this::clearPose);
 			btnRstP.setBounds(new Box(110, 0, 100, 20));
 			btnPanel.addElement(btnRstP);
 		}
@@ -189,7 +260,7 @@ public class GestureGui extends Frame {
 
 		Panel btnPanel2 = new Panel(gui);
 		btnPanel2.setBounds(new Box(width - 162, 0, 160, 0));
-		addElement(btnPanel2);
+		p.addElement(btnPanel2);
 
 		FlowLayout fl = new FlowLayout(btnPanel2, 0, 1);
 
@@ -231,7 +302,7 @@ public class GestureGui extends Frame {
 
 		Panel btnPanel3 = new Panel(gui);
 		btnPanel3.setBounds(new Box(0, height - 60, 160, 60));
-		addElement(btnPanel3);
+		p.addElement(btnPanel3);
 
 		Button btnSkinMenu = new Button(gui, gui.i18nFormat("button.cpm.models"), () -> MinecraftClientAccess.get().openGui(ModelsGui::new));
 		btnSkinMenu.setBounds(new Box(0, 40, 160, 20));
@@ -256,20 +327,14 @@ public class GestureGui extends Frame {
 	public void draw(MouseEvent event, float partialTicks) {
 		hoveredBtn = null;
 		super.draw(event, partialTicks);
-		int i = 0;
-		for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
-			if(kb.getName().startsWith("qa")) {
-				i++;
-				String k = kb.getBoundKey();
-				if(k.isEmpty())k = gui.i18nFormat("label.cpm.key_unbound");
-				gui.drawText(10, i * 10, gui.i18nFormat("label.cpm.quick_key_bound", i, k), 0xffffffff);
-			}
-		}
-		if(event.isInBounds(new Box(10, 10, 100, 60))) {
-			qaTip.set();
+
+		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition0();
+		if(def != this.def || (def != null && def.getResolveState() != state)) {
+			contentPanel.getElements().clear();
+			this.def = def;
+			initContent(contentPanel);
 		}
 
-		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
 		if(MinecraftObjectHolder.DEBUGGING && gui.isAltDown() && def != null) {
 			TextureProvider skin = def.getTexture(TextureSheetType.SKIN, true);
 			if(skin != null && skin.texture != null) {
@@ -282,53 +347,82 @@ public class GestureGui extends Frame {
 		}
 	}
 
-	private void setGesture(Gesture g) {
-		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
-		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().playGesture(def.getAnimations(), g);
+	private void clearGesture() {
+		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().playGesture(def.getAnimations(), null);
 	}
 
-	private void setPose(CustomPose pose) {
-		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition();
-		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setCustomPose(def.getAnimations(), pose);
+	private void clearPose() {
+		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setCustomPose(def.getAnimations(), null);
 	}
 
-	private class GestureButton extends Button {
-		private Gesture gesture;
-		private CustomPose pose;
-		private String kb;
+	private void setManualGesture(IManualGesture g) {
+		if(def != null)g.play(def.getAnimations());
+	}
 
-		public GestureButton(String name, int id) {
-			super(getGui(), name, null);
+	private class GestureButton extends Panel {
+		private IManualGesture gesture;
+		private String kb, kbMode, name;
+		private boolean layer, value;
+
+		public GestureButton(int id) {
+			super(GestureGui.this.gui);
 			setBounds(new Box((id % 4) * 90, (id / 4) * 40, 80, 30));
 		}
 
-		public GestureButton(Gesture g, int id) {
-			this(g.name, id);
-			setAction(() -> setGesture(g));
+		public GestureButton(IManualGesture g, int id) {
+			this(id);
+			String nm = g.getName();
+			if(g instanceof Gesture) {
+				layer = nm.startsWith(Gesture.LAYER_PREFIX);
+				value = nm.startsWith(Gesture.VALUE_LAYER_PREFIX);
+			}
+			if(layer)nm = nm.substring(Gesture.LAYER_PREFIX.length());
+			else if(value)nm = nm.substring(Gesture.VALUE_LAYER_PREFIX.length());
+			else {
+				Button btn = new Button(gui, "", () -> setManualGesture(g));
+				btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
+				addElement(btn);
+			}
+			this.name = nm;
 			this.gesture = g;
 			getKb();
-		}
-
-		public GestureButton(CustomPose pose, int id) {
-			this(pose.getName(), id);
-			setAction(() -> setPose(pose));
-			this.pose = pose;
-			getKb();
+			if(layer || value) {
+				if(!MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
+					setEnabled(false);
+					Slider s = new Slider(gui, nm);
+					s.setBounds(new Box(0, 0, bounds.w, bounds.h));
+					s.setEnabled(false);
+					s.setTooltip(new Tooltip(GestureGui.this, gui.i18nFormat("label.cpm.feature_unavailable")));
+					addElement(s);
+				} else if(value) {
+					Slider s = new Slider(gui, nm);
+					s.setBounds(new Box(0, 0, bounds.w, bounds.h));
+					s.setAction(() -> {
+						if(def != null)
+							MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setLayerValue(def.getAnimations(), (Gesture) g, s.getValue());
+					});
+					if(def != null)
+						s.setValue(Byte.toUnsignedInt(MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), (Gesture) g)) / 255f);
+					addElement(s);
+				} else if(layer) {
+					Button btn = new Button(gui, "", () -> setManualGesture(g));
+					btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
+					addElement(btn);
+				}
+			}
 		}
 
 		public void getKb() {
 			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
 			this.kb = null;
+			this.kbMode = null;
 			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
 				if(kb.getName().startsWith("qa")) {
 					String c = ce.getString(kb.getName(), null);
 					if(c != null) {
-						if(pose != null && c.startsWith("p") && c.substring(1).equals(pose.getName())) {
+						if(c.equals(gesture.getGestureId())) {
 							this.kb = kb.getName();
-							break;
-						}
-						if(gesture != null && c.startsWith("g") && c.substring(1).equals(gesture.name)) {
-							this.kb = kb.getName();
+							this.kbMode = ce.getString(kb.getName() + "_mode", "press");
 							break;
 						}
 					}
@@ -338,6 +432,10 @@ public class GestureGui extends Frame {
 
 		@Override
 		public void draw(MouseEvent event, float partialTicks) {
+			if(value) {
+				super.draw(event, partialTicks);
+				return;
+			}
 			int w = gui.textWidth(name);
 			int bgColor = gui.getColors().button_fill;
 			int color = gui.getColors().button_text_color;
@@ -349,20 +447,40 @@ public class GestureGui extends Frame {
 				bgColor = gui.getColors().button_hover;
 			}
 			gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
-			gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
+			if(layer) {
+				if(def != null) {
+					boolean on = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), (Gesture) gesture) != 0;
+					int bw = bounds.w-2;
+					gui.drawBox(bounds.x + 1,          bounds.y + 1, bw / 2, bounds.h - 2, on ? 0xff00ff00 : bgColor);
+					gui.drawBox(bounds.x + 1 + bw / 2, bounds.y + 1, bw / 2, bounds.h - 2, on ? bgColor : 0xffff0000);
+				}
+			} else {
+				gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
+			}
 			gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 - 8, name, color);
+			String boundKey = gui.i18nFormat("label.cpm.key_unbound");
 			if(kb != null) {
 				for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
 					if(kb.getName().equals(this.kb)) {
 						String k = kb.getBoundKey();
 						if(k.isEmpty())k = gui.i18nFormat("label.cpm.key_unbound");
+						boundKey = k;
 						gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 + 4, k, color);
 						break;
 					}
 				}
 			}
 			if(event.isHovered(bounds)) {
-				hoveredBtn = this;
+				if(!enabled) {
+					new Tooltip(GestureGui.this, gui.i18nFormat("label.cpm.feature_unavailable")).set();
+				} else {
+					hoveredBtn = this;
+					String kbMode = this.kbMode != null ? gui.i18nFormat("label.cpm.gestureMode." + this.kbMode) : gui.i18nFormat("label.cpm.key_unbound");
+					if(layer)
+						new Tooltip(GestureGui.this, gui.i18nFormat("tooltip.cpm.gestureButton", name, boundKey)).set();
+					else
+						new Tooltip(GestureGui.this, gui.i18nFormat("tooltip.cpm.gestureButton.mode", name, boundKey, kbMode)).set();
+				}
 			}
 		}
 	}

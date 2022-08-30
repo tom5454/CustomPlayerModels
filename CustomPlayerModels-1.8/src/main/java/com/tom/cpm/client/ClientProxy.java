@@ -1,6 +1,5 @@
 package com.tom.cpm.client;
 
-import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
 import org.lwjgl.opengl.GL11;
@@ -22,12 +21,13 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
@@ -35,6 +35,7 @@ import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -141,6 +142,16 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
+	@SubscribeEvent
+	public void drawGuiPre(DrawScreenEvent.Pre evt) {
+		PlayerProfile.inGui = true;
+	}
+
+	@SubscribeEvent
+	public void drawGuiPost(DrawScreenEvent.Post evt) {
+		PlayerProfile.inGui = false;
+	}
+
 	public void renderSkull(ModelBase skullModel, GameProfile profile) {
 		manager.bindSkull(profile, null, skullModel);
 		manager.bindSkin(skullModel, TextureSheetType.SKIN);
@@ -182,11 +193,7 @@ public class ClientProxy extends CommonProxy {
 			Player.setEnableRendering(!Player.isEnableRendering());
 		}
 
-		for (Entry<Integer, KeyBinding> e : KeyBindings.quickAccess.entrySet()) {
-			if(e.getValue().isPressed()) {
-				mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
-			}
-		}
+		mc.getPlayerRenderManager().getAnimationEngine().updateKeys(KeyBindings.quickAccess);
 	}
 
 	@SubscribeEvent
@@ -199,6 +206,12 @@ public class ClientProxy extends CommonProxy {
 				if(st != null) {
 					double d0 = evt.entity.getDistanceSqToEntity(minecraft.getRenderViewEntity());
 					if (d0 < 32*32) {
+						Scoreboard scoreboard = ((EntityPlayer) evt.entity).getWorldScoreboard();
+						ScoreObjective scoreobjective = scoreboard.getObjectiveInDisplaySlot(2);
+						double y = evt.y;
+						if (scoreobjective != null)
+							y += evt.renderer.getFontRendererFromRenderManager().FONT_HEIGHT * 1.15F * 0.025F;
+
 						GlStateManager.pushMatrix();
 						GlStateManager.translate(0, 0.125F, 0);
 						String str = ((IChatComponent) st.remap()).getFormattedText();
@@ -207,7 +220,7 @@ public class ClientProxy extends CommonProxy {
 						if (evt.entity.isSneaking()) {
 							FontRenderer fontrenderer = minecraft.fontRendererObj;
 							GlStateManager.pushMatrix();
-							GlStateManager.translate((float)evt.x, (float)evt.y + evt.entity.height + 0.5F - (evt.entity.isChild() ? evt.entity.height / 2.0F : 0.0F), (float)evt.z);
+							GlStateManager.translate((float)evt.x, (float)y + evt.entity.height + 0.5F - (evt.entity.isChild() ? evt.entity.height / 2.0F : 0.0F), (float)evt.z);
 							GL11.glNormal3f(0.0F, 1.0F, 0.0F);
 							GlStateManager.rotate(-minecraft.getRenderManager().playerViewY, 0.0F, 1.0F, 0.0F);
 							GlStateManager.rotate(minecraft.getRenderManager().playerViewX, 1.0F, 0.0F, 0.0F);
@@ -235,7 +248,7 @@ public class ClientProxy extends CommonProxy {
 							GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 							GlStateManager.popMatrix();
 						} else {
-							renderLivingLabel(evt.entity, str, evt.x, evt.y - (evt.entity.isChild() ? (double)(evt.entity.height / 2.0F) : 0.0D), evt.z, 64);
+							renderLivingLabel(evt.entity, str, evt.x, y - (evt.entity.isChild() ? (double)(evt.entity.height / 2.0F) : 0.0D), evt.z, 64);
 						}
 					}
 					GlStateManager.popMatrix();

@@ -69,7 +69,7 @@ public class ViewportPanelAnim extends ViewportPanel {
 			progress = getAnimProgress();
 		} else if(anims != null) {
 			data = anims.stream().filter(p -> p.slot == slot && p.layerSlot != null).findFirst().orElse(null);
-			progress = data != null ? editor.animTestSlider : 0f;
+			progress = data != null ? editor.animTestSliders.getOrDefault("__pose", 0f) : 0f;
 		}
 		DisplayItem i = getHeldItem(slot);
 		if(i == DisplayItem.CROSSBOW) {
@@ -90,7 +90,7 @@ public class ViewportPanelAnim extends ViewportPanel {
 			progress = getAnimProgress();
 		} else if(anims != null) {
 			data = anims.stream().filter(e -> e.type == Type.HAND).findFirst().orElse(null);
-			progress = data != null ? editor.animTestSlider : 0f;
+			progress = data != null ? editor.animTestSliders.getOrDefault("__pose", 0f) : 0f;
 		}
 		if(data == AnimationDisplayData.CROSSBOW_CH_LEFT || data == AnimationDisplayData.CROSSBOW_CH_RIGHT) {
 			p.useAmount = progress;

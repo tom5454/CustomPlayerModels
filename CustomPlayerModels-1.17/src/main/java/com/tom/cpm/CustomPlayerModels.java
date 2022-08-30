@@ -91,7 +91,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		});
 		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
 		api.buildCommon().player(Player.class).init();
-		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> CustomPlayerModelsClient.INSTANCE.apiInit());
+		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> CustomPlayerModelsClient::apiInit);
 	}
 
 	@Override

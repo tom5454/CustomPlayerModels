@@ -1,7 +1,5 @@
 package com.tom.cpm.client;
 
-import java.util.Map.Entry;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -16,7 +14,6 @@ import net.minecraft.client.renderer.entity.model.ElytraModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,6 +28,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
@@ -176,11 +174,7 @@ public class CustomPlayerModelsClient {
 			Player.setEnableRendering(!Player.isEnableRendering());
 		}
 
-		for (Entry<Integer, KeyBinding> e : KeyBindings.quickAccess.entrySet()) {
-			if(e.getValue().consumeClick()) {
-				mc.getPlayerRenderManager().getAnimationEngine().onKeybind(e.getKey());
-			}
-		}
+		mc.getPlayerRenderManager().getAnimationEngine().updateKeys(KeyBindings.quickAccess);
 	}
 
 	@SubscribeEvent
@@ -191,6 +185,16 @@ public class CustomPlayerModelsClient {
 		if(openGui.getGui() instanceof MainMenuScreen && EditorGui.doOpenEditor()) {
 			openGui.setGui(new GuiImpl(EditorGui::new, openGui.getGui()));
 		}
+	}
+
+	@SubscribeEvent
+	public void drawGuiPre(DrawScreenEvent.Pre evt) {
+		PlayerProfile.inGui = true;
+	}
+
+	@SubscribeEvent
+	public void drawGuiPost(DrawScreenEvent.Post evt) {
+		PlayerProfile.inGui = false;
 	}
 
 	public static class Button extends net.minecraft.client.gui.widget.button.Button {

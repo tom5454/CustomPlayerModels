@@ -28,6 +28,7 @@ import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public class PlayerProfile extends Player<EntityPlayer> {
+	public static boolean inGui;
 	private final GameProfile profile;
 	private String skinType;
 
@@ -154,6 +155,7 @@ public class PlayerProfile extends Player<EntityPlayer> {
 		animState.hurtTime = player.hurtTime;
 		animState.isOnLadder = player.isOnLadder();
 		animState.isBurning = player.canRenderOnFire();
+		animState.inGui = inGui;
 
 		if(player.getItemInUse() != null && player.getItemInUse().getItem() instanceof ItemBow) {
 			float f = 20F;

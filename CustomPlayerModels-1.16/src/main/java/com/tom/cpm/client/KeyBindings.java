@@ -1,9 +1,7 @@
 package com.tom.cpm.client;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -21,14 +19,15 @@ import com.tom.cpl.gui.KeyboardEvent;
 public class KeyBindings implements IKeybind {
 	private static KeyConflictCtx conflictCtx = new KeyConflictCtx();
 	public static KeyBinding gestureMenuBinding, renderToggleBinding;
-	public static Map<Integer, KeyBinding> quickAccess = new HashMap<>();
+	public static IKeybind[] quickAccess = new IKeybind[IKeybind.QUICK_ACCESS_KEYBINDS_COUNT];
+
 	public static void init() {
 		gestureMenuBinding = new KeyBinding("key.cpm.gestureMenu", KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_G), "key.cpm.category");
 		renderToggleBinding = new KeyBinding("key.cpm.renderToggle", KeyConflictContext.IN_GAME, InputMappings.UNKNOWN, "key.cpm.category");
 		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu"));
 		kbs.add(new KeyBindings(renderToggleBinding, "renderToggle"));
 
-		for(int i = 1;i<=6;i++)
+		for(int i = 1;i<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;i++)
 			createQA(i);
 	}
 
@@ -48,8 +47,9 @@ public class KeyBindings implements IKeybind {
 
 	private static void createQA(int id) {
 		KeyBinding kb = new KeyBinding("key.cpm.qa_" + id, conflictCtx, InputMappings.UNKNOWN, "key.cpm.category");
-		kbs.add(new KeyBindings(kb, "qa_" + id));
-		quickAccess.put(id, kb);
+		KeyBindings kbs = new KeyBindings(kb, "qa_" + id);
+		KeyBindings.kbs.add(kbs);
+		quickAccess[id - 1] = kbs;
 	}
 
 	public static List<IKeybind> kbs = new ArrayList<>();
@@ -76,5 +76,10 @@ public class KeyBindings implements IKeybind {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public boolean isPressed() {
+		return kb.isDown();
 	}
 }
