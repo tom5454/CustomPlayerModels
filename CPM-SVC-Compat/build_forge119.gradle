@@ -1,0 +1,106 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+    }
+}
+
+plugins {
+    id 'eclipse'
+    id 'maven-publish'
+}
+apply plugin: 'net.minecraftforge.gradle'
+
+project.buildDir = '/build_forge119'
+
+archivesBaseName = archives_base_name
+version = mod_version
+group = maven_group
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.19.2'
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "henkelmax.public"
+        url = 'https://maven.maxhenkel.de/repository/public'
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+		name = "tom5454 maven"
+		url = "https://raw.githubusercontent.com/tom5454/maven/main"
+	}
+    mavenLocal()
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.19.2-43.1.2'
+
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    implementation "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+    
+    compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+	runtimeOnly fg.deobf("com.tom5454.cpm:CustomPlayerModels-${project.cpm_mc_version}:${project.cpm_runtime_version}")
+
+    runtimeOnly fg.deobf("maven.modrinth:simple-voice-chat:forge-1.19.2-${voicechat_api_version}")
+}
+
+processResources {
+    filesMatching("**/*.toml") {
+        expand 'mod_id': mod_id,
+                'mod_version': mod_version,
+                "voicechat_dependency": voicechat_api_version
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : "examplemod",
+                "Specification-Vendor"    : "examplemodvendor",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "examplemodvendor",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+jar.finalizedBy('reobfJar')

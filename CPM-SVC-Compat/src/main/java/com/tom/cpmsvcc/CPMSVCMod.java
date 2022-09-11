@@ -18,7 +18,9 @@ public class CPMSVCMod {
 	public void sendIMC(InterModEnqueueEvent e) {
 		if (Integer.parseInt(ForgeVersion.getSpec().substring(0, 2)) < 37)
 			InterModComms.sendTo("cpm", "api", () -> (Supplier<?>) () -> CPMSVCC.make("forge116"));
-		else
+		else if (Integer.parseInt(ForgeVersion.getSpec().substring(0, 2)) < 41)
 			InterModComms.sendTo("cpm", "api", () -> (Supplier<?>) () -> CPMSVCC.make("forge118"));
+		else
+			InterModComms.sendTo("cpm", "api", () -> (Supplier<?>) () -> CPMSVCC.make("forge119"));
 	}
 }
