@@ -6,7 +6,8 @@
   "mixins": [
   	"common.ServerPlayNetHandlerMixin",
   	"common.PlayerManagerMixin",
-	"common.PlayerEntityMixin"
+	"common.PlayerEntityMixin",
+	"common.EntityTrackerEntryMixin"
   ],
   "client": [
     "PlayerRendererMixin",

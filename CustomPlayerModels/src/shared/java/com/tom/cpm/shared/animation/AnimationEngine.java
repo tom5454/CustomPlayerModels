@@ -44,6 +44,7 @@ public class AnimationEngine {
 					gestureData = new byte[lc];
 					gestureData[0] = v0;
 					gestureData[1] = v1;
+					def.getAnimations().forEachLayer((g, id) -> gestureData[id] = g.defVal);
 					sendGestureData();
 				}
 				if(player.animState.gestureData == null) {
@@ -119,11 +120,15 @@ public class AnimationEngine {
 					h.setGesture(reg.getGesture(player.animState.gestureData[1]));
 					reg.forEachLayer((g, id) -> {
 						if(player.animState.gestureData.length > id) {
-							if(g.name.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
+							if(g.name.startsWith(Gesture.VALUE_LAYER_PREFIX))
 								h.addAnimations(g.animation, new ValueLayerPose(id));
-							} else if(player.animState.gestureData[id] != 0) {
+							else if(player.animState.gestureData[id] != 0)
 								h.addAnimations(g.animation, null);
-							}
+						} else {
+							if(g.name.startsWith(Gesture.VALUE_LAYER_PREFIX))
+								h.addAnimations(g.animation, new DefaultValuePose(g.defVal));
+							else if(g.defVal != 0)
+								h.addAnimations(g.animation, null);
 						}
 					});
 				} else {
@@ -180,6 +185,24 @@ public class AnimationEngine {
 				return (long) ((Byte.toUnsignedInt(state.gestureData[id]) / 256f) * VanillaPose.DYNAMIC_DURATION_MUL);
 			else
 				return 0L;
+		}
+	}
+
+	private static class DefaultValuePose implements IPose {
+		private final byte v;
+
+		public DefaultValuePose(byte v) {
+			this.v = v;
+		}
+
+		@Override
+		public String getName(IGui gui, String display) {
+			return "value";
+		}
+
+		@Override
+		public long getTime(AnimationState state, long time) {
+			return (long) ((Byte.toUnsignedInt(v) / 256f) * VanillaPose.DYNAMIC_DURATION_MUL);
 		}
 	}
 

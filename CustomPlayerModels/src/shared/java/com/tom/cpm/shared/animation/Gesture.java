@@ -10,6 +10,7 @@ public class Gesture implements IManualGesture {
 	public List<IAnimation> animation;
 	public boolean isLoop;
 	public String name;
+	public byte defVal;
 
 	public Gesture(List<IAnimation> animation, String name, boolean isLoop) {
 		this.animation = animation;

@@ -45,6 +45,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -70,6 +71,7 @@ public class CustomPlayerModelsClient {
 	public NetHandler<ResourceLocation, PlayerEntity, ClientPlayNetHandler> netHandler;
 
 	public void init() {
+		FixSSL.fixup();
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();

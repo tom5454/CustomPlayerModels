@@ -37,6 +37,7 @@ public class RenderManager<G, P, M, D> {
 			this.profile = profile;
 			if(player != null)
 				profile.updatePlayer(player);
+			def.itemTransforms.clear();
 			renderManager.bindModel(toBind, arg, buffer, def, profile, mode);
 			renderManager.getAnimationEngine().handleAnimation(profile, mode);
 			return true;

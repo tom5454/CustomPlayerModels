@@ -21,6 +21,7 @@ import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.ListView;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
@@ -28,6 +29,8 @@ import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
 import com.tom.cpm.shared.editor.gui.popup.AnimationSettinsPopup;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
+import com.tom.cpm.shared.editor.gui.popup.ToggleLayerDefaultPopup;
+import com.tom.cpm.shared.editor.gui.popup.ValueLayerDefaultPopup;
 
 public class AnimPanel extends Panel {
 	private Editor editor;
@@ -222,6 +225,21 @@ public class AnimPanel extends Panel {
 		animPriority.addChangeListener(() -> editor.setAnimPriority((int) animPriority.getValue()));
 		p.addElement(animPriority);
 		tabHandler.add(animPriority);
+
+		Button defLayerSettings = new Button(gui, gui.i18nFormat("button.cpm.defLayerSettings"), () -> {
+			if(editor.selectedAnim != null) {
+				if(editor.selectedAnim.displayName.startsWith(Gesture.LAYER_PREFIX)) {
+					e.openPopup(new ToggleLayerDefaultPopup(gui, editor));
+				} else if(editor.selectedAnim.displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
+					e.openPopup(new ValueLayerDefaultPopup(gui, editor));
+				}
+			}
+		});
+		defLayerSettings.setBounds(new Box(5, 0, 155, 20));
+		addElement(defLayerSettings);
+		editor.updateGui.add(() -> {
+			defLayerSettings.setEnabled(editor.selectedAnim != null && editor.selectedAnim.isLayer());
+		});
 
 		layout.reflow();
 		addElement(tabHandler);

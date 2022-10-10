@@ -57,7 +57,7 @@ public enum PlayerPartValues implements PartValues {//                          
 
 	public static PlayerPartValues getFor(PlayerModelParts part, SkinType skinType) {
 		for (PlayerPartValues v : VALUES) {
-			if(v.part == part && (v.skinType == skinType || v.skinType == SkinType.UNKNOWN))
+			if(v.part == part && (v.skinType == skinType || v.skinType == SkinType.UNKNOWN || (skinType == SkinType.UNKNOWN && v.skinType == SkinType.DEFAULT)))
 				return v;
 		}
 		return null;

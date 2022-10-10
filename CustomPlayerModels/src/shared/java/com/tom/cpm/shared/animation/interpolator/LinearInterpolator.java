@@ -10,8 +10,9 @@ public class LinearInterpolator implements Interpolator {
 
 	@Override
 	public double applyAsDouble(double operand) {
-		int frm = Math.abs(MathHelper.floor(operand));
-		return MathHelper.lerp((float) (operand - Math.floor(operand)), values[Math.min(frm, values.length - 1)], values[Math.min(frm + 1, values.length - 1)]);
+		double v = operand / values.length * (values.length - 1);
+		int frm = Math.abs(MathHelper.floor(v));
+		return MathHelper.lerp((float) (v - Math.floor(v)), values[Math.min(frm, values.length - 1)], values[Math.min(frm + 1, values.length - 1)]);
 	}
 
 	@Override

@@ -17,7 +17,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.render.ItemTransform;
 
-@Mixin(ShoulderParrotFeatureRenderer.class)
+@Mixin(value = ShoulderParrotFeatureRenderer.class, priority = 2000)
 public class ShoulderParrotFeatureRendererMixin {
 
 	@Inject(at = @At("HEAD"),

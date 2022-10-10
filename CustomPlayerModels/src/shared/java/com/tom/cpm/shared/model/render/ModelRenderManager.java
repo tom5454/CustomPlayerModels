@@ -263,7 +263,6 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		protected void bindFirstSetup() {
 			if(playerObj != null)playerObj.updateFromModel(model);
-			def.itemTransforms.clear();
 			for (int i = 0; i < redirectRenderers.size(); i++) {
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();

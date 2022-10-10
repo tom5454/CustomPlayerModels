@@ -153,6 +153,7 @@ public class ClientApi extends SharedApi implements IClientAPI {
 				} else {
 					profile.prevPose = null;
 				}
+				def.itemTransforms.clear();
 				mngr.bindModel(model, "api", buffers, def, profile, renderMode);
 				mngr.getAnimationEngine().handleAnimation(profile, renderMode);
 				if(setupTexture) {

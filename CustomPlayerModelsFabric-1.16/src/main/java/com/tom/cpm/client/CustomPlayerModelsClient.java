@@ -39,6 +39,7 @@ import com.mojang.authlib.properties.Property;
 
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -63,6 +64,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Init started");
+		FixSSL.fixup();
 		INSTANCE = this;
 		mc = new MinecraftObject(MinecraftClient.getInstance());
 		optifineLoaded = OFDetector.doApply();

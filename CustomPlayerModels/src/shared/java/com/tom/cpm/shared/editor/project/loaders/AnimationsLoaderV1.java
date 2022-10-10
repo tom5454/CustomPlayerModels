@@ -75,6 +75,7 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 				e.priority = data.getInt("priority", 0);
 				e.loop = data.getBoolean("loop", false);
 				e.intType = data.getEnum("interpolator", InterpolatorType.VALUES, InterpolatorType.POLY_LOOP);
+				e.layerDefault = data.getFloat("layerDefault", 0f);
 				JsonList frames = data.getList("frames");
 				frames.forEachMap(d -> initFrame(e, d));
 			}
@@ -94,6 +95,7 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 			data.put("priority", e.priority);
 			data.put("loop", e.loop);
 			data.put("interpolator", e.intType.name().toLowerCase());
+			data.put("layerDefault", e.layerDefault);
 			data.put("frames", writeFrames(e));
 		}
 		saveEnc(editor, project);

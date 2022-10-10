@@ -39,6 +39,7 @@ public class EditorAnim implements IAnim {
 	public boolean loop;
 	public int priority;
 	public InterpolatorType intType = InterpolatorType.POLY_LOOP;
+	public float layerDefault;
 
 	public EditorAnim(Editor e, String filename, AnimationType type, boolean initNew) {
 		this.editor = e;
@@ -79,7 +80,7 @@ public class EditorAnim implements IAnim {
 			step = editor.animTestSliders.getOrDefault("__pose", 0f);
 			remap = true;
 		} else if(displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
-			step = editor.animTestSliders.getOrDefault(getId(), 0f);
+			step = editor.animTestSliders.getOrDefault(getId(), layerDefault);
 			remap = true;
 		} else step = (float) millis % duration / duration * frames.size();
 

@@ -141,6 +141,7 @@ button.cpm.config.selectButton=Select Button: %s
 button.cpm.openWikiSidebar=ToC >
 button.cpm.openWikiExt=Open in Browser
 button.cpm.clearAnimDataAll=Clear All
+button.cpm.defLayerSettings=Layer Default Value
 
 button.cpm.root_group.cape=Cape
 button.cpm.root_group.elytra=Elytra
@@ -676,6 +677,8 @@ label.cpm.anim_layer=Layer: %s
 label.cpm.new_anim_value=New Value Layer
 label.cpm.anim_value=Value Layer: %s
 label.cpm.config.gestureAutoReset=Gesture Auto-Reset
+label.cpm.defLayerSettings.toggle=Layer enabled by default
+label.cpm.defLayerSettings.value=Default Value: %s
 
 label.cpm.paste.connecting.title=Connecting...
 label.cpm.paste.connecting.message=Connecting to paste site...

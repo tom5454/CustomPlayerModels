@@ -257,6 +257,41 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		return i;
 	}
 
+	public void writeSignedVarInt(int toWrite) throws IOException {
+		int sign = toWrite < 0 ? 0b0100_0000 : 0;
+		toWrite = Math.abs(toWrite);
+		int b = toWrite & 0b0011_1111 | sign;
+		{toWrite >>>= 6;}
+
+		while (toWrite != 0) {
+			dout.writeByte(b | 128);
+			b = toWrite & 127;
+			toWrite >>>= 7;
+		}
+
+		dout.writeByte(b);
+	}
+
+	public int readSignedVarInt() throws IOException {
+		int i = 0;
+		int sign = 1;
+
+		byte b0 = din.readByte();
+		if((b0 & 0b0100_0000) != 0)sign = -1;
+		i = b0 & 0b0011_1111;
+		int j = 6;
+		while((b0 & 0b1000_0000) != 0) {
+			b0 = din.readByte();
+			i |= (b0 & 127) << j;
+			j += 7;
+			if (j > 34) {
+				throw new IOException("SignedVarInt too big");
+			}
+		}
+
+		return i * sign;
+	}
+
 	public Vec3f readVec3ub() throws IOException {
 		Vec3f v = new Vec3f();
 		v.x = din.read() / 10f;

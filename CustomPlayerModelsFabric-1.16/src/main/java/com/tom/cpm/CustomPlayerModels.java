@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.SharedConstants;
@@ -65,7 +64,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 		ServerPlayerEvents.AFTER_RESPAWN.register((o, n, end) -> {
 			if(!end)ServerHandler.netHandler.onRespawn(n);
 		});
-		EntityTrackingEvents.START_TRACKING.register(ServerHandler::onTrackingStart);
 		FabricLoader.getInstance().getEntrypointContainers("cpmapi", ICPMPlugin.class).forEach(entrypoint -> {
 			ModMetadata metadata = entrypoint.getProvider().getMetadata();
 			String modId = metadata.getId();

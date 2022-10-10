@@ -905,5 +905,8 @@
   "label.cpm.config.gestureAutoReset": "Gesture Auto-Reset",
   "tooltip.cpm.animType.pose.first_person_mod": "When your model is rendered in first person\\with the First Person Model mod installed.",
   "label.cpm.pose.first_person_mod": "First Person Model View",
-  "chat.cpm.serverSafetySettings": "[CPM] The server has recommended safety settings. Open the Gestures menu [%s] to edit the safety settings."
+  "chat.cpm.serverSafetySettings": "[CPM] The server has recommended safety settings. Open the Gestures menu [%s] to edit the safety settings.",
+  "button.cpm.defLayerSettings": "Layer Default Value",
+  "label.cpm.defLayerSettings.toggle": "Layer enabled by default",
+  "label.cpm.defLayerSettings.value": "Default Value: %s"
 }

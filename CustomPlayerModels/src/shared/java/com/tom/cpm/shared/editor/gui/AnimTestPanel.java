@@ -90,7 +90,7 @@ public class AnimTestPanel extends Panel {
 							if(a.displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
 								Slider progressSlider = new Slider(gui, name + ": 0");
 								progressSlider.setBounds(new Box(0, 0, 160, 20));
-								progressSlider.setValue(editor.animTestSliders.getOrDefault(id, 0f));
+								progressSlider.setValue(editor.animTestSliders.getOrDefault(id, a.layerDefault));
 								progressSlider.setAction(() -> {
 									progressSlider.setText(name + ": " + ((int) (progressSlider.getValue() * 100)));
 									editor.animTestSliders.put(id, progressSlider.getValue());

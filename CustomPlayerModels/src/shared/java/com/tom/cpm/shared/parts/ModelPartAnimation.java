@@ -193,6 +193,15 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			}
 			break;
 
+			case ANIMATION_DATA_LAYER_DEFAULT:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.defaultValue = block.readByte();
+			}
+			break;
+
 			default:
 				break;
 			}
@@ -217,6 +226,8 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				resolveEncID(rd, idc[1]++, allLayers);
 			} else {
 				rd = new ResolvedData(ea.getId(), ea.loop, ea.add);
+				if(rd.name.startsWith(Gesture.LAYER_PREFIX) || rd.name.startsWith(Gesture.VALUE_LAYER_PREFIX))
+					rd.defaultValue = (byte) (ea.layerDefault * 0xff);
 				resolveEncID(rd, idc[1]++, allLayers);
 			}
 			rd.gid &= valMask;
@@ -416,6 +427,13 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					d.writeEnum(dt.it);
 				}
 			}
+			if(dt.defaultValue != 0) {
+				dout.writeEnum(Type.ANIMATION_DATA_LAYER_DEFAULT);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+					d.writeByte(dt.defaultValue);
+				}
+			}
 		}
 		dout.writeEnum(Type.CTRL_IDS);
 		try(IOHelper d = dout.writeNextBlock()) {
@@ -480,7 +498,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				}
 				if(rd.show[i] == null) {
 					rd.show[i] = new Boolean[rd.frames];
-					Arrays.fill(rd.show[i], c.isVisible());
+					Arrays.fill(rd.show[i], c.isVisible());//TODO: should use the hidden flag, cube not reset after setting the hidden flag
 				}
 			}
 			if(rd.dynamicProgress())rd.duration = VanillaPose.DYNAMIC_DURATION_DIV;
@@ -494,6 +512,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				gestures.computeIfAbsent(rd.name, k -> {
 					List<IAnimation> l = new ArrayList<>();
 					Gesture g = new Gesture(l, rd.name, rd.loop);
+					g.defVal = rd.defaultValue;
 					def.getAnimations().register(g);
 					if(rd.gid != -1)
 						def.getAnimations().register(rd.gid, g);
@@ -539,6 +558,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		ANIMATION_DATA_EXTRA,
 		ANIMATION_DATA_INTERPOLATION,
 		ANIMATION_DATA_SCALE,
+		ANIMATION_DATA_LAYER_DEFAULT,
 		;
 		public static final Type[] VALUES = values();
 	}
@@ -559,6 +579,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		private boolean add;
 		private int priority;
 		private InterpolatorType it = InterpolatorType.POLY_LOOP;
+		private byte defaultValue;
 
 		public ResolvedData(VanillaPose pose, boolean add) {
 			this.pose = pose;
@@ -598,6 +619,12 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			bb.append("\n\tColorValues: \n\t\t[");
 			for (Vec3f[] vec3fs : color) {
 				bb.append(Arrays.toString(vec3fs));
+				bb.append(", ");
+			}
+			bb.append("]");
+			bb.append("\n\tVisValues: \n\t\t[");
+			for (Boolean[] b : show) {
+				bb.append(Arrays.toString(b));
 				bb.append(", ");
 			}
 			bb.append("]");
