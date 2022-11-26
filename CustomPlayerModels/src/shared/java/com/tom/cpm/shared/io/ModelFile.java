@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper.ImageBlock;
@@ -42,10 +43,14 @@ public class ModelFile {
 			mf.overflowLocal = ovf;
 			mf.link = new Link(h);
 		}
-		ImageBlock block = h.readImage();
-		if(block.getWidth() > 256 || block.getHeight() > 256)
-			throw new IOException("Texture size too large");
-		mf.icon = block;
+		if (MinecraftClientAccess.get() != null) {
+			ImageBlock block = h.readImage();
+			if (block.getWidth() > 256 || block.getHeight() > 256)
+				throw new IOException("Texture size too large");
+			mf.icon = block;
+		} else {
+			h.readNextBlock();
+		}
 		cis.checkSum();
 		return mf;
 	}
