@@ -3,6 +3,8 @@ package com.tom.cpm.shared.editor;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.tom.cpl.gui.IGui;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.project.JsonMap;
 
 public class CopyTransformEffect {
@@ -18,6 +20,7 @@ public class CopyTransformEffect {
 	public boolean copySX;
 	public boolean copySY;
 	public boolean copySZ;
+	public boolean copyVis;
 
 	public CopyTransformEffect(ModelElement to) {
 		this.to = to;
@@ -34,6 +37,7 @@ public class CopyTransformEffect {
 		copySX = data.getBoolean("sx", false);
 		copySY = data.getBoolean("sy", false);
 		copySZ = data.getBoolean("sz", false);
+		copyVis = data.getBoolean("cv", false);
 	}
 
 	public short toShort() {
@@ -47,6 +51,7 @@ public class CopyTransformEffect {
 		if(copySX)r |= (1 << 6);
 		if(copySY)r |= (1 << 7);
 		if(copySZ)r |= (1 << 8);
+		if(copyVis)r |= (1 << 9);
 		return r;
 	}
 
@@ -64,6 +69,7 @@ public class CopyTransformEffect {
 					copySX ? from.rc.getRenderScale().x : to.rc.getRenderScale().x,
 							copySY ? from.rc.getRenderScale().y : to.rc.getRenderScale().y,
 									copySZ ? from.rc.getRenderScale().z : to.rc.getRenderScale().z);
+			if(copyVis)to.rc.setVisible(from.rc.isVisible());
 		}
 	}
 
@@ -80,6 +86,7 @@ public class CopyTransformEffect {
 			r.put("sx", copySX);
 			r.put("sy", copySY);
 			r.put("sz", copySZ);
+			r.put("cv", copyVis);
 		}
 		return r;
 	}
@@ -90,5 +97,37 @@ public class CopyTransformEffect {
 				from = elem;
 			}
 		});
+	}
+
+	public String getTooltip(IGui gui) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(gui.i18nFormat("label.cpm.copyTransform"));
+		boolean p = createXYZ(sb, gui.i18nFormat("label.cpm.position"), copyPX, copyPX, copyPZ);
+		boolean r = createXYZ(sb, gui.i18nFormat("label.cpm.rotation"), copyRX, copyRX, copyRZ);
+		boolean s = createXYZ(sb, gui.i18nFormat("label.cpm.scale"), copySX, copySX, copySZ);
+		if(copyVis) {
+			sb.append("\\  ");
+			sb.append(gui.i18nFormat("label.cpm.visible"));
+		}
+		if(!(p || r || s || copyVis)) {
+			sb.append("\\  ");
+			sb.append(gui.i18nFormat("tooltip.cpm.noCopyTransforms"));
+		}
+		return sb.toString();
+	}
+
+	private boolean createXYZ(StringBuilder sb, String name, boolean x, boolean y, boolean z) {
+		if(x || y || z) {
+			sb.append("\\  ");
+			sb.append(name);
+			sb.append(": ");
+			if(x)sb.append('X');
+			if(y && x)sb.append(", Y");
+			else if(y)sb.append('Y');
+			if(z && (x || y))sb.append(", Z");
+			else if(z)sb.append('Z');
+			return true;
+		}
+		return false;
 	}
 }

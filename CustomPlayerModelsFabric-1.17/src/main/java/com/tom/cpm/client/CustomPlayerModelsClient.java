@@ -123,7 +123,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).networkHandler);
 		netHandler.setDisplayText(t -> MinecraftClient.getInstance().player.sendMessage(t.remap(), false));
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
-		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class).localModelApi(GameProfile::new).
+		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class, PlayerEntity::getUuid).localModelApi(GameProfile::new).
 		renderApi(Model.class, Identifier.class, RenderLayer.class, VertexConsumerProvider.class, GameProfile.class, ModelTexture::new).init();
 	}
 

@@ -6,4 +6,11 @@ public interface IAnimation {
 	int getDuration();
 	int getPriority();
 	void animate(long millis, ModelDefinition def);
+
+	default void prepare() {
+	}
+
+	default boolean checkAndUpdateRemove() {
+		return true;
+	}
 }

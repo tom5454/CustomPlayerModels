@@ -100,7 +100,7 @@ public class CustomPlayerModelsClient {
 	}
 
 	public static void apiInit() {
-		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class).
+		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class, PlayerEntity::getUUID).
 		renderApi(Model.class, ResourceLocation.class, RenderType.class, IRenderTypeBuffer.class, GameProfile.class, ModelTexture::new).
 		localModelApi(GameProfile::new).init();
 	}

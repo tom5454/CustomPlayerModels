@@ -1,14 +1,15 @@
 package com.tom.cpm.shared.editor.project.loaders;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.editor.CopyTransformEffect;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.ElementType;
-import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.project.IProject;
 import com.tom.cpm.shared.editor.project.JsonList;
 import com.tom.cpm.shared.editor.project.JsonMap;
@@ -158,7 +159,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		map.put("singleTex", elem.singleTex);
 		map.put("extrude", elem.extrude);
 		if(elem.faceUV != null)map.put("faceUV", elem.faceUV.toMap());
-		if(elem.itemRenderer != null)map.put("itemRenderer", elem.itemRenderer.slot.name().toLowerCase());
+		if(elem.itemRenderer != null)map.put("itemRenderer", elem.itemRenderer.slot.name().toLowerCase(Locale.ROOT));
 		if(elem.copyTransform != null)map.put("copyTransform", elem.copyTransform.toMap());
 	}
 

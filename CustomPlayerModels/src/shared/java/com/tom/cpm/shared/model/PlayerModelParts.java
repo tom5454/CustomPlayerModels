@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.model;
 
+import java.util.Locale;
+
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public enum PlayerModelParts implements VanillaModelPart {
@@ -20,7 +22,7 @@ public enum PlayerModelParts implements VanillaModelPart {
 
 	@Override
 	public String getName() {
-		return name().toLowerCase();
+		return name().toLowerCase(Locale.ROOT);
 	}
 
 	@Override

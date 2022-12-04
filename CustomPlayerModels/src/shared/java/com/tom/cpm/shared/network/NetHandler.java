@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -21,16 +22,13 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
-import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.function.ToFloatFunction;
-import com.tom.cpl.function.TriFunction;
 import com.tom.cpl.nbt.NBTTag;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.nbt.NBTTagList;
 import com.tom.cpl.nbt.NBTTagString;
 import com.tom.cpl.text.IText;
 import com.tom.cpl.text.LiteralText;
-import com.tom.cpl.util.Pair;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpl.util.TriConsumer;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -50,6 +48,7 @@ import com.tom.cpm.shared.network.packet.HelloS2C;
 import com.tom.cpm.shared.network.packet.ReceiveEventS2C;
 import com.tom.cpm.shared.network.packet.RecommendSafetyS2C;
 import com.tom.cpm.shared.network.packet.ScaleInfoS2C;
+import com.tom.cpm.shared.network.packet.ServerAnimationS2C;
 import com.tom.cpm.shared.network.packet.SetScaleC2S;
 import com.tom.cpm.shared.network.packet.SetSkinC2S;
 import com.tom.cpm.shared.network.packet.SetSkinS2C;
@@ -66,6 +65,7 @@ public class NetHandler<RL, P, NET> {
 	public static final String SUBSCRIBE_EVENT = "sub_evt";
 	public static final String RECEIVE_EVENT = "rec_evt";
 	public static final String GESTURE = "gesture";
+	public static final String SERVER_ANIMATION = "srv_anim";
 
 	protected Function<P, UUID> getPlayerUUID;
 	private TriConsumer<NET, RL, byte[]> sendPacket;
@@ -115,6 +115,8 @@ public class NetHandler<RL, P, NET> {
 		register(packetS2C, RECEIVE_EVENT, ReceiveEventS2C.class, ReceiveEventS2C::new);
 
 		register(packetC2S, GESTURE, GestureC2S.class, GestureC2S::new);
+
+		register(packetS2C, SERVER_ANIMATION, ServerAnimationS2C.class, ServerAnimationS2C::new);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -157,7 +159,7 @@ public class NetHandler<RL, P, NET> {
 	}
 
 	private void setCap(NBTTagCompound tag, ServerCaps caps) {
-		tag.setBoolean(caps.name().toLowerCase(), true);
+		tag.setBoolean(caps.name().toLowerCase(Locale.ROOT), true);
 	}
 
 	protected PlayerData newData() {
@@ -189,7 +191,7 @@ public class NetHandler<RL, P, NET> {
 	public void handleServerCaps(NBTTagCompound tag) {
 		serverCaps.clear();
 		for(ServerCaps c : ServerCaps.VALUES) {
-			if(tag.getBoolean(c.name().toLowerCase())) {
+			if(tag.getBoolean(c.name().toLowerCase(Locale.ROOT))) {
 				serverCaps.add(c);
 			}
 		}
@@ -298,6 +300,11 @@ public class NetHandler<RL, P, NET> {
 			evt.setBoolean(ModelEventType.JUMPING.getName(), true);
 			sendPacketToTracking(p, new ReceiveEventS2C(getPlayerId.applyAsInt(p), evt));
 		}
+	}
+
+	public void playAnimation(P p, String animation, int value) {
+		ServerNetH net = getSNetH(p);
+		sendPacketTo(net, new ServerAnimationS2C(animation, value));
 	}
 
 	public String getID(P pl) {
@@ -452,30 +459,6 @@ public class NetHandler<RL, P, NET> {
 
 	public boolean isSupported(ScalingOptions o) {
 		return scaleSetters.containsKey(o);
-	}
-
-	public Pair<Float, Float> getScalingLimits(ScalingOptions o, String id) {
-		ConfigEntry e = ModConfig.getWorldConfig();
-		ConfigEntry pl = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS);
-		ConfigEntry g = e.getEntry(ConfigKeys.SCALING_SETTINGS);
-		if(!getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.ENABLED, ConfigEntry::getBoolean, o.getDefualtEnabled()))
-			return null;
-		float min = getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.MIN, ConfigEntry::getFloat, o.getMin());
-		float max = getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.MAX, ConfigEntry::getFloat, o.getMax());
-		return Pair.of(min, max);
-	}
-
-	private <T> T getValue(ConfigEntry pl, ConfigEntry g, String id, String opt, String key, TriFunction<ConfigEntry, String, T, T> getter, T def) {
-		if(pl.hasEntry(id)) {
-			pl = pl.getEntry(id);
-			if(pl.hasEntry(opt)) {
-				pl = pl.getEntry(opt);
-				if(pl.hasEntry(key))
-					return getter.apply(pl, key, def);
-			}
-		}
-		g = g.getEntry(opt);
-		return getter.apply(g, key, def);
 	}
 
 	@SuppressWarnings("unchecked")

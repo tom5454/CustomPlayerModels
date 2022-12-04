@@ -2,23 +2,24 @@ package com.tom.cpl.util;
 
 import java.io.IOException;
 
-import com.tom.cpl.text.FormatText;
+import com.tom.cpl.text.IText;
 
-public class LocalizedIOException extends IOException {
+public class LocalizedIOException extends IOException implements LocalizedException {
 	private static final long serialVersionUID = -6332369839511402034L;
-	private FormatText loc;
+	private IText loc;
 
-	public LocalizedIOException(String msg, FormatText loc) {
+	public LocalizedIOException(String msg, IText loc) {
 		super(msg);
 		this.loc = loc;
 	}
 
-	public LocalizedIOException(String msg, FormatText loc, Throwable thr) {
+	public LocalizedIOException(String msg, IText loc, Throwable thr) {
 		super(msg, thr);
 		this.loc = loc;
 	}
 
-	public FormatText getLoc() {
+	@Override
+	public IText getLocalizedText() {
 		return loc;
 	}
 }

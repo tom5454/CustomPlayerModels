@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.PlayerModelParts;
@@ -29,6 +32,7 @@ public class ETextures implements TreeElement {
 	private Image defaultImg;
 	public List<AnimatedTex> animatedTexs = new ArrayList<>();
 	private final AnimTreeList animsList = new AnimTreeList();
+	public boolean customGridSize;
 
 	public ETextures(Editor e, TextureSheetType type) {
 		this(e, type, (Consumer<TextureStitcher>) null);
@@ -136,7 +140,7 @@ public class ETextures implements TreeElement {
 
 	@Override
 	public String getName() {
-		return e.gui().i18nFormat("label.cpm.texture." + type.name().toLowerCase());
+		return e.gui().i18nFormat("label.cpm.texture." + type.name().toLowerCase(Locale.ROOT));
 	}
 
 	@Override

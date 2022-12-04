@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ public class MojangAPI {
 		URL url = new URL("https://api.minecraftservices.com/minecraft/profile/skins");
 
 		HTTPMultipart req = new HTTPMultipart();
-		req.addString("variant", skinType.getApiName().toLowerCase());
+		req.addString("variant", skinType.getApiName().toLowerCase(Locale.ROOT));
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		skin.storeTo(baos);
 		req.addBinary("file", "skin.png", "image/png", baos.toByteArray());

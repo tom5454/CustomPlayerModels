@@ -2,6 +2,7 @@ package com.tom.cpm.shared.editor.gui.popup;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -45,7 +46,7 @@ public abstract class ExportPopup extends PopupPanel {
 		super(e.getGui());
 		this.editorGui = e;
 
-		modeBtn = new Button(gui, gui.i18nFormat("button.cpm.export.as_" + mode.name().toLowerCase()), () -> {
+		modeBtn = new Button(gui, gui.i18nFormat("button.cpm.export.as_" + mode.name().toLowerCase(Locale.ROOT)), () -> {
 			close();
 			for(int i = mode.ordinal() + 1;i<ExportMode.VALUES.length*2;i++) {
 				ExportMode em = ExportMode.VALUES[i % ExportMode.VALUES.length];
@@ -55,7 +56,7 @@ public abstract class ExportPopup extends PopupPanel {
 				}
 			}
 		});
-		modeBtn.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export.as_" + mode.name().toLowerCase())));
+		modeBtn.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export.as_" + mode.name().toLowerCase(Locale.ROOT))));
 		modeBtn.setBounds(new Box(5, 5, 170, 20));
 		addElement(modeBtn);
 

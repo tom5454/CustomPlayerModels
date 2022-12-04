@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.tom.cpl.gui.MouseEvent;
@@ -12,8 +13,8 @@ import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.util.Direction;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTool;
-import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
 import com.tom.cpm.shared.editor.util.UVResizableArea;
@@ -62,8 +63,8 @@ public class PerFaceUV {
 
 	public PerFaceUV(JsonMap map) {
 		for (Direction d : Direction.VALUES) {
-			if(map.containsKey(d.name().toLowerCase()))
-				faces.put(d, Face.load(map.getMap(d.name().toLowerCase())));
+			if(map.containsKey(d.name().toLowerCase(Locale.ROOT)))
+				faces.put(d, Face.load(map.getMap(d.name().toLowerCase(Locale.ROOT))));
 		}
 	}
 
@@ -131,7 +132,7 @@ public class PerFaceUV {
 			m.put("sy", sy);
 			m.put("ex", ex);
 			m.put("ey", ey);
-			m.put("rot", rotation.name().toLowerCase().substring(4));
+			m.put("rot", rotation.name().toLowerCase(Locale.ROOT).substring(4));
 			m.put("autoUV", autoUV);
 			return m;
 		}
@@ -199,7 +200,7 @@ public class PerFaceUV {
 
 	public Map<String, Object> toMap() {
 		Map<String, Object> m = new HashMap<>();
-		faces.forEach((d, f) -> m.put(d.name().toLowerCase(), f.toMap()));
+		faces.forEach((d, f) -> m.put(d.name().toLowerCase(Locale.ROOT), f.toMap()));
 		return m;
 	}
 
@@ -235,7 +236,8 @@ public class PerFaceUV {
 		else return f.autoUV;
 	}
 
-	public List<TreeSettingElement> getDragBoxes(Editor editor, ModelElement parent) {
+	public List<TreeSettingElement> getDragBoxes(ModelElement parent) {
+		Editor editor = parent.editor;
 		List<TreeSettingElement> l = new ArrayList<>();
 		List<TreeSettingElement> sel = new ArrayList<>();
 		boolean show = editor.drawMode.get() == EditorTool.MOVE_UV;
@@ -243,7 +245,7 @@ public class PerFaceUV {
 			Face f = faces.get(d);
 			if(f == null)continue;
 			if(f.controlElems == null) {
-				f.controlElems = new UVArea(editor, parent, d, f);
+				f.controlElems = new UVArea(parent, d, f);
 			}
 			if(show && d == editor.perfaceFaceDir.get()) {
 				sel.addAll(f.controlElems.elements);
@@ -255,12 +257,34 @@ public class PerFaceUV {
 		return sel;
 	}
 
+	public TreeSettingElement getFaceElement(ModelElement parent, Direction d) {
+		Face f = faces.get(d);
+		if(f == null)return null;
+		if(f.controlElems == null) {
+			f.controlElems = new UVArea(parent, d, f);
+		}
+		return f.controlElems.face;
+	}
+
+	public List<TreeSettingElement> getFaceElements(ModelElement parent) {
+		List<TreeSettingElement> l = new ArrayList<>();
+		for(Direction d : Direction.VALUES) {
+			Face f = faces.get(d);
+			if(f == null)continue;
+			if(f.controlElems == null) {
+				f.controlElems = new UVArea(parent, d, f);
+			}
+			l.add(f.controlElems.face);
+		}
+		return l;
+	}
+
 	private static class UVArea extends UVResizableArea {
 		private Face f;
 		private Direction d;
 
-		public UVArea(Editor editor, ModelElement parent, Direction d, Face f) {
-			super(editor, parent);
+		public UVArea(ModelElement parent, Direction d, Face f) {
+			super(parent.editor, parent);
 			this.f = f;
 			this.d = d;
 		}

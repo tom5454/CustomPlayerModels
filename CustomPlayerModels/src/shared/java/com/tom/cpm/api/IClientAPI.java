@@ -2,8 +2,10 @@ package com.tom.cpm.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationState;
@@ -24,6 +26,28 @@ public interface IClientAPI extends ISharedAPI {
 	 * @param getVoiceLevel function that returns the voice loudness for the specific player
 	 * */
 	<T> void registerVoice(Class<T> clazz, Function<T, Float> getVoiceLevel);
+
+	/**
+	 * Register a voice level provider.
+	 *
+	 * @param getVoiceLevel function that returns the voice loudness for the specific player uuid
+	 * */
+	<T> void registerVoice(Function<UUID, Float> getVoiceLevel);
+
+	/**
+	 * Register a voice muted provider.
+	 *
+	 * @param clazz the player entity class (Player.class) for your minecraft version
+	 * @param getMuted function that returns the voice muted status for the specific player
+	 * */
+	<T> void registerVoiceMute(Class<T> clazz, Predicate<T> getMuted);
+
+	/**
+	 * Register a voice muted provider.
+	 *
+	 * @param getMuted function that returns the voice muted status for the specific player uuid
+	 * */
+	<T> void registerVoiceMute(Predicate<UUID> getMuted);
 
 	/**
 	 * Create a new player model renderer
@@ -72,6 +96,26 @@ public interface IClientAPI extends ISharedAPI {
 	default <M, GP> RetroPlayerRenderer<M, GP> createPlayerRenderer(Class<M> modelClass, Class<GP> gameProfileClass) {
 		return new RetroPlayerRendererImpl<>(createPlayerRenderer(modelClass, Void.class, Void.class, Void.class, gameProfileClass));
 	}
+
+	/**
+	 * Play the given command animation for a player.
+	 *
+	 * @param name animation name
+	 * @param value for layers (value: 0-255, toggle: 0-1) or -1 to switch state, 0: reset pose/gesture
+	 *
+	 * @return true if the animation was found and started playing
+	 * */
+	<P> boolean playAnimation(String name, int value);
+
+	/**
+	 * Play the given command animation for a player. For custom poses and gestures only.
+	 * For more control use {@link ICommonAPI#playAnimation(Class, Object, String, int)}
+	 *
+	 * @param name animation name
+	 *
+	 * @return true if the animation was found and started playing
+	 * */
+	<P> boolean playAnimation(String name);
 
 	/**
 	 * Player renderer for 1.16 and newer versions

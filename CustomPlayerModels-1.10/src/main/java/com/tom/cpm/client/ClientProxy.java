@@ -100,7 +100,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void apiInit() {
-		CustomPlayerModels.api.buildClient().voicePlayer(EntityPlayer.class).localModelApi(GameProfile::new).
+		CustomPlayerModels.api.buildClient().voicePlayer(EntityPlayer.class, EntityPlayer::getUniqueID).localModelApi(GameProfile::new).
 		renderApi(ModelBase.class, GameProfile.class).init();
 	}
 

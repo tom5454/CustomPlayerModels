@@ -21,6 +21,8 @@ public enum ScalingOptions {
 	DEFENSE("defense", ServerCaps.ATTRIBUTE_SCALE, false),
 	HEALTH("health", ServerCaps.ATTRIBUTE_SCALE, false, 0.1F, 4F),
 	MOB_VISIBILITY("mob_vis", ServerCaps.ATTRIBUTE_SCALE, false),
+	WIDTH("width", ServerCaps.ATTRIBUTE_SCALE, false),
+	HEIGHT("height", ServerCaps.ATTRIBUTE_SCALE, false),
 	;
 	public static final ScalingOptions[] VALUES = values();
 

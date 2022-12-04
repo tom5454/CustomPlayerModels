@@ -2,6 +2,7 @@ package com.tom.cpm.shared.editor.gui;
 
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
+import com.tom.cpl.gui.elements.ComboSlider;
 import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.Slider;
@@ -85,16 +86,14 @@ public class DrawToolsPanel extends Panel {
 			sizeSlider.setBounds(new Box(5, 0, w - 10, 20));
 			//panel.addElement(sizeSlider);//TODO
 
-			Slider alphaSlider = new Slider(gui, gui.i18nFormat("label.cpm.brushAlpha", editor.alphaValue));
-			alphaSlider.setValue(editor.alphaValue / 255f);
+			ComboSlider alphaSlider = new ComboSlider(gui, a -> gui.i18nFormat("label.cpm.brushAlpha", a.intValue()), a -> Math.max(0, (int) (a * 255)), a -> a / 255f);
+			alphaSlider.setActualValue(editor.alphaValue);
 			group.addElement(EditorTool.PEN, alphaSlider);
 			group.addElement(EditorTool.FILL, alphaSlider);
-			alphaSlider.setAction(() -> {
-				editor.alphaValue = Math.max(1, (int) (alphaSlider.getValue() * 255));
-				alphaSlider.setText(gui.i18nFormat("label.cpm.brushAlpha", editor.alphaValue));
-			});
+			alphaSlider.setAction(() -> editor.alphaValue = (int) alphaSlider.getActualValue());
 			alphaSlider.setBounds(new Box(5, 0, w - 10, 20));
 			alphaSlider.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.brushAlpha")));
+			alphaSlider.getSpinner().setDp(0);
 			panel.addElement(alphaSlider);
 		}
 

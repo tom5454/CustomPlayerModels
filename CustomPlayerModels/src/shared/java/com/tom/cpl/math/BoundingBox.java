@@ -1,5 +1,7 @@
 package com.tom.cpl.math;
 
+import com.tom.cpl.util.Direction;
+
 public class BoundingBox {
 	public float minX;
 	public float minY;
@@ -27,5 +29,30 @@ public class BoundingBox {
 
 	public BoundingBox offset(float x, float y, float z) {
 		return new BoundingBox(minX + x, minY + y, minZ + z, maxX + x, maxY + y, maxZ + z);
+	}
+
+	public BoundingBox getFaceOnly(Direction d) {
+		float x = minX;
+		float y = minY;
+		float z = minZ;
+		switch (d) {
+		case DOWN:
+			y = maxY;//fall through
+		case UP:
+			return new BoundingBox(minX, y, minZ, maxX, y, maxZ);
+
+		case SOUTH:
+			z = maxZ;//fall through
+		case NORTH:
+			return new BoundingBox(minX, minY, z, maxX, maxY, z);
+
+		case EAST:
+			x = maxX;//fall through
+		case WEST:
+			return new BoundingBox(x, minY, minZ, x, maxY, maxZ);
+
+		default:
+			throw new IllegalArgumentException("Unknown direction");
+		}
 	}
 }

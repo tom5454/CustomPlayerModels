@@ -44,6 +44,7 @@ import com.mojang.authlib.properties.Property;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
+import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -58,7 +59,7 @@ import io.netty.buffer.Unpooled;
 
 public class CustomPlayerModelsClient implements ClientModInitializer {
 	public static final Identifier DEFAULT_CAPE = new Identifier("cpm:textures/template/cape.png");
-	public static boolean optifineLoaded, irisLoaded;
+	public static boolean optifineLoaded, irisLoaded, vrLoaded;
 	public static MinecraftObject mc;
 	public static CustomPlayerModelsClient INSTANCE;
 	public RenderManager<GameProfile, PlayerEntity, Model, VertexConsumerProvider> manager;
@@ -70,8 +71,10 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		INSTANCE = this;
 		mc = new MinecraftObject(MinecraftClient.getInstance());
 		optifineLoaded = OFDetector.doApply();
+		vrLoaded = VRDetector.doApply();
 		irisLoaded = FabricLoader.getInstance().isModLoaded("iris");
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
+		if(vrLoaded)Log.info("ViveCraft detected, enabling ViveCraft compatibility");
 		if(irisLoaded)Log.info("Iris detected, enabling iris compatibility");
 		ClientTickEvents.START_CLIENT_TICK.register(cl -> {
 			if(!cl.isPaused())
@@ -117,7 +120,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer {
 		netHandler.setGetNet(c -> ((ClientPlayerEntity)c).networkHandler);
 		netHandler.setDisplayText(t -> MinecraftClient.getInstance().player.sendMessage(t.remap(), false));
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
-		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class).localModelApi(GameProfile::new).
+		CustomPlayerModels.api.buildClient().voicePlayer(PlayerEntity.class, PlayerEntity::getUuid).localModelApi(GameProfile::new).
 		renderApi(Model.class, Identifier.class, RenderLayer.class, VertexConsumerProvider.class, GameProfile.class, ModelTexture::new).init();
 	}
 

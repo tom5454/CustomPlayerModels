@@ -1,9 +1,12 @@
 package com.tom.cpm.shared.gui.panel;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,6 +25,7 @@ import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.ImageIO;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationHandler;
@@ -50,11 +54,13 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	private ModelDisplayPanel display;
 	private ModelDefinition selectedDef;
 	private String selected;
-	private List<ModelPanel> panels;
+	private List<ListPanel> panels;
 	private List<Consumer<Vec2i>> sizeSetters;
 	private Button set, upload, simpleSkin;
 	private boolean doRender = true;
 	private AnimationHandler animHandler;
+	private String selectedFolder = "";
+	private Vec2i size = new Vec2i(0, 0);
 
 	public ModelsPanel(Frame frm, ViewportCamera camera) {
 		super(frm.getGui());
@@ -64,61 +70,8 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		animHandler = new AnimationHandler(this::getSelectedDefinition);
 
 		list = new ScrollPanel(gui);
-		Panel panel = new Panel(gui);
-
-		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
-		File[] fs = modelsDir.exists() ? modelsDir.listFiles((f, n) -> n.endsWith(".cpmmodel")) : null;
-		String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
-
-		Button reset = new Button(gui, gui.i18nFormat(model == null ? "button.cpm.reset_skin.sel" : "button.cpm.reset_skin"), () -> {
-			ModConfig.getCommonConfig().clearValue(ConfigKeys.SELECTED_MODEL);
-			ModConfig.getCommonConfig().save();
-			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
-				MinecraftClientAccess.get().sendSkinUpdate();
-			}
-		});
-		sizeSetters.add(s -> reset.setBounds(new Box(0, 0, s.x, 20)));
-		panel.addElement(reset);
-		sizeSetters.add(s -> panel.setBounds(new Box(0, 0, s.x, 40)));
-		panels = new ArrayList<>();
-		if(fs == null || fs.length == 0) {
-			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.no_skins"));
-			lbl.setBounds(new Box(5, 25, 0, 0));
-			panel.addElement(lbl);
-		} else {
-			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.loading"));
-			lbl.setBounds(new Box(5, 25, 0, 0));
-			MinecraftClientAccess.get().getDefinitionLoader().execute(() -> {
-				int y = 20;
-				for (int i = 0; i < fs.length; i++) {
-					if(fs[i].getName().equals(TestIngameManager.TEST_MODEL_NAME))continue;
-					try {
-						ModelPanel p = new ModelPanel(gui, ModelFile.load(fs[i]), model != null && fs[i].getName().equals(model), y);
-						y += p.getHeight();
-						panels.add(p);
-					} catch (Exception e) {
-						Log.warn("Error loading model: " + fs[i].getName(), e);
-					}
-				}
-				final int fy = y;
-				MinecraftClientAccess.get().executeLater(() -> {
-					panels.forEach(panel::addElement);
-					if(panel.getBounds() != null) {
-						int w = panel.getBounds().w;
-						panels.forEach(p -> p.setSize(w));
-						panel.setBounds(new Box(0, 0, w, fy));
-					}
-					sizeSetters.add(s -> {
-						panel.setBounds(new Box(0, 0, s.x, fy));
-						panels.forEach(p -> p.setSize(s.x));
-					});
-					panel.getElements().remove(lbl);
-				});
-			});
-		}
-
-		list.setDisplay(panel);
-		panel.setBackgroundColor(gui.getColors().panel_background & 0x00_ffffff | 0x80_000000);
+		list.setBounds(new Box(0, 0, 0, 0));
+		loadModelList();
 		addElement(list);
 
 		display = new ModelDisplayPanel(frm, this);
@@ -161,9 +114,93 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		}
 	}
 
+	private void loadModelList() {
+		sizeSetters.clear();
+		Panel panel = new Panel(gui);
+
+		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models/" + selectedFolder);
+		File[] fs = modelsDir.exists() ? modelsDir.listFiles((f, n) -> n.endsWith(".cpmmodel") || new File(f, n).isDirectory()) : null;
+		String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
+
+		if(!selectedFolder.isEmpty()) {
+			Button moveUp = new Button(gui, ".. (" + selectedFolder + ")", () -> {
+				if(selectedFolder.contains("/")) {
+					int i = selectedFolder.lastIndexOf('/');
+					selectedFolder = selectedFolder.substring(0, i);
+				} else selectedFolder = "";
+				loadModelList();
+			});
+			sizeSetters.add(s -> moveUp.setBounds(new Box(0, 0, s.x, 20)));
+			panel.addElement(moveUp);
+		} else {
+			Button reset = new Button(gui, gui.i18nFormat(model == null ? "button.cpm.reset_skin.sel" : "button.cpm.reset_skin"), () -> {
+				ModConfig.getCommonConfig().clearValue(ConfigKeys.SELECTED_MODEL);
+				ModConfig.getCommonConfig().save();
+				if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
+					MinecraftClientAccess.get().sendSkinUpdate();
+				}
+			});
+			sizeSetters.add(s -> reset.setBounds(new Box(0, 0, s.x, 20)));
+			panel.addElement(reset);
+		}
+		sizeSetters.add(s -> panel.setBounds(new Box(0, 0, s.x, 40)));
+		panels = new ArrayList<>();
+		if(fs == null || fs.length == 0) {
+			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.no_skins"));
+			lbl.setBounds(new Box(5, 25, 0, 0));
+			panel.addElement(lbl);
+		} else {
+			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.loading"));
+			lbl.setBounds(new Box(5, 25, 0, 0));
+			MinecraftClientAccess.get().getDefinitionLoader().execute(() -> {
+				int y = 20;
+				for (int i = 0; i < fs.length; i++) {
+					if(fs[i].getName().equals(TestIngameManager.TEST_MODEL_NAME) || fs[i].getName().equals("autosaves"))continue;
+					try {
+						ListPanel p;
+						if(fs[i].isDirectory()) {
+							p = new FolderPanel(gui, fs[i], y);
+						} else {
+							p = new ModelPanel(gui, ModelFile.load(fs[i]), model != null && getFullPath(fs[i].getName()).equals(model), y);
+						}
+						y += p.getHeight();
+						panels.add(p);
+					} catch (Exception e) {
+						Log.warn("Error loading model: " + fs[i].getName(), e);
+					}
+				}
+				final int fy = y;
+				MinecraftClientAccess.get().executeLater(() -> {
+					panels.forEach(panel::addElement);
+					if(panel.getBounds() != null) {
+						int w = panel.getBounds().w;
+						panels.forEach(p -> p.setSize(w));
+						panel.setBounds(new Box(0, 0, w, fy));
+					}
+					sizeSetters.add(s -> {
+						panel.setBounds(new Box(0, 0, s.x, fy));
+						panels.forEach(p -> p.setSize(s.x));
+					});
+					panel.getElements().remove(lbl);
+				});
+			});
+		}
+
+		list.setDisplay(panel);
+		panel.setBackgroundColor(gui.getColors().panel_background & 0x00_ffffff | 0x80_000000);
+
+		sizeSetters.forEach(c -> c.accept(size));
+		list.setScrollY(0);
+	}
+
+	private String getFullPath(String name) {
+		return selectedFolder.isEmpty() ? name : selectedFolder + "/" + name;
+	}
+
 	public void setSize(int width, int height) {
 		Vec2i s = new Vec2i(width / 2 - 30, height - 50);
 		list.setBounds(new Box(20, 40, s.x, s.y));
+		this.size = s;
 		sizeSetters.forEach(c -> c.accept(s));
 		int dispSize = Math.min(width / 2 - 40, height - 100);
 		if(upload != null) {
@@ -177,7 +214,18 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		setBounds(new Box(0, 0, width, height));
 	}
 
-	private class ModelPanel extends Panel {
+	private abstract class ListPanel extends Panel {
+
+		public ListPanel(IGui gui) {
+			super(gui);
+		}
+
+		protected abstract void setSize(int w);
+		protected abstract int getHeight();
+		protected abstract void onClosed();
+	}
+
+	private class ModelPanel extends ListPanel {
 		private TextureProvider icon;
 		private Button select;
 		private int linesC, y;
@@ -197,7 +245,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			this.y = y;
 
 			select = new Button(gui, gui.i18nFormat("button.cpm.select"), () -> {
-				selected = file.getFileName();
+				selected = getFullPath(file.getFileName());
 				selectedDef = MinecraftClientAccess.get().getDefinitionLoader().loadModel(file.getDataBlock(), MinecraftClientAccess.get().getClientPlayer());
 				file.registerLocalCache(MinecraftClientAccess.get().getDefinitionLoader());
 				set.setEnabled(true);
@@ -219,11 +267,13 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			}
 		}
 
+		@Override
 		public void setSize(int w) {
 			select.setBounds(new Box(w - 50, 2, 40, 20));
 			setBounds(new Box(0, y, w, getHeight()));
 		}
 
+		@Override
 		public int getHeight() {
 			return Math.max(64, linesC * 10 + 30);
 		}
@@ -238,8 +288,75 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			}
 		}
 
-		private void onClosed() {
+		@Override
+		protected void onClosed() {
 			if(icon != null)icon.free();
+		}
+	}
+
+	private class FolderPanel extends ListPanel {
+		private TextureProvider icon;
+		private Button select;
+		private int linesC, y;
+
+		public FolderPanel(IGui gui, File folder, int y) throws IOException {
+			super(gui);
+
+			Label lbl = new Label(gui, folder.getName());
+			lbl.setBounds(new Box(68, 5, 100, 10));
+			addElement(lbl);
+
+			File descFile = new File(folder, "description.txt");
+			if(descFile.exists()) {
+				int i = 0;
+				try(BufferedReader rd = new BufferedReader(new InputStreamReader(new FileInputStream(descFile), StandardCharsets.UTF_8))) {
+					addElement(new Label(gui, rd.readLine()).setBounds(new Box(68, 20 + (i++) * 10, 0, 0)));
+				}
+				linesC = i;
+			}
+			this.y = y;
+
+			select = new Button(gui, gui.i18nFormat("button.cpm.select"), () -> {
+				selectedFolder = getFullPath(folder.getName());
+				loadModelList();
+			});
+			addElement(select);
+
+			File iconFile = new File(folder, "icon.png");
+			if(iconFile.exists()) {
+				MinecraftClientAccess.get().getDefinitionLoader().execute(() -> {
+					try (FileInputStream fin = new FileInputStream(iconFile)) {
+						icon = new TextureProvider(ImageIO.read(fin), null);
+					} catch (IOException e) {
+					}
+				});
+			}
+		}
+
+		@Override
+		public int getHeight() {
+			return Math.max(64, linesC * 10 + 30);
+		}
+
+		@Override
+		protected void setSize(int w) {
+			select.setBounds(new Box(w - 50, 2, 40, 20));
+			setBounds(new Box(0, y, w, getHeight()));
+		}
+
+		@Override
+		protected void onClosed() {
+			if(icon != null)icon.free();
+		}
+
+		@Override
+		public void draw(MouseEvent event, float partialTicks) {
+			super.draw(event, partialTicks);
+
+			if(icon != null) {
+				icon.bind();
+				gui.drawTexture(bounds.x + 1, bounds.y + 1, 64, 64, 0, 0, 1, 1);
+			}
 		}
 	}
 
@@ -302,7 +419,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	}
 
 	public void onClosed() {
-		panels.forEach(ModelPanel::onClosed);
+		panels.forEach(ListPanel::onClosed);
 	}
 
 	@Override
@@ -333,5 +450,6 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 				}
 			}
 		}
+		loadModelList();
 	}
 }

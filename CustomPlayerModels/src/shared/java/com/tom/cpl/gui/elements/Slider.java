@@ -58,10 +58,14 @@ public class Slider extends GuiElement {
 			v = (x - bounds.x) / (float) bounds.w;
 			if(steps != null)v = steps.apply(v);
 			v = MathHelper.clamp(v, 0, 1);
-			if(action != null)action.run();
+			onAction();
 			return true;
 		}
 		return false;
+	}
+
+	protected void onAction() {
+		if(action != null)action.run();
 	}
 
 	public void setAction(Runnable action) {

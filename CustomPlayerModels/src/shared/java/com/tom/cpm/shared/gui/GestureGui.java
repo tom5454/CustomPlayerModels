@@ -1,7 +1,11 @@
 package com.tom.cpm.shared.gui;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.Frame;
@@ -11,6 +15,8 @@ import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
+import com.tom.cpl.gui.elements.ComboSlider;
+import com.tom.cpl.gui.elements.DropDownBox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.ScrollPanel;
@@ -18,9 +24,12 @@ import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.NamedElement;
+import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IManualGesture;
 import com.tom.cpm.shared.config.ConfigChangeRequest;
@@ -79,7 +88,10 @@ public class GestureGui extends Frame {
 					ce.setString(k, "");
 				}
 			}
-			panel.getElements().forEach(e -> ((GestureButton)e).getKb());
+			panel.getElements().forEach(e -> {
+				if(e instanceof GestureButton)
+					((GestureButton)e).getKb();
+			});
 		}
 		super.keyPressed(event);
 	}
@@ -179,8 +191,16 @@ public class GestureGui extends Frame {
 		if(def != null && this.state == ModelLoadingState.LOADED && status != ServerStatus.UNAVAILABLE) {
 			int[] id = new int[] {0};
 			panel = new Panel(gui);
-			def.getAnimations().getGestures().forEach((nm, g) -> panel.addElement(new GestureButton(g, id[0]++)));
-			def.getAnimations().getCustomPoses().forEach((nm, g) -> panel.addElement(new GestureButton(g, id[0]++)));
+			Map<String, Group> groups = new HashMap<>();
+			Stream.concat(def.getAnimations().getGestures().values().stream(), def.getAnimations().getCustomPoses().values().stream()).
+			filter(g -> !g.isProperty() && !g.isCommand()).sorted(Comparator.comparingInt(IManualGesture::getOrder)).
+			forEach(g -> {
+				if (g instanceof Gesture && ((Gesture)g).group != null) {
+					groups.computeIfAbsent(((Gesture)g).group, k -> new Group(k, panel, id[0]++)).add((Gesture) g);
+				} else
+					panel.addElement(new GestureButton(g, id[0]++));
+			});
+			groups.values().forEach(Group::update);
 			if(id[0] == 0) {
 				String str = gui.i18nFormat("label.cpm.nothing_here");
 				Label lbl = new Label(gui, str);
@@ -264,6 +284,14 @@ public class GestureGui extends Frame {
 
 		FlowLayout fl = new FlowLayout(btnPanel2, 0, 1);
 
+		Button btnModelProperties = new Button(gui, gui.i18nFormat("button.cpm.modelProperties"), () -> openPopup(new PropertiesPopup(gui, height * 2 / 3, def)));
+		btnModelProperties.setBounds(new Box(0, 0, 160, 20));
+		if(status != ServerStatus.INSTALLED || !MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
+			btnModelProperties.setEnabled(false);
+			btnModelProperties.setTooltip(new Tooltip(this, gui.i18nFormat("label.cpm.feature_unavailable")));
+		}
+		btnPanel2.addElement(btnModelProperties);
+
 		Button btnSafety = new Button(gui, gui.i18nFormat("button.cpm.safetySettings"), () -> MinecraftClientAccess.get().openGui(SettingsGui::safetySettings));
 		btnSafety.setBounds(new Box(0, 0, 160, 20));
 		btnPanel2.addElement(btnSafety);
@@ -307,7 +335,7 @@ public class GestureGui extends Frame {
 		Button btnSkinMenu = new Button(gui, gui.i18nFormat("button.cpm.models"), () -> MinecraftClientAccess.get().openGui(ModelsGui::new));
 		btnSkinMenu.setBounds(new Box(0, 40, 160, 20));
 		btnPanel3.addElement(btnSkinMenu);
-		if(MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.INSTALLED) {
+		if(status != ServerStatus.INSTALLED) {
 			btnSkinMenu.setEnabled(false);
 			btnSkinMenu.setTooltip(new Tooltip(this, gui.i18nFormat("label.cpm.feature_unavailable")));
 		}
@@ -320,6 +348,44 @@ public class GestureGui extends Frame {
 			Button btnOpenFP = new Button(gui, gui.i18nFormat("button.cpm.effect.setFpHandPos"), () -> MinecraftClientAccess.get().openGui(FirstPersonHandPosGui::new));
 			btnOpenFP.setBounds(new Box(0, 0, 160, 20));
 			btnPanel3.addElement(btnOpenFP);
+		}
+	}
+
+	private class Group {
+		private NameMapper<Gesture> groupGestures;
+		private List<Gesture> list;
+		private DropDownBox<NamedElement<Gesture>> box;
+
+		public Group(String name, Panel panel, int id) {
+			list = new ArrayList<>();
+			list.add(null);
+			groupGestures = new NameMapper<>(list, g -> g == null ? gui.i18nFormat("label.cpm.layerNone") : g.name);
+			box = new DropDownBox<>(gui.getFrame(), groupGestures.asList());
+			groupGestures.setSetter(box::setSelected);
+
+			Panel p = new Panel(gui);
+			p.setBounds(new Box((id % 4) * 90, (id / 4) * 40, 80, 30));
+			panel.addElement(p);
+
+			p.addElement(new Label(gui, name).setBounds(new Box(0, 0, 70, 10)));
+			p.addElement(box);
+			box.setBounds(new Box(0, 10, 80, 20));
+			box.setAction(() -> {
+				Gesture s = box.getSelected().getElem();
+				list.forEach(g -> {
+					MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setLayerValue(def.getAnimations(), g, g == s ? 1 : 0);
+				});
+			});
+		}
+
+		public void add(Gesture g) {
+			list.add(g);
+		}
+
+		public void update() {
+			groupGestures.refreshValues();
+			Gesture s = list.stream().filter(g -> MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), g) != 0).findFirst().orElse(null);
+			groupGestures.setValue(s);
 		}
 	}
 
@@ -372,13 +438,9 @@ public class GestureGui extends Frame {
 		public GestureButton(IManualGesture g, int id) {
 			this(id);
 			String nm = g.getName();
-			if(g instanceof Gesture) {
-				layer = nm.startsWith(Gesture.LAYER_PREFIX);
-				value = nm.startsWith(Gesture.VALUE_LAYER_PREFIX);
-			}
-			if(layer)nm = nm.substring(Gesture.LAYER_PREFIX.length());
-			else if(value)nm = nm.substring(Gesture.VALUE_LAYER_PREFIX.length());
-			else {
+			layer = g.getType() == AnimationType.LAYER;
+			value = g.getType() == AnimationType.VALUE_LAYER;
+			if(!(layer || value)) {
 				Button btn = new Button(gui, "", () -> setManualGesture(g));
 				btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
 				addElement(btn);
@@ -395,7 +457,8 @@ public class GestureGui extends Frame {
 					s.setTooltip(new Tooltip(GestureGui.this, gui.i18nFormat("label.cpm.feature_unavailable")));
 					addElement(s);
 				} else if(value) {
-					Slider s = new Slider(gui, nm);
+					ComboSlider s = new ComboSlider(gui, a -> nm, a -> a * 100f, a -> a / 100f);
+					s.getSpinner().setDp(0);
 					s.setBounds(new Box(0, 0, bounds.w, bounds.h));
 					s.setAction(() -> {
 						if(def != null)

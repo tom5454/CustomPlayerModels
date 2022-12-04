@@ -21,8 +21,9 @@ public class AnimationState {
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
 	public ArmPose leftArm = ArmPose.EMPTY, rightArm = ArmPose.EMPTY;
 	public HandAnimation usingAnimation = HandAnimation.NONE;
-	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing, inGui, firstPersonMod;
+	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing, inGui, firstPersonMod, voiceMuted;
 	public byte[] gestureData;
+	public VRState vrState;
 
 	public void resetPlayer() {
 		sleeping = false;
@@ -47,6 +48,7 @@ public class AnimationState {
 		pitch = 0;
 		hurtTime = 0;
 		speakLevel = 0;
+		voiceMuted = false;
 	}
 
 	public void resetModel() {
@@ -54,6 +56,7 @@ public class AnimationState {
 		swimAmount = 0;
 		rightArm = ArmPose.EMPTY;
 		leftArm = ArmPose.EMPTY;
+		vrState = null;
 	}
 
 	public VanillaPose getMainPose(long time, AnimationRegistry registry) {
@@ -103,6 +106,15 @@ public class AnimationState {
 		if(speakLevel > 0.1F)h.accept(VanillaPose.SPEAKING);
 		if(inGui)h.accept(VanillaPose.IN_GUI);
 		if(firstPersonMod)h.accept(VanillaPose.FIRST_PERSON_MOD);
+		if(voiceMuted)h.accept(VanillaPose.VOICE_MUTED);
+		if(vrState != null) {
+			switch (vrState) {
+			case FIRST_PERSON: h.accept(VanillaPose.VR_FIRST_PERSON); break;
+			case THIRD_PERSON_SITTING: h.accept(VanillaPose.VR_THIRD_PERSON_SITTING); break;
+			case THIRD_PERSON_STANDING: h.accept(VanillaPose.VR_THIRD_PERSON_STANDING); break;
+			default: break;
+			}
+		}
 	}
 
 	private static VanillaPose getArmPose(ArmPose pose, boolean left) {
@@ -147,5 +159,11 @@ public class AnimationState {
 	public void preAnimate() {
 		if(isOnLadder && moveAmountY > 0)isClimbing = true;
 		else if(!isOnLadder)isClimbing = false;
+	}
+
+	public static enum VRState {
+		FIRST_PERSON,
+		THIRD_PERSON_SITTING,
+		THIRD_PERSON_STANDING
 	}
 }

@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import com.tom.cpm.shared.editor.ElementType;
-import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.model.RootModelType;
 
 public class StoreIDGen {

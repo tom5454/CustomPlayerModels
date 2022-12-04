@@ -14,4 +14,8 @@ public interface VanillaModelPart {
 	default VanillaModelPart getCopyFrom() {
 		return null;
 	}
+
+	default boolean storePrevFramePos() {
+		return false;
+	}
 }

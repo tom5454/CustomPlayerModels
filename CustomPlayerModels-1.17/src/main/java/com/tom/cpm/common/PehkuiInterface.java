@@ -56,6 +56,10 @@ public class PehkuiInterface implements ScalerInterface<ServerPlayer, ScaleType>
 			return ScaleTypes.THIRD_PERSON;
 		case VIEW_BOBBING:
 			return ScaleTypes.VIEW_BOBBING;
+		case WIDTH:
+			return ScaleTypes.WIDTH;
+		case HEIGHT:
+			return ScaleTypes.HEIGHT;
 		default:
 			return null;
 		}

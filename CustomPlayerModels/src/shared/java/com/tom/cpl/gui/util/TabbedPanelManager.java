@@ -14,6 +14,10 @@ public class TabbedPanelManager extends Panel {
 	}
 
 	public Button createTab(String name, Panel panel) {
+		return createTab(name, panel, null);
+	}
+
+	public Button createTab(String name, Panel panel, Runnable onSelect) {
 		boolean vis = elements.isEmpty();
 		panel.setVisible(vis);
 		addElement(panel);
@@ -23,6 +27,8 @@ public class TabbedPanelManager extends Panel {
 			panel.setVisible(true);
 			buttons.values().forEach(b -> b.setEnabled(true));
 			btn.setEnabled(false);
+			if(onSelect != null)
+				onSelect.run();
 		});
 		btn.setEnabled(!vis);
 		buttons.put(panel, btn);

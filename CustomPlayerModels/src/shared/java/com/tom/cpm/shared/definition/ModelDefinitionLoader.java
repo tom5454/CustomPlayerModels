@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -29,7 +31,9 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Image;
+import com.tom.cpl.util.LocalizedIOException;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.Player;
@@ -45,6 +49,7 @@ import com.tom.cpm.shared.io.SkinDataInputStream;
 import com.tom.cpm.shared.loaders.GistResourceLoader;
 import com.tom.cpm.shared.loaders.GithubRepoResourceLoader;
 import com.tom.cpm.shared.loaders.PasteResourceLoader;
+import com.tom.cpm.shared.loaders.PastebinResourceLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.ModelPartEnd;
@@ -104,11 +109,12 @@ public class ModelDefinitionLoader<GP> {
 		LOADERS.put("git", new GistResourceLoader());
 		LOADERS.put("gh", new GithubRepoResourceLoader());
 		LOADERS.put("p", new PasteResourceLoader());
+		LOADERS.put("pb", new PastebinResourceLoader());
 		LOADERS.put("local", new ResourceLoader() {
 
 			@Override
 			public byte[] loadResource(String path, ResourceEncoding enc, ModelDefinition def) throws IOException {
-				throw new IOException("Test in-game model");
+				throw new LocalizedIOException("Test in-game model", new FormatText("error.cpm.testModel"));
 			}
 		});
 	}
@@ -225,6 +231,7 @@ public class ModelDefinitionLoader<GP> {
 	public void clearCache() {
 		linkCache.invalidateAll();
 		cache.invalidateAll();
+		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().resetGestureData();
 	}
 
 	public void clearServerData() {
@@ -363,5 +370,17 @@ public class ModelDefinitionLoader<GP> {
 			}
 			cos.close();
 		}
+	}
+
+	public static Link parseLink(String link) throws LocalizedIOException, URISyntaxException {
+		URI url = new URI(link);
+		for(ResourceLoader rl : LOADERS.values()) {
+			ResourceLoader.Validator v = rl.getValidator();
+			if(v != null) {
+				Link r = v.test(link);
+				if(r != null)return r;
+			}
+		}
+		throw new LocalizedIOException("Unknown domain: " + url.getHost(), new FormatText("label.cpm.link.unknownDomain", url.getHost()));
 	}
 }

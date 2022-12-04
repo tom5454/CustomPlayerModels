@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -85,7 +86,7 @@ public class TemplateLoaderV1 implements ProjectPartLoader {
 				lst.add(map);
 				map.put("name", arg.name);
 				map.put("desc", arg.desc);
-				map.put("type", arg.type.name().toLowerCase());
+				map.put("type", arg.type.name().toLowerCase(Locale.ROOT));
 				if(arg.handler.requiresParts() && arg.effectedElems != null) {
 					List<Number> partList = new ArrayList<>();
 					arg.effectedElems.forEach(e -> partList.add(e.storeID));

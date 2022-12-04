@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.model.render;
 
+import java.util.Locale;
 import java.util.function.Supplier;
 
 import com.tom.cpl.math.MatrixStack;
@@ -117,7 +118,7 @@ public class GuiModelRenderManager extends ModelRenderManager<VBuffers, Viewport
 
 		@Override
 		protected void bindDefaultTexture(ViewportPanelBase3d cbi, TextureSheetType tex) {
-			cbi.load(tex.name().toLowerCase());
+			cbi.load(tex.name().toLowerCase(Locale.ROOT));
 		}
 
 		@Override

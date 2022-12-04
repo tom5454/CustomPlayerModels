@@ -80,6 +80,7 @@ public abstract class VRPlayerRendererMixin_VR extends LivingEntityRenderer<Abst
 			"renderRightHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V"
 	}, remap = false)
 	public void onRenderRightArmPre(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
+		com.tom.cpm.client.vr.VRPlayerRenderer.isFPHand = true;
 		CustomPlayerModelsClient.INSTANCE.manager.bindHand(player, vertexConsumers, getModel());
 	}
 
@@ -87,6 +88,7 @@ public abstract class VRPlayerRendererMixin_VR extends LivingEntityRenderer<Abst
 			"renderLeftHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V"
 	}, remap = false)
 	public void onRenderLeftArmPre(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
+		com.tom.cpm.client.vr.VRPlayerRenderer.isFPHand = true;
 		CustomPlayerModelsClient.INSTANCE.manager.bindHand(player, vertexConsumers, getModel());
 	}
 
@@ -95,6 +97,7 @@ public abstract class VRPlayerRendererMixin_VR extends LivingEntityRenderer<Abst
 	}, remap = false)
 	public void onRenderRightArmPost(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
+		com.tom.cpm.client.vr.VRPlayerRenderer.isFPHand = false;
 	}
 
 	@Inject(at = @At("RETURN"), method = {
@@ -102,11 +105,19 @@ public abstract class VRPlayerRendererMixin_VR extends LivingEntityRenderer<Abst
 	}, remap = false)
 	public void onRenderLeftArmPost(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
+		com.tom.cpm.client.vr.VRPlayerRenderer.isFPHand = false;
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderNameTag(Lnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/network/chat/Component;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", cancellable = true, remap = false)
-	public void onRenderName(AbstractClientPlayer entityIn, Component displayNameIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, CallbackInfo cbi) {
+	public void onRenderName1(AbstractClientPlayer entityIn, Component displayNameIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(!Player.isEnableNames())cbi.cancel();
+	}
+
+	@Inject(at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;renderNameTag(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/network/chat/Component;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
+			ordinal = 1, remap = true),
+			method = "renderNameTag(Lnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/network/chat/Component;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", remap = false)
+	public void onRenderName2(AbstractClientPlayer entityIn, Component displayNameIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(Player.isEnableLoadingInfo())
 			CustomPlayerModelsClient.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
 	}

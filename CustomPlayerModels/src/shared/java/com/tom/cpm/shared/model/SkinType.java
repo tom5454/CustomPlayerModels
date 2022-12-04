@@ -2,6 +2,7 @@ package com.tom.cpm.shared.model;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -19,7 +20,7 @@ public enum SkinType {
 
 	private SkinType(int channel, String apiName) {
 		this.channel = channel;
-		lowerName = name().toLowerCase();
+		lowerName = name().toLowerCase(Locale.ROOT);
 		this.apiName = apiName;
 	}
 

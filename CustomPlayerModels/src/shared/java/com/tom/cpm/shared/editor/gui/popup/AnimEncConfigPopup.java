@@ -1,39 +1,23 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.util.GetFreeSkinSlots;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 
 public class AnimEncConfigPopup extends PopupPanel {
-	private static Image template;
-	static {
-		try(InputStream is = AnimEncConfigPopup.class.getResourceAsStream("/assets/cpm/textures/template/layers_template.png")) {
-			template = Image.loadFrom(is);
-		} catch (IOException e) {
-			template = null;
-		}
-	}
 
 	public AnimEncConfigPopup(IGui gui, Editor editor, Runnable onOk) {
 		super(gui);
 		setBounds(new Box(0, 0, 300, 200));
 
-		AnimationEncodingData dt = editor.animEnc != null ? new AnimationEncodingData(editor.animEnc) : new AnimationEncodingData();
-
-		if(editor.animEnc == null) {
-			dt.freeLayers = GetFreeSkinSlots.getFreeLayers(editor.vanillaSkin, template, editor.skinType);
-		}
+		AnimationEncodingData dt = editor.animEnc != null ? new AnimationEncodingData(editor.animEnc) : GetFreeSkinSlots.getDefault(editor);
 
 		Label lbl = new Label(gui, gui.i18nFormat("label.cpm.skin_layers_to_use"));
 		lbl.setBounds(new Box(5, 0, 0, 0));
@@ -67,7 +51,7 @@ public class AnimEncConfigPopup extends PopupPanel {
 			chkbxEn.setSelected(dt.defaultLayerValue.computeIfAbsent(layer, k -> !enc));
 
 			Button clearLayer = new Button(gui, gui.i18nFormat("button.cpm.clearLayer"), () -> {
-				GetFreeSkinSlots.clearLayerArea(editor.vanillaSkin, template, editor.skinType, layer);
+				GetFreeSkinSlots.clearLayerArea(editor.vanillaSkin, editor.skinType, layer);
 			});
 			clearLayer.setBounds(new Box(210, 10 + y * 25, 80, 20));
 			addElement(clearLayer);

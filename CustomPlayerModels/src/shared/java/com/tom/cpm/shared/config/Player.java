@@ -54,6 +54,7 @@ public abstract class Player<P> {
 		updateFromPlayer(player);
 		animState.speakLevel = (float) MinecraftCommonAccess.get().getApi().clientApi().getVoiceProviders().stream().
 				mapToDouble(f -> f.apply(player)).max().orElse(0);
+		animState.voiceMuted = MinecraftCommonAccess.get().getApi().clientApi().getVoiceMutedProviders().stream().anyMatch(p -> p.test(player));
 	}
 
 	public void setModelDefinition(CompletableFuture<ModelDefinition> definition) {

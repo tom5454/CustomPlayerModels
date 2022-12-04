@@ -21,7 +21,7 @@ public class AnimationHandler {
 
 	public void animate(AnimationState state, long currentTime) {
 		boolean needsSort = false;
-		currentAnimations.removeIf(a -> nextAnims.stream().noneMatch(n -> n.animation == a.currentAnimation));
+		currentAnimations.removeIf(a -> nextAnims.stream().noneMatch(n -> n.animation == a.currentAnimation) && a.currentAnimation.checkAndUpdateRemove());
 		for (NextAnim animation : nextAnims) {
 			boolean found = false;
 			for (int i = 0; i < currentAnimations.size(); i++) {
@@ -90,6 +90,7 @@ public class AnimationHandler {
 
 		public PlayingAnim(NextAnim anim, long currentStart, boolean loop) {
 			this.currentAnimation = anim.animation;
+			currentAnimation.prepare();
 			this.pose = anim.pose;
 			this.currentStart = currentStart;
 			this.loop = loop;

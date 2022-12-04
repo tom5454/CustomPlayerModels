@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.gui;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.elements.Button;
@@ -19,8 +20,8 @@ import com.tom.cpl.util.Direction;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 
@@ -31,7 +32,7 @@ public class PerfaceUVPanel extends Panel {
 		super(frm.getGui());
 		setBounds(new Box(0, 0, 170, 95));
 
-		NameMapper<Direction> dirMap = new NameMapper<>(Direction.VALUES, dir -> gui.i18nFormat("label.cpm.dir." + dir.name().toLowerCase()));
+		NameMapper<Direction> dirMap = new NameMapper<>(Direction.VALUES, dir -> gui.i18nFormat("label.cpm.dir." + dir.name().toLowerCase(Locale.ROOT)));
 		DropDownBox<NamedElement<Direction>> faces = new DropDownBox<>(frm, dirMap.asList());
 		faces.setBounds(new Box(5, 0, 160, 20));
 		dirMap.setSetter(faces::setSelected);
@@ -105,7 +106,7 @@ public class PerfaceUVPanel extends Panel {
 			spinnerEV.setValue(v.w);
 		});
 
-		NameMapper<Rot> rotMap = new NameMapper<>(Rot.VALUES, rot -> gui.i18nFormat("label.cpm.rot." + rot.name().toLowerCase()));
+		NameMapper<Rot> rotMap = new NameMapper<>(Rot.VALUES, rot -> gui.i18nFormat("label.cpm.rot." + rot.name().toLowerCase(Locale.ROOT)));
 		DropDownBox<NamedElement<Rot>> rots = new DropDownBox<>(frm, new ArrayList<>(rotMap.asList()));
 		rotMap.setSetter(rots::setSelected);
 		rots.setBounds(new Box(5, 45, 80, 20));

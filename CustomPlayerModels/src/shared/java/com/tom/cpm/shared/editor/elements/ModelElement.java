@@ -1,4 +1,4 @@
-package com.tom.cpm.shared.editor;
+package com.tom.cpm.shared.editor.elements;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Tooltip;
@@ -16,6 +17,11 @@ import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
+import com.tom.cpm.shared.editor.CopyTransformEffect;
+import com.tom.cpm.shared.editor.ETextures;
+import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.EditorTexture;
+import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.anim.IElem;
@@ -55,14 +61,16 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public boolean disableVanillaAnim;
 	public PerFaceUV faceUV;
 	public ItemRenderer itemRenderer;
-	public Tooltip tooltip;
 	public CopyTransformEffect copyTransform;
 
 	public ModelElement(ModelElement element, ModelElement parent) {
 		this(element.editor);
 		this.parent = parent;
-		element.children.stream().filter(ModelElement::canDup).forEach(c -> children.add(new ModelElement(c, this)));
-		name = editor.gui().i18nFormat("label.cpm.dup", element.name);
+		element.children.forEach(c -> children.add(new ModelElement(c, this)));
+		if(element.itemRenderer == null)
+			name = editor.gui().i18nFormat("label.cpm.dup", element.name);
+		else
+			name = element.name;
 		showInEditor = element.showInEditor;
 		texture = element.texture;
 		textureSize = element.textureSize;
@@ -82,6 +90,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		singleTex = element.singleTex;
 		extrude = element.extrude;
 		if(element.faceUV != null)faceUV = new PerFaceUV(element.faceUV);
+		if(element.itemRenderer != null)itemRenderer = new ItemRenderer(element.itemRenderer);
 	}
 
 	public ModelElement(Editor editor) {
@@ -153,6 +162,9 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public int textColor() {
+		if(itemRenderer != null && editor.definition.rendererObjectMap.get(itemRenderer) == itemRenderer) {
+			return editor.colors().link_normal;
+		}
 		return !showInEditor ? editor.colors().button_text_disabled : 0;
 	}
 
@@ -544,18 +556,18 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void populatePopup(PopupMenu popup) {
-		if(canDup()) {
-			popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), this::duplicate);
-		}
+		popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), this::duplicate);
 		if(type == ElementType.NORMAL && copyTransform != null) {
 			popup.addButton(editor.gui().i18nFormat("button.cpm.editCopyTransform"), () -> {
 				editor.frame.openPopup(new CopyTransformSettingsPopup(editor.frame, editor, copyTransform));
 			});
 		}
+		Checkbox boxHidden = popup.addCheckbox(editor.gui().i18nFormat("label.cpm.hidden_effect"), () -> switchEffect(Effect.HIDE));
+		boxHidden.setSelected(hidden);
+		boxHidden.setTooltip(new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.hidden_effect")));
 	}
 
 	private void duplicate() {
-		if(!canDup())return;
 		if(type == ElementType.NORMAL) {
 			ModelElement elem = new ModelElement(this, parent);
 			editor.action("duplicate").addToList(parent.children, elem).onUndo(() -> editor.selectedElement = null).execute();
@@ -582,11 +594,9 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public Tooltip getTooltip() {
-		return tooltip;
-	}
-
-	private boolean canDup() {
-		return itemRenderer == null;
+		StringBuilder sb = new StringBuilder();
+		if(copyTransform != null)sb.append(copyTransform.getTooltip(editor.gui()));
+		return sb.length() == 0 ? null : new Tooltip(editor.frame, sb.toString());
 	}
 
 	@Override
@@ -596,7 +606,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 				if(((MultiSelector)e.selectedElement).add(this))e.selectedElement = null;
 			} else if(e.getSelectedElement() == null)e.selectedElement = this;
 			else {
-				MultiSelector ms = new MultiSelector(e);
+				MultiSelector ms = new MultiSelector.ElementImpl(e);
 				ms.add(e.getSelectedElement());
 				ms.add(this);
 				e.selectedElement = ms;
@@ -609,11 +619,12 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public boolean canEditVec(VecType type) {
 		if(this.type == ElementType.ROOT_PART)return type == VecType.POSITION || type == VecType.ROTATION;
+		if(itemRenderer != null)return type == VecType.POSITION || type == VecType.ROTATION || type == VecType.SCALE || type == VecType.OFFSET;
 		else return true;
 	}
 
 	@Override
 	public List<TreeSettingElement> getSettingsElements() {
-		return faceUV != null ? faceUV.getDragBoxes(editor, this) : Collections.emptyList();
+		return faceUV != null ? faceUV.getDragBoxes(this) : Collections.emptyList();
 	}
 }

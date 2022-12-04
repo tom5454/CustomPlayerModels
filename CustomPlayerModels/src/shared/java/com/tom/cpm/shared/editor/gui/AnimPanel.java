@@ -18,23 +18,23 @@ import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.CombinedListView;
-import com.tom.cpl.util.ListView;
+import com.tom.cpl.util.NamedElement;
+import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
-import com.tom.cpm.shared.editor.gui.popup.AnimationSettinsPopup;
+import com.tom.cpm.shared.editor.gui.popup.AnimationSettingsPopup;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
-import com.tom.cpm.shared.editor.gui.popup.ToggleLayerDefaultPopup;
-import com.tom.cpm.shared.editor.gui.popup.ValueLayerDefaultPopup;
+import com.tom.cpm.shared.editor.gui.popup.LayerDefaultPopup;
 
 public class AnimPanel extends Panel {
 	private Editor editor;
-	private ListPicker<IAnim> animSel;
+	private ListPicker<NamedElement<EditorAnim>> animSel;
 	private TabFocusHandler tabHandler;
 	private Button prevFrm, nextFrm, clearAnimData;
 
@@ -47,39 +47,37 @@ public class AnimPanel extends Panel {
 
 		FlowLayout layout = new FlowLayout(this, 4, 1);
 
-		animSel = new ListPicker<>(e, new CombinedListView<IAnim>(Collections.singletonList(new IAnim() {
-			@Override
-			public String toString() {
-				return gui.i18nFormat("label.cpm.no_animation");
-			}
+		NameMapper<EditorAnim> mapper = new NameMapper<>(new CombinedListView<>(Collections.singletonList((EditorAnim) null), editor.animations), ea -> {
+			if(ea == null)return gui.i18nFormat("label.cpm.no_animation");
+			else return ea.toString();
+		});
 
-			@Override
-			public String noAnim() {
-				return "";
-			}
-		}), new ListView<>(editor.animations, v -> (IAnim) v)));
+		animSel = new ListPicker<>(e, mapper.asList());
+		mapper.setSetter(animSel::setSelected);
 		animSel.setBounds(new Box(5, 5, 160, 20));
 		animSel.setListLoader(l -> {
 			l.setComparator(
-					Comparator.comparing(IAnim::noAnim, Comparator.nullsLast(Comparator.naturalOrder())).
-					thenComparing(Comparator.comparing(IAnim::getPose0, Comparator.nullsLast(Comparator.naturalOrder()))).
-					thenComparing(Comparator.comparing(IAnim::getPose1, Comparator.nullsLast(Comparator.naturalOrder()))).
-					thenComparing(Comparator.comparing(IAnim::toString))
+					mapper.cmp(Comparator.comparing(a -> a == null ? null : "", Comparator.nullsFirst(Comparator.naturalOrder()))).
+					thenComparing(mapper.cmp(Comparator.comparing(AnimPanel::getPose0, Comparator.nullsLast(Comparator.naturalOrder())))).
+					thenComparing(mapper.cmp(Comparator.comparing(AnimPanel::getPose1, Comparator.nullsLast(Comparator.naturalOrder())))).
+					thenComparing(Comparator.comparing(NamedElement::toString))
 					);
 		});
 		addElement(animSel);
 		animSel.setAction(() -> {
-			IAnim sel = animSel.getSelected();
-			editor.selectedAnim = sel instanceof EditorAnim ? (EditorAnim) sel : null;
+			editor.selectedAnim = animSel.getSelected().getElem();
 			editor.updateGui();
 		});
-		editor.setSelAnim.add(animSel::setSelected);
+		editor.setSelAnim.add(v -> {
+			mapper.refreshValues();
+			mapper.setValue(v);
+		});
 
 		Panel p = new Panel(gui);
 		p.setBounds(new Box(0, 0, bounds.w, 18));
 		addElement(p);
 
-		ButtonIcon newAnimBtn = new ButtonIcon(gui, "editor", 0, 16, () -> e.openPopup(new AnimationSettinsPopup(gui, editor, false)));
+		ButtonIcon newAnimBtn = new ButtonIcon(gui, "editor", 0, 16, () -> e.openPopup(new AnimationSettingsPopup(gui, editor, false)));
 		newAnimBtn.setBounds(new Box(5, 0, 18, 18));
 		p.addElement(newAnimBtn);
 
@@ -88,7 +86,7 @@ public class AnimPanel extends Panel {
 		p.addElement(delAnimBtn);
 		editor.setAnimDelEn.add(delAnimBtn::setEnabled);
 
-		Button editBtn = new Button(gui, gui.i18nFormat("button.cpm.edit"), () -> e.openPopup(new AnimationSettinsPopup(gui, editor, true)));
+		Button editBtn = new Button(gui, gui.i18nFormat("button.cpm.edit"), () -> e.openPopup(new AnimationSettingsPopup(gui, editor, true)));
 		editBtn.setBounds(new Box(45, 0, 80, 18));
 		p.addElement(editBtn);
 		editor.setAnimDelEn.add(editBtn::setEnabled);
@@ -179,9 +177,8 @@ public class AnimPanel extends Panel {
 
 		PosPanel.addVec3("rotation", v -> editor.setAnimRot(v), this, editor.setAnimRot, 1, tabHandler);
 		PosPanel.addVec3("position", v -> editor.setAnimPos(v), this, editor.setAnimPos, 2, tabHandler);
-		Panel sc = PosPanel.addVec3("render_scale", v -> editor.setAnimScale(v), this, editor.setAnimScale, 2, tabHandler);
+		PosPanel.addVec3("render_scale", v -> editor.setAnimScale(v), this, editor.setAnimScale, 2, tabHandler);
 		editor.updateGui.add(() -> {
-			sc.setVisible(editor.displayAdvScaling);
 			clearAnimData.setEnabled(editor.getSelectedElement() != null && editor.selectedAnim != null && editor.selectedAnim.getSelectedFrame() != null);
 			layout.reflow();
 		});
@@ -228,10 +225,10 @@ public class AnimPanel extends Panel {
 
 		Button defLayerSettings = new Button(gui, gui.i18nFormat("button.cpm.defLayerSettings"), () -> {
 			if(editor.selectedAnim != null) {
-				if(editor.selectedAnim.displayName.startsWith(Gesture.LAYER_PREFIX)) {
-					e.openPopup(new ToggleLayerDefaultPopup(gui, editor));
-				} else if(editor.selectedAnim.displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
-					e.openPopup(new ValueLayerDefaultPopup(gui, editor));
+				if(editor.selectedAnim.type == AnimationType.LAYER) {
+					e.openPopup(new LayerDefaultPopup.Toggle(gui, editor));
+				} else if(editor.selectedAnim.type == AnimationType.VALUE_LAYER) {
+					e.openPopup(new LayerDefaultPopup.Value(gui, editor));
 				}
 			}
 		});
@@ -241,32 +238,32 @@ public class AnimPanel extends Panel {
 			defLayerSettings.setEnabled(editor.selectedAnim != null && editor.selectedAnim.isLayer());
 		});
 
+		p = new Panel(gui);
+		p.setBounds(new Box(0, 0, bounds.w, 28));
+		addElement(p);
+
+		Label lblOrder = new Label(gui, gui.i18nFormat("label.cpm.anim_order"));
+		lblOrder.setBounds(new Box(5, 0, 160, 10));
+		lblOrder.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim_order")));
+		p.addElement(lblOrder);
+
+		Spinner animOrder = new Spinner(gui);
+		editor.setAnimOrder.add(v -> {
+			animOrder.setEnabled(v != null);
+			if(v != null)animOrder.setValue(v);
+			else animOrder.setValue(0);
+		});
+		animOrder.setBounds(new Box(5, 10, 100, 18));
+		animOrder.setDp(0);
+		animOrder.addChangeListener(() -> editor.setAnimOrder((int) animOrder.getValue()));
+		p.addElement(animOrder);
+		tabHandler.add(animOrder);
+		editor.updateGui.add(() -> {
+			animOrder.setEnabled(editor.selectedAnim != null && editor.selectedAnim.isCustom() && !editor.selectedAnim.type.isStaged());
+		});
+
 		layout.reflow();
 		addElement(tabHandler);
-	}
-
-	public static interface IAnim {
-		default IPose getPose() {
-			return null;
-		}
-
-		default VanillaPose getPose0() {
-			IPose pose = getPose();
-			if(pose == null || !(pose instanceof VanillaPose))
-				return null;
-			return (VanillaPose) pose;
-		}
-
-		default String getPose1() {
-			IPose pose = getPose();
-			if(pose == null || !(pose instanceof CustomPose))
-				return null;
-			return ((CustomPose) pose).getName();
-		}
-
-		default String noAnim() {
-			return null;
-		}
 	}
 
 	@Override
@@ -274,8 +271,7 @@ public class AnimPanel extends Panel {
 		super.setVisible(visible);
 		if(visible) {
 			editor.playFullAnim = false;
-			IAnim sel = animSel.getSelected();
-			editor.selectedAnim = sel instanceof EditorAnim ? (EditorAnim) sel : null;
+			editor.selectedAnim = animSel.getSelected().getElem();
 			editor.setAnimPlay.accept(false);
 			editor.updateGui();
 		}
@@ -293,5 +289,21 @@ public class AnimPanel extends Panel {
 			clearAnimData.setText(gui.i18nFormat("button.cpm.clearAnimData"));
 		}
 		super.draw(event, partialTicks);
+	}
+
+	private static VanillaPose getPose0(EditorAnim ea) {
+		if(ea == null)return null;
+		IPose pose = ea.getPose();
+		if(pose == null || !(pose instanceof VanillaPose))
+			return null;
+		return (VanillaPose) pose;
+	}
+
+	private static String getPose1(EditorAnim ea) {
+		if(ea == null)return null;
+		IPose pose = ea.getPose();
+		if(pose == null || !(pose instanceof CustomPose))
+			return null;
+		return ((CustomPose) pose).getName();
 	}
 }

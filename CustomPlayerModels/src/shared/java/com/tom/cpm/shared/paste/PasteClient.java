@@ -63,7 +63,7 @@ public class PasteClient {
 		try {
 			mojang.joinServer(new BigInteger(mojangKey).toString(16));
 		} catch (LocalizedIOException e) {
-			throw new LocalizedIOException(e.getMessage(), new FormatText("error.paste.authFail", e.getLoc()), e.getCause());
+			throw new LocalizedIOException(e.getMessage(), new FormatText("error.paste.authFail", e.getLocalizedText()), e.getCause());
 		}
 		url = new URL(this.url + "/api/session");
 		httpCon = createUrlConnection(url);
@@ -126,11 +126,18 @@ public class PasteClient {
 		parseResponse(HTTPIO.getResponse(httpCon, url));
 	}
 
-
 	public void deleteFile(String id) throws IOException {
 		URL url = new URL(this.url + "/api/delete?file=" + id);
 		HttpURLConnection httpCon = createUrlConnection(url);
 		parseResponse(HTTPIO.getResponse(httpCon, url));
+	}
+
+	public String createBrowserLoginURL() throws IOException {
+		URL url = new URL(this.url + "/api/browser_login");
+		HttpURLConnection httpCon = createUrlConnection(url);
+		String response = HTTPIO.getResponse(httpCon, url);
+		Map<String, Object> r = parseResponse(response);
+		return (String) r.get("id");
 	}
 
 	private HttpURLConnection createUrlConnection(URL url) throws IOException {
@@ -174,5 +181,9 @@ public class PasteClient {
 
 	public int getMaxSize() {
 		return maxSize;
+	}
+
+	public String getUrl() {
+		return url;
 	}
 }

@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.Animation;
+import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IAnimation;
@@ -26,9 +27,10 @@ import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Exporter;
-import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.IElem;
+import com.tom.cpm.shared.editor.elements.ModelElement;
+import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.util.Log;
@@ -36,6 +38,7 @@ import com.tom.cpm.shared.util.Log;
 public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 	private Map<Integer, ResolvedData> parsedData = new HashMap<>();
 	private int blankId, resetId;
+	private String modelProfilesId;
 
 	public ModelPartAnimation(IOHelper din, ModelDefinition def) throws IOException {
 		boolean done = false;
@@ -65,7 +68,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					CustomPose p = parsedData.values().stream().map(k -> k.pose).
 							filter(k -> k instanceof CustomPose && ((CustomPose)k).getName().equals(name)).
 							map(k -> (CustomPose) k).findFirst().orElse(null);
-					if(p == null)p = new CustomPose(name);
+					if(p == null)p = new CustomPose(name, 0);
 					parsedData.put(id, new ResolvedData(p, (flags & 1) != 0));
 				} else {
 					parsedData.put(id, new ResolvedData(pose, (flags & 1) != 0));
@@ -202,6 +205,48 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			}
 			break;
 
+			case ANIMATION_DATA_ORDER:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.order = block.readByte();
+				if(rd.pose instanceof CustomPose)
+					((CustomPose)rd.pose).order = rd.order;
+			}
+			break;
+
+			case ANIMATION_DATA_IS_PROPERTY:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.isProperty = true;
+			}
+			break;
+
+			case ANIMATION_DATA_GROUP:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.group = block.readUTF();
+			}
+			break;
+
+			case MODEL_PROFILES_ID:
+				modelProfilesId = block.readUTF();
+				break;
+
+			case ANIMATION_DATA_COMMAND:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.command = true;
+			}
+			break;
+
 			default:
 				break;
 			}
@@ -214,6 +259,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		int defMask = e.animEnc == null ? 0 : (PlayerSkinLayer.encode(e.animEnc.defaultLayerValue) & (~valMask));
 		resetId = defMask | valMask;
 		blankId = defMask | 0;
+		modelProfilesId = e.modelId;
 		List<PlayerSkinLayer> allLayers = e.animEnc != null ? new ArrayList<>(e.animEnc.freeLayers) : new ArrayList<>();
 		Collections.sort(allLayers);
 		e.animations.forEach(ea -> {
@@ -225,13 +271,15 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd = new ResolvedData(ea.pose, ea.add);
 				resolveEncID(rd, idc[1]++, allLayers);
 			} else {
-				rd = new ResolvedData(ea.getId(), ea.loop, ea.add);
-				if(rd.name.startsWith(Gesture.LAYER_PREFIX) || rd.name.startsWith(Gesture.VALUE_LAYER_PREFIX))
+				rd = new ResolvedData(AnimationsLoaderV1.encodeTypeInName(ea.getId(), ea.type), ea.loop, ea.add);
+				if(ea.isLayer())
 					rd.defaultValue = (byte) (ea.layerDefault * 0xff);
-				resolveEncID(rd, idc[1]++, allLayers);
+				if(!ea.type.isStaged())
+					resolveEncID(rd, idc[1]++, allLayers);
 			}
 			rd.gid &= valMask;
 			rd.gid |= defMask;
+			if(ea.type.isStaged())rd.gid = -1;
 			parsedData.put(id, rd);
 			Log.debug(ea.filename + " " + Integer.toString(rd.gid, 2));
 			List<ModelElement> elems = ea.getComponentsFiltered();
@@ -248,6 +296,12 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.show = new Boolean[cs][];
 			rd.loop = ea.loop;
 			rd.priority = ea.priority;
+			if(ea.isCustom() && !ea.type.isStaged()) {
+				rd.command = ea.command;
+				if(!ea.command)rd.order = ea.order;
+			}
+			if(ea.isLayer() && !ea.command)rd.isProperty = ea.isProperty;
+			if(ea.group != null && !ea.group.isEmpty() && !ea.command)rd.group = ea.group;
 			rd.it = ea.intType;
 			for (int i = 0; i < cs; i++) {
 				ModelElement elem = elems.get(i);
@@ -434,11 +488,43 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					d.writeByte(dt.defaultValue);
 				}
 			}
+			if(dt.order != 0) {
+				dout.writeEnum(Type.ANIMATION_DATA_ORDER);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+					d.writeByte(dt.order);
+				}
+			}
+			if(dt.isProperty) {
+				dout.writeEnum(Type.ANIMATION_DATA_IS_PROPERTY);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+				}
+			}
+			if(dt.group != null) {
+				dout.writeEnum(Type.ANIMATION_DATA_GROUP);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+					d.writeUTF(dt.group);
+				}
+			}
+			if(dt.command) {
+				dout.writeEnum(Type.ANIMATION_DATA_COMMAND);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+				}
+			}
 		}
 		dout.writeEnum(Type.CTRL_IDS);
 		try(IOHelper d = dout.writeNextBlock()) {
 			d.write(blankId);
 			d.write(resetId);
+		}
+		if(modelProfilesId != null) {
+			dout.writeEnum(Type.MODEL_PROFILES_ID);
+			try(IOHelper d = dout.writeNextBlock()) {
+				d.writeUTF(modelProfilesId);
+			}
 		}
 		dout.writeEnum(Type.END);
 	}
@@ -505,28 +591,35 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.anim = new Animation(comp, data, rd.show, rd.duration, rd.priority, rd.add, rd.it);
 		});
 		Map<String, List<IAnimation>> gestures = new HashMap<>();
+		AnimationRegistry reg = def.getAnimations();
 		parsedData.values().forEach(rd -> {
 			if(rd.pose instanceof VanillaPose) {
-				def.getAnimations().register(rd.pose, rd.anim);
+				reg.register(rd.pose, rd.anim);
 			} else if(rd.name != null) {
 				gestures.computeIfAbsent(rd.name, k -> {
 					List<IAnimation> l = new ArrayList<>();
-					Gesture g = new Gesture(l, rd.name, rd.loop);
+					Gesture g = new Gesture(AnimationsLoaderV1.getType(rd.name), l, AnimationsLoaderV1.cleanName(rd.name), rd.loop, rd.order);
 					g.defVal = rd.defaultValue;
-					def.getAnimations().register(g);
+					g.isProperty = rd.isProperty;
+					g.group = rd.group;
+					g.command = rd.command;
+					reg.register(g);
 					if(rd.gid != -1)
-						def.getAnimations().register(rd.gid, g);
+						reg.register(rd.gid, g);
 					return l;
 				}).add(rd.anim);
 			} else {
-				def.getAnimations().register(rd.pose, rd.anim);
-				def.getAnimations().register((CustomPose) rd.pose);
+				reg.register(rd.pose, rd.anim);
+				reg.register((CustomPose) rd.pose);
+				((CustomPose) rd.pose).command = rd.command;
 				if(rd.gid != -1)
-					def.getAnimations().register(rd.gid, rd.pose);
+					reg.register(rd.gid, rd.pose);
 			}
 		});
-		def.getAnimations().setBlankGesture(blankId);
-		def.getAnimations().setPoseResetId(resetId);
+		reg.setBlankGesture(blankId);
+		reg.setPoseResetId(resetId);
+		reg.setProfileId(modelProfilesId);
+		reg.finishLoading();
 	}
 
 	@Override
@@ -559,6 +652,11 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		ANIMATION_DATA_INTERPOLATION,
 		ANIMATION_DATA_SCALE,
 		ANIMATION_DATA_LAYER_DEFAULT,
+		ANIMATION_DATA_ORDER,
+		ANIMATION_DATA_IS_PROPERTY,
+		ANIMATION_DATA_GROUP,
+		MODEL_PROFILES_ID,
+		ANIMATION_DATA_COMMAND,
 		;
 		public static final Type[] VALUES = values();
 	}
@@ -580,6 +678,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		private int priority;
 		private InterpolatorType it = InterpolatorType.POLY_LOOP;
 		private byte defaultValue;
+		private int order;
+		private boolean isProperty;
+		private String group;
+		private boolean command;
 
 		public ResolvedData(VanillaPose pose, boolean add) {
 			this.pose = pose;

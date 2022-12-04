@@ -13,7 +13,5 @@ public class ItemTransform {
 	public void set(MatrixStack stack, boolean doRender) {
 		if(doRender)
 			matrix = stack.storeLast();
-		else
-			matrix = null;
 	}
 }

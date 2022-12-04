@@ -2,6 +2,7 @@ package com.tom.cpm.shared;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.tom.cpl.command.ArgType;
 import com.tom.cpl.command.CommandCtx;
@@ -60,7 +61,7 @@ public class CommandCPM {
 						).
 				then(new LiteralCommandBuilder("kick").
 						then(new LiteralCommandBuilder("enable").
-								then(new RequiredCommandBuilder("time", ArgType.INT, Pair.of(1, (int)Short.MAX_VALUE)).
+								then(new RequiredCommandBuilder("time", ArgType.INT, Pair.of(20, (int)Short.MAX_VALUE)).
 										run(c -> executeSetKickTimer(c, c.getArgument("time")))
 										)
 								).
@@ -75,6 +76,16 @@ public class CommandCPM {
 						).
 				then(new LiteralCommandBuilder("scaling").
 						thenAll(CommandCPM::buildScaling)
+						).
+				then(new LiteralCommandBuilder("animate").
+						then(new RequiredCommandBuilder("target", ArgType.PLAYER).
+								then(new RequiredCommandBuilder("animation", ArgType.STRING, false).
+										run(c -> setAnimation(c, -1)).
+										then(new RequiredCommandBuilder("value", ArgType.INT, Pair.of(0, 255)).
+												run(c -> setAnimation(c, c.getArgument("value")))
+												)
+										)
+								)
 						)
 				;
 		dispatcher.register(cpm);
@@ -97,7 +108,7 @@ public class CommandCPM {
 		List<LiteralCommandBuilder> l = new ArrayList<>();
 		LiteralCommandBuilder profile = new LiteralCommandBuilder("profile");
 		for(BuiltInSafetyProfiles p : BuiltInSafetyProfiles.VALUES) {
-			profile.then(new LiteralCommandBuilder(p.name().toLowerCase()).
+			profile.then(new LiteralCommandBuilder(p.name().toLowerCase(Locale.ROOT)).
 					run(c -> executeSafetyProfile(c, p))
 					);
 		}
@@ -127,9 +138,9 @@ public class CommandCPM {
 	}
 
 	private static void executeSafetyProfile(CommandCtx<?> context, BuiltInSafetyProfiles profile) {
-		ModConfig.getWorldConfig().setString(ConfigKeys.SAFETY_PROFILE, profile.name().toLowerCase());
+		ModConfig.getWorldConfig().setString(ConfigKeys.SAFETY_PROFILE, profile.name().toLowerCase(Locale.ROOT));
 		ModConfig.getWorldConfig().save();
-		FormatText t = profile == BuiltInSafetyProfiles.CUSTOM ? new FormatText("commands.cpm.safety.profile.custom") : new FormatText("label.cpm.safetyProfile." + profile.name().toLowerCase());
+		FormatText t = profile == BuiltInSafetyProfiles.CUSTOM ? new FormatText("commands.cpm.safety.profile.custom") : new FormatText("label.cpm.safetyProfile." + profile.name().toLowerCase(Locale.ROOT));
 		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.safetyProfileName"), t));
 	}
 
@@ -145,7 +156,7 @@ public class CommandCPM {
 	private static List<LiteralCommandBuilder> buildScaling() {
 		List<LiteralCommandBuilder> l = new ArrayList<>();
 		for(ScalingOptions o : ScalingOptions.VALUES) {
-			String name = o.name().toLowerCase();
+			String name = o.name().toLowerCase(Locale.ROOT);
 			LiteralCommandBuilder s = new LiteralCommandBuilder(name);
 			s.then(new LiteralCommandBuilder("limit").
 					then(new RequiredCommandBuilder("target", ArgType.PLAYER).
@@ -201,9 +212,9 @@ public class CommandCPM {
 		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
 		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
 		for(ScalingOptions o : ScalingOptions.VALUES) {
-			ConfigEntry ce = e.getEntry(o.name().toLowerCase());
+			ConfigEntry ce = e.getEntry(o.name().toLowerCase(Locale.ROOT));
 			ce.setBoolean(ConfigKeys.ENABLED, en);
-			context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + o.name().toLowerCase()), new FormatText("label.cpm.enableX", en)));
+			context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + o.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.enableX", en)));
 		}
 		ModConfig.getWorldConfig().save();
 	}
@@ -214,10 +225,10 @@ public class CommandCPM {
 		ConfigEntry e = ModConfig.getWorldConfig();
 		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
 		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
-		e = e.getEntry(sc.name().toLowerCase());
+		e = e.getEntry(sc.name().toLowerCase(Locale.ROOT));
 		e.setBoolean(ConfigKeys.ENABLED, en);
 		ModConfig.getWorldConfig().save();
-		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase()), new FormatText("label.cpm.enableX", en)));
+		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.enableX", en)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -230,10 +241,19 @@ public class CommandCPM {
 		ConfigEntry e = ModConfig.getWorldConfig();
 		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
 		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
-		e = e.getEntry(sc.name().toLowerCase());
+		e = e.getEntry(sc.name().toLowerCase(Locale.ROOT));
 		e.setFloat(ConfigKeys.MIN, min);
 		e.setFloat(ConfigKeys.MAX, max);
 		ModConfig.getWorldConfig().save();
-		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase()), new FormatText("label.cpm.rangeOf", min, max)));
+		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.rangeOf", min, max)));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void setAnimation(CommandCtx<?> context, int value) {
+		Object player = context.getArgument("target");
+		String animation = context.getArgument("animation");
+		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
+		h.playAnimation(player, animation, value);
+		context.sendSuccess(new FormatText("commands.cpm.animate.success", animation, context.handler.toStringPlayer(player)));
 	}
 }

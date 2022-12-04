@@ -39,7 +39,7 @@ public class RenderManager<G, P, M, D> {
 				profile.updatePlayer(player);
 			def.itemTransforms.clear();
 			renderManager.bindModel(toBind, arg, buffer, def, profile, mode);
-			renderManager.getAnimationEngine().handleAnimation(profile, mode);
+			renderManager.getAnimationEngine().prepareAnimations(profile, mode);
 			return true;
 		}
 		renderManager.unbindModel(toBind);

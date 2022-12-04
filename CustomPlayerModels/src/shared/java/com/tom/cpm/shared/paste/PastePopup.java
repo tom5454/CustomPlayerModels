@@ -33,20 +33,28 @@ public class PastePopup extends PopupPanel {
 	public PastePopup(Frame frame) {
 		super(frame.getGui());
 		this.frm = frame;
-		setBounds(new Box(0, 0, 400, 300));
+		setBounds(new Box(0, 0, 400, 325));
 
 		scp = new ScrollPanel(gui);
-		scp.setBounds(new Box(5, 5, 390, 270));
+		scp.setBounds(new Box(5, 30, 390, 270));
 		addElement(scp);
 
 		panel = new Panel(gui);
-		panel.setBackgroundColor(0xff777777);
+		panel.setBackgroundColor(gui.getColors().button_border);
 		scp.setDisplay(panel);
 		panel.setBounds(new Box(0, 0, scp.getBounds().w, 16));
 
 		statusLbl = new Label(gui, gui.i18nFormat("label.cpm.loading"));
-		statusLbl.setBounds(new Box(100, 280, 200, 10));
+		statusLbl.setBounds(new Box(100, 305, 200, 10));
 		addElement(statusLbl);
+
+		Button btnOpenBrowser = new Button(gui, gui.i18nFormat("button.cpm.paste.openBrowser"), () -> {
+			runRequest(frame, PasteClient::createBrowserLoginURL, id -> {
+				gui.openURL(client.getUrl() + "/login.html?id=" + id);
+			}, () -> {}, "openBrowser");
+		});
+		btnOpenBrowser.setBounds(new Box(275, 5, 120, 20));
+		addElement(btnOpenBrowser);
 	}
 
 	public void open() {
@@ -54,12 +62,11 @@ public class PastePopup extends PopupPanel {
 		refreshGui();
 	}
 
-
 	private static void handleException(Frame frm, Runnable retry, Runnable close, Throwable e) {
 		IGui gui = frm.getGui();
 		if(e instanceof LocalizedIOException) {
 			frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.error"),
-					gui.i18nFormat("label.cpm.paste.error", ((LocalizedIOException) e).getLoc().toString(gui)),
+					gui.i18nFormat("label.cpm.paste.error", ((LocalizedIOException) e).getLocalizedText().toString(gui)),
 					retry, () -> {
 						if(!client.isConnected())
 							close.run();

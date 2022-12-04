@@ -27,6 +27,7 @@ import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.proxy.ModelPartOF;
+import com.tom.cpm.client.vr.VRPlayerRenderer;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -48,6 +49,8 @@ public class PlayerRenderManager extends ModelRenderManager<VertexConsumerProvid
 					M model, String arg) {
 				if ("api".equals(arg) && model instanceof BipedEntityModel) {
 					return new RedirectHolderApi(PlayerRenderManager.this, (BipedEntityModel<LivingEntity>) model);
+				} else if(CustomPlayerModelsClient.vrLoaded && VRPlayerRenderer.isVRPlayer(model)) {
+					return VRPlayerRenderer.createVRPlayer(PlayerRenderManager.this, model);
 				} else if(model instanceof PlayerEntityModel) {
 					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerEntityModel<AbstractClientPlayerEntity>) model);
 				} else if(model instanceof SkullEntityModel) {

@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
@@ -25,10 +28,12 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.NamedElement;
+import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.animation.Gesture;
+import com.tom.cpm.shared.animation.AnimationType;
+import com.tom.cpm.shared.animation.IAnimation;
 import com.tom.cpm.shared.animation.IPose;
+import com.tom.cpm.shared.animation.StagedAnimation;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData;
@@ -48,6 +53,7 @@ public class AnimTestPanel extends Panel {
 	private Checkbox chbxLeftParrot, chbxRightParrot;
 	private PopupMenu customLayers;
 	private Set<String> enabledLayers = new HashSet<>();
+	private Set<PlayableAnim> animations = new HashSet<>();
 
 	public AnimTestPanel(IGui gui, EditorGui e) {
 		super(gui);
@@ -71,49 +77,42 @@ public class AnimTestPanel extends Panel {
 				if(d.type == Type.POSE || d.type == Type.POSE_SERVER)
 					poses.add(new NamedElement<IPose>(p, this::poseToString));
 			}
-			Set<String> addedGestures = new HashSet<>();
+
+			animations = editor.animations.stream().map(a -> Pair.of(new AnimKey(a), a)).filter(a -> a.getKey().type != null).
+					collect(Collectors.groupingBy(Pair::getKey)).entrySet().stream().
+					map(me -> new PlayableAnim(me.getKey(), me.getValue().stream().map(Pair::getValue).collect(Collectors.toList()))).
+					collect(Collectors.toSet());
+
 			Set<String> addedLayers = new HashSet<>();
-			Set<String> addedPoses = new HashSet<>();
-			editor.animations.forEach(a -> {
-				if(a.isCustom()) {
-					if(a.pose != null) {
-						String name = ((CustomPose)a.pose).getId();
-						if(!addedPoses.contains(name)) {
-							addedPoses.add(name);
-							poses.add(new NamedElement<>(a.pose, k -> name));
+			animations.forEach(a -> {
+				if(a.key.type.isCustom()) {
+					if(a.key.type == AnimationType.CUSTOM_POSE) {
+						String name = a.key.name;
+						poses.add(new NamedElement<>(a.key.pose, k -> name));
+					} else if(a.key.type.isLayer()) {
+						String id = a.key.name;
+						addedLayers.add(id);
+						if(a.key.type == AnimationType.VALUE_LAYER) {
+							Slider progressSlider = new Slider(gui, id + ": 0");
+							progressSlider.setBounds(new Box(0, 0, 160, 20));
+							progressSlider.setValue(editor.animTestSliders.getOrDefault(id, a.anims.get(0).layerDefault));
+							progressSlider.setAction(() -> {
+								progressSlider.setText(id + ": " + ((int) (progressSlider.getValue() * 100)));
+								editor.animTestSliders.put(id, progressSlider.getValue());
+							});
+							customLayers.add(progressSlider);
+						} else {
+							customLayers.addCheckbox(id, b -> {
+								if(enabledLayers.contains(id)) {
+									enabledLayers.remove(id);
+								} else {
+									enabledLayers.add(id);
+								}
+								b.setSelected(enabledLayers.contains(id));
+							}).setSelected(enabledLayers.contains(id));
 						}
-					} else if(a.isLayer()) {
-						String id = a.getId();
-						String name = a.getDisplayGroup();
-						if(!addedLayers.contains(id)) {
-							addedLayers.add(id);
-							if(a.displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
-								Slider progressSlider = new Slider(gui, name + ": 0");
-								progressSlider.setBounds(new Box(0, 0, 160, 20));
-								progressSlider.setValue(editor.animTestSliders.getOrDefault(id, a.layerDefault));
-								progressSlider.setAction(() -> {
-									progressSlider.setText(name + ": " + ((int) (progressSlider.getValue() * 100)));
-									editor.animTestSliders.put(id, progressSlider.getValue());
-								});
-								customLayers.add(progressSlider);
-							} else {
-								customLayers.addCheckbox(name, b -> {
-									if(enabledLayers.contains(id)) {
-										enabledLayers.remove(id);
-									} else {
-										enabledLayers.add(id);
-									}
-									b.setSelected(enabledLayers.contains(id));
-								}).setSelected(enabledLayers.contains(id));
-							}
-						}
-					} else {
-						String id = a.getId();
-						String name = a.getDisplayGroup();
-						if(!addedGestures.contains(id)) {
-							addedGestures.add(id);
-							gestures.add(new NamedElement<>(id, k -> name));
-						}
+					} else if(a.key.type == AnimationType.GESTURE) {
+						gestures.add(new NamedElement<>(a.key.name, Function.identity()));
 					}
 				}
 			});
@@ -125,7 +124,6 @@ public class AnimTestPanel extends Panel {
 		poseSel = createDropDown("label.cpm.pose", poses);
 
 		gestureSel = createDropDown("label.cpm.gesture", gestures);
-		gestureSel.dropDown.setAction(() -> editor.gestureStartTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime());
 
 		Map<Slot, List<NamedElement<VanillaPose>>> slots = new TreeMap<>();
 		for (VanillaPose p : VanillaPose.VALUES) {
@@ -192,7 +190,7 @@ public class AnimTestPanel extends Panel {
 			Slot key = entry.getKey();
 			List<NamedElement<VanillaPose>> val = entry.getValue();
 
-			DropDownPanel<VanillaPose> dropDown = createDropDown("label.cpm.animSlot." + key.name().toLowerCase(), val);
+			DropDownPanel<VanillaPose> dropDown = createDropDown("label.cpm.animSlot." + key.name().toLowerCase(Locale.ROOT), val);
 			poseBoxes.add(dropDown);
 		}
 
@@ -236,14 +234,16 @@ public class AnimTestPanel extends Panel {
 		addElement(layersPanel);
 
 		layout.reflow();
-
-		editor.gestureFinished.add(() -> gestureSel.dropDown.setSelected(null));
 	}
 
 	private <T> DropDownPanel<T> createDropDown(String name, List<NamedElement<T>> val) {
 		DropDownPanel<T> panel = new DropDownPanel<>(name, val);
 		addElement(panel);
 		return panel;
+	}
+
+	private void gestureFinished() {
+		gestureSel.dropDown.setSelected(null);
 	}
 
 	private class DropDownPanel<T> extends Panel {
@@ -272,7 +272,6 @@ public class AnimTestPanel extends Panel {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if(visible) {
-			editor.playStartTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
 			editor.playFullAnim = true;
 			editor.selectedAnim = null;
 		}
@@ -282,25 +281,23 @@ public class AnimTestPanel extends Panel {
 	public void draw(MouseEvent event, float partialTicks) {
 		super.draw(event, partialTicks);
 		editor.animsToPlay.clear();
+		animations.forEach(a -> a.enable = false);
 		NamedElement<IPose> pose = poseSel.getSelected();
 		if(pose != null) {
 			editor.poseToApply = pose.getElem();
-			for (EditorAnim anim : editor.animations) {
-				if(anim.pose != null && (anim.pose == pose.getElem() ||
-						(pose.getElem() instanceof CustomPose && anim.pose instanceof CustomPose &&
-								((CustomPose)pose.getElem()).getId().equals(((CustomPose)anim.pose).getId())
-								))) {
-					editor.animsToPlay.add(anim);
-				} else if(anim.pose == VanillaPose.GLOBAL) {
-					editor.animsToPlay.add(anim);
+			for (PlayableAnim anim : animations) {
+				if(anim.key.matches(editor.poseToApply)) {
+					anim.enable = true;
+				} else if(anim.key.pose == VanillaPose.GLOBAL) {
+					anim.enable = true;
 				}
 			}
 		}
 		NamedElement<String> gesture = gestureSel.getSelected();
 		if(gesture != null && gesture.getElem() != null) {
-			for (EditorAnim anim : editor.animations) {
-				if(anim.isCustom() && anim.pose == null && !anim.isLayer() && anim.getId().equals(gesture.getElem())) {
-					editor.animsToPlay.add(anim);
+			for (PlayableAnim anim : animations) {
+				if(anim.key.type == AnimationType.GESTURE && anim.key.name.equals(gesture.getElem())) {
+					anim.enable = true;
 				}
 			}
 		}
@@ -313,24 +310,136 @@ public class AnimTestPanel extends Panel {
 		if(chbxLeftParrot.isSelected())handlePose(VanillaPose.PARROT_LEFT);
 		if(chbxRightParrot.isSelected())handlePose(VanillaPose.PARROT_RIGHT);
 		enabledLayers.forEach(l -> {
-			for (EditorAnim anim : editor.animations) {
-				if(anim.isCustom() && anim.pose == null && anim.isLayer() && anim.getId().equals(l)) {
-					editor.animsToPlay.add(anim);
+			for (PlayableAnim anim : animations) {
+				if(anim.key.type == AnimationType.LAYER && anim.key.name.equals(l)) {
+					anim.enable = true;
 				}
 			}
 		});
-		for (EditorAnim anim : editor.animations) {
-			if(anim.isCustom() && anim.pose == null && anim.isLayer() && anim.displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
-				editor.animsToPlay.add(anim);
+		for (PlayableAnim anim : animations) {
+			if(anim.key.type == AnimationType.VALUE_LAYER) {
+				anim.enable = true;
 			}
 		}
+		animations.stream().flatMap(PlayableAnim::get).sorted((a, b) -> Integer.compare(a.getPriority(), b.getPriority())).forEach(editor.animsToPlay::add);
 	}
 
 	private void handlePose(VanillaPose p) {
 		editor.testPoses.add(p);
-		for (EditorAnim anim : editor.animations) {
-			if(anim.pose == p) {
-				editor.animsToPlay.add(anim);
+		for (PlayableAnim anim : animations) {
+			if(anim.key.pose == p) {
+				anim.enable = true;
+			}
+		}
+	}
+
+	private class AnimKey {
+		private AnimationType type;
+		private String name;
+		private IPose pose;
+
+		public AnimKey(EditorAnim anim) {
+			if(anim.type.isStaged()) {
+				anim = anim.findLinkedAnim();
+				if(anim == null)return;
+			}
+			type = anim.type;
+			name = anim.getId();
+			pose = anim.pose;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + ((pose == null) ? 0 : pose.hashCode());
+			result = prime * result + ((type == null) ? 0 : type.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			AnimKey other = (AnimKey) obj;
+			if (name == null) {
+				if (other.name != null) return false;
+			} else if (!name.equals(other.name)) return false;
+			if (pose == null) {
+				if (other.pose != null) return false;
+			} else if (!pose.equals(other.pose)) return false;
+			if (type != other.type) return false;
+			return true;
+		}
+
+		public boolean matches(IPose pose) {
+			return (type == AnimationType.POSE || type == AnimationType.CUSTOM_POSE) && this.pose.equals(pose);
+		}
+	}
+
+	private class PlayableAnim {
+		private final List<EditorAnim> anims;
+		private final AnimKey key;
+		private StagedAnimation handler;
+		private long playStartTime;
+		private boolean enable, playing;
+		private int duration;
+
+		public PlayableAnim(AnimKey key, List<EditorAnim> anims) {
+			this.anims = anims;
+			this.key = key;
+			if(anims.stream().anyMatch(e -> e.type.isStaged())) {
+				handler = new StagedAnimation();
+				anims.forEach(a -> {
+					if(a.type == AnimationType.SETUP)handler.addPre(a);
+					else if(a.type == AnimationType.FINISH)handler.addPost(a);
+					else handler.addPlay(a);
+				});
+			}
+			if(key.type == AnimationType.GESTURE) {
+				duration = anims.stream().mapToInt(a -> a.loop ? 0 : a.duration).max().orElse(0);
+			}
+		}
+
+		public Stream<TestAnim> get() {
+			long playTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
+			if(enable && !playing) {
+				playStartTime = playTime;
+				playing = true;
+				if(handler != null) {
+					handler.getAll().forEach(IAnimation::prepare);
+				}
+			} else if(!enable) {
+				playing = false;
+			}
+
+			if(enable && key.type == AnimationType.GESTURE) {
+				if(playTime - playStartTime > duration && !anims.stream().anyMatch(a -> a.loop))
+					gestureFinished();
+			}
+			return (handler != null ?
+					handler.getAll().stream().filter(v -> enable || !v.checkAndUpdateRemove()) :
+						(enable ? anims.stream() : Stream.<IAnimation>empty())
+					).map(TestAnim::new);
+		}
+
+		private class TestAnim implements Runnable {
+			private IAnimation anim;
+
+			public TestAnim(IAnimation anim) {
+				this.anim = anim;
+			}
+
+			@Override
+			public void run() {
+				long playTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
+				anim.animate(playTime - playStartTime, editor.definition);
+			}
+
+			public int getPriority() {
+				return anim.getPriority();
 			}
 		}
 	}

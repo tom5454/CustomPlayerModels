@@ -42,4 +42,33 @@ public interface VertexBuffer {
 	}
 
 	void finish();
+
+	public static final VertexBuffer NULL = new VertexBuffer() {
+
+		@Override
+		public VertexBuffer pos(float x, float y, float z) {
+			return this;
+		}
+
+		@Override
+		public VertexBuffer tex(float u, float v) {
+			return this;
+		}
+
+		@Override
+		public VertexBuffer color(float red, float green, float blue, float alpha) {
+			return this;
+		}
+
+		@Override
+		public VertexBuffer normal(float x, float y, float z) {
+			return this;
+		}
+
+		@Override
+		public void endVertex() {}
+
+		@Override
+		public void finish() {}
+	};
 }

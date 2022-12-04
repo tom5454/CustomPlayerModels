@@ -3,6 +3,7 @@ package com.tom.cpm.shared.gui.panel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -86,7 +87,7 @@ public class SafetyHeaderPanel extends Panel {
 			List<String> profiles = new ArrayList<>();
 			for(BuiltInSafetyProfiles p : BuiltInSafetyProfiles.VALUES) {
 				if(p == BuiltInSafetyProfiles.CUSTOM)continue;
-				profiles.add(p.name().toLowerCase());
+				profiles.add(p.name().toLowerCase(Locale.ROOT));
 			}
 			ConfigEntry spfs = (ConfigEntry) fields.get("safetyBtn");
 			String server = MinecraftClientAccess.get().getConnectedServer();
@@ -98,7 +99,7 @@ public class SafetyHeaderPanel extends Panel {
 				return true;
 			}).map(e -> "custom:" + e).forEach(profiles::add);
 
-			Supplier<String> current = () -> ce.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase());
+			Supplier<String> current = () -> ce.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase(Locale.ROOT));
 
 			btnProfile = new Button(gui, "", null);
 			btnProfile.setBounds(new Box(5, 0, w - 10, 20));
@@ -197,10 +198,10 @@ public class SafetyHeaderPanel extends Panel {
 			profile.copyTo(dummy);
 			sp = new SafetyPanel(gui, dummy, bounds.w, keyGroup, null, main);
 			sp.setEnabled(false);
-			txt = gui.i18nFormat("label.cpm.safetyProfile." + profile.name().toLowerCase());
+			txt = gui.i18nFormat("label.cpm.safetyProfile." + profile.name().toLowerCase(Locale.ROOT));
 		}
 		btnProfile.setText(gui.i18nFormat("button.cpm.safetyProfile", txt));
-		btnProfile.setTooltip(!custom ? new Tooltip(frm, gui.i18nFormat("tooltip.cpm.safetyProfile." + profile.name().toLowerCase())) : null);
+		btnProfile.setTooltip(!custom ? new Tooltip(frm, gui.i18nFormat("tooltip.cpm.safetyProfile." + profile.name().toLowerCase(Locale.ROOT))) : null);
 		addElement(sp);
 	}
 }

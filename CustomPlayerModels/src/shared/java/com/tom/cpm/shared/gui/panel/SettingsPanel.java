@@ -101,6 +101,7 @@ public class SettingsPanel extends Panel {
 			FlowLayout editorLayout = new FlowLayout(editor, 5, 1);
 
 			makeCheckbox(editor, ConfigKeys.TITLE_SCREEN_BUTTON, true);
+			makeCheckbox(editor, ConfigKeys.EDITOR_ESC_EXIT, true);
 
 			if(gui.getMaxScale() != -1) {
 				Button guiScale = new Button(gui, gui.i18nFormat("button.cpm.config.scale", getScale()), null);

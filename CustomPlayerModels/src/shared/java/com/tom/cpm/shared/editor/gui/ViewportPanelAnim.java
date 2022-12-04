@@ -8,6 +8,7 @@ import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -17,13 +18,16 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData.Type;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.util.FilterBuffers;
 import com.tom.cpm.shared.model.builtin.VanillaPlayerModel;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
+import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class ViewportPanelAnim extends ViewportPanel {
 	private List<AnimationDisplayData> anims;
 	private Vec3f animPos, animRot;
+	private FilterBuffers filter = new FilterBuffers(r -> types.get(RenderMode.OUTLINE) == r);
 
 	public ViewportPanelAnim(Frame frm, Editor editor) {
 		super(frm, editor);
@@ -193,15 +197,27 @@ public class ViewportPanelAnim extends ViewportPanel {
 	}
 
 	@Override
-	public void mouseRelease(MouseEvent event) {
-		super.mouseRelease(event);
-		if(event.btn == 0 && editor.selectedAnim != null) {
-			editor.selectedAnim.endDrag();
-		}
+	protected void endGizmoDrag(boolean apply) {
+		super.endGizmoDrag(apply);
+		editor.selectedAnim.endDrag();
 	}
 
 	@Override
 	public boolean canEdit() {
 		return editor.selectedAnim != null && super.canEdit();
+	}
+
+	@Override
+	public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
+		super.render(stack, buf, partialTicks);
+		if(editor.showPreviousFrame.get() && editor.selectedAnim != null && editor.selectedElement != null && editor.selectedAnim.getFrames().size() > 1) {
+			editor.selectedAnim.prevFrame();
+			editor.definition.renderingPanel = this;
+			editor.definition.outlineOnly = true;
+			renderModel(stack, filter.filter(buf), partialTicks);
+			editor.definition.renderingPanel = null;
+			editor.definition.outlineOnly = false;
+			editor.selectedAnim.nextFrame();
+		}
 	}
 }

@@ -16,8 +16,8 @@ import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.editor.CopyTransformEffect;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 
 public class CopyTransformSettingsPopup extends PopupPanel {
 
@@ -45,6 +45,12 @@ public class CopyTransformSettingsPopup extends PopupPanel {
 		createPanel("rotation", rot);
 		createPanel("render_scale", rsc);
 
+		Checkbox cbxV = new Checkbox(gui, gui.i18nFormat("label.cpm.visible"));
+		cbxV.setBounds(new Box(5, 0, 170, 20));
+		cbxV.setSelected(cte.copyVis);
+		cbxV.setAction(() -> cbxV.setSelected(!cbxV.isSelected()));
+		addElement(cbxV);
+
 		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			ActionBuilder ab = e.action("set", "label.cpm.copyTransformSettings");
 			ab.updateValueOp(cte, cte.from, picker.getSelected().getElem(), (a, b) -> a.from = b);
@@ -57,6 +63,7 @@ public class CopyTransformSettingsPopup extends PopupPanel {
 			ab.updateValueOp(cte, cte.copySX, rsc[0], (a, b) -> a.copySX = b);
 			ab.updateValueOp(cte, cte.copySY, rsc[1], (a, b) -> a.copySY = b);
 			ab.updateValueOp(cte, cte.copySZ, rsc[2], (a, b) -> a.copySZ = b);
+			ab.updateValueOp(cte, cte.copyVis, cbxV.isSelected(), (a, b) -> a.copyVis = b);
 			ab.execute();
 			close();
 		});

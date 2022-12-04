@@ -2,6 +2,7 @@ package com.tom.cpl.math;
 
 public class MathHelper {
 	public static final double LOG2 = Math.log(2);
+	public static final float PI = (float) Math.PI;
 
 	public static double clamp(double num, double min, double max) {
 		if (num < min) {
@@ -63,6 +64,11 @@ public class MathHelper {
 
 	public static float lerp(float partial, float prev, float current) {
 		return prev + partial * (current - prev);
+	}
+
+	public static float trigInt(float partial, float prev, float current) {
+		float v = (float) Math.sin(partial * PI / 2);
+		return prev + v * (current - prev);
 	}
 
 	public static float cos(float f) {

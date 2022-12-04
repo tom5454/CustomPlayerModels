@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,9 +14,9 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Generators;
-import com.tom.cpm.shared.editor.ModelElement;
-import com.tom.cpm.shared.editor.RootGroups;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
+import com.tom.cpm.shared.editor.elements.ModelElement;
+import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.project.IProject;
 import com.tom.cpm.shared.editor.project.JsonList;
 import com.tom.cpm.shared.editor.project.JsonMap;
@@ -42,7 +43,7 @@ public class TexturesLoaderV1 implements ProjectPartLoader {
 		JsonMap data = project.getJson("config.json");
 		JsonMap texDt = data.getMap("textures");
 		for(TextureSheetType tex : TextureSheetType.VALUES) {
-			String name = tex.name().toLowerCase();
+			String name = tex.name().toLowerCase(Locale.ROOT);
 			if(!tex.editable) {
 				if(data.getBoolean(name + "Tex", false) || project.getEntry(name + ".png") != null) {
 					ETextures eTex = editor.textures.get(tex);
@@ -50,7 +51,7 @@ public class TexturesLoaderV1 implements ProjectPartLoader {
 					editor.textures.put(tex, eTex);
 					eTex.provider.size = tex.getDefSize();
 					Image def = new Image(eTex.provider.size.x, eTex.provider.size.y);
-					try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tex.name().toLowerCase() + ".png")) {
+					try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tex.name().toLowerCase(Locale.ROOT) + ".png")) {
 						def = Image.loadFrom(is);
 					} catch (IOException e) {
 					}
@@ -72,8 +73,13 @@ public class TexturesLoaderV1 implements ProjectPartLoader {
 					eTex.markDirty();
 					JsonMap skinTexSize = data.getMap(name + "Size");
 					eTex.provider.size = new Vec2i(skinTexSize, tex.getDefSize());
+					boolean customGridSize = img.getWidth() != eTex.provider.size.x || img.getHeight() != eTex.provider.size.y;
 					if(texDt != null && texDt.containsKey(name)) {
-						loadAnimatedTexture(editor, texDt.getMap(name), eTex, tex);
+						JsonMap dt = texDt.getMap(name);
+						loadAnimatedTexture(editor, dt, eTex, tex);
+						eTex.customGridSize = dt.getBoolean("customGridSize", customGridSize);
+					} else {
+						eTex.customGridSize = customGridSize;
 					}
 				}
 			}
@@ -93,7 +99,7 @@ public class TexturesLoaderV1 implements ProjectPartLoader {
 		JsonMap data = project.getJson("config.json");
 		JsonMap texDt = data.putMap("textures");
 		for(TextureSheetType tex : TextureSheetType.VALUES) {
-			String name = tex.name().toLowerCase();
+			String name = tex.name().toLowerCase(Locale.ROOT);
 			ETextures eTex = editor.textures.get(tex);
 			if(eTex != null) {
 				if(eTex.isEditable()) {
@@ -104,7 +110,9 @@ public class TexturesLoaderV1 implements ProjectPartLoader {
 					if(eTex.provider.texture != null && eTex.isEdited()) {
 						project.putFile(name + ".png", eTex.getImage(), Image::storeTo);
 					}
-					saveAnimatedTexture(texDt.putMap(name), eTex);
+					JsonMap dt = texDt.putMap(name);
+					dt.put("customGridSize", eTex.customGridSize);
+					saveAnimatedTexture(dt, eTex);
 				} else {
 					data.put(name + "Tex", true);
 				}

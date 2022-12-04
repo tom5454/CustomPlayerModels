@@ -19,10 +19,10 @@ public class NewSkinPopup extends PopupPanel {
 	public NewSkinPopup(IGui gui, Editor editor) {
 		super(gui);
 
-		Label lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
-		lblTW.setBounds(new Box(5, 15, 40, 18));
-		Label lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
-		lblTH.setBounds(new Box(75, 15, 40, 18));
+		Label lblW = new Label(gui, gui.i18nFormat("label.cpm.width"));
+		lblW.setBounds(new Box(5, 15, 40, 18));
+		Label lblH = new Label(gui, gui.i18nFormat("label.cpm.height"));
+		lblH.setBounds(new Box(75, 15, 40, 18));
 
 		Spinner spinnerW = new Spinner(gui);
 		Spinner spinnerH = new Spinner(gui);
@@ -32,38 +32,52 @@ public class NewSkinPopup extends PopupPanel {
 		spinnerH.setBounds(new Box(75, 25, 65, 18));
 		addElement(spinnerW);
 		addElement(spinnerH);
-		addElement(lblTW);
-		addElement(lblTH);
+		addElement(lblW);
+		addElement(lblH);
 		spinnerW.setValue(64);
 		spinnerH.setValue(64);
 
+		Checkbox customGridSize = new Checkbox(gui, gui.i18nFormat("label.cpm.customGridSize"));
+		customGridSize.setBounds(new Box(5, 50, 100, 20));
+		customGridSize.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.customGridSize")));
+		addElement(customGridSize);
+
+		Label lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
+		lblTW.setBounds(new Box(5, 75, 40, 18));
+		Label lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
+		lblTH.setBounds(new Box(75, 75, 40, 18));
+
 		Spinner spinnerTW = new Spinner(gui);
 		Spinner spinnerTH = new Spinner(gui);
-		if(editor.displayAdvScaling) {
-			Label lblT = new Label(gui, gui.i18nFormat("label.cpm.sheetSize"));
-			lblT.setBounds(new Box(5, 50, 120, 18));
-			lblT.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.texture_sheet")));
-			addElement(lblT);
-
-			lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
-			lblTW.setBounds(new Box(5, 60, 40, 18));
-			lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
-			lblTH.setBounds(new Box(75, 60, 40, 18));
-
-			spinnerTW.setDp(0);
-			spinnerTH.setDp(0);
-			spinnerTW.setBounds(new Box(5, 70, 65, 18));
-			spinnerTH.setBounds(new Box(75, 70, 65, 18));
-			addElement(spinnerTW);
-			addElement(spinnerTH);
-			addElement(lblTW);
-			addElement(lblTH);
-			spinnerTW.setValue(64);
-			spinnerTH.setValue(64);
-		}
+		spinnerTW.setBounds(new Box(5, 85, 65, 18));
+		spinnerTH.setBounds(new Box(75, 85, 65, 18));
+		spinnerTW.setDp(0);
+		spinnerTH.setDp(0);
+		spinnerTW.setEnabled(false);
+		spinnerTH.setEnabled(false);
+		addElement(spinnerTW);
+		addElement(spinnerTH);
+		addElement(lblTW);
+		addElement(lblTH);
+		customGridSize.setAction(() -> {
+			boolean v = !customGridSize.isSelected();
+			if(!v) {
+				spinnerTW.setValue(spinnerW.getValue());
+				spinnerTH.setValue(spinnerH.getValue());
+			}
+			customGridSize.setSelected(v);
+			spinnerTW.setEnabled(v);
+			spinnerTH.setEnabled(v);
+		});
+		spinnerW.addChangeListener(() -> {
+			if(!customGridSize.isSelected())spinnerTW.setValue(spinnerW.getValue());
+		});
+		spinnerH.addChangeListener(() -> {
+			if(!customGridSize.isSelected())spinnerTH.setValue(spinnerH.getValue());
+		});
 
 		Checkbox keepOld = new Checkbox(gui, gui.i18nFormat("label.cpm.keepOldSkin"));
-		keepOld.setBounds(new Box(5, 100, 100, 18));
+		keepOld.setBounds(new Box(5, 110, 100, 18));
 		keepOld.setAction(() -> keepOld.setSelected(!keepOld.isSelected()));
 		addElement(keepOld);
 
@@ -76,14 +90,15 @@ public class NewSkinPopup extends PopupPanel {
 				if(keepOld.isSelected()) {
 					newImage.draw(oldImg);
 				}
-				Vec2i size = new Vec2i((int) spinnerTW.getValue(), (int) spinnerTH.getValue());
-				if(size.x == 0)size.x = (int) spinnerW.getValue();
-				if(size.y == 0)size.y = (int) spinnerH.getValue();
+				Vec2i size = customGridSize.isSelected() ?
+						new Vec2i((int) spinnerTW.getValue(), (int) spinnerTH.getValue()) :
+							new Vec2i((int) spinnerW.getValue(), (int) spinnerH.getValue());
 
 				editor.action("newTexture").
 				updateValueOp(tex, tex.file, null, (a, b) -> a.file = b).
 				updateValueOp(tex, tex.isEdited(), true, ETextures::setEdited).
 				updateValueOp(tex, tex.provider.size, size, (a, b) -> a.provider.size = b).
+				updateValueOp(tex, tex.customGridSize, customGridSize.isSelected(), (a, b) -> a.customGridSize = b).
 				updateValueOp(tex, oldImg, newImage, ETextures::setImage).
 				onAction(tex::restitchTexture).
 				onAction(editor::markElementsDirty).
@@ -94,10 +109,10 @@ public class NewSkinPopup extends PopupPanel {
 				}
 			}
 		});
-		ok.setBounds(new Box(5, 125, 80, 20));
+		ok.setBounds(new Box(5, 135, 80, 20));
 		addElement(ok);
 
-		setBounds(new Box(0, 0, 150, 150));
+		setBounds(new Box(0, 0, 150, 160));
 	}
 
 	@Override

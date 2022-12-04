@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -110,7 +111,7 @@ public class MarkdownParser {
 					String h = lnt.replaceAll("^#+", "").trim();
 					sb.append(h);
 					Line line = parseLine(sb, scl, prefix);
-					headerLines.put(line, h.replaceAll("[^a-zA-Z0-9_\\-\\s]", "").replaceAll("[\\s\\-]", "-").toLowerCase());
+					headerLines.put(line, h.replaceAll("[^a-zA-Z0-9_\\-\\s]", "").replaceAll("[\\s\\-]", "-").toLowerCase(Locale.ROOT));
 
 					if(scl > 1.3f)lines.add(new HorizontalLine());
 					else lines.add(new EmptyLine(4));

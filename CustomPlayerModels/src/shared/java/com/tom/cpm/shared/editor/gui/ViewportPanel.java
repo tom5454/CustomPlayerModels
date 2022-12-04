@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import com.tom.cpl.gui.Frame;
@@ -39,7 +40,7 @@ import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorRenderer;
 import com.tom.cpm.shared.editor.EditorRenderer.BoundType;
-import com.tom.cpm.shared.editor.ModelElement;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
@@ -75,7 +76,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			VecType v = vs[i];
 			ButtonIconToggle icon = new ButtonIconToggle(gui, "editor", v.ordinal() * 16, 48, true, () -> setVec(v));
 			icon.setBounds(new Box(i * 20, 0, 20, 20));
-			icon.setTooltip(new Tooltip(frm, gui.i18nFormat("label.cpm." + v.name().toLowerCase())));
+			icon.setTooltip(new Tooltip(frm, gui.i18nFormat("label.cpm." + v.name().toLowerCase(Locale.ROOT))));
 			addElement(icon);
 			dragGroup.addElement(v, icon);
 		}
@@ -386,30 +387,34 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			}
 		}
 		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds) && dragged > 0) {
-			EditorRenderer.Bounds hovered = editor.definition.bounds.stream().filter(b -> b.isHovered && b.type == EditorRenderer.BoundType.DRAG_PANE).findFirst().orElse(null);
-			dragged = 0;
 			event.consume();
-			if(draggingElement != null && draggingVec != null) {
-				if(hovered != null) {
-					Vec3f[] n = makeDragVec(hovered);
-					setVec(draggingVec, oldValue[0], true);
-					setVec(draggingVec, n[0], false);
-					if(n.length > 1) {
-						setVec(VecType.OFFSET, oldValue[1], true);
-						setVec(VecType.OFFSET, n[1], false);
-					}
-				} else {
-					setVec(draggingVec, oldValue[0], true);
-					if(oldValue.length > 1)setVec(VecType.OFFSET, oldValue[1], true);
-				}
-				editor.updateGui();
-			}
-			draggingElement = null;
-			draggingType = null;
-			oldValue = null;
-			draggingClickOffset = null;
+			endGizmoDrag(true);
 		}
 		super.mouseRelease(event);
+	}
+
+	protected void endGizmoDrag(boolean apply) {
+		EditorRenderer.Bounds hovered = editor.definition.bounds.stream().filter(b -> b.isHovered && b.type == EditorRenderer.BoundType.DRAG_PANE).findFirst().orElse(null);
+		dragged = 0;
+		if(draggingElement != null && draggingVec != null) {
+			if(hovered != null) {
+				Vec3f[] n = makeDragVec(hovered);
+				setVec(draggingVec, oldValue[0], true);
+				if(apply)setVec(draggingVec, n[0], false);
+				if(n.length > 1) {
+					setVec(VecType.OFFSET, oldValue[1], true);
+					if(apply)setVec(VecType.OFFSET, n[1], false);
+				}
+			} else {
+				setVec(draggingVec, oldValue[0], true);
+				if(oldValue.length > 1)setVec(VecType.OFFSET, oldValue[1], true);
+			}
+			editor.updateGui();
+		}
+		draggingElement = null;
+		draggingType = null;
+		oldValue = null;
+		draggingClickOffset = null;
 	}
 
 	protected Vec3f[] makeDragVec(EditorRenderer.Bounds hovered) {
@@ -498,6 +503,10 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
+		if(event.matches(gui.getKeyCodes().KEY_ESCAPE) && draggingElement != null) {
+			event.consume();
+			endGizmoDrag(false);
+		}
 		KeybindHandler h = editor.frame.getKeybindHandler();
 		h.registerKeybind(Keybinds.POSITION, () -> setVec(VecType.POSITION));
 		h.registerKeybind(Keybinds.OFFSET, () -> setVec(VecType.OFFSET));

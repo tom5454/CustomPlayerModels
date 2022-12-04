@@ -50,9 +50,11 @@ public class ProjectFile implements IProject {
 	@Override
 	public List<String> listEntires(String path) {
 		Entry e = root;
-		for(String nm : path.split("/")) {
-			e = e.children.get(nm);
-			if(e == null)return null;
+		if(!path.isEmpty()) {
+			for(String nm : path.split("/")) {
+				e = e.children.get(nm);
+				if(e == null)return null;
+			}
 		}
 		return e.children == null ? null : new ArrayList<>(e.children.keySet());
 	}

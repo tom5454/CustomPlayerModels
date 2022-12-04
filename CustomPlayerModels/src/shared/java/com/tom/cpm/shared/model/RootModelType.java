@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.model;
 
+import java.util.Locale;
+
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public enum RootModelType implements VanillaModelPart {
@@ -30,7 +32,7 @@ public enum RootModelType implements VanillaModelPart {
 
 	@Override
 	public String getName() {
-		return name().toLowerCase();
+		return name().toLowerCase(Locale.ROOT);
 	}
 
 	@Override
@@ -41,5 +43,10 @@ public enum RootModelType implements VanillaModelPart {
 	@Override
 	public VanillaModelPart getCopyFrom() {
 		return copyFrom;
+	}
+
+	@Override
+	public boolean storePrevFramePos() {
+		return true;
 	}
 }

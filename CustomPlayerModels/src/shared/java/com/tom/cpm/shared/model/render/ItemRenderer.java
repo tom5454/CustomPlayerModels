@@ -11,6 +11,11 @@ public class ItemRenderer {
 		this.slotID = slotID;
 	}
 
+	public ItemRenderer(ItemRenderer itemRenderer) {
+		this.slot = itemRenderer.slot;
+		this.slotID = itemRenderer.slotID;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

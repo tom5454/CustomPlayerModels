@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -30,6 +31,8 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
 import com.tom.cpm.shared.editor.gui.popup.ExportStringResultPopup;
@@ -190,6 +193,7 @@ public class Exporter {
 				}
 			}
 		}
+		List<IModelPart> otherParts2 = new ArrayList<>();
 		walkElements(e.elements, el -> {
 			if(el.type == ElementType.NORMAL) {
 				if(el.glow) {
@@ -219,7 +223,7 @@ public class Exporter {
 					otherParts.add(new ModelPartRenderEffect(new EffectRenderItem(el.id, el.itemRenderer.slot, el.itemRenderer.slotID)));
 				}
 				if(el.copyTransform != null) {
-					otherParts.add(new ModelPartRenderEffect(new EffectCopyTransform(el.copyTransform.from.id, el.id, el.copyTransform.toShort())));
+					otherParts2.add(new ModelPartRenderEffect(new EffectCopyTransform(el.copyTransform.from.id, el.id, el.copyTransform.toShort())));
 				}
 			}
 		});
@@ -237,6 +241,7 @@ public class Exporter {
 				}
 			}
 		}
+		otherParts.addAll(otherParts2);
 		if(!e.animations.isEmpty()) {
 			otherParts.add(new ModelPartAnimation(e));
 		}
@@ -376,8 +381,8 @@ public class Exporter {
 				argsList.add(map);
 				map.put("name", a.name);
 				map.put("desc", a.desc);
-				map.put("type", a.type.baseType.name().toLowerCase());
-				map.put("elem_type", a.type.name().toLowerCase());
+				map.put("type", a.type.baseType.name().toLowerCase(Locale.ROOT));
+				map.put("elem_type", a.type.name().toLowerCase(Locale.ROOT));
 				Map<String, Object> d = new HashMap<>();
 				a.handler.export().export(d);
 				map.put("data", d);

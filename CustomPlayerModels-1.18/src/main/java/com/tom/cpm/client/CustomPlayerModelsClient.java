@@ -107,7 +107,7 @@ public class CustomPlayerModelsClient {
 	}
 
 	public static void apiInit() {
-		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class).
+		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class, net.minecraft.world.entity.player.Player::getUUID).
 		renderApi(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class, ModelTexture::new).
 		localModelApi(GameProfile::new).init();
 	}

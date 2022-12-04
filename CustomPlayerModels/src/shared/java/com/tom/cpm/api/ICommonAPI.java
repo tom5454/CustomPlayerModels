@@ -49,4 +49,23 @@ public interface ICommonAPI extends ISharedAPI {
 	 * */
 	<P> void playerJumped(Class<P> playerClass, P player);
 
+	/**
+	 * Play the given command animation for a player.
+	 *
+	 * @param playerClass The player entity class (Player.class)
+	 * @param player the player object
+	 * @param name animation name
+	 * @param value for layers (value: 0-255, toggle: 0-1) or -1 to switch state, 0: reset pose/gesture
+	 * */
+	<P> void playAnimation(Class<P> playerClass, P player, String name, int value);
+
+	/**
+	 * Play the given command animation for a player. For custom poses and gestures only.
+	 * For more control use {@link ICommonAPI#playAnimation(Class, Object, String, int)}
+	 *
+	 * @param playerClass The player entity class (Player.class)
+	 * @param player the player object
+	 * @param name animation name
+	 * */
+	<P> void playAnimation(Class<P> playerClass, P player, String name);
 }

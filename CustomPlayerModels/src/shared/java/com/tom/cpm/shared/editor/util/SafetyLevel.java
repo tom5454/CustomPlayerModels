@@ -3,6 +3,7 @@ package com.tom.cpm.shared.editor.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.editor.Editor;
@@ -60,7 +61,7 @@ public enum SafetyLevel {
 		}
 
 		public String getLvl() {
-			return lvl.name().toLowerCase();
+			return lvl.name().toLowerCase(Locale.ROOT);
 		}
 	}
 }

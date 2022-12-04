@@ -4,27 +4,30 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.animation.Gesture;
+import com.tom.cpm.shared.animation.IAnimation;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.Interpolator;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.ElementType;
-import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
-import com.tom.cpm.shared.editor.gui.AnimPanel.IAnim;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
-public class EditorAnim implements IAnim {
+public class EditorAnim implements IAnimation {
 	private List<ModelElement> components;
 	private final List<AnimFrame> frames = new ArrayList<>();
 	public int duration = 1000;
@@ -37,9 +40,13 @@ public class EditorAnim implements IAnim {
 	public String displayName;
 	public boolean add = true;
 	public boolean loop;
+	public boolean command;
 	public int priority;
 	public InterpolatorType intType = InterpolatorType.POLY_LOOP;
 	public float layerDefault;
+	public int order;
+	public boolean isProperty;
+	public String group;
 
 	public EditorAnim(Editor e, String filename, AnimationType type, boolean initNew) {
 		this.editor = e;
@@ -72,14 +79,15 @@ public class EditorAnim implements IAnim {
 		}
 	}
 
-	public void applyPlay(long millis) {
+	@Override
+	public void animate(long millis, ModelDefinition def) {
 		if(components == null || psfs == null)calculateSplines();
 		float step;
 		boolean remap = false;
 		if(pose != null && pose instanceof VanillaPose && ((VanillaPose)pose).hasStateGetter()) {
 			step = editor.animTestSliders.getOrDefault("__pose", 0f);
 			remap = true;
-		} else if(displayName.startsWith(Gesture.VALUE_LAYER_PREFIX)) {
+		} else if(type == AnimationType.VALUE_LAYER) {
 			step = editor.animTestSliders.getOrDefault(getId(), layerDefault);
 			remap = true;
 		} else step = (float) millis % duration / duration * frames.size();
@@ -192,8 +200,11 @@ public class EditorAnim implements IAnim {
 	@Override
 	public String toString() {
 		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), getDisplayName()));
-		else if(isLayer())return editor.gui().i18nFormat("label.cpm.anim_layer", getDisplayName());
-		return editor.gui().i18nFormat("label.cpm.anim_gesture", getDisplayName());
+		else if(type.isStaged()) {
+			EditorAnim anim = findLinkedAnim();
+			if(anim == null)return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getDisplayName());
+			return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), anim.toString());
+		} else return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getDisplayName());
 	}
 
 	public AnimFrame getSelectedFrame() {
@@ -220,8 +231,8 @@ public class EditorAnim implements IAnim {
 		}
 	}
 
-	public boolean isCustom () {
-		return type == AnimationType.GESTURE || pose instanceof CustomPose;
+	public boolean isCustom() {
+		return type.isCustom();
 	}
 
 	public void clearCache() {
@@ -253,7 +264,6 @@ public class EditorAnim implements IAnim {
 		return ind / (float) (frames.size() - 1);
 	}
 
-	@Override
 	public IPose getPose() {
 		return pose;
 	}
@@ -267,14 +277,45 @@ public class EditorAnim implements IAnim {
 	}
 
 	public String getDisplayGroup() {
-		String nm = getDisplayName();
-		int i = nm.indexOf('#');
-		if(i == -1)return nm;
-		if(i == 0)return "";
-		nm = nm.substring(0, i);
-		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), nm));
-		else if(isLayer())return editor.gui().i18nFormat("label.cpm.anim_layer", nm);
-		return editor.gui().i18nFormat("label.cpm.anim_gesture", nm);
+		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), getId()));
+		else if(type.isStaged()) {
+			EditorAnim anim = findLinkedAnim();
+			if(anim == null)return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getId());
+			return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), anim.getDisplayGroup());
+		} else return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getId());
+	}
+
+	public EditorAnim findLinkedAnim() {
+		String[] nm = displayName.split(":", 2);
+		if(nm.length == 2) {
+			Predicate<EditorAnim> search = null;
+			switch (nm[0]) {
+			case "p":
+				for(VanillaPose p : VanillaPose.VALUES) {
+					if(nm[1].equals(p.name().toLowerCase(Locale.ROOT))) {
+						search = a -> a.pose == p;
+						break;
+					}
+				}
+				break;
+
+			case "c":
+				search = a -> a.pose instanceof CustomPose && ((CustomPose)a.pose).getName().equals(nm[1]);
+				break;
+
+			case "g":
+				search = a -> a.pose == null && a.getId().equals(nm[1]);
+				break;
+
+			default:
+				break;
+			}
+
+			if(search != null) {
+				return editor.animations.stream().filter(search).findFirst().orElse(null);
+			}
+		}
+		return null;
 	}
 
 	public void updateGui() {
@@ -341,13 +382,25 @@ public class EditorAnim implements IAnim {
 		if(currentFrame != null)currentFrame.dragVal(type, vec);
 	}
 
+	public boolean isDragging() {
+		return currentFrame != null ? currentFrame.isDragging() : false;
+	}
+
 	public String getDisplayName() {
-		if(displayName.startsWith(Gesture.LAYER_PREFIX))return displayName.substring(Gesture.LAYER_PREFIX.length());
-		if(displayName.startsWith(Gesture.VALUE_LAYER_PREFIX))return displayName.substring(Gesture.VALUE_LAYER_PREFIX.length());
 		return displayName;
 	}
 
 	public boolean isLayer() {
-		return displayName.startsWith(Gesture.LAYER_PREFIX) || displayName.startsWith(Gesture.VALUE_LAYER_PREFIX);
+		return type.isLayer();
+	}
+
+	@Override
+	public int getPriority() {
+		return priority;
+	}
+
+	@Override
+	public int getDuration() {
+		return duration;
 	}
 }

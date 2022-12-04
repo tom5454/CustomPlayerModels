@@ -4,23 +4,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Pair;
+import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
-import com.tom.cpm.shared.editor.anim.AnimationType;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.project.IProject;
 import com.tom.cpm.shared.editor.project.JsonList;
 import com.tom.cpm.shared.editor.project.JsonMap;
@@ -29,6 +31,10 @@ import com.tom.cpm.shared.editor.project.ProjectWriter;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 
 public class AnimationsLoaderV1 implements ProjectPartLoader {
+	private static final String LAYER_PREFIX = "$layer$";
+	private static final String VALUE_LAYER_PREFIX = "$value$";
+	private static final String SETUP_PREFIX = "$pre$";
+	private static final String FINISH_PREFIX = "$post$";
 
 	@Override
 	public String getId() {
@@ -53,17 +59,18 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 				if(sp[0].equals("v")) {
 					String poseName = sp[1].endsWith(".json") ? sp[1].substring(0, sp[1].length() - 5) : sp[1];
 					for(VanillaPose p : VanillaPose.VALUES) {
-						if(poseName.startsWith(p.name().toLowerCase())) {
+						if(poseName.startsWith(p.name().toLowerCase(Locale.ROOT))) {
 							pose = p;
 							type = AnimationType.POSE;
 							break;
 						}
 					}
 				} else if(sp[0].equals("c")) {
-					pose = new CustomPose(displayName);
-					type = AnimationType.POSE;
+					pose = new CustomPose(displayName, 0);
+					type = AnimationType.CUSTOM_POSE;
 				} else if(sp[0].equals("g")) {
-					type = AnimationType.GESTURE;
+					type = getType(displayName);
+					displayName = cleanName(displayName);
 				}
 				if(type == null)continue;
 				EditorAnim e = new EditorAnim(editor, anim, type, false);
@@ -76,6 +83,10 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 				e.loop = data.getBoolean("loop", false);
 				e.intType = data.getEnum("interpolator", InterpolatorType.VALUES, InterpolatorType.POLY_LOOP);
 				e.layerDefault = data.getFloat("layerDefault", 0f);
+				e.order = data.getInt("order", 0);
+				e.isProperty = data.getBoolean("isProperty", false);
+				e.group = data.getString("group", null);
+				e.command = data.getBoolean("command", false);
 				JsonList frames = data.getList("frames");
 				frames.forEachMap(d -> initFrame(e, d));
 			}
@@ -89,13 +100,17 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 		for (EditorAnim e : editor.animations) {
 			JsonMap data = project.getJson("animations/" + e.filename);
 			data.put("additive", e.add);
-			data.put("name", e.displayName);
+			data.put("name", encodeTypeInName(e.displayName, e.type));
 			if(e.pose instanceof CustomPose)data.put("name", ((CustomPose)e.pose).getName());
 			data.put("duration", e.duration);
 			data.put("priority", e.priority);
 			data.put("loop", e.loop);
-			data.put("interpolator", e.intType.name().toLowerCase());
+			data.put("interpolator", e.intType.name().toLowerCase(Locale.ROOT));
 			data.put("layerDefault", e.layerDefault);
+			data.put("order", e.order);
+			data.put("isProperty", e.isProperty);
+			if(e.group != null && !e.group.isEmpty())data.put("group", e.group);
+			data.put("command", e.command);
 			data.put("frames", writeFrames(e));
 		}
 		saveEnc(editor, project);
@@ -166,5 +181,46 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 			data.put("freeLayers", editor.animEnc.freeLayers.stream().map(l -> l.getLowerName()).collect(Collectors.toList()));
 			data.put("defaultValues", editor.animEnc.defaultLayerValue.entrySet().stream().map(e -> Pair.of(e.getKey().getLowerName(), e.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
 		}
+	}
+
+	public static String getFileName(IPose pose, String displayName) {
+		String fname = null;
+		UUID newId = UUID.randomUUID();
+		if(pose instanceof VanillaPose) {
+			fname = "v_" + ((VanillaPose)pose).name().toLowerCase(Locale.ROOT) + "_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
+		} else if(pose != null) {
+			fname = "c_" + ((CustomPose) pose).getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
+		} else {
+			fname = "g_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
+		}
+		return fname;
+	}
+
+	public static AnimationType getType(String displayName) {
+		if(displayName.startsWith(LAYER_PREFIX))return AnimationType.LAYER;
+		if(displayName.startsWith(VALUE_LAYER_PREFIX))return AnimationType.VALUE_LAYER;
+		if(displayName.startsWith(SETUP_PREFIX))return AnimationType.SETUP;
+		if(displayName.startsWith(FINISH_PREFIX))return AnimationType.FINISH;
+		return AnimationType.GESTURE;
+	}
+
+	public static String cleanName(String displayName) {
+		if(displayName.startsWith(LAYER_PREFIX))
+			return displayName.substring(LAYER_PREFIX.length());
+		if(displayName.startsWith(VALUE_LAYER_PREFIX))
+			return displayName.substring(VALUE_LAYER_PREFIX.length());
+		if(displayName.startsWith(SETUP_PREFIX))
+			return displayName.substring(SETUP_PREFIX.length());
+		if(displayName.startsWith(FINISH_PREFIX))
+			return displayName.substring(FINISH_PREFIX.length());
+		return displayName;
+	}
+
+	public static String encodeTypeInName(String displayName, AnimationType type) {
+		if(type == AnimationType.LAYER)return LAYER_PREFIX + displayName;
+		if(type == AnimationType.VALUE_LAYER)return VALUE_LAYER_PREFIX + displayName;
+		if(type == AnimationType.SETUP)return SETUP_PREFIX + displayName;
+		if(type == AnimationType.FINISH)return FINISH_PREFIX + displayName;
+		return displayName;
 	}
 }

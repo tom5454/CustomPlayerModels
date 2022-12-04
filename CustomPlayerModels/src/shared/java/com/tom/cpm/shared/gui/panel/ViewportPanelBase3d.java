@@ -21,7 +21,7 @@ import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.DisplayItem;
-import com.tom.cpm.shared.editor.RootGroups;
+import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.gui.Keybinds;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.model.SkinType;

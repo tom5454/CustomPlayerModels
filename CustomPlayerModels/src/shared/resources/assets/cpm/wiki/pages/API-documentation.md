@@ -137,18 +137,28 @@ else
 ### Voice animation
 Register a voice level supplier.  
 `IClientAPI:registerVoice(Player.class, player -> voiceLevel);`  
-[Player.class](#client-playerclass)
+[Player.class](#client-player-class)  
+
+Register a voice level supplier. (UUID variant) (0.6.0+)  
+`IClientAPI:registerVoice(playerUUID -> voiceLevel);`  
+
+Register a voice muted supplier. (0.6.0+)  
+`IClientAPI:registerVoiceMute(Player.class, player -> voiceMuted);`  
+[Player.class](#client-player-class)  
+
+Register a voice muted supplier. (UUID variant) (0.6.0+)  
+`IClientAPI:registerVoiceMute(playerUUID -> voiceMuted);`  
 
 ### Rendering API
 Create a player renderer to render CPM models on any Humanoid Entity.  
 `PlayerRenderer<Model, ResourceLocation, RenderType, MultiBufferSource, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class)`  
 For 1.12 and lower use:  
 `RetroPlayerRenderer<Model, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, GameProfile.class);`  
-[Model.class](#client-modelclass)  
-[ResourceLocation.class](#client-resourcelocationclass)  
-[RenderType.class](#client-rendertypeclass)  
-[MultiBufferSource.class](#client-multibuffersourceclass)  
-[GameProfile.class](#client-gameprofileclass)  
+[Model.class](#client-model-class)  
+[ResourceLocation.class](#client-resourcelocation-class)  
+[RenderType.class](#client-rendertype-class)  
+[MultiBufferSource.class](#client-multibuffersource-class)  
+[GameProfile.class](#client-gameprofile-class)  
 
 #### Rendering an Entity with CPM model
 1. Using the renderer set the GameProfile or LocalModel before rendering.  
@@ -242,6 +252,15 @@ public class ExampleGenerator {
 Localization:  
 Add `button.example_mod.example_generator`, `tooltip.example_mod.example_generator` to your language file. Use `\` characters for line breaks in the tooltip.
 
+### Play Animation (0.6.0+)
+Play the given command animation for a player (Client-side).  
+
+Name: Animation name  
+`IClientAPI.playAnimation(name);` or  
+Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or -1 to switch state
+`IClientAPI.playAnimation(name, value);`  
+Returns: true if the animation was found and started playing  
+
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  
 #### Client Player.class
@@ -280,12 +299,21 @@ Create a ModelFile using `ModelFile.load(file);` or `ModelFile.load(inputstream)
 or  
 `ICommonAPI.resetPlayerModel(Player.class, playerObj);`  
 clear the server set model  
-[Player.class](#common-playerclass)  
+[Player.class](#common-player-class)  
 
 ### Jump (0.4.1+)
 Play the jump animation on for a player.  
 `ICommonAPI.playerJumped(Player.class, playerObj);`  
-[Player.class](#common-playerclass)
+[Player.class](#common-player-class)
+
+### Play Animation (0.6.0+)
+Play the given command animation for a player (Server-side).  
+
+Name: Animation name  
+`ICommonAPI.playAnimation(Player.class, playerObj, name);` or  
+Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or -1 to switch state
+`ICommonAPI.playAnimation(Player.class, playerObj, name, value);`  
+[Player.class](#common-player-class)
 
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  

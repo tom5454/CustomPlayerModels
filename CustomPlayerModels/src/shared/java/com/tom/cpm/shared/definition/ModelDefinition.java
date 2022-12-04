@@ -20,6 +20,7 @@ import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
+import com.tom.cpl.util.LocalizedException;
 import com.tom.cpl.util.StringBuilderStream;
 import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.IModelComponent;
@@ -485,7 +486,10 @@ public class ModelDefinition {
 	public FormatText getStatus() {
 		switch (getResolveState()) {
 		case ERRORRED:
-			return new FormatText("label.cpm.errorLoadingModel", getError().toString());
+			if(getError() instanceof LocalizedException)
+				return new FormatText("label.cpm.errorLoadingModel", ((LocalizedException)getError()).getLocalizedText());
+			else
+				return new FormatText("label.cpm.errorLoadingModel", getError().toString());
 		case NEW:
 		case RESOLVING:
 			return new FormatText("label.cpm.loading");

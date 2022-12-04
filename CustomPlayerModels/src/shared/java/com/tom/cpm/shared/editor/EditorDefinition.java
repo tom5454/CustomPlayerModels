@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.TriangleBoundingBox;
@@ -13,9 +14,12 @@ import com.tom.cpl.render.OptionalBuffer;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VertexBuffer;
+import com.tom.cpl.util.Direction;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartRoot;
@@ -27,15 +31,20 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.BoxRender;
 import com.tom.cpm.shared.model.render.GuiModelRenderManager.RedirectPartRenderer;
+import com.tom.cpm.shared.model.render.IExtraRenderDefinition;
+import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.Mesh;
+import com.tom.cpm.shared.model.render.ModelRenderManager.RedirectRenderer;
 import com.tom.cpm.shared.model.render.RenderMode;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
 
-public class EditorDefinition extends ModelDefinition {
+public class EditorDefinition extends ModelDefinition implements IExtraRenderDefinition {
 	private Editor editor;
 	public List<EditorRenderer.Bounds> bounds = new ArrayList<>();
 	public ViewportPanel renderingPanel;
+	public boolean outlineOnly;
+	public Map<ItemRenderer, ItemRenderer> rendererObjectMap = new HashMap<>();
 
 	public EditorDefinition(Editor editor) {
 		this.editor = editor;
@@ -98,19 +107,33 @@ public class EditorDefinition extends ModelDefinition {
 		return editor.elements.stream().map(e -> ((RootModelElement) e.rc).getPart()).anyMatch(t -> t == type);
 	}
 
-	private void drawSelectionBox(RedirectPartRenderer renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube) {
+	private void drawSelectionBox(RedirectPartRenderer renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube, boolean doRenderElems) {
+		if(!doRenderElems && !outlineOnly)return;
 		ElementSelectMode sel = cube.getSelected();
 		if(sel.isRenderOutline()) {
 			boolean s = sel == ElementSelectMode.SELECTED;
-			if(s)BoxRender.drawOrigin(stack, buf.getBuffer(renderTypes, RenderMode.OUTLINE), 0, 0, 0, 1);
+			if(s)BoxRender.drawOrigin(stack, buf.getBuffer(renderTypes, RenderMode.OUTLINE), 0, 0, 0, outlineOnly ? 0.5f : 1);
 			Cube c = cube.getCube();
-			if(c.size == null || c.size.x != 0 || c.size.y != 0 || c.size.z != 0 || c.mcScale != 0)
+			if(c.size == null || c.size.x != 0 || c.size.y != 0 || c.size.z != 0 || c.mcScale != 0) {
 				BoxRender.drawBoundingBox(
 						stack, buf.getBuffer(renderTypes, RenderMode.OUTLINE),
 						cube.getBounds(),
-						s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, 1
+						s ? 1 : 0.5f, s ? 1 : 0.5f, s ? 1 : 0, outlineOnly ? 0.5f : 1
 						);
+				if(cube.getCube() instanceof ModelElement) {
+					ModelElement me = (ModelElement) cube.getCube();
+					if(me.faceUV != null) {
+						Direction d = editor.perfaceFaceDir.get();
+						BoxRender.drawBoundingBox(
+								stack, buf.getBuffer(renderTypes, RenderMode.OUTLINE),
+								cube.getBounds().getFaceOnly(d),
+								1, 0, 0, 1
+								);
+					}
+				}
+			}
 		}
+		if(!doRenderElems)return;
 		if(cube.getCube() instanceof ModelElement && editor.displayGizmo.get()) {
 			Mesh mesh = cube.renderObject;
 			ModelElement me = (ModelElement) cube.getCube();
@@ -139,8 +162,10 @@ public class EditorDefinition extends ModelDefinition {
 		}
 	}
 
-	public void render(RedirectPartRenderer renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube) {
-		drawSelectionBox(renderer, stack, buf, renderTypes, cube);
+	@Override
+	public void render(RedirectRenderer<?> renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube, boolean doRenderElems) {
+		drawSelectionBox((RedirectPartRenderer) renderer, stack, buf, renderTypes, cube, doRenderElems);
+		if(!doRenderElems)return;
 		drawGizmo(cube, stack, buf, renderTypes);
 	}
 
@@ -195,6 +220,13 @@ public class EditorDefinition extends ModelDefinition {
 
 	public void preRender() {
 		itemTransforms.clear();
+		rendererObjectMap.clear();
 		bounds.clear();
+	}
+
+	@Override
+	public void storeTransform(ItemRenderer render, MatrixStack stack, boolean doRender) {
+		if(doRender)rendererObjectMap.put(render, render);
+		super.storeTransform(render, stack, doRender);
 	}
 }

@@ -17,8 +17,8 @@ import com.tom.cpl.math.Vec4f;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTool;
-import com.tom.cpm.shared.editor.ElementType;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
+import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
@@ -264,19 +264,8 @@ public class TextureEditorPanel extends GuiElement {
 			dragging = false;
 			switch (editor.drawMode.get()) {
 			case MOVE_UV:
-			{
-				TreeElement me = editor.selectedElement;
-				if(me != null && moveStart != null) {
-					Vec3f uv = me.getVec(VecType.TEXTURE);
-					me.setVecTemp(VecType.TEXTURE, new Vec3f(moveStart.x, moveStart.y, uv.z));
-					me.setVec(uv, VecType.TEXTURE);
-					moveStart = null;
-					if(me instanceof TreeSettingElement)
-						editor.selectedElement = ((TreeSettingElement)me).getParent();
-					editor.updateGui();
-				}
-			}
-			break;
+				endDrag(true);
+				break;
 
 			default:
 				break;
@@ -302,12 +291,29 @@ public class TextureEditorPanel extends GuiElement {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
+		if(event.matches(gui.getKeyCodes().KEY_ESCAPE) && moveStart != null) {
+			event.consume();
+			endDrag(false);
+		}
 		if(!event.isConsumed() && bounds.isInBounds(mouseCursorPos)) {
 			if(event.matches("+")) {
 				zoom(mouseCursorPos.x, mouseCursorPos.y, 1);
 			} else if(event.matches("-")) {
 				zoom(mouseCursorPos.x, mouseCursorPos.y, -1);
 			}
+		}
+	}
+
+	private void endDrag(boolean apply) {
+		TreeElement me = editor.selectedElement;
+		if(me != null && moveStart != null) {
+			Vec3f uv = me.getVec(VecType.TEXTURE);
+			me.setVecTemp(VecType.TEXTURE, new Vec3f(moveStart.x, moveStart.y, uv.z));
+			if(apply)me.setVec(uv, VecType.TEXTURE);
+			moveStart = null;
+			if(me instanceof TreeSettingElement)
+				editor.selectedElement = ((TreeSettingElement)me).getParent();
+			editor.updateGui();
 		}
 	}
 }

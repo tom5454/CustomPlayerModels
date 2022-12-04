@@ -1,5 +1,6 @@
 package com.tom.cpm.api;
 
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpm.shared.MinecraftServerAccess;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.network.NetHandler;
@@ -62,5 +63,18 @@ public class CommonApi extends SharedApi implements ICommonAPI {
 		if(checkClass(playerClass, Clazz.PLAYER))return;
 		NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
 		h.onJump(player);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> void playAnimation(Class<P> playerClass, P player, String name, int value) {
+		if(checkClass(playerClass, Clazz.PLAYER))return;
+		NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
+		h.playAnimation(player, name, MathHelper.clamp(value, -1, 255));
+	}
+
+	@Override
+	public <P> void playAnimation(Class<P> playerClass, P player, String name) {
+		playAnimation(playerClass, player, name, -1);
 	}
 }

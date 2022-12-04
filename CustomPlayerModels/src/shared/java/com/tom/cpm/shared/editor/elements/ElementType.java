@@ -1,13 +1,15 @@
-package com.tom.cpm.shared.editor;
+package com.tom.cpm.shared.editor.elements;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.FlatListView;
 import com.tom.cpl.util.ListView;
+import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler.ArgElem;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
+import com.tom.cpm.shared.model.render.PlayerModelSetup;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public enum ElementType {
@@ -49,7 +51,7 @@ public enum ElementType {
 			elem.rc.recolor = elem.recolor;
 			elem.texSize = elem.texture ? (elem.mirror ? -elem.textureSize : elem.textureSize) : 0;
 			elem.rc.reset();
-			elem.rc.display = elem.showInEditor && (!elem.editor.applyAnim || !elem.hidden);
+			elem.rc.display = elem.showInEditor && (!elem.editor.applyAnim || !elem.hidden) && !elem.editor.definition.outlineOnly;
 			elem.rc.rotation = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
 			elem.rc.glow = elem.glow;
 			elem.rc.singleTex = elem.singleTex;
@@ -94,6 +96,7 @@ public enum ElementType {
 			elem.rc.rotation = new Vec3f();
 			elem.rc.children = new CombinedListView<>(new ListView<>(elem.children, m -> m.rc), new FlatListView<>(editor.templates, t -> t.getForPart(type).stream()));
 			elem.storeID = type.getId(elem.rc);
+			PlayerModelSetup.initDefaultPose((RootModelElement) elem.rc, type);
 		}
 
 		@Override

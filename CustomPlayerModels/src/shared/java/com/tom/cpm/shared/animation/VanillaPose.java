@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.animation;
 
+import java.util.Locale;
+
 import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.gui.IGui;
 
@@ -58,6 +60,11 @@ public enum VanillaPose implements IPose {
 	TOOT_HORN_RIGHT,
 	IN_GUI,
 	FIRST_PERSON_MOD,
+	VOICE_MUTED,
+	VR_FIRST_PERSON,
+	VR_THIRD_PERSON_SITTING,
+	VR_THIRD_PERSON_STANDING,
+	FIRST_PERSON_HAND,
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;
@@ -66,7 +73,7 @@ public enum VanillaPose implements IPose {
 	public static final int DYNAMIC_DURATION_DIV = 1001;
 
 	private VanillaPose() {
-		i18nKey = "label.cpm.pose." + name().toLowerCase();
+		i18nKey = "label.cpm.pose." + name().toLowerCase(Locale.ROOT);
 	}
 
 	private VanillaPose(ToFloatFunction<AnimationState> stateGetter) {

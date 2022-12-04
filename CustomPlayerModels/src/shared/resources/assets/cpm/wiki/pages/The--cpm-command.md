@@ -4,6 +4,7 @@
 * [safety](#safety)
 * [kick](#kick)
 * [scaling](#scaling)
+* [animate](#animate)
 
 ## setskin
 Usage `/cpm setskin [-f|-t|-r] <target> <base64 model>`  
@@ -49,7 +50,7 @@ Set the kick message
 
 ## scaling
 Usage: `/cpm scaling <scaling option>`  
-Only has an effect after re-logging.  
+Only has an effect after re-logging.
 Subcommands:
 * [limit](#scaling-limit)
 * [enabled](#scaling-enabled)
@@ -62,3 +63,7 @@ Set the Pehkui scaling limit for `scaling option`. Optionally can be set per pla
 Usage: `/cpm scaling <scaling option> enabled [player] <enable>`  
 Enable Pehkui scaling for `scaling option`. Optionally can be set per player using the player argument, leave empty for global setting.
 
+## animate
+Usage: `/cpm animate <target> <animation name> [value (0-255)]`  
+Play the animation for the target player(s).  
+Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or leave empty to switch state.

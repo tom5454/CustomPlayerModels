@@ -7,9 +7,9 @@ import java.util.stream.Stream;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
-import com.tom.cpm.shared.editor.ElementType;
-import com.tom.cpm.shared.editor.ModelElement;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -356,5 +356,9 @@ public class AnimFrame {
 		default:
 			break;
 		}
+	}
+
+	public boolean isDragging() {
+		return applyDrag;
 	}
 }

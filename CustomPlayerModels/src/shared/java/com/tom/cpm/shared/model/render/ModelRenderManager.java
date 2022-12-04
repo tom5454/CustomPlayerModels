@@ -23,7 +23,6 @@ import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
-import com.tom.cpm.shared.editor.EditorDefinition;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartPosition;
 import com.tom.cpm.shared.model.PartRoot;
@@ -32,7 +31,6 @@ import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.BatchedBuffers.BufferOutput;
-import com.tom.cpm.shared.model.render.GuiModelRenderManager.RedirectPartRenderer;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.ErrorLog;
 import com.tom.cpm.shared.util.ErrorLog.LogLevel;
@@ -262,7 +260,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected void bindDefaultTexture(S cbi, TextureSheetType tex) {}
 
 		protected void bindFirstSetup() {
-			if(playerObj != null)playerObj.updateFromModel(model);
+			if(playerObj != null) {
+				playerObj.updateFromModel(model);
+				mngr.animEngine.handleAnimation(playerObj, mode);
+			}
 			for (int i = 0; i < redirectRenderers.size(); i++) {
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();
@@ -294,7 +295,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		}
 
 		protected RedirectRenderer<P> registerHead(Field<P> f) {
-			return register(f).setRenderPredicate(p -> !p.animState.hasSkullOnHead);
+			return register(f).setRenderPredicate(p -> !p.animState.hasSkullOnHead || !def.isHideHeadIfSkull());
 		}
 
 		public void copyModel(P from, P to) {
@@ -417,7 +418,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						float rx = mngr.rx.apply(tp);
 						float ry = mngr.ry.apply(tp);
 						float rz = mngr.rz.apply(tp);
-						boolean doRender = holder.playerObj == null || dh.renderPredicate.test(holder.playerObj) || !holder.def.isHideHeadIfSkull();
+						boolean doRender = holder.playerObj == null || dh.renderPredicate.test(holder.playerObj);
 						elems.forEach(elem -> {
 							if(!elem.renderPart())return;
 							if(holder.def.isRemoveArmorOffset() && elems.getMainRoot() != elem && part.getCopyFrom() != null) {
@@ -485,8 +486,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		public default void render(RenderedCube elem, MatrixStack matrixStackIn, VBuffers buf, float red, float green, float blue, float alpha, boolean doRenderRoot, boolean doRenderElems) {
 			RedirectHolder<?, ?, ?, P> holder = getHolder();
-			if(holder.def instanceof EditorDefinition && buf != null) {
-				((EditorDefinition)holder.def).render((RedirectPartRenderer) this, matrixStackIn, buf, holder.renderTypes, elem);
+			if(holder.def instanceof IExtraRenderDefinition && buf != null) {
+				((IExtraRenderDefinition)holder.def).render(this, matrixStackIn, buf, holder.renderTypes, elem, doRenderElems);
 			}
 			if(elem.children == null)return;
 			for(RenderedCube cube : elem.children) {
@@ -494,8 +495,8 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				translateRotate(cube, matrixStackIn);
 				if(cube.itemRenderer != null) {
 					Cube c = cube.getCube();
-					if(holder.def instanceof EditorDefinition && buf != null) {
-						((EditorDefinition)holder.def).render((RedirectPartRenderer) this, matrixStackIn, buf, holder.renderTypes, cube);
+					if(holder.def instanceof IExtraRenderDefinition && buf != null) {
+						((IExtraRenderDefinition)holder.def).render(this, matrixStackIn, buf, holder.renderTypes, cube, doRenderElems);
 					}
 					matrixStackIn.translate(c.offset.x / 16f, c.offset.y / 16f, c.offset.z / 16f);
 					matrixStackIn.scale(c.scale.x, c.scale.y, c.scale.z);
@@ -504,7 +505,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					continue;
 				}
 				if(!cube.display) {
-					render(cube, matrixStackIn, null, red, green, blue, alpha, doRenderRoot, false);
+					render(cube, matrixStackIn, buf, red, green, blue, alpha, doRenderRoot, false);
 					matrixStackIn.pop();
 					continue;
 				}
@@ -549,7 +550,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				render(elem, stack, buf, color.x, color.y, color.z, color.w, doRender, true);
 				if(!bufIn.isBatched())buf.finishAll();
 			} else {
-				render(elem, stack, null, 1, 1, 1, 1, doRender, true);
+				render(elem, stack, null, 1, 1, 1, 1, doRender, false);
 			}
 		}
 

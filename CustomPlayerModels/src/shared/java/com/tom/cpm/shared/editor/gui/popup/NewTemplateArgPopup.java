@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.elements.Button;
@@ -32,7 +33,7 @@ public class NewTemplateArgPopup extends PopupPanel {
 
 		DropDownBox<NamedElement<TemplateArgType>> argType = new DropDownBox<>(e.frame, Arrays.stream(TemplateArgType.values()).
 				filter(t -> t.canBeAdded).
-				map(t -> new NamedElement<>(t, v -> gui.i18nFormat("label.cpm.template_arg." + v.name().toLowerCase()))).
+				map(t -> new NamedElement<>(t, v -> gui.i18nFormat("label.cpm.template_arg." + v.name().toLowerCase(Locale.ROOT)))).
 				collect(Collectors.toList()));
 		argType.setBounds(new Box(5, 80, 190, 20));
 		addElement(argType);

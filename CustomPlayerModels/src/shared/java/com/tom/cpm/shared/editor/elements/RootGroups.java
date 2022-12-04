@@ -1,4 +1,4 @@
-package com.tom.cpm.shared.editor;
+package com.tom.cpm.shared.editor.elements;
 
 import java.util.function.Consumer;
 

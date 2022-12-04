@@ -4,11 +4,15 @@
   "package": "com.tom.cpm.mixin.of",
   "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "compatibilityLevel": "JAVA_17",
+  "refmap": "CustomPlayerModels-Fabric-1.19-refmap.json",
   "mixins": [
   ],
   "client": [
     "AbstractTextureMixin_OF",
-    "ModelPartMixin_OF"
+    "ModelPartMixin_OF",
+	"VRArmRendererMixin_VR",
+	"VRPlayerRendererMixin_VR",
+	"VRPlayerModelWithArmsMixin_VR"
   ],
   "injectors": {
     "defaultRequire": 1

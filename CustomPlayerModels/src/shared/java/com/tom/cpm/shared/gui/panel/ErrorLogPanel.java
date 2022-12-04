@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.tom.cpl.gui.Frame;
@@ -116,7 +117,7 @@ public class ErrorLogPanel extends Panel {
 		public EntryPanel(LogEntry entry, int y, int w) {
 			super(ErrorLogPanel.this.getGui());
 
-			addElement(new Label(gui, gui.i18nFormat("label.cpm.level." + entry.getLevel().name().toLowerCase())).setBounds(new Box(5, 4, 20, 10)));
+			addElement(new Label(gui, gui.i18nFormat("label.cpm.level." + entry.getLevel().name().toLowerCase(Locale.ROOT))).setBounds(new Box(5, 4, 20, 10)));
 
 			addElement(new Label(gui, entry.getMessage().toString(gui)).setBounds(new Box(45, 4, w - 35, 10)));
 

@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.project.loaders;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
@@ -40,7 +41,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 		if(scaling != null) {
 			for(ScalingOptions opt : ScalingOptions.VALUES) {
 				if(opt == ScalingOptions.ENTITY)continue;
-				float v = scaling.getFloat(opt.name().toLowerCase(), 0);
+				float v = scaling.getFloat(opt.name().toLowerCase(Locale.ROOT), 0);
 				if(v != 0)
 					editor.scalingElem.scaling.put(opt, v);
 			}
@@ -52,6 +53,9 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 		if(fpHand != null) {
 			editor.leftHandPos = loadPartPos(fpHand, "left");
 			editor.rightHandPos = loadPartPos(fpHand, "right");
+		}
+		if(data.containsKey("modelId")) {
+			editor.modelId = data.getString("modelId");
 		}
 	}
 
@@ -84,7 +88,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 		JsonMap scaling = data.putMap("scalingEx");
 		for(ScalingOptions opt : ScalingOptions.VALUES) {
 			if(opt == ScalingOptions.ENTITY)continue;
-			scaling.put(opt.name().toLowerCase(), editor.scalingElem.getScale(opt));
+			scaling.put(opt.name().toLowerCase(Locale.ROOT), editor.scalingElem.getScale(opt));
 		}
 		scaling.put("render_position", editor.scalingElem.pos.toMap());
 		scaling.put("render_rotation", editor.scalingElem.rotation.toMap());
@@ -92,6 +96,9 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 		JsonMap fpHand = data.putMap("firstPersonHand");
 		putPartPos(editor.leftHandPos, fpHand, "left");
 		putPartPos(editor.rightHandPos, fpHand, "right");
+		if(editor.modelId != null) {
+			data.put("modelId", editor.modelId);
+		}
 	}
 
 }

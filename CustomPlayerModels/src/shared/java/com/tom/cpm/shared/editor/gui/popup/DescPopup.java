@@ -24,7 +24,7 @@ public class DescPopup extends PopupPanel {
 
 	public DescPopup(EditorGui g, boolean skinTypeSettings, Runnable onOk) {
 		super(g.getGui());
-		setBounds(new Box(0, 0, 320, 195));
+		setBounds(new Box(0, 0, 320, 220));
 		Editor editor = g.getEditor();
 		skinType = editor.skinType;
 
@@ -99,6 +99,16 @@ public class DescPopup extends PopupPanel {
 			group.accept(skinType);
 		}
 
+		Label modelIdLbl = new Label(gui, gui.i18nFormat("label.cpm.modelPropertyId"));
+		modelIdLbl.setBounds(new Box(5, 160, 130, 10));
+		modelIdLbl.setTooltip(new Tooltip(g, gui.i18nFormat("tooltip.cpm.modelPropertyId")));
+		addElement(modelIdLbl);
+
+		TextField modelIdField = new TextField(gui);
+		modelIdField.setBounds(new Box(5, 170, 130, 20));
+		if(editor.modelId != null)modelIdField.setText(editor.modelId);
+		addElement(modelIdField);
+
 		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			if(skinTypeSettings && editor.skinType != skinType) {
 				if(editor.elements.stream().anyMatch(m -> !m.hidden)) {
@@ -115,12 +125,13 @@ public class DescPopup extends PopupPanel {
 			editor.description.name = nameField.getText();
 			editor.description.desc = descField.getText();
 			editor.description.copyProtection = chbxUUIDLock.isSelected() ? CopyProtection.UUID_LOCK : chbxClone.isSelected() ? CopyProtection.CLONEABLE : CopyProtection.NORMAL;
+			if(!modelIdField.getText().isEmpty())editor.modelId = modelIdField.getText();
 			editor.markDirty();
 			close();
 			if(onOk != null)
 				onOk.run();
 		});
-		ok.setBounds(new Box(5, 170, 60, 20));
+		ok.setBounds(new Box(5, 195, 60, 20));
 		addElement(ok);
 	}
 

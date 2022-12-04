@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.project.loaders;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Image;
@@ -41,7 +42,7 @@ public class DescriptionLoaderV1 implements ProjectPartLoader {
 			map.put("zoom", editor.description.camera.camDist);
 			map.put("look", editor.description.camera.look.toMap());
 			map.put("pos", editor.description.camera.position.toMap());
-			map.put("copyProt", editor.description.copyProtection.name().toLowerCase());
+			map.put("copyProt", editor.description.copyProtection.name().toLowerCase(Locale.ROOT));
 			if(editor.description.icon != null) {
 				project.putFile("desc_icon.png", editor.description.icon, Image::storeTo);
 			}

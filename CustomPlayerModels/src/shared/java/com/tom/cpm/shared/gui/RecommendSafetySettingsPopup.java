@@ -3,6 +3,7 @@ package com.tom.cpm.shared.gui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.IGui;
@@ -120,7 +121,7 @@ public class RecommendSafetySettingsPopup extends PopupPanel {
 				}
 			}
 		} else if(profile != null) {
-			se.setString(ConfigKeys.SAFETY_PROFILE, profile.name().toLowerCase());
+			se.setString(ConfigKeys.SAFETY_PROFILE, profile.name().toLowerCase(Locale.ROOT));
 		}
 		ModConfig.getCommonConfig().save();
 		changes.clear();
@@ -159,7 +160,7 @@ public class RecommendSafetySettingsPopup extends PopupPanel {
 			String name = ce.getString(ConfigKeys.NAME, "???");
 			return gui.i18nFormat("label.cpm.safetyProfile.custom", name);
 		} else {
-			return gui.i18nFormat("label.cpm.safetyProfile." + profile.name().toLowerCase());
+			return gui.i18nFormat("label.cpm.safetyProfile." + profile.name().toLowerCase(Locale.ROOT));
 		}
 	}
 

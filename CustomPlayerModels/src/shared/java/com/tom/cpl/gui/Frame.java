@@ -26,10 +26,14 @@ public abstract class Frame extends Panel {
 	public void keyPressed(KeyboardEvent event) {
 		super.keyPressed(event);
 		if(event.matches(gui.getKeyCodes().KEY_ESCAPE)) {
-			gui.close();
+			onClosing();
 			event.consume();
 		}
 		keybindHandler.keyEvent(event);
+	}
+
+	protected void onClosing() {
+		gui.close();
 	}
 
 	public final void init(int width, int height) {

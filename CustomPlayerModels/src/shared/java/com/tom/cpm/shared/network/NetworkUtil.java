@@ -3,6 +3,7 @@ package com.tom.cpm.shared.network;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.tom.cpl.config.ConfigEntry;
@@ -60,10 +61,10 @@ public class NetworkUtil {
 	}
 
 	public static void sendSafetySettings(NetHandler<?, ?, ?> handler, ServerNetH net) {
-		BuiltInSafetyProfiles profile = BuiltInSafetyProfiles.get(ModConfig.getWorldConfig().getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase()));
+		BuiltInSafetyProfiles profile = BuiltInSafetyProfiles.get(ModConfig.getWorldConfig().getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase(Locale.ROOT)));
 		if(profile != null) {
 			NBTTagCompound tag = new NBTTagCompound();
-			tag.setString(PROFILE_TAG, profile.name().toLowerCase());
+			tag.setString(PROFILE_TAG, profile.name().toLowerCase(Locale.ROOT));
 			if(profile == BuiltInSafetyProfiles.CUSTOM) {
 				Map<String, Object> map = new HashMap<>();
 				ConfigEntry main = ModConfig.getWorldConfig().getEntry(ConfigKeys.SAFETY_SETTINGS);
@@ -87,10 +88,10 @@ public class NetworkUtil {
 		ConfigEntry e = ModConfig.getWorldConfig();
 		ConfigEntry pl = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS);
 		ConfigEntry g = e.getEntry(ConfigKeys.SCALING_SETTINGS);
-		if(!getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.ENABLED, ConfigEntry::getBoolean, o.getDefualtEnabled()))
+		if(!getValue(pl, g, id, o.name().toLowerCase(Locale.ROOT), ConfigKeys.ENABLED, ConfigEntry::getBoolean, o.getDefualtEnabled()))
 			return null;
-		float min = getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.MIN, ConfigEntry::getFloat, o.getMin());
-		float max = getValue(pl, g, id, o.name().toLowerCase(), ConfigKeys.MAX, ConfigEntry::getFloat, o.getMax());
+		float min = getValue(pl, g, id, o.name().toLowerCase(Locale.ROOT), ConfigKeys.MIN, ConfigEntry::getFloat, o.getMin());
+		float max = getValue(pl, g, id, o.name().toLowerCase(Locale.ROOT), ConfigKeys.MAX, ConfigEntry::getFloat, o.getMax());
 		return Pair.of(min, max);
 	}
 

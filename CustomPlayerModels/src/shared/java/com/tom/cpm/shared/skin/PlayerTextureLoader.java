@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.skin;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -43,8 +44,8 @@ public abstract class PlayerTextureLoader {
 		}
 
 		private CompletableFuture<Image> get0() {
-			if(MinecraftObjectHolder.DEBUGGING && new File(type.name().toLowerCase() + "_test.png").exists()) {
-				return Image.loadFrom(new File(type.name().toLowerCase() + "_test.png"));
+			if(MinecraftObjectHolder.DEBUGGING && new File(type.name().toLowerCase(Locale.ROOT) + "_test.png").exists()) {
+				return Image.loadFrom(new File(type.name().toLowerCase(Locale.ROOT) + "_test.png"));
 			}
 			if(url == null)return null;
 			if(cachedFile != null && cachedFile.isFile())

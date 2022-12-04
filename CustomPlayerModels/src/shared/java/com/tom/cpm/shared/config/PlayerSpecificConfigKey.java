@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.config;
 
 import java.util.EnumMap;
+import java.util.Locale;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -75,7 +76,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 
 			@Override
 			public IText formatValue(T v) {
-				return new FormatText("label.cpm.safety." + name, new FormatText("label.cpm.safety." + name + "." + v.name().toLowerCase()));
+				return new FormatText("label.cpm.safety." + name, new FormatText("label.cpm.safety." + name + "." + v.name().toLowerCase(Locale.ROOT)));
 			}
 
 			@Override
@@ -278,7 +279,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 
 	public V getValueFor(String server, String uuid, ConfigEntry ce) {
 		ConfigEntry gs = ce.getEntry(ConfigKeys.GLOBAL_SETTINGS);
-		String[] spf = gs.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase()).split(":", 2);
+		String[] spf = gs.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase(Locale.ROOT)).split(":", 2);
 		BuiltInSafetyProfiles profile = SocialConfig.getProfile(spf);
 		ConfigEntry fr = ce.getEntry(ConfigKeys.FRIEND_SETTINGS);
 		ConfigEntry ss = ce.getEntry(ConfigKeys.SERVER_SETTINGS);
@@ -286,7 +287,7 @@ public abstract class PlayerSpecificConfigKey<V> {
 		if(server != null && ss.hasEntry(server)) {
 			ConfigEntry e = ss.getEntry(server);
 			if(e.hasEntry(ConfigKeys.SAFETY_PROFILE)) {
-				spf = e.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase()).split(":", 2);
+				spf = e.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase(Locale.ROOT)).split(":", 2);
 				profile = SocialConfig.getProfile(spf);
 			}
 		}

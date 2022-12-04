@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import com.tom.cpl.config.ConfigEntry.ConfigEntryList;
 import com.tom.cpl.gui.Frame;
@@ -47,8 +48,9 @@ import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.Generators;
-import com.tom.cpm.shared.editor.RootGroups;
 import com.tom.cpm.shared.editor.TestIngameManager;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.gui.popup.ChangelogPopup;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.DescPopup;
@@ -77,6 +79,7 @@ public class EditorGui extends Frame {
 	private TabbedPanelManager tabs;
 	private HorizontalLayout topPanel;
 	private Editor editor;
+	private ViewType viewType;
 	private static boolean smallGuiWarning = true;
 	private static boolean notSupportedWarning = true;
 	private static boolean showFirstStart;
@@ -164,6 +167,7 @@ public class EditorGui extends Frame {
 		}
 
 		editor.updaterReg.reset();
+		viewType = ViewType.MODEL;
 
 		tabs = new TabbedPanelManager(gui);
 		tabs.setBounds(new Box(0, 20, width, height - 20));
@@ -233,7 +237,7 @@ public class EditorGui extends Frame {
 		sp.setBounds(new Box(0, 0, 170, height - 20));
 		sp.setScrollBarSide(true);
 		mainPanel.addElement(sp);
-		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.model"), mainPanel));
+		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.model"), mainPanel, () -> viewType = ViewType.MODEL));
 
 		mainPanel.addElement(new TreePanel(gui, this, width, height - 20, true));
 
@@ -246,7 +250,7 @@ public class EditorGui extends Frame {
 	private void initTexturePanel(int width, int height) {
 		Panel textureEditor = new Panel(gui);
 		textureEditor.setBounds(new Box(0, 0, width, height - 20));
-		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.texture"), textureEditor));
+		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.texture"), textureEditor, () -> viewType = ViewType.TEXTURE));
 
 		ViewportPaintPanel viewT = new ViewportPaintPanel(this, editor);
 		viewT.setBounds(new Box(0, 0, width - height / 2, height - 20));
@@ -320,7 +324,7 @@ public class EditorGui extends Frame {
 		mainPanel.addElement(animPanelTabs);
 		mainPanel.addElement(buttonsPanel);
 
-		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.animation"), mainPanel));
+		topPanel.add(tabs.createTab(gui.i18nFormat("tab.cpm.animation"), mainPanel, () -> viewType = ViewType.ANIMATION));
 
 		mainPanel.addElement(new TreePanel(gui, this, width, height - 20, false) {
 
@@ -489,7 +493,7 @@ public class EditorGui extends Frame {
 		pp.addMenuButton(gui.i18nFormat("button.cpm.edit.parts"), parts);
 
 		RootGroups.forEach(c -> {
-			parts.addButton(gui.i18nFormat("button.cpm.root_group." + c.name().toLowerCase()), () -> editor.addRoot(c));
+			parts.addButton(gui.i18nFormat("button.cpm.root_group." + c.name().toLowerCase(Locale.ROOT)), () -> editor.addRoot(c));
 		});
 
 		parts.addButton(gui.i18nFormat("button.cpm.root_group.itemHoldPos"), () -> Generators.addItemHoldPos(editor));
@@ -600,91 +604,109 @@ public class EditorGui extends Frame {
 	}
 
 	private void initDisplayMenu() {
-		PopupMenu pp = new PopupMenu(gui, this);
 		int x = topPanel.getX();
-		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.display"), () -> pp.display(x, 20)));
 
-		editor.renderBase.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawBase"));
+		topPanel.add(new Button(gui, gui.i18nFormat("button.cpm.display"), () -> {
+			PopupMenu pp = new PopupMenu(gui, this);
 
-		editor.playerTpose.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.player_tpose"));
+			editor.renderBase.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawBase"));
 
-		editor.drawAllUVs.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.allUVs"));
+			if(viewType != ViewType.ANIMATION)
+				editor.playerTpose.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.player_tpose"));
 
-		Checkbox chxbxFilterDraw = editor.onlyDrawOnSelected.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.onlyDrawOnSelected"));
-		chxbxFilterDraw.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.onlyDrawOnSelected")));
+			editor.drawAllUVs.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.allUVs"));
 
-		Checkbox chxbxVanillaAnims = editor.playVanillaAnims.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.playVanillaAnims"));
-		chxbxVanillaAnims.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playVanillaAnims")));
-
-		Checkbox chxbxAnimatedTex = editor.playAnimatedTex.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.playAnimatedTex"));
-		editor.playAnimatedTex.add(() -> {
-			if(!editor.playAnimatedTex.get())
-				editor.textures.values().forEach(ETextures::refreshTexture);
-		});
-		chxbxAnimatedTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playAnimatedTex")));
-
-		editor.drawBoundingBox.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawBoundingBox"));
-
-		Checkbox chxbxChat = pp.addCheckbox(gui.i18nFormat("label.cpm.display.displayChat"), b -> {
-			editor.displayChat = !b.isSelected();
-			b.setSelected(editor.displayChat);
-		});
-		chxbxChat.setSelected(editor.displayChat);
-
-		Checkbox chxbxAdvScaling = pp.addCheckbox(gui.i18nFormat("label.cpm.display.advScaling"), b -> {
-			editor.displayAdvScaling = !b.isSelected();
-			b.setSelected(editor.displayAdvScaling);
-			editor.updateGui();
-		});
-		chxbxAdvScaling.setSelected(editor.displayAdvScaling);
-
-		Checkbox chxbxForceItemInAnim = editor.forceHeldItemInAnim.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.forceItemInAnim"));
-		editor.forceHeldItemInAnim.add(editor::updateGui);
-		chxbxForceItemInAnim.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.forceItemInAnim")));
-
-		Checkbox chxbxDisplayGizmo = editor.displayGizmo.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.displayGizmo"));
-		editor.displayGizmo.add(editor::updateGui);
-		chxbxDisplayGizmo.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.displayGizmo", Keybinds.TOGGLE_GIZMO.getSetKey(gui))));
-
-		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
-
-		PopupMenu heldItemRight = new PopupMenu(gui, this);
-		pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.right"), heldItemRight);
-		initHeldItemPopup(heldItemRight, ItemSlot.RIGHT_HAND);
-
-		PopupMenu heldItemLeft = new PopupMenu(gui, this);
-		pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
-		initHeldItemPopup(heldItemLeft, ItemSlot.LEFT_HAND);
-
-		PopupMenu heldItemHead = new PopupMenu(gui, this);
-		pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.head"), heldItemHead);
-		initHeldItemPopup(heldItemHead, ItemSlot.HEAD);
-
-		pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.layers")).setBounds(new Box(5, 5, 0, 0)));
-
-		addLayerToggle(pp, PlayerModelLayer.CAPE);
-
-		PopupMenu armor = new PopupMenu(gui, this);
-		pp.addMenuButton(gui.i18nFormat("button.cpm.display.armor"), armor);
-		for (PlayerModelLayer a : PlayerModelLayer.ARMOR) {
-			addLayerToggle(armor, a);
-		}
-		armor.addButton(gui.i18nFormat("button.cpm.display.toggleArmor"), () -> {
-			if(Arrays.stream(PlayerModelLayer.ARMOR).noneMatch(r -> editor.modelDisplayLayers.stream().anyMatch(l -> l == r))) {
-				for (PlayerModelLayer a : PlayerModelLayer.ARMOR)editor.modelDisplayLayers.add(a);
-			} else {
-				for (PlayerModelLayer a : PlayerModelLayer.ARMOR)editor.modelDisplayLayers.remove(a);
+			if(viewType == ViewType.TEXTURE) {
+				Checkbox chxbxFilterDraw = editor.onlyDrawOnSelected.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.onlyDrawOnSelected"));
+				chxbxFilterDraw.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.onlyDrawOnSelected")));
 			}
-			editor.updateGui();
-		});
 
-		addLayerToggle(pp, PlayerModelLayer.ELYTRA);
+			if(viewType == ViewType.ANIMATION) {
+				Checkbox chxbxVanillaAnims = editor.playVanillaAnims.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.playVanillaAnims"));
+				chxbxVanillaAnims.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playVanillaAnims")));
+			}
 
-		editor.drawParrots.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawParrots"));
+			Checkbox chxbxAnimatedTex = editor.playAnimatedTex.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.playAnimatedTex"));
+			editor.playAnimatedTex.add(() -> {
+				if(!editor.playAnimatedTex.get())
+					editor.textures.values().forEach(ETextures::refreshTexture);
+			});
+			chxbxAnimatedTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.playAnimatedTex")));
+
+			editor.drawBoundingBox.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawBoundingBox"));
+
+			Checkbox chxbxChat = pp.addCheckbox(gui.i18nFormat("label.cpm.display.displayChat"), b -> {
+				editor.displayChat = !b.isSelected();
+				b.setSelected(editor.displayChat);
+			});
+			chxbxChat.setSelected(editor.displayChat);
+
+			Checkbox chxbxAdvScaling = pp.addCheckbox(gui.i18nFormat("label.cpm.display.advScaling"), b -> {
+				editor.displayAdvScaling = !b.isSelected();
+				b.setSelected(editor.displayAdvScaling);
+				editor.updateGui();
+			});
+			chxbxAdvScaling.setSelected(editor.displayAdvScaling);
+
+			if(viewType == ViewType.ANIMATION) {
+				Checkbox chxbxForceItemInAnim = editor.forceHeldItemInAnim.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.forceItemInAnim"));
+				editor.forceHeldItemInAnim.add(editor::updateGui);
+				chxbxForceItemInAnim.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.forceItemInAnim")));
+			}
+
+			Checkbox chxbxDisplayGizmo = editor.displayGizmo.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.displayGizmo"));
+			editor.displayGizmo.add(editor::updateGui);
+			chxbxDisplayGizmo.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.displayGizmo", Keybinds.TOGGLE_GIZMO.getSetKey(gui))));
+
+			if(viewType == ViewType.ANIMATION) {
+				Checkbox chxbxShowPreviousFrame = editor.showPreviousFrame.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.showPreviousFrame"));
+				chxbxShowPreviousFrame.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.showPreviousFrame")));
+			}
+
+			if(viewType != ViewType.ANIMATION || editor.forceHeldItemInAnim.get()) {
+				pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.items")).setBounds(new Box(5, 5, 0, 0)));
+
+				PopupMenu heldItemRight = new PopupMenu(gui, this);
+				pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.right"), heldItemRight);
+				initHeldItemPopup(heldItemRight, ItemSlot.RIGHT_HAND);
+
+				PopupMenu heldItemLeft = new PopupMenu(gui, this);
+				pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.left"), heldItemLeft);
+				initHeldItemPopup(heldItemLeft, ItemSlot.LEFT_HAND);
+
+				PopupMenu heldItemHead = new PopupMenu(gui, this);
+				pp.addMenuButton(gui.i18nFormat("button.cpm.display.heldItem.head"), heldItemHead);
+				initHeldItemPopup(heldItemHead, ItemSlot.HEAD);
+
+				pp.add(new Label(gui, gui.i18nFormat("label.cpm.display.layers")).setBounds(new Box(5, 5, 0, 0)));
+
+				addLayerToggle(pp, PlayerModelLayer.CAPE);
+
+				PopupMenu armor = new PopupMenu(gui, this);
+				pp.addMenuButton(gui.i18nFormat("button.cpm.display.armor"), armor);
+				for (PlayerModelLayer a : PlayerModelLayer.ARMOR) {
+					addLayerToggle(armor, a);
+				}
+				armor.addButton(gui.i18nFormat("button.cpm.display.toggleArmor"), () -> {
+					if(Arrays.stream(PlayerModelLayer.ARMOR).noneMatch(r -> editor.modelDisplayLayers.stream().anyMatch(l -> l == r))) {
+						for (PlayerModelLayer a : PlayerModelLayer.ARMOR)editor.modelDisplayLayers.add(a);
+					} else {
+						for (PlayerModelLayer a : PlayerModelLayer.ARMOR)editor.modelDisplayLayers.remove(a);
+					}
+					editor.updateGui();
+				});
+
+				addLayerToggle(pp, PlayerModelLayer.ELYTRA);
+
+				editor.drawParrots.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawParrots"));
+			}
+
+			pp.display(x, 20);
+		}));
 	}
 
 	private void addLayerToggle(PopupMenu pp, PlayerModelLayer layer) {
-		Checkbox chbx = pp.addCheckbox(gui.i18nFormat("label.cpm.display." + layer.name().toLowerCase()), c -> {
+		Checkbox chbx = pp.addCheckbox(gui.i18nFormat("label.cpm.display." + layer.name().toLowerCase(Locale.ROOT)), c -> {
 			if(!c.isSelected())editor.modelDisplayLayers.add(layer);
 			else editor.modelDisplayLayers.remove(layer);
 			editor.updateGui();
@@ -696,7 +718,7 @@ public class EditorGui extends Frame {
 		ButtonGroup<DisplayItem, Checkbox> group = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> editor.handDisplay.put(hand, i));
 		for(DisplayItem item : DisplayItem.VALUES) {
 			if(hand == ItemSlot.HEAD && !item.canBeOnHead)continue;
-			group.addElement(item, r -> pp.addCheckbox(gui.i18nFormat("button.cpm.heldItem." + item.name().toLowerCase()), r));
+			group.addElement(item, r -> pp.addCheckbox(gui.i18nFormat("button.cpm.heldItem." + item.name().toLowerCase(Locale.ROOT)), r));
 		}
 		group.accept(editor.handDisplay.getOrDefault(hand, DisplayItem.NONE));
 	}
@@ -747,8 +769,9 @@ public class EditorGui extends Frame {
 	public void loadSkin(File file) {
 		ETextures tex = editor.getTextureProvider();
 		if(tex != null) {
-			tex.file = file;
-			editor.reloadSkin();
+			ActionBuilder ab = editor.action("loadTexture");
+			ab.updateValueOp(tex, tex.file, file, (a, b) -> a.file = b);
+			editor.reloadSkin(ab, tex, file);
 			editor.updateGui();
 		}
 	}
@@ -772,11 +795,9 @@ public class EditorGui extends Frame {
 		getKeybindHandler().registerKeybind(Keybinds.REDO, editor::redo);
 		getKeybindHandler().registerKeybind(Keybinds.SAVE, this::save);
 		getKeybindHandler().registerKeybind(Keybinds.TOGGLE_GIZMO, editor.displayGizmo::toggle);
-		if(!event.isConsumed()) {
-			if(event.keyCode == gui.getKeyCodes().KEY_F5) {
-				editor.refreshCaches();
-				event.consume();
-			}
+		if(event.matches(gui.getKeyCodes().KEY_F5)) {
+			editor.refreshCaches();
+			event.consume();
 		}
 		super.keyPressed(event);
 	}
@@ -826,5 +847,17 @@ public class EditorGui extends Frame {
 
 	public static Editor getActiveTestingEditor() {
 		return toReopen;
+	}
+
+	@Override
+	protected void onClosing() {
+		if(ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_ESC_EXIT, true))
+			gui.close();
+	}
+
+	public static enum ViewType {
+		MODEL,
+		TEXTURE,
+		ANIMATION
 	}
 }

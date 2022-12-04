@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
@@ -14,7 +15,9 @@ import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.LocalizedIOException;
 import com.tom.cpm.shared.definition.Link;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.paste.PastePopup;
 
@@ -125,24 +128,18 @@ public class OverflowPopup extends PopupPanel {
 			setter.setTooltip(null);
 			return;
 		}
-		if(text.startsWith("https://gist.github.com/")) {
-			text = text.substring("https://gist.github.com/".length());
-			String[] sp = text.split("/");
-			if(sp.length < 2) {
-				setter.setText("Inavlid Gist URL");
-				setter.setTooltip(new Tooltip(frm, "Your link should look like this:\\https://gist.github.com/<name>/<gist>"));
-				return;
-			} else {
-				setter.setText("");
-				setter.setTooltip(null);
-				if(linkConsumer != null)
-					linkConsumer.accept(new Link("git", sp[0] + "/" + sp[1]));
-				return;
-			}
+		try {
+			Link l = ModelDefinitionLoader.parseLink(text);
+			if(linkConsumer != null)linkConsumer.accept(l);
+			setter.setText("");
+			setter.setTooltip(null);
+		} catch (URISyntaxException e) {
+			setter.setText(gui.i18nFormat("error.cpm.malformedURL"));
+			setter.setTooltip(null);
+		} catch (LocalizedIOException e) {
+			setter.setText(gui.i18nFormat("error.cpm.unknownURL"));
+			setter.setTooltip(new Tooltip(frm, e.getLocalizedText().toString(gui)));
 		}
-		setter.setText("Unknown URL");
-		setter.setTooltip(new Tooltip(frm, "Unknown link, currently only GitHub Gists are supported."));
-		return;
 	}
 
 	@Override

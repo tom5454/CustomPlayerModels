@@ -1,5 +1,7 @@
 package com.tom.cpm.shared.network;
 
+import java.util.Locale;
+
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 
@@ -13,7 +15,7 @@ public enum ModelEventType {
 	private final VanillaPose pose;
 
 	private ModelEventType(VanillaPose pose) {
-		name = name().toLowerCase();
+		name = name().toLowerCase(Locale.ROOT);
 		this.pose = pose;
 	}
 

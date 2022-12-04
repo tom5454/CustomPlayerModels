@@ -2,12 +2,19 @@ package com.tom.cpm.shared.editor.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.math.Vec3i;
 import com.tom.cpl.math.Vec4f;
+import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.elements.ModelElement;
+import com.tom.cpm.shared.editor.elements.MultiSelector;
+import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
 
@@ -112,8 +119,10 @@ public abstract class UVResizableArea {
 			Box b = getTextureBox();
 
 			Vec4f v = expandBox(b, xs);
-			gui.drawRectangle(x + v.x * xs, y + v.y * ys, v.z * xs, v.w * ys, 0xff999999);
+			gui.drawRectangle(x + v.x * xs, y + v.y * ys, v.z * xs, v.w * ys, getColor());
 		}
+
+		protected abstract int getColor();
 	}
 
 	protected class FaceArea extends BaseArea {
@@ -166,6 +175,38 @@ public abstract class UVResizableArea {
 			int ey = Math.max(f.sy, f.ey);
 			return new Box(sx, sy, ex - sx, ey - sy);
 		}
+
+		@Override
+		public void onClick(Editor e, MouseEvent evt) {
+			if(e.gui().isCtrlDown()) {
+				if(e.selectedElement instanceof MultiFaceArea) {
+					if(((MultiFaceArea)e.selectedElement).add(this))e.selectedElement = null;
+				} else if(e.selectedElement instanceof FaceArea || e.selectedElement instanceof ModelElement) {
+					MultiFaceArea ms = new MultiFaceArea(e);
+					if(e.selectedElement instanceof ModelElement) {
+						ModelElement me = (ModelElement) e.selectedElement;
+						TreeSettingElement f = me.faceUV.getFaceElement(me, me.editor.perfaceFaceDir.get());
+						if(f != null && f instanceof FaceArea)
+							ms.add(f);
+					} else
+						ms.add(e.selectedElement);
+					ms.add(this);
+					e.selectedElement = ms;
+				} else if(e.selectedElement instanceof MultiSelector) {
+					MultiFaceArea ms = new MultiFaceArea(e);
+					((MultiSelector)e.selectedElement).forEachSelected(ms::add);
+					ms.add(this);
+					e.selectedElement = ms;
+				} else e.selectedElement = this;
+			} else {
+				e.selectedElement = this;
+			}
+		}
+
+		@Override
+		protected int getColor() {
+			return 0xff999999;
+		}
 	}
 
 	protected class CornerArea extends BaseArea {
@@ -214,6 +255,11 @@ public abstract class UVResizableArea {
 					(corner > 1 ? f.ey : f.sy),
 					0, 0
 					);
+		}
+
+		@Override
+		protected int getColor() {
+			return 0xffaaaaaa;
 		}
 	}
 
@@ -271,6 +317,117 @@ public abstract class UVResizableArea {
 					(side % 2 == 0 ? (f.ex - f.sx) : 0),
 					(side % 2 != 0 ? (f.ey - f.sy) : 0)
 					);
+		}
+
+		@Override
+		protected int getColor() {
+			return 0xff666666;
+		}
+	}
+
+	public static class MultiFaceArea implements MultiSelector {
+		private List<FaceArea> elements = new ArrayList<>();
+		private final Editor editor;
+
+		public MultiFaceArea(Editor editor) {
+			this.editor = editor;
+		}
+
+		@Override
+		public String getName() {
+			return "";
+		}
+
+		private void addImpl(FaceArea faceArea) {
+			if(elements.contains(faceArea))
+				elements.remove(faceArea);
+			else
+				elements.add(faceArea);
+		}
+
+		@Override
+		public Vec3f getVec(VecType type) {
+			if(type == VecType.TEXTURE) {
+				return elements.stream().map(e -> e.getVec(VecType.TEXTURE)).
+						reduce(new Vec3f(Integer.MAX_VALUE, Integer.MAX_VALUE, 1), (a, b) -> new Vec3f(Math.min(a.x, b.x), Math.min(a.y, b.y), 1));
+			}
+			return Vec3f.ZERO;
+		}
+
+		@Override
+		public void setVec(Vec3f v, VecType object) {
+			if(object == VecType.TEXTURE) {
+				Vec3f uv = getVec(VecType.TEXTURE);
+				float uOff = v.x - uv.x;
+				float vOff = v.y - uv.y;
+				elements.forEach(e -> {
+					Vec3f ve = e.getVec(VecType.TEXTURE);
+					e.setVec(new Vec3f(ve.x + uOff, ve.y + vOff, 1), VecType.TEXTURE);
+				});
+			}
+		}
+
+		@Override
+		public void setVecTemp(VecType object, Vec3f v) {
+			if(object == VecType.TEXTURE) {
+				Vec3f uv = getVec(VecType.TEXTURE);
+				float uOff = v.x - uv.x;
+				float vOff = v.y - uv.y;
+				elements.forEach(e -> {
+					Vec3f ve = e.getVec(VecType.TEXTURE);
+					e.setVecTemp(VecType.TEXTURE, new Vec3f(ve.x + uOff, ve.y + vOff, 1));
+				});
+			}
+		}
+
+		@Override
+		public boolean isSelected(Editor e, TreeElement other) {
+			return elements.contains(other);
+		}
+
+		@Override
+		public ETextures getTexture() {
+			if(elements.isEmpty())return null;
+			return elements.get(0).getTexture();
+		}
+
+		@Override
+		public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
+			elements.forEach(e -> e.drawTexture(gui, x, y, xs, ys));
+		}
+
+		@Override
+		public boolean add(TreeElement modelElement) {
+			if(modelElement instanceof FaceArea) {
+				addImpl((FaceArea) modelElement);
+			} else if(modelElement instanceof ModelElement) {
+				ModelElement me = (ModelElement) modelElement;
+				if(me.faceUV != null) {
+					me.faceUV.getFaceElements(me).forEach(f -> {
+						if(f instanceof FaceArea) {
+							addImpl((FaceArea) f);
+						}
+					});
+				}
+			}
+			return elements.isEmpty();
+		}
+
+		@Override
+		public void forEachSelected(Consumer<TreeElement> c) {
+			elements.forEach(c);
+		}
+
+		@Override
+		public void updateGui() {
+			editor.setModePanel.accept(ModeDisplayType.TEX);
+			Vec3f v = getVec(VecType.TEXTURE);
+			editor.setTexturePanel.accept(new Vec3i((int) v.x, (int) v.y, 1));
+		}
+
+		@Override
+		public Box getTextureBox() {
+			return elements.stream().map(TreeElement::getTextureBox).filter(e -> e != null).reduce(null, (a, b) -> a == null ? b : (b == null ? a : a.union(b)));
 		}
 	}
 }

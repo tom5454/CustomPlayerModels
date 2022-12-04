@@ -59,6 +59,11 @@ public enum AnimationDisplayData {
 	TOOT_HORN_RIGHT(VanillaPose.TOOT_HORN_RIGHT, ItemSlot.RIGHT_HAND, DisplayItem.GOAT_HORN, Type.HAND),
 	IN_GUI(VanillaPose.IN_GUI, null, null, Type.LAYERS),
 	FIRST_PERSON_MOD(VanillaPose.FIRST_PERSON_MOD, null, null, Type.LAYERS),
+	VOICE_MUTED(VanillaPose.VOICE_MUTED, null, null, Type.LAYERS),
+	VR_FIRST_PERSON(VanillaPose.VR_FIRST_PERSON, null, null, Type.LAYERS),
+	VR_THIRD_PERSON_SITTING(VanillaPose.VR_THIRD_PERSON_SITTING, null, null, Type.LAYERS),
+	VR_THIRD_PERSON_STANDING(VanillaPose.VR_THIRD_PERSON_STANDING, null, null, Type.LAYERS),
+	FIRST_PERSON_HAND(VanillaPose.FIRST_PERSON_HAND, null, null, Type.LAYERS),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;

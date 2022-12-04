@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.editor.util;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -15,7 +16,7 @@ public enum PlayerSkinLayer {
 	public static final PlayerSkinLayer[] VALUES = values();
 	private String lowerName;
 	private PlayerSkinLayer() {
-		lowerName = name().toLowerCase();
+		lowerName = name().toLowerCase(Locale.ROOT);
 	}
 
 	public static PlayerSkinLayer getLayer(String name) {

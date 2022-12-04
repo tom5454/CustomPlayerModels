@@ -21,12 +21,14 @@ import net.minecraft.util.text.ITextComponent;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.CustomPlayerModelsClient.PlayerNameTagRenderer;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(VRPlayerRenderer.class)
-public abstract class VRPlayerRendererMixin_VR extends LivingRenderer<AbstractClientPlayerEntity, VRPlayerModel<AbstractClientPlayerEntity>> {
+public abstract class VRPlayerRendererMixin_VR extends LivingRenderer<AbstractClientPlayerEntity, VRPlayerModel<AbstractClientPlayerEntity>> implements PlayerNameTagRenderer<AbstractClientPlayerEntity> {
 
 	public VRPlayerRendererMixin_VR(EntityRendererManager p_i50965_1_, VRPlayerModel<AbstractClientPlayerEntity> p_i50965_2_,
 			float p_i50965_3_) {
@@ -102,9 +104,24 @@ public abstract class VRPlayerRendererMixin_VR extends LivingRenderer<AbstractCl
 		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
 	}
 
-	@Inject(at = @At("HEAD"), method = "renderName(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Lnet/minecraft/util/text/ITextComponent;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V", cancellable = true, remap = false)
-	public void onRenderName(AbstractClientPlayerEntity entityIn, ITextComponent displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, CallbackInfo cbi) {
+	@Inject(at = @At("HEAD"), method = {
+			"renderNameTag(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Lnet/minecraft/util/text/ITextComponent;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V",
+			"func_225629_a_(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Lnet/minecraft/util/text/ITextComponent;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V"
+	}, cancellable = true, remap = false)
+	public void onRenderName1(AbstractClientPlayerEntity entityIn, ITextComponent displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(!Player.isEnableNames())cbi.cancel();
+	}
+
+	@Inject(at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/client/renderer/entity/LivingRenderer;renderNameTag(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/text/ITextComponent;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V",
+			ordinal = 1, remap = true),
+			method = {
+					"renderNameTag(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Lnet/minecraft/util/text/ITextComponent;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V",
+					"func_225629_a_(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Lnet/minecraft/util/text/ITextComponent;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V"
+	}, remap = false)
+	public void onRenderName2(AbstractClientPlayerEntity entityIn, ITextComponent displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, CallbackInfo cbi) {
+		if(Player.isEnableLoadingInfo())
+			CustomPlayerModelsClient.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
 	}
 
 	@Redirect(at =
@@ -123,5 +140,16 @@ public abstract class VRPlayerRendererMixin_VR extends LivingRenderer<AbstractCl
 			)
 	public RenderType getArmLayer(ResourceLocation loc, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, AbstractClientPlayerEntity playerIn, ModelRenderer rendererArmIn, ModelRenderer rendererArmwearIn) {
 		return CustomPlayerModelsClient.mc.getPlayerRenderManager().isBound(getModel()) ? RenderType.entityTranslucent(getTextureLocation(playerIn)) : RenderType.entitySolid(getTextureLocation(playerIn));
+	}
+
+	@Override
+	public void cpm$renderNameTag(AbstractClientPlayerEntity entityIn, ITextComponent displayNameIn,
+			MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
+		super.renderNameTag(entityIn, displayNameIn, matrixStackIn, bufferIn, packedLightIn);
+	}
+
+	@Override
+	public EntityRendererManager cpm$entityRenderDispatcher() {
+		return entityRenderDispatcher;
 	}
 }

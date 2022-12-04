@@ -24,7 +24,7 @@
   	"client": [
       "com.tom.cpm.client.CustomPlayerModelsClient"
     ],
-	"mm:early_risers": [
+	"preLaunch": [
       "com.tom.cpm.LaunchMixinWithOptifineRunnable"
     ],
 	"modmenu": [

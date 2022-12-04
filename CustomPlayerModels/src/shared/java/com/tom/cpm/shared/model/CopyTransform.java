@@ -14,6 +14,7 @@ public class CopyTransform {
 	private final boolean copySX;
 	private final boolean copySY;
 	private final boolean copySZ;
+	private final boolean copyVis;
 
 	public CopyTransform(RenderedCube from, RenderedCube to, short copy) {
 		this.from = from;
@@ -27,6 +28,7 @@ public class CopyTransform {
 		copySX = (copy & (1 << 6)) != 0;
 		copySY = (copy & (1 << 7)) != 0;
 		copySZ = (copy & (1 << 8)) != 0;
+		copyVis = (copy & (1 << 9)) != 0;
 	}
 
 	public void apply() {
@@ -39,5 +41,6 @@ public class CopyTransform {
 		to.setPosition(false, copyPX ? pf.x : pt.x, copyPY ? pf.y : pt.y, copyPZ ? pf.z : pt.z);
 		to.setRotation(false, copyRX ? rf.x : rt.x, copyRY ? rf.y : rt.y, copyRZ ? rf.z : rt.z);
 		to.setRenderScale(false, copySX ? sf.x : st.x, copySY ? sf.y : st.y, copySZ ? sf.z : st.z);
+		if(copyVis)to.setVisible(from.isVisible());
 	}
 }

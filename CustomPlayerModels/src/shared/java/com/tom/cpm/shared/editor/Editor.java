@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -38,7 +37,7 @@ import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
@@ -49,13 +48,16 @@ import com.tom.cpm.shared.editor.actions.Action;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
-import com.tom.cpm.shared.editor.anim.AnimationType;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.ModelElement;
+import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.RenderUtil;
 import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.project.ProjectFile;
 import com.tom.cpm.shared.editor.project.ProjectIO;
+import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
@@ -115,6 +117,7 @@ public class Editor {
 	public Updater<Boolean> setPerFaceUV = updaterReg.create(null);
 	public Updater<Boolean> setExtrudeEffect = updaterReg.create(null);
 	public Updater<Integer> setAnimPriority = updaterReg.create(null);
+	public Updater<Integer> setAnimOrder = updaterReg.create(null);
 	public Updater<Boolean> displayViewport = updaterReg.create(true);
 	public Updater<Boolean> setEnAddAnimTex = updaterReg.create(false);
 	public Updater<Boolean> setCopyTransformEffect = updaterReg.create(null);
@@ -133,7 +136,6 @@ public class Editor {
 	public Updater<Vec4f> setFaceUVs = updaterReg.create();
 	public Updater<Rot> setFaceRot = updaterReg.create();
 	public Updater<Boolean> setAutoUV = updaterReg.create();
-	public Updater<Void> gestureFinished = updaterReg.create();
 	public Updater<Pair<Integer, String>> setInfoMsg = updaterReg.create();
 	public TreeHandler<TreeElement> treeHandler = new TreeHandler<>(new ModelTree(this));
 
@@ -167,14 +169,15 @@ public class Editor {
 	public BooleanUpdater playerTpose = updaterReg.createBool(false);
 	public boolean applyScaling;
 	public BooleanUpdater drawBoundingBox = updaterReg.createBool(false);
-	public long playStartTime, gestureStartTime;
+	public long playStartTime;
 	public AnimationEncodingData animEnc;
+	public BooleanUpdater showPreviousFrame = updaterReg.createBool(true);
 
 	public Frame frame;
 	public TreeElement selectedElement;
 	public List<ModelElement> elements = new ArrayList<>();
 	public EditorAnim selectedAnim;
-	public List<EditorAnim> animsToPlay = new ArrayList<>();
+	public List<Runnable> animsToPlay = new ArrayList<>();
 	public IPose poseToApply;
 	public IPose renderedPose;
 	public List<EditorAnim> animations = new ArrayList<>();
@@ -185,6 +188,7 @@ public class Editor {
 	public SkinType skinType;
 	public boolean customSkinType;
 	public ModelDescription description;
+	public String modelId;
 	public boolean hideHeadIfSkull, removeArmorOffset;
 	public Image vanillaSkin;
 	public boolean dirty, autoSaveDirty;
@@ -419,6 +423,7 @@ public class Editor {
 		scalingElem.reset();
 		removeArmorOffset = true;
 		hideHeadIfSkull = true;
+		modelId = null;
 		Player<?> profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.getTextures().load().thenRun(() -> {
 			if(!customSkinType)skinType = profile.getSkinType();
@@ -457,7 +462,7 @@ public class Editor {
 			if(this.playFullAnim) {
 				long playTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
 				long currentStep = (playTime - this.playStartTime);
-				this.selectedAnim.applyPlay(currentStep);
+				this.selectedAnim.animate(currentStep, definition);
 				if(currentStep > this.selectedAnim.duration && !this.selectedAnim.loop && this.selectedAnim.pose == null){
 					this.playFullAnim = false;
 					setAnimPlay.accept(false);
@@ -466,14 +471,8 @@ public class Editor {
 				this.selectedAnim.apply();
 			}
 		} else if(this.applyAnim && !animsToPlay.isEmpty()) {
-			animsToPlay.sort((a, b) -> Integer.compare(a.priority, b.priority));
-			for (EditorAnim anim : animsToPlay) {
-				long playTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
-				long currentStep = (playTime - (anim.pose == null ? this.gestureStartTime : this.playStartTime));
-				anim.applyPlay(currentStep);
-				if(currentStep > anim.duration && !anim.loop && anim.pose == null){
-					gestureFinished.accept(null);
-				}
+			for (Runnable anim : animsToPlay) {
+				anim.run();
 			}
 			animsToPlay.clear();
 		}
@@ -526,21 +525,44 @@ public class Editor {
 	public void reloadSkin() {
 		ETextures tex = getTextureProvider();
 		if(tex != null && tex.file != null) {
-			Image.loadFrom(tex.file).thenAccept(img -> {
-				if(img.getWidth() > 8192 || img.getHeight() > 8192) {
-					frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", frame.getGui().i18nFormat("label.cpm.tex_size_too_big", 8192))));
-					return;
+			reloadSkin(null, tex, tex.file);
+		}
+		markDirty();
+	}
+
+	public void reloadSkin(ActionBuilder ab, ETextures tex, File file) {
+		Image.loadFrom(file).thenAccept(img -> {
+			if(img.getWidth() > 8192 || img.getHeight() > 8192) {
+				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", frame.getGui().i18nFormat("label.cpm.tex_size_too_big", 8192))));
+				return;
+			}
+			if(ab != null) {
+				ab.updateValueOp(tex, tex.getImage(), img, ETextures::setImage).
+				updateValueOp(tex, tex.isEdited(), true, ETextures::setEdited);
+				if(!tex.customGridSize) {
+					ab.updateValueOp(tex, tex.provider.size.x, img.getWidth(), (a, b) -> a.provider.size.x = b).
+					updateValueOp(tex, tex.provider.size.y, img.getHeight(), (a, b) -> a.provider.size.y = b).
+					onAction(this::markElementsDirty);
 				}
+				ab.onAction(tex::restitchTexture);
+				ab.execute();
+			} else {
 				tex.setImage(img);
 				tex.setEdited(true);
-				setSkinEdited.accept(true);
+				if(!tex.customGridSize) {
+					tex.provider.size.x = img.getWidth();
+					tex.provider.size.y = img.getHeight();
+					markDirty();
+					markElementsDirty();
+				}
 				tex.restitchTexture();
-			}).exceptionally(e -> {
-				Log.error("Failed to load image", e);
-				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
-				return null;
-			});
-		}
+			}
+			setSkinEdited.accept(true);
+		}).exceptionally(e -> {
+			Log.error("Failed to load image", e);
+			frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
+			return null;
+		});
 	}
 
 	public void saveSkin(File f) {
@@ -640,55 +662,32 @@ public class Editor {
 		}
 	}
 
-	public void addNewAnim(IPose pose, String displayName, boolean add, boolean loop, InterpolatorType it) {
-		String fname = null;
-		AnimationType type;
-		UUID newId = UUID.randomUUID();
-		if(pose instanceof VanillaPose) {
-			fname = "v_" + ((VanillaPose)pose).name().toLowerCase() + "_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
-			type = AnimationType.POSE;
-		} else if(pose != null) {
-			fname = "c_" + ((CustomPose) pose).getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
-			type = AnimationType.POSE;
-		} else {
-			fname = "g_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
-			type = AnimationType.GESTURE;
-		}
-		EditorAnim anim = new EditorAnim(this, fname, type, true);
+	public void addNewAnim(IPose pose, String displayName, AnimationType type, boolean add, boolean loop, InterpolatorType it, boolean command) {
+		String fn = AnimationsLoaderV1.getFileName(pose, displayName);
+		EditorAnim anim = new EditorAnim(this, fn, type, true);
 		anim.pose = pose;
 		anim.add = add;
 		anim.loop = loop;
 		anim.displayName = displayName;
 		anim.intType = it;
+		anim.command = command;
 		action("add", "action.cpm.anim").addToList(animations, anim).onUndo(() -> selectedAnim = null).execute();
 		selectedAnim = anim;
-		markDirty();
 		updateGui();
 	}
 
-	public void editAnim(IPose pose, String displayName, boolean add, boolean loop, InterpolatorType it) {
+	public void editAnim(IPose pose, String displayName, AnimationType type, boolean add, boolean loop, InterpolatorType it, boolean command) {
 		if(selectedAnim != null) {
-			String fname = null;
-			AnimationType type;
-			UUID newId = UUID.randomUUID();
-			if(pose instanceof VanillaPose) {
-				fname = "v_" + ((VanillaPose)pose).name().toLowerCase() + "_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
-				type = AnimationType.POSE;
-			} else if(pose != null) {
-				fname = "c_" + ((CustomPose) pose).getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
-				type = AnimationType.POSE;
-			} else {
-				fname = "g_" + displayName.replaceAll("[^a-zA-Z0-9\\.\\-]", "") + "_" + newId.toString() + ".json";
-				type = AnimationType.GESTURE;
-			}
+			String fn = AnimationsLoaderV1.getFileName(pose, displayName);
 			action("edit", "action.cpm.anim").
 			updateValueOp(selectedAnim, selectedAnim.add, add, (a, b) -> a.add = b).
 			updateValueOp(selectedAnim, selectedAnim.loop, loop, (a, b) -> a.loop = b).
 			updateValueOp(selectedAnim, selectedAnim.displayName, displayName, (a, b) -> a.displayName = b).
 			updateValueOp(selectedAnim, selectedAnim.pose, pose, (a, b) -> a.pose = b).
 			updateValueOp(selectedAnim, selectedAnim.type, type, (a, b) -> a.type = b).
-			updateValueOp(selectedAnim, selectedAnim.filename, fname, (a, b) -> a.filename = b).
+			updateValueOp(selectedAnim, selectedAnim.filename, fn, (a, b) -> a.filename = b).
 			updateValueOp(selectedAnim, selectedAnim.intType, it, (a, b) -> a.intType = b).
+			updateValueOp(selectedAnim, selectedAnim.command, command, (a, b) -> a.command = b).
 			onAction(selectedAnim, EditorAnim::clearCache).
 			execute();
 			updateGui();
@@ -729,6 +728,13 @@ public class Editor {
 		if(selectedAnim == null)return;
 		action("setAnim", "label.cpm.anim_priority").
 		updateValueOp(selectedAnim, selectedAnim.priority, value, (int) Byte.MIN_VALUE, (int) Byte.MAX_VALUE, (a, b) -> a.priority = b, setAnimPriority).
+		execute();
+	}
+
+	public void setAnimOrder(int value) {
+		if(selectedAnim == null)return;
+		action("setAnim", "label.cpm.anim_order").
+		updateValueOp(selectedAnim, selectedAnim.order, value, (int) Byte.MIN_VALUE, (int) Byte.MAX_VALUE, (a, b) -> a.order = b, setAnimOrder).
 		execute();
 	}
 

@@ -3,6 +3,7 @@ package com.tom.cpm.shared.editor.tree;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -72,7 +73,7 @@ public class ScalingElement implements TreeElement {
 		private ScalingOptions opt;
 
 		public ValElem(ScalingOptions opt) {
-			super(opt.name().toLowerCase());
+			super(opt.name().toLowerCase(Locale.ROOT));
 			this.opt = opt;
 		}
 

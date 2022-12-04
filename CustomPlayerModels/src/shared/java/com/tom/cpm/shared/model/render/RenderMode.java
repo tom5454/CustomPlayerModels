@@ -8,6 +8,7 @@ public enum RenderMode {
 	COLOR_GLOW,
 	DEFAULT,
 	;
+	public static final RenderMode[] VALUES = values();
 
 	public RenderMode glow() {
 		if(this == COLOR)return COLOR_GLOW;

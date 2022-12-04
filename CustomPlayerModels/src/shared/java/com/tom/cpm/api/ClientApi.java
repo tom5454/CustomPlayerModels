@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.render.RenderTypeBuilder.TextureHandler;
@@ -30,8 +31,10 @@ import com.tom.cpm.shared.model.render.ModelRenderManager;
 
 public class ClientApi extends SharedApi implements IClientAPI {
 	private List<ToFloatFunction<Object>> voice = new ArrayList<>();
+	private List<Predicate<Object>> voiceMuted = new ArrayList<>();
 	private TextureHandlerFactory<?, ?> textureHandlerFactory;
 	private BiFunction<UUID, String, ?> gameProfileFactory;
+	private Function<Object, UUID> getPlayerUUID;
 
 	@Override
 	protected void callInit0(ICPMPlugin plugin) {
@@ -48,6 +51,23 @@ public class ClientApi extends SharedApi implements IClientAPI {
 		voice.add(p -> getVoiceLevel.apply((T) p));
 	}
 
+	@Override
+	public <T> void registerVoice(Function<UUID, Float> getVoiceLevel) {
+		voice.add(p -> getVoiceLevel.apply(getPlayerUUID.apply(p)));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> void registerVoiceMute(Class<T> clazz, Predicate<T> getMuted) {
+		if(checkClass(clazz, Clazz.PLAYER))return;
+		voiceMuted.add(p -> getMuted.test((T) p));
+	}
+
+	@Override
+	public <T> void registerVoiceMute(Predicate<UUID> getMuted) {
+		voiceMuted.add(p -> getMuted.test(getPlayerUUID.apply(p)));
+	}
+
 	public static class ApiBuilder {
 		private final CPMApiManager api;
 
@@ -56,8 +76,10 @@ public class ClientApi extends SharedApi implements IClientAPI {
 			api.client = new ClientApi();
 		}
 
-		public ApiBuilder voicePlayer(Class<?> player) {
+		@SuppressWarnings("unchecked")
+		public <P> ApiBuilder voicePlayer(Class<P> player, Function<P, UUID> getUUID) {
 			api.client.classes.put(Clazz.PLAYER, player);
+			api.client.getPlayerUUID = (Function<Object, UUID>) getUUID;
 			return this;
 		}
 
@@ -155,7 +177,7 @@ public class ClientApi extends SharedApi implements IClientAPI {
 				}
 				def.itemTransforms.clear();
 				mngr.bindModel(model, "api", buffers, def, profile, renderMode);
-				mngr.getAnimationEngine().handleAnimation(profile, renderMode);
+				mngr.getAnimationEngine().prepareAnimations(profile, renderMode);
 				if(setupTexture) {
 					TextureHandler<RL, RT> tex = ((TextureHandlerFactory<RL, RT>) textureHandlerFactory).apply(null, renderTypeFactory);
 					((ModelRenderManager<MBS, TextureHandler<RL, RT>, ?, M>)mngr).bindSkin(model, tex, TextureSheetType.SKIN);
@@ -252,6 +274,10 @@ public class ClientApi extends SharedApi implements IClientAPI {
 		return voice;
 	}
 
+	public List<Predicate<Object>> getVoiceMutedProviders() {
+		return voiceMuted;
+	}
+
 	@Override
 	public <HM, RL, RT, MBS, GP> PlayerRenderer<HM, RL, RT, MBS, GP> createPlayerRenderer(Class<HM> humanoidModelClass,
 			Class<RL> resourceLocationClass, Class<RT> renderTypeClass, Class<MBS> multiBufferSourceClass, Class<GP> gameProfileClass) {
@@ -306,5 +332,15 @@ public class ClientApi extends SharedApi implements IClientAPI {
 	public void registerEditorGenerator(String name, String tooltip, Consumer<EditorGui> func) {
 		String modid = initingPlugin != null ? initingPlugin.getOwnerModId() : "?";
 		Generators.generators.add(new Generators(name, new FormatText("tooltip.cpm.pluginGenerator", new FormatText(tooltip), modid), func));
+	}
+
+	@Override
+	public <P> boolean playAnimation(String name, int value) {
+		return MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().applyCommand(name, value);
+	}
+
+	@Override
+	public <P> boolean playAnimation(String name) {
+		return playAnimation(name, -1);
 	}
 }

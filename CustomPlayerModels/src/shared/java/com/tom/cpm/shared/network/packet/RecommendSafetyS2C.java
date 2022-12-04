@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.network.packet;
 
+import java.util.Locale;
 import java.util.Map;
 
 import com.tom.cpl.config.ConfigEntry;
@@ -60,13 +61,13 @@ public class RecommendSafetyS2C extends NBTS2C {
 		}
 		if(!handler.getRecommendedSettingChanges().isEmpty()) {
 			ConfigEntry gs = cc.getEntry(ConfigKeys.GLOBAL_SETTINGS);
-			String[] spf = gs.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase()).split(":", 2);
+			String[] spf = gs.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase(Locale.ROOT)).split(":", 2);
 			BuiltInSafetyProfiles profile = SocialConfig.getProfile(spf);
 
 			if(server != null && ss.hasEntry(server)) {
 				ConfigEntry e = ss.getEntry(server);
 				if(e.hasEntry(ConfigKeys.SAFETY_PROFILE)) {
-					spf = e.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase()).split(":", 2);
+					spf = e.getString(ConfigKeys.SAFETY_PROFILE, BuiltInSafetyProfiles.MEDIUM.name().toLowerCase(Locale.ROOT)).split(":", 2);
 					profile = SocialConfig.getProfile(spf);
 				}
 			}
@@ -75,13 +76,13 @@ public class RecommendSafetyS2C extends NBTS2C {
 			if(profile == BuiltInSafetyProfiles.CUSTOM) {
 				old = "custom:" + spf[1];
 			} else {
-				old = profile.name().toLowerCase();
+				old = profile.name().toLowerCase(Locale.ROOT);
 			}
 
 			if(netProfile == BuiltInSafetyProfiles.CUSTOM) {
 				handler.getRecommendedSettingChanges().add(new ConfigChangeRequest<>(ConfigKeys.SAFETY_PROFILE, old, "custom:import-" + server));
 			} else {
-				handler.getRecommendedSettingChanges().add(new ConfigChangeRequest<>(ConfigKeys.SAFETY_PROFILE, old, netProfile.name().toLowerCase()));
+				handler.getRecommendedSettingChanges().add(new ConfigChangeRequest<>(ConfigKeys.SAFETY_PROFILE, old, netProfile.name().toLowerCase(Locale.ROOT)));
 			}
 
 			handler.displayText(new FormatText("chat.cpm.serverSafetySettings", new KeybindText("key.cpm.gestureMenu", "gestureMenu")));

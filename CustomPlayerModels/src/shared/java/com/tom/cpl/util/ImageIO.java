@@ -37,6 +37,10 @@ public class ImageIO {
 		return getApi().getSize(din);
 	}
 
+	public static boolean isAvailable() {
+		return api != null || MinecraftClientAccess.get() != null;
+	}
+
 	public static interface IImageIO {
 		default CompletableFuture<Image> readF(File f) {
 			CompletableFuture<Image> cf = new CompletableFuture<>();

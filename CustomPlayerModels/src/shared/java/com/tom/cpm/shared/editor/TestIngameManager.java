@@ -6,6 +6,7 @@ import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.editor.gui.EditorGui;
+import com.tom.cpm.shared.editor.util.GetFreeSkinSlots;
 
 public class TestIngameManager {
 	private static final String VANILLA_MODEL = "~~VANILLA~~";
@@ -48,6 +49,9 @@ public class TestIngameManager {
 			} else {
 				e.openPopup(new MessagePopup(e, e.getGui().i18nFormat("label.cpm.error"), e.getGui().i18nFormat("label.cpm.feature_unavailable")));
 				return false;
+			}
+			if(e.getEditor().animEnc == null) {
+				e.getEditor().animEnc = GetFreeSkinSlots.getDefault(e.getEditor());
 			}
 			if(!Exporter.exportTempModel(e.getEditor(), e))return false;
 			String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);

@@ -526,7 +526,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 
 		public ImageBlock(IOHelper io) throws IOException {
 			buf = io.readNextBlock();
-			if(buf.dataIn.length != 0) {
+			if(buf.dataIn.length != 0 && ImageIO.isAvailable()) {
 				Vec2i size = ImageIO.getSize(buf.getDin());
 				w = size.x;
 				h = size.y;
@@ -543,7 +543,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		}
 
 		public void doReadImage() throws IOException {
-			if(buf.dataIn.length != 0) {
+			if(buf.dataIn.length != 0 && ImageIO.isAvailable()) {
 				image = Image.loadFrom(buf.getDin());
 				w = image.getWidth();
 				h = image.getHeight();

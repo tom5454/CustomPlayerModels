@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -27,6 +28,9 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.actions.ImageAction;
+import com.tom.cpm.shared.editor.elements.ElementType;
+import com.tom.cpm.shared.editor.elements.ModelElement;
+import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.util.SafetyLevel;
@@ -210,7 +214,7 @@ public class Generators {
 			if(!added.contains(itemSlot)) {
 				ModelElement elem = new ModelElement(editor);
 				elem.itemRenderer = new ItemRenderer(itemSlot, 0);
-				elem.name = editor.gui().i18nFormat("label.cpm.elem.item." + itemSlot.name().toLowerCase());
+				elem.name = editor.gui().i18nFormat("label.cpm.elem.item." + itemSlot.name().toLowerCase(Locale.ROOT));
 				elem.size = new Vec3f(0, 0, 0);
 				switch (itemSlot) {
 				case HEAD:
@@ -254,7 +258,7 @@ public class Generators {
 				texs.accept(tx, tex);
 				tex.provider.size = tx.getDefSize();
 				Image def = new Image(tex.provider.size.x, tex.provider.size.y);
-				try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tx.name().toLowerCase() + ".png")) {
+				try(InputStream is = ModelDefinitionLoader.class.getResourceAsStream("/assets/cpm/textures/template/" + tx.name().toLowerCase(Locale.ROOT) + ".png")) {
 					def = Image.loadFrom(is);
 				} catch (IOException e) {
 				}

@@ -51,6 +51,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.mixinplugin.OFDetector;
+import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -66,7 +67,7 @@ import io.netty.buffer.Unpooled;
 
 public class CustomPlayerModelsClient {
 	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
-	public static boolean optifineLoaded;
+	public static boolean optifineLoaded, vrLoaded;
 	public static final CustomPlayerModelsClient INSTANCE = new CustomPlayerModelsClient();
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
@@ -81,7 +82,9 @@ public class CustomPlayerModelsClient {
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();
+		vrLoaded = VRDetector.doApply();
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
+		if(vrLoaded)Log.info("ViveCraft detected, enabling ViveCraft compatibility");
 		MinecraftForge.EVENT_BUS.register(this);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders);
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), net.minecraft.world.entity.player.Player::getGameProfile);
@@ -104,7 +107,7 @@ public class CustomPlayerModelsClient {
 	}
 
 	public static void apiInit() {
-		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class).
+		CustomPlayerModels.api.buildClient().voicePlayer(net.minecraft.world.entity.player.Player.class, net.minecraft.world.entity.player.Player::getUUID).
 		renderApi(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class, ModelTexture::new).
 		localModelApi(GameProfile::new).init();
 	}

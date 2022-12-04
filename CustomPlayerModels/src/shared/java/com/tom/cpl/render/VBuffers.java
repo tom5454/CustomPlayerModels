@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -96,6 +97,10 @@ public class VBuffers {
 
 	public VBuffers map(UnaryOperator<VertexBuffer> map) {
 		return new VBuffers(rt -> map.apply(getBuffer(rt)), normalBuffer != null ? map.apply(normalBuffer) : null).setBatched(batched);
+	}
+
+	public VBuffers map(BiFunction<NativeRenderType, VertexBuffer, VertexBuffer> map) {
+		return new VBuffers(rt -> map.apply(rt, getBuffer(rt)), normalBuffer != null ? map.apply(null, normalBuffer) : null).setBatched(batched);
 	}
 
 	public VBuffers transform(MatrixStack stack) {
