@@ -958,5 +958,7 @@
   "tooltip.cpm.config.editorEscExit": "Enable exiting the editor by pressing ESC",
   "label.cpm.config.editorEscExit": "Exit editor with ESC",
   "label.cpm.customGridSize": "Custom Grid Size",
-  "action.cpm.loadTexture": "Load Texture"
+  "action.cpm.loadTexture": "Load Texture",
+  "tooltip.cpm.effect.removeBedOffset": "Removes the offset in the sleeping pose,\\when viewed by other players\\Makes the player sink into the bed\\like in first person, to make it look consistent across players.\\Requires converted parts",
+  "label.cpm.effect.removeBedOffset": "Remove Bed Offset"
 }

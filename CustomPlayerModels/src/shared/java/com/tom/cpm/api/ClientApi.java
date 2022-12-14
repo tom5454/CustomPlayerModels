@@ -8,12 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.tom.cpl.function.ToFloatFunction;
+import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.render.RenderTypeBuilder.TextureHandler;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -35,6 +37,7 @@ public class ClientApi extends SharedApi implements IClientAPI {
 	private TextureHandlerFactory<?, ?> textureHandlerFactory;
 	private BiFunction<UUID, String, ?> gameProfileFactory;
 	private Function<Object, UUID> getPlayerUUID;
+	private Map<String, BiConsumer<Object, NBTTagCompound>> pluginMessageHandlers = new HashMap<>();
 
 	@Override
 	protected void callInit0(ICPMPlugin plugin) {
@@ -52,7 +55,7 @@ public class ClientApi extends SharedApi implements IClientAPI {
 	}
 
 	@Override
-	public <T> void registerVoice(Function<UUID, Float> getVoiceLevel) {
+	public void registerVoice(Function<UUID, Float> getVoiceLevel) {
 		voice.add(p -> getVoiceLevel.apply(getPlayerUUID.apply(p)));
 	}
 
@@ -64,7 +67,7 @@ public class ClientApi extends SharedApi implements IClientAPI {
 	}
 
 	@Override
-	public <T> void registerVoiceMute(Predicate<UUID> getMuted) {
+	public void registerVoiceMute(Predicate<UUID> getMuted) {
 		voiceMuted.add(p -> getMuted.test(getPlayerUUID.apply(p)));
 	}
 
@@ -177,7 +180,7 @@ public class ClientApi extends SharedApi implements IClientAPI {
 				}
 				def.itemTransforms.clear();
 				mngr.bindModel(model, "api", buffers, def, profile, renderMode);
-				mngr.getAnimationEngine().prepareAnimations(profile, renderMode);
+				mngr.getAnimationEngine().prepareAnimations(profile, renderMode, def);
 				if(setupTexture) {
 					TextureHandler<RL, RT> tex = ((TextureHandlerFactory<RL, RT>) textureHandlerFactory).apply(null, renderTypeFactory);
 					((ModelRenderManager<MBS, TextureHandler<RL, RT>, ?, M>)mngr).bindSkin(model, tex, TextureSheetType.SKIN);
@@ -342,5 +345,50 @@ public class ClientApi extends SharedApi implements IClientAPI {
 	@Override
 	public <P> boolean playAnimation(String name) {
 		return playAnimation(name, -1);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> MessageSender registerPluginMessage(Class<P> clazz, String messageId, BiConsumer<P, NBTTagCompound> handler, boolean broadcastToTracking) {
+		if(checkClass(clazz, Clazz.PLAYER))return null;
+		if(initingPlugin == null)return null;
+		String fullID = initingPlugin.getOwnerModId() + ":" + messageId;
+		pluginMessageHandlers.put(fullID, (a, b) -> handler.accept((P) a, b));
+		return sendPluginMsg(fullID, broadcastToTracking ? 1 : 0);
+	}
+
+	@Override
+	public MessageSender registerPluginMessage(String messageId, BiConsumer<UUID, NBTTagCompound> handler, boolean broadcastToTracking) {
+		if(initingPlugin == null)return null;
+		String fullID = initingPlugin.getOwnerModId() + ":" + messageId;
+		pluginMessageHandlers.put(fullID, (a, b) -> handler.accept(getPlayerUUID.apply(a), b));
+		return sendPluginMsg(fullID, broadcastToTracking ? 1 : 0);
+	}
+
+	private static MessageSender sendPluginMsg(String fullID, int flags) {
+		return msg -> MinecraftClientAccess.get().getNetHandler().sendPluginMessage(fullID, msg, flags);
+	}
+
+	public void handlePacket(String id, NBTTagCompound tag, Object player) {
+		BiConsumer<Object, NBTTagCompound> h = pluginMessageHandlers.get(id);
+		h.accept(player, tag);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> MessageSender registerPluginStateMessage(Class<P> clazz, String messageId, BiConsumer<P, NBTTagCompound> handler) {
+		if(checkClass(clazz, Clazz.PLAYER))return null;
+		if(initingPlugin == null)return null;
+		String fullID = initingPlugin.getOwnerModId() + ":" + messageId;
+		pluginMessageHandlers.put(fullID, (a, b) -> handler.accept((P) a, b));
+		return sendPluginMsg(fullID, 2);
+	}
+
+	@Override
+	public MessageSender registerPluginStateMessage(String messageId, BiConsumer<UUID, NBTTagCompound> handler) {
+		if(initingPlugin == null)return null;
+		String fullID = initingPlugin.getOwnerModId() + ":" + messageId;
+		pluginMessageHandlers.put(fullID, (a, b) -> handler.accept(getPlayerUUID.apply(a), b));
+		return sendPluginMsg(fullID, 2);
 	}
 }

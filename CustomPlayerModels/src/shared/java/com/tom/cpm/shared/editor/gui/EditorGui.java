@@ -596,6 +596,14 @@ public class EditorGui extends Frame {
 		Button fpHand = pp.addButton(gui.i18nFormat("button.cpm.effect.setFpHandPos"), new MessagePopup(this, gui.i18nFormat("label.cpm.info"), fpText));
 		fpHand.setTooltip(new Tooltip(this, fpText));
 
+		Checkbox removeBedOffset = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.removeBedOffset"), () -> {
+			editor.action("switch", "label.cpm.effect.removeBedOffset").
+			updateValueOp(editor, editor.removeBedOffset, !editor.removeBedOffset, (a, b) -> a.removeBedOffset = b).execute();
+			editor.updateGui();
+		});
+		editor.updateGui.add(() -> removeBedOffset.setSelected(editor.removeBedOffset));
+		removeBedOffset.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.removeBedOffset")));
+
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.textureEffects")).setBounds(new Box(5, 5, 0, 0)));
 
 		Button btnAddAnimTex = pp.addButton(gui.i18nFormat("button.cpm.addAnimatedTex"), editor::addAnimTex);
@@ -712,6 +720,7 @@ public class EditorGui extends Frame {
 			editor.updateGui();
 		});
 		editor.updateGui.add(() -> chbx.setSelected(editor.modelDisplayLayers.contains(layer)));
+		chbx.setSelected(editor.modelDisplayLayers.contains(layer));
 	}
 
 	private void initHeldItemPopup(PopupMenu pp, ItemSlot hand) {

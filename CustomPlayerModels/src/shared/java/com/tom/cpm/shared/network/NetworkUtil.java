@@ -21,6 +21,7 @@ import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey.KeyGroup;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
+import com.tom.cpm.shared.network.packet.PluginMessageS2C;
 import com.tom.cpm.shared.network.packet.ReceiveEventS2C;
 import com.tom.cpm.shared.network.packet.RecommendSafetyS2C;
 import com.tom.cpm.shared.network.packet.SetSkinC2S;
@@ -41,13 +42,18 @@ public class NetworkUtil {
 	public static final FormatText FORCED_CHAT_MSG = new FormatText("chat.cpm.skinForced");
 
 	public static <P> void sendPlayerData(NetHandler<?, P, ?> handler, P target, P to) {
+		ServerNetH netTo = handler.getSNetH(to);
 		PlayerData dt = handler.getSNetH(target).cpm$getEncodedModelData();
 		if(dt == null)return;
-		handler.sendPacketTo(handler.getSNetH(to), writeSkinData(handler, dt, target));
+		handler.sendPacketTo(netTo, writeSkinData(handler, dt, target));
 		if(dt.gestureData.length > 0) {
 			NBTTagCompound evt = new NBTTagCompound();
 			evt.setByteArray(NetworkUtil.GESTURE, dt.gestureData);
-			handler.sendPacketTo(handler.getSNetH(to), new ReceiveEventS2C(handler.getPlayerId(target), evt));
+			handler.sendPacketTo(netTo, new ReceiveEventS2C(handler.getPlayerId(target), evt));
+		}
+		if(!dt.pluginStates.isEmpty()) {
+			int id = handler.getPlayerId(target);
+			dt.pluginStates.forEach((k, v) -> handler.sendPacketTo(netTo, new PluginMessageS2C(k, id, v)));
 		}
 	}
 

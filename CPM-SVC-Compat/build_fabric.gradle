@@ -24,6 +24,10 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    maven {
+		name = "tom5454 maven"
+		url = "https://raw.githubusercontent.com/tom5454/maven/main"
+	}
     mavenLocal()
 }
 
@@ -38,9 +42,10 @@ dependencies {
 
     implementation "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
     
-    implementation files("CustomPlayerModels-API-0.4.0.jar");
+    compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+	modRuntimeOnly "com.tom5454.cpm:CustomPlayerModels-${project.cpm_mc_version}:${project.cpm_runtime_version}"
 
-    modRuntimeOnly "maven.modrinth:simple-voice-chat:fabric-1.18.2-${voicechat_api_version}"
+    modImplementation "maven.modrinth:simple-voice-chat:fabric-1.18.2-${voicechat_api_version}"
 }
 
 processResources {

@@ -20,6 +20,7 @@ public enum RenderEffects {
 	COPY_TRANSFORM(EffectCopyTransform::new),
 	FIRST_PERSON_HAND(EffectFirstPersonHandPos::new),
 	DISABLE_VANILLA(EffectDisableVanilla::new),
+	REMOVE_BED_OFFSET(EffectRemoveBedOffset::new),
 	;
 	public static final RenderEffects[] VALUES = values();
 	private Supplier<IRenderEffect> factory;

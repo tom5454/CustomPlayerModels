@@ -80,7 +80,10 @@ public class NamedElement<T> {
 			Iterator<Entry<T, NamedElement<T>>> i = elems.entrySet().iterator();
 			while (i.hasNext()) {
 				Map.Entry<T, NamedElement<T>> entry = i.next();
-				if(!in.contains(entry.getKey()))i.remove();
+				if(!in.contains(entry.getKey())) {
+					i.remove();
+					list.remove(entry.getValue());
+				}
 			}
 			for (T t : in) {
 				if(!elems.containsKey(t)) {

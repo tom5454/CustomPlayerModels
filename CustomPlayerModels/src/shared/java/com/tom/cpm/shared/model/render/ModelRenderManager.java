@@ -262,7 +262,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected void bindFirstSetup() {
 			if(playerObj != null) {
 				playerObj.updateFromModel(model);
-				mngr.animEngine.handleAnimation(playerObj, mode);
+				mngr.animEngine.handleAnimation(playerObj, mode, def);
 			}
 			for (int i = 0; i < redirectRenderers.size(); i++) {
 				RedirectRenderer<P> re = redirectRenderers.get(i);
@@ -320,6 +320,9 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected void setupTransform(MatrixStack stack, RedirectRenderer<P> forPart, boolean pre) {
 			if(pre && def != null && def.getScale() != null && mode == AnimationMode.PLAYER) {
 				transform(stack, def.getScale());
+			}
+			if(pre && def != null && def.removeBedOffset && mode == AnimationMode.PLAYER && playerObj != null && !playerObj.isClientPlayer() && playerObj.animState.sleeping) {
+				stack.translate(0, 0, 0.125f);
 			}
 			if(pre && def != null && mode == AnimationMode.HAND) {
 				if(forPart.getPart() == PlayerModelParts.LEFT_ARM && def.fpLeftHand != null)transform(stack, def.fpLeftHand);

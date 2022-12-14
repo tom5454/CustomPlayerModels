@@ -1,17 +1,15 @@
 buildscript {
     repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
         maven {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
+        maven {
+            url = "http://localhost:8000"
+        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'gradlefix:ForgeGradle:1.2-fix2'
     }
 }
 
@@ -59,7 +57,7 @@ dependencies {
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+	compile "com.mojang:brigadier:1.0.18"
 }
 
 sourceSets {
@@ -77,6 +75,25 @@ sourceSets {
     }
 }
 
+jar {
+    from sourceSets.api.output
+    manifest {
+        attributes(
+                'FMLCorePlugin': 'com.tom.cpmcore.CPMLoadingPlugin',
+                'FMLCorePluginContainsFMLMod': 'true',
+                'FMLAT': 'cpm_at.cfg')
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
 processResources
 {
     // this will ensure that this task is redone when the versions change.
@@ -90,7 +107,7 @@ processResources
         // replace version and mcversion
         expand 'version':project.version, 'mcversion':project.minecraft.version
     }
-        
+    
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'

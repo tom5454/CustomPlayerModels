@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "cpmapi": [
-      "com.tom.cpmsvcc.platform.fabric.CPMSVCPlugin"
+      "com.tom.cpmsvcc.CPMSVCPlugin"
     ],
     "voicechat": [
       "com.tom.cpmsvcc.CPMVoicechatPlugin"

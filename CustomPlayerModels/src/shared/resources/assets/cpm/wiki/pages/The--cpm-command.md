@@ -50,7 +50,7 @@ Set the kick message
 
 ## scaling
 Usage: `/cpm scaling <scaling option>`  
-Only has an effect after re-logging.
+Only has an effect after re-logging.  
 Subcommands:
 * [limit](#scaling-limit)
 * [enabled](#scaling-enabled)

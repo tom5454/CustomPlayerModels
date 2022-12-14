@@ -104,6 +104,10 @@ public class MatrixStack {
 			return new Mat4f(normal).toArray();
 		}
 
+		public float[] getNormalArray3() {
+			return normal.toArray();
+		}
+
 		public Entry copy() {
 			return new MatrixStack.Entry(matrix.copy(), normal.copy());
 		}

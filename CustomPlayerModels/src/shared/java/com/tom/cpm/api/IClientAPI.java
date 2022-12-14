@@ -3,10 +3,12 @@ package com.tom.cpm.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationState;
 import com.tom.cpm.shared.editor.gui.EditorGui;
@@ -32,7 +34,7 @@ public interface IClientAPI extends ISharedAPI {
 	 *
 	 * @param getVoiceLevel function that returns the voice loudness for the specific player uuid
 	 * */
-	<T> void registerVoice(Function<UUID, Float> getVoiceLevel);
+	void registerVoice(Function<UUID, Float> getVoiceLevel);
 
 	/**
 	 * Register a voice muted provider.
@@ -47,7 +49,7 @@ public interface IClientAPI extends ISharedAPI {
 	 *
 	 * @param getMuted function that returns the voice muted status for the specific player uuid
 	 * */
-	<T> void registerVoiceMute(Predicate<UUID> getMuted);
+	void registerVoiceMute(Predicate<UUID> getMuted);
 
 	/**
 	 * Create a new player model renderer
@@ -82,6 +84,63 @@ public interface IClientAPI extends ISharedAPI {
 	 * @param func consumer of {@link EditorGui}
 	 * */
 	void registerEditorGenerator(String name, String tooltip, Consumer<EditorGui> func);
+
+	/**
+	 * Register a plugin message handler, the messages are sent across the server (if supported)
+	 *
+	 * @param clazz the player entity class (Player.class) for your minecraft version
+	 * @param messageId the id of your message
+	 * @param handler Message handler
+	 * @param broadcastToTracking if true the message is broadcast to all tracking players if false the server attempts to process the packet
+	 * @return message sender
+	 * */
+	<P> MessageSender registerPluginMessage(Class<P> clazz, String messageId, BiConsumer<P, NBTTagCompound> handler, boolean broadcastToTracking);
+
+	/**
+	 * Register a plugin message handler, the messages are sent across the server (if supported)
+	 *
+	 * @param messageId the id of your message
+	 * @param handler Message handler
+	 * @param broadcastToTracking if true the message is broadcast to all tracking players if false the server attempts to process the packet
+	 * @return message sender
+	 * */
+	MessageSender registerPluginMessage(String messageId, BiConsumer<UUID, NBTTagCompound> handler, boolean broadcastToTracking);
+
+	/**
+	 * Register a plugin message handler, the messages are sent across the server (if supported),
+	 * the last message is resent when a new player starts tracking
+	 *
+	 * @param clazz the player entity class (Player.class) for your minecraft version
+	 * @param messageId the id of your message
+	 * @param handler Message handler
+	 * @return message sender
+	 * */
+	<P> MessageSender registerPluginStateMessage(Class<P> clazz, String messageId, BiConsumer<P, NBTTagCompound> handler);
+
+	/**
+	 * Register a plugin message handler, the messages are sent across the server (if supported),
+	 * the last message is resent when a new player starts tracking
+	 *
+	 * @param messageId the id of your message
+	 * @param handler Message handler
+	 * @return message sender
+	 * */
+	MessageSender registerPluginStateMessage(String messageId, BiConsumer<UUID, NBTTagCompound> handler);
+
+	/**
+	 * Broadcast a message to all nearby players on a server
+	 * */
+	@FunctionalInterface
+	public static interface MessageSender {
+
+		/**
+		 * Broadcast a message
+		 *
+		 * @param tag Message written as a {@link NBTTagCompound}
+		 * @return send success (server has a supported mod version installed)
+		 * */
+		boolean sendMessage(NBTTagCompound tag);
+	}
 
 	/**
 	 * Create a new player model renderer

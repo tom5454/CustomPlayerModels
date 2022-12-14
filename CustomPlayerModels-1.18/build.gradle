@@ -139,6 +139,12 @@ repositories {
     //     dir 'libs'
     // }
     maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 mixin {
@@ -148,6 +154,8 @@ mixin {
     
     debug.verbose = true
     debug.export = true
+    
+    extraMappings file("vivecraft-4061820.tsrg")
 }
 
 dependencies {
@@ -173,15 +181,18 @@ dependencies {
     compileOnly files("of.jar")
     
     compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.3.0-1.18.2-forge")
+    compileOnly fg.deobf('curse.maven:vivecraft-667903:4061820')
 }
 
 sourceSets {
 	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
+			srcDir "src/platform-shared/java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
+			srcDir "src/platform-shared/resources"
 		}
 	}
 }

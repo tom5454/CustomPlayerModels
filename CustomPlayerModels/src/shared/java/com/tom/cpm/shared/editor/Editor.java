@@ -189,7 +189,7 @@ public class Editor {
 	public boolean customSkinType;
 	public ModelDescription description;
 	public String modelId;
-	public boolean hideHeadIfSkull, removeArmorOffset;
+	public boolean hideHeadIfSkull, removeArmorOffset, removeBedOffset;
 	public Image vanillaSkin;
 	public boolean dirty, autoSaveDirty;
 	public long lastEdit;
@@ -423,6 +423,7 @@ public class Editor {
 		scalingElem.reset();
 		removeArmorOffset = true;
 		hideHeadIfSkull = true;
+		removeBedOffset = false;
 		modelId = null;
 		Player<?> profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.getTextures().load().thenRun(() -> {

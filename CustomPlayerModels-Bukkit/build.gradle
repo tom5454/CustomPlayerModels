@@ -14,11 +14,15 @@ repositories {
     maven {
         url "https://hub.spigotmc.org/nexus/content/repositories/snapshots"
     }
+    maven {
+    	url "https://libraries.minecraft.net"
+    }
 }
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
     compileOnly "io.netty:netty-all:4.1.25.Final"
+    compileOnly "com.mojang:brigadier:1.0.18"
 }
 
 sourceSets {
@@ -39,6 +43,7 @@ spigot {
         authors 'tom5454'
         main 'com.tom.cpm.bukkit.CPMBukkitPlugin'
         description 'Customizable Player Models server-side plugin.'
+        website 'https://github.com/tom5454/CustomPlayerModels'
         apiVersion '1.13'
         command {
         	named 'cpm'
@@ -62,6 +67,15 @@ spigot {
 }
 
 processResources.finalizedBy(spigotPlugin)
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {

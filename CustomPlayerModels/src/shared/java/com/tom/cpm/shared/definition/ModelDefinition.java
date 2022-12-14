@@ -71,7 +71,7 @@ public class ModelDefinition {
 	private ScaleData scale;
 	public PartPosition fpLeftHand, fpRightHand;
 	private boolean stitchedTexture;
-	public boolean hideHeadIfSkull = true, removeArmorOffset;
+	public boolean hideHeadIfSkull = true, removeArmorOffset, removeBedOffset;
 	public ModelPartCloneable cloneable;
 	private Throwable error;
 

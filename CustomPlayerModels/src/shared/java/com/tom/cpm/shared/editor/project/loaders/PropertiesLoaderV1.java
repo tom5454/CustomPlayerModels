@@ -57,6 +57,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 		if(data.containsKey("modelId")) {
 			editor.modelId = data.getString("modelId");
 		}
+		editor.removeBedOffset = data.getBoolean("removeBedOffset", false);
 	}
 
 	protected static PartPosition loadPartPos(JsonMap fpHand, String name) {
@@ -99,6 +100,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 		if(editor.modelId != null) {
 			data.put("modelId", editor.modelId);
 		}
+		data.put("removeBedOffset", editor.removeBedOffset);
 	}
 
 }

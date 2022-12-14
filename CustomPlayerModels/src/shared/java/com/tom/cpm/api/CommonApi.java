@@ -1,11 +1,19 @@
 package com.tom.cpm.api;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
+
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpm.shared.MinecraftServerAccess;
 import com.tom.cpm.shared.io.ModelFile;
+import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.network.packet.PluginMessageS2C;
 
 public class CommonApi extends SharedApi implements ICommonAPI {
+	private Map<String, BiConsumer<Object, NBTTagCompound>> pluginMessageHandlers = new HashMap<>();
 
 	@Override
 	protected void callInit0(ICPMPlugin plugin) {
@@ -23,7 +31,7 @@ public class CommonApi extends SharedApi implements ICommonAPI {
 			api.common = new CommonApi();
 		}
 
-		public ApiBuilder player(Class<?> player) {
+		public <P> ApiBuilder player(Class<P> player) {
 			api.common.classes.put(Clazz.PLAYER, player);
 			return this;
 		}
@@ -76,5 +84,50 @@ public class CommonApi extends SharedApi implements ICommonAPI {
 	@Override
 	public <P> void playAnimation(Class<P> playerClass, P player, String name) {
 		playAnimation(playerClass, player, name, -1);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> MessageSender<P> registerPluginMessage(Class<P> clazz, String messageId,
+			BiConsumer<P, NBTTagCompound> handler) {
+		if(checkClass(clazz, Clazz.PLAYER))return null;
+		if(initingPlugin == null)return null;
+		String fullID = initingPlugin.getOwnerModId() + ":" + messageId;
+		pluginMessageHandlers.put(fullID, (a, b) -> handler.accept((P) a, b));
+		return new SenderImpl<>(fullID);
+	}
+
+	private class SenderImpl<P> implements MessageSender<P> {
+		private final String id;
+
+		public SenderImpl(String id) {
+			this.id = id;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public boolean sendMessageTo(P player, NBTTagCompound tag) {
+			NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
+			ServerNetH net = h.getSNetH(player);
+			if(net.cpm$hasMod()) {
+				h.sendPacketTo(net, new PluginMessageS2C(id, h.getPlayerId(player), tag));
+				return true;
+			}
+			return false;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void sendMessageToTracking(P player, NBTTagCompound tag, boolean sendToSelf) {
+			NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
+			PluginMessageS2C m = new PluginMessageS2C(id, h.getPlayerId(player), tag);
+			h.sendPacketToTracking(player, m);
+			if(sendToSelf)h.sendPacketTo(h.getSNetH(player), m);
+		}
+	}
+
+	public void handlePacket(String id, NBTTagCompound tag, Object player) {
+		BiConsumer<Object, NBTTagCompound> h = pluginMessageHandlers.get(id);
+		h.accept(player, tag);
 	}
 }

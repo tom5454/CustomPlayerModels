@@ -3,9 +3,11 @@ package com.tom.cpm.shared.config;
 import java.util.Base64;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.tom.cpl.config.ConfigEntry;
+import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpm.shared.network.ModelEventType;
 import com.tom.cpm.shared.util.ScalingOptions;
 
@@ -16,6 +18,7 @@ public class PlayerData {
 	public Map<ScalingOptions, Float> scale = new EnumMap<>(ScalingOptions.class);
 	public EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
 	public byte[] gestureData = new byte[0];
+	public Map<String, NBTTagCompound> pluginStates = new HashMap<>();
 
 	public PlayerData() {
 	}

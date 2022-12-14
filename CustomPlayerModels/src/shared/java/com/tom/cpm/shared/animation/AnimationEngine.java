@@ -100,9 +100,8 @@ public class AnimationEngine {
 		return (long) ((tickCounter + partial) * 50);
 	}
 
-	public void prepareAnimations(Player<?> player, AnimationMode mode) {
+	public void prepareAnimations(Player<?> player, AnimationMode mode, ModelDefinition def) {
 		long time = getTime();
-		ModelDefinition def = player.getModelDefinition();
 		AnimationRegistry reg = def.getAnimations();
 		if(mode == AnimationMode.PLAYER) {
 			player.animState.preAnimate();
@@ -126,11 +125,10 @@ public class AnimationEngine {
 		reg.tickAnimated(time);
 	}
 
-	public void handleAnimation(Player<?> player, AnimationMode mode) {
+	public void handleAnimation(Player<?> player, AnimationMode mode, ModelDefinition def) {
 		AnimationHandler h = player.getAnimationHandler(mode);
 		try {
 			long time = getTime();
-			ModelDefinition def = player.getModelDefinition();
 			AnimationRegistry reg = def.getAnimations();
 			switch (mode) {
 			case HAND:
@@ -191,7 +189,7 @@ public class AnimationEngine {
 			h.animate(player.animState, time);
 		} catch (Exception e) {
 			Log.warn("Error animating model", e);
-			player.getModelDefinition().resetAnimationPos();
+			def.resetAnimationPos();
 			h.clear();
 		}
 	}

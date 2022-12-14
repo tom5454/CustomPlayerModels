@@ -17,24 +17,40 @@ group = project.maven_group
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
+repositories {
+	maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	mappings loom.officialMojangMappings()
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	modImplementation("com.terraformersmc:modmenu:4.0.0") {
+	modImplementation("com.terraformersmc:modmenu:4.0.6") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.3.2') {
+	modImplementation ('com.github.Virtuoel:Pehkui:3.4.1') {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	compileOnly files("of.jar")
+	compileOnly files("../CustomPlayerModels-1.19/of.jar")
+	
+	modImplementation ('curse.maven:sodium-394468:3957319')
+    modImplementation ('curse.maven:irisshaders-455508:3957332')
+    /*implementation("org.joml:joml:1.10.4")
+    implementation("org.anarres:jcpp:1.4.14")
+    modImplementation (files('firstperson-fabric-2.1.2-mc1.19.1.jar'))*/
+    modCompileOnly('curse.maven:vivecraft-667903:4061843')
 }
 
 loom {
@@ -45,9 +61,11 @@ sourceSets {
 	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
+			srcDir "../CustomPlayerModels-1.19/src/platform-shared/java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
+			srcDir "../CustomPlayerModels-1.19/src/platform-shared/resources"
 		}
 	}
 }

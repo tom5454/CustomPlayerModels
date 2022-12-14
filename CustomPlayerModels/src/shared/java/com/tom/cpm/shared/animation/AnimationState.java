@@ -65,8 +65,8 @@ public class AnimationState {
 		else if(elytraFlying)return VanillaPose.FLYING;
 		else if(tridentSpin)return VanillaPose.TRIDENT_SPIN;
 		else if(fallDistance > 4 || fallDistanceServer > 4)return VanillaPose.FALLING;
-		else if(creativeFlying || creativeFlyingServer)return VanillaPose.CREATIVE_FLYING;
 		else if(riding)return VanillaPose.RIDING;
+		else if(creativeFlying || creativeFlyingServer)return VanillaPose.CREATIVE_FLYING;
 		else if(swimming)return VanillaPose.SWIMMING;
 		else if(retroSwimming && registry.hasPoseAnimations(VanillaPose.RETRO_SWIMMING))return VanillaPose.RETRO_SWIMMING;
 		else if(isClimbing && Math.abs(moveAmountY) > 0.05F && registry.hasPoseAnimations(VanillaPose.CLIMBING_ON_LADDER))return VanillaPose.CLIMBING_ON_LADDER;

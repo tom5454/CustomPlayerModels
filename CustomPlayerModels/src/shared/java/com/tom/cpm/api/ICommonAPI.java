@@ -1,5 +1,8 @@
 package com.tom.cpm.api;
 
+import java.util.function.BiConsumer;
+
+import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpm.shared.io.ModelFile;
 
 /**
@@ -68,4 +71,38 @@ public interface ICommonAPI extends ISharedAPI {
 	 * @param name animation name
 	 * */
 	<P> void playAnimation(Class<P> playerClass, P player, String name);
+
+	/**
+	 * Register a plugin message handler
+	 *
+	 * @param clazz the player entity class (Player.class) for your minecraft version
+	 * @param messageId the id of your message
+	 * @param handler Message handler
+	 * @return message sender
+	 * */
+	<P> MessageSender<P> registerPluginMessage(Class<P> clazz, String messageId, BiConsumer<P, NBTTagCompound> handler);
+
+	/**
+	 * Broadcast a message to all nearby players on a server
+	 * */
+	public static interface MessageSender<P> {
+
+		/**
+		 * Sends a message to a specific player
+		 *
+		 * @param player The player to send the message to
+		 * @param tag Message written as a {@link NBTTagCompound}
+		 * @return send success (client has mod installed)
+		 * */
+		boolean sendMessageTo(P player, NBTTagCompound tag);
+
+		/**
+		 * Broadcast a message to all of the tracking players
+		 *
+		 * @param player The player
+		 * @param tag Message written as a {@link NBTTagCompound}
+		 * @param sendToSelf Send message to the selected player
+		 * */
+		void sendMessageToTracking(P player, NBTTagCompound tag, boolean sendToSelf);
+	}
 }

@@ -261,6 +261,26 @@ Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, tog
 `IClientAPI.playAnimation(name, value);`  
 Returns: true if the animation was found and started playing  
 
+### Client Networking (0.6.1+)
+Register a NBT message to send to the server, or broadcast it to other clients.  
+`MessageSender sender = IClientAPI.registerPluginMessage(Player.class, message_id, (player, message) -> {/*Handle message*/}, broadcastToTracking);`  
+[Player.class](#client-player-class)  
+or UUID version:  
+`MessageSender sender = IClientAPI.registerPluginMessage(message_id, (player_uuid, message) -> {/*Handle message*/}, broadcastToTracking);`  
+Use the `MessageSender` to send messages.  
+`boolean success = sender.sendMessage(message_tag);`  
+Use the platform independent NBT implementation from `com.tom.cpl.nbt.*` package.  
+broadcastToTracking: false: Send the message to the server / true: broadcast message to nearby players (through the server).  
+CPM 0.6.1+ is required on the server side for the networking to work.  
+When using broadcastToTracking, or State Messages your mod/plugin is not required on the server for the packet forwarding to work, you don't have to register anything. To receive non broadcast messages use the ICommonAPI.registerPluginMessage  
+
+#### State Messages
+The last state message is stored on the server and sent to every client that enters the tracking range (render distance).  
+`MessageSender sender = IClientAPI.registerPluginStateMessage(Player.class, message_id, (player, message) -> {/*Handle message*/});`  
+[Player.class](#client-player-class)  
+or UUID version:  
+`MessageSender sender = IClientAPI.registerPluginMessage(message_id, (player_uuid, message) -> {/*Handle message*/});`  
+
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  
 #### Client Player.class
@@ -314,6 +334,17 @@ Name: Animation name
 Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or -1 to switch state
 `ICommonAPI.playAnimation(Player.class, playerObj, name, value);`  
 [Player.class](#common-player-class)
+
+### Server Networking (0.6.1+)
+Register a NBT message to receive non broadcast messages/send messages to clients.  
+`MessageSender<Player> sender = ICommonAPI.registerPluginMessage(Player.class, message_id, (player, message) -> {/*Handle message*/});`  
+[Player.class](#client-player-class)  
+Use the `MessageSender` to send messages.  
+`boolean success = sender.sendMessageTo(player, message_tag);`  
+or broadcast to nearby players:  
+`sender.sendMessageToTracking(player, message_tag, sendToSelf);`  
+Use the platform independent NBT implementation from `com.tom.cpl.nbt.*` package.  
+sendToSelf: Send message to the selected player in argument 1
 
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  

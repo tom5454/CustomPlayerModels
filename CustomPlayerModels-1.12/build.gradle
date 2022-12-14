@@ -57,26 +57,14 @@ minecraft {
 }
 
 repositories {
-    maven { url "http://dvs1.progwml6.com/files/maven" }
-    //maven { url "https://tehnut.info/maven" }
+    maven { url "https://dvs1.progwml6.com/files/maven" }
     maven { // TOP
         name 'tterrag maven'
-        url "http://maven.tterrag.com/"
+        url "https://maven.tterrag.com/"
     }
     maven { // McJtyLib
-        url "http://maven.k-4u.nl"
+        url "https://maven.k-4u.nl"
     }
-    maven {
-        name = "CoFH Maven"
-        url = "http://maven.covers1624.net"
-    }
-    jcenter()
-	/*maven {
-		url "http://maven.shadowfacts.net/"
-	}*/
-	maven {
-		url "http://chickenbones.net/maven/"
-	}
 }
 
 dependencies {

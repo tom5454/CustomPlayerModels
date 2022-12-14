@@ -8,6 +8,7 @@ public enum ServerCaps {
 	THIRD_PERSON,
 	ATTRIBUTE_SCALE,
 	GESTURES,
+	PLUGIN_MESSAGES,
 	;
 	public static final ServerCaps[] VALUES = values();
 }

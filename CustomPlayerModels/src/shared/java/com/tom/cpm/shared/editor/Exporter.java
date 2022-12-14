@@ -51,6 +51,7 @@ import com.tom.cpm.shared.effects.EffectHideSkull;
 import com.tom.cpm.shared.effects.EffectModelScale;
 import com.tom.cpm.shared.effects.EffectPerFaceUV;
 import com.tom.cpm.shared.effects.EffectRemoveArmorOffset;
+import com.tom.cpm.shared.effects.EffectRemoveBedOffset;
 import com.tom.cpm.shared.effects.EffectRenderItem;
 import com.tom.cpm.shared.effects.EffectScale;
 import com.tom.cpm.shared.effects.EffectScaling;
@@ -263,6 +264,7 @@ public class Exporter {
 		}
 		if(!e.hideHeadIfSkull)otherParts.add(new ModelPartRenderEffect(new EffectHideSkull(e.hideHeadIfSkull)));
 		if(e.removeArmorOffset)otherParts.add(new ModelPartRenderEffect(new EffectRemoveArmorOffset(e.removeArmorOffset)));
+		if(e.removeBedOffset)otherParts.add(new ModelPartRenderEffect(new EffectRemoveBedOffset()));
 		if(e.leftHandPos.isChanged() || e.rightHandPos.isChanged())
 			otherParts.add(new ModelPartRenderEffect(new EffectFirstPersonHandPos(e.leftHandPos, e.rightHandPos)));
 

@@ -45,6 +45,8 @@ import com.tom.cpm.shared.network.packet.GestureC2S;
 import com.tom.cpm.shared.network.packet.GetSkinS2C;
 import com.tom.cpm.shared.network.packet.HelloC2S;
 import com.tom.cpm.shared.network.packet.HelloS2C;
+import com.tom.cpm.shared.network.packet.PluginMessageC2S;
+import com.tom.cpm.shared.network.packet.PluginMessageS2C;
 import com.tom.cpm.shared.network.packet.ReceiveEventS2C;
 import com.tom.cpm.shared.network.packet.RecommendSafetyS2C;
 import com.tom.cpm.shared.network.packet.ScaleInfoS2C;
@@ -66,6 +68,7 @@ public class NetHandler<RL, P, NET> {
 	public static final String RECEIVE_EVENT = "rec_evt";
 	public static final String GESTURE = "gesture";
 	public static final String SERVER_ANIMATION = "srv_anim";
+	public static final String PLUGIN = "plugin";
 
 	protected Function<P, UUID> getPlayerUUID;
 	private TriConsumer<NET, RL, byte[]> sendPacket;
@@ -117,6 +120,9 @@ public class NetHandler<RL, P, NET> {
 		register(packetC2S, GESTURE, GestureC2S.class, GestureC2S::new);
 
 		register(packetS2C, SERVER_ANIMATION, ServerAnimationS2C.class, ServerAnimationS2C::new);
+
+		register(packetC2S, PLUGIN, PluginMessageC2S.class, PluginMessageC2S::new);
+		register(packetS2C, PLUGIN, PluginMessageS2C.class, PluginMessageS2C::new);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -155,6 +161,7 @@ public class NetHandler<RL, P, NET> {
 		scaleSetters.keySet().stream().map(ScalingOptions::getCaps).filter(e -> e != null).distinct().forEach(c -> setCap(data, c));
 		setCap(data, ServerCaps.MODEL_EVENT_SUBS);
 		setCap(data, ServerCaps.GESTURES);
+		setCap(data, ServerCaps.PLUGIN_MESSAGES);
 		return data;
 	}
 
@@ -303,8 +310,15 @@ public class NetHandler<RL, P, NET> {
 	}
 
 	public void playAnimation(P p, String animation, int value) {
-		ServerNetH net = getSNetH(p);
-		sendPacketTo(net, new ServerAnimationS2C(animation, value));
+		sendPacketTo(getSNetH(p), new ServerAnimationS2C(animation, value));
+	}
+
+	public boolean sendPluginMessage(String id, NBTTagCompound msg, int flags) {
+		if(hasModClient() && serverCaps.contains(ServerCaps.PLUGIN_MESSAGES)) {
+			sendPacketToServer(new PluginMessageC2S(id, msg, flags));
+			return true;
+		}
+		return false;
 	}
 
 	public String getID(P pl) {

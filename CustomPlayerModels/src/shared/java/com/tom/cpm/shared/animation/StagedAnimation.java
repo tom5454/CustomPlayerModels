@@ -92,7 +92,7 @@ public class StagedAnimation {
 
 		@Override
 		public void prepare() {
-			currentStage = Stage.SETUP;
+			currentStage = pre.isEmpty() ? Stage.PLAY : Stage.SETUP;
 			all.forEach(a -> ((Anim) a).reset());
 		}
 
