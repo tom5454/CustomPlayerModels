@@ -1,14 +1,12 @@
 package com.tom.cpl.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
-
-import com.google.gwt.core.client.JavaScriptException;
-
-import com.tom.cpm.shared.io.SkinDataInputStream;
 
 import elemental2.core.Uint32Array;
 
@@ -39,6 +37,10 @@ public class Image {
 
 	public void loadRGB(int x, int y, int rgb) {
 		dataSet(data, y * w + x, rgb);
+	}
+
+	public int storeRGB(int x, int y) {
+		return dataGet(data, y * w + x);
 	}
 
 	public int getRGB(int x, int y) {
@@ -114,15 +116,12 @@ public class Image {
 			cf.completeExceptionally(new IOException("Only data protocol is allowed"));
 			return cf;
 		}
-		String dec = SkinDataInputStream.decodedURL.get(url);
-		com.tom.cpm.web.client.util.ImageIO.loadImage(url, false, false).then(i -> {
-			if(dec != null)SkinDataInputStream.decodedData.put(i, dec);
-			cf.complete(i);
-			return null;
-		}).catch_(e -> {
-			cf.completeExceptionally(e instanceof Throwable ? (Throwable) e : new JavaScriptException(e));
-			return null;
-		});
+		url = url.substring(url.indexOf(',') + 1);
+		try {
+			cf.complete(ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(url))));
+		} catch (IOException e) {
+			cf.completeExceptionally(e);
+		}
 		return cf;
 	}
 

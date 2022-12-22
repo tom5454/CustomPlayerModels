@@ -111,4 +111,9 @@ public class DataOutputStream extends OutputStream implements DataOutput {
 		writeShort(baos.count);
 		os.write(baos.buf, 0, baos.count);*/
 	}
+
+	@Override
+	public void close() throws IOException {
+		os.close();
+	}
 }

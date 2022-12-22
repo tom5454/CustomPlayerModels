@@ -48,7 +48,6 @@ sourceSets {
 				exclude "com/tom/cpm/externals/org/apache/commons/math3/PolynomialFunction.java"
 				exclude "com/tom/cpm/shared/editor/TestIngameManager.java"
 				exclude "com/tom/cpm/shared/editor/project/ProjectFile.java"
-				exclude "com/tom/cpm/shared/io/SkinDataInputStream.java"
 				exclude "com/tom/cpm/shared/loaders/HttpResourceLoader.java"
 				exclude "com/tom/cpm/shared/loaders/PasteResourceLoader.java"
 				exclude "com/tom/cpm/shared/model/render/BoxRender.java"
@@ -94,14 +93,14 @@ dependencies {
     implementation 'com.google.gwt:gwt-codeserver:2.9.0'
     implementation 'javax.validation:validation-api:1.0.0.GA'
     implementation 'javax.validation:validation-api:1.0.0.GA:sources'
-    //implementation 'org.slf4gwt:slf4gwt:1.4'
+    implementation 'org.slf4gwt:slf4gwt:1.4'
     /*implementation 'com.alexdupre:pngj:2.1.2.1'
     implementation 'com.alexdupre:pngj:2.1.2.1:sources'
     implementation 'com.jcraft:jzlib:1.1.3'
     implementation 'com.jcraft:jzlib:1.1.3:sources'*/
     if ("${useLib}" != "null") {
-    	extraLibs "com.tom5454.cpm:CustomPlayerModels-API:0.4.3"
-    	extraLibs "com.tom5454.cpm:CustomPlayerModels-API:0.4.3:sources"
+    	extraLibs "com.tom5454.cpm:CustomPlayerModels-API:0.6.2"
+    	extraLibs "com.tom5454.cpm:CustomPlayerModels-API:0.6.2:sources"
     }
     priority files(sourceSets.main.java.srcDirs)
 	priority files(sourceSets.blockbench.java.srcDirs)

@@ -10,6 +10,7 @@ import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.web.client.FS;
 import com.tom.cpm.web.client.Stylesheet;
+import com.tom.cpm.web.client.java.io.FileNotFoundException;
 import com.tom.cpm.web.client.util.JSZip;
 import com.tom.cpm.web.client.util.JSZip.ZipFileProperties;
 import com.tom.cpm.web.client.util.JSZip.ZipWriteProperties;
@@ -20,7 +21,6 @@ import elemental2.dom.CSSProperties.MarginLeftUnionType;
 import elemental2.dom.CSSProperties.MarginRightUnionType;
 import elemental2.dom.CSSProperties.WidthUnionType;
 import elemental2.dom.DataTransferItem;
-import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import elemental2.dom.File;
 import elemental2.dom.FileReader;
@@ -180,32 +180,31 @@ public class FileManagerPopup extends PopupPanel {
 			btn = Js.uncheckedCast(doc.getElementById("exportZip"));
 			btn.onclick = ev -> {
 				JSZip zip = new JSZip();
-				Promise<Object[]> p = Promise.all(exportZip(zip, path.value).stream().toArray(Promise[]::new));
-				p.then(v -> zip.generateAsync(ZipWriteProperties.make())).
-				then(blob -> {
-					FS.saveAs(blob, "cpm_fs.zip");
-					return null;
-				});
+				try {
+					exportZip(zip, path.value);
+					zip.generateAsync(ZipWriteProperties.make()).
+					then(blob -> {
+						FS.saveAs(blob, "cpm_fs.zip");
+						return null;
+					});
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
 				return null;
 			};
 			initFS();
 		};
 	}
 
-	private List<Promise<Void>> exportZip(JSZip zip, String path) {
-		List<Promise<Void>> promises = new ArrayList<>();
+	private void exportZip(JSZip zip, String path) throws FileNotFoundException {
 		for(String f : FS.list(path)) {
 			String[] sp = f.split("/");
 			if(FS.isDir(f)) {
-				promises.addAll(exportZip(zip.folder(sp[sp.length - 1]), f));
+				exportZip(zip.folder(sp[sp.length - 1]), f);
 			} else {
-				promises.add(FS.getContent(f).then(c -> {
-					zip.file(sp[sp.length - 1], c, ZipFileProperties.make());
-					return null;
-				}));
+				zip.file(sp[sp.length - 1], FS.getContent(f), ZipFileProperties.make());
 			}
 		}
-		return promises;
 	}
 
 	private void openPopup(String innerHTML) {
@@ -363,8 +362,7 @@ public class FileManagerPopup extends PopupPanel {
 					openDir(name);
 				} else {
 					String[] sp2 = name.split("/");
-					FS.getContent(name).
-					then(dt -> DomGlobal.fetch("data:application/octet-binary;base64," + dt)).
+					FS.getContentFuture(name).
 					then(v -> v.blob()).then(b -> {
 						FS.saveAs(b, sp2[sp2.length - 1]);
 						return null;

@@ -51,6 +51,7 @@ import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
+import com.tom.cpm.shared.editor.elements.MultiSelector;
 import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.RenderUtil;
@@ -814,6 +815,18 @@ public class Editor {
 			else return null;
 		}
 		return selectedElement instanceof ModelElement ? (ModelElement) selectedElement : null;
+	}
+
+	public void forEachSeletectedElement(Consumer<TreeElement> el) {
+		TreeElement elem = selectedElement;
+		if(selectedElement instanceof TreeSettingElement) {
+			elem = ((TreeSettingElement) selectedElement).getParent();
+		}
+		if(elem instanceof MultiSelector) {
+			((MultiSelector)elem).forEachSelected(el);
+		} else {
+			el.accept(elem);
+		}
 	}
 
 	public void free() {

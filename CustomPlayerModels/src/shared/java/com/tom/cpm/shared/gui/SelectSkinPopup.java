@@ -11,6 +11,7 @@ import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
@@ -19,6 +20,7 @@ import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.ScrollPanel;
+import com.tom.cpl.gui.util.ButtonGroup;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Image;
@@ -42,6 +44,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 	private ModelDefinition selectedDef;
 	private Button openSkin, set;
 	private SkinType type;
+	private Panel skinTypesPanel;
 
 	public SelectSkinPopup(Frame frm, SkinType typeIn, BiConsumer<SkinType, Image> accept) {
 		super(frm.getGui());
@@ -150,6 +153,21 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 		});
 		addElement(set);
 
+		skinTypesPanel = new Panel(gui);
+		ButtonGroup<SkinType, Checkbox> group = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> {
+			type = i;
+			selectedDef = ModelDefinition.createVanilla(() -> selected, type);
+		});
+		for (int j = 0; j < SkinType.VANILLA_TYPES.length; j++) {
+			SkinType s = SkinType.VANILLA_TYPES[j];
+			Checkbox chbxSt = new Checkbox(gui, gui.i18nFormat("label.cpm.skin_type." + s.getName()));
+			chbxSt.setBounds(new Box(0, j * 25, 60, 20));
+			skinTypesPanel.addElement(chbxSt);
+			group.addElement(s, chbxSt);
+		}
+		group.accept(type);
+		addElement(skinTypesPanel);
+
 		selectedOpen = new TextureProvider();
 
 		setSize(400, 300);
@@ -163,8 +181,9 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 		openSkin.setBounds(new Box(20, 20, s.x, 20));
 		sizeSetters.forEach(c -> c.accept(s));
 		int dispSize = Math.min(width / 2 - 40, height - 100);
-		set.setBounds(new Box(width / 2 + (dispSize / 2) - 50, height / 2 + (dispSize / 2) + 10, 100, 20));
-		display.setBounds(new Box(width / 2 + 10, height / 2 - (dispSize / 2), dispSize, dispSize));
+		set.setBounds(new Box(width / 2 + (dispSize / 2) - 50, 40 + dispSize + SkinType.VANILLA_TYPES.length * 25, 100, 20));
+		display.setBounds(new Box(width / 2 + 10, 20, dispSize, dispSize));
+		skinTypesPanel.setBounds(new Box(width / 2 + (dispSize / 2) - 50, 30 + dispSize, 100, SkinType.VANILLA_TYPES.length * 25));
 		setBounds(new Box(0, 0, width, height));
 	}
 

@@ -42,7 +42,7 @@ public class Pattern {
 		return new Matcher(reg.exec(v));
 	}
 
-	public static class Matcher {
+	public class Matcher {
 		private final MatchResult res;
 
 		public Matcher(MatchResult res) {
@@ -59,6 +59,10 @@ public class Pattern {
 
 		public boolean matches() {
 			return res != null;
+		}
+
+		public String replaceAll(String replacement) {
+			return reg.replace(res.getInput(), replacement);
 		}
 	}
 }

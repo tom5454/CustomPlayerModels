@@ -18,9 +18,22 @@ public class KeybindPopup extends MessagePopup {
 		this.kb = kb;
 	}
 
+	private String getModifKey() {
+		String key = "";
+		if(modKeys < 1)
+			return key;
+		if((modKeys & Keybind.ALT) != 0)key = gui.i18nFormat("label.cpm.keybind.mod.alt", key);
+		if((modKeys & Keybind.SHIFT) != 0)key = gui.i18nFormat("label.cpm.keybind.mod.shift", key);
+		if((modKeys & Keybind.CTRL) != 0)key = gui.i18nFormat("label.cpm.keybind.mod.ctrl", key);
+		return key;
+	}
+
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
 		super.draw(event, partialTicks);
+
+		String m = getModifKey();
+		gui.drawText(bounds.w / 2 - gui.textWidth(m) / 2, 30, m, gui.getColors().label_text_color);
 
 		if(modKeys > 0) {
 			if((modKeys & Keybind.SHIFT) != 0 && !gui.isShiftDown()) {

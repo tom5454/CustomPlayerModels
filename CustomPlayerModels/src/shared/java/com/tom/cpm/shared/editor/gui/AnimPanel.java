@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.KeybindHandler;
+import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
@@ -12,11 +14,13 @@ import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.ListPicker;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.NamedElement.NameMapper;
@@ -26,17 +30,23 @@ import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.anim.AnimFrame;
+import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
+import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
 import com.tom.cpm.shared.editor.gui.popup.AnimationSettingsPopup;
 import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.LayerDefaultPopup;
+import com.tom.cpm.shared.gui.Keybinds;
 
 public class AnimPanel extends Panel {
 	private Editor editor;
 	private ListPicker<NamedElement<EditorAnim>> animSel;
 	private TabFocusHandler tabHandler;
 	private Button prevFrm, nextFrm, clearAnimData;
+	private AnimFrame cpyFrame;
+	private FrameData cpyData;
 
 	public AnimPanel(IGui gui, EditorGui e) {
 		super(gui);
@@ -90,6 +100,42 @@ public class AnimPanel extends Panel {
 		editBtn.setBounds(new Box(45, 0, 80, 18));
 		p.addElement(editBtn);
 		editor.setAnimDelEn.add(editBtn::setEnabled);
+
+		Button optBtn = new Button(gui, "...", null) {
+
+			@Override
+			public void mouseClick(MouseEvent evt) {
+				if(evt.isHovered(bounds)) {
+					Vec2i p = evt.getPos();
+					PopupMenu animPopup = new PopupMenu(gui, e);
+					if(editor.selectedAnim != null) {
+						animPopup.addButton(gui.i18nFormat("button.cpm.dupAnim"), () -> {
+							EditorAnim cpy = new EditorAnim(editor.selectedAnim);
+							editor.action("add", "action.cpm.anim").addToList(editor.animations, cpy).onUndo(() -> editor.selectedAnim = null).execute();
+							editor.selectedAnim = cpy;
+							editor.updateGui();
+						});
+						AnimPanel this0 = AnimPanel.this;
+						animPopup.addButton(gui.i18nFormat("buttom.cpm.copyAnimFrame"), this0::copyFrame).setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.copyFrame", Keybinds.COPY_ANIM_FRAME.getSetKey(gui))));
+						if(cpyFrame != null) {
+							animPopup.addButton(gui.i18nFormat("button.cpm.pasteAnimFrame"), this0::pasteFrame).setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.pasteFrame", Keybinds.PASTE_ANIM_FRAME.getSetKey(gui))));
+						}
+						if(editor.getSelectedElement() != null) {
+							animPopup.addButton(gui.i18nFormat("buttom.cpm.copyAnimFrameData"), this0::copyData).setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.copyData", Keybinds.COPY_ANIM_PART.getSetKey(gui))));
+							if(cpyData != null) {
+								animPopup.addButton(gui.i18nFormat("button.cpm.pasteAnimFrameData"), this0::pasteData).setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.pasteData", Keybinds.PASTE_ANIM_PART.getSetKey(gui))));
+							}
+						}
+					}
+					if(animPopup.getY() != 0)
+						animPopup.display(p.x - evt.x + bounds.x / 2, p.y - evt.y + bounds.h + bounds.y, 160);
+					evt.consume();
+				}
+			}
+		};
+		optBtn.setBounds(new Box(130, 0, 30, 18));
+		editor.setAnimDelEn.add(optBtn::setEnabled);
+		p.addElement(optBtn);
 
 		p = new Panel(gui);
 		p.setBounds(new Box(0, 0, bounds.w, 18));
@@ -266,6 +312,36 @@ public class AnimPanel extends Panel {
 		addElement(tabHandler);
 	}
 
+	private void copyFrame() {
+		if(editor.selectedAnim != null) {
+			cpyFrame = new AnimFrame(editor.selectedAnim.getSelectedFrame());
+		}
+	}
+
+	private void pasteFrame() {
+		if(editor.selectedAnim != null && cpyFrame != null) {
+			editor.selectedAnim.addFrame(cpyFrame);
+			cpyFrame = null;
+			editor.updateGui();
+		}
+	}
+
+	private void copyData() {
+		ModelElement me = editor.getSelectedElement();
+		if(editor.selectedAnim != null && me != null) {
+			cpyData = editor.selectedAnim.getSelectedFrame().copy(me);
+		}
+	}
+
+	private void pasteData() {
+		ModelElement me = editor.getSelectedElement();
+		if(editor.selectedAnim != null && cpyData != null && me != null) {
+			editor.selectedAnim.getSelectedFrame().importFrameData(me, cpyData);
+			cpyData = null;
+			editor.updateGui();
+		}
+	}
+
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -305,5 +381,15 @@ public class AnimPanel extends Panel {
 		if(pose == null || !(pose instanceof CustomPose))
 			return null;
 		return ((CustomPose) pose).getName();
+	}
+
+	@Override
+	public void keyPressed(KeyboardEvent event) {
+		KeybindHandler h = editor.frame.getKeybindHandler();
+		h.registerKeybind(Keybinds.COPY_ANIM_FRAME, this::copyFrame);
+		h.registerKeybind(Keybinds.PASTE_ANIM_FRAME, this::pasteFrame);
+		h.registerKeybind(Keybinds.COPY_ANIM_PART, this::copyData);
+		h.registerKeybind(Keybinds.PASTE_ANIM_PART, this::pasteData);
+		super.keyPressed(event);
 	}
 }

@@ -164,6 +164,10 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 
 	@Override
 	public void render(RedirectRenderer<?> renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube, boolean doRenderElems) {
+		if(cube.getCube() instanceof ModelElement) {
+			ModelElement me = (ModelElement) cube.getCube();
+			me.matrixPosition = stack.getLast().getMatrix().copy();
+		}
 		drawSelectionBox((RedirectPartRenderer) renderer, stack, buf, renderTypes, cube, doRenderElems);
 		if(!doRenderElems)return;
 		drawGizmo(cube, stack, buf, renderTypes);

@@ -46,10 +46,12 @@ public class MainWrapper {
 			a.add("cpm.version=" + args[1]);
 			a.add("-saveSource");
 			a.add("-setProperty");
-			a.add("cpm.webApiEndpoint=/cpm/api");
 			if(mode.equals("Blockbench")) {
+				a.add("cpm.webApiEndpoint=https://tom5454.com/cpm/api");
 				a.add("-setProperty");
 				a.add("cpm.pluginId=cpm_plugin" + args[3]);
+			} else {
+				a.add("cpm.webApiEndpoint=/cpm/api");
 			}
 			a.add(mode.equals("Blockbench") ? "com.tom.cpm.CPMBlockbench" : "com.tom.cpm.web.CPM" + mode);
 		} else {
@@ -129,7 +131,7 @@ public class MainWrapper {
 			//ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("\\/\\/\\$\\{launchTypeName-djhsdafjlasdjlsdjl\\}\\$", mode));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("\\/\\/\\$\\{fill_resource_map_lqsnlna\\}\\$", resGen));
 			ClassSrcTransformer.addImportTransformRegex("^java\\.nio\\.(\\w+)$", "com.tom.cpm.web.client.java.nio.$1");
-			//ClassSrcTransformer.addImportTransformRegex("^java\\.util\\.zip\\.(\\w+)$", "com.tom.cpm.web.client.java.zip.$1");
+			ClassSrcTransformer.addImportTransformRegex("^java\\.util\\.zip\\.(\\w+)$", "com.tom.cpm.web.client.java.zip.$1");
 			ClassSrcTransformer.addImportTransform("java.io.DataInput", "com.tom.cpm.web.client.java.io.DataInput");
 			ClassSrcTransformer.addImportTransform("java.io.DataInputStream", "com.tom.cpm.web.client.java.io.DataInputStream");
 			ClassSrcTransformer.addImportTransform("java.io.DataOutput", "com.tom.cpm.web.client.java.io.DataOutput");
@@ -164,9 +166,7 @@ public class MainWrapper {
 			//ClassSrcTransformer.addImportTransform("java.io.*", "com.tom.cpm.web.client.java.io.*");
 			//ClassSrcTransformer.transformers.add(new UGWTTransformer());
 			//ClassSrcTransformer.buggyFiles.add("com/tom/cpm/web/client/GuiImpl.java");
-			//ClassSrcTransformer.buggyFiles.add("com/tom/cpm/web/client/launch/Launch.java");
 			ClassSrcTransformer.buggyFiles.add("com/tom/cpm/web/client/resources/Resources.java");
-			//ClassSrcTransformer.buggyFiles.add("com/tom/ugwt/Emscripten.java");
 
 			System.out.println("Init finished");
 		}

@@ -1,6 +1,7 @@
 package com.tom.cpm.web.client;
 
 import com.tom.cpm.web.client.FS.IFS;
+import com.tom.cpm.web.client.java.io.FileNotFoundException;
 
 import elemental2.core.Global;
 import elemental2.core.JsArray;
@@ -111,20 +112,20 @@ public class LocalStorageFS implements IFS {
 	}
 
 	@Override
-	public Promise<String> getContent(String path) {
+	public String getContent(String path) throws FileNotFoundException {
 		if(path.startsWith("/mnt/")) {
 			String[] sp = path.split("/");
 			if(sp[1] == "mnt") {
 				String f = session.getItem(sp[2]);
-				if(f == null)return Promise.reject("File not found");
-				return Promise.resolve(f);
+				if(f == null)throw new FileNotFoundException();
+				return f;
 			}
-			return Promise.reject("File not found");
+			throw new FileNotFoundException();
 		}
-		if(!this.enable)return Promise.reject("File system not enabled");
+		if(!this.enable)throw new FileNotFoundException("File system not enabled");
 		String c = local.getItem("f:" + path);
-		if(c == null)return Promise.reject("File not found");
-		return Promise.resolve(c);
+		if(c == null)throw new FileNotFoundException();
+		return c;
 	}
 
 	@Override
@@ -176,7 +177,7 @@ public class LocalStorageFS implements IFS {
 			reader.readAsDataURL(file);
 			reader.onload = __ -> {
 				String b64 = reader.result.asString().substring(reader.result.asString().indexOf(',') + 1);
-				session.setItem(file.name, b64);
+				mount(b64, file.name);
 				res.onInvoke((Object) null);
 				return null;
 			};
@@ -190,5 +191,10 @@ public class LocalStorageFS implements IFS {
 	@Override
 	public boolean needFileManager() {
 		return true;
+	}
+
+	@Override
+	public void mount(String b64, String name) {
+		session.setItem(name, b64);
 	}
 }

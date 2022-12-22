@@ -33,6 +33,7 @@
   <inherits name="com.google.common.io.Io"/>
   <inherits name='com.ekotrope.gwt.CompletableFuture'/>
   <inherits name='elemental2.webstorage.WebStorage'/>
+  <inherits name='ar.com.hjg.pngj.PNGJ'/>
   
   <define-configuration-property name="cpm.debug" is-multi-valued='false' />
   <define-configuration-property name="cpm.version" is-multi-valued='false' />

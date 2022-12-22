@@ -6,11 +6,12 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Desc;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -54,19 +55,14 @@ public abstract class HumanoidArmorLayerMixin extends RenderLayer<LivingEntity, 
 		CustomPlayerModelsClient.INSTANCE.manager.unbind(innerModel);
 	}
 
-
-	@Surrogate
-	private void preRenderTexture(PoseStack p_241738_1_, MultiBufferSource p_241738_2_, int p_241738_3_, boolean p_241738_5_, HumanoidModel<LivingEntity> model, float p_241738_8_, float p_241738_9_, float p_241738_10_, ResourceLocation resLoc, CallbackInfo cbi) {
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
-	}
-
-	@Inject(at = @At("HEAD"), method = "renderModel")
+	@Inject(at = @At("HEAD"), method = "renderModel(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
+			+ "Lnet/minecraft/world/item/ArmorItem;ZLnet/minecraft/client/model/HumanoidModel;ZFFFLjava/lang/String;)V")
 	private void preRenderTexture(PoseStack p_117107_, MultiBufferSource p_117108_, int p_117109_, ArmorItem p_117110_, boolean p_117111_, HumanoidModel<LivingEntity> model, boolean p_117113_, float p_117114_, float p_117115_, float p_117116_, @Nullable String p_117117_, CallbackInfo cbi) {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(getArmorLocation(p_117110_, p_117113_, p_117117_), PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
 
-	@Surrogate
-	private void preRenderTexture(PoseStack p_117107_, MultiBufferSource p_117108_, int p_117109_, boolean p_117111_, net.minecraft.client.model.Model model, float p_117114_, float p_117115_, float p_117116_, ResourceLocation resLoc, CallbackInfo cbi) {
+	@Inject(at = @At("HEAD"), target = @Desc(value = "renderModel", args = {PoseStack.class, MultiBufferSource.class, int.class, boolean.class, Model.class, float.class, float.class, float.class, ResourceLocation.class}), remap = false, require = 0, expect = 0)
+	private void preRenderTexture(PoseStack p_117107_, MultiBufferSource p_117108_, int p_117109_, boolean p_117111_, Model model, float p_117114_, float p_117115_, float p_117116_, ResourceLocation resLoc, CallbackInfo cbi) {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import com.tom.cpm.shared.io.IOHelper;
@@ -18,6 +19,13 @@ public class InputStreamReader extends Reader implements FakeReader {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		IOHelper.copy(in, baos);
 		text = new String(baos.toByteArray(), StandardCharsets.ISO_8859_1);
+		rd = new StringReader(text);
+	}
+
+	public InputStreamReader(InputStream in, Charset cs) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		IOHelper.copy(in, baos);
+		text = new String(baos.toByteArray(), cs);
 		rd = new StringReader(text);
 	}
 

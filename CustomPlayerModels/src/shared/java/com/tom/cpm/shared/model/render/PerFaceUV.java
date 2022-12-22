@@ -11,6 +11,7 @@ import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.util.Direction;
+import com.tom.cpl.util.Direction.Axis;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTool;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
@@ -320,6 +321,66 @@ public class PerFaceUV {
 					e.perfaceFaceDir.accept(d);
 				}
 			};
+		}
+	}
+
+	public void mirror(ActionBuilder ab, Axis axis) {
+		Direction[] swap = new Direction[2];
+		Direction[] mirrorX = new Direction[6];
+		Direction[] mirrorY = new Direction[6];
+		switch (axis) {
+		case X:
+			swap[0] = Direction.NORTH;
+			swap[1] = Direction.SOUTH;
+			mirrorX[0] = Direction.EAST;
+			mirrorX[1] = Direction.WEST;
+			mirrorX[2] = Direction.NORTH;
+			mirrorX[3] = Direction.SOUTH;
+			mirrorY[0] = Direction.UP;
+			mirrorY[1] = Direction.DOWN;
+			break;
+
+		case Y:
+			swap[0] = Direction.UP;
+			swap[1] = Direction.DOWN;
+			mirrorY[0] = Direction.NORTH;
+			mirrorY[1] = Direction.SOUTH;
+			mirrorY[2] = Direction.EAST;
+			mirrorY[3] = Direction.WEST;
+			break;
+
+		case Z:
+			swap[0] = Direction.EAST;
+			swap[1] = Direction.WEST;
+			System.arraycopy(Direction.VALUES, 0, mirrorX, 0, 6);
+			break;
+
+		default:
+			break;
+		}
+		ab.onAction(() -> faces.values().forEach(f -> f.controlElems = null));
+		Face s0 = faces.get(swap[0]);
+		Face s1 = faces.get(swap[1]);
+		if(s0 == null)ab.removeFromMap(faces, swap[1]);
+		else ab.addToMap(faces, swap[1], s0);
+		if(s1 == null)ab.removeFromMap(faces, swap[0]);
+		else ab.addToMap(faces, swap[0], s1);
+
+		for (int i = 0; i < mirrorX.length; i++) {
+			Direction d = mirrorX[i];
+			Face f = faces.get(d);
+			if(d != null && f != null) {
+				ab.updateValueOp(f, f.sx, f.ex, (a, b) -> a.sx = b);
+				ab.updateValueOp(f, f.ex, f.sx, (a, b) -> a.ex = b);
+			}
+		}
+		for (int i = 0; i < mirrorY.length; i++) {
+			Direction d = mirrorY[i];
+			Face f = faces.get(d);
+			if(d != null && f != null) {
+				ab.updateValueOp(f, f.sy, f.ey, (a, b) -> a.sy = b);
+				ab.updateValueOp(f, f.ey, f.sy, (a, b) -> a.ey = b);
+			}
 		}
 	}
 }

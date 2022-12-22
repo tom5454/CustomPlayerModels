@@ -6,6 +6,7 @@ public class Keybinds {
 	public static final Keybind ZOOM_IN_CAMERA = new Keybind("zoomInCamera", "+");
 	public static final Keybind ZOOM_OUT_CAMERA = new Keybind("zoomOutCamera", "-");
 	public static final Keybind RESET_CAMERA = new Keybind("resetCamera", "c");
+	public static final Keybind FOCUS_CAMERA = new Keybind("focusCamera", "f");
 
 	public static final Keybind OFFSET = new Keybind("offset", "o");
 	public static final Keybind ROTATION = new Keybind("rotation", "r");
@@ -23,10 +24,22 @@ public class Keybinds {
 	public static final Keybind NEW_PART = new Keybind("new_part", "n", Keybind.CTRL);
 	public static final Keybind TOGGLE_GIZMO = new Keybind("toggleGizmo", "g");
 
+	public static final Keybind COPY_ANIM_FRAME = new Keybind("copyAnimFrame", "h");
+	public static final Keybind PASTE_ANIM_FRAME = new Keybind("pasteAnimFrame", "j");
+	public static final Keybind COPY_ANIM_PART = new Keybind("copyAnimPart", "v");
+	public static final Keybind PASTE_ANIM_PART = new Keybind("pasteAnimPart", "b");
+
 	public static final Object MOUSE_MARKER = new Object();
 
-	public static final Object[] KEYBINDS = new Object[] {"3dView", ZOOM_IN_CAMERA, ZOOM_OUT_CAMERA, RESET_CAMERA, "editor",
+	public static final Object[] KEYBINDS = new Object[] {
+			"3dView",
+			ZOOM_IN_CAMERA, ZOOM_OUT_CAMERA, RESET_CAMERA, FOCUS_CAMERA,
+			"editor",
 			MOUSE_MARKER, OFFSET, ROTATION, POSITION, SIZE, SAVE, UNDO, REDO, NEW_PART, DELETE, TOGGLE_GIZMO,
-			"treeNav", TREE_PREV, TREE_NEXT, TREE_UP, TREE_DOWN};
+			"treeNav",
+			TREE_PREV, TREE_NEXT, TREE_UP, TREE_DOWN,
+			"animAct",
+			COPY_ANIM_FRAME, PASTE_ANIM_FRAME, COPY_ANIM_PART, PASTE_ANIM_PART
+	};
 
 }

@@ -333,11 +333,6 @@ public abstract class UVResizableArea {
 			this.editor = editor;
 		}
 
-		@Override
-		public String getName() {
-			return "";
-		}
-
 		private void addImpl(FaceArea faceArea) {
 			if(elements.contains(faceArea))
 				elements.remove(faceArea);

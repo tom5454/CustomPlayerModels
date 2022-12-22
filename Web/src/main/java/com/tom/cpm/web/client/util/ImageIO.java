@@ -1,7 +1,8 @@
 package com.tom.cpm.web.client.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,39 +17,26 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
 import com.tom.cpm.shared.editor.project.ProjectFile.BAIS;
-import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.web.client.FS;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.java.Java.ResourceInputStream;
+import com.tom.cpm.web.client.java.io.FileNotFoundException;
 import com.tom.cpm.web.client.render.RenderSystem;
-import com.tom.cpm.web.client.render.ViewerGui;
 
+import ar.com.hjg.pngj.ImageInfo;
+import ar.com.hjg.pngj.ImageLineInt;
+import ar.com.hjg.pngj.PngReader;
+import ar.com.hjg.pngj.PngWriter;
 import elemental2.core.Uint32Array;
-import elemental2.core.Uint8ClampedArray;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLCanvasElement;
 import elemental2.dom.ImageBitmapOptions;
-import elemental2.dom.ImageData;
 import elemental2.promise.Promise;
 import jsinterop.base.Js;
 
 public class ImageIO implements IImageIO {
 	public static final Cache<String, Image> loadedImages = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.SECONDS).build();
-
-	@Override
-	public CompletableFuture<Image> readF(File file) {
-		CompletableFuture<Image> f = new CompletableFuture<>();
-		FS.getContent(file.getAbsolutePath()).then(v -> {
-			Java.promiseToCf(loadImage(v, true, false), f);
-			return null;
-		}).catch_(ex -> {
-			if(ex instanceof Throwable)f.completeExceptionally((Throwable) ex);
-			else f.completeExceptionally(new IOException(String.valueOf(ex)));
-			return null;
-		});
-		return f;
-	}
 
 	@Override
 	public Image read(InputStream f) throws IOException {
@@ -60,48 +48,21 @@ public class ImageIO implements IImageIO {
 			Image j = loadedImages.getIfPresent(Base64.getEncoder().encodeToString(((BAIS)f).getBuf()));
 			if(j != null)return new Image(j);
 		} else {
-			//return load(f);/*
-
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			IOHelper.copy(f, baos);
-			String b64 = Base64.getEncoder().encodeToString(baos.toByteArray());
-			Image j = loadedImages.getIfPresent(b64);
-			if(j == null) {
-				CompletableFuture<Image> cf = new CompletableFuture<>();
-				Java.promiseToCf(loadImage(b64, true, true), cf);
-				ViewerGui.addBgLoad(cf);
-				throw new AsyncResourceException();
-			} else {
-				return new Image(j);
-			}//*/
+			return load(f);
 		}
 		throw new IOException("Image not found");
 	}
 
 	@Override
 	public void write(Image img, File f) throws IOException {
-		String base64 = toBase64(img);
-		if(!FS.setContent(f.getAbsolutePath(), base64))throw new IOException("Failed to write file");
-	}
-
-	private String toBase64(Image img) {
-		HTMLCanvasElement canvas = Js.uncheckedCast(DomGlobal.document.createElement("canvas"));
-		canvas.width = img.getWidth();
-		canvas.height = img.getHeight();
-		CanvasRenderingContext2D ctx = Js.uncheckedCast(canvas.getContext("2d"));
-		Uint8ClampedArray i = new Uint8ClampedArray(img.getData().buffer);
-		ImageData im = new ImageData(i, img.getWidth(), img.getHeight());
-		ctx.globalCompositeOperation = "copy";
-		ctx.putImageData(im, 0, 0);
-		String base64 = canvas.toDataURL();
-		base64 = base64.substring(base64.indexOf(',') + 1);
-		return base64;
+		try(FileOutputStream fo = new FileOutputStream(f)) {
+			write(img, fo);
+		}
 	}
 
 	@Override
 	public void write(Image img, OutputStream f) throws IOException {
-		String base64 = toBase64(img);
-		f.write(Base64.getDecoder().decode(base64));
+		save(img, f);
 	}
 
 	@Override
@@ -111,7 +72,28 @@ public class ImageIO implements IImageIO {
 
 	@Override
 	public Image read(File f) throws IOException {
-		throw new IOException("Unsupported exception");
+		try(FileInputStream fi = new FileInputStream(f)) {
+			return read(fi);
+		}
+	}
+
+	@Override
+	public CompletableFuture<Image> readF(File file) {
+		CompletableFuture<Image> f = new CompletableFuture<>();
+		try {
+			f.complete(read(file));
+			return f;
+		} catch (Exception e) {
+		}
+		String v;
+		try {
+			v = FS.getContent(file.getAbsolutePath());
+		} catch (FileNotFoundException e) {
+			f.completeExceptionally(e);
+			return f;
+		}
+		Java.promiseToCf(loadImage(v, true, false), f);
+		return f;
 	}
 
 	public static CompletableFuture<Image> loadImage(byte[] f) {
@@ -127,26 +109,6 @@ public class ImageIO implements IImageIO {
 	}
 
 	public static Promise<Image> loadImage(String data, boolean b64, boolean cache) {
-		/*return new Promise<>((res, rej) -> {
-			HTMLImageElement img = Js.uncheckedCast(DomGlobal.document.createElement("img"));
-			img.src = b64 ? "data:image/png;base64," + data : data;
-			img.onload = e -> {
-				HTMLCanvasElement canvas = Js.uncheckedCast(DomGlobal.document.createElement("canvas"));
-				canvas.width = img.width;
-				canvas.height = img.height;
-				CanvasRenderingContext2D ctx = Js.uncheckedCast(canvas.getContext("2d"));
-				ctx.globalCompositeOperation = "copy";
-				ctx.drawImage(img, 0, 0);
-				Image image = new Image(new Uint32Array(ctx.getImageData(0, 0, img.width, img.height).data.buffer), img.width, img.height);
-				if(cache)loadedImages.put(data, image);
-				res.onInvoke(image);
-				return null;
-			};
-			img.onerror = e -> {
-				rej.onInvoke(e);
-				return null;
-			};
-		});*/
 		ImageBitmapOptions opt = ImageBitmapOptions.create();
 		opt.setColorSpaceConversion("none");
 		opt.setPremultiplyAlpha("none");
@@ -164,7 +126,6 @@ public class ImageIO implements IImageIO {
 				});
 	}
 
-	/* TODO emulate java features(port zlib, and pngj) to use this ? or web assembly ?
 	public static Image load(InputStream din) throws IOException {
 		try {
 			PngReader pngr = new PngReader(din);
@@ -178,8 +139,8 @@ public class ImageIO implements IImageIO {
 				int[] scanline = l1.getScanline();
 				for (int j = 0; j < pngr.imgInfo.cols; j++) {
 					int offset = j * channels;
-					img.loadRGB(j, row, (scanline[offset + 3] << 24) | (scanline[offset] << 16) | (scanline[offset + 1] << 8)
-							| (scanline[offset + 2]));
+					img.loadRGB(j, row, (scanline[offset + 3] << 24) | (scanline[offset + 2] << 16) | (scanline[offset + 1] << 8)
+							| (scanline[offset]));
 				}
 			}
 			pngr.end();
@@ -187,5 +148,27 @@ public class ImageIO implements IImageIO {
 		} catch (Throwable e) {
 			throw new IOException(e);
 		}
-	}//*/
+	}
+
+	public static void save(Image img, OutputStream os) throws IOException {
+		try {
+			ImageInfo imi = new ImageInfo(img.getWidth(), img.getHeight(), 8, true);
+			PngWriter pngw = new PngWriter(os, imi);
+			for(int y = 0;y<img.getHeight();y++) {
+				int[] d = new int[img.getWidth() * 4];
+				for(int x = 0;x<img.getWidth();x++) {
+					int c = img.storeRGB(x, y);
+					int off = x * 4;
+					d[off] = c & 0xff;
+					d[off + 1] = ((c & 0xff00) >> 8);
+					d[off + 2] = ((c & 0xff0000) >> 16);
+					d[off + 3] = ((c & 0xff000000) >> 24);
+				}
+				pngw.writeRowInt(d);
+			}
+			pngw.end();
+		} catch (Throwable e) {
+			throw new IOException(e);
+		}
+	}
 }

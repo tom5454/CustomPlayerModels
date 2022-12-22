@@ -160,4 +160,9 @@ public class DataInputStream extends InputStream implements DataInput {
 	public void reset() throws IOException {
 		is.reset();
 	}
+
+	@Override
+	public void close() throws IOException {
+		is.close();
+	}
 }

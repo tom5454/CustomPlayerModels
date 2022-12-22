@@ -13,6 +13,7 @@ import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Mat4f;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
@@ -62,6 +63,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public PerFaceUV faceUV;
 	public ItemRenderer itemRenderer;
 	public CopyTransformEffect copyTransform;
+	public Mat4f matrixPosition;
 
 	public ModelElement(ModelElement element, ModelElement parent) {
 		this(element.editor);

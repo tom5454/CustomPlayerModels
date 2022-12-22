@@ -41,8 +41,11 @@ public class PasteClient {
 		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
 	}
 
-
 	public void deleteFile(String id) throws IOException {
+		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
+	}
+
+	public String createBrowserLoginURL() throws IOException {
 		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
 	}
 
@@ -56,5 +59,9 @@ public class PasteClient {
 
 	public int getMaxSize() {
 		return 0;
+	}
+
+	public String getUrl() {
+		return URL;
 	}
 }

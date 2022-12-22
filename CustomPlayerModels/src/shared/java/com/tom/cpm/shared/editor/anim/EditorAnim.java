@@ -23,6 +23,7 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
+import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -53,6 +54,27 @@ public class EditorAnim implements IAnimation {
 		this.filename = filename;
 		this.type = type;
 		if(initNew)addFrame();
+	}
+
+	public EditorAnim(EditorAnim anim) {
+		this.editor = anim.editor;
+		this.filename = AnimationsLoaderV1.getFileName(anim.pose, anim.displayName);
+		this.type = anim.type;
+		this.displayName = anim.displayName;
+		this.pose = anim.pose;
+		this.add = anim.add;
+		this.duration = anim.duration;
+		this.priority = anim.priority;
+		this.loop = anim.loop;
+		this.intType = anim.intType;
+		this.layerDefault = anim.layerDefault;
+		this.order = anim.order;
+		this.isProperty = anim.isProperty;
+		this.group = anim.group;
+		this.command = anim.command;
+		anim.frames.stream().map(AnimFrame::new).forEach(this.frames::add);
+		if(frames.size() > 0)
+			this.currentFrame = this.frames.get(0);
 	}
 
 	private void calculateSplines() {
@@ -176,6 +198,13 @@ public class EditorAnim implements IAnimation {
 
 	public void addFrame() {
 		AnimFrame frm = new AnimFrame(this);
+		editor.action("add", "action.cpm.animFrame").addToList(frames, frm).onAction(this::clearCache).execute();
+		if(currentFrame != null)frm.copy(currentFrame);
+		currentFrame = frm;
+	}
+
+	public void addFrame(AnimFrame cpyFrame) {
+		AnimFrame frm = new AnimFrame(this, cpyFrame);
 		editor.action("add", "action.cpm.animFrame").addToList(frames, frm).onAction(this::clearCache).execute();
 		if(currentFrame != null)frm.copy(currentFrame);
 		currentFrame = frm;

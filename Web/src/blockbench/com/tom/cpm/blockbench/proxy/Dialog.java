@@ -24,7 +24,6 @@ public class Dialog {
 		public CallbackCancel onCancel;
 		public String[] lines;
 		public boolean singleButton;
-		public VueProperties component;
 		public int width;
 	}
 

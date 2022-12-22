@@ -960,5 +960,21 @@
   "label.cpm.customGridSize": "Custom Grid Size",
   "action.cpm.loadTexture": "Load Texture",
   "tooltip.cpm.effect.removeBedOffset": "Removes the offset in the sleeping pose,\\when viewed by other players\\Makes the player sink into the bed\\like in first person, to make it look consistent across players.\\Requires converted parts",
-  "label.cpm.effect.removeBedOffset": "Remove Bed Offset"
+  "label.cpm.effect.removeBedOffset": "Remove Bed Offset",
+  "button.cpm.models.openFolder": "Open",
+  "button.cpm.dupAnim": "Duplicate Animation",
+  "buttom.cpm.copyAnimFrame": "Copy Frame",
+  "button.cpm.pasteAnimFrame": "Paste Frame",
+  "buttom.cpm.copyAnimFrameData": "Copy Part Pose",
+  "button.cpm.pasteAnimFrameData": "Paste Part Pose",
+  "tooltip.cpm.anim.copyFrame": "Copies the current frame\\Keybind: %s",
+  "tooltip.cpm.anim.pasteFrame": "Sets the current frame from the clipboard (internal)\\Keybind: %s",
+  "tooltip.cpm.anim.copyData": "Copies the selected part\u0027s pose\\Keybind: %s",
+  "tooltip.cpm.anim.pasteData": "Sets the selected part\u0027s pose from the clipboard (internal)\\Keybind: %s",
+  "label.cpm.keybinds.animAct": "- Animation Actions ---",
+  "label.cpm.keybind.focusCamera": "Focus on Selected",
+  "label.cpm.keybind.copyAnimFrame": "Copy Frame:",
+  "label.cpm.keybind.pasteAnimFrame": "Paste Frame:",
+  "label.cpm.keybind.copyAnimPart": "Copy Part Pose:",
+  "label.cpm.keybind.pasteAnimPart": "Paste Part Pose:"
 }

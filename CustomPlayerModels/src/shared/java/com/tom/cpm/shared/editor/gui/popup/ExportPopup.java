@@ -111,6 +111,7 @@ public abstract class ExportPopup extends PopupPanel {
 		private Tooltip vanillaSkinTooltip;
 		private boolean gist, upload;
 		private SkinType skinType;
+		private ButtonGroup<SkinType, Checkbox> groupSkinType;
 
 		protected Skin(EditorGui e) {
 			super(e, 320, 280, ExportMode.SKIN);
@@ -125,7 +126,9 @@ public abstract class ExportPopup extends PopupPanel {
 			addElement(encSettings);
 
 			Button changeVanillaSkin = new Button(gui, gui.i18nFormat("button.cpm.change_vanilla_skin"), () -> {
-				SelectSkinPopup ssp = new SelectSkinPopup(editor.frame, editor.skinType, (type, img) -> {
+				SelectSkinPopup ssp = new SelectSkinPopup(editor.frame, skinType, (type, img) -> {
+					skinType = type;
+					groupSkinType.accept(type);
 					editor.vanillaSkin = img;
 					vanillaSkin.setImage(img);
 					detectLink();
@@ -244,15 +247,15 @@ public abstract class ExportPopup extends PopupPanel {
 			}
 			addElement(okUpload);
 
-			ButtonGroup<SkinType, Checkbox> group = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> skinType = i);
+			groupSkinType = new ButtonGroup<>(Checkbox::setSelected, Checkbox::setAction, i -> skinType = i);
 			for (int j = 0; j < SkinType.VANILLA_TYPES.length; j++) {
 				SkinType s = SkinType.VANILLA_TYPES[j];
 				Checkbox chbxSt = new Checkbox(gui, gui.i18nFormat("label.cpm.skin_type." + s.getName()));
 				chbxSt.setBounds(new Box(bounds.w - 135, bounds.y + 175 + j * 25, 60, 20));
 				addElement(chbxSt);
-				group.addElement(s, chbxSt);
+				groupSkinType.addElement(s, chbxSt);
 			}
-			group.accept(skinType);
+			groupSkinType.accept(skinType);
 
 			ok.setEnabled(false);
 			ok.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export.skin.noFile")));

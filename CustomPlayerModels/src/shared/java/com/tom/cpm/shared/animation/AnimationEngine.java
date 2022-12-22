@@ -189,8 +189,14 @@ public class AnimationEngine {
 			h.animate(player.animState, time);
 		} catch (Exception e) {
 			Log.warn("Error animating model", e);
-			def.resetAnimationPos();
-			h.clear();
+			try {
+				def.resetAnimationPos();
+				h.clear();
+			} catch (Exception ex) {
+				ex.addSuppressed(e);
+				Log.error("Error animating model", e);
+				def.setError(ex);
+			}
 		}
 	}
 

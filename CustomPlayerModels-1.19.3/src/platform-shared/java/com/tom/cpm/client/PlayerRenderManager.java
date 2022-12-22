@@ -337,7 +337,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 	}
 
 	public static void multiplyStacks(MatrixStack.Entry e, PoseStack stack) {
-		stack.last().pose().mul(new Matrix4f().set(e.getMatrixArray()));
-		stack.last().normal().mul(new Matrix3f().set(e.getNormalArray3()));
+		stack.last().pose().mul(new Matrix4f().setTransposed(e.getMatrixArray()));
+		stack.last().normal().mul(new Matrix3f().set(e.getNormalArray3()).transpose());
 	}
 }

@@ -23,6 +23,7 @@ import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
+import com.tom.cpl.util.Pair;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.shared.IPlayerRenderManager;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -30,6 +31,8 @@ import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
+import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.panel.ViewportPanelBase3d;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
@@ -40,6 +43,7 @@ import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.FileManagerPopup;
 import com.tom.cpm.web.client.render.RenderSystem;
 import com.tom.cpm.web.client.util.AsyncResourceException;
+import com.tom.cpm.web.client.util.CPMApi;
 import com.tom.cpm.web.client.util.GameProfile;
 import com.tom.cpm.web.client.util.ImageIO;
 import com.tom.ugwt.client.ExceptionUtil;
@@ -57,7 +61,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	private File root;
 	private static WebMC instance;
 	private boolean canExit, versionCheck;
-	private static boolean betaWarning = true;
+	private static boolean firstOpen = true;
 
 	public WebMC(ModConfigFile config, boolean canExit, boolean versionCheck) {
 		this.versionCheck = versionCheck;
@@ -72,10 +76,6 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		profile = new GameProfile(UUID.randomUUID(), "Web");
 		this.config = config;
 		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId, GameProfile::getName);
-		/*try {
-			ImageTest.runTest();
-		} catch (Exception e) {
-		}*/
 	}
 
 	public static void setProfile(GameProfile profile) {
@@ -303,14 +303,28 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		break;
 
 		case "general":
-
+			//TODO language selector
 			break;
 
 		case "editor":
-			if(betaWarning) {
-				betaWarning = false;
+			if(firstOpen) {
+				firstOpen = false;
 				IGui gui = panel.getGui();
-				((Frame)panel).openPopup(new MessagePopup((Frame) panel, gui.i18nFormat("label.cpm.warning"), "The web version of the editor is in Beta\\You may experience minor visual glitches with the editor.\\\\Your models will be saved inside your browser\\use the File/File Manager to download them, or use the ... button in the file chooser.\\Exporting models with the web editor is not recommended."));
+				((Frame)panel).openPopup(new MessagePopup((Frame) panel, gui.i18nFormat("label.cpm.warning"), "The web version of the editor is in Beta\\You may experience minor visual glitches with the editor.\\\\Your models will be saved inside your browser\\use the File/File Manager to download them, or use the ... button in the file chooser."));
+				String url = Java.getQueryVariable("file");
+				Java.removeQueryVariable("file");
+				if(url != null) {
+					Editor e = ((EditorGui)panel).getEditor();
+					e.setInfoMsg.accept(Pair.of(20000, "Loading project from URL"));
+					CPMApi.fetch("file", url).then(f -> {
+						FS.mount((String) f.get("data"), "download.cpmproject");
+						e.load(new File("/mnt/download.cpmproject"));
+						return null;
+					}).catch_(err -> {
+						e.setInfoMsg.accept(Pair.of(3000, "Failed to load project: " + err));
+						return null;
+					});
+				}
 			}
 			break;
 

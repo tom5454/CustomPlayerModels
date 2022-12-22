@@ -12,6 +12,7 @@ import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.web.client.render.ViewerGui;
 import com.tom.cpm.web.client.util.AsyncResourceException;
+import com.tom.cpm.web.client.util.CPMApi;
 
 public abstract class HttpResourceLoader implements ResourceLoader {
 	private static Map<String, CompletableFuture<byte[]>> data = new HashMap<>();
@@ -33,7 +34,7 @@ public abstract class HttpResourceLoader implements ResourceLoader {
 		CompletableFuture<byte[]> cf = new CompletableFuture<>();
 		ViewerGui.addBgLoad(cf);
 		data.put(path, cf);
-		ViewerGui.fetch("link", path).then(v -> {
+		CPMApi.fetch("link", path).then(v -> {
 			String dt = (String) v.get("data");
 			if(enc == ResourceEncoding.NO_ENCODING)
 				cf.complete(dt.getBytes());

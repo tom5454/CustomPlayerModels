@@ -22,10 +22,24 @@ public class AnimFrame {
 	}
 
 	public AnimFrame(AnimFrame cpy) {
-		this.anim = cpy.anim;
+		this(cpy.anim, cpy);
+	}
+
+	public AnimFrame(EditorAnim anim, AnimFrame cpy) {
+		this.anim = anim;
 		for (Entry<ModelElement, FrameData> e : cpy.components.entrySet()) {
 			components.put(e.getKey(), new FrameData(e.getValue()));
 		}
+	}
+
+	public void importFrameData(ModelElement elem, FrameData from) {
+		anim.editor.action("setAnim", "action.cpm.value").addToMap(components, elem, new FrameData(elem, from)).execute();
+	}
+
+	public FrameData copy(ModelElement elem) {
+		FrameData f = components.get(elem);
+		if(f == null)return null;
+		return new FrameData(f);
 	}
 
 	public class FrameData implements IElem {
@@ -58,13 +72,17 @@ public class AnimFrame {
 			show = !comp.hidden;
 		}
 
-		public FrameData(FrameData cpy) {
-			this.comp = cpy.comp;
+		public FrameData(ModelElement comp, FrameData cpy) {
+			this.comp = comp;
 			pos = new Vec3f(cpy.pos);
 			rot = new Vec3f(cpy.rot);
 			color = new Vec3f(cpy.color);
 			scale = new Vec3f(cpy.scale);
 			show = cpy.show;
+		}
+
+		public FrameData(FrameData cpy) {
+			this(cpy.comp, cpy);
 		}
 
 		@Override

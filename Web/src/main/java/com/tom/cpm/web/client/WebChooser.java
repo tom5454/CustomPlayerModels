@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
 import com.tom.cpl.gui.elements.FileChooserPopup;
+import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
 import com.tom.cpl.gui.elements.FileChooserPopup.NativeChooser;
 import com.tom.cpl.gui.elements.InputPopup;
 import com.tom.cpm.web.client.java.Java;
@@ -33,6 +34,12 @@ public class WebChooser implements NativeChooser {
 			HTMLInputElement input = Js.uncheckedCast(RenderSystem.getDocument().createElement("input"));
 			input.style.display = "none";
 			input.type = "file";
+			if(fc.getFilter() instanceof FileFilter) {
+				FileFilter ff = (FileFilter) fc.getFilter();
+				if(ff.getExt() != null) {
+					input.accept = "." + ff.getExt();
+				}
+			}
 			RenderSystem.getDocument().body.appendChild(input);
 			input.onchange = e -> {
 				if(input.files.getLength() > 0) {

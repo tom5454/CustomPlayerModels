@@ -21,6 +21,7 @@ import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.text.FormatText;
+import com.tom.cpl.util.Direction.Axis;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -174,26 +175,33 @@ public class Generators {
 
 	private static void fillUV(EditorGui eg) {
 		Editor editor = eg.getEditor();
-		ModelElement me = editor.getSelectedElement();
-		if(me != null && me.type == ElementType.NORMAL && me.texture) {
-			Box box = me.getTextureBox();
-			int ts = Math.abs(me.texSize);
-			int bx = me.u * ts;
-			int by = me.v * ts;
-			int dx = MathHelper.ceil(me.size.x * ts);
-			int dy = MathHelper.ceil(me.size.y * ts);
-			int dz = MathHelper.ceil(me.size.z * ts);
-			editor.action("i", "button.cpm.tools.fillUV").
-			action(new ImageAction(me.getTexture().getImage(), box, img -> {
-				img.fill(bx + dx + dz, by + dz, dz, dy, 0xffff0000);
-				img.fill(bx, by + dz, dz, dy, 0xffdd0000);
-				img.fill(bx + dz, by, dx, dz, 0xff00ff00);
-				img.fill(bx + dz + dx, by, dx, dz, 0xff00dd00);
-				img.fill(bx + dz, by + dz, dx, dy, 0xff0000ff);
-				img.fill(bx + dz * 2 + dx, by + dz, dx, dy, 0xff0000dd);
-			})).onAction(me.getTexture()::markDirty).
-			execute();
-		}
+		ActionBuilder ab = editor.action("i", "button.cpm.tools.fillUV");
+		Set<ETextures> texs = new HashSet<>();
+		editor.forEachSeletectedElement(el -> {
+			if(el instanceof ModelElement) {
+				ModelElement me = (ModelElement) el;
+				if(me.type == ElementType.NORMAL && me.texture) {
+					Box box = me.getTextureBox();
+					int ts = Math.abs(me.texSize);
+					int bx = me.u * ts;
+					int by = me.v * ts;
+					int dx = MathHelper.ceil(me.size.x * ts);
+					int dy = MathHelper.ceil(me.size.y * ts);
+					int dz = MathHelper.ceil(me.size.z * ts);
+					ab.action(new ImageAction(me.getTexture().getImage(), box, img -> {
+						img.fill(bx + dx + dz, by + dz, dz, dy, 0xffff0000);
+						img.fill(bx, by + dz, dz, dy, 0xffdd0000);
+						img.fill(bx + dz, by, dx, dz, 0xff00ff00);
+						img.fill(bx + dz + dx, by, dx, dz, 0xff00dd00);
+						img.fill(bx + dz, by + dz, dx, dy, 0xff0000ff);
+						img.fill(bx + dz * 2 + dx, by + dz, dx, dy, 0xff0000dd);
+					}));
+					texs.add(me.getTexture());
+				}
+			}
+		});
+		ab.onAction(() -> texs.forEach(ETextures::markDirty));
+		ab.execute();
 	}
 
 	public static void addItemHoldPos(Editor editor) {
@@ -309,16 +317,26 @@ public class Generators {
 
 	private static void mirrorElement(EditorGui eg) {
 		Editor editor = eg.getEditor();
-		ModelElement me = editor.getSelectedElement();
-		if(me != null && me.type == ElementType.NORMAL) {
-			ActionBuilder b = eg.getEditor().action("i", "button.cpm.tools.mirror");
-			mirror(me, b);
-			b.execute();
-		}
+		ActionBuilder b = eg.getEditor().action("i", "button.cpm.tools.mirror");
+		Set<ModelElement> mirrored = new HashSet<>();
+		editor.forEachSeletectedElement(el -> {
+			if(el instanceof ModelElement) {
+				ModelElement me = (ModelElement) el;
+				if(me.type == ElementType.NORMAL) {
+					mirrorZ(me, b, mirrored);
+				}
+			}
+		});
+		b.execute();
 	}
 
-	private static void mirror(ModelElement e, ActionBuilder b) {
-		b.updateValueOp(e, e.mirror, !e.mirror, (a, c) -> a.mirror = c);
+	private static void mirrorZ(ModelElement e, ActionBuilder b, Set<ModelElement> mirrored) {
+		if(mirrored.contains(e))return;
+		mirrored.add(e);
+		if(e.faceUV != null) {
+			e.faceUV.mirror(b, Axis.Z);
+		} else
+			b.updateValueOp(e, e.mirror, !e.mirror, (a, c) -> a.mirror = c);
 		Vec3f s = e.size;
 		Vec3f v = new Vec3f(e.pos);
 		v.x = -v.x;
@@ -330,7 +348,7 @@ public class Generators {
 		v.y = 360 - v.y;
 		v.z = 360 - v.z;
 		b.updateValueOp(e, e.rotation, v, (a, c) -> a.rotation = c);
-		e.children.forEach(p -> mirror(p, b));
+		e.children.forEach(p -> mirrorZ(p, b, mirrored));
 		b.onAction(() -> e.markDirty());
 	}
 }

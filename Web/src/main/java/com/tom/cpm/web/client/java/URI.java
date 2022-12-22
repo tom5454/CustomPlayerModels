@@ -22,4 +22,8 @@ public class URI {
 	public String getScheme() {
 		return url.protocol != null && url.protocol.equals("null:") ? null : url.protocol.substring(0, url.protocol.length() - 1);
 	}
+
+	public String getHost() {
+		return url.host;
+	}
 }

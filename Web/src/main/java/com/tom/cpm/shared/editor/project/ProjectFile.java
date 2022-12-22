@@ -25,7 +25,6 @@ import com.tom.cpm.web.client.util.JSZip.ZipWriteProperties;
 
 import elemental2.core.JsObject;
 import elemental2.dom.Blob;
-import elemental2.dom.DomGlobal;
 import elemental2.dom.FileReader;
 import elemental2.promise.Promise;
 import jsinterop.base.Js;
@@ -108,8 +107,7 @@ public class ProjectFile implements IProject {
 		root = new Entry();
 		root.children = new HashMap<>();
 		CompletableFuture<Void> cf = new CompletableFuture<>();
-		FS.getContent(file.getAbsolutePath()).
-		then(b -> DomGlobal.fetch("data:application/octet-binary;base64," + b)).
+		FS.getContentFuture(file.getAbsolutePath()).
 		then(b -> b.arrayBuffer()).
 		then(b -> new JSZip().loadAsync(b)).
 		then(this::load).then(v -> {

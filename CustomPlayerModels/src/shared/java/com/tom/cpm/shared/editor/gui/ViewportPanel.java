@@ -24,6 +24,7 @@ import com.tom.cpl.math.TriangleBoundingBox;
 import com.tom.cpl.math.Vec2f;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VirtualTriangleRenderer;
@@ -514,7 +515,20 @@ public class ViewportPanel extends ViewportPanelBase3d {
 		h.registerKeybind(Keybinds.ROTATION, () -> setVec(VecType.ROTATION));
 		h.registerKeybind(Keybinds.DELETE, editor::deleteSel);
 		h.registerKeybind(Keybinds.NEW_PART, editor::addNew);
+		h.registerKeybind(Keybinds.FOCUS_CAMERA, this::focusOnSelected);
 		super.keyPressed(event);
+	}
+
+	private void focusOnSelected() {
+		ModelElement me = editor.getSelectedElement();
+		if(me != null && me.matrixPosition != null) {
+			Vec4f v = new Vec4f(0, 0, 1, 1);
+			v.transform(me.matrixPosition);
+			ViewportCamera cam = getCamera();
+			cam.position.x = v.z - 0.5f;
+			cam.position.y = 1.5f - v.y;
+			cam.position.z = v.x + 0.5f;
+		}
 	}
 
 	@Override

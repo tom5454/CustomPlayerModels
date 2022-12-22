@@ -31,6 +31,7 @@ import com.tom.cpm.web.client.JSKeyCodes;
 import com.tom.cpm.web.client.Stylesheet;
 import com.tom.cpm.web.client.WebMC.Texture;
 import com.tom.cpm.web.client.resources.Resources;
+import com.tom.cpm.web.client.util.I18n;
 import com.tom.cpm.web.client.util.ImageIO;
 import com.tom.ugwt.client.UGWTContext;
 
@@ -112,9 +113,10 @@ public class RenderSystem implements RetroGLAccess<String> {
 		proj2d = new Mat4f();
 		proj2d.setIdentity();
 
-		preloadComplete = new Promise<>((resolve, reject) -> {
+		preloadComplete = Resources.loaded.then(__ -> new Promise<>((resolve, reject) -> {
 			preloadedAssets = new HashMap<>();
 			JsArray<Promise<Object>> promises = new JsArray<>();
+			promises.push(I18n.loaded);
 			for(String res : Resources.listResources()) {
 				if(res.endsWith(".png")) {
 					promises.push(ImageIO.loadImage(Resources.getResource(res), true, false).then(img -> {
@@ -130,7 +132,7 @@ public class RenderSystem implements RetroGLAccess<String> {
 				reject.onInvoke(v);
 				return null;
 			});
-		});
+		}));
 	}
 
 	public static void init(Window windowIn, Supplier<EventHandler> preload) {

@@ -23,6 +23,7 @@ import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartPosition;
 import com.tom.cpm.shared.model.PartRoot;
@@ -264,6 +265,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				playerObj.updateFromModel(model);
 				mngr.animEngine.handleAnimation(playerObj, mode, def);
 			}
+			if(def.getResolveState() != ModelLoadingState.LOADED)return;
 			for (int i = 0; i < redirectRenderers.size(); i++) {
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();
@@ -401,6 +403,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						holder.preRenderSetup = true;
 						holder.bindFirstSetup();
 					}
+					if(holder.def.getResolveState() != ModelLoadingState.LOADED)return;
 					if(!holder.skinBound) {
 						holder.skinBound = true;
 						holder.bindSkin();

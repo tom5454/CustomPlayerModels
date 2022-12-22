@@ -20,17 +20,17 @@ public interface MultiSelector extends TreeElement {
 	boolean add(TreeElement modelElement);
 	void forEachSelected(Consumer<TreeElement> c);
 
+	@Override
+	default String getName() {
+		return "";
+	}
+
 	public static class ElementImpl implements MultiSelector {
 		private List<ModelElement> elements = new ArrayList<>();
 		private final Editor editor;
 
 		public ElementImpl(Editor editor) {
 			this.editor = editor;
-		}
-
-		@Override
-		public String getName() {
-			return "";
 		}
 
 		private void addImpl(ModelElement modelElement) {

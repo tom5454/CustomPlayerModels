@@ -316,7 +316,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			}
 			this.y = y;
 
-			select = new Button(gui, gui.i18nFormat("button.cpm.select"), () -> {
+			select = new Button(gui, gui.i18nFormat("button.cpm.models.openFolder"), () -> {
 				selectedFolder = getFullPath(folder.getName());
 				loadModelList();
 			});
@@ -433,7 +433,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 	}
 
 	public void filesDropped(List<File> files) {
-		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models/" + selectedFolder);
 		for (int i = 0; i < files.size(); i++) {
 			File model = files.get(i);
 			if(model.getName().endsWith(".cpmmodel")) {

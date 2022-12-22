@@ -1,6 +1,7 @@
 package com.tom.cpm.blockbench;
 
 import com.tom.cpm.web.client.FS.IFS;
+import com.tom.cpm.web.client.java.io.FileNotFoundException;
 
 import elemental2.dom.File;
 import elemental2.promise.Promise;
@@ -31,8 +32,8 @@ public class BlockBenchFS implements IFS {
 	}
 
 	@Override
-	public Promise<String> getContent(String path) {
-		return null;
+	public String getContent(String path) throws FileNotFoundException {
+		throw new FileNotFoundException();
 	}
 
 	@Override
@@ -53,5 +54,9 @@ public class BlockBenchFS implements IFS {
 	@Override
 	public boolean needFileManager() {
 		return false;
+	}
+
+	@Override
+	public void mount(String b64, String name) {
 	}
 }

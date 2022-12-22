@@ -1,9 +1,12 @@
 package com.tom.cpm.web.client;
 
+import com.tom.cpm.web.client.java.io.FileNotFoundException;
+
 import elemental2.dom.Blob;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.File;
 import elemental2.dom.HTMLLinkElement;
+import elemental2.dom.Response;
 import elemental2.dom.URL;
 import elemental2.promise.Promise;
 import jsinterop.annotations.JsPackage;
@@ -33,9 +36,19 @@ public class FS {
 		impl.mkdir(path);
 	}
 
-	public static Promise<String> getContent(String path) {
-		if(impl == null)return Promise.reject("File not found");
+	public static String getContent(String path) throws FileNotFoundException {
+		if(impl == null)throw new FileNotFoundException("File not found");
 		return impl.getContent(path);
+	}
+
+	public static Promise<Response> getContentFuture(String path) {
+		return new Promise<>((res, rej) -> {
+			try {
+				res.onInvoke(DomGlobal.fetch("data:application/octet-binary;base64," + getContent(path)));
+			} catch (FileNotFoundException e) {
+				rej.onInvoke(e);
+			}
+		});
 	}
 
 	public static boolean setContent(String path, String content) {
@@ -46,6 +59,11 @@ public class FS {
 	public static Promise<Object> mount(File file) {
 		if(impl == null)return Promise.reject(null);
 		return impl.mount(file);
+	}
+
+	public static void mount(String b64, String name) {
+		if(impl == null)return;
+		impl.mount(b64, name);
 	}
 
 	public static void deleteFile(String name) {
@@ -71,10 +89,11 @@ public class FS {
 		boolean exists(String path);
 		boolean isDir(String path);
 		void mkdir(String path);
-		Promise<String> getContent(String path);
+		String getContent(String path) throws FileNotFoundException;
 		boolean setContent(String path, String content);
 		void deleteFile(String path);
 		Promise<Object> mount(File file);
+		void mount(String b64, String name);
 		boolean needFileManager();
 	}
 

@@ -2,8 +2,11 @@ package com.tom.cpm.web.client.java;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.JavaScriptException;
 
@@ -12,6 +15,7 @@ import com.tom.cpm.web.client.resources.Resources;
 import elemental2.core.Global;
 import elemental2.core.JsArray;
 import elemental2.core.JsNumber;
+import elemental2.core.JsObject;
 import elemental2.core.JsRegExp;
 import elemental2.core.JsString;
 import elemental2.dom.DomGlobal;
@@ -170,6 +174,24 @@ public class Java {
 			}
 		}
 		return null;
+	}
+
+	public static void removeQueryVariable(String key) {
+		String newUrl = DomGlobal.window.location.protocol + "//" + DomGlobal.window.location.host + DomGlobal.window.location.pathname;
+		List<String> q = new ArrayList<>();
+		String query = DomGlobal.window.location.search.substring(1);
+		if(query.isEmpty())return;
+		String[] vars = query.split("&");
+		for (int i = 0; i < vars.length; i++) {
+			String[] pair = vars[i].split("=");
+			if (!Global.decodeURIComponent(pair[0]).equals(key)) {
+				q.add(vars[i]);
+			}
+		}
+		if(!q.isEmpty()) {
+			newUrl += q.stream().collect(Collectors.joining("&", "?", ""));
+		}
+		DomGlobal.window.history.pushState(new JsObject(), "", newUrl);
 	}
 
 	public static String getPlatform() {
