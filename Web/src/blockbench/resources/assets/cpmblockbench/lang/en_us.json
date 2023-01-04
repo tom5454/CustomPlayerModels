@@ -1,0 +1,13 @@
+{
+  "comment.cpm.doNotEdit1": "#########################################################",
+  "comment.cpm.doNotEdit2": "Auto-generated file DO NOT EDIT! See template jsons in the Localization folder of the GitHub Repo.",
+  "comment.cpm.doNotEdit3": "#########################################################",
+  "bb-button.openCPMProject": "Open Customizable Player Models Project",
+  "bb-button.exportCPMProject": "Export Customizable Player Models Project",
+  "bb-button.openEmbeddedEditor": "Open Embedded CPM Editor",
+  "bb-button.newAnimation": "Add new Animation (CPM)",
+  "bb-button.viewInEmbeddedEditor": "View In Embedded CPM Editor",
+  "bb-label.cpmCodecDesc": "Model for Customizable Player Models mod",
+  "bb-label.cpmInfo.export": "You have to export to Customizable Player Models Project file to use it in-game.",
+  "bb-label.cpmInfo.import": "Use the Open Customizable Player Models Project option to import an existing project file."
+}

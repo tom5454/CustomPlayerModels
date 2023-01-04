@@ -3,6 +3,7 @@ package com.tom.cpm.web.client.render;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
@@ -93,7 +95,7 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 					return null;
 				});
 			else
-				errorLoading("Invalid url");
+				errorLoading(gui.i18nFormat("web-label.viewer.invaidURL"));
 		} else {
 			CPMApi.fetch("search", name).then(this::loadProfile).then(this::initModel).catch_(e -> {
 				errorLoading(e);
@@ -123,26 +125,25 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 		else
 			DomGlobal.console.error("Failed to load model: ", e);
 		state.clear();
-		state.put("error", "Failed to load model: " + e);
+		state.put("error", gui.i18nFormat("label.cpm.errorLoadingModel", e.toString()));
 		updateState();
 	}
 
-	private static final String CLONE_POPUP_HTML = "<div>"
-			+ "<h1>Select vanilla skin</h1>"
-			+ "<label for=\"cpmv_upload\"><button onclick=\"document.getElementById('cpmv_upload').click()\">Add file</button></label> "
+	private final String CLONE_POPUP_HTML = "<div>"
+			+ "<h1>" + gui.i18nFormat("web-label.viewer.selectVanilla") + "</h1>"
+			+ "<label for=\"cpmv_upload\"><button onclick=\"document.getElementById('cpmv_upload').click()\">" + gui.i18nFormat("web-button.viewer.add") + "</button></label> "
 			+ "<input type=\"file\" id=\"cpmv_upload\" name=\"cpmv_upload\" style=\"display: none;\" accept=\"image/png\" onchange=\"uploadChange()\">"
-			+ "<input id=\"nameSearch\" placeholder=\"Name / UUID\"> "
-			+ "<button onclick=\"E('clone:skinSearch', document.getElementById('nameSearch').value)\">Search</button>"
+			+ "<input id=\"nameSearch\" placeholder=\"" + gui.i18nFormat("web-label.viewer.searchGhost") + "\"> "
+			+ "<button onclick=\"E('clone:skinSearch', document.getElementById('nameSearch').value)\">" + gui.i18nFormat("web-button.viewer.search") + "</button>"
 			+ "</div>";
 
-	private static final String SKIN_TYPE_POPUP = "<h1>Skin Type</h1>"
-			+ "<button onclick=\"setSkinType('default')\">Default</button> "
-			+ "<button onclick=\"setSkinType('slim')\">Slim</button>"
+	private final String SKIN_TYPE_POPUP = "<h1>" + gui.i18nFormat("web-label.viewer.skinType") + "</h1>"
+			+ Arrays.stream(SkinType.VANILLA_TYPES).map(t -> "<button onclick=\"setSkinType('" + t.getName() + "')\">" + gui.i18nFormat("label.cpm.skin_type." + t.getName()) + "</button> ").collect(Collectors.joining())
 			+ "<p id=\"cpmv_skinImageData\" style=\"display: none;\">$</p>";
 
-	private static final String SKIN_OUTPUT_POPUP = "<h1>Use cloned skin:</h1>"
-			+ "<button onclick=\"useSkinDl()\">Download</button> "
-			+ "<button onclick=\"useSkinMc()\">Upload to Minecraft.net</button>"
+	private final String SKIN_OUTPUT_POPUP = "<h1>" + gui.i18nFormat("web-label.viewer.useSkin") + "</h1>"
+			+ "<button onclick=\"useSkinDl()\">" + gui.i18nFormat("web-button.viewer.download") + "</button> "
+			+ "<button onclick=\"useSkinMc()\">" + gui.i18nFormat("web-button.viewer.uploadToMc") + "</button>"
 			+ "<p id=\"cpmv_skinImageData\" style=\"display: none;\">$</p>";
 
 	private void receiveData(Map<String, Object> data) {
@@ -263,7 +264,7 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 		} else {
 			msg = String.valueOf(err);
 		}
-		openPopup("<h1>Error cloning skin</h1><p>" + msg + "</p>");
+		openPopup("<h1>" + gui.i18nFormat("web-label.viewer.errCloning") + "</h1><p>" + msg + "</p>");
 		return Promise.resolve((Void) null);
 	}
 
@@ -568,7 +569,7 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 	private void sendControls(ModelDefinition def) {
 		StringBuilder sb = new StringBuilder();
 		boolean skin = fileData == null || fileData.convertable();
-		if(def.cloneable != null)makeDropdown(sb, "clone", "Clone Model", skin ? "skin" : null, "Skin", "model", "Model");
+		if(def.cloneable != null)makeDropdown(sb, "clone", gui.i18nFormat("web-label.viewer.clone"), skin ? "skin" : null, gui.i18nFormat("web-label.viewer.mode.skin"), "model", gui.i18nFormat("web-label.viewer.mode.model"));
 		state.put("ctrl", sb.toString());
 	}
 

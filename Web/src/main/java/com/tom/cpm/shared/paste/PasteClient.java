@@ -15,6 +15,7 @@ public class PasteClient {
 	}
 
 	public void connect() throws IOException {
+		//WebMC.getInstance().getGui().getFrame().openPopup(new PastePopup(WebMC.getInstance().getGui()));
 		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
 	}
 

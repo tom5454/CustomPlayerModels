@@ -39,6 +39,7 @@ public class CPMWebInterface {
 		} catch (Throwable e) {
 			gui.onGuiException("Error creating gui", e, true);
 		}
+		WebMC.getInstance().setGui(gui);
 		return gui;
 	}
 

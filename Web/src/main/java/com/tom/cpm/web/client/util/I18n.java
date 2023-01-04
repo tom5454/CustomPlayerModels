@@ -37,4 +37,8 @@ public class I18n {
 					return a;
 				});
 	}
+
+	public static String format(String loc, Object... args) {
+		return String.format(get(loc), args);
+	}
 }

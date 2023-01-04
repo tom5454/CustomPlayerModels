@@ -80,13 +80,13 @@ public class FileManagerPopup extends PopupPanel {
 
 			doc.body.style.background = "#202124";
 			doc.body.style.color = "#e8eaed";
-			doc.body.innerHTML = "<h1>CPM Web File Manager</h1>"
-					+ "<label for=\"path\">Path:</label>"
+			doc.body.innerHTML = "<h1>" + gui.i18nFormat("web-label.filemanager.title") + "</h1>"
+					+ "<label for=\"path\">" + gui.i18nFormat("web-label.filemanager.path") + "</label>"
 					+ "<input id=\"path\" value=\"/\" name=\"path\"> "
-					+ "<label for=\"upload\"><button onclick=\"document.getElementById('upload').click()\">Add file</button></label> "
+					+ "<label for=\"upload\"><button onclick=\"document.getElementById('upload').click()\">" + gui.i18nFormat("web-button.filemanager.add") + "</button></label> "
 					+ "<input type=\"file\" id=\"upload\" name=\"upload\" multiple=\"multiple\" style=\"display: none;\">"
-					+ "<button id=\"newFolder\" title=\"New folder\"><span class=\"material-icons\">create_new_folder</span></button> "
-					+ "<button id=\"exportZip\" title=\"Create a zip file from all of the files in the Local Storage\"><span class=\"material-icons\">folder_zip</span><span class=\"material-icons\">download</span></button>"
+					+ "<button id=\"newFolder\" title=\"" + gui.i18nFormat("web-button.filemanager.newFolder") + "\"><span class=\"material-icons\">create_new_folder</span></button> "
+					+ "<button id=\"exportZip\" title=\"" + gui.i18nFormat("web-button.filemanager.makeZip") + "\"><span class=\"material-icons\">folder_zip</span><span class=\"material-icons\">download</span></button>"
 					+ "<p id=\"info\"></p>"
 					+ "<div id=\"fileList\" style=\"background: #303134; margin-left: 8px; margin-right: 8px; padding: 1px 10px;\"></div>";
 			doc.body.addEventListener("drop", ev -> {
@@ -108,7 +108,7 @@ public class FileManagerPopup extends PopupPanel {
 				}
 
 				Promise.all(prs.toArray(new Promise[0])).then(v -> {
-					info.innerHTML = "Files added";
+					info.innerHTML = gui.i18nFormat("web-label.filemanager.added");
 					initFS();
 					return null;
 				});
@@ -128,7 +128,7 @@ public class FileManagerPopup extends PopupPanel {
 					prs.add(loadFile(f));
 				});
 				Promise.all(prs.toArray(new Promise[0])).then(v -> {
-					info.innerHTML = "Files added";
+					info.innerHTML = gui.i18nFormat("web-label.filemanager.added");
 					initFS();
 					return null;
 				}).finally_(() -> {
@@ -138,9 +138,9 @@ public class FileManagerPopup extends PopupPanel {
 			};
 			HTMLButtonElement btn = Js.uncheckedCast(doc.getElementById("newFolder"));
 			btn.onclick = ev -> {
-				openPopup("<div style=\"padding: 10;\"><h1>Folder name</h1>"
+				openPopup("<div style=\"padding: 10;\"><h1>" + gui.i18nFormat("web-label.filemanager.folderName") + "</h1>"
 						+ "<input id=\"folderNameIn\" value=\"\" name=\"folderNameIn\"><br><br>"
-						+ "<button id=\"folderNameOk\">Ok</button> <button id=\"folderNameCancel\">Cancel</button>"
+						+ "<button id=\"folderNameOk\">" + gui.i18nFormat("button.cpm.ok") + "</button> <button id=\"folderNameCancel\">" + gui.i18nFormat("button.cpm.cancel") + "</button>"
 						+ "</div>");
 
 				HTMLDivElement div = Js.uncheckedCast(doc.getElementById("popupBg"));
@@ -155,8 +155,8 @@ public class FileManagerPopup extends PopupPanel {
 						String np = path.value + "/" + name;
 						if(np.startsWith("//"))np = np.substring(1);
 						if(FS.exists(np)) {
-							divP.innerHTML = "<div style=\"padding: 10;\"><h1>File already exists</h1>"
-									+ "<button id=\"fileExistOk\">Ok</button>"
+							divP.innerHTML = "<div style=\"padding: 10;\"><h1>" + gui.i18nFormat("web-label.filemanager.fileExists") + "</h1>"
+									+ "<button id=\"fileExistOk\">" + gui.i18nFormat("button.cpm.ok") + "</button>"
 									+ "</div>";
 							HTMLButtonElement btnOk2 = Js.uncheckedCast(doc.getElementById("fileExistOk"));
 							btnOk2.onclick = ____ -> {
@@ -242,9 +242,9 @@ public class FileManagerPopup extends PopupPanel {
 		Promise<Void> process;
 		if(FS.exists(filePath)) {
 			process = new Promise<>((res, rej) -> {
-				openPopup("<div style=\"padding: 10;\"><h1>Overwrite file?</h1>"
+				openPopup("<div style=\"padding: 10;\"><h1>" + gui.i18nFormat("label.cpm.overwrite") + "</h1>"
 						+ "<p>" + file.name + "</p>"
-						+ "<button id=\"overwriteOk\">Ok</button> <button id=\"overwriteCancel\">Cancel</button>"
+						+ "<button id=\"overwriteOk\">" + gui.i18nFormat("button.cpm.ok") + "</button> <button id=\"overwriteCancel\">" + gui.i18nFormat("button.cpm.cancel") + "</button>"
 						+ "</div>");
 				HTMLButtonElement btnOk = Js.uncheckedCast(doc.getElementById("overwriteOk"));
 				HTMLButtonElement btnCancel = Js.uncheckedCast(doc.getElementById("overwriteCancel"));
@@ -284,7 +284,7 @@ public class FileManagerPopup extends PopupPanel {
 
 	@Override
 	public String getTitle() {
-		return "File Manager";
+		return gui.i18nFormat("web-button.fileManager");
 	}
 
 	private void openDir(String pathIn) {
@@ -338,9 +338,9 @@ public class FileManagerPopup extends PopupPanel {
 			}
 			fl.appendChild(ent);
 			doc.getElementById("d-" + uuid).onclick = __ -> {
-				openPopup("<div style=\"padding: 10;\"><h1>Delete file?</h1>"
+				openPopup("<div style=\"padding: 10;\"><h1>" + gui.i18nFormat("web-label.filemanager.delete") + "</h1>"
 						+ "<p>" + name + "</p>"
-						+ "<button id=\"deleteOk\">Ok</button> <button id=\"deleteCancel\">Cancel</button>"
+						+ "<button id=\"deleteOk\">" + gui.i18nFormat("button.cpm.ok") + "</button> <button id=\"deleteCancel\">" + gui.i18nFormat("button.cpm.cancel") + "</button>"
 						+ "</div>");
 				HTMLButtonElement btnOk = Js.uncheckedCast(doc.getElementById("deleteOk"));
 				HTMLButtonElement btnCancel = Js.uncheckedCast(doc.getElementById("deleteCancel"));

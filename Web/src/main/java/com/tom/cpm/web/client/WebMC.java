@@ -37,10 +37,14 @@ import com.tom.cpm.shared.gui.panel.ViewportPanelBase3d;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.retro.RetroGLAccess.RetroLayer;
+import com.tom.cpm.shared.util.ErrorLog;
+import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.IVersionCheck;
+import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.MojangAPI;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.FileManagerPopup;
+import com.tom.cpm.web.client.render.GuiImpl;
 import com.tom.cpm.web.client.render.RenderSystem;
 import com.tom.cpm.web.client.util.AsyncResourceException;
 import com.tom.cpm.web.client.util.CPMApi;
@@ -62,6 +66,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	private static WebMC instance;
 	private boolean canExit, versionCheck;
 	private static boolean firstOpen = true;
+	private GuiImpl currentGui;
 
 	public WebMC(ModConfigFile config, boolean canExit, boolean versionCheck) {
 		this.versionCheck = versionCheck;
@@ -297,7 +302,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 				sp.getDisplay().getElements().remove(sp.getDisplay().getElements().size() - 1);
 			}
 			if(FS.needFileManager()) {
-				pp.addButton("File Manager", () -> panel.getGui().getFrame().openPopup(new FileManagerPopup(panel.getGui())));
+				pp.addButton(panel.getGui().i18nFormat("web-button.fileManager"), () -> panel.getGui().getFrame().openPopup(new FileManagerPopup(panel.getGui())));
 			}
 		}
 		break;
@@ -310,18 +315,25 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 			if(firstOpen) {
 				firstOpen = false;
 				IGui gui = panel.getGui();
-				((Frame)panel).openPopup(new MessagePopup((Frame) panel, gui.i18nFormat("label.cpm.warning"), "The web version of the editor is in Beta\\You may experience minor visual glitches with the editor.\\\\Your models will be saved inside your browser\\use the File/File Manager to download them, or use the ... button in the file chooser."));
+				((Frame)panel).openPopup(new MessagePopup((Frame) panel, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("web-label.editorBeta")));
 				String url = Java.getQueryVariable("file");
 				Java.removeQueryVariable("file");
 				if(url != null) {
 					Editor e = ((EditorGui)panel).getEditor();
-					e.setInfoMsg.accept(Pair.of(20000, "Loading project from URL"));
+					e.setInfoMsg.accept(Pair.of(20000, gui.i18nFormat("web-label.loadFromURL")));
 					CPMApi.fetch("file", url).then(f -> {
 						FS.mount((String) f.get("data"), "download.cpmproject");
-						e.load(new File("/mnt/download.cpmproject"));
+						e.load(new File("/mnt/download.cpmproject")).handle((v, ex) -> {
+							if(ex != null) {
+								Log.warn("Error loading project file", ex);
+								ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.load", ex);
+								e.setInfoMsg.accept(Pair.of(3000, gui.i18nFormat("label.cpm.error.load") + "\\" + ex));
+							}
+							return null;
+						});
 						return null;
 					}).catch_(err -> {
-						e.setInfoMsg.accept(Pair.of(3000, "Failed to load project: " + err));
+						e.setInfoMsg.accept(Pair.of(3000, gui.i18nFormat("label.cpm.error.load") + "\\" + err));
 						return null;
 					});
 				}
@@ -372,5 +384,17 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 				}
 			};
 		}
+	}
+
+	public static WebMC getInstance() {
+		return instance;
+	}
+
+	public void setGui(GuiImpl gui) {
+		this.currentGui = gui;
+	}
+
+	public GuiImpl getGui() {
+		return currentGui;
 	}
 }

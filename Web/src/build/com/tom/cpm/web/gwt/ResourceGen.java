@@ -24,6 +24,7 @@ public class ResourceGen {
 			ResourceGen.wr = wr;
 			run(new File(wd, "../CustomPlayerModels/src/shared/resources"));
 			run(new File(wd, "../CustomPlayerModels-EditorWeb/src/main/resources"));
+			run(new File(wd, "../CustomPlayerModels-EditorWeb/src/blockbench/resources"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

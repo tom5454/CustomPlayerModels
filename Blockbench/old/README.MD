@@ -1,14 +1,14 @@
 # Customizable Player Models Blockbench Plugin  
 **This plugin is in beta, some features are not supported yet**  
 
-Tested with Blockbench desktop 4.5.2 portable
+Tested with Blockbench desktop 4.1.4 portable
 
-If you find a bug report it here [Bugtracker](https://github.com/tom5454/CustomPlayerModels/issues) / Click on issues, and create an issue with screenshots and your blockbench project attached in a .zip file.  
+This version of the plugin is no longer receiving updates.  
 
 ## How to install
 You need the desktop version of Blockbench. Link: [https://blockbench.net/downloads/](https://blockbench.net/downloads/)  
 Go to File/Plugins then click the load plugin from URL, and paste the following URL in:  
-`https://tom5454.com/cpm/cpm_plugin/new/cpm_plugin.js`  
+`https://tom5454.com/cpm/cpm_plugin/old/cpm_plugin.js`  
 The plugin should be installed and you can import and export `.cpmproject` files.  
 
 <details>
@@ -19,3 +19,4 @@ Open the plugin: [Link](https://raw.githubusercontent.com/tom5454/CustomPlayerMo
 
 ## Usage
 You can open .cpmproject files, or start from scratch. It is recommended that you start with the `Customizable Player Models model` Preset. If you have a different model use File/Convert Project and change it to `Customizable Player Models model`.  
+If you import additional data may be placed in the cube names after a `|` character. Do not edit this text.
