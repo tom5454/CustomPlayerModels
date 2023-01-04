@@ -66,7 +66,7 @@ public class ModelDefinition {
 	private TextureProvider skinTexture;
 	public Map<ItemRenderer, ItemTransform> itemTransforms = new HashMap<>();
 	protected Map<VanillaModelPart, PartRoot> rootRenderingCubes;
-	private ModelLoadingState resolveState = ModelLoadingState.NEW;
+	protected ModelLoadingState resolveState = ModelLoadingState.NEW;
 	private AnimationRegistry animations = new AnimationRegistry();
 	private ScaleData scale;
 	public PartPosition fpLeftHand, fpRightHand;

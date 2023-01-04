@@ -396,6 +396,8 @@ public class EditorAnim implements IAnimation {
 			editor.setAnimDuration.accept(this.duration);
 		editor.setAnimPlayEn.accept(this.getFrames().size() > 1);
 		editor.setAnimPriority.accept(this.priority);
+		if(type.isCustom() && !type.isStaged())
+			editor.setAnimOrder.accept(this.order);
 	}
 
 	public void beginDrag() {

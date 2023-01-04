@@ -44,21 +44,4 @@ public class BlockEntityWithoutLevelRendererMixin {
 			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
 		}
 	}
-
-	@Inject(at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/blockentity/SkullBlockRenderer;"
-					+ "getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lcom/mojang/authlib/GameProfile;)"
-					+ "Lnet/minecraft/client/renderer/RenderType;"
-			),
-			method = "renderRaw",
-			locals = LocalCapture.CAPTURE_FAILHARD,
-			require = 0,
-			remap = false)//Optifine
-	public void onRenderOF(ItemStack stack, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int arg5, CallbackInfo ci, Item item, Block block, GameProfile gameProfile, SkullBlock.Type skullType, SkullModelBase model) {
-		RefHolder.CPM_MODELS = skullModels;
-		if(skullType == SkullBlock.Types.PLAYER && gameProfile != null) {
-			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
-		}
-	}
 }

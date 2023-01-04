@@ -10,6 +10,7 @@
   "client": [
 	"AbstractTextureMixin_OF",
 	"ModelPartMixin_OF",
+	"BlockEntityWithoutLevelRendererMixin_OF",
 	"VRArmRendererMixin_VR",
 	"VRPlayerRendererMixin_VR",
 	"VRPlayerModelWithArmsMixin_VR"

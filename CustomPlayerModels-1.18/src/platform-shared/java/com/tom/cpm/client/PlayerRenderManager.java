@@ -25,6 +25,7 @@ import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
+import com.tom.cpm.client.optifine.RedirectModelRendererOF;
 import com.tom.cpm.client.optifine.proxy.ModelPartOF;
 import com.tom.cpm.client.vr.VRPlayerRenderer;
 import com.tom.cpm.shared.model.PlayerModelParts;
@@ -70,7 +71,9 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			public RedirectRenderer<ModelPart> create(Model model,
 					RedirectHolder<Model, ?, ModelTexture, ModelPart> access,
 					Supplier<ModelPart> modelPart, VanillaModelPart part) {
-				return new RedirectModelRendererVanilla((RDH) access, modelPart, part);
+				return CustomPlayerModelsClient.optifineLoaded ?
+						new RedirectModelRendererOF((RDH) access, modelPart, part) :
+							new RedirectModelRendererVanilla((RDH) access, modelPart, part);
 			}
 		});
 		setVis(m -> m.visible, (m, v) -> m.visible = v);
@@ -294,7 +297,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 		}
 	}
 
-	private static class RedirectModelRendererVanilla extends RedirectModelRendererBase {
+	public static class RedirectModelRendererVanilla extends RedirectModelRendererBase {
 
 		public RedirectModelRendererVanilla(RDH holder, Supplier<ModelPart> parent, VanillaModelPart part) {
 			super(holder, parent, part);

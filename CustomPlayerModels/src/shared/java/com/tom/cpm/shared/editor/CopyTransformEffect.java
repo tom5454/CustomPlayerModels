@@ -102,6 +102,10 @@ public class CopyTransformEffect {
 	public String getTooltip(IGui gui) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(gui.i18nFormat("label.cpm.copyTransform"));
+		if(from != null) {
+			sb.append("\\ ");
+			sb.append(gui.i18nFormat("label.cpm.copyTransform.from", from.getElemName()));
+		}
 		boolean p = createXYZ(sb, gui.i18nFormat("label.cpm.position"), copyPX, copyPX, copyPZ);
 		boolean r = createXYZ(sb, gui.i18nFormat("label.cpm.rotation"), copyRX, copyRX, copyRZ);
 		boolean s = createXYZ(sb, gui.i18nFormat("label.cpm.scale"), copySX, copySX, copySZ);

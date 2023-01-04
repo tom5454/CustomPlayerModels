@@ -27,4 +27,6 @@ public class UIColors {
 
 	public int link_normal          = 0xff6699ff;
 	public int link_hover           = 0xffffff66;
+
+	public int grid_color           = 0xffffffff;
 }

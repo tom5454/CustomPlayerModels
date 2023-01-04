@@ -133,7 +133,7 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 				}
 			}
 		}
-		if(!doRenderElems)return;
+		if(!doRenderElems || outlineOnly)return;
 		if(cube.getCube() instanceof ModelElement && editor.displayGizmo.get()) {
 			Mesh mesh = cube.renderObject;
 			ModelElement me = (ModelElement) cube.getCube();
@@ -169,7 +169,7 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 			me.matrixPosition = stack.getLast().getMatrix().copy();
 		}
 		drawSelectionBox((RedirectPartRenderer) renderer, stack, buf, renderTypes, cube, doRenderElems);
-		if(!doRenderElems)return;
+		if(!doRenderElems || outlineOnly)return;
 		drawGizmo(cube, stack, buf, renderTypes);
 	}
 
@@ -226,6 +226,7 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 		itemTransforms.clear();
 		rendererObjectMap.clear();
 		bounds.clear();
+		resolveState = ModelLoadingState.LOADED;
 	}
 
 	@Override

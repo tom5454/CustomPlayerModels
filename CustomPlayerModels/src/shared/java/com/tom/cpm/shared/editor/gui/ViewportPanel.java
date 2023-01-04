@@ -317,7 +317,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			EditorRenderer.Bounds hovered = editor.definition.bounds.stream().filter(b -> b.isHovered && b.type != EditorRenderer.BoundType.DRAG_PANE).sorted(Comparator.comparingInt(b -> -b.type.ordinal())).findFirst().orElse(null);
 			if(hovered != null) {
 				dragged = 1;
-				if(hovered.type != EditorRenderer.BoundType.CLICK && draggingVec != null) {
+				if(hovered.type != EditorRenderer.BoundType.CLICK && draggingVec != null && canEdit()) {
 					draggingElement = hovered.elem;
 					draggingType = hovered.type;
 					if(draggingType == EditorRenderer.BoundType.DRAG_NX || draggingType == EditorRenderer.BoundType.DRAG_NY || draggingType == EditorRenderer.BoundType.DRAG_NZ)
@@ -348,7 +348,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public void mouseDrag(MouseEvent event) {
-		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds)) {
+		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds) && canEdit()) {
 			if(dragged > 0) {
 				dragged = 2;
 				EditorRenderer.Bounds hovered = editor.definition.bounds.stream().filter(b -> b.isHovered && b.type == EditorRenderer.BoundType.DRAG_PANE).findFirst().orElse(null);
@@ -387,7 +387,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				((ModelTree) editor.treeHandler.getModel()).displayPopup(event, elem);
 			}
 		}
-		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds) && dragged > 0) {
+		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds) && dragged > 0 && canEdit()) {
 			event.consume();
 			endGizmoDrag(true);
 		}
@@ -559,6 +559,6 @@ public class ViewportPanel extends ViewportPanelBase3d {
 	}
 
 	public boolean canEdit() {
-		return editor.selectedElement.canEditVec(draggingVec);
+		return editor.selectedElement != null && editor.selectedElement.canEditVec(draggingVec);
 	}
 }

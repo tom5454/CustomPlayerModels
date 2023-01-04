@@ -41,6 +41,15 @@ public interface VertexBuffer {
 		return this.normal(vec3f.x, vec3f.y, vec3f.z);
 	}
 
+	default VertexBuffer color(int argb) {
+		int a = ((argb & 0xff000000) >>> 24);
+		int r = ((argb & 0x00ff0000) >> 16);
+		int g = ((argb & 0x0000ff00) >> 8);
+		int b =  argb & 0x000000ff;
+		color(r / 255f, g / 255f, b / 255f, a / 255f);
+		return this;
+	}
+
 	void finish();
 
 	public static final VertexBuffer NULL = new VertexBuffer() {

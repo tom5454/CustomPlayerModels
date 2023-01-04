@@ -37,7 +37,8 @@
   "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.7.4",
-    "fabric": "*"
+    "fabric": "*",
+    "minecraft": ">=1.19 <=1.19.2"
   },
   "suggests": {
     "flamingo": "*"

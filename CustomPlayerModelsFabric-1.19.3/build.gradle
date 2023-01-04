@@ -3,11 +3,6 @@ plugins {
 	id 'maven-publish'
 }
 
-repositories {
-maven { url 'https://jitpack.io' }
-maven { url "https://maven.terraformersmc.com/releases/"}
-}
-
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
@@ -18,6 +13,8 @@ group = project.maven_group
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 repositories {
+	maven { url 'https://jitpack.io' }
+	maven { url "https://maven.terraformersmc.com/releases/"}
 	maven {
         url 'https://www.cursemaven.com'
         content {
@@ -39,7 +36,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.6.1') {
+	modImplementation ('com.github.Virtuoel:Pehkui:3.6.2') {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	

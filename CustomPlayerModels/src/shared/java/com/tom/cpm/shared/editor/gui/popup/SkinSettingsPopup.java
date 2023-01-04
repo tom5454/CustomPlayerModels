@@ -20,19 +20,25 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 public class SkinSettingsPopup extends PopupPanel {
 	private static boolean shownWarning = false;
 
+	private ETextures tex;
+
 	public static void showPopup(EditorGui e) {
-		Editor editor = e.getEditor();
-		ETextures tex = editor.getTextureProvider();
-		if(tex != null && tex.isEditable()) {
+		if(canEdit(e)) {
 			e.openPopup(new SkinSettingsPopup(e.getGui(), e));
 		}
+	}
+
+	public static boolean canEdit(EditorGui e) {
+		Editor editor = e.getEditor();
+		ETextures tex = editor.getTextureProvider();
+		return tex != null && tex.isEditable();
 	}
 
 	private SkinSettingsPopup(IGui gui, EditorGui e) {
 		super(gui);
 
 		Editor editor = e.getEditor();
-		ETextures tex = editor.getTextureProvider();
+		tex = editor.getTextureProvider();
 
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.openSkin"), () -> {
 			FileChooserPopup fc = new FileChooserPopup(editor.frame);
@@ -150,6 +156,6 @@ public class SkinSettingsPopup extends PopupPanel {
 
 	@Override
 	public String getTitle() {
-		return gui.i18nFormat("button.cpm.skinSettings");
+		return gui.i18nFormat("label.cpm.skinSettings.title", tex.getName());
 	}
 }

@@ -36,6 +36,7 @@ public class DrawToolsPanel extends Panel {
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.skinSettings"), () -> SkinSettingsPopup.showPopup(e));
 		openSkinBtn.setBounds(new Box(5, 0, w - 10, 20));
 		panel.addElement(openSkinBtn);
+		editor.updateGui.add(() -> openSkinBtn.setEnabled(SkinSettingsPopup.canEdit(e)));
 
 		Button refreshSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.reloadSkin"), editor::reloadSkin);
 		refreshSkinBtn.setBounds(new Box(5, 0, w - 10, 20));

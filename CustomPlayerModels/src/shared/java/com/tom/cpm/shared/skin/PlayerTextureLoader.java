@@ -45,11 +45,11 @@ public abstract class PlayerTextureLoader {
 
 		private CompletableFuture<Image> get0() {
 			if(MinecraftObjectHolder.DEBUGGING && new File(type.name().toLowerCase(Locale.ROOT) + "_test.png").exists()) {
-				return Image.loadFrom(new File(type.name().toLowerCase(Locale.ROOT) + "_test.png"));
+				return Image.loadFrom(new File(type.name().toLowerCase(Locale.ROOT) + "_test.png")).thenApply(postProcessor);
 			}
 			if(url == null)return null;
 			if(cachedFile != null && cachedFile.isFile())
-				return Image.loadFrom(cachedFile).exceptionally(e -> null);
+				return Image.loadFrom(cachedFile).thenApply(postProcessor).exceptionally(e -> null);
 			return cache.getUnchecked(url).thenApply(postProcessor).exceptionally(e -> null);
 		}
 	}

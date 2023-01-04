@@ -199,7 +199,8 @@ public class ViewportPanelAnim extends ViewportPanel {
 	@Override
 	protected void endGizmoDrag(boolean apply) {
 		super.endGizmoDrag(apply);
-		editor.selectedAnim.endDrag();
+		if(editor.selectedAnim != null)
+			editor.selectedAnim.endDrag();
 	}
 
 	@Override
