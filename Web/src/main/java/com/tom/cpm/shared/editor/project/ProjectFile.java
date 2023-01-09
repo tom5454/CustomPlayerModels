@@ -121,8 +121,7 @@ public class ProjectFile implements IProject {
 		return cf;
 	}
 
-	@SuppressWarnings("unchecked")
-	public Promise<Object> load(JSZip zip) {
+	public Promise<Object[]> load(JSZip zip) {
 		List<Promise<Object>> resolved = new ArrayList<>();
 		for(String f : JsObject.keys(zip.files).asList()) {
 			ZipEntry e = zip.file(f);
@@ -136,7 +135,7 @@ public class ProjectFile implements IProject {
 				}));
 			}
 		}
-		return Promise.all(resolved.toArray(new Promise[0]));
+		return Promise.all(Js.cast(resolved.toArray(new Promise[0])));
 	}
 
 	public CompletableFuture<Void> save(File file) {

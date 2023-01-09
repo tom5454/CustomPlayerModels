@@ -21,6 +21,7 @@ import com.tom.cpm.blockbench.proxy.Project;
 import com.tom.cpm.blockbench.proxy.Texture;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec2;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
+import com.tom.cpm.blockbench.util.BBPartValues;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
@@ -90,7 +91,7 @@ public class BlockbenchImport {
 
 		for (ModelElement me : editor.elements) {
 			VanillaModelPart part = (VanillaModelPart) me.typeData;
-			PartValues pv = part.getDefaultSize(editor.skinType);
+			PartValues pv = part instanceof RootModelType ? BBParts.getPart((RootModelType) part) : part.getDefaultSize(editor.skinType);
 			Vec3f pos = pv.getPos().add(me.pos);
 			Vec3f rot = me.rotation;
 			if(part.getCopyFrom() != null) {
@@ -99,6 +100,8 @@ public class BlockbenchImport {
 					pos = pos.add(c.pos);
 					rot = rot.add(c.rotation);
 				}
+			} else if(pv instanceof BBPartValues) {
+				rot = rot.add(((BBPartValues)pv).getRotation());
 			}
 			String name = part.getName();
 			if(me.duplicated) {
@@ -184,6 +187,16 @@ public class BlockbenchImport {
 				}
 			}
 			if(hasTex)pluginDt.put("tex", ant);
+		}
+		if(editor.description != null) {
+			Map<String, Object> desc = new HashMap<>();
+			desc.put("name", editor.description.name);
+			desc.put("desc", editor.description.desc);
+			desc.put("zoom", editor.description.camera.camDist);
+			desc.put("look", editor.description.camera.look.toMap());
+			desc.put("pos", editor.description.camera.position.toMap());
+			desc.put("copyProt", editor.description.copyProtection.name().toLowerCase(Locale.ROOT));
+			pluginDt.put("desc", desc);
 		}
 
 		if(!pluginDt.isEmpty()) {
@@ -424,7 +437,7 @@ public class BlockbenchImport {
 		boxToPFUV(cube, 1, 1, 1, 1, mul);
 	}
 
-	private static void boxToPFUV(Cube cube, int texSc, float scX, float scY, float scZ, UVMul mul) {
+	public static void boxToPFUV(Cube cube, int texSc, float scX, float scY, float scZ, UVMul mul) {
 		Vec3f d = cube.to.toVecF().sub(cube.from.toVecF()).mul(texSc);
 		d.mul(scX == 0 ? 1 : 1f / scX, scY == 0 ? 1 : 1f / scY, scZ == 0 ? 1 : 1f / scZ);
 		float dx = ProjectConvert.ceil(d.x);
@@ -460,8 +473,8 @@ public class BlockbenchImport {
 		cube.autouv = 0;
 	}
 
-	private static class UVMul {
-		private float x = 1, y = 1;
+	public static class UVMul {
+		public float x = 1, y = 1;
 
 		private boolean needsPF() {
 			return x != 1 || y != 1;

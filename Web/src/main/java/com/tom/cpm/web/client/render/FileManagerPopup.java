@@ -9,6 +9,7 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.web.client.FS;
+import com.tom.cpm.web.client.LocalStorageFS;
 import com.tom.cpm.web.client.Stylesheet;
 import com.tom.cpm.web.client.java.io.FileNotFoundException;
 import com.tom.cpm.web.client.util.JSZip;
@@ -36,10 +37,12 @@ import jsinterop.base.Js;
 
 public class FileManagerPopup extends PopupPanel {
 	private IFramePanel ifrm;
+	private LocalStorageFS fs;
 
 	@SuppressWarnings("unchecked")
-	public FileManagerPopup(IGui gui) {
+	public FileManagerPopup(IGui gui, LocalStorageFS lfs) {
 		super(gui);
+		this.fs = lfs;
 		Box w = gui.getFrame().getBounds();
 		setBounds(new Box(0, 0, w.w / 3 * 2, w.h / 3 * 2));
 
@@ -154,7 +157,7 @@ public class FileManagerPopup extends PopupPanel {
 					if(!name.isEmpty()) {
 						String np = path.value + "/" + name;
 						if(np.startsWith("//"))np = np.substring(1);
-						if(FS.exists(np)) {
+						if(fs.exists(np)) {
 							divP.innerHTML = "<div style=\"padding: 10;\"><h1>" + gui.i18nFormat("web-label.filemanager.fileExists") + "</h1>"
 									+ "<button id=\"fileExistOk\">" + gui.i18nFormat("button.cpm.ok") + "</button>"
 									+ "</div>";
@@ -165,7 +168,7 @@ public class FileManagerPopup extends PopupPanel {
 							};
 							return null;
 						}
-						FS.mkdir(np);
+						fs.mkdir(np);
 						initFS();
 					}
 					div.remove();
@@ -184,7 +187,7 @@ public class FileManagerPopup extends PopupPanel {
 					exportZip(zip, path.value);
 					zip.generateAsync(ZipWriteProperties.make()).
 					then(blob -> {
-						FS.saveAs(blob, "cpm_fs.zip");
+						LocalStorageFS.saveAs(blob, "cpm_fs.zip");
 						return null;
 					});
 				} catch (FileNotFoundException e) {
@@ -197,9 +200,9 @@ public class FileManagerPopup extends PopupPanel {
 	}
 
 	private void exportZip(JSZip zip, String path) throws FileNotFoundException {
-		for(String f : FS.list(path)) {
+		for(String f : fs.list(path)) {
 			String[] sp = f.split("/");
-			if(FS.isDir(f)) {
+			if(fs.isDir(f)) {
 				exportZip(zip.folder(sp[sp.length - 1]), f);
 			} else {
 				zip.file(sp[sp.length - 1], FS.getContent(f), ZipFileProperties.make());
@@ -240,7 +243,7 @@ public class FileManagerPopup extends PopupPanel {
 		String filePath = path.value + "/" + file.name;
 		if(filePath.startsWith("//"))filePath = filePath.substring(1);
 		Promise<Void> process;
-		if(FS.exists(filePath)) {
+		if(fs.exists(filePath)) {
 			process = new Promise<>((res, rej) -> {
 				openPopup("<div style=\"padding: 10;\"><h1>" + gui.i18nFormat("label.cpm.overwrite") + "</h1>"
 						+ "<p>" + file.name + "</p>"
@@ -299,10 +302,10 @@ public class FileManagerPopup extends PopupPanel {
 		HTMLDivElement fl = Js.uncheckedCast(doc.getElementById("fileList"));
 		HTMLInputElement path = Js.uncheckedCast(doc.getElementById("path"));
 		fl.innerHTML = "";
-		String[] files = FS.list(path.value);
+		String[] files = fs.list(path.value);
 		Arrays.sort(files, (a, b) -> {
-			boolean dirA = FS.isDir(a);
-			boolean dirB = FS.isDir(b);
+			boolean dirA = fs.isDir(a);
+			boolean dirB = fs.isDir(b);
 
 			if(dirA && !dirB)return -1;
 			else if(!dirA && dirB)return 1;
@@ -328,7 +331,7 @@ public class FileManagerPopup extends PopupPanel {
 			String[] sp = name.split("/");
 			Element ent = doc.createElement("p");
 			UUID uuid = UUID.randomUUID();
-			if(FS.isDir(name)) {
+			if(fs.isDir(name)) {
 				ent.innerHTML = "<a href=\"javascript:void(0)\" id=\"o-" + uuid + "\"><span class=\"material-icons\" style='vertical-align:middle;'>folder</span> " + sp[sp.length - 1] + "</a> <button id=\"d-" + uuid + "\"><span class=\"material-icons\" style='vertical-align:middle;'>delete</span></button>";
 			} else {
 				String type = "insert_drive_file";
@@ -347,7 +350,7 @@ public class FileManagerPopup extends PopupPanel {
 				HTMLDivElement div = Js.uncheckedCast(doc.getElementById("popupBg"));
 				btnOk.onclick = ___ -> {
 					div.remove();
-					FS.deleteFile(name);
+					fs.deleteFile(name);
 					initFS();
 					return null;
 				};
@@ -358,13 +361,13 @@ public class FileManagerPopup extends PopupPanel {
 				return null;
 			};
 			doc.getElementById("o-" + uuid).onclick = __ -> {
-				if(FS.isDir(name)) {
+				if(fs.isDir(name)) {
 					openDir(name);
 				} else {
 					String[] sp2 = name.split("/");
 					FS.getContentFuture(name).
 					then(v -> v.blob()).then(b -> {
-						FS.saveAs(b, sp2[sp2.length - 1]);
+						LocalStorageFS.saveAs(b, sp2[sp2.length - 1]);
 						return null;
 					});
 				}

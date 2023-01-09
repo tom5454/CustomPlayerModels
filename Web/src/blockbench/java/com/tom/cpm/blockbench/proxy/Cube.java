@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import com.tom.cpl.util.Direction;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec2;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
+import com.tom.cpm.blockbench.proxy.three.ThreeMesh;
 import com.tom.ugwt.client.JsArrayE;
 
 import jsinterop.annotations.JsOverlay;
@@ -24,6 +25,8 @@ public class Cube extends OutlinerElement {
 	public float inflate;
 	public static JsArrayE<Cube> all;
 
+	public ThreeMesh mesh;
+
 	@JsProperty(name = "cpm_glow")
 	public boolean glow;
 
@@ -32,6 +35,8 @@ public class Cube extends OutlinerElement {
 
 	@JsProperty(name = "cpm_extrude")
 	public boolean extrude;
+
+	public static NodePreviewController preview_controller;
 
 	public Cube(CubeProperties ctr) {}
 

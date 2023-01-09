@@ -2,7 +2,6 @@ package com.tom.cpm.web.client.render;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,9 +211,10 @@ public class RenderSystem implements RetroGLAccess<String> {
 						f.add(e.dataTransfer.files.getAt(i));
 					}
 				}
-				Promise<File[]> p = Promise.all(f.stream().map(RenderSystem::mount).toArray(Promise[]::new));
+				Promise<JsArray<File>> p = Promise.all(f.stream().map(FS::mount).toArray(Promise[]::new));
 				p.then(fs -> {
-					handler.filesDropped(Arrays.asList(fs));
+					List<File> files = fs.asList();
+					withContext(() -> handler.filesDropped(files));
 					return null;
 				});
 			}, true);
@@ -232,10 +232,6 @@ public class RenderSystem implements RetroGLAccess<String> {
 
 			return null;
 		}));
-	}
-
-	public static Promise<File> mount(elemental2.dom.File file) {
-		return FS.mount(file).then(v -> Promise.resolve(new File("/mnt/" + file.name)));
 	}
 
 	public static void bindEventListeners(EventTarget l, boolean registerRemove) {
@@ -1237,21 +1233,34 @@ public class RenderSystem implements RetroGLAccess<String> {
 		return window;
 	}
 
+	private static boolean setCtx;
 	public static void withContext(Runnable r) {
-		try {
-			UGWTContext.setContext(window);
+		if(setCtx) {
 			r.run();
-		} finally {
-			UGWTContext.resetContext();
+		} else {
+			try {
+				UGWTContext.setContext(window);
+				setCtx = true;
+				r.run();
+			} finally {
+				UGWTContext.resetContext();
+				setCtx = false;
+			}
 		}
 	}
 
 	public static <R> R withContext(Supplier<R> r) {
-		try {
-			UGWTContext.setContext(window);
+		if(setCtx) {
 			return r.get();
-		} finally {
-			UGWTContext.resetContext();
+		} else {
+			try {
+				UGWTContext.setContext(window);
+				setCtx = true;
+				return r.get();
+			} finally {
+				UGWTContext.resetContext();
+				setCtx = false;
+			}
 		}
 	}
 

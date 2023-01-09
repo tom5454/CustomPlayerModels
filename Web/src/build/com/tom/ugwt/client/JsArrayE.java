@@ -6,6 +6,7 @@ import elemental2.core.JsArray;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
 
 @JsType(isNative = true, name = "Array", namespace = JsPackage.GLOBAL)
 public class JsArrayE<E> extends JsArray<E> {
@@ -16,7 +17,7 @@ public class JsArrayE<E> extends JsArray<E> {
 	}
 
 	@JsOverlay
-	public final void forEach(Consumer<E> f) {
+	public final void forEach(Consumer<? super E> f) {
 		forEach((e, __, ___) -> {
 			f.accept(e);
 			return null;
@@ -34,5 +35,10 @@ public class JsArrayE<E> extends JsArray<E> {
 			f.accept(e);
 			return null;
 		});
+	}
+
+	@JsOverlay
+	public final E[] array() {
+		return Js.uncheckedCast(this);
 	}
 }

@@ -495,19 +495,19 @@ public class Editor {
 
 	public CompletableFuture<Void> save(File file) {
 		setInfoMsg.accept(Pair.of(200000, gui().i18nFormat("tooltip.cpm.saving", file.getName())));
-		return save0(file).thenRun(() -> {
+		return save0(file).thenRunAsync(() -> {
 			this.file = file;
 			dirty = false;
 			autoSaveDirty = false;
 			setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.saveSuccess", file.getName())));
 			updateGui();
-		});
+		}, gui()::executeLater);
 	}
 
 	public CompletableFuture<Void> load(File file) {
 		setInfoMsg.accept(Pair.of(200000, gui().i18nFormat("tooltip.cpm.loading", file.getName())));
 		loadDefaultPlayerModel();
-		return project.load(file).thenCompose(v -> {
+		return project.load(file).thenComposeAsync(v -> {
 			try {
 				ProjectIO.loadProject(this, project);
 			} catch (Exception e) {
@@ -521,7 +521,7 @@ public class Editor {
 			updateGui();
 			setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.loadSuccess", file.getName())));
 			return CompletableFuture.completedFuture(null);
-		});
+		}, gui()::executeLater);
 	}
 
 	public void reloadSkin() {
@@ -533,7 +533,7 @@ public class Editor {
 	}
 
 	public void reloadSkin(ActionBuilder ab, ETextures tex, File file) {
-		Image.loadFrom(file).thenAccept(img -> {
+		Image.loadFrom(file).thenAcceptAsync(img -> {
 			if(img.getWidth() > 8192 || img.getHeight() > 8192) {
 				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", frame.getGui().i18nFormat("label.cpm.tex_size_too_big", 8192))));
 				return;
@@ -560,7 +560,7 @@ public class Editor {
 				tex.restitchTexture();
 			}
 			setSkinEdited.accept(true);
-		}).exceptionally(e -> {
+		}, gui()::executeLater).exceptionally(e -> {
 			Log.error("Failed to load image", e);
 			frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
 			return null;

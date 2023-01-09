@@ -1,5 +1,6 @@
 package com.tom.cpm.blockbench.proxy;
 
+import com.tom.cpm.blockbench.proxy.three.ThreeMaterial;
 import com.tom.ugwt.client.JsArrayE;
 
 import jsinterop.annotations.JsPackage;
@@ -15,6 +16,8 @@ public class Texture {
 
 	public native Texture fromDataURL(String url);
 	public native void add(boolean undo);
+
+	public native ThreeMaterial getMaterial();
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class TextureProperties {

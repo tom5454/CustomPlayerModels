@@ -398,7 +398,8 @@ public class GuiImpl implements IGui, EventHandler {
 		}
 
 		public void changed() {
-			if(eventListener != null && !settingText && enabled)eventListener.run();
+			if(eventListener != null && !settingText && enabled)
+				RenderSystem.withContext(eventListener);
 		}
 
 		@Override

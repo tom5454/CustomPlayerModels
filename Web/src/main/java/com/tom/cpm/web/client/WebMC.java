@@ -75,12 +75,16 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		instance = this;
 		this.canExit = canExit;
 
-		platform = Java.getPlatform() + " CPM " + System.getProperty("cpm.version");
-		root = new File("/");
+		platform = buildPlatformString();
+		root = new File(FS.getWorkDir());
 
 		profile = new GameProfile(UUID.randomUUID(), "Web");
 		this.config = config;
 		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId, GameProfile::getName);
+	}
+
+	protected String buildPlatformString() {
+		return Java.getPlatform() + " CPM " + System.getProperty("cpm.version");
 	}
 
 	public static void setProfile(GameProfile profile) {
@@ -163,7 +167,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	@Override
 	public void executeLater(Runnable r) {
 		new Promise<>((res, rej) -> {
-			r.run();
+			RenderSystem.withContext(r);
 			res.onInvoke(Js.undefined());
 		});
 	}
@@ -302,7 +306,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 				sp.getDisplay().getElements().remove(sp.getDisplay().getElements().size() - 1);
 			}
 			if(FS.needFileManager()) {
-				pp.addButton(panel.getGui().i18nFormat("web-button.fileManager"), () -> panel.getGui().getFrame().openPopup(new FileManagerPopup(panel.getGui())));
+				pp.addButton(panel.getGui().i18nFormat("web-button.fileManager"), () -> panel.getGui().getFrame().openPopup(new FileManagerPopup(panel.getGui(), LocalStorageFS.getInstance())));
 			}
 		}
 		break;

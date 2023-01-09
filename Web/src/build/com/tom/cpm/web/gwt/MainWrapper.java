@@ -2,6 +2,7 @@ package com.tom.cpm.web.gwt;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,28 @@ public class MainWrapper {
 			mode = args[2];
 			build = true;
 			if(args[0].equals("--buildDebug"))debug = true;
+		} else if(args.length > 0 && args[0].equals("--cpFix")) {
+			String[] cp = System.getProperty("java.class.path").split(";");
+			Map<String, Integer> sortMap = new HashMap<>();
+			for (int i = 0; i < cp.length; i++) {
+				if(cp[i].endsWith(".jar"))
+					sortMap.put(cp[i], i + 100);
+				else
+					sortMap.put(cp[i], i);
+			}
+			String ncp = Arrays.stream(cp).sorted(Comparator.comparingInt(sortMap::get)).collect(Collectors.joining(";"));
+			String[] nargs = new String[] {"java", "-cp", ncp, "com.tom.cpm.web.gwt.MainWrapper"};
+			ProcessBuilder pb = new ProcessBuilder(nargs);
+			pb.directory(new File("."));
+			pb.inheritIO();
+			System.out.println("Launching classpath fixed GWT runtime");
+			try {
+				int i = pb.start().waitFor();
+				System.out.println("GWT exit: " + i);
+			} catch (InterruptedException | IOException e) {
+				e.printStackTrace();
+			}
+			return;
 		} else {
 			build = false;
 		}
@@ -49,7 +72,7 @@ public class MainWrapper {
 			if(mode.equals("Blockbench")) {
 				a.add("cpm.webApiEndpoint=https://tom5454.com/cpm/api");
 				a.add("-setProperty");
-				a.add("cpm.pluginId=cpm_plugin" + args[3]);
+				a.add("cpm.pluginId=cpm_plugin");
 			} else {
 				a.add("cpm.webApiEndpoint=/cpm/api");
 			}

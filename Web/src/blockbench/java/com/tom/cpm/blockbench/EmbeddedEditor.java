@@ -2,6 +2,9 @@ package com.tom.cpm.blockbench;
 
 import java.util.function.Consumer;
 
+import com.tom.cpm.blockbench.proxy.electron.Electron;
+import com.tom.cpm.blockbench.proxy.electron.ElectronApp.ElectronEventHandler;
+import com.tom.cpm.blockbench.proxy.electron.ElectronApp.ElectronWindow;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.EditorGui;
@@ -14,9 +17,6 @@ import com.tom.cpm.web.client.render.RenderSystem.WindowEx;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLIFrameElement;
-import jsinterop.annotations.JsFunction;
-import jsinterop.annotations.JsPackage;
-import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
 
 public class EmbeddedEditor {
@@ -160,29 +160,6 @@ public class EmbeddedEditor {
 		if(openListener != null && g != null)openListener.accept(g.getEditor());
 		openListener = null;
 		return gui;
-	}
-
-	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_electron_$$")
-	private static class Electron {
-		public static ElectronApp app;
-	}
-
-	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "")
-	private static class ElectronApp {
-		public native void on(String event, ElectronEventHandler h);
-		public native void removeListener(String event, ElectronEventHandler h);
-	}
-
-	@JsFunction
-	public static interface ElectronEventHandler {
-		void onEvent(Object ev, ElectronWindow w);
-	}
-
-	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
-	private static class ElectronWindow {
-		public native void removeMenu();
-		public native void openDevTools();
-		public native void focus();
 	}
 
 	/*@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")

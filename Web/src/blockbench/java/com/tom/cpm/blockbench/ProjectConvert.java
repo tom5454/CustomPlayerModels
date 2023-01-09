@@ -125,7 +125,7 @@ public class ProjectConvert {
 					DomGlobal.console.error(ExceptionUtil.getStackTrace((Throwable) err));
 				else
 					DomGlobal.console.log(err);
-				errorDialog.lines = new String[] {"Error while importing:<br>", err.toString(), "<br>Please report this on GitHub"};
+				errorDialog.lines = new String[] {"Error while exporting:<br>", err.toString(), "<br>Please report this on GitHub"};
 				errorDialog.show();
 				return null;
 			});

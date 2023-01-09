@@ -16,6 +16,9 @@ public class Group extends OutlinerNode {
 	@JsOverlay
 	public static final Group ROOT = Js.uncheckedCast("root");
 
+	public static Group selected;
+	public static Group[] all;
+
 	public boolean isOpen;
 	public String name;
 	public JsVec3 origin;

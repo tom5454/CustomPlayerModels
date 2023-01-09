@@ -5,7 +5,6 @@ import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Blockbench.WriteProperties;
 import com.tom.cpm.blockbench.proxy.Codec;
 import com.tom.cpm.blockbench.proxy.Cube;
-import com.tom.cpm.blockbench.proxy.FileSystem;
 import com.tom.cpm.blockbench.proxy.Global;
 import com.tom.cpm.blockbench.proxy.Group;
 import com.tom.cpm.blockbench.proxy.ModelFormat;
@@ -37,7 +36,7 @@ public class CPMCodec {
 		prop.load_filter.extensions = new String[] {"cpmproject"};
 		prop.export = ProjectConvert::export;
 		prop.write = (content, path) -> {
-			if(FileSystem.existsSync(path) && codec.overwrite) {
+			if(BlockBenchFS.fs.existsSync(path) && codec.overwrite) {
 				codec.overwrite(content, path, codec::afterSave);
 			} else {
 				WriteProperties pr = new WriteProperties();
@@ -102,12 +101,20 @@ public class CPMCodec {
 					BBActions.glowButton.value = ((Cube)Outliner.selected[0]).glow;
 					BBActions.glowButton.updateEnabledState();
 				}
-				if(Outliner.selected.length == 1 && Outliner.selected[0] instanceof Group) {
-					BBActions.hiddenButton.value = ((Group)Outliner.selected[0]).hidden;
+				if(Group.selected != null) {
+					BBActions.hiddenButton.value = Group.selected.hidden;
 					BBActions.hiddenButton.updateEnabledState();
 				}
 			}
 		});
+
+		/*PluginStart.addEventListener(Cube.preview_controller, "update_geometry", dt -> {
+			OutlinerElement elem = NodePreviewEvent.getElement(dt);
+			if(elem instanceof Cube) {
+				Cube c = (Cube) elem;
+				c.mesh.material = c.glow ? c.mesh.material.getGlow() : c.mesh.material.getNormal();
+			}
+		});*/
 	}
 
 	public static void createProperty(Clazz clz, Type type, String id, String label, Object def, Condition cond) {

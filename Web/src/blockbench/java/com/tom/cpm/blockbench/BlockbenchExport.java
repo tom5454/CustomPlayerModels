@@ -24,6 +24,7 @@ import com.tom.cpm.blockbench.proxy.Group;
 import com.tom.cpm.blockbench.proxy.Group.GroupProperties;
 import com.tom.cpm.blockbench.proxy.Project;
 import com.tom.cpm.blockbench.proxy.Texture;
+import com.tom.cpm.blockbench.util.BBPartValues;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.CopyTransformEffect;
 import com.tom.cpm.shared.editor.ETextures;
@@ -37,6 +38,8 @@ import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.project.JsonList;
 import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
+import com.tom.cpm.shared.editor.util.ModelDescription;
+import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.model.PartPosition;
 import com.tom.cpm.shared.model.PartValues;
@@ -220,13 +223,17 @@ public class BlockbenchExport {
 			me.rotation.x = -group.rotation.x;
 			me.rotation.y = -group.rotation.y;
 			me.rotation.z = group.rotation.z;
-			PartValues pv = part.getDefaultSize(SkinType.DEFAULT);
+			PartValues pv;
+			if(part instanceof RootModelType)pv = BBParts.getPart((RootModelType) part);
+			else pv = part.getDefaultSize(SkinType.DEFAULT);
 			o = o.sub(pv.getPos());
 			VanillaModelPart p = part.getCopyFrom();
 			if(p != null) {
 				ModelElement e = getPart(p);
 				me.rotation = me.rotation.sub(e.rotation);
 				o = o.sub(e.pos);
+			} else if(pv instanceof BBPartValues) {
+				me.rotation = me.rotation.sub(((BBPartValues)pv).getRotation());
 			}
 			me.pos = o;
 			modelTree.put(group.uuid, new CPMElem(me));
@@ -357,6 +364,16 @@ public class BlockbenchExport {
 						list.forEachMap(elem -> eTex.animatedTexs.add(new AnimatedTex(editor, tx, elem)));
 					}
 				}
+			}
+			if(s.containsKey("desc")) {
+				JsonMap desc = s.getMap("desc");
+				editor.description = new ModelDescription();
+				editor.description.name = desc.getString("name");
+				editor.description.desc = desc.getString("desc");
+				editor.description.camera.camDist = desc.getFloat("zoom");
+				editor.description.camera.look = new Vec3f(desc.getMap("look"), editor.description.camera.look);
+				editor.description.camera.position = new Vec3f(desc.getMap("pos"), editor.description.camera.position);
+				editor.description.copyProtection = CopyProtection.lookup(desc.getString("copyProt", "normal"));
 			}
 		}
 		editor.hideHeadIfSkull = Project.hideHeadIfSkull;

@@ -2,53 +2,44 @@ package com.tom.cpm.web.client.java.io;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.tom.cpm.web.client.FS;
+import com.tom.cpm.web.client.IFile;
 
 public class File {
-	private String[] path;
+	private IFile impl;
 
 	public File(File file, String name) {
-		List<String> l = new ArrayList<>();
-		l.addAll(Arrays.asList(file.path));
-		l.addAll(Arrays.asList(name.split("/")));
-		l.removeIf(f -> f.isEmpty() || f.equals("."));
-		path = l.toArray(new String[0]);
+		impl = FS.getImpl(file.impl, name);
 	}
 
 	public File(String name) {
-		if(name.startsWith("/"))name = name.substring(1);
-		path = name.split("/");
+		impl = FS.getImpl(name);
 	}
 
-	private File(String[] path) {
-		this.path = path;
+	private File(IFile impl) {
+		this.impl = impl;
 	}
 
 	public String getName() {
-		return path.length == 0 ? "" : path[path.length - 1];
+		return impl.getName();
 	}
 
 	public boolean exists() {
-		return FS.exists(getAbsolutePath());
+		return impl.exists();
 	}
 
 	public File getParentFile() {
-		return path.length > 1 ? new File(Arrays.copyOf(path, path.length - 1)) : new File("/");
+		return new File(impl.getParentFile());
 	}
 
 	public void mkdirs() {
-		if(path.length < 2)return;
-		for (int i = 1; i <= path.length; i++) {
-			FS.mkdir("/" + Arrays.stream(path, 0, i).collect(Collectors.joining("/")));
-		}
+		impl.mkdirs();
 	}
 
 	public File[] listFiles(FilenameFilter filter) {
-		String[] l = FS.list(getAbsolutePath());
+		String[] l = impl.list();
 		List<File> ret = new ArrayList<>();
 		for (int i = 0; i < l.length; i++) {
 			File f = new File(l[i]);
@@ -60,7 +51,7 @@ public class File {
 	}
 
 	public String[] list(FilenameFilter filter) {
-		String[] l = FS.list(getAbsolutePath());
+		String[] l = impl.list();
 		List<String> ret = new ArrayList<>();
 		for (int i = 0; i < l.length; i++) {
 			File f = new File(l[i]);
@@ -72,20 +63,11 @@ public class File {
 	}
 
 	public boolean isDirectory() {
-		return FS.isDir(getAbsolutePath());
+		return impl.isDirectory();
 	}
 
 	public String getAbsolutePath() {
-		List<String> l = new ArrayList<>();
-		for(String pe : path) {
-			if(pe.equals("..")) {
-				if(!l.isEmpty())
-					l.remove(l.size() - 1);
-			} else {
-				l.add(pe);
-			}
-		}
-		return "/" + l.stream().collect(Collectors.joining("/"));
+		return impl.getAbsolutePath();
 	}
 
 	public File getAbsoluteFile() {
@@ -94,10 +76,7 @@ public class File {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(path);
-		return result;
+		return impl.hashCode();
 	}
 
 	@Override
@@ -106,7 +85,7 @@ public class File {
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		File other = (File) obj;
-		if (!Arrays.equals(path, other.path)) return false;
+		if (!impl.equals(other.impl)) return false;
 		return true;
 	}
 
@@ -116,22 +95,22 @@ public class File {
 	}
 
 	public boolean isHidden() {
-		return false;
+		return impl.isHidden();
 	}
 
 	public File getCanonicalFile() throws IOException {
-		return getAbsoluteFile();
+		return new File(impl.getCanonicalPath());
 	}
 
 	public File toPath() {
 		return this;
 	}
-
+	/**Method from Path*/
 	public int getNameCount() {
-		return getAbsolutePath().equals("/") ? 0 : 1;
+		return impl.isRoot() ? 0 : 1;
 	}
 
 	public boolean isFile() {
-		return exists() && !isDirectory();
+		return impl.isFile();
 	}
 }

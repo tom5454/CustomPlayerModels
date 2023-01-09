@@ -11,16 +11,23 @@ public class Undo {
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class UndoData {
-		public OutlinerNode[] elements;
+		public OutlinerElement[] elements;
 		public boolean selection, outliner, uv_mode, uv_only;
 		public Group group;
 		public Texture[] textures;
 		public Object[] animations;
 
 		@JsOverlay
-		public static UndoData make(OutlinerNode... elem) {
+		public static UndoData make(OutlinerElement... elem) {
 			UndoData d = new UndoData();
 			d.elements = elem;
+			return d;
+		}
+
+		@JsOverlay
+		public static UndoData make(Group elem) {
+			UndoData d = new UndoData();
+			d.group = elem;
 			return d;
 		}
 	}

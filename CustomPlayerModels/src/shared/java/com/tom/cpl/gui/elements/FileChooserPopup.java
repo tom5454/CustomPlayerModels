@@ -303,7 +303,7 @@ public class FileChooserPopup extends PopupPanel {
 			f = new CompletableFuture<>();
 			new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.waiting"), gui.i18nFormat("label.cpm.filechooser.waitingForNative"), nc::open, f).start();
 		}
-		f.thenAccept(this::setSelected).exceptionally(ex -> {
+		f.thenAcceptAsync(this::setSelected, gui::executeLater).exceptionally(ex -> {
 			Log.error("Error while opening native file chooser", ex);
 			frm.openPopup(new MessagePopup(frm, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.filechooser.nativeError", ex.getMessage())));
 			return null;

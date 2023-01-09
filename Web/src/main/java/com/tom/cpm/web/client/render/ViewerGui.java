@@ -43,7 +43,7 @@ import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.MojangAPI;
-import com.tom.cpm.web.client.FS;
+import com.tom.cpm.web.client.LocalStorageFS;
 import com.tom.cpm.web.client.PlayerProfile;
 import com.tom.cpm.web.client.PlayerProfile.PlayerInfo;
 import com.tom.cpm.web.client.java.Java;
@@ -152,7 +152,7 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 		{
 			cloneModel(fout -> {
 				DomGlobal.fetch("data:application/octet-binary;base64," + fout.toB64()).then(Response::blob).then(b -> {
-					FS.saveAs(b, "cloned_model.cpmmodel");
+					LocalStorageFS.saveAs(b, "cloned_model.cpmmodel");
 					return null;
 				});
 			}, this::skinErrPopup, true);
@@ -237,7 +237,7 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 			{
 				Map<String, Object> r = new HashMap<>();
 				DomGlobal.fetch("data:application/octet-binary;base64," + skin).then(Response::blob).then(b -> {
-					FS.saveAs(b, "cloned_model.png");
+					LocalStorageFS.saveAs(b, "cloned_model.png");
 					return null;
 				});
 				updateCallback(data, r);

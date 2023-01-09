@@ -12,6 +12,8 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Blockbench_$$")
 public class Blockbench {
 
+	public static String version;
+
 	@JsMethod(name = "import")
 	public static native void import_(ImportProperties pr, CallbackImport cb);
 
