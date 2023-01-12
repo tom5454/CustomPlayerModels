@@ -210,7 +210,6 @@ public class ViewportPanelAnim extends ViewportPanel {
 
 	@Override
 	public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
-		super.render(stack, buf, partialTicks);
 		if(editor.showPreviousFrame.get() && editor.selectedAnim != null && editor.selectedElement != null && editor.selectedAnim.getFrames().size() > 1) {
 			editor.selectedAnim.prevFrame();
 			editor.definition.renderingPanel = this;
@@ -220,5 +219,6 @@ public class ViewportPanelAnim extends ViewportPanel {
 			editor.definition.outlineOnly = false;
 			editor.selectedAnim.nextFrame();
 		}
+		super.render(stack, buf, partialTicks);
 	}
 }

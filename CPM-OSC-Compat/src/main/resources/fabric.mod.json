@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "cpmoscc",
+  "version": "${version}",
+  "name": "CPM OSC Compat",
+  "description": "A Customizable Player Models, OSC/VMC protocol compat mod.",
+  "authors": [
+    "tom5454"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/cpmsvcc",
+    "sources": "https://github.com/tom5454/CustomPlayerModels"
+  },
+  "license": "MIT",
+  "icon": "assets/cpmoscc/icon.png",
+  "environment": "*",
+  "entrypoints": {
+	"client": [
+		"com.tom.cpmoscc.CPMOSCClientFabric"
+	],
+    "cpmapi": [
+    	"com.tom.cpmoscc.CPMOSCPlugin"
+    ]
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+	"cpm": "*"
+  }
+}

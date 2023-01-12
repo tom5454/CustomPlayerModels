@@ -1,0 +1,22 @@
+{
+  "comment.cpm.doNotEdit1": "#########################################################",
+  "comment.cpm.doNotEdit2": "Auto-generated file DO NOT EDIT! See template jsons in the Localization folder of the GitHub Repo.",
+  "comment.cpm.doNotEdit3": "#########################################################",
+  "osc-button.cpmosc.oscSettings": "OSC Settings",
+  "osc-button.cpmosc.oscWizard": "OSC Animation Wizard",
+  "osc-button.cpmosc.copyName": "Copy Name",
+  "osc-button.cpmosc.selectFromInputs": "Select from Existing Inputs",
+  "osc-button.cpmosc.importFromSelected": "Import from Selected Animation",
+  "osc-label.cpmosc.oscPath": "OSC Path:",
+  "osc-label.cpmosc.oscFirstArg": "First Argument:",
+  "osc-label.cpmosc.oscArgId": "Argument ID:",
+  "osc-label.cpmosc.valueRange": "Value Range:",
+  "osc-label.cpmosc.noOscData": "No OSC data was received\\Check your sender program settings\\You may need to restart your sender program\\if you launched it before opening this UI",
+  "osc-label.cpmosc.oscEnable": "OSC Enabled",
+  "osc-label.cpmosc.oscDisabled": "OSC is disabled, please enable it using the checkbox and press save",
+  "osc-label.cpmosc.oscPort": "Port:",
+  "osc-label.cpmosc.oscDebugger": "OSC Debugger",
+  "osc-tooltip.cpmosc.oscSettings": "Open the OSC Settings and Debug Popup",
+  "osc-tooltip.cpmosc.oscWizard": "Generate a new OSC Animation using a wizard",
+  "osc-tooltip.cpmosc.oscFirstArg": "Filter for the first string argument, leave empty for no filter\\Useful for VMC triggers"
+}

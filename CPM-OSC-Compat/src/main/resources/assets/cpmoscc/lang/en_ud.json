@@ -1,0 +1,22 @@
+{
+  "comment.cpm.doNotEdit1": "#########################################################",
+  "comment.cpm.doNotEdit2": "Auto-generated file DO NOT EDIT! See template jsons in the Localization folder of the GitHub Repo.",
+  "comment.cpm.doNotEdit3": "#########################################################",
+  "osc-button.cpmosc.oscSettings": "sbuıʇʇǝS ƆSO",
+  "osc-button.cpmosc.oscWizard": "pɹɐzıM uoıʇɐɯıuⱯ ƆSO",
+  "osc-button.cpmosc.copyName": "ǝɯɐN ʎdoƆ",
+  "osc-button.cpmosc.selectFromInputs": "sʇnduI buıʇsıxƎ ɯoɹɟ ʇɔǝןǝS",
+  "osc-button.cpmosc.importFromSelected": "uoıʇɐɯıuⱯ pǝʇɔǝןǝS ɯoɹɟ ʇɹodɯI",
+  "osc-label.cpmosc.oscPath": ":ɥʇɐԀ ƆSO",
+  "osc-label.cpmosc.oscFirstArg": ":ʇuǝɯnbɹⱯ ʇsɹıℲ",
+  "osc-label.cpmosc.oscArgId": ":ᗡI ʇuǝɯnbɹⱯ",
+  "osc-label.cpmosc.valueRange": ":ǝbuɐᴚ ǝnןɐΛ",
+  "osc-label.cpmosc.noOscData": "I∩ sıɥʇ buıuǝdo ǝɹoɟǝq ʇı pǝɥɔunɐן noʎ ɟı\\ɯɐɹboɹd ɹǝpuǝs ɹnoʎ ʇɹɐʇsǝɹ oʇ pǝǝu ʎɐɯ noʎ\\sbuıʇʇǝs ɯɐɹboɹd ɹǝpuǝs ɹnoʎ ʞɔǝɥƆ\\pǝʌıǝɔǝɹ sɐʍ ɐʇɐp ƆSO oN",
+  "osc-label.cpmosc.oscEnable": "pǝןqɐuƎ ƆSO",
+  "osc-label.cpmosc.oscDisabled": "ǝʌɐs ssǝɹd puɐ xoqʞɔǝɥɔ ǝɥʇ buısn ʇı ǝןqɐuǝ ǝsɐǝןd \u0027pǝןqɐsıp sı ƆSO",
+  "osc-label.cpmosc.oscPort": ":ʇɹoԀ",
+  "osc-label.cpmosc.oscDebugger": "ɹǝbbnqǝᗡ ƆSO",
+  "osc-tooltip.cpmosc.oscSettings": "dndoԀ bnqǝᗡ puɐ sbuıʇʇǝS ƆSO ǝɥʇ uǝdO",
+  "osc-tooltip.cpmosc.oscWizard": "pɹɐzıʍ ɐ buısn uoıʇɐɯıuⱯ ƆSO ʍǝu ɐ ǝʇɐɹǝuǝ⅁",
+  "osc-tooltip.cpmosc.oscFirstArg": "sɹǝbbıɹʇ ƆWΛ ɹoɟ ןnɟǝs∩\\ɹǝʇןıɟ ou ɹoɟ ʎʇdɯǝ ǝʌɐǝן \u0027ʇuǝɯnbɹɐ buıɹʇs ʇsɹıɟ ǝɥʇ ɹoɟ ɹǝʇןıℲ"
+}

@@ -1014,5 +1014,22 @@
   "bb-button.viewInEmbeddedEditor": "UNLOCALIZED: View In Embedded CPM Editor",
   "bb-label.cpmCodecDesc": "UNLOCALIZED: Model for Customizable Player Models mod",
   "bb-label.cpmInfo.export": "UNLOCALIZED: You have to export to Customizable Player Models Project file to use it in-game.",
-  "bb-label.cpmInfo.import": "UNLOCALIZED: Use the Open Customizable Player Models Project option to import an existing project file."
+  "bb-label.cpmInfo.import": "UNLOCALIZED: Use the Open Customizable Player Models Project option to import an existing project file.",
+  "osc-button.cpmosc.oscSettings": "UNLOCALIZED: OSC Settings",
+  "osc-button.cpmosc.oscWizard": "UNLOCALIZED: OSC Animation Wizard",
+  "osc-button.cpmosc.copyName": "UNLOCALIZED: Copy Name",
+  "osc-button.cpmosc.selectFromInputs": "UNLOCALIZED: Select from Existing Inputs",
+  "osc-button.cpmosc.importFromSelected": "UNLOCALIZED: Import from Selected Animation",
+  "osc-label.cpmosc.oscPath": "UNLOCALIZED: OSC Path:",
+  "osc-label.cpmosc.oscFirstArg": "UNLOCALIZED: First Argument:",
+  "osc-label.cpmosc.oscArgId": "UNLOCALIZED: Argument ID:",
+  "osc-label.cpmosc.valueRange": "UNLOCALIZED: Value Range:",
+  "osc-label.cpmosc.noOscData": "UNLOCALIZED: No OSC data was received\\Check your sender program settings\\You may need to restart your sender program\\if you launched it before opening this UI",
+  "osc-label.cpmosc.oscEnable": "UNLOCALIZED: OSC Enabled",
+  "osc-label.cpmosc.oscDisabled": "UNLOCALIZED: OSC is disabled, please enable it using the checkbox and press save",
+  "osc-label.cpmosc.oscPort": "UNLOCALIZED: Port:",
+  "osc-label.cpmosc.oscDebugger": "UNLOCALIZED: OSC Debugger",
+  "osc-tooltip.cpmosc.oscSettings": "UNLOCALIZED: Open the OSC Settings and Debug Popup",
+  "osc-tooltip.cpmosc.oscWizard": "UNLOCALIZED: Generate a new OSC Animation using a wizard",
+  "osc-tooltip.cpmosc.oscFirstArg": "UNLOCALIZED: Filter for the first string argument, leave empty for no filter\\Useful for VMC triggers"
 }

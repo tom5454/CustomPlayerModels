@@ -65,6 +65,15 @@ public class Vectors {
 
 		public native void V3_add(JsVec3 origin);
 		public native boolean allEqual(int i);
+
+		@JsOverlay
+		public final boolean hasValues(int v) {
+			int i = 0;
+			if(x != 0)i++;
+			if(y != 0)i++;
+			if(z != 0)i++;
+			return i > v;
+		}
 	}
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Array_$$")

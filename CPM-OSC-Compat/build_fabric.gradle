@@ -1,0 +1,79 @@
+plugins {
+    id 'fabric-loom' version '0.11-SNAPSHOT'
+}
+
+sourceCompatibility = JavaLanguageVersion.of(8)
+targetCompatibility = JavaLanguageVersion.of(8)
+
+project.buildDir = '/build_fabric'
+
+version = mod_version
+group = 'com.tom5454' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'cpm-osc-compat'
+
+repositories {
+    mavenCentral()
+    maven {
+		name = "tom5454 maven"
+		url = "https://raw.githubusercontent.com/tom5454/maven/main"
+	}
+    mavenLocal()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+	modRuntimeOnly "com.tom5454.cpm:CustomPlayerModels-1.18:${project.cpm_runtime_version}"
+	
+	compileOnly "com.illposed.osc:javaosc-core:0.8"
+	
+	include "org.slf4j:slf4j-api:1.8.0-beta4"
+	include "org.slf4j:slf4j-log4j12:1.7.25"
+}
+
+processResources {
+    inputs.property "version", version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": mod_version
+    }
+    
+    filesMatching("**/*.toml") {
+        expand 'mod_version': mod_version
+    }
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "src/shared/java"
+		}
+		resources {
+			srcDir "src/shared/resources"
+		}
+	}
+    main {
+        java {
+            srcDir 'src/main/java'
+            exclude '**/CPMOSCClientForge.java'
+            exclude '**/CPMOSCMod.java'
+       }
+   }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 8
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}

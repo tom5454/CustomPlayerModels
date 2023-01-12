@@ -160,7 +160,7 @@ public class BlockbenchExport {
 				if(!cube.rotation.allEqual(0)) {
 					Group sub = subgroups.stream().filter(s -> {
 						if(!s.rotation.equals(cube.rotation))return false;
-						if(s.rotation.filter((n, __, ___) -> n).length > 1) {
+						if(s.rotation.hasValues(1)) {
 							return s.origin.equals(cube.origin);
 						} else {
 							if(s.rotation.x == 0 && s.origin.x != cube.origin.x)return false;

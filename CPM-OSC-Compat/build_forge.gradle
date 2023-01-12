@@ -1,0 +1,258 @@
+plugins {
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+project.buildDir = '/build_forge'
+
+version = mod_version
+group = 'com.tom5454' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'cpm-osc-compat'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+minecraft {
+    // The mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: "official", version: "1.16.5"
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            
+            property "mixin.debug.export", "true"
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                cpmoscc {
+                    source sourceSets.main
+                }
+            }
+            
+            property 'mixin.env.remapRefMap', 'true'
+			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+			
+			property 'cpm.debug', 'true'
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                cpmoscc {
+                    source sourceSets.main
+                }
+            }
+            
+            property 'mixin.env.remapRefMap', 'true'
+			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', 'cpmoscc', '--all', '--output', file('src/generated/resources/')
+
+            mods {
+                cpmoscc {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    maven { url "https://dvs1.progwml6.com/files/maven" }
+    maven { // TOP
+        name 'tterrag maven'
+        url "https://maven.tterrag.com/"
+    }
+    maven { // McJtyLib
+        url "https://maven.k-4u.nl"
+    }
+	maven { url 'https://jitpack.io' }
+	maven {
+		name = "tom5454 maven"
+		url = "https://raw.githubusercontent.com/tom5454/maven/main"
+	}
+}
+
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
+
+dependencies {
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
+
+    // You may put jars on which you depend on in ./libs or you may define them like so..
+    // compile "some.group:artifact:version:classifier"
+    // compile "some.group:artifact:version"
+
+    // Real examples
+    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
+    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // These dependencies get remapped to your current MCP mappings
+    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // For more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+	// compile against the JEI API but do not include it at runtime
+  	compileOnly fg.deobf("mezz.jei:jei-1.16.5:7.7.1.145:api")
+  	// at runtime, use the full JEI jar
+  	runtimeOnly fg.deobf("mezz.jei:jei-1.16.5:7.7.1.145")
+  	
+  	// compile against the TOP API but do not include it at runtime
+  	compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22:api")
+  	// at runtime, use the full TOP jar
+  	runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22")
+  	
+  	compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+  	runtimeOnly fg.deobf("com.tom5454.cpm:CustomPlayerModels-1.16:${project.cpm_runtime_version}")
+  	
+  	compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.1.0-1.16.5-forge")
+  	
+  	shade "com.illposed.osc:javaosc-core:0.8"
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "src/shared/java"
+		}
+		resources {
+			srcDir "src/shared/resources"
+		}
+	}
+	main {
+        java {
+            srcDir 'src/main/java'
+            exclude '**/CPMOSCClientFabric.java'
+       }
+   }
+}
+
+// Example for how to get properties into the manifest for reading by the runtime..
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": project.name,
+            "Specification-Vendor": "tom5454",
+            "Specification-Version": "1", // We are version 1 of ourselves
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" : "tom5454",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+        ])
+    }
+}
+
+
+// Example configuration to allow publishing using the maven-publish task
+// This is the preferred method to reobfuscate your jar file
+tasks.named('jar', Jar).configure {
+    finalizedBy 'reobfJar'
+    archiveClassifier.set('lite')
+}
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+//publish.dependsOn('reobfJar')
+
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar).configure {
+	configurations = [project.configurations.shade]
+	archiveClassifier.set('')
+  
+	relocate 'com.illposed.osc', 'com.tom.cpmoscc.external.com.illposed.osc'
+  
+	exclude 'log4j-dev.properties'
+
+	dependencies {
+		exclude(dependency('log4j:log4j:'))
+		exclude(dependency(':slf4j-api:'))
+		exclude(dependency(':slf4j-ext:'))
+		exclude(dependency(':slf4j-log4j12:'))
+	}
+	
+	finalizedBy 'reobfShadowJar'
+}
+
+tasks.named('assemble') {
+    dependsOn shadowJar
+}
+
+reobf {
+    shadowJar {}
+}
+
+// Without these two, Gradle will issue warnings about task inputs from other tasks outputs without declaring dependencies
+tasks.named('reobfShadowJar') { dependsOn tasks.named('jar') }
+tasks.named('shadowJar') { dependsOn 'reobfJar' }
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	duplicatesStrategy = "exclude"
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+processResources {
+    inputs.property "version", version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": mod_version
+    }
+    
+    filesMatching("**/*.toml") {
+        expand 'mod_version': mod_version
+    }
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
