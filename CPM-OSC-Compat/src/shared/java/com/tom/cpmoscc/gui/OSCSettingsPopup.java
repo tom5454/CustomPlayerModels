@@ -49,6 +49,7 @@ public class OSCSettingsPopup extends PopupPanel {
 		Button save = new Button(gui, gui.i18nFormat("button.cpm.saveCfg"), () -> {
 			ModConfig.getCommonConfig().setBoolean(CPMOSC.OSC_ENABLE, chbxEn.isSelected());
 			ModConfig.getCommonConfig().setInt(CPMOSC.OSC_PORT_KEY, (int) oscPort.getValue());
+			ModConfig.getCommonConfig().save();
 			CPMOSC.resetOsc();
 			data.reset();
 		});

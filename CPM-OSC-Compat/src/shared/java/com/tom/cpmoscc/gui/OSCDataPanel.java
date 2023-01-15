@@ -74,7 +74,7 @@ public class OSCDataPanel extends Panel implements OSCListener {
 					if(select != null && event.isHovered(b)) {
 						update = 64;
 						hoveredBox = b;
-						hoveredChannel = new OSCChannel(key, i, 0, 1);
+						hoveredChannel = new OSCChannel(key, 0, 0, 1);
 					}
 					gui.drawBox(x + 1, y + 1, SIZE, SIZE, update << 24 | 0xffffff);
 				} else {
@@ -104,7 +104,7 @@ public class OSCDataPanel extends Panel implements OSCListener {
 							if(select != null && event.isHovered(b)) {
 								update = 64;
 								hoveredBox = b;
-								hoveredChannel = new OSCChannel(key, i, oscValue.min, oscValue.max);
+								hoveredChannel = new OSCChannel(key, j, oscValue.min, oscValue.max);
 							}
 							gui.drawBox(x + 2, y + 2 + j * h, 126, h, update << 24 | 0xffffff);
 
