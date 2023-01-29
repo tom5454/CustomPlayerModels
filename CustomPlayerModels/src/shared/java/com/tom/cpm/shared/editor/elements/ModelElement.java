@@ -328,7 +328,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
-		if(showInEditor || editor.selectedElement == this)
+		if(texture && (showInEditor || editor.selectedElement == this))
 			TextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys, TextureDisplay.getAlphaForBox(editor.selectedElement == this));
 	}
 
@@ -384,18 +384,20 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setHiddenEffect.accept(this.hidden);
 			if(itemRenderer == null) {
 				editor.setGlow.accept(this.glow);
-				editor.setReColor.accept(this.recolor);
-				if(faceUV == null) {
-					editor.setSingleTex.accept(this.singleTex);
-					editor.setExtrudeEffect.accept(this.extrude);
-				} else {
-					editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir.get()));
-					editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir.get()));
-					editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir.get()));
-					editor.setSingleTex.accept(null);
+				if (this.texture) {
+					editor.setReColor.accept(this.recolor);
+					if(faceUV == null) {
+						editor.setSingleTex.accept(this.singleTex);
+						editor.setExtrudeEffect.accept(this.extrude);
+					} else {
+						editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir.get()));
+						editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir.get()));
+						editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir.get()));
+						editor.setSingleTex.accept(null);
+					}
+					if(!singleTex)editor.setPerFaceUV.accept(this.faceUV != null);
+					else editor.setPerFaceUV.accept(null);
 				}
-				if(!singleTex)editor.setPerFaceUV.accept(this.faceUV != null);
-				else editor.setPerFaceUV.accept(null);
 				editor.updateName.accept(this.name);
 			}
 			break;
@@ -533,6 +535,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 					(int) (2 * (dx + dz) / 64f * skin.size.x),
 					(int) ((dz + dy) / 64f * skin.size.y));
 		}
+		if(!texture)return new Box(0, 0, 0, 0);
 		int dx = MathHelper.ceil(size.x);
 		int dy = MathHelper.ceil(size.y);
 		int dz = MathHelper.ceil(size.z);

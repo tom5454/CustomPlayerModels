@@ -1,5 +1,7 @@
 package com.tom.cpm.blockbench.proxy;
 
+import com.tom.cpm.blockbench.format.ProjectData;
+
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
@@ -31,5 +33,14 @@ public class Project {
 	@JsOverlay
 	public static Object getProject() {
 		return G.project;
+	}
+
+	@JsProperty(name = "cpm_dataCache")
+	private static ProjectData data;
+
+	@JsOverlay
+	public static ProjectData getData() {
+		if(data == null)data = new ProjectData();
+		return data;
 	}
 }

@@ -167,7 +167,6 @@ public class MainWrapper {
 			ClassSrcTransformer.addImportTransform("java.io.FileOutputStream", "com.tom.cpm.web.client.java.io.FileOutputStream");
 			ClassSrcTransformer.addImportTransform("java.io.RandomAccessFile", "com.tom.cpm.web.client.java.io.RandomAccessFile");
 			ClassSrcTransformer.addImportTransform("java.io.UTFDataFormatException", "com.tom.cpm.web.client.java.io.UTFDataFormatException");
-			ClassSrcTransformer.addImportTransform("java.io.Writer", "com.tom.cpm.web.client.java.io.Writer");
 			ClassSrcTransformer.addImportTransform("java.io.BufferedReader", "com.tom.cpm.web.client.java.io.BufferedReader");
 			ClassSrcTransformer.addImportTransform("java.io.StringReader", "com.tom.cpm.web.client.java.io.StringReader");
 			ClassSrcTransformer.addImportTransform("java.util.UUID", "com.tom.cpm.web.client.java.UUID");

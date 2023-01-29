@@ -13,11 +13,12 @@ public class ModelFormat {
 
 	@JsProperty(name = "new")
 	public CallbackNew new_;
+	public String name;
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class FormatProperties {
 		public String id, icon, name, description, target, category;
-		public boolean bone_rig, box_uv, optional_box_uv, centered_grid, single_texture, rotate_cubes, animation_mode;
+		public boolean bone_rig, box_uv, optional_box_uv, centered_grid, single_texture, rotate_cubes, animation_mode, animation_controllers, animation_files, bone_binding_expression, uv_rotation;
 		public Codec codec;
 		public FormatPage format_page;
 	}

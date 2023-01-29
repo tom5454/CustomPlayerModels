@@ -32,6 +32,7 @@ import com.tom.cpm.web.client.WebMC.Texture;
 import com.tom.cpm.web.client.resources.Resources;
 import com.tom.cpm.web.client.util.I18n;
 import com.tom.cpm.web.client.util.ImageIO;
+import com.tom.ugwt.client.ExceptionUtil;
 import com.tom.ugwt.client.UGWTContext;
 
 import elemental2.core.Float32Array;
@@ -111,8 +112,9 @@ public class RenderSystem implements RetroGLAccess<String> {
 	static {
 		proj2d = new Mat4f();
 		proj2d.setIdentity();
+		ExceptionUtil.init();
 
-		preloadComplete = Resources.loaded.then(__ -> new Promise<>((resolve, reject) -> {
+		preloadComplete = Resources.loaded.then(__ -> {
 			preloadedAssets = new HashMap<>();
 			JsArray<Promise<Object>> promises = new JsArray<>();
 			promises.push(I18n.loaded);
@@ -124,14 +126,8 @@ public class RenderSystem implements RetroGLAccess<String> {
 					}));
 				}
 			}
-			Promise.all(Js.cast(promises)).then(v -> {
-				resolve.onInvoke((Void) null);
-				return null;
-			}).catch_(v -> {
-				reject.onInvoke(v);
-				return null;
-			});
-		}));
+			return Promise.all(Js.cast(promises)).then(v -> null);
+		});
 	}
 
 	public static void init(Window windowIn, Supplier<EventHandler> preload) {

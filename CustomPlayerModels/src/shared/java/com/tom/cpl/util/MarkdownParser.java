@@ -57,7 +57,7 @@ public class MarkdownParser {
 		sb.append("\n");
 		sb.append(gui.i18nFormat("label.cpm.md.loadFail." + (e instanceof IOException ? "network" : "unknown")));
 		sb.append("\n```");
-		e.printStackTrace(new StringBuilderStream(sb, "\t"));
+		StringBuilderStream.stacktraceToString(e, sb, "\t");
 		sb.append("```");
 		return new MarkdownParser(sb.toString());
 	}

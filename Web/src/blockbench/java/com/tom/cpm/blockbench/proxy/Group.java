@@ -1,5 +1,6 @@
 package com.tom.cpm.blockbench.proxy;
 
+import com.tom.cpm.blockbench.format.GroupData;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
 import com.tom.ugwt.client.JsArrayE;
 
@@ -48,4 +49,14 @@ public class Group extends OutlinerNode {
 	public native void createUniqueName(JsArray<Group> all);
 	public native void addTo(Group gr);
 	public native Group init();
+	public native void resolve();
+
+	@JsProperty(name = "cpm_dataCache")
+	private GroupData data;
+
+	@JsOverlay
+	public final GroupData getData() {
+		if(data == null)data = new GroupData(this);
+		return data;
+	}
 }

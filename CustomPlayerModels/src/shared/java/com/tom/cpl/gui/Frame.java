@@ -125,7 +125,6 @@ public abstract class Frame extends Panel {
 		@Override
 		public void draw(MouseEvent event, float partialTicks) {
 			if(elements.isEmpty())return;
-			setTooltip(null);
 			gui.pushMatrix();
 			gui.setPosOffset(getBounds());
 			gui.setupCut();

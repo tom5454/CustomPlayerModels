@@ -43,10 +43,17 @@ public class EmbeddedEditor {
 				window = Js.uncheckedCast(DomGlobal.window.open(Js.undefined(), "", "toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1280,height=720"));
 			}
 			runIn(window);
-		} else {
-			if(electronWindow != null)electronWindow.focus();
-			else window.focus();
-		}
+		} else focus();
+	}
+
+	public static void focus() {
+		if(electronWindow != null)electronWindow.focus();
+		else window.focus();
+	}
+
+	public static void close() {
+		if(window != null)window.close();
+		window = null;
 	}
 
 	public static HTMLIFrameElement openIframe() {

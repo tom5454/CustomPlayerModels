@@ -1,0 +1,213 @@
+body {
+  font: 14px/150% sans-serif;
+  overflow: hidden;
+}
+
+canvas {
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+#dragTarget {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  user-select: none;
+  touch-action: none;
+  box-shadow: inset 0 0 0 10px rgba(50, 150, 255, 0.75);
+}
+
+#toolbar {
+  display: none;
+  position: fixed;
+  box-sizing: border-box;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 32px;
+  line-height: 32px;
+  background: rgba(127, 127, 127, 0.2);
+  z-index: 1;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.5);
+}
+
+#toolbar section {
+  flex: 1;
+  display: flex;
+}
+
+#toolbar section:first-child {
+  padding-left: 8px;
+}
+
+#toolbar section > * {
+  vertical-align: middle;
+  margin-right: 20px;
+}
+
+#theme {
+  position: fixed;
+  right: 0;
+  top: 0;
+  padding: 3px 5px;
+  z-index: 2;
+  cursor: pointer;
+}
+
+#theme svg {
+  display: block;
+  width: 25px;
+  height: 25px;
+}
+
+#statusBar {
+  display: none;
+  position: fixed;
+  box-sizing: border-box;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  height: 32px;
+  line-height: 32px;
+  background: rgba(127, 127, 127, 0.2);
+  z-index: 1;
+  border-top: 1px solid rgba(127, 127, 127, 0.5);
+}
+
+#statusBar section {
+  flex: 1;
+  display: flex;
+  width: 50%;
+}
+
+#statusBar section:first-child {
+  padding-left: 8px;
+}
+
+#statusBar section > * {
+  vertical-align: middle;
+  margin-right: 20px;
+  opacity: 0.7;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#fileListParent {
+  max-width: 500px;
+  width: 80%;
+}
+
+select {
+  width: 100%;
+}
+
+h1 {
+  font-size: 40px;
+  line-height: 120%;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+h2 {
+  font-size: 18px;
+  margin: 0;
+  display: inline-block;
+}
+
+#promptText {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow-y: auto;
+  padding: 100px 20px;
+}
+
+#promptText section {
+  max-width: 640px;
+  margin: auto;
+}
+
+#errorText {
+  display: none;
+}
+
+noscript {
+  display: block;
+}
+
+#errorText, noscript {
+  margin-top: 50px;
+  color: #f33;
+  background: rgba(255, 0, 0, 0.1);
+  padding: 15px 15px 15px 50px;
+  border: 1px solid #f33;
+  border-radius: 10px;
+}
+
+#errorText:before, noscript:before {
+  content: '🚫';
+  display: block;
+  width: 50px;
+  line-height: 22px;
+  text-align: center;
+  font-size: 28px;
+  float: left;
+  margin-left: -50px;
+}
+
+/* ---------- Light colors ---------- */
+
+body:not([data-theme=dark]) {
+  color: #222;
+  fill: #222;
+  stroke: #222;
+  background: white;
+}
+
+body:not([data-theme=dark]) #theme-dark {
+  display: none;
+}
+
+/* ---------- Dark colors ---------- */
+
+body[data-theme=dark] {
+  color: #eee;
+  fill: #eee;
+  stroke: #eee;
+  background: #333;
+}
+
+body[data-theme=dark] #theme-light {
+  display: none;
+}
+
+body[data-theme=dark] #theme-dark {
+  display: block;
+}
+
+/* ---------- Dark colors without JavaScript ---------- */
+
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme=light]) {
+    color: #eee;
+    fill: #eee;
+    stroke: #eee;
+    background: #333;
+  }
+
+  body:not([data-theme=light]) #theme-light {
+    display: none;
+  }
+
+  body:not([data-theme=light]) #theme-dark {
+    display: block;
+  }
+}

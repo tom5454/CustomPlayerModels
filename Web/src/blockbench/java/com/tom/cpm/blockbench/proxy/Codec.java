@@ -1,5 +1,7 @@
 package com.tom.cpm.blockbench.proxy;
 
+import com.tom.cpm.blockbench.proxy.Blockbench.CallbackEvent;
+
 import elemental2.core.ArrayBuffer;
 import elemental2.core.JsObject;
 import jsinterop.annotations.JsConstructor;
@@ -67,4 +69,6 @@ public class Codec {
 	public native String fileName();
 	public native String startPath();
 	public native void overwrite(JsObject content, String path, CallbackOverwrite cb);
+	public native void on(String id, CallbackEvent cb);
+	public native void removeListener(String id, CallbackEvent cb);
 }

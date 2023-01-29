@@ -175,7 +175,7 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 			animState.leftArm = ArmPose.of(m.leftArmPose);
 			animState.rightArm = ArmPose.of(m.rightArmPose);
 			if(CustomPlayerModelsClient.vrLoaded)
-				animState.vrState = VRPlayerRenderer.getVRState(model);
+				animState.vrState = VRPlayerRenderer.getVRState(animState.animationMode, model);
 		}
 	}
 

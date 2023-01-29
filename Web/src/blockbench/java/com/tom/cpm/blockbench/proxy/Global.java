@@ -1,5 +1,6 @@
 package com.tom.cpm.blockbench.proxy;
 
+import com.tom.cpm.blockbench.proxy.MenuBar.BarItem;
 import com.tom.ugwt.client.JsArrayE;
 
 import jsinterop.annotations.JsMethod;
@@ -34,6 +35,9 @@ public class Global {
 
 		@JsProperty(name = "$$ugwt_m_Formats_$$")
 		public static JsPropertyMap<ModelFormat> formats;
+
+		@JsProperty(name = "$$ugwt_m_BarItems_$$")
+		public static JsPropertyMap<BarItem> barItems;
 	}
 
 	@JsOverlay
@@ -54,5 +58,10 @@ public class Global {
 	@JsOverlay
 	public static JsPropertyMap<ModelFormat> getFormats() {
 		return G.formats;
+	}
+
+	@JsOverlay
+	public static BarItem getBarItem(String id) {
+		return G.barItems.get(id);
 	}
 }

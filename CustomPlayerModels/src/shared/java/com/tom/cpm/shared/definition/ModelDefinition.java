@@ -344,7 +344,7 @@ public class ModelDefinition {
 		case ERRORRED:
 		case SAFETY_BLOCKED:
 			bb.append("\n\t\t");
-			error.printStackTrace(new StringBuilderStream(bb, "\n\t\t"));
+			StringBuilderStream.stacktraceToString(error, bb, "\n\t\t");
 			if(error instanceof SafetyException)bb.append(((SafetyException)error).getBlockReason());
 			else bb.append("Unexpected error");
 			break;

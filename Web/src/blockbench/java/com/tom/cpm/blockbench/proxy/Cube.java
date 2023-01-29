@@ -3,6 +3,7 @@ package com.tom.cpm.blockbench.proxy;
 import java.util.function.Consumer;
 
 import com.tom.cpl.util.Direction;
+import com.tom.cpm.blockbench.format.CubeData;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec2;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
 import com.tom.cpm.blockbench.proxy.three.ThreeMesh;
@@ -88,6 +89,7 @@ public class Cube extends OutlinerElement {
 		public FaceUV uv;
 		public int rotation;
 		public boolean autoUV;
+		public String texture;
 	}
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Array_$$")
@@ -124,5 +126,19 @@ public class Cube extends OutlinerElement {
 			ey *= y;
 			return this;
 		}
+
+		@JsOverlay
+		public final boolean isEmpty() {
+			return sx == 0 && sy == 0 && ex == 0 && ey == 0;
+		}
+	}
+
+	@JsProperty(name = "cpm_dataCache")
+	private CubeData data;
+
+	@JsOverlay
+	public final CubeData getData() {
+		if(data == null)data = new CubeData(this);
+		return data;
 	}
 }

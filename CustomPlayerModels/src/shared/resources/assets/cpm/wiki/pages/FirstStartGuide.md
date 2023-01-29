@@ -15,7 +15,7 @@ $[mouseControls]()
 You can change these settings later under `Edit/Controls`.  
 
 ### Spinners:
-![Image: Spinner](https://github.com/tom5454/CustomPlayerModels/blob/master/screenshots/spinner.png)  
+![Image: Spinner](https://github.com/tom5454/CustomPlayerModels/wiki/images/spinner.png)  
 Hold Shift to increment/decrement by 0.1  
 Hold Ctrl to increment/decrement by 10  
 You can type in the numbers.  

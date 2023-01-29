@@ -10,4 +10,6 @@ public class OutlinerNode {
 
 	@JsProperty(name = "cpm_data")
 	public String pluginData;
+
+	public native void remove();
 }

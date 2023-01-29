@@ -35,6 +35,7 @@ public class RenderManager<G, P, M, D> {
 		ModelDefinition def = profile.getModelDefinition();
 		if(def != null) {
 			this.profile = profile;
+			profile.animState.animationMode = mode;
 			if(player != null)
 				profile.updatePlayer(player);
 			def.itemTransforms.clear();

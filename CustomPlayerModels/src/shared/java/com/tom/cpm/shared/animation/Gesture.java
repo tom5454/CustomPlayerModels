@@ -11,7 +11,7 @@ public class Gesture implements IManualGesture {
 	public String name;
 	public byte defVal;
 	private int order;
-	public boolean isProperty, command;
+	public boolean isProperty, command, layerCtrl;
 	public String group;
 
 	public Gesture(AnimationType type, List<IAnimation> animation, String name, boolean isLoop, int order) {
@@ -55,5 +55,10 @@ public class Gesture implements IManualGesture {
 	@Override
 	public boolean isCommand() {
 		return command;
+	}
+
+	@Override
+	public boolean isLayerControlled() {
+		return layerCtrl;
 	}
 }

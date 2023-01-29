@@ -8,5 +8,6 @@
 <module rename-to='ugwt_client'>
   <define-linker name="ugwt" class="com.tom.ugwt.UGWTSingleLinker" />
   <define-linker name="ugwt_xsiframe" class="com.tom.ugwt.UGWTCrossSiteIframeLinker" />
+  <inherits name='com.atlassian.sourcemap.SourceMap'/>
   <source path='client'/>
 </module>

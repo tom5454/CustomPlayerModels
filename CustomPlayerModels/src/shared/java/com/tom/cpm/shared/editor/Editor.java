@@ -48,6 +48,7 @@ import com.tom.cpm.shared.editor.actions.Action;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
+import com.tom.cpm.shared.editor.anim.AnimationProperties;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
@@ -664,33 +665,26 @@ public class Editor {
 		}
 	}
 
+	@Deprecated //Used by OSC addon remove in 0.7.0
 	public void addNewAnim(IPose pose, String displayName, AnimationType type, boolean add, boolean loop, InterpolatorType it, boolean command) {
-		String fn = AnimationsLoaderV1.getFileName(pose, displayName);
-		EditorAnim anim = new EditorAnim(this, fn, type, true);
-		anim.pose = pose;
-		anim.add = add;
-		anim.loop = loop;
-		anim.displayName = displayName;
-		anim.intType = it;
-		anim.command = command;
-		action("add", "action.cpm.anim").addToList(animations, anim).onUndo(() -> selectedAnim = null).execute();
+		addNewAnim(new AnimationProperties(pose, displayName, type, add, loop, it, command));
+	}
+
+	public void addNewAnim(AnimationProperties prop) {
+		String fn = AnimationsLoaderV1.getFileName(prop.pose, prop.displayName);
+		EditorAnim anim = new EditorAnim(this, fn, prop.type, true);
+		ActionBuilder ab = action("add", "action.cpm.anim");
+		anim.setProperties(prop, ab);
+		ab.addToList(animations, anim).onUndo(() -> selectedAnim = null).execute();
 		selectedAnim = anim;
 		updateGui();
 	}
 
-	public void editAnim(IPose pose, String displayName, AnimationType type, boolean add, boolean loop, InterpolatorType it, boolean command) {
+	public void editAnim(AnimationProperties prop) {
 		if(selectedAnim != null) {
-			String fn = AnimationsLoaderV1.getFileName(pose, displayName);
-			action("edit", "action.cpm.anim").
-			updateValueOp(selectedAnim, selectedAnim.add, add, (a, b) -> a.add = b).
-			updateValueOp(selectedAnim, selectedAnim.loop, loop, (a, b) -> a.loop = b).
-			updateValueOp(selectedAnim, selectedAnim.displayName, displayName, (a, b) -> a.displayName = b).
-			updateValueOp(selectedAnim, selectedAnim.pose, pose, (a, b) -> a.pose = b).
-			updateValueOp(selectedAnim, selectedAnim.type, type, (a, b) -> a.type = b).
-			updateValueOp(selectedAnim, selectedAnim.filename, fn, (a, b) -> a.filename = b).
-			updateValueOp(selectedAnim, selectedAnim.intType, it, (a, b) -> a.intType = b).
-			updateValueOp(selectedAnim, selectedAnim.command, command, (a, b) -> a.command = b).
-			onAction(selectedAnim, EditorAnim::clearCache).
+			ActionBuilder ab = action("edit", "action.cpm.anim");
+			selectedAnim.setProperties(prop, ab);
+			ab.onAction(selectedAnim, EditorAnim::clearCache).
 			execute();
 			updateGui();
 		}

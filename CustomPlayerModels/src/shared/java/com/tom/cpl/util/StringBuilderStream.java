@@ -17,4 +17,14 @@ public class StringBuilderStream extends PrintStream {
 		bb.append(x);
 		bb.append(sep);
 	}
+
+	@Override
+	public void println(String x) {
+		bb.append(x);
+		bb.append(sep);
+	}
+
+	public static void stacktraceToString(Throwable t, StringBuilder sb, String sep) {
+		t.printStackTrace(new StringBuilderStream(sb, sep));
+	}
 }

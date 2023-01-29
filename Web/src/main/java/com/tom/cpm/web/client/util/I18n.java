@@ -41,4 +41,14 @@ public class I18n {
 	public static String format(String loc, Object... args) {
 		return String.format(get(loc), args);
 	}
+
+	public static String formatNl(String loc, Object... args) {
+		String f = format(loc, args);
+		return f.replace("\\", "\n");
+	}
+
+	public static String formatBr(String loc, Object... args) {
+		String f = format(loc, args);
+		return f.replace("\\", "<br>");
+	}
 }

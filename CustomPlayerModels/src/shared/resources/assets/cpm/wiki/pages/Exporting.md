@@ -25,14 +25,14 @@ This options is for developers only.
 ## Skin
 To use custom models in-game you have to export the models, using the editor, and upload the exported skin.
 
-![Image: Export Skin Gui](https://github.com/tom5454/CustomPlayerModels/blob/master/screenshots/export_gui.png)
+![Image: Export Skin Gui](https://github.com/tom5454/CustomPlayerModels/wiki/images/export_gui.png)
 
 Click the '...' button to set the output file, then press Export. You can change the base skin with the 'Change Vanilla Skin' button. This is the skin that will show up if you don't have the mod installed, by default it loads your current skin.
 Skin Layer settings are used [for creating custom animations](https://github.com/tom5454/CustomPlayerModels/wiki/Animations#custom-animations-encoding).
 
 If the model is too big to fit in the unused space on the skin file, then you have to upload it to my paste site, or you can create a [GitHub Gist](https://gist.github.com/) with your model data and link it to your skin.
 
-![Image: Export Overflow Gui](https://github.com/tom5454/CustomPlayerModels/blob/master/screenshots/export_overflow_popup.png)
+![Image: Export Overflow Gui](https://github.com/tom5454/CustomPlayerModels/wiki/images/export_overflow_popup.png)
 
 Press OK to finish the export.
 

@@ -85,7 +85,7 @@ public class ProcessPopup<R> extends PopupPanel implements Runnable {
 			if(!cancelled.get()) {
 				gui.executeLater(() -> finished.accept(r));
 			} else {
-				gui.executeLater(() -> error.accept(null));
+				gui.executeLater(() -> error.accept(new InterruptedException()));
 			}
 		} catch (Throwable e) {
 			if(!cancelled.get())gui.executeLater(() -> error.accept(e));

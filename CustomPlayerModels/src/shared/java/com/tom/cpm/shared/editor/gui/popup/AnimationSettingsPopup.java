@@ -15,6 +15,7 @@ import com.tom.cpl.gui.elements.ListPicker;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
+import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.NamedElement.NameMapper;
@@ -26,6 +27,7 @@ import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData.Type;
+import com.tom.cpm.shared.editor.anim.AnimationProperties;
 
 public class AnimationSettingsPopup extends PopupPanel {
 	private final Editor editor;
@@ -35,6 +37,8 @@ public class AnimationSettingsPopup extends PopupPanel {
 		super(gui);
 		this.editor = editor;
 		setBounds(new Box(0, 0, 200, 195));
+
+		FlowLayout layout = new FlowLayout(this, 4, 1);
 
 		AnimType sel = null;
 		List<AnimType> ats = new ArrayList<>();
@@ -64,27 +68,27 @@ public class AnimationSettingsPopup extends PopupPanel {
 			l.setRenderer(AnimType::draw);
 			l.setGetTooltip(AnimType::getTooltip);
 		});
-		typeDd.setBounds(new Box(5, 5, 190, 20));
+		typeDd.setBounds(new Box(5, 0, 190, 20));
 		this.addElement(typeDd);
 		if(sel != null)typeDd.setSelected(sel);
 
 		Checkbox boxAdd = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_additive"));
 		if(edit && editor.selectedAnim != null)boxAdd.setSelected(editor.selectedAnim.add);
 		else boxAdd.setSelected(true);
-		boxAdd.setBounds(new Box(5, 30, 60, 18));
+		boxAdd.setBounds(new Box(5, 0, 60, 18));
 		this.addElement(boxAdd);
 		boxAdd.setAction(() -> boxAdd.setSelected(!boxAdd.isSelected()));
 
 		Checkbox boxLoop = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_loop"));
 		if(edit && editor.selectedAnim != null)boxLoop.setSelected(editor.selectedAnim.loop);
-		boxLoop.setBounds(new Box(5, 50, 60, 18));
+		boxLoop.setBounds(new Box(5, 0, 60, 18));
 		this.addElement(boxLoop);
 
-		this.addElement(new Label(gui, gui.i18nFormat("label.cpm.name")).setBounds(new Box(5, 70, 0, 0)));
+		this.addElement(new Label(gui, gui.i18nFormat("label.cpm.name")).setBounds(new Box(5, 0, 190, 10)));
 
 		TextField nameField = new TextField(gui);
 		if(edit && editor.selectedAnim != null)nameField.setText(editor.selectedAnim.getDisplayName());
-		nameField.setBounds(new Box(5, 80, 190, 20));
+		nameField.setBounds(new Box(5, 0, 190, 20));
 		this.addElement(nameField);
 
 		List<AnimSel> selAnims = new ArrayList<>();
@@ -97,7 +101,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 		map(a -> new AnimSel(a.getId(), a.getDisplayGroup())).distinct().forEach(selAnims::add);
 
 		ListPicker<AnimSel> dropDownAnimSel = new ListPicker<>(editor.frame, selAnims);
-		dropDownAnimSel.setBounds(new Box(5, 80, 190, 20));
+		dropDownAnimSel.setBounds(new Box(5, 0, 190, 20));
 		dropDownAnimSel.setVisible(false);
 		addElement(dropDownAnimSel);
 
@@ -137,7 +141,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 			}
 		}
 
-		addElement(new Label(gui, gui.i18nFormat("label.cpm.animIntType")).setBounds(new Box(5, 105, 190, 10)));
+		addElement(new Label(gui, gui.i18nFormat("label.cpm.animIntType")).setBounds(new Box(5, 0, 190, 10)));
 		NameMapper<InterpolatorType> intMap = new NameMapper<>(InterpolatorType.VALUES, e -> gui.i18nFormat("label.cpm.animIntType." + e.name().toLowerCase(Locale.ROOT)));
 		DropDownBox<NamedElement<InterpolatorType>> intBox = new DropDownBox<>(editor.frame, intMap.asList());
 		intMap.setSetter(intBox::setSelected);
@@ -146,15 +150,18 @@ public class AnimationSettingsPopup extends PopupPanel {
 		} else {
 			intMap.setValue(InterpolatorType.POLY_LOOP);
 		}
-		intBox.setBounds(new Box(5, 115, 190, 20));
+		intBox.setBounds(new Box(5, 0, 190, 20));
 		addElement(intBox);
 
 		Checkbox boxCommand = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_command"));
+
+		Checkbox boxLayerCtrl = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_layerCtrl"));
 
 		Runnable r = () -> {
 			AnimType at = typeDd.getSelected();
 			boxLoop.setEnabled(at.canLoop());
 			boxCommand.setEnabled(at.option.isCustom() && !at.option.isStaged());
+			boxLayerCtrl.setEnabled(at.option == AnimationType.CUSTOM_POSE || at.option == AnimationType.GESTURE);
 			if(!edit)intMap.setValue(intBox.getSelected().getElem().getAlt(at.useLooping()));
 			if(at.option.isStaged()) {
 				nameField.setVisible(false);
@@ -174,12 +181,21 @@ public class AnimationSettingsPopup extends PopupPanel {
 		});
 
 		if(edit && editor.selectedAnim != null)boxCommand.setSelected(editor.selectedAnim.command);
-		boxCommand.setBounds(new Box(5, 140, 60, 18));
+		boxCommand.setBounds(new Box(5, 0, 190, 18));
 		boxCommand.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.anim_command")));
 		boxCommand.setAction(() -> {
 			boxCommand.setSelected(!boxCommand.isSelected());
 		});
 		this.addElement(boxCommand);
+
+		if(edit && editor.selectedAnim != null)boxLayerCtrl.setSelected(editor.selectedAnim.layerControlled);
+		else boxLayerCtrl.setSelected(true);
+		boxLayerCtrl.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.anim_layerCtrl")));
+		boxLayerCtrl.setBounds(new Box(5, 0, 190, 18));
+		boxLayerCtrl.setAction(() -> {
+			boxLayerCtrl.setSelected(!boxLayerCtrl.isSelected());
+		});
+		this.addElement(boxLayerCtrl);
 
 		Button okBtn = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			String name = nameField.getText();
@@ -190,15 +206,18 @@ public class AnimationSettingsPopup extends PopupPanel {
 				if(s == null)return;
 				name = s.getName();
 			}
+			AnimationProperties pr = new AnimationProperties(pose, name, at.option, boxAdd.isSelected(), at.canLoop() && boxLoop.isSelected(), intBox.getSelected().getElem(), boxCommand.isSelected(), boxLayerCtrl.isSelected());
 			if(edit) {
-				editor.editAnim(pose, name, at.option, boxAdd.isSelected(), at.canLoop() && boxLoop.isSelected(), intBox.getSelected().getElem(), boxCommand.isSelected());
+				editor.editAnim(pr);
 			} else {
-				editor.addNewAnim(pose, name, at.option, boxAdd.isSelected(), at.canLoop() && boxLoop.isSelected(), intBox.getSelected().getElem(), boxCommand.isSelected());
+				editor.addNewAnim(pr);
 			}
 			this.close();
 		});
-		okBtn.setBounds(new Box(80, 165, 40, 20));
+		okBtn.setBounds(new Box(80, 0, 40, 20));
 		this.addElement(okBtn);
+
+		layout.reflow();
 
 		title = gui.i18nFormat("label.cpm.animationSettings." + (edit ? "edit" : "new"));
 	}

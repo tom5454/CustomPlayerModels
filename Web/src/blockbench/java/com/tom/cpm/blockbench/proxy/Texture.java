@@ -9,7 +9,7 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Texture_$$")
 public class Texture {
 	public static JsArrayE<Texture> all;
-	public String name, source;
+	public String name, source, uuid;
 
 	public Texture() {}
 	public Texture(TextureProperties ctr) {}

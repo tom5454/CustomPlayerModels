@@ -63,6 +63,7 @@ public class PastePopup extends PopupPanel {
 	}
 
 	private static void handleException(Frame frm, Runnable retry, Runnable close, Throwable e) {
+		if(e instanceof InterruptedException)return;
 		IGui gui = frm.getGui();
 		if(e instanceof LocalizedIOException) {
 			frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.error"),

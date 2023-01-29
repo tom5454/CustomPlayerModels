@@ -3,7 +3,7 @@ Model parts can only be added to existing elements (such as vanilla player parts
 Vanilla model parts can be hidden with the Toggle Visibility button, this option will not hide custom model parts when exporting.  
 Custom parts can be hidden with Effects/'Hidden by default' option. Hidden parts can be made visible with [custom animations](https://github.com/tom5454/CustomPlayerModels/wiki/Animations).  
 
-![Image: Model Settings Panel](https://github.com/tom5454/CustomPlayerModels/blob/master/screenshots/model_settings.png)  
+![Image: Model Settings Panel](https://github.com/tom5454/CustomPlayerModels/wiki/images/model_settings.png)  
 Position: center position and rotation point of the element.  
 Rotation: rotation.  
 

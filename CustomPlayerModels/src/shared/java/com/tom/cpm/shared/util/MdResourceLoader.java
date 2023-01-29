@@ -96,14 +96,14 @@ public class MdResourceLoader implements MarkdownResourceLoader {
 			} else {
 				return fetchOnline(url);
 			}
-		} else if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/wiki/")) {
-			return fetch(url + ".md", offline);
-		} else if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/blob/master/screenshots/") || url.startsWith("https://github.com/tom5454/CustomPlayerModels/raw/master/screenshots/")) {
+		} else if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/wiki/images/")) {
 			if(offline) {
 				return asset0("/assets/cpm/wiki/images/" + url.substring(url.lastIndexOf('/') + 1));
 			} else {
-				return fetchOnline("https://github.com/tom5454/CustomPlayerModels/raw/master/screenshots/" + url.substring(url.lastIndexOf('/') + 1));
+				return fetchOnline("https://github.com/tom5454/CustomPlayerModels/wiki/images/" + url.substring(url.lastIndexOf('/') + 1));
 			}
+		} else if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/wiki/")) {
+			return fetch(url + ".md", offline);
 		} else {
 			CompletableFuture<byte[]> f = new CompletableFuture<>();
 			f.completeExceptionally(new IOException("Unknown url: " + url));

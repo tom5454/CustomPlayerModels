@@ -7,6 +7,7 @@ public class CustomPose implements IPose, IManualGesture {
 	private String name;
 	public int order;
 	public boolean command;
+	public boolean layerCtrl;
 
 	public CustomPose(String name, int order) {
 		this.name = name;
@@ -78,5 +79,10 @@ public class CustomPose implements IPose, IManualGesture {
 	@Override
 	public boolean isCommand() {
 		return command;
+	}
+
+	@Override
+	public boolean isLayerControlled() {
+		return layerCtrl;
 	}
 }

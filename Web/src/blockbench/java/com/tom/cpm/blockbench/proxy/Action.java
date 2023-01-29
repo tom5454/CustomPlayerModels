@@ -14,6 +14,7 @@ public class Action extends BarItem {
 	public Action(String name, ActionProperties ctr) {}
 
 	public native void delete();
+	public native void click();
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class ActionProperties {

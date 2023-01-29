@@ -6,6 +6,7 @@ import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.network.ModelEventType;
 import com.tom.cpm.shared.network.NetworkUtil;
@@ -24,6 +25,7 @@ public class AnimationState {
 	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing, inGui, firstPersonMod, voiceMuted;
 	public byte[] gestureData;
 	public VRState vrState;
+	public AnimationMode animationMode;
 
 	public void resetPlayer() {
 		sleeping = false;

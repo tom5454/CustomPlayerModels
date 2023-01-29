@@ -6,10 +6,13 @@ import java.util.List;
 import com.google.gwt.core.client.EntryPoint;
 
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpm.blockbench.format.CPMCodec;
+import com.tom.cpm.blockbench.format.ProjectGenerator;
 import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Condition;
 import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Blockbench.CallbackEvent;
+import com.tom.cpm.blockbench.proxy.Codec;
 import com.tom.cpm.blockbench.proxy.Global;
 import com.tom.cpm.blockbench.proxy.NodePreviewController;
 import com.tom.cpm.blockbench.proxy.Plugin;
@@ -19,6 +22,7 @@ import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.RenderSystem;
 import com.tom.cpm.web.client.util.LoggingPrintStream;
+import com.tom.ugwt.client.ExceptionUtil;
 
 import elemental2.dom.DomGlobal;
 
@@ -38,16 +42,25 @@ public class PluginStart implements EntryPoint {
 					protected String buildPlatformString() {
 						return Java.getPlatform() + " BB " + Blockbench.version + (!Global.isApp() ? " (Web)" : "") + " CPM " + System.getProperty("cpm.version");
 					}
+
+					@Override
+					public String getMCVersion() {
+						return "blockbench";
+					}
 				};
 				DomGlobal.console.log("CPM Plugin loading " + WebMC.platform);
 			} catch (Throwable e) {
-				e.printStackTrace();
+				StringBuilder sb = new StringBuilder();
+				sb.append("Error loading plugin:\n");
+				sb.append(ExceptionUtil.getStackTrace(e, false));
+				DomGlobal.console.error(sb.toString());
 			}
 
 			Plugin.PluginProperties prop = new Plugin.PluginProperties();
 			prop.name = "Customizable Player Models Plugin";
 			prop.author = "tom5454";
 			prop.variant = "both";
+			prop.description = "Customizable Player Models Project (.cpmproject) support for Blockbench.";
 			prop.version = System.getProperty("cpm.version");
 			prop.tags = new String[] {"Minecraft: Java Edition", "Modded"};
 			prop.icon = "icon-player";
@@ -62,7 +75,6 @@ public class PluginStart implements EntryPoint {
 
 		CPMCodec.init();
 		ProjectGenerator.initDialog();
-		ProjectConvert.initDialogs();
 		BBActions.load();
 	}
 
@@ -90,5 +102,10 @@ public class PluginStart implements EntryPoint {
 	public static void addEventListener(NodePreviewController npc, String id, CallbackEvent cb) {
 		npc.on(id, cb);
 		cleanup.add(() -> npc.removeListener(id, cb));
+	}
+
+	public static void addEventListener(Codec c, String id, CallbackEvent cb) {
+		c.on(id, cb);
+		cleanup.add(() -> c.removeListener(id, cb));
 	}
 }

@@ -481,7 +481,7 @@ public class EditorGui extends Frame {
 				editor.markDirty();
 				editor.updateGui();
 			}, e -> {
-				if(e == null)return;
+				if(e instanceof InterruptedException)return;
 				Log.warn("Failed to download template", e);
 				openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.template_load_error", e.getMessage())));
 			}).start();

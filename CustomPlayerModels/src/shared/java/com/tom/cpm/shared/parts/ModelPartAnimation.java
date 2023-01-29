@@ -153,11 +153,13 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			}
 			break;
 			case ENCODING:
+			case ANIMATION_DATA_ENC:
 			{
 				int id = block.read();
 				ResolvedData rd = parsedData.get(id);
 				if(rd == null)continue;
 				rd.gid = block.read();
+				rd.layerCtrl = type == Type.ENCODING;
 			}
 			break;
 			case CTRL_IDS:
@@ -262,6 +264,9 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		modelProfilesId = e.modelId;
 		List<PlayerSkinLayer> allLayers = e.animEnc != null ? new ArrayList<>(e.animEnc.freeLayers) : new ArrayList<>();
 		Collections.sort(allLayers);
+		List<ResolvedData> notLayerControlled = new ArrayList<>();
+		Set<CustomPose> addedPoses = new HashSet<>();
+		Set<String> addedGestures = new HashSet<>();
 		e.animations.forEach(ea -> {
 			int id = idc[0]++;
 			ResolvedData rd;
@@ -269,17 +274,30 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd = new ResolvedData((VanillaPose) ea.pose, ea.add);
 			} else if(ea.pose != null) {
 				rd = new ResolvedData(ea.pose, ea.add);
-				resolveEncID(rd, idc[1]++, allLayers);
+				if(ea.layerControlled) {
+					if(addedPoses.add((CustomPose) ea.pose))
+						resolveEncID(rd, idc[1]++, allLayers);
+					else
+						rd.gid = -1;
+				} else
+					notLayerControlled.add(rd);
 			} else {
 				rd = new ResolvedData(AnimationsLoaderV1.encodeTypeInName(ea.getId(), ea.type), ea.loop, ea.add);
 				if(ea.isLayer())
 					rd.defaultValue = (byte) (ea.layerDefault * 0xff);
-				if(!ea.type.isStaged())
-					resolveEncID(rd, idc[1]++, allLayers);
+				if(!ea.type.isStaged() && !ea.type.isLayer()) {
+					if(ea.layerControlled) {
+						if(addedGestures.add(rd.name))
+							resolveEncID(rd, idc[1]++, allLayers);
+						else
+							rd.gid = -1;
+					} else
+						notLayerControlled.add(rd);
+				}
 			}
 			rd.gid &= valMask;
 			rd.gid |= defMask;
-			if(ea.type.isStaged())rd.gid = -1;
+			if(ea.type.isStaged() || ea.type.isLayer())rd.gid = -1;
 			parsedData.put(id, rd);
 			Log.debug(ea.filename + " " + Integer.toString(rd.gid, 2));
 			List<ModelElement> elems = ea.getComponentsFiltered();
@@ -328,6 +346,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				}
 			}
 		});
+		notLayerControlled.forEach(rd -> rd.gid = idc[1]++);
 	}
 
 	private static void resolveEncID(ResolvedData rd, int id, List<PlayerSkinLayer> allLayers) {
@@ -341,6 +360,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		}
 		if(encL.containsAll(allLayers))throw new Exporter.ExportException("error.cpm.too_many_animations");
 		rd.gid = PlayerSkinLayer.encode(encL);
+		rd.layerCtrl = true;
 	}
 
 	private static <T> void fillArray(T[] array, List<AnimFrame> frames, ModelElement elem, Function<IElem, T> func, boolean add, T empty) {
@@ -402,7 +422,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				}
 			}
 			if(dt.gid != -1) {
-				dout.writeEnum(Type.ENCODING);
+				dout.writeEnum(dt.layerCtrl ? Type.ENCODING : Type.ANIMATION_DATA_ENC);
 				try(IOHelper d = dout.writeNextBlock()) {
 					d.write(id);
 					d.write(dt.gid);
@@ -603,6 +623,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					g.isProperty = rd.isProperty;
 					g.group = rd.group;
 					g.command = rd.command;
+					g.layerCtrl = rd.layerCtrl;
 					reg.register(g);
 					if(rd.gid != -1)
 						reg.register(rd.gid, g);
@@ -610,8 +631,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				}).add(rd.anim);
 			} else {
 				reg.register(rd.pose, rd.anim);
-				reg.register((CustomPose) rd.pose);
-				((CustomPose) rd.pose).command = rd.command;
+				CustomPose cp = (CustomPose) rd.pose;
+				reg.register(cp);
+				cp.command = rd.command;
+				cp.layerCtrl = rd.layerCtrl;
 				if(rd.gid != -1)
 					reg.register(rd.gid, rd.pose);
 			}
@@ -657,6 +680,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		ANIMATION_DATA_GROUP,
 		MODEL_PROFILES_ID,
 		ANIMATION_DATA_COMMAND,
+		ANIMATION_DATA_ENC,
 		;
 		public static final Type[] VALUES = values();
 	}
@@ -682,6 +706,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		private boolean isProperty;
 		private String group;
 		private boolean command;
+		private boolean layerCtrl;
 
 		public ResolvedData(VanillaPose pose, boolean add) {
 			this.pose = pose;

@@ -7,6 +7,7 @@ public interface IManualGesture {
 	AnimationType getType();
 	int getOrder();
 	boolean isCommand();
+	boolean isLayerControlled();
 
 	default boolean isProperty() {
 		return false;

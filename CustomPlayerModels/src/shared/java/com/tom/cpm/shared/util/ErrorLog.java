@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.text.FormatText;
@@ -19,14 +18,19 @@ public class ErrorLog {
 
 	@SuppressWarnings("unchecked")
 	public static List<LogEntry> collectErrors() {
-		List<Player<?>> players = MinecraftClientAccess.get().getDefinitionLoader().getPlayers();
-		List<LogEntry> entries = players.stream().map(Player::getModelDefinition0).filter(d -> d != null && d.getError() != null).map(d -> {
-			Throwable err = d.getError();
-			if(err instanceof SafetyException)
-				return new LogEntry(LogLevel.INFO, new FormatText("label.cpm.error.blockedBySafety", d.getPlayerObj().getName(), new FormatText("label.cpm.block_reason." + ((SafetyException)err).getBlockReason().name().toLowerCase(Locale.ROOT))), err, 0);
-			else
-				return new LogEntry(LogLevel.WARNING, new FormatText("label.cpm.error.errorWhileLoading", d.getPlayerObj().getName(), err.toString()), err, 0);
-		}).collect(Collectors.toList());
+		List<LogEntry> entries = new ArrayList<>();
+		try {
+			List<Player<?>> players = MinecraftClientAccess.get().getDefinitionLoader().getPlayers();
+			players.stream().map(Player::getModelDefinition0).filter(d -> d != null && d.getError() != null).map(d -> {
+				Throwable err = d.getError();
+				if(err instanceof SafetyException)
+					return new LogEntry(LogLevel.INFO, new FormatText("label.cpm.error.blockedBySafety", d.getPlayerObj().getName(), new FormatText("label.cpm.block_reason." + ((SafetyException)err).getBlockReason().name().toLowerCase(Locale.ROOT))), err, 0);
+				else
+					return new LogEntry(LogLevel.WARNING, new FormatText("label.cpm.error.errorWhileLoading", d.getPlayerObj().getName(), err.toString()), err, 0);
+			}).forEach(entries::add);
+		} catch (Exception e) {
+			addLog(LogLevel.ERROR, "Error while fetching model loading errors", e);
+		}
 		entries.addAll(errors);
 		return entries;
 	}
@@ -49,7 +53,7 @@ public class ErrorLog {
 			m.put("level", level.name());
 			m.put("msg", message.toMap());
 			StringBuilder sb = new StringBuilder();
-			error.printStackTrace(new StringBuilderStream(sb, "\n"));
+			StringBuilderStream.stacktraceToString(error, sb, "\n");
 			m.put("error", sb.toString());
 			m.put("time", Long.toString(time, 16));
 			return m;
@@ -67,7 +71,7 @@ public class ErrorLog {
 			String msg;
 			if(st) {
 				StringBuilder sb = new StringBuilder();
-				error.printStackTrace(new StringBuilderStream(sb, "\n\t"));
+				StringBuilderStream.stacktraceToString(error, sb, "\n\t");
 				msg = sb.toString().replace("\t", "   ").replace("\n", "\\");
 			} else {
 				msg = error.toString();

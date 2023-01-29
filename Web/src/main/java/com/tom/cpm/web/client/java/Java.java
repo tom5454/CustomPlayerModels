@@ -165,6 +165,7 @@ public class Java {
 	}
 
 	public static String getQueryVariable(String key) {
+		if(DomGlobal.window.location.search.isEmpty())return null;
 		String query = DomGlobal.window.location.search.substring(1);
 		String[] vars = query.split("&");
 		for (int i = 0; i < vars.length; i++) {
@@ -177,6 +178,7 @@ public class Java {
 	}
 
 	public static void removeQueryVariable(String key) {
+		if(DomGlobal.window.location.search.isEmpty())return;
 		String newUrl = DomGlobal.window.location.protocol + "//" + DomGlobal.window.location.host + DomGlobal.window.location.pathname;
 		List<String> q = new ArrayList<>();
 		String query = DomGlobal.window.location.search.substring(1);

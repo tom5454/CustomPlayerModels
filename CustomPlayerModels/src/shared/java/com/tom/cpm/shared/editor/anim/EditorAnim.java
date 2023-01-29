@@ -42,6 +42,7 @@ public class EditorAnim implements IAnimation {
 	public boolean add = true;
 	public boolean loop;
 	public boolean command;
+	public boolean layerControlled = true;
 	public int priority;
 	public InterpolatorType intType = InterpolatorType.POLY_LOOP;
 	public float layerDefault;
@@ -75,6 +76,19 @@ public class EditorAnim implements IAnimation {
 		anim.frames.stream().map(AnimFrame::new).forEach(this.frames::add);
 		if(frames.size() > 0)
 			this.currentFrame = this.frames.get(0);
+	}
+
+	public void setProperties(AnimationProperties p, ActionBuilder ab) {
+		String fn = AnimationsLoaderV1.getFileName(p.pose, p.displayName);
+		ab.updateValueOp(this, this.add, p.add, (a, b) -> a.add = b).
+		updateValueOp(this, this.loop, p.loop, (a, b) -> a.loop = b).
+		updateValueOp(this, this.displayName, p.displayName, (a, b) -> a.displayName = b).
+		updateValueOp(this, this.pose, p.pose, (a, b) -> a.pose = b).
+		updateValueOp(this, this.type, p.type, (a, b) -> a.type = b).
+		updateValueOp(this, this.filename, fn, (a, b) -> a.filename = b).
+		updateValueOp(this, this.intType, p.it, (a, b) -> a.intType = b).
+		updateValueOp(this, this.command, p.command, (a, b) -> a.command = b).
+		updateValueOp(this, this.layerControlled, p.layerCtrl, (a, b) -> a.layerControlled = b);
 	}
 
 	private void calculateSplines() {

@@ -9,12 +9,11 @@ import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.client.PlayerRenderManager;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationState.VRState;
 import com.tom.cpm.shared.model.render.ModelRenderManager.RedirectHolder;
 
 public class VRPlayerRenderer {
-
-	public static boolean isFPHand;
 
 	public static boolean isVRPlayer(Object model) {
 		return model instanceof VRPlayerModel;
@@ -24,8 +23,8 @@ public class VRPlayerRenderer {
 		return new RedirectHolderVRPlayer(mngr, (VRPlayerModel<AbstractClientPlayer>) model);
 	}
 
-	public static VRState getVRState(Object model) {
-		if(isFPHand)return VRState.FIRST_PERSON;
+	public static VRState getVRState(AnimationMode mode, Object model) {
+		if(mode == AnimationMode.HAND)return VRState.FIRST_PERSON;
 		if(model instanceof VRPlayerModel_WithArms)return VRState.THIRD_PERSON_STANDING;
 		if(model instanceof VRPlayerModel)return VRState.THIRD_PERSON_SITTING;
 		return null;

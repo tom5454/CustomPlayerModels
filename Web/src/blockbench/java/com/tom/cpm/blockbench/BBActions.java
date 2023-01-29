@@ -2,14 +2,16 @@ package com.tom.cpm.blockbench;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.ItemSlot;
-import com.tom.cpm.blockbench.BlockbenchImport.UVMul;
+import com.tom.cpm.blockbench.convert.BBParts;
+import com.tom.cpm.blockbench.convert.BlockbenchImport;
+import com.tom.cpm.blockbench.convert.BlockbenchImport.UVMul;
+import com.tom.cpm.blockbench.convert.ProjectConvert;
+import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Toggle;
 import com.tom.cpm.blockbench.proxy.Cube;
@@ -31,7 +33,9 @@ import com.tom.cpm.blockbench.proxy.Undo;
 import com.tom.cpm.blockbench.proxy.Undo.UndoData;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec2;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
+import com.tom.cpm.blockbench.proxy.electron.Electron;
 import com.tom.cpm.blockbench.util.BBPartValues;
+import com.tom.cpm.blockbench.util.PopupDialogs;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.model.PartValues;
@@ -201,8 +205,19 @@ public class BBActions {
 			a.icon = "launch";
 			a.click = e -> {
 				EmbeddedEditor.setOpenListener(ed -> {
-					new BlockbenchExport(ed).doExport().then(__ -> {
+					//MessagePopup msg = new MessagePopup(ed.frame, I18n.get("label.cpm.loading"), I18n.get("label.cpm.loading"));
+					//ed.frame.openPopup(msg);
+					ProjectConvert.prepExport(ed, w -> {
+						Electron.app.focus();
+						return PopupDialogs.displayWarning(ed, w);
+					}).then(__ -> {
 						ed.refreshCaches();
+						EmbeddedEditor.focus();
+						//msg.close();
+						return null;
+					}).catch_(ex -> {
+						EmbeddedEditor.close();
+						PopupDialogs.displayError("bb-label.error.export", ex);
 						return null;
 					});
 				});
@@ -264,9 +279,7 @@ public class BBActions {
 			grp.name = I18n.format("label.cpm.elem.item." + itemSlot.name().toLowerCase(Locale.ROOT));
 			Group gr = new Group(grp);
 
-			Map<String, Object> pluginDt = new HashMap<>();
-			pluginDt.put("item", itemSlot.name().toLowerCase());
-			gr.pluginData = JsonUtil.toJson(pluginDt);
+			gr.getData().setItemRenderer(itemSlot.name().toLowerCase()).flush();
 
 			Group parent = null;
 			switch (itemSlot) {

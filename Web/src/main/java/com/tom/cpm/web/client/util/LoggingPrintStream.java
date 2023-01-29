@@ -53,7 +53,8 @@ public class LoggingPrintStream extends PrintStream {
 		}
 		StackTraceElement stacktraceelement = astacktraceelement[Math.min(d, astacktraceelement.length)];*/
 		//"[" + stacktraceelement.getFileName() + ":" + stacktraceelement.getLineNumber() + "]: " +
-		if(string.endsWith("\n") || string.endsWith("\r"))string = string.substring(0, string.length() - 2);
+		while(string.endsWith("\n") || string.endsWith("\r"))
+			string = string.substring(0, string.length() - 1);
 		logger.accept(string);
 	}
 

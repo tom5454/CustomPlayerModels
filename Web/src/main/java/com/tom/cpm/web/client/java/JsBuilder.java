@@ -15,4 +15,12 @@ public class JsBuilder<V> {
 	public JsObject build() {
 		return JsObject.fromEntries(Js.uncheckedCast(map.entries()));
 	}
+
+	public boolean isEmpty() {
+		return map.size == 0;
+	}
+
+	public String first() {
+		return map.keys().next().getValue();
+	}
 }

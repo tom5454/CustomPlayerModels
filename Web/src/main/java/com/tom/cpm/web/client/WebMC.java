@@ -261,7 +261,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		StringBuilder sb = new StringBuilder();
 		sb.append(text);
 		sb.append('\n');
-		sb.append(ExceptionUtil.getStackTrace(thr));
+		sb.append(ExceptionUtil.getStackTrace(thr, false));
 		DomGlobal.console.info(sb.toString());
 	}
 
@@ -276,7 +276,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		StringBuilder sb = new StringBuilder();
 		sb.append(text);
 		sb.append('\n');
-		sb.append(ExceptionUtil.getStackTrace(thr));
+		sb.append(ExceptionUtil.getStackTrace(thr, false));
 		DomGlobal.console.error(sb.toString());
 	}
 
@@ -291,7 +291,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		StringBuilder sb = new StringBuilder();
 		sb.append(text);
 		sb.append('\n');
-		sb.append(ExceptionUtil.getStackTrace(thr));
+		sb.append(ExceptionUtil.getStackTrace(thr, false));
 		DomGlobal.console.warn(sb.toString());
 	}
 
@@ -357,7 +357,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 
 	@Override
 	public String getMCVersion() {
-		return "1.16.5";
+		return "web";
 	}
 
 	@Override

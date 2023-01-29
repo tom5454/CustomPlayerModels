@@ -4,7 +4,7 @@ Hold the Middle mouse button to rotate the view. Hold Shift+Middle mouse button 
 Can be changed to right click in Edit/Settings.
 
 ### Spinners:
-![Image: Spinner](https://github.com/tom5454/CustomPlayerModels/blob/master/screenshots/spinner.png)  
+![Image: Spinner](https://github.com/tom5454/CustomPlayerModels/wiki/images/spinner.png)  
 Hold Shift to increment/decrement by 0.1  
 Hold Ctrl to increment/decrement by 10  
 Hold Alt to increment/decrement by 0.01  
@@ -20,7 +20,7 @@ Ctrl+Y Redo
 
 ## In-Game Controls (Keybindings)
 Gestures Menu (defualt G):  
-![Image: Gestures Menu](https://github.com/tom5454/CustomPlayerModels/blob/master/screenshots/gestures_menu.png)  
+![Image: Gestures Menu](https://github.com/tom5454/CustomPlayerModels/wiki/images/gestures_menu.png)  
 Control custom animations, setup quick access keybindings.  
 Quick Access 1-6: Quick Access Keybindings for custom animations  
 Toggle Rendering: Toggle Custom Model rendering on/off.  

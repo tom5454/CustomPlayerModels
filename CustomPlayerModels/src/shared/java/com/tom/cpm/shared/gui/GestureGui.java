@@ -448,7 +448,7 @@ public class GestureGui extends Frame {
 			this.name = nm;
 			this.gesture = g;
 			getKb();
-			if(layer || value) {
+			if(layer || value || !g.isLayerControlled()) {
 				if(!MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
 					setEnabled(false);
 					Slider s = new Slider(gui, nm);

@@ -26,26 +26,22 @@ public class VRArmRendererMixin_VR extends PlayerRenderer {
 
 	@Inject(at = @At("HEAD"), method = "renderRightHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderRightArmPre(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
-		com.tom.cpm.client.vr.VRPlayerRenderer.isFPHand = true;
 		CustomPlayerModelsClient.INSTANCE.manager.bindHand(player, vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderLeftHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderLeftArmPre(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
-		com.tom.cpm.client.vr.VRPlayerRenderer.isFPHand = true;
 		CustomPlayerModelsClient.INSTANCE.manager.bindHand(player, vertexConsumers, getModel());
 	}
 
 	@Inject(at = @At("RETURN"), method = "renderRightHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderRightArmPost(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
-		com.tom.cpm.client.vr.VRPlayerRenderer.isFPHand = false;
 	}
 
 	@Inject(at = @At("RETURN"), method = "renderLeftHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V")
 	public void onRenderLeftArmPost(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(getModel());
-		com.tom.cpm.client.vr.VRPlayerRenderer.isFPHand = false;
 	}
 
 	@Redirect(at =

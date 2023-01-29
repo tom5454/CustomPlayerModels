@@ -95,6 +95,7 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 		e.isProperty = data.getBoolean("isProperty", false);
 		e.group = data.getString("group", null);
 		e.command = data.getBoolean("command", false);
+		e.layerControlled = data.getBoolean("layerControlled", true);
 		JsonList frames = data.getList("frames");
 		frames.forEachMap(d -> initFrame(e, d));
 	}
@@ -122,6 +123,7 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 		data.put("isProperty", e.isProperty);
 		if(e.group != null && !e.group.isEmpty())data.put("group", e.group);
 		data.put("command", e.command);
+		data.put("layerControlled", e.layerControlled);
 		data.put("frames", writeFrames(e));
 	}
 
