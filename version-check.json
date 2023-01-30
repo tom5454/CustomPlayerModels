@@ -30,7 +30,8 @@
     "1.19.3-latest": "0.6.4a",
     "1.19.3-fabric-latest": "0.6.4a",
     "web-latest": "0.6.4a",
-    "blockbench-latest": "0.6.4_pre1"
+    "blockbench-latest": "0.6.4_pre1",
+    "1.19.4-fabric-latest": "0.6.4a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -763,5 +764,8 @@
     "0.6.3_pre2": "Fixed blockbench plugin not exporting (Closes #341, Closes #345)\nFixed embedded editor file issues (Closes #344)\nFixed the CPM/Add parts buttons not working\nFixed CPM/Hidden by Default option not showing up",
     "0.6.3_pre3": "Fixed blockbench export bug (Closes #346)",
     "0.6.4_pre1": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups\nAdded the warnings popup again\n- Some warnings have an Auto Fix option\nAdded format converter from old plugin format\nAdded source maps\nFixed export crash with bad texture names\nFixed models with decimal size and box UV not converting correctly"
+  },
+  "1.19.4-fabric": {
+    "0.6.4a": "Ported to 23w04a"
   }
 }
