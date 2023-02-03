@@ -1,15 +1,14 @@
 package com.tom.blockbench;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.tom.cpl.util.Pair;
+import com.tom.cpm.web.gwt.ClasspathFix;
 
 public class BuildBlockbench {
 
@@ -23,18 +22,11 @@ public class BuildBlockbench {
 
 	public static Pair<File, File> main(boolean debug, boolean prod) {
 		System.out.println("Running CPM Blockbench Plugin builder");
-		String version = "0.6.4_pre1";
+		String version = "0.6.5_pre1";
 		File f = new File(".");
-		String cp;
-		try(BufferedReader rd = new BufferedReader(new FileReader(new File(f, "cp.txt")))) {
-			cp = rd.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
 		File war = new File(f, "war");
 
-		buildGwt(cp, version, f, "Blockbench", debug);
+		buildGwt(version, f, "Blockbench", debug);
 
 		File symbolMaps = new File(war, "WEB-INF/deploy/cpmblockbench/symbolMaps");
 		File[] sm = symbolMaps.listFiles(s -> s.getName().endsWith("_sourceMap0.json"));
@@ -46,9 +38,9 @@ public class BuildBlockbench {
 		return Pair.of(r, sourceMap);
 	}
 
-	private static void buildGwt(String cp, String version, File f, String mode, boolean debug) {
+	private static void buildGwt(String version, File f, String mode, boolean debug) {
 		//"-Xdebug", "-Xrunjdwp:server=n,transport=dt_socket,address=4013,suspend=y"
-		String[] args = new String[] {"java", "-cp", cp, "-Dugwt.useContext=true", "-Dugwt.sourcemap=http://localhost:8000/src/cpmblockbench.map", "com.tom.cpm.web.gwt.MainWrapper", debug ? "--buildDebug" : "--build", version, mode};
+		String[] args = new String[] {"java", "-cp", ClasspathFix.getFixedClasspath(), "-Dugwt.useContext=true", "-Dugwt.sourcemap=http://localhost:8000/src/cpmblockbench.map", "com.tom.cpm.web.gwt.MainWrapper", debug ? "--buildDebug" : "--build", version, mode};
 		ProcessBuilder pb = new ProcessBuilder(args);
 		pb.directory(f);
 		pb.inheritIO();

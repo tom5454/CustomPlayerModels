@@ -261,7 +261,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		StringBuilder sb = new StringBuilder();
 		sb.append(text);
 		sb.append('\n');
-		sb.append(ExceptionUtil.getStackTrace(thr, false));
+		sb.append(ExceptionUtil.getStackTrace(thr));
 		DomGlobal.console.info(sb.toString());
 	}
 
@@ -276,7 +276,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		StringBuilder sb = new StringBuilder();
 		sb.append(text);
 		sb.append('\n');
-		sb.append(ExceptionUtil.getStackTrace(thr, false));
+		sb.append(ExceptionUtil.getStackTrace(thr));
 		DomGlobal.console.error(sb.toString());
 	}
 
@@ -291,7 +291,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		StringBuilder sb = new StringBuilder();
 		sb.append(text);
 		sb.append('\n');
-		sb.append(ExceptionUtil.getStackTrace(thr, false));
+		sb.append(ExceptionUtil.getStackTrace(thr));
 		DomGlobal.console.warn(sb.toString());
 	}
 

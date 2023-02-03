@@ -32,8 +32,8 @@ public class AnimFrame {
 		}
 	}
 
-	public void importFrameData(ModelElement elem, FrameData from) {
-		anim.editor.action("setAnim", "action.cpm.value").addToMap(components, elem, new FrameData(elem, from)).execute();
+	public void importFrameData(ActionBuilder ab, ModelElement elem, FrameData from) {
+		ab.addToMap(components, elem, new FrameData(elem, from));
 	}
 
 	public FrameData copy(ModelElement elem) {

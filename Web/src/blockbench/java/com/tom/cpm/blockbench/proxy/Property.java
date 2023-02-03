@@ -39,10 +39,11 @@ public class Property {
 	}
 
 	@JsOverlay
-	public static Property createProperty(Clazz clz, Type type, String id, String label, Object def, Condition cond) {
+	public static Property createProperty(Clazz clz, Type type, String id, String label, Object def, Condition cond, boolean hidden) {
 		PropertyInit init = new PropertyInit();
 		init.label = label;
 		init.def = def;
+		init.exposed = !hidden;
 		init.condition = cond;
 		return new Property(clz.obj, type.name().toLowerCase(), id, init);
 	}

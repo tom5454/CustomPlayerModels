@@ -24,8 +24,8 @@ public class ProjectData {
 	public ModelDescription description;
 	public Map<String, Object> animations = new HashMap<>();
 
-	public ProjectData() {
-		if(Project.pluginData != null && !Project.pluginData.isEmpty()) {
+	public ProjectData(boolean init) {
+		if(init && Project.pluginData != null && !Project.pluginData.isEmpty()) {
 			JsonMap s = JsonUtil.fromJson(Project.pluginData);
 
 			if(s.containsKey("anims")) {

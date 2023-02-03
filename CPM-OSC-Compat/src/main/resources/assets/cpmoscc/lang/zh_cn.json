@@ -1,0 +1,22 @@
+{
+  "comment.cpm.doNotEdit1": "#########################################################",
+  "comment.cpm.doNotEdit2": "Auto-generated file DO NOT EDIT! See template jsons in the Localization folder of the GitHub Repo.",
+  "comment.cpm.doNotEdit3": "#########################################################",
+  "osc-button.cpmosc.oscSettings": "OSC 设置",
+  "osc-button.cpmosc.oscWizard": "OSC 动画向导",
+  "osc-button.cpmosc.copyName": "复制名称",
+  "osc-button.cpmosc.selectFromInputs": "从现有输入中选择",
+  "osc-button.cpmosc.importFromSelected": "从选定动画导入",
+  "osc-label.cpmosc.oscPath": "OSC路径：",
+  "osc-label.cpmosc.oscFirstArg": "第一个参数：",
+  "osc-label.cpmosc.oscArgId": "参数ID:",
+  "osc-label.cpmosc.valueRange": "取值范围：",
+  "osc-label.cpmosc.noOscData": "未收到 OSC 数据\\检查您的发送程序设置\\您可能需要重新启动您的发送程序\\如果您在打开此 UI 之前启动它",
+  "osc-label.cpmosc.oscEnable": "启用 OSC",
+  "osc-label.cpmosc.oscDisabled": "OSC 已禁用，请使用复选框启用它并按保存",
+  "osc-label.cpmosc.oscPort": "端口：",
+  "osc-label.cpmosc.oscDebugger": "OSC调试",
+  "osc-tooltip.cpmosc.oscSettings": "打开 OSC 设置和调试弹出窗口",
+  "osc-tooltip.cpmosc.oscWizard": "使用向导生成新的 OSC 动画",
+  "osc-tooltip.cpmosc.oscFirstArg": "过滤第一个字符串参数，留空不过滤\\对VMC触发器有用"
+}

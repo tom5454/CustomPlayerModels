@@ -14,6 +14,7 @@ import com.tom.cpm.blockbench.convert.ProjectConvert;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Toggle;
+import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Cube.CubeProperties;
 import com.tom.cpm.blockbench.proxy.Group;
@@ -33,7 +34,6 @@ import com.tom.cpm.blockbench.proxy.Undo;
 import com.tom.cpm.blockbench.proxy.Undo.UndoData;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec2;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
-import com.tom.cpm.blockbench.proxy.electron.Electron;
 import com.tom.cpm.blockbench.util.BBPartValues;
 import com.tom.cpm.blockbench.util.PopupDialogs;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -207,17 +207,14 @@ public class BBActions {
 				EmbeddedEditor.setOpenListener(ed -> {
 					//MessagePopup msg = new MessagePopup(ed.frame, I18n.get("label.cpm.loading"), I18n.get("label.cpm.loading"));
 					//ed.frame.openPopup(msg);
-					ProjectConvert.prepExport(ed, w -> {
-						Electron.app.focus();
-						return PopupDialogs.displayWarning(ed, w);
-					}).then(__ -> {
+					PopupDialogs.runTaskWithWarning(w -> ProjectConvert.prepExport(ed, w), Blockbench::focus).then(__ -> {
 						ed.refreshCaches();
 						EmbeddedEditor.focus();
 						//msg.close();
 						return null;
 					}).catch_(ex -> {
 						EmbeddedEditor.close();
-						PopupDialogs.displayError("bb-label.error.export", ex);
+						PopupDialogs.displayError(I18n.get("bb-label.error.export"), ex);
 						return null;
 					});
 				});

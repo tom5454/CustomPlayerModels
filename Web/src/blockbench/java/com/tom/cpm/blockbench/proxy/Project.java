@@ -40,7 +40,12 @@ public class Project {
 
 	@JsOverlay
 	public static ProjectData getData() {
-		if(data == null)data = new ProjectData();
+		if(data == null)data = new ProjectData(true);
 		return data;
+	}
+
+	@JsOverlay
+	public static void setData(ProjectData data) {
+		Project.data = data;
 	}
 }

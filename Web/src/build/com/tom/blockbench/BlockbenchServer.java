@@ -32,7 +32,7 @@ public class BlockbenchServer {
 				path = path.substring(1);
 				if(log)System.out.println(t.getRemoteAddress() + " " + path);
 				if(path.equals("cpm_plugin.js")) {
-					Pair<File, File> r = BuildBlockbench.main(true, false);
+					Pair<File, File> r = BuildBlockbench.main(false, false);
 					File in = r.getKey();
 					map = r.getValue();
 					try(FileInputStream f = new FileInputStream(in)) {
@@ -77,7 +77,7 @@ public class BlockbenchServer {
 	private static HttpServer server;
 
 	public static void main(String[] args) {
-		System.out.println("http://localhost:8000/cpm_plugin.js");
+		System.out.println("Load the plugin from: http://localhost:8000/cpm_plugin.js");
 		try {
 			server = HttpServer.create(new InetSocketAddress(8000), 0);
 			server.createContext("/", new MyHandler(true));
@@ -86,11 +86,13 @@ public class BlockbenchServer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("Press enter to exit");
 		try {
 			System.in.read();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("Stopping server...");
 		server.stop(1);
 		System.exit(0);
 	}

@@ -29,11 +29,14 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.actions.ImageAction;
+import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
+import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
+import com.tom.cpm.shared.editor.util.QuickTask;
 import com.tom.cpm.shared.editor.util.SafetyLevel;
 import com.tom.cpm.shared.editor.util.SafetyLevel.SafetyReport;
 import com.tom.cpm.shared.model.PartValues;
@@ -328,6 +331,23 @@ public class Generators {
 			}
 		});
 		b.execute();
+		editor.setQuickAction.accept(new QuickTask(editor.gui().i18nFormat("button.cpm.mirrorAnimations"), editor.gui().i18nFormat("tooltip.cpm.mirrorAnimations"), () -> {
+			ActionBuilder ab = eg.getEditor().action("i", "button.cpm.tools.mirror");
+			editor.animations.forEach(a -> a.getFrames().forEach(f -> mirrored.forEach(me -> {
+				FrameData dt = f.getComponents().get(me);
+				if(dt != null) {
+					Vec3f p = new Vec3f(dt.getPosition());
+					p.x = -p.x;
+					Vec3f r = new Vec3f(dt.getRotation());
+					r.y = 360 - r.y;
+					r.z = 360 - r.z;
+					ab.updateValueOp(dt, dt.getPosition(), p, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, FrameData::setPos, editor.setAnimPos);
+					ab.updateValueOp(dt, dt.getRotation(), r, 0, 360, true, FrameData::setRot, editor.setAnimRot);
+				}
+			})));
+			ab.onAction(() -> editor.animations.forEach(EditorAnim::clearCache));
+			ab.execute();
+		}));
 	}
 
 	private static void mirrorZ(ModelElement e, ActionBuilder b, Set<ModelElement> mirrored) {

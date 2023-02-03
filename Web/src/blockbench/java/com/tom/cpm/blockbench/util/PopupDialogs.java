@@ -1,15 +1,17 @@
 package com.tom.cpm.blockbench.util;
 
 import java.util.List;
+import java.util.function.Function;
 
-import com.tom.cpm.blockbench.convert.ProjectConvert;
+import com.tom.cpm.blockbench.PluginStart;
 import com.tom.cpm.blockbench.convert.WarnEntry;
 import com.tom.cpm.blockbench.proxy.Dialog;
-import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.web.client.util.Clipboard;
 import com.tom.cpm.web.client.util.I18n;
 import com.tom.ugwt.client.ExceptionUtil;
 import com.tom.ugwt.client.GlobalFunc;
 
+import elemental2.core.JsError;
 import elemental2.dom.DomGlobal;
 import elemental2.promise.Promise;
 import elemental2.promise.Promise.PromiseExecutorCallbackFn.ResolveCallbackFn;
@@ -19,6 +21,7 @@ public class PopupDialogs {
 	public static Dialog errorDialog;
 	public static Dialog infoDialog;
 	public static Dialog warnDialog;
+	public static GlobalFunc copyErrorFunc;
 
 	static {
 		Dialog.DialogProperties dctr = new Dialog.DialogProperties();
@@ -39,16 +42,27 @@ public class PopupDialogs {
 		dctr.title = I18n.get("label.cpm.info");
 		dctr.lines = new String[] {"?"};
 		infoDialog = new Dialog(dctr);
+
+		copyErrorFunc = GlobalFunc.pushGlobalFunc(CopyErrorCallback.class, err -> Clipboard.writeText(DomGlobal.atob(err)));
+		PluginStart.cleanup.add(copyErrorFunc);
 	}
 
 	public static void displayError(String msg, Object err) {
 		if(err instanceof PopupDialogs.CancelException)return;
+		String errorMsg;
 		if(err instanceof Throwable) {
-			String st = ExceptionUtil.getStackTrace((Throwable) err, true);
+			String st = ExceptionUtil.getStackTrace((Throwable) err);
+			errorMsg = msg + "\n" + st;
 			DomGlobal.console.error(st);
-		} else
+		} else if(err instanceof JsError) {
+			String st = ExceptionUtil.getStackTrace((JsError) err);
+			errorMsg = msg + "\n" + st;
+			DomGlobal.console.error(st);
+		} else {
 			DomGlobal.console.log(err);
-		errorDialog.setLines(I18n.get(msg), "<br>", err.toString(), "<br>", I18n.get("bb-label.pleaseReport"));
+			errorMsg = msg + "\n" + err;
+		}
+		errorDialog.setLines(msg, "<br>", err.toString(), "<br>", I18n.get("bb-label.pleaseReport"), "<br>", "<button onclick='" + copyErrorFunc + "(\"" + DomGlobal.btoa(errorMsg) + "\")'>" + I18n.get("bb-button.copyErrorMsg") + "</button>");
 		errorDialog.show();
 	}
 
@@ -65,16 +79,25 @@ public class PopupDialogs {
 		void run(int id);
 	}
 
+	@JsFunction
+	public interface CopyErrorCallback {
+		void run(String b64);
+	}
+
+	public interface WarnCallback {
+		Promise<Void> updateState(Function<List<WarnEntry>, Promise<Void>> openWarn);
+	}
+
 	private static class WarnDialogHandler {
-		private Editor e;
+		private WarnCallback cb;
 		private List<WarnEntry> ent;
 		private boolean quickFixed;
 		private GlobalFunc quickFixFunc;
 		private ResolveCallbackFn<Void> res;
 
-		public WarnDialogHandler(Editor e, List<WarnEntry> ent) {
-			this.e = e;
+		public WarnDialogHandler(List<WarnEntry> ent, WarnCallback cb) {
 			this.ent = ent;
+			this.cb = cb;
 		}
 
 		public Promise<Void> display() {
@@ -87,7 +110,7 @@ public class PopupDialogs {
 				};
 				warnDialog.onConfirm = dr -> {
 					if(quickFixed) {
-						res.onInvoke(ProjectConvert.prepExport(e, w -> Promise.resolve((Void) null)));
+						res.onInvoke(cb.updateState(w -> Promise.resolve((Void) null)));
 					} else {
 						res.onInvoke((Void) null);
 					}
@@ -102,7 +125,7 @@ public class PopupDialogs {
 		private void applyQuickFix(int id) {
 			ent.get(id).runQuickFix().then(f -> {
 				if(f) {
-					ProjectConvert.prepExport(e, w -> {
+					cb.updateState(w -> {
 						this.ent = w;
 						fillWarnDialog(w, quickFixFunc);
 						return Promise.reject(null);
@@ -118,8 +141,19 @@ public class PopupDialogs {
 		}
 	}
 
-	public static Promise<Void> displayWarning(Editor e, List<WarnEntry> ent) {
-		return new WarnDialogHandler(e, ent).display();
+	public static Promise<Void> runTaskWithWarning(WarnCallback cb) {
+		return cb.updateState(w -> displayWarning(cb, w));
+	}
+
+	public static Promise<Void> runTaskWithWarning(WarnCallback cb, Runnable onWarn) {
+		return cb.updateState(w -> {
+			onWarn.run();
+			return displayWarning(cb, w);
+		});
+	}
+
+	public static Promise<Void> displayWarning(WarnCallback cb, List<WarnEntry> ent) {
+		return new WarnDialogHandler(ent, cb).display();
 	}
 
 	private static void fillWarnDialog(List<WarnEntry> ent, GlobalFunc quickFix) {

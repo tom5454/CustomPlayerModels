@@ -150,6 +150,8 @@ buttom.cpm.copyAnimFrame=Copy Frame
 button.cpm.pasteAnimFrame=Paste Frame
 buttom.cpm.copyAnimFrameData=Copy Part Pose
 button.cpm.pasteAnimFrameData=Paste Part Pose
+button.cpm.dupAnimations=Duplicate Animations
+button.cpm.mirrorAnimations=Mirror Animations
 
 button.cpm.root_group.cape=Cape
 button.cpm.root_group.elytra=Elytra
@@ -320,6 +322,8 @@ tooltip.cpm.anim.pasteFrame=Sets the current frame from the clipboard (internal)
 tooltip.cpm.anim.copyData=Copies the selected part's pose\Keybind: %s
 tooltip.cpm.anim.pasteData=Sets the selected part's pose from the clipboard (internal)\Keybind: %s
 tooltip.cpm.anim_layerCtrl=Use skin layers to trigger\this animation on vanilla servers.\Selected by default
+tooltip.cpm.dupAnimations=Copy all of the animations for the duplicated parts
+tooltip.cpm.mirrorAnimations=Mirror animations for the mirrored parts
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -742,6 +746,7 @@ label.cpm.keybind.pasteAnimPart=Paste Part Pose:
 label.cpm.skinSettings.title=Skin Settings (Texture: %s)
 label.cpm.copyTransform.from=Copy from: %s
 label.cpm.anim_layerCtrl=Skin Layer Triggered
+label.cpm.keybind.quickAction=Run Quick Action
 
 label.cpm.paste.connecting.title=Connecting...
 label.cpm.paste.connecting.message=Connecting to paste site...
@@ -880,6 +885,7 @@ error.paste.noSession=No session
 error.paste.invalidSession=Invalid session
 error.paste.authFail=Failed to connect to paste site:\%s
 error.paste.parseError=Corrupted response from server
+error.paste.fileTooBig=File size too big
 
 narrator.cpm.field=Text Field
 
@@ -1039,6 +1045,8 @@ bb-button.openEmbeddedEditor=Open Embedded CPM Editor
 bb-button.newAnimation=Add new Animation (CPM)
 bb-button.viewInEmbeddedEditor=View In Embedded CPM Editor
 bb-button.autoFix=Auto Fix
+bb-button.copyErrorMsg=Copy Error Message
+bb-button.viewInBB=View in Blockbench
 
 bb-label.cpmCodecDesc=Model for Customizable Player Models mod
 bb-label.cpmInfo.export=You have to export to Customizable Player Models Project file to use it in-game.
@@ -1062,6 +1070,9 @@ bb-label.autoFix.renameTexture=Renamed Texture
 bb-label.autoFix.regroup=Regroup
 bb-label.convertedFromOld=This project was made using an earlier version of the plugin.\The plugin data was converted into the new format.
 bb-label.error.oldConvertFail=Failed to convert old project data
+bb-label.warn.nonConvertedPartNotSupported=Root Part %s is not hidden, The cube will be converted.
+bb-label.warn.coloredCubeNotSupported=Colored cubes not supported: %s
+bb-label.warn.copyTransformNotVis=Elements with Copy Transform won't show correctly
 
 bb-tooltip.export.renameGroup=Rename the group to the selected type\If a group with the same name already exists the action will fail.
 

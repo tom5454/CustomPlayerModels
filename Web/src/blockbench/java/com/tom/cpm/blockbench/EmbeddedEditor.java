@@ -35,7 +35,7 @@ public class EmbeddedEditor {
 
 	public static void open() {
 		if(window == null) {
-			if(Electron.app != null) {
+			if(Electron.isElectron() && Electron.app != null) {
 				Electron.app.on("browser-window-created", noMenuBar);
 				window = Js.uncheckedCast(DomGlobal.window.open(Js.undefined(), "", "toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=1280,height=720"));
 				Electron.app.removeListener("browser-window-created", noMenuBar);

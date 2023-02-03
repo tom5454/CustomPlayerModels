@@ -13,6 +13,7 @@ import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
+import com.tom.cpm.shared.editor.anim.AnimationProperties;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.popup.AnimationSettingsPopup;
@@ -118,7 +119,7 @@ public class OSCWizardPopup extends PopupPanel {
 
 		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			close();
-			eg.getEditor().addNewAnim(null, createPath(), AnimationType.LAYER, true, false, InterpolatorType.POLY_LOOP, true);
+			eg.getEditor().addNewAnim(new AnimationProperties(null, createPath(), AnimationType.LAYER, true, false, InterpolatorType.POLY_LOOP, true, false));
 			eg.openPopup(new AnimationSettingsPopup(gui, eg.getEditor(), true));
 		});
 		ok.setBounds(new Box(5, 0, 80, 20));

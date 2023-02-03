@@ -8,6 +8,8 @@
   "bb-button.newAnimation": "(WԀƆ) uoıʇɐɯıuⱯ ʍǝu ppⱯ",
   "bb-button.viewInEmbeddedEditor": "ɹoʇıpƎ WԀƆ pǝppǝqɯƎ uI ʍǝıΛ",
   "bb-button.autoFix": "xıℲ oʇnⱯ",
+  "bb-button.copyErrorMsg": "ǝbɐssǝW ɹoɹɹƎ ʎdoƆ",
+  "bb-button.viewInBB": "ɥɔuǝqʞɔoןᗺ uı ʍǝıΛ",
   "bb-label.cpmCodecDesc": "poɯ sןǝpoW ɹǝʎɐןԀ ǝןqɐzıɯoʇsnƆ ɹoɟ ןǝpoW",
   "bb-label.cpmInfo.export": "˙ǝɯɐb-uı ʇı ǝsn oʇ ǝןıɟ ʇɔǝظoɹԀ sןǝpoW ɹǝʎɐןԀ ǝןqɐzıɯoʇsnƆ oʇ ʇɹodxǝ oʇ ǝʌɐɥ noʎ",
   "bb-label.cpmInfo.import": "˙ǝןıɟ ʇɔǝظoɹd buıʇsıxǝ uɐ ʇɹodɯı oʇ uoıʇdo ʇɔǝظoɹԀ sןǝpoW ɹǝʎɐןԀ ǝןqɐzıɯoʇsnƆ uǝdO ǝɥʇ ǝs∩",
@@ -30,5 +32,8 @@
   "bb-label.autoFix.regroup": "dnoɹbǝᴚ",
   "bb-label.convertedFromOld": "˙ʇɐɯɹoɟ ʍǝu ǝɥʇ oʇuı pǝʇɹǝʌuoɔ sɐʍ ɐʇɐp uıbnןd ǝɥ⟘\\˙uıbnןd ǝɥʇ ɟo uoısɹǝʌ ɹǝıןɹɐǝ uɐ buısn ǝpɐɯ sɐʍ ʇɔǝظoɹd sıɥ⟘",
   "bb-label.error.oldConvertFail": "ɐʇɐp ʇɔǝظoɹd pןo ʇɹǝʌuoɔ oʇ pǝןıɐℲ",
+  "bb-label.warn.nonConvertedPartNotSupported": "˙pǝʇɹǝʌuoɔ ǝq ןןıʍ ǝqnɔ ǝɥ⟘ \u0027uǝppıɥ ʇou sı %s ʇɹɐԀ ʇooᴚ",
+  "bb-label.warn.coloredCubeNotSupported": "%s :pǝʇɹoddns ʇou sǝqnɔ pǝɹoןoƆ",
+  "bb-label.warn.copyTransformNotVis": "ʎןʇɔǝɹɹoɔ ʍoɥs ʇ,uoʍ ɯɹoɟsuɐɹ⟘ ʎdoƆ ɥʇıʍ sʇuǝɯǝןƎ",
   "bb-tooltip.export.renameGroup": "˙ןıɐɟ ןןıʍ uoıʇɔɐ ǝɥʇ sʇsıxǝ ʎpɐǝɹןɐ ǝɯɐu ǝɯɐs ǝɥʇ ɥʇıʍ dnoɹb ɐ ɟI\\ǝdʎʇ pǝʇɔǝןǝs ǝɥʇ oʇ dnoɹb ǝɥʇ ǝɯɐuǝᴚ"
 }

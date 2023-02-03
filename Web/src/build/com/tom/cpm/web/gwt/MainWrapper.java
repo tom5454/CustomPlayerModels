@@ -2,16 +2,10 @@ package com.tom.cpm.web.gwt;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class MainWrapper {
 	private static boolean isLoaded;
@@ -24,31 +18,11 @@ public class MainWrapper {
 			mode = args[2];
 			build = true;
 			if(args[0].equals("--buildDebug"))debug = true;
-		} else if(args.length > 0 && args[0].equals("--cpFix")) {
-			String[] cp = System.getProperty("java.class.path").split(";");
-			Map<String, Integer> sortMap = new HashMap<>();
-			for (int i = 0; i < cp.length; i++) {
-				if(cp[i].endsWith(".jar"))
-					sortMap.put(cp[i], i + 100);
-				else
-					sortMap.put(cp[i], i);
-			}
-			String ncp = Arrays.stream(cp).sorted(Comparator.comparingInt(sortMap::get)).collect(Collectors.joining(";"));
-			String[] nargs = new String[] {"java", "-cp", ncp, "com.tom.cpm.web.gwt.MainWrapper"};
-			ProcessBuilder pb = new ProcessBuilder(nargs);
-			pb.directory(new File("."));
-			pb.inheritIO();
-			System.out.println("Launching classpath fixed GWT runtime");
-			try {
-				int i = pb.start().waitFor();
-				System.out.println("GWT exit: " + i);
-			} catch (InterruptedException | IOException e) {
-				e.printStackTrace();
-			}
-			return;
 		} else {
 			build = false;
 		}
+		new File("./gwt_temp").mkdirs();
+		System.setProperty("java.io.tmpdir", "./gwt_temp");
 		checkLoad(new File("."));
 		System.out.println("Making launch args");
 		List<String> a = new ArrayList<>();
@@ -93,15 +67,7 @@ public class MainWrapper {
 			a.add("com.tom.cpm.web.CPM" + mode);
 
 			try(PrintWriter wr = new PrintWriter("cp.txt")) {
-				String[] cp = System.getProperty("java.class.path").split(";");
-				Map<String, Integer> sortMap = new HashMap<>();
-				for (int i = 0; i < cp.length; i++) {
-					if(cp[i].endsWith(".jar"))
-						sortMap.put(cp[i], i + 100);
-					else
-						sortMap.put(cp[i], i);
-				}
-				wr.println(Arrays.stream(cp).sorted(Comparator.comparingInt(sortMap::get)).collect(Collectors.joining(";")));
+				wr.println(ClasspathFix.getFixedClasspath());
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -144,14 +110,12 @@ public class MainWrapper {
 			};
 
 			System.out.println("GWT Loading patchers");
-			System.setProperty("java.io.tmpdir", "./gwt_temp");
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("String\\.format\\(", "com.tom.cpm.web.client.java.Java.format("));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("Integer\\.parseUnsignedInt\\(", "com.tom.cpm.web.client.java.Java.parseUnsignedInt("));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("(\\w+)\\.class.getResourceAsStream\\(", "com.tom.cpm.web.client.java.Java.getResourceAsStream("));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("System\\.nanoTime\\(\\)", "System.currentTimeMillis()"));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("new ThreadPoolExecutor\\([^;]+;", "new com.tom.cpm.web.client.java.AsyncPool();"));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("Byte\\.toUnsignedInt\\(", "com.tom.cpm.web.client.java.Java.toUnsignedInt("));
-			//ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("\\/\\/\\$\\{launchTypeName-djhsdafjlasdjlsdjl\\}\\$", mode));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("\\/\\/\\$\\{fill_resource_map_lqsnlna\\}\\$", resGen));
 			ClassSrcTransformer.addImportTransformRegex("^java\\.nio\\.(\\w+)$", "com.tom.cpm.web.client.java.nio.$1");
 			ClassSrcTransformer.addImportTransformRegex("^java\\.util\\.zip\\.(\\w+)$", "com.tom.cpm.web.client.java.zip.$1");
@@ -184,10 +148,6 @@ public class MainWrapper {
 			ClassSrcTransformer.addImportTransform("com.google.common.hash.Hashing", "com.tom.cpm.web.client.java.Hashing");
 			ClassSrcTransformer.addImportTransform("java.net.URI", "com.tom.cpm.web.client.java.URI");
 			ClassSrcTransformer.addImportTransform("java.net.URISyntaxException", "com.tom.cpm.web.client.java.URISyntaxException");
-			//WASMInjector.load(ClassSrcTransformer.transformers);
-			//ClassSrcTransformer.addImportTransform("java.io.*", "com.tom.cpm.web.client.java.io.*");
-			//ClassSrcTransformer.transformers.add(new UGWTTransformer());
-			//ClassSrcTransformer.buggyFiles.add("com/tom/cpm/web/client/GuiImpl.java");
 			ClassSrcTransformer.buggyFiles.add("com/tom/cpm/web/client/resources/Resources.java");
 
 			System.out.println("Init finished");

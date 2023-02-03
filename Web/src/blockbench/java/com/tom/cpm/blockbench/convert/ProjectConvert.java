@@ -3,6 +3,7 @@ package com.tom.cpm.blockbench.convert;
 import java.util.List;
 import java.util.function.Function;
 
+import com.tom.cpl.gui.Frame;
 import com.tom.cpm.blockbench.BBGui;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.proxy.Blockbench;
@@ -12,9 +13,12 @@ import com.tom.cpm.blockbench.proxy.Global;
 import com.tom.cpm.blockbench.proxy.Project;
 import com.tom.cpm.blockbench.util.PopupDialogs;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.project.ProjectIO;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
+import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.render.RenderSystem;
+import com.tom.cpm.web.client.util.I18n;
 import com.tom.cpm.web.client.util.JSZip;
 
 import elemental2.core.ArrayBuffer;
@@ -31,7 +35,7 @@ public class ProjectConvert {
 		DomGlobal.console.log("Export");
 		Editor editor = new Editor();
 		editor.setGui(BBGui.makeFrame());
-		return prepExport(editor, w -> PopupDialogs.displayWarning(editor, w)).then(__ -> {
+		return exportWithWarnings(editor).then(__ -> {
 			try {
 				StoreIDGen storeIDgen = new StoreIDGen();
 				Editor.walkElements(editor.elements, storeIDgen::setID);
@@ -48,6 +52,10 @@ public class ProjectConvert {
 		});
 	}
 
+	public static Promise<Void> exportWithWarnings(Editor editor) {
+		return PopupDialogs.runTaskWithWarning(w -> prepExport(editor, w));
+	}
+
 	public static Promise<Void> prepExport(Editor editor, Function<List<WarnEntry>, Promise<Void>> openWarn) {
 		return new Promise<>((res, rej) -> {
 			RenderSystem.withContext(() -> {
@@ -61,26 +69,32 @@ public class ProjectConvert {
 		});
 	}
 
-	public static void parse(ArrayBuffer ab) {
-		DomGlobal.console.log("Parse");
-		CPMCodec.codec.dispatchEvent("parse", Js.cast(JsPropertyMap.of("arraybuffer", ab)));
-		Editor editor = new Editor();
-		editor.setGui(BBGui.makeFrame());
-		editor.loadDefaultPlayerModel();
-		new JSZip().loadAsync(ab).then(editor.project::load).then(__ -> {
-			try {
-				ProjectIO.loadProject(editor, editor.project);
-			} catch (Exception e) {
-				return Promise.reject(e);
-			}
-			return Promise.resolve((Void) null);
-		}).then(v -> {
-			new BlockbenchImport(editor).doImport();
-			return null;
-		}).catch_(err -> {
-			PopupDialogs.displayError("bb-label.error.import", err);
-			return null;
-		});
+	public static Promise<Void> parse(ArrayBuffer ab) {
+		try {
+			DomGlobal.console.log("Parse");
+			CPMCodec.codec.dispatchEvent("parse", Js.cast(JsPropertyMap.of("arraybuffer", ab)));
+			return RenderSystem.withContext(() -> {
+				Editor editor = new Editor();
+				editor.setGui(BBGui.makeFrame());
+				editor.loadDefaultPlayerModel();
+				return new JSZip().loadAsync(ab).then(editor.project::load).then(__ -> {
+					return RenderSystem.withContext(() -> {
+						try {
+							ProjectIO.loadProject(editor, editor.project);
+						} catch (Exception e) {
+							return Promise.reject(e);
+						}
+						return Promise.resolve((Void) null);
+					});
+				}).then(v -> {
+					return PopupDialogs.runTaskWithWarning(w -> RenderSystem.withContext(() -> {
+						return new BlockbenchImport(editor, w).doImport();
+					}));
+				});
+			});
+		} catch (Throwable e) {
+			return Promise.reject(e);
+		}
 	}
 
 	public static float ceil(float val) {
@@ -98,15 +112,15 @@ public class ProjectConvert {
 		pr.readtype = "binary";
 		pr.resource_id = "cpmproject_files";
 		Blockbench.import_(pr, files -> {
-			Global.newProject(CPMCodec.format);
-			try {
-				parse(files[0].binaryContent);
-			} catch (Throwable e) {
-				PopupDialogs.displayError("bb-label.error.import", e);
-			}
 			String csname = files[0].name.replace(".cpmproject", "").replaceAll("\\s+", "_").toLowerCase();
-			Project.name = csname;
-			Project.geometry_name = csname;
+			parse(files[0].binaryContent).then(__ -> {
+				Project.name = csname;
+				Project.geometry_name = csname;
+				return null;
+			}).catch_(e -> {
+				PopupDialogs.displayError(I18n.get("bb-label.error.import"), e);
+				return null;
+			});
 		});
 	}
 
@@ -124,11 +138,22 @@ public class ProjectConvert {
 				Blockbench.export(pr, CPMCodec.codec::afterDownload);
 				return null;
 			}).catch_(err -> {
-				PopupDialogs.displayError("bb-label.error.export", err);
+				PopupDialogs.displayError(I18n.get("bb-label.error.export"), err);
 				return null;
 			});
 		} catch (Exception e) {
-			PopupDialogs.displayError("bb-label.error.export", e);
+			PopupDialogs.displayError(I18n.get("bb-label.error.export"), e);
+		}
+	}
+
+	public static void viewInBB() {
+		Frame frm = WebMC.getInstance().getGui().getFrame();
+		if(frm instanceof EditorGui) {
+			EditorGui eg = (EditorGui) frm;
+			Blockbench.focus();
+			PopupDialogs.runTaskWithWarning(w -> RenderSystem.withContext(() -> {
+				return new BlockbenchImport(eg.getEditor(), w).doImport();
+			}));
 		}
 	}
 }

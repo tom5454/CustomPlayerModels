@@ -493,12 +493,12 @@ public class BlockbenchExport {
 		ProjectData pd = Project.getData();
 		if(!pd.animations.isEmpty())new AnimEnc().load(new JsonMapImpl(pd.animations));
 		editor.scalingElem.scaling.putAll(pd.scalingOpt);
-		editor.scalingElem.pos = pd.renderPos;
-		editor.scalingElem.rotation = pd.renderRot;
-		editor.scalingElem.scale = pd.renderScl;
+		if(pd.renderPos != null)editor.scalingElem.pos = pd.renderPos;
+		if(pd.renderRot != null)editor.scalingElem.rotation = pd.renderRot;
+		if(pd.renderScl != null)editor.scalingElem.scale = pd.renderScl;
 
-		editor.leftHandPos = pd.leftHandPos;
-		editor.rightHandPos = pd.rightHandPos;
+		if(pd.leftHandPos != null)editor.leftHandPos = pd.leftHandPos;
+		if(pd.rightHandPos != null)editor.rightHandPos = pd.rightHandPos;
 		editor.modelId = pd.modelId;
 		editor.removeArmorOffset = pd.removeArmorOffset;//TODO test
 
@@ -535,9 +535,11 @@ public class BlockbenchExport {
 		public void load(JsonMap data) {
 			JsonMap an = data.getMap("anims");
 			an.asMap().keySet().forEach(a -> loadAnimation(editor, a, an.getMap(a)));
-			editor.animEnc = new AnimationEncodingData();
-			data.getList("free").forEach(v -> editor.animEnc.freeLayers.add(PlayerSkinLayer.getLayer((String) v)));
-			data.getMap("def").forEach((k, v) -> editor.animEnc.defaultLayerValue.put(PlayerSkinLayer.getLayer(k), (Boolean) v));
+			if(data.containsKey("free") && data.containsKey("def")) {
+				editor.animEnc = new AnimationEncodingData();
+				data.getList("free").forEach(v -> editor.animEnc.freeLayers.add(PlayerSkinLayer.getLayer((String) v)));
+				data.getMap("def").forEach((k, v) -> editor.animEnc.defaultLayerValue.put(PlayerSkinLayer.getLayer(k), (Boolean) v));
+			}
 		}
 
 		@Override

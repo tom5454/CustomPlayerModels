@@ -97,18 +97,18 @@ public class CPMCodec {
 		codec.format = format;
 		PluginStart.cleanup.add(() -> Global.getFormats().delete(FORMAT_ID));
 
-		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_glow", "CPM Glow Effect", false, PluginStart.formatCPM());
-		createProperty(Clazz.CUBE, Type.NUMBER, "cpm_recolor", "CPM Recolor Effect", -1, PluginStart.formatCPM());
-		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_hidden", "CPM Hidden Effect", false, PluginStart.formatCPM());
-		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_extrude", "CPM Extrude Effect", false, PluginStart.formatCPM());
-		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_dva", "CPM Disable Vanilla Animations Effect", false, PluginStart.formatCPM());
-		createProperty(Clazz.GROUP, Type.STRING, "cpm_copy_transform", "CPM Copy Transform Effect", Js.undefined(), PluginStart.formatCPM());
-		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_hideHeadIfSkull", "CPM Hide Head with Skull", true, PluginStart.formatCPM());
-		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_removeBedOffset", "CPM Remove Bed Offset", false, PluginStart.formatCPM());
+		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_glow", "CPM Glow Effect", false, PluginStart.formatCPM(), true);
+		createProperty(Clazz.CUBE, Type.NUMBER, "cpm_recolor", "CPM Recolor Effect", -1, PluginStart.formatCPM(), true);
+		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_hidden", "CPM Hidden Effect", false, PluginStart.formatCPM(), true);
+		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_extrude", "CPM Extrude Effect", false, PluginStart.formatCPM(), true);
+		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_dva", "CPM Disable Vanilla Animations Effect", false, PluginStart.formatCPM(), true);
+		createProperty(Clazz.GROUP, Type.STRING, "cpm_copy_transform", "CPM Copy Transform Effect", Js.undefined(), PluginStart.formatCPM(), true);
+		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_hideHeadIfSkull", "CPM Hide Head with Skull", true, PluginStart.formatCPM(), false);
+		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_removeBedOffset", "CPM Remove Bed Offset", false, PluginStart.formatCPM(), false);
 
-		createProperty(Clazz.GROUP, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM());
-		createProperty(Clazz.CUBE, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM());
-		createProperty(Clazz.PROJECT, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM());
+		createProperty(Clazz.GROUP, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM(), true);
+		createProperty(Clazz.CUBE, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM(), true);
+		createProperty(Clazz.PROJECT, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM(), true);
 
 		PluginStart.addEventListener("update_selection", dt -> {
 			if(Global.getFormat() == CPMCodec.format) {
@@ -133,8 +133,8 @@ public class CPMCodec {
 		});*/
 	}
 
-	public static void createProperty(Clazz clz, Type type, String id, String label, Object def, Condition cond) {
-		Property p = Property.createProperty(clz, type, id, label, def, cond);
+	public static void createProperty(Clazz clz, Type type, String id, String label, Object def, Condition cond, boolean hidden) {
+		Property p = Property.createProperty(clz, type, id, label, def, cond, hidden);
 		PluginStart.cleanup.add(p::delete);
 	}
 }

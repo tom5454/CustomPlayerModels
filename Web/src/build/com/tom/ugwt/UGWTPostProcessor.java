@@ -98,8 +98,9 @@ public class UGWTPostProcessor {
 						int end = sizeOff + m.end();
 						m.appendReplacement(sb, replace[i + 1]);
 						int rEnd = sb.length();
-						sizeOff += (rEnd - end);
-						add(st, end, rEnd, j);
+						int d = rEnd - end;
+						sizeOff += d;
+						add(st, d, j - linesOff);
 						result = m.find();
 					} while (result);
 					m.appendTail(sb);
@@ -110,53 +111,36 @@ public class UGWTPostProcessor {
 		}
 	}
 
-	private static void add(int start, int end, int replaceEnd, int line) {
-		infos.forEach(r -> r.update(start, end, replaceEnd, line));
-		infos.add(new ReplaceInfo(start, end, replaceEnd, line));
+	private static void add(int start, int d, int line) {
+		infos.add(new ReplaceInfo(start, d, line));
 	}
 
 	private static class ReplaceInfo {
-		private final int start, end, line;
-		private int replaceStart, replaceEnd;
+		private final int start, line;
 		private int d;
 
-		public ReplaceInfo(int start, int end, int replaceEnd, int line) {
-			this.replaceStart = start;
+		public ReplaceInfo(int start, int d, int line) {
 			this.start = start;
-			this.end = end;
-			this.replaceEnd = replaceEnd;
+			this.d = d;
 			this.line = line;
 		}
 
 		public ReplaceInfo(Map<String, Object> m) {
 			start = ((Number) m.get("s")).intValue();
-			end = ((Number) m.get("e")).intValue();
-			replaceStart = ((Number) m.get("rs")).intValue();
-			replaceEnd = ((Number) m.get("re")).intValue();
-			d = (replaceEnd - replaceStart) - (end - start);
+			d = ((Number) m.get("d")).intValue();
 			this.line = ((Number) m.get("ln")).intValue();
-		}
-
-		public void update(int start, int end, int replaceEnd, int line) {
-			if(this.replaceStart >= start && this.line == line) {
-				int d = replaceEnd - end;
-				if(this.replaceStart != start)this.replaceStart += d;
-				this.replaceEnd += d;
-			}
 		}
 
 		public Map<String, Object> toMap() {
 			Map<String, Object> m = new HashMap<>();
 			m.put("s", start);
-			m.put("e", end);
-			m.put("rs", replaceStart);
-			m.put("re", replaceEnd);
+			m.put("d", d);
 			m.put("ln", line);
 			return m;
 		}
 
 		public int getD(int c) {
-			if(start <= c) {
+			if(start < c) {
 				return d;
 			}
 			return 0;
@@ -176,13 +160,7 @@ public class UGWTPostProcessor {
 		FixedSourceMap mapOut = new FixedSourceMap();
 		mapOut.unFixed = sy;
 		mapOut.map = writeOut();
-		Map<Integer, List<ReplaceInfo>> infos;
-		{
-			//Map<String, Object> m = (Map<String, Object>) new Gson().fromJson(fixIn, Object.class);
-			infos = UGWTPostProcessor.infos.stream().collect(Collectors.groupingBy(r -> r.line));
-			//infos = ((List<Map<String, Object>>) m.get("corrections")).stream().map(ReplaceInfo::new).collect(Collectors.groupingBy(r -> r.line));
-			//linesOff = ((Number)m.get("linesOff")).intValue();
-		}
+		Map<Integer, List<ReplaceInfo>> infos = UGWTPostProcessor.infos.stream().collect(Collectors.groupingBy(r -> r.line));
 		SourceMapImpl map = new SourceMapImpl(sy);
 		mapOut.unFixedH = map.generateForHumans();
 		List<MappingImpl> out = new ArrayList<>();

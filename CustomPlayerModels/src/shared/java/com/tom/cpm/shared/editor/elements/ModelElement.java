@@ -24,12 +24,15 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
+import com.tom.cpm.shared.editor.anim.AnimFrame;
+import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
 import com.tom.cpm.shared.editor.gui.popup.CopyTransformSettingsPopup;
 import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.util.QuickTask;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.RenderedCube;
@@ -585,6 +588,25 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.action("duplicate").addToList(editor.elements, elem).onUndo(() -> editor.selectedElement = null).execute();
 			editor.selectedElement = elem;
 			editor.updateGui();
+		}
+		if(!editor.animations.isEmpty()) {
+			ModelElement el = editor.getSelectedElement();
+			editor.setQuickAction.accept(new QuickTask(editor.gui().i18nFormat("button.cpm.dupAnimations"), editor.gui().i18nFormat("tooltip.cpm.dupAnimations"), () -> {
+				ActionBuilder ab = editor.action("duplicate");
+				editor.animations.forEach(a -> a.getFrames().forEach(f -> dupAnim(ab, this, el, f)));
+				ab.onAction(() -> editor.animations.forEach(EditorAnim::clearCache));
+				ab.execute();
+			}));
+		}
+	}
+
+	private void dupAnim(ActionBuilder ab, ModelElement from, ModelElement to, AnimFrame frm) {
+		FrameData fd = frm.getComponents().get(from);
+		if(fd != null)frm.importFrameData(ab, to, fd);
+		for (int i = 0; i < from.children.size(); i++) {
+			ModelElement f = from.children.get(i);
+			ModelElement t = to.children.get(i);
+			dupAnim(ab, f, t, frm);
 		}
 	}
 

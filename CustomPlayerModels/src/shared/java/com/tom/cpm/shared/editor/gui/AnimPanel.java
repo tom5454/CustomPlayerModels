@@ -30,6 +30,7 @@ import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
@@ -336,7 +337,9 @@ public class AnimPanel extends Panel {
 	private void pasteData() {
 		ModelElement me = editor.getSelectedElement();
 		if(editor.selectedAnim != null && cpyData != null && me != null) {
-			editor.selectedAnim.getSelectedFrame().importFrameData(me, cpyData);
+			ActionBuilder ab = editor.action("setAnim", "action.cpm.value");
+			editor.selectedAnim.getSelectedFrame().importFrameData(ab, me, cpyData);
+			ab.execute();
 			cpyData = null;
 			editor.updateGui();
 		}

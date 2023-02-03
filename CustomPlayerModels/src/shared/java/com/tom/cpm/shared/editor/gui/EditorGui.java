@@ -27,6 +27,7 @@ import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.ButtonGroup;
 import com.tom.cpl.gui.util.ElementGroup;
+import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.gui.util.HorizontalLayout;
 import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.gui.util.TabbedPanelManager;
@@ -229,6 +230,28 @@ public class EditorGui extends Frame {
 		MinecraftClientAccess.get().populatePlatformSettings("editor", this);
 	}
 
+	private Panel initQuickPanel(int x, int y, int w) {
+		Panel quickActPanel = new Panel(gui);
+
+		quickActPanel.setBounds(new Box(x, y, w, 0));
+		FlowLayout layout = new FlowLayout(quickActPanel, 0, 1);
+
+		editor.setQuickAction.add(q -> {
+			quickActPanel.getElements().clear();
+			if(q != null) {
+				q.initButtons(gui, quickActPanel);
+				layout.run();
+				int h = quickActPanel.getBounds().h;
+				quickActPanel.setBounds(new Box(x, y - h, w, h));
+				quickActPanel.setVisible(true);
+			} else {
+				quickActPanel.setVisible(false);
+			}
+		});
+
+		return quickActPanel;
+	}
+
 	private void initModelPanel(int width, int height) {
 		Panel mainPanel = new Panel(gui);
 		mainPanel.setBounds(new Box(0, 0, width, height - 20));
@@ -242,9 +265,11 @@ public class EditorGui extends Frame {
 		mainPanel.addElement(new TreePanel(gui, this, width, height - 20, true));
 
 		ViewportPanel view = new ViewportPanel(this, editor);
-		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
+		view.setBounds(new Box(170, 0, width - 320, height - 20));
 		mainPanel.addElement(view);
 		editor.displayViewport.add(view::setEnabled);
+
+		mainPanel.addElement(initQuickPanel(Math.max(width - 350, 170), height - 20, Math.min(200, width - 320)));
 	}
 
 	private void initTexturePanel(int width, int height) {
@@ -270,7 +295,7 @@ public class EditorGui extends Frame {
 		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - treeW, height / 2));
 
 		Panel uvPanel = new Panel(gui);
-		uvPanel.setBounds(new Box(0, height, 170, 0));
+		uvPanel.setBounds(new Box(0, height, 175, 0));
 		uvPanel.setBackgroundColor(gui.getColors().panel_background);
 		ElementGroup<ModeDisplayType, GuiElement> group = new ElementGroup<>(GuiElement::setVisible);
 		editor.setModePanel.add(group);
@@ -294,6 +319,14 @@ public class EditorGui extends Frame {
 		uvPanel.addElement(panel);
 		uvPanel.addElement(tabHandler);
 		textureEditor.addElement(uvPanel);
+
+		{
+			int w = height / 2 - treeW;
+			int x = width - height / 2;
+			if(w < 70)x -= (70 - w);
+			w = Math.min(200, x - Math.max(x - 200, 175));
+			textureEditor.addElement(initQuickPanel(Math.max(x - 200, 175), height - 20, w));
+		}
 	}
 
 	private void initAnimPanel(int width, int height) {
@@ -340,6 +373,8 @@ public class EditorGui extends Frame {
 		view.setBounds(new Box(170, 0, width - 170 - 150, height - 20));
 		mainPanel.addElement(view);
 		editor.displayViewport.add(view::setEnabled);
+
+		mainPanel.addElement(initQuickPanel(Math.max(width - 350, 170), height - 20, Math.min(200, width - 320)));
 	}
 
 	private void newModel(SkinType type) {
@@ -804,6 +839,9 @@ public class EditorGui extends Frame {
 		getKeybindHandler().registerKeybind(Keybinds.REDO, editor::redo);
 		getKeybindHandler().registerKeybind(Keybinds.SAVE, this::save);
 		getKeybindHandler().registerKeybind(Keybinds.TOGGLE_GIZMO, editor.displayGizmo::toggle);
+		getKeybindHandler().registerKeybind(Keybinds.RUN_QUICK_ACTION, () -> {
+			if(editor.setQuickAction.get() != null)editor.setQuickAction.get().runTask();
+		});
 		if(event.matches(gui.getKeyCodes().KEY_F5)) {
 			editor.refreshCaches();
 			event.consume();

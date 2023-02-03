@@ -26,6 +26,7 @@ import com.tom.cpm.web.client.WebChooser;
 import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.RenderSystem.VertexBuffer2d;
+import com.tom.cpm.web.client.util.Clipboard;
 import com.tom.cpm.web.client.util.I18n;
 
 import elemental2.dom.CSSProperties.FontSizeUnionType;
@@ -36,8 +37,6 @@ import elemental2.dom.Element;
 import elemental2.dom.HTMLDivElement;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLInputElement;
-import jsinterop.annotations.JsPackage;
-import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
 
 public class GuiImpl implements IGui, EventHandler {
@@ -519,11 +518,6 @@ public class GuiImpl implements IGui, EventHandler {
 	@Override
 	public void setClipboardText(String text) {
 		Clipboard.writeText(text);
-	}
-
-	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "navigator.clipboard")
-	public static class Clipboard {
-		public static native void writeText(String text);
 	}
 
 	@Override

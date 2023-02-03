@@ -138,8 +138,13 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 			+ "</div>";
 
 	private final String SKIN_TYPE_POPUP = "<h1>" + gui.i18nFormat("web-label.viewer.skinType") + "</h1>"
-			+ Arrays.stream(SkinType.VANILLA_TYPES).map(t -> "<button onclick=\"setSkinType('" + t.getName() + "')\">" + gui.i18nFormat("label.cpm.skin_type." + t.getName()) + "</button> ").collect(Collectors.joining())
+			+ Arrays.stream(SkinType.VANILLA_TYPES).map(this::makeSkinTypeButton).collect(Collectors.joining())
 			+ "<p id=\"cpmv_skinImageData\" style=\"display: none;\">$</p>";
+
+	//Javac stack overflows if this is inlined
+	private String makeSkinTypeButton(SkinType t) {
+		return "<button onclick=\"setSkinType('" + t.getName() + "')\">" + gui.i18nFormat("label.cpm.skin_type." + t.getName()) + "</button> ";
+	}
 
 	private final String SKIN_OUTPUT_POPUP = "<h1>" + gui.i18nFormat("web-label.viewer.useSkin") + "</h1>"
 			+ "<button onclick=\"useSkinDl()\">" + gui.i18nFormat("web-button.viewer.download") + "</button> "

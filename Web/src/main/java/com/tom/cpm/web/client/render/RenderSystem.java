@@ -207,7 +207,7 @@ public class RenderSystem implements RetroGLAccess<String> {
 						f.add(e.dataTransfer.files.getAt(i));
 					}
 				}
-				Promise<JsArray<File>> p = Promise.all(f.stream().map(FS::mount).toArray(Promise[]::new));
+				Promise<JsArray<File>> p = Js.cast(Promise.all((Promise<File>[]) f.stream().map(FS::mount).toArray(Promise[]::new)));
 				p.then(fs -> {
 					List<File> files = fs.asList();
 					withContext(() -> handler.filesDropped(files));

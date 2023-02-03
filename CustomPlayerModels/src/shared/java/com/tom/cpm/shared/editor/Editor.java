@@ -70,6 +70,7 @@ import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.editor.util.ModelDescription;
+import com.tom.cpm.shared.editor.util.QuickTask;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.model.PartPosition;
@@ -140,6 +141,7 @@ public class Editor {
 	public Updater<Boolean> setAutoUV = updaterReg.create();
 	public Updater<Pair<Integer, String>> setInfoMsg = updaterReg.create();
 	public TreeHandler<TreeElement> treeHandler = new TreeHandler<>(new ModelTree(this));
+	public UpdaterWithValue<QuickTask> setQuickAction = updaterReg.createValue(null);
 
 	public Supplier<Vec2i> cursorPos;
 	public int penColor = 0xffffff;
@@ -363,9 +365,10 @@ public class Editor {
 		redoQueue.clear();
 		setUndo.accept(undoQueue.empty() ? null : undoQueue.peek().getName());
 		setRedo.accept(null);
+		setQuickAction.accept(null);
 	}
 
-	public void markDirty0() {
+	private void markDirty0() {
 		setNameDisplay.accept((file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : file.getName()) + "*");
 		dirty = true;
 		if(!autoSaveDirty)lastEdit = System.currentTimeMillis();

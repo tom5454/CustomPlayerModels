@@ -50,7 +50,7 @@ public class ChangelogPanel extends Panel {
 				if(c.equals(e.getKey()))
 					sb.append(gui.i18nFormat("label.cpm.changelog.currentVersion", e.getKey().toString()));
 				else
-					sb.append(e.getKey());
+					sb.append(e.getKey().toString().replace("_", "\\_"));
 				sb.append('\n');
 				String chlnk = e.getValue().replaceAll("#(\\d+)", "[#$1](https://github.com/tom5454/CustomPlayerModels/issues/$1)");
 				String chmd = chlnk.replaceAll("- (.+)\n([^-])", "- $1\n\n$2").replace("\n", "  \n");

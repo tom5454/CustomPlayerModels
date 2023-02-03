@@ -1056,5 +1056,16 @@
   "bb-label.autoFix.renameTexture": "Renamed Texture",
   "bb-label.autoFix.regroup": "Regroup",
   "bb-label.convertedFromOld": "This project was made using an earlier version of the plugin.\\The plugin data was converted into the new format.",
-  "bb-label.error.oldConvertFail": "Failed to convert old project data"
+  "bb-label.error.oldConvertFail": "Failed to convert old project data",
+  "bb-button.copyErrorMsg": "Copy Error Message",
+  "bb-label.warn.nonConvertedPartNotSupported": "Root Part %s is not hidden, The cube will be converted.",
+  "bb-label.warn.coloredCubeNotSupported": "Colored cubes not supported: %s",
+  "error.paste.fileTooBig": "File size too big",
+  "bb-label.warn.copyTransformNotVis": "Elements with Copy Transform won\u0027t show correctly",
+  "bb-button.viewInBB": "View in Blockbench",
+  "button.cpm.dupAnimations": "Duplicate Animations",
+  "button.cpm.mirrorAnimations": "Mirror Animations",
+  "tooltip.cpm.dupAnimations": "Copy all of the animations for the duplicated parts",
+  "tooltip.cpm.mirrorAnimations": "Mirror animations for the mirrored parts",
+  "label.cpm.keybind.quickAction": "Run Quick Action"
 }

@@ -6,6 +6,9 @@ import java.util.List;
 import com.google.gwt.core.client.EntryPoint;
 
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.PopupMenu;
+import com.tom.cpm.blockbench.convert.ProjectConvert;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.format.ProjectGenerator;
 import com.tom.cpm.blockbench.proxy.Action;
@@ -47,12 +50,24 @@ public class PluginStart implements EntryPoint {
 					public String getMCVersion() {
 						return "blockbench";
 					}
+
+					@Override
+					public void populatePlatformSettings(String group, Panel panel) {
+						super.populatePlatformSettings(group, panel);
+						switch (group) {
+						case "filePopup": {
+							PopupMenu pp = (PopupMenu) panel;
+							pp.addButton(panel.getGui().i18nFormat("bb-button.viewInBB"), ProjectConvert::viewInBB);
+						}
+						break;
+						}
+					}
 				};
 				DomGlobal.console.log("CPM Plugin loading " + WebMC.platform);
 			} catch (Throwable e) {
 				StringBuilder sb = new StringBuilder();
 				sb.append("Error loading plugin:\n");
-				sb.append(ExceptionUtil.getStackTrace(e, false));
+				sb.append(ExceptionUtil.getStackTrace(e));
 				DomGlobal.console.error(sb.toString());
 			}
 

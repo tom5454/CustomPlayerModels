@@ -1,10 +1,14 @@
 package com.tom.ugwt.client;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.atlassian.sourcemap.Mapping;
 import com.atlassian.sourcemap.SourceMapImpl;
 
 import com.tom.cpm.web.client.util.JSZip;
 
+import elemental2.core.JsError;
 import elemental2.core.JsRegExp;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Response;
@@ -17,7 +21,9 @@ import jsinterop.base.Js;
 
 public class ExceptionUtil {
 	private static SourceMapImpl sourceMap;
-	private static final JsRegExp formatRegex = new JsRegExp("(at (?:new )?)([\\w$\\<\\>]+(?:\\.[\\w$\\<\\>]+)? (?:\\[[\\w $]+\\] )?)\\(([\\w:\\/\\.]+\\/\\w+\\.js)(\\?_=\\d+)?:(\\d+):(\\d+)\\)", "g");
+	private static final JsRegExp formatRegex = new JsRegExp("(at (?:new )?)([\\w$\\<\\>]+(?:\\.[\\w$\\<\\>]+)? (?:\\[[\\w $]+\\] )?)\\(([\\w:\\/\\.]+\\/[\\w-]+\\.js)(\\?_=\\d+)?:(\\d+):(\\d+)\\)", "g");
+	private static final JsRegExp formatRegexFF = new JsRegExp("()([\\w$]+(?:\\.[\\w$]+)?)\\@((?:[\\w:\\/\\.]+\\/)?[\\w-]+\\.js)(\\?_=\\d+)?:(\\d+):(\\d+)", "g");
+	private static final String SOURCE_NAME = new JsError().fileName;
 
 	static {
 		String pr = getSourceMap();
@@ -41,24 +47,58 @@ public class ExceptionUtil {
 	@JsProperty(namespace = JsPackage.GLOBAL, name = "$$ugwt_m___ugwt_sourceMap___$$")
 	private static native String getSourceMap();
 
-	private static native String getStackTrace0(Throwable thr)/*-{
-		var jserr = thr.@java.lang.Throwable::backingJsObject;
-		return jserr ? (jserr.stack ? jserr.stack : "?") : "?";
+	private static native JsError getJsErr(Throwable thr)/*-{
+		return thr.@java.lang.Throwable::backingJsObject;
 	}-*/;
 
-	public static String getStackTrace(Throwable thr, boolean useSourceMap) {
-		String st = getStackTrace0(thr);
-		if(sourceMap != null) {// && useSourceMap
+	private static String mapError(String st) {
+		if(sourceMap != null) {
 			StringEx str = Js.uncheckedCast(st);
-			String r = str.replace(formatRegex, ExceptionUtil::formatExc);
-			return r;
+			str = str.replace(formatRegex, ExceptionUtil::formatExc).replace(formatRegexFF, ExceptionUtil::formatExc);
+			return Js.uncheckedCast(str);
 		}
 		return st;
 	}
 
+	public static String getStackTrace(Throwable thr) {
+		return getStackTrace0(thr, new HashSet<>());
+	}
+
+	private static String getStackTrace0(Throwable thr, Set<Throwable> dejavu) {
+		String s = getStackTrace1(thr);
+		if(dejavu.add(thr)) {
+			if(thr.getCause() != null) {
+				s += "\nCaused by: " + getStackTrace0(thr.getCause(), dejavu);
+			}
+			if(thr.getSuppressed() != null && thr.getSuppressed().length > 0) {
+				for (Throwable se : thr.getSuppressed()) {
+					s += "\nSupressed: " + getStackTrace0(se, dejavu);
+				}
+
+			}
+		} else {
+			return "[CIRCULAR REFERENCE: " + thr + "]";
+		}
+		return s;
+	}
+
+	private static String getStackTrace1(Throwable thr) {
+		JsError error = getJsErr(thr);
+		if(error == null) {
+			return thr.getMessage() + "\n\tStacktrace unknown";
+		}
+		String st = getStackTrace(error);
+		return mapError(st);
+	}
+
+	public static String getStackTrace(JsError thr) {
+		String st = thr.stack != null ? thr.stack : "?";
+		return mapError(st);
+	}
+
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "String")
 	private static class StringEx {
-		public native String replace(JsRegExp replaceregex, ReplaceCallback object);
+		public native StringEx replace(JsRegExp replaceregex, ReplaceCallback object);
 	}
 
 	@JsFunction
@@ -67,7 +107,12 @@ public class ExceptionUtil {
 	}
 
 	private static String formatExc(String fullText, String at, String func, String file, String q, String line, String col) {
-		if(file.endsWith("cpm_plugin.js")) {
+		if(Js.isFalsy(q))q = "";
+		if(Js.isTruthy(file) && (
+				(SOURCE_NAME != null && SOURCE_NAME.equals(file + q)) ||
+				file.equals("cpmweb-0.js") ||
+				file.endsWith("cpm_plugin.js")
+				)) {
 			Mapping m = sourceMap.getMapping(Integer.parseInt(line), Integer.parseInt(col));
 			if(m != null) {
 				String src = m.getSourceFileName();

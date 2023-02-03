@@ -27,6 +27,6 @@ public class StringBuilderStream extends PrintStream {
 	}
 
 	public static void stacktraceToString(Throwable t, StringBuilder sb, String sep) {
-		sb.append(ExceptionUtil.getStackTrace(t, true).replace("\t", "").replace("\n", sep));
+		sb.append(ExceptionUtil.getStackTrace(t).replace("\t", "").replace("\n", sep));
 	}
 }

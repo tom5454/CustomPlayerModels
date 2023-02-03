@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.math.Vec2i;
@@ -11,6 +12,7 @@ import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Direction;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.Pair;
+import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.format.CubeData;
 import com.tom.cpm.blockbench.format.GroupData;
 import com.tom.cpm.blockbench.format.ProjectData;
@@ -18,6 +20,7 @@ import com.tom.cpm.blockbench.format.ProjectGenerator;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Cube.CubeFace;
 import com.tom.cpm.blockbench.proxy.Cube.FaceUV;
+import com.tom.cpm.blockbench.proxy.Global;
 import com.tom.cpm.blockbench.proxy.Group;
 import com.tom.cpm.blockbench.proxy.Group.GroupProperties;
 import com.tom.cpm.blockbench.proxy.Project;
@@ -41,12 +44,14 @@ import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
+import com.tom.cpm.web.client.util.I18n;
 
 import elemental2.core.Uint8ClampedArray;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLCanvasElement;
 import elemental2.dom.ImageData;
+import elemental2.promise.Promise;
 import jsinterop.base.Js;
 
 public class BlockbenchImport {
@@ -55,12 +60,46 @@ public class BlockbenchImport {
 	private Map<ModelElement, Group> me2group = new HashMap<>();
 	private List<Runnable> postConvert = new ArrayList<>();
 	private final Editor editor;
+	private Function<List<WarnEntry>, Promise<Void>> openWarn;
+	private List<WarnEntry> warnings = new ArrayList<>();
+	private boolean copyTrWarn;
 
-	public BlockbenchImport(Editor editor) {
+	public BlockbenchImport(Editor editor, Function<List<WarnEntry>, Promise<Void>> openWarn) {
 		this.editor = editor;
+		this.openWarn = openWarn;
 	}
 
-	public void doImport() {
+	public Promise<Void> doImport() {
+		for (ModelElement me : editor.elements) {
+			if(!me.hidden)
+				warnings.add(new WarnEntry(I18n.format("bb-label.warn.nonConvertedPartNotSupported", me.getElemName())));
+
+			checkCompat(me.children);
+		}
+
+		return (!warnings.isEmpty() ? openWarn.apply(warnings) : Promise.resolve((Void) null)).then(__ -> {
+			Global.newProject(CPMCodec.format);
+			doImport0();
+			return null;
+		});
+	}
+
+	private void checkCompat(List<ModelElement> children) {
+		for (ModelElement me : children) {
+			if(!me.texture) {
+				warnings.add(new WarnEntry(I18n.format("bb-label.warn.coloredCubeNotSupported", me.getElemName())));
+			}
+
+			if(me.copyTransform != null && !copyTrWarn) {
+				warnings.add(new WarnEntry(I18n.format("bb-label.warn.copyTransformNotVis")));
+				copyTrWarn = true;
+			}
+
+			checkCompat(me.children);
+		}
+	}
+
+	private void doImport0() {
 		Vec2i tex = editor.textures.get(TextureSheetType.SKIN).provider.size;
 		Project.texture_width = tex.x;
 		Project.texture_height = tex.y;
@@ -85,9 +124,6 @@ public class BlockbenchImport {
 			UVMul m = new UVMul();
 			m.x = Project.texture_width / (float) e.getValue().provider.size.x;
 			m.y = Project.texture_height / (float) e.getValue().provider.size.y;
-			/*if(m.x != 1 || m.y != 1) {
-				Project.box_uv = false;
-			}*/
 			uvMul.put(e.getKey(), m);
 		});
 
@@ -136,14 +172,14 @@ public class BlockbenchImport {
 				c.to = JsVec3.make(cube.from.x + s.x, cube.from.y + s.y, cube.from.z + s.z);
 				cube.extend(c);
 				cube.addTo(gr).init();
+
 				cube.applyTexture(textures.get(tst), true);
+				UVMul uvm = uvMul.get(tst);
+				if(uvm.needsPF())boxToPFUV(cube, uvm);
 			}
 
 			importChildren(me.children, gr, tst);
 		}
-
-		Project.hideHeadIfSkull = editor.hideHeadIfSkull;
-		Project.removeBedOffset = editor.removeBedOffset;
 
 		ProjectData pd = Project.getData();
 
@@ -196,8 +232,10 @@ public class BlockbenchImport {
 				writeAnimation(e, data);
 			}
 			an.put("anims", l);
-			an.put("free", editor.animEnc.freeLayers.stream().map(v -> v.getLowerName()).collect(Collectors.toList()));
-			an.put("def", editor.animEnc.defaultLayerValue.entrySet().stream().map(e -> Pair.of(e.getKey().getLowerName(), e.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+			if(editor.animEnc != null) {
+				an.put("free", editor.animEnc.freeLayers.stream().map(v -> v.getLowerName()).collect(Collectors.toList()));
+				an.put("def", editor.animEnc.defaultLayerValue.entrySet().stream().map(e -> Pair.of(e.getKey().getLowerName(), e.getValue())).collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+			}
 		}
 
 		@Override
@@ -286,7 +324,8 @@ public class BlockbenchImport {
 	}
 
 	private void importTextureUV(ModelElement me, Cube cube, UVMul uvm, boolean forcePF) {
-		if(me.faceUV != null || forcePF || me.textureSize > 1 || me.singleTex || me.extrude || me.scale.x != 1 || me.scale.y != 1 || me.scale.z != 1) {
+		if(!me.texture)return;
+		if(me.faceUV != null || forcePF || uvm.needsPF() || me.textureSize > 1 || me.singleTex || me.extrude || me.scale.x != 1 || me.scale.y != 1 || me.scale.z != 1) {
 			cube.box_uv = false;
 			cube.autouv = 0;
 			if(me.faceUV != null) {
@@ -371,9 +410,6 @@ public class BlockbenchImport {
 			} else {
 				boxToPFUV(cube, me.textureSize, me.scale.x, me.scale.y, me.scale.z, uvm);
 			}
-		} else if (uvm.needsPF()) {
-			cube.box_uv = false;
-			boxToPFUV(cube, uvm);
 		} else {
 			cube.box_uv = true;
 		}

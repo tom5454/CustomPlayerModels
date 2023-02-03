@@ -23,6 +23,7 @@ public class Keybinds {
 	public static final Keybind TREE_DOWN = new Keybind("tree_down", c -> c.KEY_RIGHT);
 	public static final Keybind NEW_PART = new Keybind("new_part", "n", Keybind.CTRL);
 	public static final Keybind TOGGLE_GIZMO = new Keybind("toggleGizmo", "g");
+	public static final Keybind RUN_QUICK_ACTION = new Keybind("quickAction", "w");
 
 	public static final Keybind COPY_ANIM_FRAME = new Keybind("copyAnimFrame", "h");
 	public static final Keybind PASTE_ANIM_FRAME = new Keybind("pasteAnimFrame", "j");
@@ -35,7 +36,7 @@ public class Keybinds {
 			"3dView",
 			ZOOM_IN_CAMERA, ZOOM_OUT_CAMERA, RESET_CAMERA, FOCUS_CAMERA,
 			"editor",
-			MOUSE_MARKER, OFFSET, ROTATION, POSITION, SIZE, SAVE, UNDO, REDO, NEW_PART, DELETE, TOGGLE_GIZMO,
+			MOUSE_MARKER, OFFSET, ROTATION, POSITION, SIZE, SAVE, UNDO, REDO, NEW_PART, DELETE, TOGGLE_GIZMO, RUN_QUICK_ACTION,
 			"treeNav",
 			TREE_PREV, TREE_NEXT, TREE_UP, TREE_DOWN,
 			"animAct",

@@ -57,16 +57,26 @@ public class VersionCheck implements IVersionCheck {
 					}
 				}
 				List<Pair<ComparableVersion, String>> ordered = new ArrayList<>();
+				ComparableVersion oldFilter = null;
 				while(tmp != null) {
 					for (String key : tmp.keySet()) {
 						if(key.equals(PREV_TAG))continue;
 						ComparableVersion ver = new ComparableVersion(key);
+						if(oldFilter != null && ver.compareTo(oldFilter) > 0)continue;
 						if(ordered.stream().map(Pair::getKey).noneMatch(ver::equals)) {
 							ordered.add(Pair.of(ver, tmp.get(ver.toString())));
 						}
 					}
 
-					tmp = (Map<String, String>) json.get(tmp.get(PREV_TAG));
+					String prev = tmp.get(PREV_TAG);
+					if(prev != null && prev.indexOf(':') != -1) {
+						String[] sp = prev.split(":");
+						prev = sp[0];
+						oldFilter = new ComparableVersion(sp[1]);
+					} else {
+						oldFilter = ordered.stream().map(Pair::getKey).sorted().findFirst().orElse(oldFilter);
+					}
+					tmp = (Map<String, String>) json.get(prev);
 				}
 				ordered.sort(Comparator.comparing(Pair::getKey));
 

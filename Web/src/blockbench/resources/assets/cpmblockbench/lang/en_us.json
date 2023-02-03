@@ -8,6 +8,8 @@
   "bb-button.newAnimation": "Add new Animation (CPM)",
   "bb-button.viewInEmbeddedEditor": "View In Embedded CPM Editor",
   "bb-button.autoFix": "Auto Fix",
+  "bb-button.copyErrorMsg": "Copy Error Message",
+  "bb-button.viewInBB": "View in Blockbench",
   "bb-label.cpmCodecDesc": "Model for Customizable Player Models mod",
   "bb-label.cpmInfo.export": "You have to export to Customizable Player Models Project file to use it in-game.",
   "bb-label.cpmInfo.import": "Use the Open Customizable Player Models Project option to import an existing project file.",
@@ -30,5 +32,8 @@
   "bb-label.autoFix.regroup": "Regroup",
   "bb-label.convertedFromOld": "This project was made using an earlier version of the plugin.\\The plugin data was converted into the new format.",
   "bb-label.error.oldConvertFail": "Failed to convert old project data",
+  "bb-label.warn.nonConvertedPartNotSupported": "Root Part %s is not hidden, The cube will be converted.",
+  "bb-label.warn.coloredCubeNotSupported": "Colored cubes not supported: %s",
+  "bb-label.warn.copyTransformNotVis": "Elements with Copy Transform won\u0027t show correctly",
   "bb-tooltip.export.renameGroup": "Rename the group to the selected type\\If a group with the same name already exists the action will fail."
 }
