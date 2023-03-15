@@ -1,7 +1,7 @@
 # Customizable Player Models Blockbench Plugin  
 **This plugin is in beta, some features are not supported yet**  
 
-Tested with Blockbench desktop 4.6.1 portable
+Tested with Blockbench desktop 4.6.4 portable
 
 If you find a bug report it here [Bugtracker](https://github.com/tom5454/CustomPlayerModels/issues) / Click on issues, and create an issue with screenshots and your blockbench project attached in a .zip file.  
 

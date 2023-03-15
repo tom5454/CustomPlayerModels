@@ -29,13 +29,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modCompileOnly("me.shedaniel:RoughlyEnoughItems-api:5.8.7"){
-        exclude(group: "net.fabricmc.fabric-api")
-    }
-    modRuntimeOnly("me.shedaniel:RoughlyEnoughItems:5.8.7"){
-        exclude(group: "net.fabricmc.fabric-api")
-    }
-    modImplementation ('com.github.Virtuoel:Pehkui:3.1.0'){
+    modImplementation ('com.github.Virtuoel:Pehkui:3.7.0'){
         exclude(group: "net.fabricmc.fabric-api")
     }
     

@@ -38,6 +38,7 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
+import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 import com.tom.cpm.shared.editor.TestIngameManager;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.FirstPersonHandPosGui;
@@ -236,6 +237,7 @@ public class GestureGui extends Frame {
 			default:
 				break;
 			}
+			if(def.getBlockReason() == BlockReason.UUID_LOCK)txt = gui.i18nFormat("label.cpm.uuidBlocked");
 			p.addElement(new Label(gui, txt).setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4, 0, 0)));
 			txt = gui.i18nFormat("label.cpm.checkErrorLog");
 			p.addElement(new Label(gui, txt).setBounds(new Box(width / 2 - gui.textWidth(txt) / 2, height / 2 - 4 + 10, 0, 0)));

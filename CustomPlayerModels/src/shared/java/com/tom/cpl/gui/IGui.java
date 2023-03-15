@@ -148,6 +148,14 @@ public interface IGui {
 		Log.error(msg, e);
 		ErrorLog.addLog(LogLevel.ERROR, msg, e);
 		if(fatal) {
+			Frame frm = getFrame();
+			if(frm != null) {
+				try {
+					frm.onCrashed(msg, e);
+				} catch (Throwable ex) {
+					e.addSuppressed(ex);
+				}
+			}
 			displayError(msg + ": " + e.toString());
 		} else {
 			Frame frm = getFrame();

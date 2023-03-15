@@ -30,7 +30,11 @@ To use custom models in-game you have to export the models, using the editor, an
 Click the '...' button to set the output file, then press Export. You can change the base skin with the 'Change Vanilla Skin' button. This is the skin that will show up if you don't have the mod installed, by default it loads your current skin.
 Skin Layer settings are used [for creating custom animations](https://github.com/tom5454/CustomPlayerModels/wiki/Animations#custom-animations-encoding).
 
-If the model is too big to fit in the unused space on the skin file, then you have to upload it to my paste site, or you can create a [GitHub Gist](https://gist.github.com/) with your model data and link it to your skin.
+### Data overflow
+If the model is too big to fit in the unused space on the skin file, then you have to upload it to one of the following:
+- My Paste Site: Select `Upload Paste`. You can change the name of the Paste (You can view your uploaded pastes in Edit/Pastes, the site has a limit of 15 pastes and 100kB per file).
+- [GitHub Gist](https://gist.github.com/), or [Pastebin](https://pastebin.com/): Select `Upload Gist` option. Click `Copy`, then create a new Gist/Pastebin and paste in your model data you just copied. Then grab the URL from the created Gist, then put it into the bottom text field.
+- GitHub repo, you can put the model data into a text file in your public repo and link it.
 
 ![Image: Export Overflow Gui](https://github.com/tom5454/CustomPlayerModels/wiki/images/export_overflow_popup.png)
 
@@ -49,4 +53,5 @@ The name will be used for the file name. You can set an icon for your model.
 Click Export.  
 Apply your model in `Edit/Models`, or in-game `Gestures Menu/Models`.  
 Select your model and click apply below the preview.  
-Local models only work in singleplayer and in multiplayer servers with the mod (or plugin) installed.
+Local models only work in singleplayer and in multiplayer servers with the mod (or plugin) installed.  
+[If the model is too big (above 30kB) you have to upload](#data-overflow)  

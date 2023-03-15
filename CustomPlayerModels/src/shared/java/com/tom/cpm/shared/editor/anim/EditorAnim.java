@@ -220,7 +220,6 @@ public class EditorAnim implements IAnimation {
 	public void addFrame(AnimFrame cpyFrame) {
 		AnimFrame frm = new AnimFrame(this, cpyFrame);
 		editor.action("add", "action.cpm.animFrame").addToList(frames, frm).onAction(this::clearCache).execute();
-		if(currentFrame != null)frm.copy(currentFrame);
 		currentFrame = frm;
 	}
 
@@ -384,11 +383,12 @@ public class EditorAnim implements IAnimation {
 						editor.setAnimRot.accept(selectedElement.rotation);
 						editor.setAnimScale.accept(new Vec3f(1, 1, 1));
 					}
-					if(!selectedElement.texture || selectedElement.recolor) {
-						editor.setAnimColor.accept(selectedElement.rgb);
-					}
-					if(selectedElement.type != ElementType.ROOT_PART)
+					if(selectedElement.type != ElementType.ROOT_PART) {
+						if(!selectedElement.texture || selectedElement.recolor) {
+							editor.setAnimColor.accept(selectedElement.rgb);
+						}
 						editor.setAnimShow.accept(!selectedElement.hidden);
+					}
 				} else {
 					if(!selectedElement.texture || selectedElement.recolor) {
 						Vec3f c = dt.getColor();

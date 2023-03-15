@@ -300,4 +300,8 @@ public abstract class Frame extends Panel {
 	public KeybindHandler getKeybindHandler() {
 		return keybindHandler;
 	}
+
+	public void onCrashed(String msg, Throwable e) {
+
+	}
 }

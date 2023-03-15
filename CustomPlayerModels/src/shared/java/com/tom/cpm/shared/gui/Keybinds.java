@@ -24,11 +24,13 @@ public class Keybinds {
 	public static final Keybind NEW_PART = new Keybind("new_part", "n", Keybind.CTRL);
 	public static final Keybind TOGGLE_GIZMO = new Keybind("toggleGizmo", "g");
 	public static final Keybind RUN_QUICK_ACTION = new Keybind("quickAction", "w");
+	public static final Keybind TOGGLE_VIS_ACTION = new Keybind("toggleVis", "v");
+	public static final Keybind TOGGLE_HIDDEN_ACTION = new Keybind("toggleHidden", "h");
 
-	public static final Keybind COPY_ANIM_FRAME = new Keybind("copyAnimFrame", "h");
-	public static final Keybind PASTE_ANIM_FRAME = new Keybind("pasteAnimFrame", "j");
-	public static final Keybind COPY_ANIM_PART = new Keybind("copyAnimPart", "v");
-	public static final Keybind PASTE_ANIM_PART = new Keybind("pasteAnimPart", "b");
+	public static final Keybind COPY_ANIM_FRAME = new Keybind("copyAnimFrame", "c", Keybind.ALT);
+	public static final Keybind PASTE_ANIM_FRAME = new Keybind("pasteAnimFrame", "v", Keybind.ALT);
+	public static final Keybind COPY_ANIM_PART = new Keybind("copyAnimPart", "c", Keybind.CTRL);
+	public static final Keybind PASTE_ANIM_PART = new Keybind("pasteAnimPart", "v", Keybind.CTRL);
 
 	public static final Object MOUSE_MARKER = new Object();
 
@@ -37,6 +39,7 @@ public class Keybinds {
 			ZOOM_IN_CAMERA, ZOOM_OUT_CAMERA, RESET_CAMERA, FOCUS_CAMERA,
 			"editor",
 			MOUSE_MARKER, OFFSET, ROTATION, POSITION, SIZE, SAVE, UNDO, REDO, NEW_PART, DELETE, TOGGLE_GIZMO, RUN_QUICK_ACTION,
+			TOGGLE_VIS_ACTION, TOGGLE_HIDDEN_ACTION,
 			"treeNav",
 			TREE_PREV, TREE_NEXT, TREE_UP, TREE_DOWN,
 			"animAct",

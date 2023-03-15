@@ -2,11 +2,12 @@ package com.tom.cpm;
 
 import org.spongepowered.asm.mixin.Mixins;
 
-public class LaunchMixinWithOptifineRunnable implements Runnable {
+import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 
-	//Taken from Immersive Portals
+public class LaunchMixinWithOptifineRunnable implements PreLaunchEntrypoint {
+
 	@Override
-	public void run() {
+	public void onPreLaunch() {
 		Mixins.addConfiguration("cpm.mixins.of.json");
 	}
 }

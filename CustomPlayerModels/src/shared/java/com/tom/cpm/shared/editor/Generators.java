@@ -335,15 +335,7 @@ public class Generators {
 			ActionBuilder ab = eg.getEditor().action("i", "button.cpm.tools.mirror");
 			editor.animations.forEach(a -> a.getFrames().forEach(f -> mirrored.forEach(me -> {
 				FrameData dt = f.getComponents().get(me);
-				if(dt != null) {
-					Vec3f p = new Vec3f(dt.getPosition());
-					p.x = -p.x;
-					Vec3f r = new Vec3f(dt.getRotation());
-					r.y = 360 - r.y;
-					r.z = 360 - r.z;
-					ab.updateValueOp(dt, dt.getPosition(), p, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, FrameData::setPos, editor.setAnimPos);
-					ab.updateValueOp(dt, dt.getRotation(), r, 0, 360, true, FrameData::setRot, editor.setAnimRot);
-				}
+				if(dt != null)dt.mirror(ab);
 			})));
 			ab.onAction(() -> editor.animations.forEach(EditorAnim::clearCache));
 			ab.execute();

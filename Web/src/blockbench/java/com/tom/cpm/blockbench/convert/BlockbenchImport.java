@@ -302,7 +302,7 @@ public class BlockbenchImport {
 			cube = new Cube(c);
 			cube.glow = me.glow;
 			cube.extrude = me.extrude;
-			cube.recolor = me.recolor ? me.rgb : -1;
+			cube.setRecolor(me.recolor ? me.rgb : -1);
 			c = new Cube.CubeProperties();
 			c.to = JsVec3.make(cube.from.x + s.x, cube.from.y + s.y, cube.from.z + s.z);
 			cube.extend(c);

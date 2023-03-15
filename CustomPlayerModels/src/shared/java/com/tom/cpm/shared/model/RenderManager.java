@@ -31,7 +31,10 @@ public class RenderManager<G, P, M, D> {
 	public boolean tryBindModel(G gprofile, P player, D buffer, M toBind, String arg, String unique, AnimationMode mode) {
 		if(gprofile == null)gprofile = getProfile.apply(player);
 		Player<P> profile = (Player<P>) loader.loadPlayer(gprofile, unique);
-		if(profile == null)return false;
+		if(profile == null) {
+			renderManager.unbindModel(toBind);
+			return false;
+		}
 		ModelDefinition def = profile.getModelDefinition();
 		if(def != null) {
 			this.profile = profile;
@@ -84,6 +87,7 @@ public class RenderManager<G, P, M, D> {
 	}
 
 	public void bindPlayer(P player, D buffer, M model) {
+		if(profile != null)clearBoundPlayer();
 		tryBindModel(null, player, buffer, model, null, ModelDefinitionLoader.PLAYER_UNIQUE, AnimationMode.PLAYER);
 	}
 

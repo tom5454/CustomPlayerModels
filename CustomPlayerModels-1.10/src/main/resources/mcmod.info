@@ -6,6 +6,6 @@
   "version": "${version}",
   "url" : "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "authorList": ["tom5454"],
-  "logoFile" : "logo.png"
+  "logoFile" : "icon.png"
 }
 ]

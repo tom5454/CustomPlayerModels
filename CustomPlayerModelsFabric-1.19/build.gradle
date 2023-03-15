@@ -39,18 +39,18 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.4.1') {
+	modImplementation ('com.github.Virtuoel:Pehkui:3.7.0') {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
 	compileOnly files("../CustomPlayerModels-1.19/of.jar")
 	
-	modImplementation ('curse.maven:sodium-394468:3957319')
-    modImplementation ('curse.maven:irisshaders-455508:3957332')
+	//modImplementation ('curse.maven:sodium-394468:3957319')
+    //modImplementation ('curse.maven:irisshaders-455508:3957332')
     /*implementation("org.joml:joml:1.10.4")
     implementation("org.anarres:jcpp:1.4.14")
     modImplementation (files('firstperson-fabric-2.1.2-mc1.19.1.jar'))*/
-    modCompileOnly('curse.maven:vivecraft-667903:4061843')
+    modCompileOnly('curse.maven:vivecraft-667903:4409428')
 }
 
 loom {

@@ -136,6 +136,7 @@ public class PlayerProfile extends Player<PlayerEntity> {
 		if(player.isUsingItem()) {
 			animState.usingAnimation = HandAnimation.of(player.getUseItem().getUseAnimation());
 		}
+		if(player.isInWater())animState.retroSwimming = true;
 		animState.fallDistance = player.fallDistance;
 		animState.moveAmountX = (float) (player.getX() - player.xo);
 		animState.moveAmountY = (float) (player.getY() - player.yo);

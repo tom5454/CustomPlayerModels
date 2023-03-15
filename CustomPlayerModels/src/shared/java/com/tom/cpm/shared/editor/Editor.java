@@ -919,4 +919,16 @@ public class Editor {
 	public void markElementsDirty() {
 		walkElements(elements, ModelElement::markDirty);
 	}
+
+	public void saveRecovered() throws Exception {
+		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
+		File autosaves = new File(modelsDir, "autosaves");
+		autosaves.mkdirs();
+		File file = new File(autosaves, String.format("recovered-%1$tY%1$tm%1$td-%1$tH%1$tM%1$tS-", System.currentTimeMillis()) + (this.file == null ? gui().i18nFormat("label.cpm.new_project") : this.file.getName()));
+		save0(file).thenRun(() -> {
+			ModConfig.getCommonConfig().setString(ConfigKeys.REOPEN_PROJECT, file.getAbsolutePath());
+			ModConfig.getCommonConfig().save();
+			Log.info("Saved recovery project: " + file.getName());
+		});
+	}
 }

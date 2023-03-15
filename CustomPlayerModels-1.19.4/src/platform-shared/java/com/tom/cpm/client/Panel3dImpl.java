@@ -11,11 +11,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AbstractSkullBlock;
@@ -151,12 +151,12 @@ public class Panel3dImpl extends Panel3dNative {
 			matrixstack.pushPose();
 			PlayerRenderManager.multiplyStacks(stack.getLast(), matrixstack);
 			boolean flag = false;
-			ItemTransforms.TransformType view = ItemTransforms.TransformType.FIXED;
+			ItemDisplayContext view = ItemDisplayContext.FIXED;
 			if(hand == ItemSlot.LEFT_HAND || hand == ItemSlot.RIGHT_HAND) {
 				matrixstack.mulPose(Axis.XP.rotationDegrees(-90.0F));
 				matrixstack.mulPose(Axis.YP.rotationDegrees(180.0F));
 				flag = hand == ItemSlot.LEFT_HAND;
-				view = flag ? ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND : ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND;
+				view = flag ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
 				matrixstack.translate((flag ? -1 : 1) / 16.0F, 0.125D, -0.625D);
 			} else if(hand == ItemSlot.HEAD) {
 				Item item = itemstack.getItem();
@@ -175,7 +175,7 @@ public class Panel3dImpl extends Panel3dNative {
 					matrixstack.translate(0.0D, -0.25D, 0.0D);
 					matrixstack.mulPose(Axis.YP.rotationDegrees(180.0F));
 					matrixstack.scale(0.625F, -0.625F, -0.625F);
-					view = ItemTransforms.TransformType.HEAD;
+					view = ItemDisplayContext.HEAD;
 				}
 			}
 			Minecraft.getInstance().getItemRenderer().renderStatic(null, itemstack, view, flag, matrixstack, mc.renderBuffers().bufferSource(), null, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY, 0);

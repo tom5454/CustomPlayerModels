@@ -104,6 +104,10 @@ public class Keybind {
 		return getSetKey(ModConfig.getCommonConfig(), gui);
 	}
 
+	public String formatTooltip(IGui gui, String info) {
+		return gui.i18nFormat("tooltip.cpm.keybind", info, getSetKey(gui));
+	}
+
 	public String getSetKey(ConfigEntry ce, IGui gui) {
 		ce = ce.getEntry(ConfigKeys.KEYBINDS);
 		String key = getSetKey0(ce, gui);

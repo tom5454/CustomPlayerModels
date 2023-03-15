@@ -133,14 +133,7 @@ public class EditorGui extends Frame {
 		} else {
 			this.editor = new Editor();
 			this.editor.setGui(this);
-			String reopen = ModConfig.getCommonConfig().getString(ConfigKeys.REOPEN_PROJECT, null);
-			if(reopen != null) {
-				ModConfig.getCommonConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
-				ModConfig.getCommonConfig().save();
-				load(new File(reopen));
-			} else {
-				this.editor.loadDefaultPlayerModel();
-			}
+			this.editor.loadDefaultPlayerModel();
 		}
 		TestIngameManager.checkConfig();
 		gui.setCloseListener(c -> {
@@ -220,6 +213,16 @@ public class EditorGui extends Frame {
 		if(showNewVersionPopup) {
 			openPopup(new MessagePopup(this, gui.i18nFormat("label.cpm.changelog.newVersion.title"), gui.i18nFormat("label.cpm.changelog.newVersion.desc")));
 			showNewVersionPopup = false;
+		}
+
+		if(toReopen == null) {
+			String reopen = ModConfig.getCommonConfig().getString(ConfigKeys.REOPEN_PROJECT, null);
+			if(reopen != null) {
+				ModConfig.getCommonConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
+				ModConfig.getCommonConfig().save();
+				File f = new File(reopen);
+				openPopup(new ConfirmPopup(this, gui.i18nFormat("label.cpm.reopenProject", f.getName()), () -> load(f), null));
+			}
 		}
 
 		editor.setInfoMsg.add(p -> {
@@ -587,7 +590,7 @@ public class EditorGui extends Frame {
 
 		Checkbox boxHidden = pp.addCheckbox(gui.i18nFormat("label.cpm.hidden_effect"), () -> editor.switchEffect(Effect.HIDE));
 		editor.setHiddenEffect.add(boxHidden::updateState);
-		boxHidden.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.hidden_effect")));
+		boxHidden.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.hidden_effect"), Keybinds.TOGGLE_HIDDEN_ACTION));
 
 		Checkbox boxExtrude = pp.addCheckbox(gui.i18nFormat("label.cpm.extrude_effect"), () -> editor.switchEffect(Effect.EXTRUDE));
 		editor.setExtrudeEffect.add(boxExtrude::updateState);
@@ -866,7 +869,7 @@ public class EditorGui extends Frame {
 	}
 
 	public static boolean doOpenEditor() {
-		return toReopen != null || ModConfig.getCommonConfig().getString(ConfigKeys.REOPEN_PROJECT, null) != null;
+		return toReopen != null;
 	}
 
 	@Override
@@ -900,6 +903,20 @@ public class EditorGui extends Frame {
 	protected void onClosing() {
 		if(ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_ESC_EXIT, true))
 			gui.close();
+	}
+
+	@Override
+	public void onCrashed(String msg, Throwable e) {
+		try {
+			editor.saveRecovered();
+		} catch (Throwable ex) {
+			e.addSuppressed(ex);
+		}
+		try {
+			editor.free();
+		} catch (Throwable ex) {
+			e.addSuppressed(ex);
+		}
 	}
 
 	public static enum ViewType {

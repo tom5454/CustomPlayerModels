@@ -13,6 +13,7 @@ import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
+import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimationProperties;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.gui.EditorGui;
@@ -24,13 +25,14 @@ public class OSCWizardPopup extends PopupPanel {
 	private TextField pathField, firstArgField;
 	private Spinner argId, min, max;
 	private Checkbox chbxValRange;
+	private Button editSel;
 
 	public OSCWizardPopup(EditorGui eg) {
 		super(eg.getGui());
 
 		TabFocusHandler tabHandler = new TabFocusHandler(gui);
 
-		setBounds(new Box(0, 0, 210, 300));
+		setBounds(new Box(0, 0, 240, 300));
 
 		FlowLayout layout = new FlowLayout(this, 5, 1);
 
@@ -114,24 +116,41 @@ public class OSCWizardPopup extends PopupPanel {
 		});
 
 		p = new Panel(gui);
-		p.setBounds(new Box(0, 0, 200, 20));
+		p.setBounds(new Box(0, 0, 240, 20));
 		addElement(p);
 
-		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
+		FlowLayout blayout = new FlowLayout(p, 5, 0);
+
+		Button ok = new Button(gui, gui.i18nFormat("osc-button.cpmosc.createNew"), () -> {
 			close();
 			eg.getEditor().addNewAnim(new AnimationProperties(null, createPath(), AnimationType.LAYER, true, false, InterpolatorType.POLY_LOOP, true, false));
 			eg.openPopup(new AnimationSettingsPopup(gui, eg.getEditor(), true));
 		});
-		ok.setBounds(new Box(5, 0, 80, 20));
+		ok.setBounds(new Box(0, 0, 80, 20));
 		p.addElement(ok);
+
+		if(eg.getEditor().selectedAnim != null) {
+			Button editSel = new Button(gui, gui.i18nFormat("osc-button.cpmosc.editSelected"), () -> {
+				close();
+				Editor e = eg.getEditor();
+				if(e.selectedAnim != null) {
+					eg.getEditor().action("edit", "action.cpm.anim").
+					updateValueOp(e.selectedAnim, e.selectedAnim.displayName, createPath(), (a, b) -> a.displayName = b).
+					execute();
+				}
+			});
+			editSel.setBounds(new Box(0, 0, 80, 20));
+			p.addElement(editSel);
+		}
 
 		Button copyName = new Button(gui, gui.i18nFormat("osc-button.cpmosc.copyName"), () -> {
 			close();
 			gui.setClipboardText(createPath());
 		});
-		copyName.setBounds(new Box(90, 0, 80, 20));
+		copyName.setBounds(new Box(0, 0, 80, 20));
 		p.addElement(copyName);
 
+		blayout.setSize(240);
 		layout.run();
 		addElement(tabHandler);
 	}

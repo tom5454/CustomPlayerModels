@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec3f;
@@ -19,6 +20,7 @@ import com.tom.cpm.shared.editor.anim.AnimationDisplayData;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData.Type;
 import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
 import com.tom.cpm.shared.editor.util.FilterBuffers;
+import com.tom.cpm.shared.gui.Keybinds;
 import com.tom.cpm.shared.model.builtin.VanillaPlayerModel;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.model.render.RenderMode;
@@ -220,5 +222,11 @@ public class ViewportPanelAnim extends ViewportPanel {
 			editor.selectedAnim.nextFrame();
 		}
 		super.render(stack, buf, partialTicks);
+	}
+
+	@Override
+	public void keyPressed(KeyboardEvent event) {
+		super.keyPressed(event);
+		frame.getKeybindHandler().registerKeybind(Keybinds.TOGGLE_HIDDEN_ACTION, editor::switchAnimShow);
 	}
 }

@@ -2,36 +2,37 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "homepage-fabric": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
   "promos": {
-    "1.12.2-latest": "0.6.5a",
+    "1.12.2-latest": "0.6.6a",
     "1.16.4-latest": "0.4.3a",
-    "1.16.5-latest": "0.6.5a",
-    "1.8.9-latest": "0.6.5a",
-    "1.7.10-latest": "0.6.5a",
+    "1.16.5-latest": "0.6.6a",
+    "1.8.9-latest": "0.6.6a",
+    "1.7.10-latest": "0.6.6a",
     "1.15.2-latest": "0.0.17d",
     "1.16.4-fabric-latest": "0.4.3a",
-    "1.16.5-fabric-latest": "0.6.5a",
+    "1.16.5-fabric-latest": "0.6.6a",
     "1.17-fabric-latest": "0.4.3a",
-    "bukkit-latest": "0.6.5a",
-    "1.17.1-fabric-latest": "0.6.5a",
-    "1.17.1-latest": "0.6.5a",
+    "bukkit-latest": "0.6.6a",
+    "1.17.1-fabric-latest": "0.6.6a",
+    "1.17.1-latest": "0.6.6a",
     "1.18-latest": "0.4.0a",
     "1.18.1-latest": "0.4.0a",
     "1.18-fabric-latest": "0.4.1a",
     "1.18.1-fabric-latest": "0.4.1a",
-    "1.10.2-latest": "0.6.5a",
-    "1.18.2-latest": "0.6.5a",
-    "1.18.2-fabric-latest": "0.6.5a",
-    "1.19-latest": "0.6.5a",
-    "1.19-fabric-latest": "0.6.5a",
-    "1.19.1-latest": "0.6.5a",
-    "1.19.1-fabric-latest": "0.6.5a",
-    "1.19.2-latest": "0.6.5a",
-    "1.19.2-fabric-latest": "0.6.5a",
-    "1.19.3-latest": "0.6.5a",
-    "1.19.3-fabric-latest": "0.6.5a",
-    "web-latest": "0.6.5a",
-    "blockbench-latest": "0.6.5_pre1",
-    "1.19.4-fabric-latest": "0.6.5a"
+    "1.10.2-latest": "0.6.6a",
+    "1.18.2-latest": "0.6.6a",
+    "1.18.2-fabric-latest": "0.6.6a",
+    "1.19-latest": "0.6.6a",
+    "1.19-fabric-latest": "0.6.6a",
+    "1.19.1-latest": "0.6.6a",
+    "1.19.1-fabric-latest": "0.6.6a",
+    "1.19.2-latest": "0.6.6a",
+    "1.19.2-fabric-latest": "0.6.6a",
+    "1.19.3-latest": "0.6.6a",
+    "1.19.3-fabric-latest": "0.6.6a",
+    "web-latest": "0.6.6a",
+    "blockbench-latest": "0.6.6_pre1",
+    "1.19.4-latest": "0.6.6a",
+    "1.19.4-fabric-latest": "0.6.6a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -85,7 +86,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.16.4": {
     "0.0.5a": "First release",
@@ -188,7 +190,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.16.4-fabric": {
     "0.0.5a": "First release",
@@ -287,7 +290,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.17-fabric": {
     "0.0.5a": "First release",
@@ -385,7 +389,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.7.10": {
     "0.0.5a": "First release",
@@ -438,7 +443,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.15.2": {
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
@@ -504,7 +510,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.17.1-fabric": {
     "0.0.0": "1.17-fabric",
@@ -535,7 +542,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.17.1": {
     "0.0.0": "1.16.5",
@@ -561,7 +569,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.18": {
     "0.0.0": "1.17.1",
@@ -611,7 +620,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.18.2": {
     "0.0.0": "1.18.1",
@@ -631,7 +641,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.18.2-fabric": {
     "0.0.0": "1.18.1-fabric",
@@ -651,7 +662,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.19": {
     "0.0.0": "1.18.2",
@@ -666,7 +678,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.19-fabric": {
     "0.0.0": "1.18.2-fabric",
@@ -681,7 +694,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.19.1": {
     "0.0.0": "1.19",
@@ -696,7 +710,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.19.1-fabric": {
     "0.0.0": "1.19-fabric",
@@ -711,7 +726,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.19.2": {
     "0.0.0": "1.19.1",
@@ -725,7 +741,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.19.2-fabric": {
     "0.0.0": "1.19.1-fabric",
@@ -739,7 +756,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.19.3": {
     "0.0.0": "1.19.2",
@@ -747,7 +765,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "1.19.3-fabric": {
     "0.0.0": "1.19.2-fabric",
@@ -755,7 +774,8 @@
     "0.6.2a": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV",
     "0.6.3a": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "web": {
     "0.0.0": "1.16.5:0.4.4",
@@ -776,7 +796,8 @@
     "0.6.2_beta1": "Added duplicate animation option (Closes #325)\nAdded copy animation frame and pose options (#62)\nAdded \u0027Focus on Part\u0027 keybind\n\nFixed custom armor not rendering in fabric (Closes #327)\nFixed held item looking weird on 1.19.3 (Closes #326)\nFixed race condition crash with model loading and rendering (Closes #331)\nFixed Fill UV, and Mirror Element not working with multi-select\nFixed Mirror Element not working with per-face UV\nFixed language decoding error (Closes #328)",
     "0.6.3_beta1": "Updated Simplified Chinese translation (#333)\n\nFixed crash with optifabric on 1.19\nFixed skulls not rendering with Optifine on 1.18+\nFixed button order spinner not showing the correct value\nFixed mouse errors in the animation editor when no animation is selected\nFixed gizmo rendering multiple times in the animation editor\nFixed model not rendering in the editor after test-in-game (Closes #335)\nFixed pre 1.8 skin converter not working in some cases",
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   },
   "blockbench": {
     "0.0.0": "web:0.6.1_beta1",
@@ -784,10 +805,17 @@
     "0.6.3_pre2": "Fixed blockbench plugin not exporting (Closes #341, Closes #345)\nFixed embedded editor file issues (Closes #344)\nFixed the CPM/Add parts buttons not working\nFixed CPM/Hidden by Default option not showing up",
     "0.6.3_pre3": "Fixed blockbench export bug (Closes #346)",
     "0.6.4_pre1": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups\nAdded the warnings popup again\n- Some warnings have an Auto Fix option\nAdded format converter from old plugin format\nAdded source maps\nFixed export crash with bad texture names\nFixed models with decimal size and box UV not converting correctly",
-    "0.6.5_pre1": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)\nAdded copy error message button\nAdded View in Blockbench under File in embedded editor\nAdded warnings for opening projects\n\nFixed some projects not opening (Closes #364)\nFixed some projects not exporting (Closes #365)\nFixed plugin not working in the web version of Blockbench"
+    "0.6.5_pre1": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)\nAdded copy error message button\nAdded View in Blockbench under File in embedded editor\nAdded warnings for opening projects\n\nFixed some projects not opening (Closes #364)\nFixed some projects not exporting (Closes #365)\nFixed plugin not working in the web version of Blockbench",
+    "0.6.6_pre1": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric\nFixed CPM export turning black in some cases (Closes #391)"
   },
   "1.19.4-fabric": {
+    "0.0.0": "1.19.3-fabric",
     "0.6.4a": "Ported to 23w04a",
-    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)"
+    "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
+  },
+  "1.19.4": {
+    "0.0.0": "1.19.3",
+    "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric"
   }
 }

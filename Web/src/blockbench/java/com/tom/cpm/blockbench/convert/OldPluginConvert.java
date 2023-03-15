@@ -62,7 +62,7 @@ public class OldPluginConvert {
 					}
 					if(odt.glow)c.glow = true;
 					if(odt.recolor) {
-						c.recolor = odt.color;
+						c.setRecolor(odt.color);
 					}
 					if(odt.item != null) {
 						if(c.parent.children.length == 1) {

@@ -27,7 +27,7 @@ public class CopyTransformEffect {
 	}
 
 	public void load(JsonMap data) {
-		storeID = data.getLong("storeID", 0);
+		storeID = data.getLong("storeID", -1L);
 		copyPX = data.getBoolean("px", false);
 		copyPY = data.getBoolean("py", false);
 		copyPZ = data.getBoolean("pz", false);
@@ -75,19 +75,17 @@ public class CopyTransformEffect {
 
 	public Map<String, Object> toMap() {
 		Map<String, Object> r = new HashMap<>();
-		if(from != null) {
-			r.put("storeID", from.storeID);
-			r.put("px", copyPX);
-			r.put("py", copyPY);
-			r.put("pz", copyPZ);
-			r.put("rx", copyRX);
-			r.put("ry", copyRY);
-			r.put("rz", copyRZ);
-			r.put("sx", copySX);
-			r.put("sy", copySY);
-			r.put("sz", copySZ);
-			r.put("cv", copyVis);
-		}
+		if(from != null)r.put("storeID", from.storeID);
+		r.put("px", copyPX);
+		r.put("py", copyPY);
+		r.put("pz", copyPZ);
+		r.put("rx", copyRX);
+		r.put("ry", copyRY);
+		r.put("rz", copyRZ);
+		r.put("sx", copySX);
+		r.put("sy", copySY);
+		r.put("sz", copySZ);
+		r.put("cv", copyVis);
 		return r;
 	}
 

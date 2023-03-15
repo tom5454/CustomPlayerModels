@@ -91,7 +91,8 @@ public class ListPanel<E> extends Panel implements ListModel<E> {
 		if(i != -1) {
 			if(scpList.getBounds().h < i*10) {
 				scpList.setScrollY(i*10 - scpList.getBounds().h + 10);
-			}
+			} else
+				scpList.setScrollY(0);
 		} else
 			scpList.setScrollY(0);
 	}

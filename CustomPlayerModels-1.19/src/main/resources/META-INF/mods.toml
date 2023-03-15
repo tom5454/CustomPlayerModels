@@ -53,3 +53,9 @@ Customize your minecraft avatar!
     versionRange="[1.19,1.19.3)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.cpm]]
+    modId="vivecraft"
+    mandatory=false
+    versionRange="[0.0.14,)"
+    ordering="NONE"
+    side="CLIENT"

@@ -279,7 +279,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 						resolveEncID(rd, idc[1]++, allLayers);
 					else
 						rd.gid = -1;
-				} else
+				} else if(addedPoses.add((CustomPose) ea.pose))
 					notLayerControlled.add(rd);
 			} else {
 				rd = new ResolvedData(AnimationsLoaderV1.encodeTypeInName(ea.getId(), ea.type), ea.loop, ea.add);
@@ -291,7 +291,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 							resolveEncID(rd, idc[1]++, allLayers);
 						else
 							rd.gid = -1;
-					} else
+					} else if(addedGestures.add(rd.name))
 						notLayerControlled.add(rd);
 				}
 			}
@@ -346,7 +346,11 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				}
 			}
 		});
-		notLayerControlled.forEach(rd -> rd.gid = idc[1]++);
+		notLayerControlled.forEach(rd -> {
+			int n = idc[1]++;
+			if(n == resetId)n = idc[1]++;//Skip reset id
+			rd.gid = n;
+		});
 	}
 
 	private static void resolveEncID(ResolvedData rd, int id, List<PlayerSkinLayer> allLayers) {

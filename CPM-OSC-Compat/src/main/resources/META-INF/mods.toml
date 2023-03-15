@@ -1,12 +1,13 @@
 modLoader="javafml"
 loaderVersion="[31,)"
 license="MIT"
+issueTrackerURL="https://github.com/tom5454/CustomPlayerModels/issues"
 [[mods]]
 modId="cpmoscc"
 version="${mod_version}"
 displayName="CPM OSC Compat"
 logoFile="assets/cpmoscc/icon.png"
-displayURL="https://www.curseforge.com/minecraft/mc-mods/custom-player-models" #optional
+displayURL="https://www.curseforge.com/minecraft/mc-mods/cpmoscc" #optional
 credits="tom5454"
 authors="tom5454"
 description='''

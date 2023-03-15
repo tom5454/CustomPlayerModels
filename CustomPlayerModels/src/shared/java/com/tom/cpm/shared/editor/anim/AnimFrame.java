@@ -199,6 +199,16 @@ public class AnimFrame {
 		public void setScale(Vec3f v) {
 			this.scale = v;
 		}
+
+		public void mirror(ActionBuilder ab) {
+			Vec3f p = new Vec3f(this.getPosition());
+			p.x = -p.x;
+			Vec3f r = new Vec3f(this.getRotation());
+			r.y = 360 - r.y;
+			r.z = 360 - r.z;
+			ab.updateValueOp(this, this.getPosition(), p, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, FrameData::setPos, anim.editor.setAnimPos);
+			ab.updateValueOp(this, this.getRotation(), r, 0, 360, true, FrameData::setRot, anim.editor.setAnimRot);
+		}
 	}
 
 	public void setPos(ModelElement elem, Vec3f v) {

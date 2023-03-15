@@ -391,7 +391,7 @@ public class GuiBase extends Screen implements IGui {
 		Tesselator tessellator = Tesselator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-		float bo = getBlitOffset();
+		float bo = 0;
 		Matrix4f matrix = matrixStack.last().pose();
 		bufferbuilder.vertex(matrix, x, y + height, bo).uv(u1, v2).endVertex();
 		bufferbuilder.vertex(matrix, x + width, y + height, bo).uv(u2, v2).endVertex();
@@ -631,10 +631,11 @@ public class GuiBase extends Screen implements IGui {
 		BufferBuilder bufferbuilder = tessellator.getBuilder();
 		Matrix4f mat = matrixStack.last().pose();
 		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		bufferbuilder.vertex(mat, right, top, this.getBlitOffset()).color(rtr, gtr, btr, atr).endVertex();
-		bufferbuilder.vertex(mat, left, top, this.getBlitOffset()).color(rtl, gtl, btl, atl).endVertex();
-		bufferbuilder.vertex(mat, left, bottom, this.getBlitOffset()).color(rbl, gbl, bbl, abl).endVertex();
-		bufferbuilder.vertex(mat, right, bottom, this.getBlitOffset()).color(rbr, gbr, bbr, abr).endVertex();
+		float bo = 0;
+		bufferbuilder.vertex(mat, right, top, bo).color(rtr, gtr, btr, atr).endVertex();
+		bufferbuilder.vertex(mat, left, top, bo).color(rtl, gtl, btl, atl).endVertex();
+		bufferbuilder.vertex(mat, left, bottom, bo).color(rbl, gbl, bbl, abl).endVertex();
+		bufferbuilder.vertex(mat, right, bottom, bo).color(rbr, gbr, bbr, abr).endVertex();
 		tessellator.end();
 		RenderSystem.disableBlend();
 	}

@@ -608,8 +608,9 @@ public class BlockbenchExport {
 		elem.offset.y = -cube.from.y - elem.size.y + group.origin.y;
 		elem.offset.z = cube.from.z - group.origin.z;
 		elem.glow = cube.glow;
-		elem.recolor = cube.recolor != -1;
-		if(cube.recolor != -1)elem.rgb = cube.recolor;
+		int rc = cube.getRecolor();
+		elem.recolor = rc != -1;
+		if(rc != -1)elem.rgb = rc;
 		elem.extrude = cube.extrude;
 		convertUV(elem, cube);
 		CubeData cd = cube.getData();

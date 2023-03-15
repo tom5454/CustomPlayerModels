@@ -132,6 +132,7 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 		if(player.isUsingItem()) {
 			animState.usingAnimation = HandAnimation.of(player.getUseItem().getUseAnimation());
 		}
+		if(player.isInWater())animState.retroSwimming = true;
 		animState.fallDistance = player.fallDistance;
 		animState.moveAmountX = (float) (player.getX() - player.xo);
 		animState.moveAmountY = (float) (player.getY() - player.yo);

@@ -10,7 +10,8 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
-    "sources": "https://github.com/tom5454/CustomPlayerModels"
+    "sources": "https://github.com/tom5454/CustomPlayerModels",
+	"issues": "https://github.com/tom5454/CustomPlayerModels/issues"
   },
 
   "license": "MIT",
@@ -37,9 +38,7 @@
   "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.7.4",
-    "fabric": "*"
-  },
-  "suggests": {
-    "flamingo": "*"
+    "fabric": "*",
+    "minecraft": ">=1.16 <1.17"
   }
 }

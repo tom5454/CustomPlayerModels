@@ -5,6 +5,7 @@ import java.util.EnumSet;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -37,6 +38,9 @@ public class CustomPlayerModels extends CommonBase implements ModInitializer {
 		ServerTickEvents.END_SERVER_TICK.register(s -> ServerHandler.netHandler.tick());
 		CommandRegistrationCallback.EVENT.register((d, isD) -> {
 			new Command(d);
+		});
+		ServerPlayerEvents.AFTER_RESPAWN.register((o, n, end) -> {
+			if(!end)ServerHandler.netHandler.onRespawn(n);
 		});
 		FabricLoader.getInstance().getEntrypointContainers("cpmapi", ICPMPlugin.class).forEach(entrypoint -> {
 			ModMetadata metadata = entrypoint.getProvider().getMetadata();

@@ -3,6 +3,7 @@ package com.tom.cpl.gui.elements;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
+import com.tom.cpm.shared.config.Keybind;
 
 public class Tooltip extends Panel {
 	private final Frame frm;
@@ -26,6 +27,10 @@ public class Tooltip extends Panel {
 			addElement(new Label(gui, lines[i]).setBounds(new Box(5, 5 + i * 10, 0, 0)));
 		}
 		setBounds(new Box(0, 0, wm + 20, 8 + lines.length * 10));
+	}
+
+	public Tooltip(Frame frm, String text, Keybind kb) {
+		this(frm, kb.formatTooltip(frm.getGui(), text));
 	}
 
 	public void set() {

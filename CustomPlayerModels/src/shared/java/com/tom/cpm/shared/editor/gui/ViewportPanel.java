@@ -41,6 +41,7 @@ import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorRenderer;
 import com.tom.cpm.shared.editor.EditorRenderer.BoundType;
+import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
@@ -516,6 +517,8 @@ public class ViewportPanel extends ViewportPanelBase3d {
 		h.registerKeybind(Keybinds.DELETE, editor::deleteSel);
 		h.registerKeybind(Keybinds.NEW_PART, editor::addNew);
 		h.registerKeybind(Keybinds.FOCUS_CAMERA, this::focusOnSelected);
+		h.registerKeybind(Keybinds.TOGGLE_HIDDEN_ACTION, () -> editor.switchEffect(Effect.HIDE));
+		h.registerKeybind(Keybinds.TOGGLE_VIS_ACTION, editor::switchVis);
 		super.keyPressed(event);
 	}
 

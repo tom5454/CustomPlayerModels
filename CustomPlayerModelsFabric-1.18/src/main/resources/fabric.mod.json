@@ -10,11 +10,12 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
-    "sources": "https://github.com/tom5454/CustomPlayerModels"
+    "sources": "https://github.com/tom5454/CustomPlayerModels",
+	"issues": "https://github.com/tom5454/CustomPlayerModels/issues"
   },
 
   "license": "MIT",
-  "icon": "assets/cpm/icon.png",
+  "icon": "icon.png",
 
   "environment": "*",
   "entrypoints": {
@@ -24,7 +25,7 @@
   	"client": [
       "com.tom.cpm.client.CustomPlayerModelsClient"
     ],
-	"mm:early_risers": [
+	"preLaunch": [
       "com.tom.cpm.LaunchMixinWithOptifineRunnable"
     ],
 	"modmenu": [
@@ -37,9 +38,10 @@
   "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.7.4",
-    "fabric": "*"
+    "fabric": "*",
+    "minecraft": ">=1.18 <1.19"
   },
   "suggests": {
-    "flamingo": "*"
+	"vivecraft": ">=0.0.14"
   }
 }

@@ -73,6 +73,7 @@ public class AnimPanel extends Panel {
 					thenComparing(mapper.cmp(Comparator.comparing(AnimPanel::getPose1, Comparator.nullsLast(Comparator.naturalOrder())))).
 					thenComparing(Comparator.comparing(NamedElement::toString))
 					);
+			l.setGetTooltip(n -> n.getElem() == null ? null : new Tooltip(e, n.getElem().toString()));
 		});
 		addElement(animSel);
 		animSel.setAction(() -> {
@@ -117,15 +118,21 @@ public class AnimPanel extends Panel {
 							editor.updateGui();
 						});
 						AnimPanel this0 = AnimPanel.this;
-						animPopup.addButton(gui.i18nFormat("buttom.cpm.copyAnimFrame"), this0::copyFrame).setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.copyFrame", Keybinds.COPY_ANIM_FRAME.getSetKey(gui))));
+						animPopup.addButton(gui.i18nFormat("button.cpm.copyAnimFrame"), this0::copyFrame).
+						setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.copyFrame"), Keybinds.COPY_ANIM_FRAME));
 						if(cpyFrame != null) {
-							animPopup.addButton(gui.i18nFormat("button.cpm.pasteAnimFrame"), this0::pasteFrame).setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.pasteFrame", Keybinds.PASTE_ANIM_FRAME.getSetKey(gui))));
+							animPopup.addButton(gui.i18nFormat("button.cpm.pasteAnimFrame"), this0::pasteFrame).
+							setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.pasteFrame"), Keybinds.PASTE_ANIM_FRAME));
 						}
 						if(editor.getSelectedElement() != null) {
-							animPopup.addButton(gui.i18nFormat("buttom.cpm.copyAnimFrameData"), this0::copyData).setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.copyData", Keybinds.COPY_ANIM_PART.getSetKey(gui))));
+							animPopup.addButton(gui.i18nFormat("button.cpm.copyAnimFrameData"), this0::copyData).
+							setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.copyData", Keybinds.COPY_ANIM_PART)));
 							if(cpyData != null) {
-								animPopup.addButton(gui.i18nFormat("button.cpm.pasteAnimFrameData"), this0::pasteData).setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.pasteData", Keybinds.PASTE_ANIM_PART.getSetKey(gui))));
+								animPopup.addButton(gui.i18nFormat("button.cpm.pasteAnimFrameData"), this0::pasteData).
+								setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.pasteData", Keybinds.PASTE_ANIM_PART)));
 							}
+							animPopup.addButton(gui.i18nFormat("button.cpm.mirrorFrameData"), this0::mirrorData).
+							setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.mirrorFrameData")));
 						}
 					}
 					if(animPopup.getY() != 0)
@@ -342,6 +349,18 @@ public class AnimPanel extends Panel {
 			ab.execute();
 			cpyData = null;
 			editor.updateGui();
+		}
+	}
+
+	private void mirrorData() {
+		ModelElement me = editor.getSelectedElement();
+		if(editor.selectedAnim != null && me != null) {
+			FrameData d = editor.selectedAnim.getSelectedFrame().getComponents().get(me);
+			if(d != null) {
+				ActionBuilder ab = editor.action("i", "button.cpm.tools.mirror");
+				d.mirror(ab);
+				ab.execute();
+			}
 		}
 	}
 

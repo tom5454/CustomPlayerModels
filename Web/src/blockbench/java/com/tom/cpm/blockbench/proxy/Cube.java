@@ -9,10 +9,12 @@ import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
 import com.tom.cpm.blockbench.proxy.three.ThreeMesh;
 import com.tom.ugwt.client.JsArrayE;
 
+import elemental2.core.JsObject;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Cube_$$")
 public class Cube extends OutlinerElement {
@@ -32,7 +34,20 @@ public class Cube extends OutlinerElement {
 	public boolean glow;
 
 	@JsProperty(name = "cpm_recolor")
-	public int recolor;
+	private int recolor;
+
+	@JsProperty(name = "cpm_recolor")
+	private JsObject recolor_;
+
+	@JsOverlay
+	public final int getRecolor() {
+		return Js.typeof(recolor_) == "undefined" ? -1 : recolor;
+	}
+
+	@JsOverlay
+	public final void setRecolor(int recolor) {
+		this.recolor = recolor;
+	}
 
 	@JsProperty(name = "cpm_extrude")
 	public boolean extrude;

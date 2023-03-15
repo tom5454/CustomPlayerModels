@@ -1,8 +1,14 @@
 Integration animations:
+- [Scaling](#scaling)
 - [Voice Animations](#voice-animations)
 - [First Person View](#first-person-view)
 - [VR Animations](#vr-animations)
 - [OSC](#osc-protocol)
+
+## Scaling
+Player size, health, movement, and various attributes can be scaled using Pehkui:
+[CurseForge](https://www.curseforge.com/minecraft/mc-mods/pehkui), [Modrinth](https://modrinth.com/mod/pehkui)  
+Some attributes' scaling is disabled by default and have to be enabled using the [/cpm command](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command#scaling) on the server.  
 
 ## Voice Animations
 - [Simple Voice Chat](https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat)  
