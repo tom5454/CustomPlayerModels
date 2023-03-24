@@ -274,6 +274,8 @@ public class CPMTransformerService implements IClassTransformer {
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, DATA_FIELD, Type.getDescriptor(PlayerData.class)));
 				method.instructions.add(new InsnNode(Opcodes.ARETURN));
+				method.maxLocals = 2;
+				method.maxStack = 2;
 				LOG.info("CPM ServerNet/getData: injected");
 
 				method = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$setEncodedModelData", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(PlayerData.class)), null, null);
@@ -282,6 +284,8 @@ public class CPMTransformerService implements IClassTransformer {
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
 				method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, input.name, DATA_FIELD, Type.getDescriptor(PlayerData.class)));
 				method.instructions.add(new InsnNode(Opcodes.RETURN));
+				method.maxLocals = 2;
+				method.maxStack = 2;
 				LOG.info("CPM ServerNet/setData: injected");
 				return input;
 			}
@@ -345,6 +349,8 @@ public class CPMTransformerService implements IClassTransformer {
 		method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 		method.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, input.name, HAS_MOD_FIELD, "Z"));
 		method.instructions.add(new InsnNode(Opcodes.IRETURN));
+		method.maxLocals = 2;
+		method.maxStack = 2;
 		LOG.info("CPM " + name + "/hasMod: injected");
 
 		method = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$setHasMod", "(Z)V", null, null);
@@ -353,6 +359,8 @@ public class CPMTransformerService implements IClassTransformer {
 		method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
 		method.instructions.add(new FieldInsnNode(Opcodes.PUTFIELD, input.name, HAS_MOD_FIELD, "Z"));
 		method.instructions.add(new InsnNode(Opcodes.RETURN));
+		method.maxLocals = 2;
+		method.maxStack = 2;
 		LOG.info("CPM " + name + "/setHasMod: injected");
 	}
 

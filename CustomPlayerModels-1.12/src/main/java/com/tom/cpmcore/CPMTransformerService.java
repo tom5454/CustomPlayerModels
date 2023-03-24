@@ -109,6 +109,27 @@ public class CPMTransformerService implements IClassTransformer {
 				return input;
 			}
 		});
+		transformers.put("gg.essential.mixins.impl.client.model.ModelBipedUtil", new UnaryOperator<ClassNode>() {
+
+			@Override
+			public ClassNode apply(ClassNode input) {
+				for(MethodNode method : input.methods) {
+					if(method.name.equals("resetPose")) {
+						LOG.info("CPM Armor Hook (Essential)/No setup: found resetPose method");
+						InsnList lst = new InsnList();
+						lst.add(new VarInsnNode(Opcodes.ALOAD, 0));
+						lst.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/model/ModelBiped", NO_MODEL_SETUP_FIELD, "Z"));
+						LabelNode lbln = new LabelNode();
+						lst.add(new JumpInsnNode(Opcodes.IFEQ, lbln));
+						lst.add(new InsnNode(Opcodes.RETURN));
+						lst.add(lbln);
+						method.instructions.insertBefore(method.instructions.getFirst(), lst);
+						LOG.info("CPM Armor Hook (Essential)/No setup: injected");
+					}
+				}
+				return input;
+			}
+		});
 		transformers.put("net.minecraft.client.renderer.entity.layers.LayerArmorBase", new UnaryOperator<ClassNode>() {
 
 			@Override

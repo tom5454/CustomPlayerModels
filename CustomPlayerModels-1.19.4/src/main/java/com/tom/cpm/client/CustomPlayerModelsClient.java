@@ -1,7 +1,6 @@
 package com.tom.cpm.client;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.function.Consumer;
 
 import net.minecraft.client.Minecraft;
@@ -70,7 +69,6 @@ public class CustomPlayerModelsClient extends ClientBase {
 					b -> Minecraft.getInstance().setScreen(new GuiImpl(EditorGui::new, screen))
 					).bounds(0, 0, 100, 20).build();
 			evt.addListener(btn);
-			((List) evt.getScreen().children()).add(btn);
 		}
 	}
 
