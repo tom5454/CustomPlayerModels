@@ -12,6 +12,8 @@ public class Property {
 
 	private Property(Object mp, String type, String id, PropertyInit init) {}
 
+	public Condition condition;
+
 	//UGWT won't replace unless in separate class
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
 	private static class G {

@@ -1,6 +1,7 @@
 package com.tom.cpm.blockbench.proxy;
 
 import com.tom.cpm.blockbench.format.ProjectData;
+import com.tom.ugwt.client.JsArrayE;
 
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
@@ -12,6 +13,7 @@ public class Project {
 	public static int texture_width, texture_height;
 	public static String name, geometry_name;
 	public static boolean box_uv;
+	public static JsArrayE<Animation> animations;
 
 	@JsProperty(name = "cpm_data")
 	public static String pluginData;

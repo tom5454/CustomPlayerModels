@@ -61,7 +61,10 @@ public class ProjectConvert {
 			RenderSystem.withContext(() -> {
 				editor.loadDefaultPlayerModel();
 				try {
-					res.onInvoke(new BlockbenchExport(editor, openWarn).doExport());
+					res.onInvoke(new BlockbenchExport(editor, openWarn).doExport().finally_(() -> {
+						editor.dirty = false;
+						editor.autoSaveDirty = false;
+					}));
 				} catch (Throwable e) {
 					rej.onInvoke(e);
 				}

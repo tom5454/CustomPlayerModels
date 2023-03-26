@@ -11,6 +11,7 @@ import com.tom.cpl.util.Pair;
 import com.tom.cpm.web.gwt.ClasspathFix;
 
 public class BuildBlockbench {
+	public static final String VERSION = "0.6.6_pre2";
 
 	public static void main(String[] args0) {
 		Pair<File, File> in = main(false, true);
@@ -18,11 +19,15 @@ public class BuildBlockbench {
 		copy(in.getKey(), out);
 		out = new File(args0[0], "Blockbench\\cpm_plugin.map");
 		copy(in.getValue(), out);
+		out = new File(args0[1], "blockbench_plugin-" + VERSION + ".js");
+		copy(in.getKey(), out);
+		out = new File(args0[1], "blockbench_plugin-" + VERSION + ".map");
+		copy(in.getValue(), out);
 	}
 
 	public static Pair<File, File> main(boolean debug, boolean prod) {
 		System.out.println("Running CPM Blockbench Plugin builder");
-		String version = "0.6.5_pre1";
+		String version = VERSION;
 		File f = new File(".");
 		File war = new File(f, "war");
 

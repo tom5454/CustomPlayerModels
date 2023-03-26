@@ -6,7 +6,9 @@ import com.tom.cpm.blockbench.EmbeddedEditor;
 import com.tom.cpm.blockbench.PluginStart;
 import com.tom.cpm.blockbench.convert.OldPluginConvert;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
+import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Condition;
+import com.tom.cpm.blockbench.proxy.Action.ConditionMethod;
 import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Blockbench.WriteProperties;
 import com.tom.cpm.blockbench.proxy.Codec;
@@ -68,11 +70,11 @@ public class CPMCodec {
 		ctr.single_texture = false;
 		ctr.rotate_cubes = true;
 		ctr.uv_rotation = true;
+		ctr.animation_mode = true;
+		ctr.animation_files = true;
 		if(MinecraftObjectHolder.DEBUGGING) {
-			ctr.animation_mode = true;
-			ctr.animation_controllers = true;
-			ctr.animation_files = true;
-			ctr.bone_binding_expression = true;
+			//ctr.animation_controllers = true;
+			//ctr.bone_binding_expression = true;
 		}
 		ctr.codec = codec;
 		ctr.category = "minecraft";
@@ -97,18 +99,20 @@ public class CPMCodec {
 		codec.format = format;
 		PluginStart.cleanup.add(() -> Global.getFormats().delete(FORMAT_ID));
 
-		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_glow", "CPM Glow Effect", false, PluginStart.formatCPM(), true);
-		createProperty(Clazz.CUBE, Type.NUMBER, "cpm_recolor", "CPM Recolor Effect", -1, PluginStart.formatCPM(), true);
-		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_hidden", "CPM Hidden Effect", false, PluginStart.formatCPM(), true);
-		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_extrude", "CPM Extrude Effect", false, PluginStart.formatCPM(), true);
-		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_dva", "CPM Disable Vanilla Animations Effect", false, PluginStart.formatCPM(), true);
-		createProperty(Clazz.GROUP, Type.STRING, "cpm_copy_transform", "CPM Copy Transform Effect", Js.undefined(), PluginStart.formatCPM(), true);
-		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_hideHeadIfSkull", "CPM Hide Head with Skull", true, PluginStart.formatCPM(), false);
-		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_removeBedOffset", "CPM Remove Bed Offset", false, PluginStart.formatCPM(), false);
+		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_glow", "CPM Glow Effect", false, true);
+		createProperty(Clazz.CUBE, Type.NUMBER, "cpm_recolor", "CPM Recolor Effect", -1, true);
+		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_hidden", "CPM Hidden Effect", false, true);
+		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_extrude", "CPM Extrude Effect", false, true);
+		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_dva", "CPM Disable Vanilla Animations Effect", false, true);
+		createProperty(Clazz.GROUP, Type.STRING, "cpm_copy_transform", "CPM Copy Transform Effect", Js.undefined(), true);
+		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_hideHeadIfSkull", "CPM Hide Head with Skull", true, false);
+		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_removeBedOffset", "CPM Remove Bed Offset", false, false);
+		createProperty(Clazz.ANIMATION, Type.STRING, "cpm_type", "CPM Animation Type", "custom_pose", true);
+		createProperty(Clazz.ANIMATION, Type.BOOLEAN, "cpm_additive", "CPM Animation Type", true, false);
 
-		createProperty(Clazz.GROUP, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM(), true);
-		createProperty(Clazz.CUBE, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM(), true);
-		createProperty(Clazz.PROJECT, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), PluginStart.formatCPM(), true);
+		createProperty(Clazz.GROUP, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);
+		createProperty(Clazz.CUBE, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);
+		createProperty(Clazz.PROJECT, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);
 
 		PluginStart.addEventListener("update_selection", dt -> {
 			if(Global.getFormat() == CPMCodec.format) {
@@ -133,8 +137,18 @@ public class CPMCodec {
 		});*/
 	}
 
-	public static void createProperty(Clazz clz, Type type, String id, String label, Object def, Condition cond, boolean hidden) {
-		Property p = Property.createProperty(clz, type, id, label, def, cond, hidden);
+	public static void createProperty(Clazz clz, Type type, String id, String label, Object def, boolean hidden) {
+		Property p = Property.createProperty(clz, type, id, label, def, formatCPM(), hidden);
 		PluginStart.cleanup.add(p::delete);
+	}
+
+	public static Condition formatCPM() {
+		Condition condition = new Action.Condition();
+		condition.formats = new String[] {FORMAT_ID};
+		return condition;
+	}
+
+	public static ConditionMethod notCPM() {
+		return c -> !FORMAT_ID.equals(Global.getFormat().id);
 	}
 }

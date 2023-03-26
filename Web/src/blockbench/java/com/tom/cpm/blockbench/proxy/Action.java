@@ -10,6 +10,7 @@ import jsinterop.annotations.JsType;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Action_$$")
 public class Action extends BarItem {
+	public String name;
 
 	public Action(String name, ActionProperties ctr) {}
 

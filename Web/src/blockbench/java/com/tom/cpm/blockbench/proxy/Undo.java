@@ -7,6 +7,7 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Undo_$$")
 public class Undo {
 	public static native void initEdit(UndoData dt);
+	public static native void finishEdit(String action);
 	public static native void finishEdit(String action, UndoData dt);
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
@@ -15,7 +16,7 @@ public class Undo {
 		public boolean selection, outliner, uv_mode, uv_only;
 		public Group group;
 		public Texture[] textures;
-		public Object[] animations;
+		public Animation[] animations;
 
 		@JsOverlay
 		public static UndoData make(OutlinerElement... elem) {
@@ -28,6 +29,13 @@ public class Undo {
 		public static UndoData make(Group elem) {
 			UndoData d = new UndoData();
 			d.group = elem;
+			return d;
+		}
+
+		@JsOverlay
+		public static UndoData make(Animation... an) {
+			UndoData d = new UndoData();
+			d.animations = an;
 			return d;
 		}
 	}

@@ -34,7 +34,7 @@ public class ProjectGenerator {
 	public static void initDialog() {
 		Dialog.DialogProperties dctr = new Dialog.DialogProperties();
 		dctr.id = "cpm_new_project";
-		dctr.title = Global.translate("dialog.skin.title");
+		dctr.title = I18n.get("bb-label.newCPMProject");
 		Dialog.FormVectorElement selRes = Dialog.FormVectorElement.make("dialog.project.texture_size", 64, 64);
 		selRes.min = 64;
 		selRes.max = 8192;

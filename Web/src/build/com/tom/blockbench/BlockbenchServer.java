@@ -32,7 +32,7 @@ public class BlockbenchServer {
 				path = path.substring(1);
 				if(log)System.out.println(t.getRemoteAddress() + " " + path);
 				if(path.equals("cpm_plugin.js")) {
-					Pair<File, File> r = BuildBlockbench.main(false, false);
+					Pair<File, File> r = BuildBlockbench.main(true, false);
 					File in = r.getKey();
 					map = r.getValue();
 					try(FileInputStream f = new FileInputStream(in)) {

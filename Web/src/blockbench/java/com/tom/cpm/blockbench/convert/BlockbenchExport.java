@@ -7,21 +7,31 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Direction;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
+import com.tom.cpl.util.Pair;
+import com.tom.cpm.blockbench.convert.WarnEntry.MultiWarnEntry;
+import com.tom.cpm.blockbench.format.AnimationWizard;
 import com.tom.cpm.blockbench.format.CubeData;
 import com.tom.cpm.blockbench.format.GroupData;
 import com.tom.cpm.blockbench.format.ProjectData;
 import com.tom.cpm.blockbench.format.ProjectGenerator;
+import com.tom.cpm.blockbench.proxy.Animation;
+import com.tom.cpm.blockbench.proxy.Animation.BoneAnimator;
+import com.tom.cpm.blockbench.proxy.Animation.GeneralAnimator;
+import com.tom.cpm.blockbench.proxy.Animation.Keyframe;
+import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Cube.CubeFace;
 import com.tom.cpm.blockbench.proxy.Dialog;
@@ -37,13 +47,20 @@ import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
 import com.tom.cpm.blockbench.util.BBPartValues;
 import com.tom.cpm.blockbench.util.JsonUtil;
 import com.tom.cpm.blockbench.util.PopupDialogs;
+import com.tom.cpm.shared.animation.AnimationType;
+import com.tom.cpm.shared.animation.CustomPose;
+import com.tom.cpm.shared.animation.IPose;
+import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.CopyTransformEffect;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
+import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
+import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.elements.RootGroups;
@@ -68,6 +85,7 @@ import com.tom.cpm.web.client.util.I18n;
 import com.tom.cpm.web.client.util.ImageIO;
 import com.tom.ugwt.client.JsArrayE;
 
+import elemental2.core.JsArray;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.FileReader;
 import elemental2.promise.Promise;
@@ -296,7 +314,7 @@ public class BlockbenchExport {
 				children.add(e);
 			}
 			if(ch == null) {
-				warnings.add(new WarnEntry(I18n.format("bb-label.warn.cubeSkipped", group.name)).setPriority(-1));
+				MultiWarnEntry.addOrIncEntry(warnings, I18n.format("bb-label.warn.cubeSkipped")).setPriority(-1);
 				return;
 			}
 			ch.children.add(children.get(0));
@@ -516,6 +534,361 @@ public class BlockbenchExport {
 		editor.description = pd.description;
 		editor.hideHeadIfSkull = Project.hideHeadIfSkull;
 		editor.removeBedOffset = Project.removeBedOffset;
+
+		Project.animations.forEach(this::convertAnimation);
+
+		resetEditorState(editor);
+	}
+
+	private static native void resetEditorState(Editor e)/*-{
+		e.@com.tom.cpm.shared.editor.Editor::undoQueue.@java.util.Stack::clear()();
+		e.@com.tom.cpm.shared.editor.Editor::redoQueue.@java.util.Stack::clear()();
+	}-*/;
+
+	//Ported from timeline_animators.js
+	private static JsVec3 mapAxes(Function<String, Float> cb) {
+		JsVec3 v = new JsVec3();
+		v.x = cb.apply("x");
+		v.y = cb.apply("y");
+		v.z = cb.apply("z");
+		return v;
+	}
+
+	private static JsVec3 interpolate(JsArrayE<Keyframe> keyframes, float time) {
+		if(keyframes.length == 0)return null;
+		Keyframe before = null;
+		Keyframe after = null;
+		Keyframe result = null;
+		float epsilon = 1/1200f;
+
+		for (Keyframe keyframe : keyframes.array()) {
+			if (keyframe.time < time) {
+				if (before == null || keyframe.time > before.time) {
+					before = keyframe;
+				}
+			} else  {
+				if (after == null || keyframe.time < after.time) {
+					after = keyframe;
+				}
+			}
+		}
+		if (before != null && epsilon(before.time, time, epsilon)) {
+			result = before;
+		} else if (after != null && epsilon(after.time, time, epsilon)) {
+			result = after;
+		} else if (before != null && before.interpolation.equals("step")) {
+			result = before;
+		} else if (before != null && after == null) {
+			result = before;
+		} else if (after != null && before == null) {
+			result = after;
+		} else if (before == null && after == null) {
+			//
+		} else {
+			boolean no_interpolations = Blockbench.hasFlag("no_interpolations");
+			float alpha = getLerp(before.time, after.time, time);
+
+			if (no_interpolations || (
+					before.interpolation.equals("linear") &&
+					(after.interpolation.equals("linear") || after.interpolation.equals("step"))
+					)) {
+				if (no_interpolations) {
+					alpha = Math.round(alpha);
+				}
+
+				final Keyframe fbefore = before;
+				final Keyframe fafter = after;
+				final float falpha = alpha;
+				return mapAxes(axis -> fbefore.getLerp(fafter, axis, falpha, false));
+
+			} else if (before.interpolation.equals("catmullrom") || after.interpolation.equals("catmullrom")) {
+				JsArray<Keyframe> sorted = keyframes.slice().sort((kf1, kf2) -> (kf1.time - kf2.time));
+				int before_index = sorted.indexOf(before);
+				Keyframe before_plus = sorted.getAt(before_index-1);
+				Keyframe after_plus = sorted.getAt(before_index+2);
+
+				final Keyframe fbefore = before;
+				final Keyframe fafter = after;
+				final float falpha = alpha;
+				return mapAxes(axis -> fbefore.getCatmullromLerp(before_plus, fbefore, fafter, after_plus, axis, falpha));
+
+			} else if (before.interpolation.equals("bezier") || after.interpolation.equals("bezier")) {
+				// Bezier
+				final Keyframe fbefore = before;
+				final Keyframe fafter = after;
+				final float falpha = alpha;
+				return mapAxes(axis -> fbefore.getBezierLerp(fbefore, fafter, axis, falpha));
+			}
+		}
+		if (result != null && result instanceof Keyframe) {
+			Keyframe keyframe = result;
+			int dp_index = (keyframe.time > time || epsilon(keyframe.time, time, epsilon)) ? 0 : keyframe.data_points.length-1;
+
+			return mapAxes(axis -> keyframe.calc(axis, dp_index));
+		}
+		return null;
+	}
+
+	private static float getLerp(float a, float b, float m) {
+		return (m-a) / (b-a);
+	}
+
+	private static boolean epsilon(float a, float b, float epsilon) {
+		return Math.abs(b - a) < epsilon;
+	}
+
+	private static final int FRAME_TICKS = 10;
+
+	private void convertAnimation(Animation anim) {
+		if(Js.typeof(anim.type) != "string") {
+			warnings.add(new WarnEntry(I18n.formatBr("bb-label.warn.unknownAnimation", anim.name), () -> new Promise<>((res, rej) -> {
+				AnimationWizard.open(anim, res::onInvoke);
+			})));
+			return;
+		}
+
+		boolean[] error = new boolean[] {false, false};
+		List<BoneAnimator> anims = new ArrayList<>();
+		anim.animators.forEach(k -> {
+			GeneralAnimator ga = anim.animators.get(k);
+			if(ga instanceof BoneAnimator) {
+				BoneAnimator ba = (BoneAnimator) ga;
+				if(ba.position.length == 0 && ba.rotation.length == 0 && ba.scale.length == 0)return;
+				anims.add(ba);
+			}
+		});
+
+		Pair<AnimationType, VanillaPose> typeA = Animation.parseType(anim.type);
+		Pair<AnimationType, VanillaPose> type = typeA;
+
+		String setupName;
+		if(typeA.getKey() == AnimationType.POSE) {
+			setupName = "p:" + typeA.getKey().name().toLowerCase(Locale.ROOT);
+		} else if(typeA.getKey() == AnimationType.CUSTOM_POSE) {
+			setupName = "c:" + anim.name;
+		} else if(typeA.getKey() == AnimationType.GESTURE || typeA.getKey() == AnimationType.LAYER) {
+			setupName = "g:" + anim.name;
+		} else
+			setupName = null;
+
+		boolean loop = false;
+		String name = anim.name;
+
+		if(type.getKey().isStaged()) {
+			if(!anim.loop.equals("once")) {
+				warnings.add(new WarnEntry(I18n.formatBr("bb-label.warn.stagedAnimLooping", anim.name), () -> new Promise<>((res, rej) -> {
+					Undo.initEdit(UndoData.make(anim));
+					anim.loop = "once";
+					Undo.finishEdit("Edit animation properties");
+					res.onInvoke(true);
+				})));
+				return;
+			}
+			String[] sp = anim.name.split(":", 2);
+			boolean err = false;
+			if(sp.length < 2)err = true;
+			else if(sp[0].equals("p")) {
+				VanillaPose pose = null;
+				for (VanillaPose p : VanillaPose.VALUES) {
+					if(sp[1].equalsIgnoreCase(p.name())) {
+						pose = p;
+						break;
+					}
+				}
+				if(pose == null)err = true;
+				else {
+					String nm = sp[1] + " Base";
+					String fn = AnimationsLoaderV1.getFileName(pose, nm);
+					EditorAnim ea = new EditorAnim(editor, fn, AnimationType.POSE, true);
+					ea.intType = InterpolatorType.LINEAR_SINGLE;
+					ea.add = true;
+					ea.displayName = nm;
+					ea.pose = pose;
+					editor.animations.add(ea);
+				}
+			} else if(!sp[0].equals("c") && !sp[0].equals("g")) {
+				err = true;
+			}
+			if(err) {
+				warnings.add(new WarnEntry(I18n.formatBr("bb-label.warn.unknownStagedAnimation", anim.name), () -> fixStaged(anim)));
+				return;
+			}
+		} else {
+			if(anim.loop.equals("loop")) {
+				if(type.getKey().canLoop())loop = true;
+			} else if(anim.loop.equals("once")) {
+				if(!type.getKey().canLoop()) {
+					if(type.getKey() == AnimationType.VALUE_LAYER) {
+						warnings.add(new WarnEntry(I18n.formatBr("bb-label.warn.valueAnimNotLooping", anim.name), () -> new Promise<>((res, rej) -> {
+							Undo.initEdit(UndoData.make(anim));
+							anim.loop = "loop";
+							Undo.finishEdit("Edit animation properties");
+							res.onInvoke(true);
+						})));
+						return;
+					}
+					type = Pair.of(AnimationType.SETUP, null);
+					name = setupName;
+				}
+			} else if(anim.loop.equals("hold")) {
+				if(type.getKey() == AnimationType.VALUE_LAYER) {
+					warnings.add(new WarnEntry(I18n.formatBr("bb-label.warn.valueAnimNotLooping", anim.name), () -> new Promise<>((res, rej) -> {
+						Undo.initEdit(UndoData.make(anim));
+						anim.loop = "loop";
+						Undo.finishEdit("Edit animation properties");
+					})));
+					return;
+				}
+
+				IPose pose;
+				if(type.getKey() == AnimationType.CUSTOM_POSE)
+					pose = new CustomPose(anim.name, 0);
+				else if(type.getKey() == AnimationType.POSE)
+					pose = type.getValue();
+				else
+					pose = null;
+
+				String fn = AnimationsLoaderV1.getFileName(pose, name);
+				EditorAnim ea = new EditorAnim(editor, fn, type.getKey(), false);
+				ea.intType = InterpolatorType.LINEAR_SINGLE;
+				ea.add = anim.additive;
+				ea.loop = true;
+				ea.displayName = name;
+				ea.pose = pose;
+				generateFrame(anims, ea, anim.length, error);
+				editor.animations.add(ea);
+
+				type = Pair.of(AnimationType.SETUP, null);
+				name = setupName;
+			} else return;//Error
+		}
+
+		IPose pose;
+		if(type.getKey() == AnimationType.CUSTOM_POSE)
+			pose = new CustomPose(anim.name, 0);
+		else if(type.getKey() == AnimationType.POSE)
+			pose = type.getValue();
+		else
+			pose = null;
+
+		String fn = AnimationsLoaderV1.getFileName(pose, name);
+		EditorAnim ea = new EditorAnim(editor, fn, type.getKey(), false);
+		ea.intType = InterpolatorType.LINEAR_SINGLE;
+		ea.add = anim.additive;
+		ea.loop = loop;
+		ea.displayName = name;
+		ea.pose = pose;
+
+		if(!anims.isEmpty()) {
+			float time = anim.length;
+			ea.duration = (int) (time * 1000);
+
+			int frameCount = MathHelper.ceil(time * FRAME_TICKS);
+			for (int i = 0; i < frameCount; i++) {
+				float ftime = i / (float) FRAME_TICKS;
+				generateFrame(anims, ea, ftime, error);
+			}
+		}
+
+		editor.animations.add(ea);
+		if(error[0])
+			MultiWarnEntry.addOrIncEntry(warnings, I18n.format("bb-label.warn.rootScaling")).setPriority(-1);
+		if(error[1])
+			MultiWarnEntry.addOrIncEntry(warnings, I18n.format("bb-label.warn.globalRotation")).setPriority(-1);
+	}
+
+	private void generateFrame(List<BoneAnimator> anims, EditorAnim ea, float ftime, boolean[] error) {
+		ea.addFrame();
+		AnimFrame f = ea.getSelectedFrame();
+
+		anims.forEach(a -> {
+			ModelElement me = uuidLookup.get(a.uuid);
+			Vec3f addPos = me.pos;
+			Vec3f addRot = me.rotation;
+			if(!ea.add && me.type == ElementType.ROOT_PART) {
+				PartValues pv;
+				VanillaModelPart part = (VanillaModelPart) me.typeData;
+				if(part instanceof RootModelType)pv = BBParts.getPart((RootModelType) part);
+				else pv = part.getDefaultSize(SkinType.DEFAULT);
+				if(pv instanceof BBPartValues) {
+					addRot = addRot.add(((BBPartValues)pv).getRotation());
+				}
+				addPos = addPos.add(pv.getPos());
+			}
+
+			JsVec3 pos = interpolate(a.position, ftime);
+			JsVec3 rot = interpolate(a.rotation, ftime);
+			JsVec3 scl = interpolate(a.scale, ftime);
+
+			FrameData dt = f.getComponents().get(me);
+			if(dt == null) {
+				dt = f.new FrameData(me);
+				f.getComponents().put(me, dt);
+			}
+
+			if(pos != null) {
+				Vec3f v = pos.toVecF();
+				v.y *= -1;
+				if(!ea.add)v = v.add(addPos);
+				dt.setPos(v);
+			}
+			if(rot != null) {
+				Vec3f v = rot.toVecF();
+				if(!ea.add)v = v.add(addRot);
+				dt.setRot(v);
+				if(a.rotation_global)error[1] = true;
+			}
+			if(scl != null) {
+				if(me.type == ElementType.ROOT_PART)
+					error[0] = true;
+				else
+					dt.setScale(scl.toVecF());
+			}
+		});
+	}
+
+	private Promise<Boolean> fixStaged(Animation a) {
+		return new Promise<>((res, rej) -> {
+			JsBuilder<String> b = new JsBuilder<>();
+			for (VanillaPose p : VanillaPose.VALUES) {
+				if(p == VanillaPose.CUSTOM)continue;
+				String id = p.name().toLowerCase(Locale.ROOT);
+				b.put("p:" + id, I18n.get("label.cpm.pose." + id));
+			}
+			Project.animations.forEach(an -> {
+				Pair<AnimationType, VanillaPose> type = Animation.parseType(an.type);
+				if(type.getKey() == AnimationType.CUSTOM_POSE) {
+					b.put("c:" + an.name, an.name);
+				} else if(type.getKey() == AnimationType.GESTURE || type.getKey() == AnimationType.LAYER) {
+					b.put("g:" + an.name, an.name);
+				}
+			});
+
+			DialogProperties pr = new DialogProperties();
+			pr.id = "cpm_fix_staged";
+			pr.title = I18n.get("bb-label.fixStagedAnim.title");
+			pr.singleButton = false;
+			Dialog.FormSelectElement selPart = Dialog.FormSelectElement.make(I18n.format("bb-label.fixStagedAnim.selectBase"));
+			selPart.value = b.first();
+			selPart.options = b.build();
+			pr.form = new JsBuilder<>().put("root", selPart).build();
+			pr.onConfirm = d -> {
+				JsPropertyMap<String> dr = Js.uncheckedCast(d);
+				String root = dr.get("root");
+
+				Undo.initEdit(UndoData.make(a));
+				a.name = root;
+				Undo.finishEdit(I18n.format("bb-label.autoFixApplied", I18n.get("bb-label.autoFix.stagedAnim")));
+
+				res.onInvoke(true);
+				return true;
+			};
+			pr.onCancel = () -> {
+				res.onInvoke(false);
+				return true;
+			};
+			new Dialog(pr).show();
+		});
 	}
 
 	protected static PartPosition loadPartPos(JsonMap fpHand, String name) {

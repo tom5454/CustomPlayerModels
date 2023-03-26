@@ -1076,5 +1076,18 @@
   "button.cpm.copyAnimFrameData": "Copy Part Pose",
   "label.cpm.reopenProject": "Reopen/recover previously open project?\\%s",
   "osc-button.cpmosc.createNew": "Create New",
-  "osc-button.cpmosc.editSelected": "Edit Selected"
+  "osc-button.cpmosc.editSelected": "Edit Selected",
+  "bb-label.warn.multiple": "%s (%s warnings)",
+  "bb-label.warn.rootScaling": "Scaling animations on roots",
+  "bb-label.warn.globalRotation": "Global rotation in animation",
+  "bb-label.newCPMProject": "Create New CPM Project",
+  "bb-label.newAnimation": "Create New Animation",
+  "bb-label.animationType": "Animation Type:",
+  "bb-label.warn.valueAnimNotLooping": "Value layers must loop (%s)",
+  "bb-label.warn.unknownAnimation": "Unknown Animation Type (%s)",
+  "bb-label.warn.stagedAnimLooping": "Staged animation can\u0027t loop or hold (%s)",
+  "bb-label.warn.unknownStagedAnimation": "Can\u0027t find the base animation for %s (Staged)",
+  "bb-label.fixStagedAnim.title": "Auto-Fix Staged Animation",
+  "bb-label.fixStagedAnim.selectBase": "Select Base Animation:",
+  "bb-label.autoFix.stagedAnim": "Staged Animation Base"
 }

@@ -41,4 +41,13 @@ public class JsArrayE<E> extends JsArray<E> {
 	public final E[] array() {
 		return Js.uncheckedCast(this);
 	}
+
+	@SuppressWarnings("unchecked")
+	@JsOverlay
+	public final void remove(E e) {
+		int i = indexOf(e);
+		if(i != -1) {
+			splice(i, 1);
+		}
+	}
 }

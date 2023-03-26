@@ -1,5 +1,9 @@
 package com.tom.cpm.blockbench.convert;
 
+import java.util.List;
+
+import com.tom.cpm.web.client.util.I18n;
+
 import elemental2.promise.Promise;
 
 public class WarnEntry implements Comparable<WarnEntry> {
@@ -57,5 +61,33 @@ public class WarnEntry implements Comparable<WarnEntry> {
 
 	public String getTooltip() {
 		return tooltip;
+	}
+
+	public static class MultiWarnEntry extends WarnEntry {
+		private int count = 1;
+
+		private MultiWarnEntry(String message) {
+			super(message);
+		}
+
+		public static WarnEntry addOrIncEntry(List<WarnEntry> ent, String msg) {
+			WarnEntry e = ent.stream().filter(w -> w instanceof MultiWarnEntry && ((MultiWarnEntry)w).getMessage0().equals(msg)).findFirst().orElse(null);
+			if(e != null) {
+				((MultiWarnEntry)e).count++;
+			} else {
+				e = new MultiWarnEntry(msg);
+				ent.add(e);
+			}
+			return e;
+		}
+
+		public String getMessage0() {
+			return super.getMessage();
+		}
+
+		@Override
+		public String getMessage() {
+			return I18n.formatBr("bb-label.warn.multiple", super.getMessage(), count);
+		}
 	}
 }

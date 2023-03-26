@@ -11,8 +11,6 @@ import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.format.ProjectGenerator;
-import com.tom.cpm.blockbench.proxy.Action;
-import com.tom.cpm.blockbench.proxy.Action.Condition;
 import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Blockbench.CallbackEvent;
 import com.tom.cpm.blockbench.proxy.Codec;
@@ -91,12 +89,6 @@ public class PluginStart implements EntryPoint {
 		CPMCodec.init();
 		ProjectGenerator.initDialog();
 		BBActions.load();
-	}
-
-	public static Condition formatCPM() {
-		Condition condition = new Action.Condition();
-		condition.formats = new String[] {"cpm"};
-		return condition;
 	}
 
 	public static void onUnload() {

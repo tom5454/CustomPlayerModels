@@ -13,7 +13,7 @@ public class ModelFormat {
 
 	@JsProperty(name = "new")
 	public CallbackNew new_;
-	public String name;
+	public String name, id;
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class FormatProperties {

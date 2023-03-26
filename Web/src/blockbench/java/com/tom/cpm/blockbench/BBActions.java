@@ -11,9 +11,11 @@ import com.tom.cpm.blockbench.convert.BBParts;
 import com.tom.cpm.blockbench.convert.BlockbenchImport;
 import com.tom.cpm.blockbench.convert.BlockbenchImport.UVMul;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
+import com.tom.cpm.blockbench.format.AnimationWizard;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Toggle;
+import com.tom.cpm.blockbench.proxy.Animation;
 import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Cube.CubeProperties;
@@ -21,6 +23,7 @@ import com.tom.cpm.blockbench.proxy.Group;
 import com.tom.cpm.blockbench.proxy.Group.GroupProperties;
 import com.tom.cpm.blockbench.proxy.Interface;
 import com.tom.cpm.blockbench.proxy.MenuBar;
+import com.tom.cpm.blockbench.proxy.MenuBar.BarItem;
 import com.tom.cpm.blockbench.proxy.MenuBar.BarMenu;
 import com.tom.cpm.blockbench.proxy.MenuBar.BarMenuInit;
 import com.tom.cpm.blockbench.proxy.Outliner;
@@ -30,11 +33,13 @@ import com.tom.cpm.blockbench.proxy.Plugin.Plugins;
 import com.tom.cpm.blockbench.proxy.Project;
 import com.tom.cpm.blockbench.proxy.Texture;
 import com.tom.cpm.blockbench.proxy.Texture.TextureProperties;
+import com.tom.cpm.blockbench.proxy.Toolbars;
 import com.tom.cpm.blockbench.proxy.Undo;
 import com.tom.cpm.blockbench.proxy.Undo.UndoData;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec2;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
 import com.tom.cpm.blockbench.util.BBPartValues;
+import com.tom.cpm.blockbench.util.ConditionUtil;
 import com.tom.cpm.blockbench.util.PopupDialogs;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.editor.elements.RootGroups;
@@ -47,6 +52,8 @@ import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.web.client.resources.Resources;
 import com.tom.cpm.web.client.util.I18n;
+
+import jsinterop.base.Js;
 
 public class BBActions {
 	public static Toggle glowButton, hiddenButton;
@@ -226,18 +233,19 @@ public class BBActions {
 		}
 
 		BarMenuInit bmi = new BarMenuInit();
-		bmi.condition = PluginStart.formatCPM();
+		bmi.condition = CPMCodec.formatCPM();
 		bmi.name = "CPM";
 		new BarMenu("cpm", cpmMenu.toArray(), bmi);
 		PluginStart.cleanup.add(() -> MenuBar.menus.delete("cpm"));
 
-		/*Action openCPM;
+		Action openCPM;
 		{
 			Action.ActionProperties a = new Action.ActionProperties();
 			a.icon = "fa-plus-circle";
 			a.name = I18n.get("bb-button.newAnimation");
 			a.category = "animation";
-			a.condition = PluginStart.formatCPM();
+			a.condition = CPMCodec.formatCPM();
+			a.click = e -> AnimationWizard.open(null, null);
 			openCPM = new Action("cpm_animation_wizard", a);
 			PluginStart.cleanup.add(openCPM::delete);
 		}
@@ -245,13 +253,35 @@ public class BBActions {
 		boolean add = true;
 		for(BarItem bi : Toolbars.animations.children) {
 			if(bi.id.equals("add_animation")) {
-				PluginStart.cleanup.add(new FieldReplace<>(bi.condition, a -> a.method, (a, b) -> a.method = b, c -> Global.getFormat() != CPMCodec.format, (a, b) -> c -> (a.check(c) && b.check(c))));
+				ConditionUtil.and(bi.condition, a -> bi.condition = a, CPMCodec.notCPM());
 			} else if(bi.id.equals("cpm_animation_wizard")) {
 				add = false;
 			}
 		}
 		if(add)
-			Toolbars.animations.add(openCPM, "0");*/
+			Toolbars.animations.add(openCPM, "0");
+
+		Animation.menu.structure.forEach(v -> {
+			if(!(v instanceof String)) {
+				Action ac = Js.uncheckedCast(v);
+				if(ac.name.equals("menu.animation.properties")) {
+					ConditionUtil.and(ac.condition, a -> ac.condition = a, CPMCodec.notCPM());
+				}
+			}
+		});
+		{
+			Action.ActionProperties a = new Action.ActionProperties();
+			a.category = "animation";
+			a.icon = "list";
+			a.name = "menu.animation.properties";
+			a.click = e -> AnimationWizard.open(Js.uncheckedCast(e), null);
+			a.condition = CPMCodec.formatCPM();
+			Animation.menu.structure.push(a);
+			PluginStart.cleanup.add(() -> {
+				Animation.menu.structure.remove(a);
+			});
+		}
+
 
 		Interface.updateInterface();
 	}

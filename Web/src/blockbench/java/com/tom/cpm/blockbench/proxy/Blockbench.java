@@ -89,4 +89,6 @@ public class Blockbench {
 		if(Electron.isElectron())Electron.app.focus();
 		else DomGlobal.window.focus();
 	}
+
+	public static native boolean hasFlag(String flag);
 }
