@@ -485,7 +485,7 @@ public class CPMTransformerService implements IClassTransformer {
 			classReader.accept(classNode, 0);
 			LOG.info("Applying cpm transformer: " + transformedName);
 			classNode = tr.apply(classNode);
-			ClassWriter writer = new ClassWriter(0);//ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES
+			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
 			return writer.toByteArray();
 		}

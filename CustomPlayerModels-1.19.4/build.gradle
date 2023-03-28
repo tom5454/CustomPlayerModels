@@ -158,7 +158,7 @@ mixin {
     debug.verbose = true
     debug.export = true
     
-    extraMappings file("vivecraft-667903-4409429.tsrg")
+    extraMappings file("vivecraft-667903-4462688.tsrg")
 }
 
 dependencies {
@@ -183,8 +183,8 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     compileOnly files("of.jar")
     
-    //compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.6.2-1.19.3-forge")
-    //compileOnly fg.deobf('curse.maven:vivecraft-667903:4160377')
+    compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.1-1.19.4-forge")
+    compileOnly fg.deobf('curse.maven:vivecraft-667903:4462688')
 }
 
 sourceSets {

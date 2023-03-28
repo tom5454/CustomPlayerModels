@@ -5,7 +5,7 @@
     "1.12.2-latest": "0.6.6b",
     "1.16.4-latest": "0.4.3a",
     "1.16.5-latest": "0.6.6a",
-    "1.8.9-latest": "0.6.6b",
+    "1.8.9-latest": "0.6.6c",
     "1.7.10-latest": "0.6.6b",
     "1.15.2-latest": "0.0.17d",
     "1.16.4-fabric-latest": "0.4.3a",
@@ -30,9 +30,9 @@
     "1.19.3-latest": "0.6.6a",
     "1.19.3-fabric-latest": "0.6.6a",
     "web-latest": "0.6.6a",
-    "blockbench-latest": "0.6.6_pre1",
-    "1.19.4-latest": "0.6.6b",
-    "1.19.4-fabric-latest": "0.6.6b"
+    "blockbench-latest": "0.6.6_pre2",
+    "1.19.4-latest": "0.6.6c",
+    "1.19.4-fabric-latest": "0.6.6c"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -392,7 +392,8 @@
     "0.6.4a": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups",
     "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
     "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric",
-    "0.6.6b": "Fixed crash on 1.19.4 (Closes #397)\nFixed crash on 1.7.10 (Closes #393)\nFixed essential breaking armor on 1.8.9 and 1.12.2 (Closes #362)"
+    "0.6.6b": "Fixed crash on 1.19.4 (Closes #397)\nFixed crash on 1.7.10 (Closes #393)\nFixed essential breaking armor on 1.8.9 and 1.12.2 (Closes #362)",
+    "0.6.6c": "Added pehkui and vivecraft support on 1.19.4\nFixed crash on 1.8.9 (Closes #399)"
   },
   "1.7.10": {
     "0.0.5a": "First release",
@@ -809,18 +810,21 @@
     "0.6.3_pre3": "Fixed blockbench export bug (Closes #346)",
     "0.6.4_pre1": "Added \u0027Skin Layer Triggered\u0027 setting under animation settings\n\nFixed crash with vivecraft 0.0.14 on 1.18+\nFixed rare concurrent modification exceptions while loading projects\nFixed animation editor gizmo not working (Closes #359)\nFixed animations using too many skin layer slots, and showing an error (Closes #358)\nFixed some texture settings showing in color mode\nFixed status message tooltips not showing in popups\nAdded the warnings popup again\n- Some warnings have an Auto Fix option\nAdded format converter from old plugin format\nAdded source maps\nFixed export crash with bad texture names\nFixed models with decimal size and box UV not converting correctly",
     "0.6.5_pre1": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)\nAdded copy error message button\nAdded View in Blockbench under File in embedded editor\nAdded warnings for opening projects\n\nFixed some projects not opening (Closes #364)\nFixed some projects not exporting (Closes #365)\nFixed plugin not working in the web version of Blockbench",
-    "0.6.6_pre1": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric\nFixed CPM export turning black in some cases (Closes #391)"
+    "0.6.6_pre1": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric\nFixed CPM export turning black in some cases (Closes #391)",
+  	"0.6.6_pre2": "Animation support Beta (Closes #142)\nOnly works from Blockbench to CPM (you can't edit CPM animations yet)"
   },
   "1.19.4-fabric": {
     "0.0.0": "1.19.3-fabric",
     "0.6.4a": "Ported to 23w04a",
     "0.6.5a": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)",
     "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric",
-    "0.6.6b": "Fixed crash on 1.19.4 (Closes #397)\nFixed crash on 1.7.10 (Closes #393)\nFixed essential breaking armor on 1.8.9 and 1.12.2 (Closes #362)"
+    "0.6.6b": "Fixed crash on 1.19.4 (Closes #397)\nFixed crash on 1.7.10 (Closes #393)\nFixed essential breaking armor on 1.8.9 and 1.12.2 (Closes #362)",
+    "0.6.6c": "Added pehkui and vivecraft support on 1.19.4\nFixed crash on 1.8.9 (Closes #399)"
   },
   "1.19.4": {
     "0.0.0": "1.19.3",
     "0.6.6a": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric",
-    "0.6.6b": "Fixed crash on 1.19.4 (Closes #397)\nFixed crash on 1.7.10 (Closes #393)\nFixed essential breaking armor on 1.8.9 and 1.12.2 (Closes #362)"
+    "0.6.6b": "Fixed crash on 1.19.4 (Closes #397)\nFixed crash on 1.7.10 (Closes #393)\nFixed essential breaking armor on 1.8.9 and 1.12.2 (Closes #362)",
+    "0.6.6c": "Added pehkui and vivecraft support on 1.19.4\nFixed crash on 1.8.9 (Closes #399)"
   }
 }

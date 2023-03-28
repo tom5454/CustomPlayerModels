@@ -1,5 +1,6 @@
 package com.tom.cpm.common;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,9 +24,9 @@ public class ServerHandler extends ServerHandlerBase {
 		netHandler = init();
 		netHandler.setGetOnlinePlayers(() -> getServer().getPlayerList().getPlayers());
 		netHandler.setExecutor(n -> n.server);
-		/*if(FabricLoader.getInstance().isModLoaded("pehkui")) {
+		if(FabricLoader.getInstance().isModLoaded("pehkui")) {
 			netHandler.setScaler(new PehkuiInterface());
-		}*/
+		}
 	}
 
 	public static void onPlayerJoin(ServerPlayer spe) {
