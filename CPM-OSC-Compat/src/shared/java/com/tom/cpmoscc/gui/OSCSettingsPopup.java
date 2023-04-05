@@ -1,11 +1,13 @@
 package com.tom.cpmoscc.gui;
 
+import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Spinner;
+import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpm.shared.config.ModConfig;
@@ -44,16 +46,37 @@ public class OSCSettingsPopup extends PopupPanel {
 		});
 		addElement(oscPort);
 
+		Checkbox chbxEnT = new Checkbox(gui, gui.i18nFormat("osc-label.cpmosc.oscEnableTransmit"));
+		chbxEnT.setBounds(new Box(195, 5, 100, 18));
+		chbxEnT.setSelected(ModConfig.getCommonConfig().getBoolean(CPMOSC.OSC_ENABLE_TRANSMIT, false));
+		addElement(chbxEnT);
+
+		addElement(new Label(gui, gui.i18nFormat("osc-label.cpmosc.oscTransmitAddr")).setBounds(new Box(316, 10, 20, 10)));
+
+		TextField oscTrAddr = new TextField(gui);
+		oscTrAddr.setText(ModConfig.getCommonConfig().getString(CPMOSC.OSC_OUT_KEY, "localhost:9001"));
+		oscTrAddr.setBounds(new Box(360, 4, 100, 20));
+		oscTrAddr.setEnabled(chbxEnT.isSelected());
+		addElement(oscTrAddr);
+		chbxEnT.setAction(() -> {
+			boolean v = !chbxEnT.isSelected();
+			chbxEnT.setSelected(v);
+			oscTrAddr.setEnabled(v);
+		});
+
 		data = new OSCDataPanel(gui, null, b.w - 60);
 
 		Button save = new Button(gui, gui.i18nFormat("button.cpm.saveCfg"), () -> {
-			ModConfig.getCommonConfig().setBoolean(CPMOSC.OSC_ENABLE, chbxEn.isSelected());
-			ModConfig.getCommonConfig().setInt(CPMOSC.OSC_PORT_KEY, (int) oscPort.getValue());
-			ModConfig.getCommonConfig().save();
+			ModConfigFile f = ModConfig.getCommonConfig();
+			f.setBoolean(CPMOSC.OSC_ENABLE, chbxEn.isSelected());
+			f.setInt(CPMOSC.OSC_PORT_KEY, (int) oscPort.getValue());
+			f.setBoolean(CPMOSC.OSC_ENABLE_TRANSMIT, chbxEnT.isSelected());
+			f.setString(CPMOSC.OSC_OUT_KEY, oscTrAddr.getText());
+			f.save();
 			CPMOSC.resetOsc();
 			data.reset();
 		});
-		save.setBounds(new Box(195, 4, 50, 20));
+		save.setBounds(new Box(465, 4, 50, 20));
 		addElement(save);
 
 		ScrollPanel scp = new ScrollPanel(gui);

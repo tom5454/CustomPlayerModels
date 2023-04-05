@@ -1089,5 +1089,7 @@
   "bb-label.warn.unknownStagedAnimation": "Can\u0027t find the base animation for %s (Staged)",
   "bb-label.fixStagedAnim.title": "Auto-Fix Staged Animation",
   "bb-label.fixStagedAnim.selectBase": "Select Base Animation:",
-  "bb-label.autoFix.stagedAnim": "Staged Animation Base"
+  "bb-label.autoFix.stagedAnim": "Staged Animation Base",
+  "osc-label.cpmosc.oscEnableTransmit": "Enable Transmit",
+  "osc-label.cpmosc.oscTransmitAddr": "Address:"
 }

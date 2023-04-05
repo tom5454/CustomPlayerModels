@@ -12,7 +12,7 @@
     "sources": "https://github.com/tom5454/CustomPlayerModels"
   },
   "license": "MIT",
-  "icon": "assets/cpmoscc/icon.png",
+  "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
 	"client": [

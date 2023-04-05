@@ -1087,6 +1087,8 @@
   "osc-label.cpmosc.oscDisabled": "OSC is disabled, please enable it using the checkbox and press save",
   "osc-label.cpmosc.oscPort": "Port:",
   "osc-label.cpmosc.oscDebugger": "OSC Debugger",
+  "osc-label.cpmosc.oscEnableTransmit": "Enable Transmit",
+  "osc-label.cpmosc.oscTransmitAddr": "Address:",
   "osc-tooltip.cpmosc.oscSettings": "Open the OSC Settings and Debug Popup",
   "osc-tooltip.cpmosc.oscWizard": "Generate a new OSC Animation using a wizard",
   "osc-tooltip.cpmosc.oscFirstArg": "Filter for the first string argument, leave empty for no filter\\Useful for VMC triggers"

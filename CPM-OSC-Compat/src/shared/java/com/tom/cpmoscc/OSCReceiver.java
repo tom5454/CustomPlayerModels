@@ -55,13 +55,6 @@ public class OSCReceiver implements MessageSelector, OSCMessageListener, Closeab
 		return true;
 	}
 
-	public static void main(String[] args) throws IOException {
-		OSCReceiver r = new OSCReceiver(9000);
-		r.start();
-		System.in.read();
-		r.close();
-	}
-
 	public Exception getError() {
 		return error;
 	}

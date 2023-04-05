@@ -1087,6 +1087,8 @@
   "osc-label.cpmosc.oscDisabled": "OSC 已禁用，请使用复选框启用它并按保存",
   "osc-label.cpmosc.oscPort": "端口：",
   "osc-label.cpmosc.oscDebugger": "OSC调试",
+  "osc-label.cpmosc.oscEnableTransmit": "UNLOCALIZED: Enable Transmit",
+  "osc-label.cpmosc.oscTransmitAddr": "UNLOCALIZED: Address:",
   "osc-tooltip.cpmosc.oscSettings": "打开 OSC 设置和调试弹出窗口",
   "osc-tooltip.cpmosc.oscWizard": "使用向导生成新的 OSC 动画",
   "osc-tooltip.cpmosc.oscFirstArg": "过滤第一个字符串参数，留空不过滤\\对VMC触发器有用"

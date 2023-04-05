@@ -1,0 +1,53 @@
+{
+	"homepage": "https://www.curseforge.com/minecraft/mc-mods/cpmoscc",
+	"promos": {
+		"1.19.4-latest": "1.2.0",
+		"1.19.3-latest": "1.2.0",
+		"1.19.2-latest": "1.2.0",
+		"1.18.2-latest": "1.2.0",
+		"1.17.1-latest": "1.2.0",
+		"1.16.5-latest": "1.2.0"
+	},
+	"1.19.4": {
+		"1.2.0": "Added OSC Output functionality",
+		"1.1.2": "Added an Edit Selected option to the OSC Animation Wizard\nFixed mod homepage links",
+		"1.1.1": "Added Simplified Chinese translation",
+		"1.1.0": "Fixed OSC select from inputs using the wrong argument id\nFixed crash with OSC mod on Fabric\nFixed OSC Settings not saving in some cases",
+		"1.0.0": "First Release"
+	},
+	"1.19.3": {
+		"1.2.0": "Added OSC Output functionality",
+		"1.1.2": "Added an Edit Selected option to the OSC Animation Wizard\nFixed mod homepage links",
+		"1.1.1": "Added Simplified Chinese translation",
+		"1.1.0": "Fixed OSC select from inputs using the wrong argument id\nFixed crash with OSC mod on Fabric\nFixed OSC Settings not saving in some cases",
+		"1.0.0": "First Release"
+	},
+	"1.19.2": {
+		"1.2.0": "Added OSC Output functionality",
+		"1.1.2": "Added an Edit Selected option to the OSC Animation Wizard\nFixed mod homepage links",
+		"1.1.1": "Added Simplified Chinese translation",
+		"1.1.0": "Fixed OSC select from inputs using the wrong argument id\nFixed crash with OSC mod on Fabric\nFixed OSC Settings not saving in some cases",
+		"1.0.0": "First Release"
+	},
+	"1.18.2": {
+		"1.2.0": "Added OSC Output functionality",
+		"1.1.2": "Added an Edit Selected option to the OSC Animation Wizard\nFixed mod homepage links",
+		"1.1.1": "Added Simplified Chinese translation",
+		"1.1.0": "Fixed OSC select from inputs using the wrong argument id\nFixed crash with OSC mod on Fabric\nFixed OSC Settings not saving in some cases",
+		"1.0.0": "First Release"
+	},
+	"1.17.1": {
+		"1.2.0": "Added OSC Output functionality",
+		"1.1.2": "Added an Edit Selected option to the OSC Animation Wizard\nFixed mod homepage links",
+		"1.1.1": "Added Simplified Chinese translation",
+		"1.1.0": "Fixed OSC select from inputs using the wrong argument id\nFixed crash with OSC mod on Fabric\nFixed OSC Settings not saving in some cases",
+		"1.0.0": "First Release"
+	},
+	"1.16.5": {
+		"1.2.0": "Added OSC Output functionality",
+		"1.1.2": "Added an Edit Selected option to the OSC Animation Wizard\nFixed mod homepage links",
+		"1.1.1": "Added Simplified Chinese translation",
+		"1.1.0": "Fixed OSC select from inputs using the wrong argument id\nFixed crash with OSC mod on Fabric\nFixed OSC Settings not saving in some cases",
+		"1.0.0": "First Release"
+	}
+}

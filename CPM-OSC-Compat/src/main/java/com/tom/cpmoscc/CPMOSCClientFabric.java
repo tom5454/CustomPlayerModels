@@ -9,7 +9,7 @@ public class CPMOSCClientFabric implements ClientModInitializer {
 	public void onInitializeClient() {
 		ClientTickEvents.START_CLIENT_TICK.register(cl -> {
 			if(!cl.isPaused())
-				CPMOSC.tick();
+				CPMOSC.tick(cl.player);
 		});
 		CPMOSC.LOGGER.info("CPM OSC initialized");
 	}
