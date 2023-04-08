@@ -33,25 +33,35 @@ public class Animation {
 	public boolean commandCtrl;
 
 	@JsProperty(name = "cpm_priority")
-	public int priority;
+	private int priority;
 
 	@JsProperty(name = "cpm_priority")
 	private JsObject priority_;
 
 	@JsOverlay
 	public final int getPriority() {
-		return Js.typeof(priority_) == "undefined" ? 0 : priority;
+		return Js.typeof(priority_) == "undefined" ? 0 : Js.typeof(priority_) == "object" ? Js.cast(priority_) : priority;
+	}
+
+	@JsOverlay
+	public final void setPriority(int priority) {
+		this.priority = priority;
 	}
 
 	@JsProperty(name = "cpm_order")
-	public int order;
+	private int order;
 
 	@JsProperty(name = "cpm_order")
 	private JsObject order_;
 
 	@JsOverlay
 	public final int getOrder() {
-		return Js.typeof(order_) == "undefined" ? 0 : order;
+		return Js.typeof(order_) == "undefined" ? 0 : Js.typeof(order_) == "object" ? Js.cast(order_) : order;
+	}
+
+	@JsOverlay
+	public final void setOrder(int order) {
+		this.order = order;
 	}
 
 	@JsProperty(name = "cpm_isProperty")
@@ -61,14 +71,19 @@ public class Animation {
 	public String group;
 
 	@JsProperty(name = "cpm_layerDefault")
-	public float layerDefault;
+	private float layerDefault;
 
 	@JsProperty(name = "cpm_layerDefault")
 	private JsObject layerDefault_;
 
 	@JsOverlay
 	public final float getLayerDefault() {
-		return Js.typeof(layerDefault_) == "undefined" ? 0 : layerDefault;
+		return Js.typeof(layerDefault_) == "undefined" ? 0 : Js.typeof(layerDefault_) == "object" ? Js.cast(layerDefault_) : layerDefault;
+	}
+
+	@JsOverlay
+	public final void setLayerDefault(float layerDefault) {
+		this.layerDefault = layerDefault;
 	}
 
 	public static Props properties;

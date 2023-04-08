@@ -2,6 +2,7 @@ package com.tom.cpm.blockbench.proxy;
 
 import com.tom.cpm.blockbench.proxy.Action.Condition;
 
+import javaemul.internal.annotations.DoNotAutobox;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
@@ -41,7 +42,7 @@ public class Property {
 	}
 
 	@JsOverlay
-	public static Property createProperty(Clazz clz, Type type, String id, String label, Object def, Condition cond, boolean hidden) {
+	public static Property createProperty(Clazz clz, Type type, String id, String label, @DoNotAutobox Object def, Condition cond, boolean hidden) {
 		PropertyInit init = new PropertyInit();
 		init.label = label;
 		init.def = def;

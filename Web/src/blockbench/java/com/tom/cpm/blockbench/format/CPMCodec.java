@@ -29,6 +29,7 @@ import com.tom.cpm.web.client.util.I18n;
 import com.tom.ugwt.client.GlobalFunc;
 import com.tom.ugwt.client.JsRunnable;
 
+import javaemul.internal.annotations.DoNotAutobox;
 import jsinterop.base.Js;
 
 public class CPMCodec {
@@ -147,7 +148,7 @@ public class CPMCodec {
 		});*/
 	}
 
-	public static void createProperty(Clazz clz, Type type, String id, String label, Object def, boolean hidden) {
+	public static void createProperty(Clazz clz, Type type, String id, String label, @DoNotAutobox Object def, boolean hidden) {
 		Property p = Property.createProperty(clz, type, id, label, def, formatCPM(), hidden);
 		PluginStart.cleanup.add(p::delete);
 	}

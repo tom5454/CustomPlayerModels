@@ -152,14 +152,14 @@ public class AnimationWizard {
 			a.additive = r.add;
 			a.layerCtrl = r.layerCtrl;
 			a.commandCtrl = r.commandCtrl;
-			a.priority = (int) r.priority;
+			a.setPriority(Math.round(r.priority));
 			a.group = r.group;
 			a.isProperty = r.prop;
-			a.order = (int) r.order;
+			a.setOrder(Math.round(r.order));
 			if(a.type.equals(AnimationType.LAYER.name().toLowerCase(Locale.ROOT)))
-				a.layerDefault = r.layerDefaultB ? 1 : 0;
+				a.setLayerDefault(r.layerDefaultB ? 1 : 0);
 			else
-				a.layerDefault = r.layerDefaultF;
+				a.setLayerDefault(r.layerDefaultF);
 
 			if(edit)Undo.finishEdit("Edit animation properties");
 			else Undo.finishEdit("Add animation", UndoData.make(a));
