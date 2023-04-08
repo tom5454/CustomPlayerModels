@@ -3,7 +3,6 @@ package com.tom.cpl.text;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpm.shared.MinecraftClientAccess;
 
@@ -36,7 +35,7 @@ public class KeybindText implements IText {
 	}
 
 	@Override
-	public String toString(IGui gui) {
+	public String toString(I18n gui) {
 		IKeybind rtkb = null;
 		for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
 			if(kb.getName().startsWith(fallback)) {

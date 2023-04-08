@@ -37,6 +37,8 @@ API version: ![API version badge](https://img.shields.io/maven-metadata/v?color=
 
 | Minecraft Version | Runtime version (Forge) | Runtime version (Fabric) |
 | ----------------- | ----------------------- | ------------------------ |
+| 1.19.4 | ![1.19.4 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.19.4%2Fmaven-metadata.xml) | ![1.19 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.19.4%2Fmaven-metadata.xml) |
+| 1.19.3 | ![1.19.3 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.19.3%2Fmaven-metadata.xml) | ![1.19 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.19.3%2Fmaven-metadata.xml) |
 | 1.19 | ![1.19 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.19%2Fmaven-metadata.xml) | ![1.19 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.19%2Fmaven-metadata.xml) |
 | 1.18 | ![1.18 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.18%2Fmaven-metadata.xml) | ![1.18 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.18%2Fmaven-metadata.xml) |
 | 1.17 | ![1.17 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.17%2Fmaven-metadata.xml) | ![1.17 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=beta&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.17%2Fmaven-metadata.xml) |
@@ -109,8 +111,20 @@ Send an IMC message with your plugin class location.
 `FMLInterModComms.sendMessage("customplayermodels", "api", "com.example.mod.CPMCompat");`
 
 ### Forge 1.16 and up
-Send an IMC message.  
-`InterModComms.sendTo("cpm", "api", () -> (Supplier<?>) () -> new CPMCompat());`
+Send an IMC message. 
+ 
+```java
+public MyMod() {
+	...
+	FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
+	...
+}
+	
+private void enqueueIMC(final InterModEnqueueEvent event)  {
+	InterModComms.sendTo("cpm", "api", () -> (Supplier<?>) () -> new CPMCompat());
+	...
+}
+```
 
 ### Fabric
 Register your plugin class as entry point in your fabric.mod.json as such:
@@ -178,7 +192,9 @@ Example (1.18 Forge):
 
 ```java
 import java.io.IOException;
+import java.io.InputStream;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -200,8 +216,10 @@ public class ExampleRenderer extends LivingEntityRenderer<ExampleEntity, PlayerM
 
 	public static void init(IClientAPI api) {
 		renderer = api.createPlayerRenderer(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class);
-		try {
-			renderer.setLocalModel(api.loadModel("example_entity_model", ...));
+		
+		// TODO: replace with resource reload listeners to support resourcepacks.
+		try (InputStream is = Minecraft.getInstance().getResourceManager().open(new ResourceLocation("example_mod", "models/example_entity_model.cpmmodel"))){
+			renderer.setLocalModel(api.loadModel("example_entity_model", is));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -217,8 +235,13 @@ public class ExampleRenderer extends LivingEntityRenderer<ExampleEntity, PlayerM
 			MultiBufferSource pBuffer, int pPackedLight) {
 		renderer.setRenderModel(model);
 		renderer.setRenderType(RenderType::entityTranslucent);
+		//Pose model using renderer.getAnimationState(), setActivePose(name) or setActiveGesture(name)
 		renderer.preRender(pBuffer, AnimationMode.PLAYER);
-		super.render(pEntity, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
+		if(renderer.getDefaultTexture() != null) {
+			super.render(pEntity, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
+		} else {
+			renderNameTag(pEntity, pEntity.getDisplayName(), pMatrixStack, pBuffer, pPackedLight);
+		}
 		renderer.postRender();
 	}
 
@@ -228,6 +251,8 @@ public class ExampleRenderer extends LivingEntityRenderer<ExampleEntity, PlayerM
 	}
 }
 ```
+
+While the model is loading in the background `renderer.getDefaultTexture()` will return null!
 
 #### Loading a local model
 Load a model from a `.cpmmodel` file.  

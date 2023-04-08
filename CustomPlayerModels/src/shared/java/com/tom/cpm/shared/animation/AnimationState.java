@@ -5,19 +5,20 @@ import java.util.function.Consumer;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
-import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.network.ModelEventType;
 import com.tom.cpm.shared.network.NetworkUtil;
 
 public class AnimationState {
+	public final ServerAnimationState serverState = new ServerAnimationState();
+	public final ServerAnimationState localState = new ServerAnimationState();//TODO integrate
 	public int encodedState;
 	public long jumping;
 	public boolean hasSkullOnHead;
 	public boolean wearingHelm, wearingBody, wearingLegs, wearingBoots, wearingElytra;
-	public boolean sleeping, dying, riding, elytraFlying, creativeFlying, creativeFlyingServer, swimming, retroSwimming, sprinting, sneaking, takingDmg, tridentSpin;
-	public float fallDistance, fallDistanceServer, moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, pitch, speakLevel;
+	public boolean sleeping, dying, riding, elytraFlying, swimming, retroSwimming, sprinting, sneaking, takingDmg, tridentSpin;
+	public float moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, pitch, speakLevel;
 	public int hurtTime;
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
 	public ArmPose leftArm = ArmPose.EMPTY, rightArm = ArmPose.EMPTY;
@@ -32,7 +33,6 @@ public class AnimationState {
 		dying = false;
 		riding = false;
 		elytraFlying = false;
-		creativeFlying = false;
 		swimming = false;
 		retroSwimming = false;
 		sprinting = false;
@@ -40,7 +40,6 @@ public class AnimationState {
 		tridentSpin = false;
 		usingAnimation = HandAnimation.NONE;
 		encodedState = 0;
-		fallDistance = 0;
 		moveAmountX = 0;
 		moveAmountY = 0;
 		moveAmountZ = 0;
@@ -66,9 +65,9 @@ public class AnimationState {
 		else if(dying)return VanillaPose.DYING;
 		else if(elytraFlying)return VanillaPose.FLYING;
 		else if(tridentSpin)return VanillaPose.TRIDENT_SPIN;
-		else if(fallDistance > 4 || fallDistanceServer > 4)return VanillaPose.FALLING;
+		else if(localState.falling > 4 || serverState.falling > 4)return VanillaPose.FALLING;
 		else if(riding)return VanillaPose.RIDING;
-		else if(creativeFlying || creativeFlyingServer)return VanillaPose.CREATIVE_FLYING;
+		else if(localState.creativeFlying || serverState.creativeFlying)return VanillaPose.CREATIVE_FLYING;
 		else if(swimming)return VanillaPose.SWIMMING;
 		else if(retroSwimming && registry.hasPoseAnimations(VanillaPose.RETRO_SWIMMING))return VanillaPose.RETRO_SWIMMING;
 		else if(isClimbing && Math.abs(moveAmountY) > 0.05F && registry.hasPoseAnimations(VanillaPose.CLIMBING_ON_LADDER))return VanillaPose.CLIMBING_ON_LADDER;
@@ -80,7 +79,7 @@ public class AnimationState {
 		else return VanillaPose.STANDING;
 	}
 
-	public void collectAnimations(Consumer<VanillaPose> h) {
+	public void collectAnimations(Consumer<VanillaPose> h, AnimationRegistry registry) {
 		h.accept(VanillaPose.GLOBAL);
 		if(attackTime > 0F) {
 			if(swingingHand == Hand.LEFT)h.accept(VanillaPose.PUNCH_LEFT);
@@ -117,6 +116,10 @@ public class AnimationState {
 			default: break;
 			}
 		}
+		if(localState.inMenu || serverState.inMenu)h.accept(VanillaPose.IN_MENU);
+		h.accept(VanillaPose.HEALTH);
+		h.accept(VanillaPose.HUNGER);
+		h.accept(VanillaPose.AIR);
 	}
 
 	private static VanillaPose getArmPose(ArmPose pose, boolean left) {
@@ -147,15 +150,17 @@ public class AnimationState {
 
 	public void receiveEvent(NBTTagCompound tag, boolean isClient) {
 		if(!isClient) {
-			if(tag.hasKey(ModelEventType.FALLING.getName()))fallDistanceServer = tag.getFloat(ModelEventType.FALLING.getName());
-			if(tag.hasKey(ModelEventType.CREATIVE_FLYING.getName()))creativeFlyingServer = tag.getBoolean(ModelEventType.CREATIVE_FLYING.getName());
-			if(tag.hasKey(ModelEventType.JUMPING.getName()))jumping = tag.getBoolean(ModelEventType.JUMPING.getName()) ? MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime() : 0;
+			for(ModelEventType t : ModelEventType.VALUES) {
+				if(tag.hasKey(t.getName())) {
+					t.read(this, tag);
+				}
+			}
 		}
 		if(tag.hasKey(NetworkUtil.GESTURE))gestureData = tag.getByteArray(NetworkUtil.GESTURE);
 	}
 
 	public void jump() {
-		jumping = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
+		ModelEventType.JUMPING.trigger(this);
 	}
 
 	public void preAnimate() {

@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import com.tom.cpl.gui.IGui;
-
 public class CompositeText implements IText {
 	private final IText[] parts;
 
@@ -28,7 +26,7 @@ public class CompositeText implements IText {
 	}
 
 	@Override
-	public String toString(IGui gui) {
+	public String toString(I18n gui) {
 		StringBuilder sb = new StringBuilder();
 		for (IText iText : parts) {
 			sb.append(iText.toString(gui));
@@ -44,7 +42,7 @@ public class CompositeText implements IText {
 	}
 
 	@Override
-	public void walkParts(IGui gui, BiConsumer<String, TextStyle> renderer) {
+	public void walkParts(I18n gui, BiConsumer<String, TextStyle> renderer) {
 		for (int i = 0;i<parts.length;i++) {
 			parts[i].walkParts(gui, renderer);
 		}

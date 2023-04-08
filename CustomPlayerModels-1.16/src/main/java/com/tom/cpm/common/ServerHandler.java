@@ -1,17 +1,10 @@
 package com.tom.cpm.common;
 
-import java.util.Collections;
-import java.util.function.Function;
-
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.ServerPlayNetHandler;
-import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ChunkManager.EntityTracker;
-import net.minecraft.world.server.ServerWorld;
 
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -29,39 +22,16 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 
-import io.netty.buffer.Unpooled;
-
-public class ServerHandler {
+public class ServerHandler extends ServerHandlerBase {
 	public static NetHandler<ResourceLocation, ServerPlayerEntity, ServerPlayNetHandler> netHandler;
 
 	static {
-		netHandler = new NetHandler<>(ResourceLocation::new);
-		netHandler.setGetPlayerUUID(ServerPlayerEntity::getUUID);
-		netHandler.setSendPacketServer(d -> new PacketBuffer(Unpooled.wrappedBuffer(d)), (c, rl, pb) -> c.send(new SCustomPayloadPlayPacket(rl, pb)), ent -> {
-			EntityTracker tr = ((ServerWorld)ent.level).getChunkSource().chunkMap.entityMap.get(ent.getId());
-			if(tr != null) {
-				return tr.seenBy;
-			}
-			return Collections.emptyList();
-		}, Function.identity());
-		netHandler.setFindTracking((p, f) -> {
-			for(EntityTracker tr : ((ServerWorld)p.level).getChunkSource().chunkMap.entityMap.values()) {
-				if(tr.entity instanceof PlayerEntity && tr.seenBy.contains(p)) {
-					f.accept((ServerPlayerEntity) tr.entity);
-				}
-			}
-		});
-		netHandler.setSendChat((p, m) -> p.displayClientMessage(m.remap(), false));
+		netHandler = init();
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
+		netHandler.setGetOnlinePlayers(() -> ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers());
 		if(ModList.get().isLoaded("pehkui")) {
 			netHandler.setScaler(new PehkuiInterface());
 		}
-		netHandler.setGetNet(spe -> spe.connection);
-		netHandler.setGetPlayer(net -> net.player);
-		netHandler.setGetPlayerId(ServerPlayerEntity::getId);
-		netHandler.setGetOnlinePlayers(() -> ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers());
-		netHandler.setKickPlayer((p, m) -> p.connection.disconnect(m.remap()));
-		netHandler.setGetPlayerAnimGetters(p -> p.fallDistance, p -> p.abilities.flying);
 	}
 
 	@SubscribeEvent

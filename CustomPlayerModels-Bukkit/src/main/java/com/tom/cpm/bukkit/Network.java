@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,7 +44,15 @@ public class Network implements PluginMessageListener, Listener {
 			netHandler.setGetPlayerId(Player::getEntityId);
 			netHandler.setGetOnlinePlayers(Bukkit::getOnlinePlayers);
 			netHandler.setKickPlayer((p, m) -> p.kickPlayer(m.remap()));
-			netHandler.setGetPlayerAnimGetters(Player::getFallDistance, Player::isFlying);
+			netHandler.setGetPlayerAnimGetters((t, u) -> {
+				u.updated = true;
+				u.creativeFlying = t.isFlying();
+				u.falling = t.getFallDistance();
+				u.health = (float) (t.getHealth() / t.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+				u.air = Math.max(t.getRemainingAir() / (float) t.getMaximumAir(), 0);
+				u.hunger = t.getFoodLevel() / 20f;
+				u.inMenu = t.getOpenInventory() != null;
+			});
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}

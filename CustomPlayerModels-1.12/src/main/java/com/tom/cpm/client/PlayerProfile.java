@@ -78,13 +78,11 @@ public class PlayerProfile extends Player<EntityPlayer> {
 		if(player.isElytraFlying())animState.elytraFlying = true;
 		if(player.isRiding() && (player.getRidingEntity() != null && player.getRidingEntity().shouldRiderSit()))animState.riding = true;
 		if(player.isSneaking())animState.sneaking = true;
-		if(player.capabilities.isFlying)animState.creativeFlying = true;
 		if(player.isSprinting())animState.sprinting = true;
 		if(player.isHandActive()) {
 			animState.usingAnimation = HandAnimation.of(player.getActiveItemStack().getItemUseAction());
 		}
 		if(player.isInWater())animState.retroSwimming = true;
-		animState.fallDistance = player.fallDistance;
 		animState.moveAmountX = (float) (player.posX - player.prevPosX);
 		animState.moveAmountY = (float) (player.posY - player.prevPosY);
 		animState.moveAmountZ = (float) (player.posZ - player.prevPosZ);

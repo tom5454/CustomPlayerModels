@@ -149,7 +149,7 @@ public class AnimationEngine {
 				if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES) && player.animState.gestureData != null && player.animState.gestureData.length > 1) {
 					List<IAnimation> anim = reg.getPoseAnimations(player.currentPose);
 					h.addAnimations(anim, player.currentPose);
-					player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p));
+					player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p), reg);
 					h.setGesture(reg.getGesture(player.animState.gestureData[1]));
 					reg.forEachLayer((g, id) -> {
 						if(player.animState.gestureData.length > id) {
@@ -168,7 +168,7 @@ public class AnimationEngine {
 					int gesture = player.animState.encodedState;
 					List<IAnimation> anim = reg.getPoseAnimations(player.currentPose);
 					h.addAnimations(anim, player.currentPose);
-					player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p));
+					player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p), reg);
 					h.setGesture(reg.getGesture(gesture));
 				}
 			}

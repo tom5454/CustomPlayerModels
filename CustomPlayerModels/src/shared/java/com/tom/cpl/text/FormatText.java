@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.tom.cpl.gui.IGui;
-
 public class FormatText implements IText {
 	private final String key;
 	private final Object[] args;
@@ -34,7 +32,7 @@ public class FormatText implements IText {
 	}
 
 	@Override
-	public String toString(IGui gui) {
+	public String toString(I18n gui) {
 		Object[] a = new Object[args.length];
 		for (int i = 0; i < args.length; i++) {
 			Object o = args[i];

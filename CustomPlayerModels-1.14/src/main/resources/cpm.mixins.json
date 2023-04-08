@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.tom.cpm.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "cpm.mixins.refmap.json",
+  "mixins": [
+  	"ServerPlayNetHandlerMixin",
+  	"CommandsMixinForge"
+  ],
+  "client": [
+    "ClientPlayNetHandlerMixin",
+	"ClientPlayerEntityMixin",
+	"PlayerRendererMixin",
+	"CapeLayerMixin",
+	"ElytraLayerMixin",
+	"ParrotVariantLayerMixin",
+	"SkullTileEntityRendererMixin",
+	"ArmorLayerMixin",
+	"BipedModelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Vec3f;
@@ -88,6 +89,15 @@ public class ScalingElement implements TreeElement {
 		public void setValue(float value) {
 			editor.action("set", "label.cpm.tree.scaling." + name).
 			addToMap(scaling, opt, value).execute();
+		}
+
+		@Override
+		public Tooltip getTooltip() {
+			IGui gui = editor.gui();
+			String tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling." + name);
+			if(opt != ScalingOptions.ENTITY)tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling.serverRequired", tooltip);
+			if(!opt.getDefualtEnabled())tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling.disabledByDefault", tooltip, name);
+			return new Tooltip(editor.frame, tooltip);
 		}
 	}
 

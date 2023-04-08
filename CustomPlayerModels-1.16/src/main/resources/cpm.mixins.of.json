@@ -8,11 +8,6 @@
   "mixins": [
   ],
   "client": [
-    "ModelRendererMixin_OF",
-    "WorldRendererMixin_OF",
-    "IRenderTypeBufferImplMixin_OF",
-    "IVertexBuilderMixin_OF",
-    "PlayerItemModelMixin_OF",
     "TextureMixin_OF",
 	"VRArmRendererMixin_VR",
 	"VRPlayerRendererMixin_VR",

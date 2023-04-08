@@ -363,4 +363,20 @@ public class Generators {
 		e.children.forEach(p -> mirrorZ(p, b, mirrored));
 		b.onAction(() -> e.markDirty());
 	}
+
+	public static void fixAdditive(Editor editor) {
+		if(editor.selectedAnim != null) {
+			boolean add = editor.selectedAnim.add;
+			ActionBuilder ab = editor.action("i", "button.cpm.fixAdditiveToggle");
+			editor.selectedAnim.getFrames().forEach(frm -> frm.getComponents().forEach((p, f) -> {
+				Vec3f pos = add ? f.getPosition().sub(p.pos) : f.getPosition().add(p.pos);
+				Vec3f rot = add ? f.getRotation().sub(p.rotation) : f.getRotation().add(p.rotation);
+				ab.updateValueOp(f, f.getPosition(), pos, FrameData::setPos);
+				ab.updateValueOp(f, f.getRotation(), rot, FrameData::setRot);
+			}));
+			ab.onAction(editor::updateGui);
+			ab.execute();
+		}
+	}
+
 }

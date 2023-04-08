@@ -64,6 +64,10 @@ public enum AnimationDisplayData {
 	VR_THIRD_PERSON_SITTING(VanillaPose.VR_THIRD_PERSON_SITTING, null, null, Type.LAYERS),
 	VR_THIRD_PERSON_STANDING(VanillaPose.VR_THIRD_PERSON_STANDING, null, null, Type.LAYERS),
 	FIRST_PERSON_HAND(VanillaPose.FIRST_PERSON_HAND, null, null, Type.LAYERS),
+	HEALTH(VanillaPose.HEALTH, null, null, Type.LAYERS),
+	HUNGER(VanillaPose.HUNGER, null, null, Type.LAYERS),
+	AIR(VanillaPose.AIR, null, null, Type.LAYERS),
+	IN_MENU(VanillaPose.IN_MENU, null, null, Type.LAYERS),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;

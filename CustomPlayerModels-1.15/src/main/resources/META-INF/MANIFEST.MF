@@ -1,1 +1,1 @@
-MixinConfigs: assets/cpm/cpm.mixins.json
+MixinConfigs: cpm.mixins.json,cpm.mixins.of.json

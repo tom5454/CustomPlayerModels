@@ -6,10 +6,12 @@ import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.ugwt.client.JsArrayE;
 
+import elemental2.core.JsObject;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
 import jsinterop.base.JsPropertyMap;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Animation_$$")
@@ -23,6 +25,51 @@ public class Animation {
 
 	@JsProperty(name = "cpm_additive")
 	public boolean additive;
+
+	@JsProperty(name = "cpm_layerCtrl")
+	public boolean layerCtrl;
+
+	@JsProperty(name = "cpm_commandCtrl")
+	public boolean commandCtrl;
+
+	@JsProperty(name = "cpm_priority")
+	public int priority;
+
+	@JsProperty(name = "cpm_priority")
+	private JsObject priority_;
+
+	@JsOverlay
+	public final int getPriority() {
+		return Js.typeof(priority_) == "undefined" ? 0 : priority;
+	}
+
+	@JsProperty(name = "cpm_order")
+	public int order;
+
+	@JsProperty(name = "cpm_order")
+	private JsObject order_;
+
+	@JsOverlay
+	public final int getOrder() {
+		return Js.typeof(order_) == "undefined" ? 0 : order;
+	}
+
+	@JsProperty(name = "cpm_isProperty")
+	public boolean isProperty;
+
+	@JsProperty(name = "cpm_group")
+	public String group;
+
+	@JsProperty(name = "cpm_layerDefault")
+	public float layerDefault;
+
+	@JsProperty(name = "cpm_layerDefault")
+	private JsObject layerDefault_;
+
+	@JsOverlay
+	public final float getLayerDefault() {
+		return Js.typeof(layerDefault_) == "undefined" ? 0 : layerDefault;
+	}
 
 	public static Props properties;
 

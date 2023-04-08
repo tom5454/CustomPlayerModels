@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.nbt.NBTTagCompound;
+import com.tom.cpm.shared.animation.ServerAnimationState;
 import com.tom.cpm.shared.network.ModelEventType;
 import com.tom.cpm.shared.util.ScalingOptions;
 
@@ -15,10 +16,11 @@ public class PlayerData {
 	public long ticksSinceLogin;
 	public byte[] data;
 	public boolean forced, save;
-	public Map<ScalingOptions, Float> scale = new EnumMap<>(ScalingOptions.class);
-	public EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
+	public final Map<ScalingOptions, Float> scale = new EnumMap<>(ScalingOptions.class);
+	public final EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
 	public byte[] gestureData = new byte[0];
-	public Map<String, NBTTagCompound> pluginStates = new HashMap<>();
+	public final Map<String, NBTTagCompound> pluginStates = new HashMap<>();
+	public final ServerAnimationState state = new ServerAnimationState();
 
 	public PlayerData() {
 	}

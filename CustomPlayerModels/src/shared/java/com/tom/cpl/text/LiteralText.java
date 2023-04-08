@@ -3,8 +3,6 @@ package com.tom.cpl.text;
 import java.util.Collections;
 import java.util.Map;
 
-import com.tom.cpl.gui.IGui;
-
 public class LiteralText implements IText {
 	private final String value;
 
@@ -18,7 +16,7 @@ public class LiteralText implements IText {
 	}
 
 	@Override
-	public String toString(IGui gui) {
+	public String toString(I18n gui) {
 		return value;
 	}
 

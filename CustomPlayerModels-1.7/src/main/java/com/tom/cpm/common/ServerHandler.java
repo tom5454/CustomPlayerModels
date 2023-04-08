@@ -42,7 +42,7 @@ public class ServerHandler {
 		netHandler.setGetPlayerId(EntityPlayerMP::getEntityId);
 		netHandler.setGetOnlinePlayers(() -> MinecraftServer.getServer().getConfigurationManager().playerEntityList);
 		netHandler.setKickPlayer((p, m) -> p.playerNetServerHandler.kickPlayerFromServer(m.toString()));
-		netHandler.setGetPlayerAnimGetters(p -> p.fallDistance, p -> p.capabilities.isFlying);
+		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
 	}
 
 	@SubscribeEvent

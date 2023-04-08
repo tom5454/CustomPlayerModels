@@ -40,7 +40,7 @@ public class ServerHandlerBase {
 		netHandler.setGetPlayer(net -> net.player);
 		netHandler.setGetPlayerId(ServerPlayer::getId);
 		netHandler.setKickPlayer((p, m) -> p.connection.disconnect(m.remap()));
-		netHandler.setGetPlayerAnimGetters(p -> p.fallDistance, p -> p.getAbilities().flying);
+		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
 		return netHandler;
 	}
 }

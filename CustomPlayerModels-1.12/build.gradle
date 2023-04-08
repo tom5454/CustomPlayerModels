@@ -65,6 +65,12 @@ repositories {
     maven { // McJtyLib
         url "https://maven.k-4u.nl"
     }
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
@@ -101,6 +107,8 @@ dependencies {
   	// at runtime, use the full TOP jar
   	runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.28-17")*/
   	compileOnly "com.mojang:brigadier:1.0.18" //dummy
+  	
+  	compileOnly fg.deobf("curse.maven:artemislib-313590:2741812")
 }
 
 sourceSets {

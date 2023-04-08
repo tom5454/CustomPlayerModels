@@ -1,44 +1,44 @@
 accessWidener	v1	named
-mutable field net/minecraft/client/render/entity/model/PlayerEntityModel leftSleeve Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/PlayerEntityModel rightSleeve Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/PlayerEntityModel leftPants Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/PlayerEntityModel rightPants Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/PlayerEntityModel jacket Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/PlayerEntityModel cloak Lnet/minecraft/client/model/ModelPart;
-accessible field net/minecraft/client/render/entity/model/PlayerEntityModel cloak Lnet/minecraft/client/model/ModelPart;
+mutable field net/minecraft/client/renderer/entity/model/PlayerModel leftSleeve Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/PlayerModel rightSleeve Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/PlayerModel leftPants Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/PlayerModel rightPants Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/PlayerModel jacket Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/PlayerModel cloak Lnet/minecraft/client/renderer/model/ModelRenderer;
+accessible field net/minecraft/client/renderer/entity/model/PlayerModel cloak Lnet/minecraft/client/renderer/model/ModelRenderer;
 
-accessible field net/minecraft/client/model/ModelPart cuboids Lit/unimi/dsi/fastutil/objects/ObjectList;
-accessible field net/minecraft/client/model/ModelPart children Lit/unimi/dsi/fastutil/objects/ObjectList;
+accessible field net/minecraft/client/renderer/model/ModelRenderer cubes Lit/unimi/dsi/fastutil/objects/ObjectList;
+accessible field net/minecraft/client/renderer/model/ModelRenderer children Lit/unimi/dsi/fastutil/objects/ObjectList;
 
-accessible field net/minecraft/client/render/entity/EntityRenderDispatcher modelRenderers Ljava/util/Map;
+accessible field net/minecraft/client/gui/widget/Widget height I
 
-accessible field net/minecraft/client/gui/widget/ClickableWidget height I
+accessible field net/minecraft/client/GameSettings modelParts Ljava/util/Set;
 
-accessible field net/minecraft/client/option/GameOptions enabledPlayerModelParts Ljava/util/Set;
+accessible field net/minecraft/client/renderer/entity/model/HumanoidHeadModel hat Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/HumanoidHeadModel hat Lnet/minecraft/client/renderer/model/ModelRenderer;
 
-accessible field net/minecraft/client/render/entity/model/SkullOverlayEntityModel skullOverlay Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/SkullOverlayEntityModel skullOverlay Lnet/minecraft/client/model/ModelPart;
+accessible field net/minecraft/client/renderer/entity/model/GenericHeadModel head Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/GenericHeadModel head Lnet/minecraft/client/renderer/model/ModelRenderer;
 
-accessible field net/minecraft/client/render/entity/model/SkullEntityModel head Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/SkullEntityModel head Lnet/minecraft/client/model/ModelPart;
+accessible field net/minecraft/client/renderer/entity/model/ElytraModel rightWing Lnet/minecraft/client/renderer/model/ModelRenderer;
+accessible field net/minecraft/client/renderer/entity/model/ElytraModel leftWing Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/ElytraModel rightWing Lnet/minecraft/client/renderer/model/ModelRenderer;
+mutable field net/minecraft/client/renderer/entity/model/ElytraModel leftWing Lnet/minecraft/client/renderer/model/ModelRenderer;
 
-accessible field net/minecraft/client/render/entity/model/ElytraEntityModel field_3364 Lnet/minecraft/client/model/ModelPart;
-accessible field net/minecraft/client/render/entity/model/ElytraEntityModel field_3365 Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/ElytraEntityModel field_3364 Lnet/minecraft/client/model/ModelPart;
-mutable field net/minecraft/client/render/entity/model/ElytraEntityModel field_3365 Lnet/minecraft/client/model/ModelPart;
+accessible class net/minecraft/world/server/ChunkManager$EntityTracker
+accessible field net/minecraft/world/server/ChunkManager entityMap Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
+accessible field net/minecraft/world/server/ChunkManager$EntityTracker seenBy Ljava/util/Set;
+accessible field net/minecraft/world/server/ChunkManager$EntityTracker entity Lnet/minecraft/entity/Entity;
 
-accessible class net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker
-accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage entityTrackers Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
-accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker playersTracking Ljava/util/Set;
-accessible field net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker entity Lnet/minecraft/entity/Entity;
+accessible field net/minecraft/network/play/client/CCustomPayloadPacket identifier Lnet/minecraft/util/ResourceLocation;
+accessible field net/minecraft/network/play/client/CCustomPayloadPacket data Lnet/minecraft/network/PacketBuffer;
 
-accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket channel Lnet/minecraft/util/Identifier;
-accessible field net/minecraft/network/packet/c2s/play/CustomPayloadC2SPacket data Lnet/minecraft/network/PacketByteBuf;
+accessible method net/minecraft/world/storage/FolderName <init> (Ljava/lang/String;)V
 
-accessible method net/minecraft/util/WorldSavePath <init> (Ljava/lang/String;)V
+accessible field net/minecraft/network/NetworkManager channel Lio/netty/channel/Channel;
 
-accessible field net/minecraft/network/ClientConnection channel Lio/netty/channel/Channel;
+accessible field net/minecraft/client/gui/widget/TextFieldWidget highlightPos I
 
-accessible field net/minecraft/client/gui/widget/TextFieldWidget selectionEnd I
+accessible field net/minecraft/client/resources/SkinManager skinsDirectory Ljava/io/File;
 
-accessible field net/minecraft/client/texture/PlayerSkinProvider skinCacheDir Ljava/io/File;
+accessible field net/minecraft/network/play/ServerPlayNetHandler server Lnet/minecraft/server/MinecraftServer;

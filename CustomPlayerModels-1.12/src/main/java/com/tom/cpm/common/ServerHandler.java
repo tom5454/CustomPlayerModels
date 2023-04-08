@@ -12,6 +12,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -44,7 +45,12 @@ public class ServerHandler {
 		netHandler.setGetPlayerId(EntityPlayerMP::getEntityId);
 		netHandler.setGetOnlinePlayers(() -> FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers());
 		netHandler.setKickPlayer((p, m) -> p.connection.disconnect(m.remap()));
-		netHandler.setGetPlayerAnimGetters(p -> p.fallDistance, p -> p.capabilities.isFlying);
+		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
+		if(Loader.isModLoaded("chiseled_me")) {
+			netHandler.setScaler(new ChiseledMeScaler());
+		} else if(Loader.isModLoaded("artemislib")) {
+			netHandler.setScaler(new ArtemisScaler());
+		}
 	}
 
 	@SubscribeEvent

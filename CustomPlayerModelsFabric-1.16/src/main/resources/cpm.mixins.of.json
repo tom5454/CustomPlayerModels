@@ -4,15 +4,12 @@
   "package": "com.tom.cpm.mixin.of",
   "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "compatibilityLevel": "JAVA_8",
+  "refmap": "CustomPlayerModels-Fabric-1.16-refmap.json",
   "mixins": [
   ],
   "client": [
-    "AbstractTextureMixin_OF",
-	"ModelPartMixin_OF",
-	"PlayerItemModelMixin_OF",
-	"VertexConsumerMixin_OF",
-	"VertexConsumerProviderImmediateMixin_OF",
-	"WorldRendererMixin_OF"
+    "ModelRendererMixin_OF",
+    "TextureMixin_OF"
   ],
   "injectors": {
     "defaultRequire": 1

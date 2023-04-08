@@ -18,11 +18,9 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
-import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.nbt.NBTTag;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.nbt.NBTTagList;
@@ -32,6 +30,7 @@ import com.tom.cpl.text.LiteralText;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpl.util.TriConsumer;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.animation.ServerAnimationState;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.ConfigChangeRequest;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -85,9 +84,8 @@ public class NetHandler<RL, P, NET> {
 	protected ToIntFunction<P> getPlayerId;
 	protected Consumer<IText> displayText;
 	protected Supplier<Collection<? extends P>> getOnlinePlayers;
-	protected ToFloatFunction<P> getFallDistance;
-	protected Predicate<P> getIsCreativeFlying;
 	protected Map<ScalingOptions, BiConsumer<P, Float>> scaleSetters = new EnumMap<>(ScalingOptions.class);
+	protected BiConsumer<? super P, ServerAnimationState> animStateUpdate;
 
 	private List<ConfigChangeRequest<?, ?>> recommendedSettingChanges = new ArrayList<>();
 	private EnumSet<ServerCaps> serverCaps = EnumSet.noneOf(ServerCaps.class);
@@ -263,13 +261,21 @@ public class NetHandler<RL, P, NET> {
 					}
 				}
 				NBTTagCompound evt = new NBTTagCompound();
-				if(dt.eventSubs.contains(ModelEventType.FALLING))evt.setFloat(ModelEventType.FALLING.getName(), getFallDistance.apply(p));
-				if(dt.eventSubs.contains(ModelEventType.CREATIVE_FLYING))evt.setBoolean(ModelEventType.CREATIVE_FLYING.getName(), getIsCreativeFlying.test(p));
+				updatePlayer(p, dt.state);
+				for (ModelEventType type : ModelEventType.SNYC_TYPES) {
+					if(dt.eventSubs.contains(type)) {
+						type.write(dt.state, evt);
+					}
+				}
 				if(evt.tagCount() > 0) {
 					sendPacketToTracking(p, new ReceiveEventS2C(getPlayerId.applyAsInt(p), evt));
 				}
 			}
 		}
+	}
+
+	public void updatePlayer(P player, ServerAnimationState state) {
+		animStateUpdate.accept(player, state);
 	}
 
 	public boolean hasModClient() {
@@ -300,11 +306,15 @@ public class NetHandler<RL, P, NET> {
 	}
 
 	public void onJump(P p) {
+		onEvent(p, ModelEventType.JUMPING);
+	}
+
+	public void onEvent(P p, ModelEventType event) {
 		ServerNetH net = getSNetH(p);
 		PlayerData dt = net.cpm$getEncodedModelData();
-		if(dt != null && dt.eventSubs.contains(ModelEventType.JUMPING)) {
+		if(!event.autoSync() && dt != null && dt.eventSubs.contains(event)) {
 			NBTTagCompound evt = new NBTTagCompound();
-			evt.setBoolean(ModelEventType.JUMPING.getName(), true);
+			event.write(dt.state, evt);
 			sendPacketToTracking(p, new ReceiveEventS2C(getPlayerId.applyAsInt(p), evt));
 		}
 	}
@@ -437,9 +447,8 @@ public class NetHandler<RL, P, NET> {
 		this.getOnlinePlayers = getOnlinePlayers;
 	}
 
-	public void setGetPlayerAnimGetters(ToFloatFunction<P> getFallDistance, Predicate<P> getIsCreativeFlying) {
-		this.getIsCreativeFlying = getIsCreativeFlying;
-		this.getFallDistance = getFallDistance;
+	public void setGetPlayerAnimGetters(BiConsumer<? super P, ServerAnimationState> animStateUpdate) {
+		this.animStateUpdate = animStateUpdate;
 	}
 
 	public <E extends Throwable> void registerOut(ThrowingConsumer<RL, E> reg) throws E {
@@ -456,7 +465,13 @@ public class NetHandler<RL, P, NET> {
 
 	public <K> void setScaler(ScalerInterface<P, K> intf) {
 		for(ScalingOptions opt : ScalingOptions.VALUES) {
-			K key = intf.toKey(opt);
+			K key;
+			try {
+				key = intf.toKey(opt);
+			} catch (Throwable e) {
+				Log.warn("Failed to create scaler key for " + opt.name().toLowerCase(Locale.ROOT) + ". Make sure your scaling supported mods are up to date!", e);
+				continue;
+			}
 			if(key != null)
 				scaleSetters.put(opt, (p, v) -> intf.setScale(key, p, v));
 		}

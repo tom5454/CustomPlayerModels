@@ -165,9 +165,11 @@ sourceSets {
 	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
+			srcDir "src/platform-shared/java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
+			srcDir "src/platform-shared/resources"
 		}
 	}
 }

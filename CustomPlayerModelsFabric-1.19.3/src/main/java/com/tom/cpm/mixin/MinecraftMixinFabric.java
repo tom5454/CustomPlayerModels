@@ -40,4 +40,9 @@ public abstract class MinecraftMixinFabric {
 			setScreen(new GuiImpl(EditorGui::new, screen));
 		}
 	}
+
+	@Inject(at = @At("HEAD"), method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V")
+	public void onDisconnect(Screen screen, CallbackInfo cbi) {
+		CustomPlayerModelsClient.INSTANCE.onLogout();
+	}
 }

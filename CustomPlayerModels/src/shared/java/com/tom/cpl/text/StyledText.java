@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import com.tom.cpl.gui.IGui;
-
 public class StyledText implements IText {
 	private final IText text;
 	private final TextStyle textStyle;
@@ -21,7 +19,7 @@ public class StyledText implements IText {
 	}
 
 	@Override
-	public String toString(IGui gui) {
+	public String toString(I18n gui) {
 		return text.toString(gui);
 	}
 
@@ -34,7 +32,7 @@ public class StyledText implements IText {
 	}
 
 	@Override
-	public void walkParts(IGui gui, BiConsumer<String, TextStyle> consumer) {
+	public void walkParts(I18n gui, BiConsumer<String, TextStyle> consumer) {
 		text.walkParts(gui, (c, s) -> consumer.accept(c, textStyle));
 	}
 }

@@ -3,10 +3,12 @@ package com.tom.cpm.shared.editor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -685,11 +687,15 @@ public class Editor {
 
 	public void editAnim(AnimationProperties prop) {
 		if(selectedAnim != null) {
+			boolean add = selectedAnim.add;
 			ActionBuilder ab = action("edit", "action.cpm.anim");
 			selectedAnim.setProperties(prop, ab);
 			ab.onAction(selectedAnim, EditorAnim::clearCache).
 			execute();
 			updateGui();
+			if(add != prop.add) {
+				setQuickAction.accept(new QuickTask(gui().i18nFormat("button.cpm.fixAdditiveToggle"), gui().i18nFormat("tooltip.cpm.fixAdditiveToggle"), () -> Generators.fixAdditive(this)));
+			}
 		}
 	}
 
@@ -930,5 +936,14 @@ public class Editor {
 			ModConfig.getCommonConfig().save();
 			Log.info("Saved recovery project: " + file.getName());
 		});
+	}
+
+	public static void walkFromRoot(ModelElement from, Consumer<ModelElement> c) {
+		Deque<ModelElement> list = new LinkedList<>();
+		while(from != null) {
+			list.addFirst(from);
+			from = from.parent;
+		}
+		list.forEach(c);
 	}
 }

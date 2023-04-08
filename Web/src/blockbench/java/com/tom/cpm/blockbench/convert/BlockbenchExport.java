@@ -56,6 +56,7 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.CopyTransformEffect;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
@@ -775,6 +776,13 @@ public class BlockbenchExport {
 		EditorAnim ea = new EditorAnim(editor, fn, type.getKey(), false);
 		ea.intType = InterpolatorType.LINEAR_SINGLE;
 		ea.add = anim.additive;
+		ea.command = anim.commandCtrl;
+		ea.layerControlled = anim.layerCtrl;
+		ea.priority = anim.getPriority();
+		ea.isProperty = anim.isProperty;
+		ea.order = anim.getOrder();
+		ea.group = anim.group;
+		ea.layerDefault = anim.getLayerDefault();
 		ea.loop = loop;
 		ea.displayName = name;
 		ea.pose = pose;
@@ -835,6 +843,7 @@ public class BlockbenchExport {
 			if(rot != null) {
 				Vec3f v = rot.toVecF();
 				if(!ea.add)v = v.add(addRot);
+				ActionBuilder.limitVec(v, 0, 360, true);
 				dt.setRot(v);
 				if(a.rotation_global)error[1] = true;
 			}

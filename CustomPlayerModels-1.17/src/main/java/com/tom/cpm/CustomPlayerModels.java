@@ -5,17 +5,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.function.Supplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import net.minecraft.SharedConstants;
-import net.minecraft.network.chat.KeybindComponent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.entity.player.Player;
-
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -33,14 +22,9 @@ import net.minecraftforge.fmlserverevents.FMLServerStoppingEvent;
 import net.minecraftforge.versions.forge.ForgeVersion;
 
 import com.tom.cpl.config.ModConfigFile;
-import com.tom.cpl.text.TextRemapper;
-import com.tom.cpl.text.TextStyle;
-import com.tom.cpl.util.ILogger;
-import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.common.ServerHandler;
-import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
@@ -48,10 +32,9 @@ import com.tom.cpm.shared.util.IVersionCheck;
 import com.tom.cpm.shared.util.VersionCheck;
 
 @Mod("cpm")
-public class CustomPlayerModels implements MinecraftCommonAccess {
+public class CustomPlayerModels extends CommonBase {
 
 	public CustomPlayerModels() {
-		api = new CPMApiManager();
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
@@ -60,16 +43,9 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		MinecraftForge.EVENT_BUS.register(new ServerHandler());
 	}
 
-	public static final Logger LOG = LogManager.getLogger("CPM");
-	public static final ILogger log = new Log4JLogger(LOG);
-
-	public static CPMApiManager api;
-
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		CustomPlayerModelsClient.INSTANCE.init();
 	}
-
-	private ModConfigFile cfg;
 
 	public void setup(FMLCommonSetupEvent evt) {
 		cfg = new ModConfigFile(new File(FMLPaths.CONFIGDIR.get().toFile(), "cpm.json"));
@@ -89,14 +65,8 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 				LOG.error("Mod {} provides a broken implementation of CPM api", m.senderModId(), e);
 			}
 		});
-		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
-		api.buildCommon().player(Player.class).init();
+		apiInit();
 		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> CustomPlayerModelsClient::apiInit);
-	}
-
-	@Override
-	public ModConfigFile getConfig() {
-		return cfg;
 	}
 
 	@SubscribeEvent
@@ -110,11 +80,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		MinecraftObjectHolder.setServerObject(null);
 	}
 
-	@Override
-	public ILogger getLogger() {
-		return log;
-	}
-
 	private static final EnumSet<PlatformFeature> features = EnumSet.of(
 			PlatformFeature.EDITOR_HELD_ITEM,
 			PlatformFeature.EDITOR_SUPPORTED
@@ -126,11 +91,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	}
 
 	@Override
-	public String getMCVersion() {
-		return SharedConstants.getCurrentVersion().getName();
-	}
-
-	@Override
 	public String getMCBrand() {
 		return "(forge/" + ForgeVersion.getVersion() + ")";
 	}
@@ -138,21 +98,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public String getModVersion() {
 		return ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
-	}
-
-	@Override
-	public TextRemapper<MutableComponent> getTextRemapper() {
-		return new TextRemapper<>(TranslatableComponent::new, TextComponent::new, MutableComponent::append, KeybindComponent::new,
-				CustomPlayerModels::styleText);
-	}
-
-	private static MutableComponent styleText(MutableComponent in, TextStyle style) {
-		return in.withStyle(Style.EMPTY.withBold(style.bold).withItalic(style.italic).withUnderlined(style.underline).withStrikethrough(style.strikethrough));
-	}
-
-	@Override
-	public CPMApiManager getApi() {
-		return api;
 	}
 
 	@Override

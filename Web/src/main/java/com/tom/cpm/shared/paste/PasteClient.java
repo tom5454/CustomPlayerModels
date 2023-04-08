@@ -1,7 +1,7 @@
 package com.tom.cpm.shared.paste;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.LocalizedIOException;
@@ -14,13 +14,19 @@ public class PasteClient {
 	public PasteClient(MojangAPI mojang, String url, String fallback) {
 	}
 
-	public void connect() throws IOException {
-		//WebMC.getInstance().getGui().getFrame().openPopup(new PastePopup(WebMC.getInstance().getGui()));
-		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
+	private static <T> CompletableFuture<T> error() {
+		CompletableFuture<T> cf = new CompletableFuture<>();
+		cf.completeExceptionally(new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown")));
+		return cf;
 	}
 
-	public List<Paste> listFiles() throws IOException {
-		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
+	public CompletableFuture<Void> connect() {
+		//WebMC.getInstance().getGui().getFrame().openPopup(new PastePopup(WebMC.getInstance().getGui()));
+		return error();
+	}
+
+	public CompletableFuture<List<Paste>> listFiles() {
+		return error();
 	}
 
 	public static class Paste {
@@ -34,20 +40,20 @@ public class PasteClient {
 		}
 	}
 
-	public String uploadFile(String name, byte[] content) throws IOException {
-		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
+	public CompletableFuture<String> uploadFile(String name, byte[] content) {
+		return error();
 	}
 
-	public void updateFile(String id, byte[] content) throws IOException {
-		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
+	public CompletableFuture<Void> updateFile(String id, byte[] content) {
+		return error();
 	}
 
-	public void deleteFile(String id) throws IOException {
-		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
+	public CompletableFuture<Void> deleteFile(String id) {
+		return error();
 	}
 
-	public String createBrowserLoginURL() throws IOException {
-		throw new LocalizedIOException("Unknown error", new FormatText("error.paste.unknown"));
+	public CompletableFuture<String> createBrowserLoginURL() {
+		return error();
 	}
 
 	public boolean isConnected() {

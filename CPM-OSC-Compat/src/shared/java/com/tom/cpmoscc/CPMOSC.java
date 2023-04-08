@@ -11,6 +11,7 @@ import com.tom.cpm.api.IClientAPI;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationState;
+import com.tom.cpm.shared.animation.ServerAnimationState;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -32,6 +33,16 @@ public class CPMOSC {
 	public static WeakReference<ModelDefinition> currentDefinition = new WeakReference<>(null);
 	public static OSCMessageManager manager = new OSCMessageManager();
 	private static final Field[] outputFields = AnimationState.class.getDeclaredFields();
+	private static final Field[] outputFields2;
+	static {//TODO move this to a normal field in CPM 0.7.0
+		Field[] f;
+		try {
+			f = ServerAnimationState.class.getDeclaredFields();
+		} catch (Throwable e) {
+			f = new Field[0];
+		}
+		outputFields2 = f;
+	}
 
 	public static void tick(Object playerIn) {
 		if(MinecraftClientAccess.get() != null && MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED && api != null && isEnabled()) {
@@ -56,20 +67,27 @@ public class CPMOSC {
 					player.updatePlayer(playerIn);
 					try {
 						for (Field f : outputFields) {
-							Object v = f.get(player.animState);
-							if(v instanceof Enum) {
-								Enum<?> e = (Enum<?>) v;
-								transmit.send("/cpm/" + f.getName() + "/name", e.name());
-								transmit.send("/cpm/" + f.getName() + "/id", e.ordinal());
-							} else if (v instanceof Number || v instanceof Boolean) {
-								transmit.send("/cpm/" + f.getName(), v);
-							}
+							send(player.animState, f);
+						}
+						for (Field f : outputFields2) {
+							send(player.animState.localState, f);
 						}
 						transmit.send("/cpm/gameTime", MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime());
 					} catch (Exception e) {
 					}
 				}
 			}
+		}
+	}
+
+	private static void send(Object inst, Field f) throws Exception {
+		Object v = f.get(inst);
+		if(v instanceof Enum) {
+			Enum<?> e = (Enum<?>) v;
+			transmit.send("/cpm/" + f.getName() + "/name", e.name());
+			transmit.send("/cpm/" + f.getName() + "/id", e.ordinal());
+		} else if (v instanceof Number || v instanceof Boolean) {
+			transmit.send("/cpm/" + f.getName(), v);
 		}
 	}
 

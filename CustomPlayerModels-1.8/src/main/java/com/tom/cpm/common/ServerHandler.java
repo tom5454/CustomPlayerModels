@@ -44,7 +44,7 @@ public class ServerHandler {
 		netHandler.setGetPlayerId(EntityPlayerMP::getEntityId);
 		netHandler.setGetOnlinePlayers(() -> FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().getPlayerList());
 		netHandler.setKickPlayer((p, m) -> p.playerNetServerHandler.kickPlayerFromServer(m.toString()));
-		netHandler.setGetPlayerAnimGetters(p -> p.fallDistance, p -> p.capabilities.isFlying);
+		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
 	}
 
 	@SubscribeEvent

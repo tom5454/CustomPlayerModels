@@ -48,6 +48,7 @@ import com.mojang.authlib.properties.Property;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.common.PlayerAnimUpdater;
 import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -96,6 +97,7 @@ public class ClientProxy extends CommonProxy {
 		netHandler.setGetClient(() -> minecraft.thePlayer);
 		netHandler.setGetNet(c -> ((EntityPlayerSP)c).connection);
 		netHandler.setDisplayText(f -> minecraft.ingameGUI.getChatGUI().printChatMessage(f.remap()));
+		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
 	}
 
 	@Override

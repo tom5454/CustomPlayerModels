@@ -16,6 +16,7 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.definition.ModelDefinition.ModelLoadingState;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public abstract class Player<P> {
@@ -50,8 +51,11 @@ public abstract class Player<P> {
 	public abstract Object getGameProfile();
 	public abstract void updateFromModel(Object model);
 
+	@SuppressWarnings("unchecked")
 	public void updatePlayer(P player) {
 		updateFromPlayer(player);
+		NetHandler<?, P, ?> net = (NetHandler<?, P, ?>) MinecraftClientAccess.get().getNetHandler();
+		net.updatePlayer(player, animState.localState);
 		animState.speakLevel = (float) MinecraftCommonAccess.get().getApi().clientApi().getVoiceProviders().stream().
 				mapToDouble(f -> f.apply(player)).max().orElse(0);
 		animState.voiceMuted = MinecraftCommonAccess.get().getApi().clientApi().getVoiceMutedProviders().stream().anyMatch(p -> p.test(player));

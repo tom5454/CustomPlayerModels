@@ -65,6 +65,10 @@ public enum VanillaPose implements IPose {
 	VR_THIRD_PERSON_SITTING,
 	VR_THIRD_PERSON_STANDING,
 	FIRST_PERSON_HAND,
+	HEALTH(syncedState(s -> s.health)),
+	HUNGER(syncedState(s -> s.hunger)),
+	AIR(syncedState(s -> s.air)),
+	IN_MENU,
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;
@@ -74,6 +78,13 @@ public enum VanillaPose implements IPose {
 
 	private VanillaPose() {
 		i18nKey = "label.cpm.pose." + name().toLowerCase(Locale.ROOT);
+	}
+
+	private static ToFloatFunction<AnimationState> syncedState(ToFloatFunction<ServerAnimationState> state) {
+		return s -> {
+			if(s.serverState.updated)return state.apply(s.serverState);
+			else return state.apply(s.localState);
+		};
 	}
 
 	private VanillaPose(ToFloatFunction<AnimationState> stateGetter) {

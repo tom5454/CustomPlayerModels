@@ -1,25 +1,24 @@
 package com.tom.cpm.shared.paste;
 
 import java.util.Comparator;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.elements.FuturePopup;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
-import com.tom.cpl.gui.elements.ProcessPopup;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.LocalizedIOException;
-import com.tom.cpl.util.ThrowingConsumer;
-import com.tom.cpl.util.ThrowingFunction;
-import com.tom.cpl.util.ThrowingRunnable;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.paste.PasteClient.Paste;
 
@@ -103,37 +102,34 @@ public class PastePopup extends PopupPanel {
 				}, "listing");
 	}
 
-	public static <T> void runRequest(Frame frm, ThrowingFunction<PasteClient, T, Exception> task, Consumer<T> finish, Runnable close, String name) {
+	public static <T> void runRequest(Frame frm, Function<PasteClient, CompletableFuture<T>> task, Consumer<T> finish, Runnable close, String name) {
 		if(!client.isConnected()) {
-			runRequest0(frm, client -> {
-				client.connect();
-				return null;
-			}, v -> runRequest0(frm, task, finish, close, name), close, "connecting.message");
+			runRequest0(frm, PasteClient::connect, v -> runRequest0(frm, task, finish, close, name), close, "connecting.message");
 		} else {
 			runRequest0(frm, task, finish, close, name);
 		}
 	}
 
-	public static void runRequest(Frame frm, ThrowingConsumer<PasteClient, Exception> task, Runnable finish, Runnable close, String name) {
-		runRequest(frm, client -> {
-			task.accept(client);
-			return null;
-		}, v -> finish.run(), close, name);
+	public static void runRequest(Frame frm, Function<PasteClient, CompletableFuture<Void>> task, Runnable finish, Runnable close, String name) {
+		runRequest(frm, task, v -> finish.run(), close, name);
 	}
 
-	private static <T> void runRequest0(Frame frm, ThrowingFunction<PasteClient, T, Exception> task, Consumer<T> finish, Runnable close, String name) {
+	private static <T> void runRequest0(Frame frm, Function<PasteClient, CompletableFuture<T>> task, Consumer<T> finish, Runnable close, String name) {
 		IGui gui = frm.getGui();
-		new ProcessPopup<>(frm, gui.i18nFormat("label.cpm.paste.connecting.title"), gui.i18nFormat("label.cpm.paste." + name),
-				() -> task.apply(client), finish, e -> handleException(frm,
-						() -> runRequest(frm, task, finish, close, name), close, e)).start();
+		CompletableFuture<T> cf = task.apply(client);
+		frm.openPopup(new FuturePopup<>(frm, gui.i18nFormat("label.cpm.paste.connecting.title"), gui.i18nFormat("label.cpm.paste." + name), cf));
+		cf.thenAcceptAsync(finish, gui::executeLater).exceptionally(e -> {
+			gui.executeLater(() -> handleException(frm, () -> runRequest(frm, task, finish, close, name), close, e));
+			return null;
+		});
 	}
 
-	private <T> void runRequest(Callable<T> task, Consumer<T> finish, String name) {
-		runRequest(frm, _c -> task.call(), finish, this::close, name);
+	private <T> void runRequest(Supplier<CompletableFuture<T>> task, Consumer<T> finish, String name) {
+		runRequest(frm, _c -> task.get(), finish, this::close, name);
 	}
 
-	private void runRequest(ThrowingRunnable<Exception> task, Runnable finish, String name) {
-		runRequest(frm, _c -> task.run(), finish, this::close, name);
+	private void runRequest(Supplier<CompletableFuture<Void>> task, Runnable finish, String name) {
+		runRequest(frm, _c -> task.get(), finish, this::close, name);
 	}
 
 	private class PastePanel extends Panel {

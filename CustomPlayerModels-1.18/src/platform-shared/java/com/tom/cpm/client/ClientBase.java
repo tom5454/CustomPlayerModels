@@ -34,6 +34,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.common.PlayerAnimUpdater;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -77,6 +78,7 @@ public class ClientBase {
 		netHandler.setGetClient(() -> minecraft.player);
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
 		netHandler.setDisplayText(t -> minecraft.player.displayClientMessage(t.remap(), false));
+		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
 	}
 
 	public static void apiInit() {

@@ -1,52 +1,51 @@
 package com.tom.cpm;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.function.Supplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.versions.forge.ForgeVersion;
 
-import com.tom.cpl.config.ConfigEntry.ModConfigFile;
-import com.tom.cpl.util.ILogger;
-import com.tom.cpm.client.ClientProxy;
+import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpm.api.ICPMPlugin;
+import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.common.ServerHandler;
-import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
+import com.tom.cpm.shared.util.IVersionCheck;
+import com.tom.cpm.shared.util.VersionCheck;
 
 @Mod("cpm")
-public class CustomPlayerModels implements MinecraftCommonAccess {
+public class CustomPlayerModels extends CommonBase {
 
 	public CustomPlayerModels() {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
 
 		MinecraftForge.EVENT_BUS.register(this);
 		MinecraftForge.EVENT_BUS.register(new ServerHandler());
 	}
 
-	public static final Logger LOG = LogManager.getLogger("CPM");
-	public static final ILogger log = new Log4JLogger(LOG);
-
-	public static CommonProxy proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
-
 	private void doClientStuff(final FMLClientSetupEvent event) {
-		proxy.init();
+		CustomPlayerModelsClient.INSTANCE.init();
 	}
-
-	private ModConfigFile cfg;
 
 	public void setup(FMLCommonSetupEvent evt) {
 		cfg = new ModConfigFile(new File(FMLPaths.CONFIGDIR.get().toFile(), "cpm.json"));
@@ -54,9 +53,21 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		LOG.info("Customizable Player Models Initialized");
 	}
 
-	@Override
-	public ModConfigFile getConfig() {
-		return cfg;
+	@SuppressWarnings("unchecked")
+	private void processIMC(final InterModProcessEvent event) {
+		event.getIMCStream().forEach(m -> {
+			try {
+				if(m.getMethod().equals("api")) {
+					ICPMPlugin plugin = ((Supplier<ICPMPlugin>) m.getMessageSupplier().get()).get();
+					api.register(plugin);
+				}
+			} catch (Throwable e) {
+				LOG.error("Mod {} provides a broken implementation of CPM api", m.getSenderModId(), e);
+			}
+		});
+		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
+		apiInit();
+		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> CustomPlayerModelsClient::apiInit);
 	}
 
 	@SubscribeEvent
@@ -70,20 +81,28 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		MinecraftObjectHolder.setServerObject(null);
 	}
 
-	@Override
-	public ILogger getLogger() {
-		return log;
-	}
-
 	private static final EnumSet<PlatformFeature> features = EnumSet.of(
 			PlatformFeature.EDITOR_HELD_ITEM,
-			PlatformFeature.RENDER_ARMOR,
-			PlatformFeature.RENDER_ELYTRA,
-			PlatformFeature.RENDER_CAPE
+			PlatformFeature.EDITOR_SUPPORTED
 			);
 
 	@Override
 	public EnumSet<PlatformFeature> getSupportedFeatures() {
 		return features;
+	}
+
+	@Override
+	public String getMCBrand() {
+		return "(forge/" + ForgeVersion.getVersion() + ")";
+	}
+
+	@Override
+	public String getModVersion() {
+		return ModList.get().getModContainerById("cpm").map(m -> m.getModInfo().getVersion().toString()).orElse("?UNKNOWN?");
+	}
+
+	@Override
+	public IVersionCheck getVersionCheck() {
+		return VersionCheck.get(() -> ModList.get().getModContainerById("cpm").map(c -> VersionChecker.getResult(c.getModInfo()).changes).orElse(Collections.emptyMap()));
 	}
 }

@@ -172,6 +172,7 @@ public class Dialog {
 			e.type = FORM_VECTOR;
 			e.label = label;
 			e.dimensions = dim;
+			e.value = new float[dim];
 			return e;
 		}
 

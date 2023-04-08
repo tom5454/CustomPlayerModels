@@ -52,6 +52,7 @@ import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.web.client.resources.Resources;
 import com.tom.cpm.web.client.util.I18n;
+import com.tom.ugwt.client.JsArrayE;
 
 import jsinterop.base.Js;
 
@@ -251,15 +252,28 @@ public class BBActions {
 		}
 
 		boolean add = true;
-		for(BarItem bi : Toolbars.animations.children) {
+		for (int i = 0; i < Toolbars.animations.children.length; i++) {
+			BarItem bi = Toolbars.animations.children[i];
 			if(bi.id.equals("add_animation")) {
 				ConditionUtil.and(bi.condition, a -> bi.condition = a, CPMCodec.notCPM());
 			} else if(bi.id.equals("cpm_animation_wizard")) {
 				add = false;
+				Toolbars.animations.children[i] = openCPM;
 			}
 		}
 		if(add)
 			Toolbars.animations.add(openCPM, "0");
+
+		PluginStart.cleanup.add(() -> {
+			for (int i = 0; i < Toolbars.animations.children.length; i++) {
+				BarItem bi = Toolbars.animations.children[i];
+				if(bi.id.equals("cpm_animation_wizard")) {
+					JsArrayE<BarItem> ar = Js.cast(Toolbars.animations.children);
+					ar.splice(i, 1);
+					break;
+				}
+			}
+		});
 
 		Animation.menu.structure.forEach(v -> {
 			if(!(v instanceof String)) {
@@ -396,6 +410,10 @@ public class BBActions {
 			grp.name = r.getName();
 			PartValues pv = BBParts.getPart(r);
 			grp.origin = JsVec3.make(-pv.getPos().x, 24 - pv.getPos().y, pv.getPos().z);
+			if(pv instanceof BBPartValues) {
+				BBPartValues bp = (BBPartValues) pv;
+				grp.rotation = JsVec3.make(-bp.getRotation().x, -bp.getRotation().y, bp.getRotation().z);
+			}
 			Group gr = new Group(grp).init();
 			gr.isOpen = true;
 			CubeProperties cp = new CubeProperties();
@@ -405,10 +423,6 @@ public class BBActions {
 					gr.origin.x - pv.getOffset().x - pv.getSize().x,
 					gr.origin.y - pv.getOffset().y - pv.getSize().y,
 					gr.origin.z + pv.getOffset().z);
-			if(pv instanceof BBPartValues) {
-				BBPartValues bp = (BBPartValues) pv;
-				cp.rotation = JsVec3.make(-bp.getRotation().x, -bp.getRotation().y, bp.getRotation().z);
-			}
 			TextureSheetType tst = c.getTexSheet(r);
 			Cube cube = new Cube(cp);
 			cube.mirror_uv = pv.isMirror();

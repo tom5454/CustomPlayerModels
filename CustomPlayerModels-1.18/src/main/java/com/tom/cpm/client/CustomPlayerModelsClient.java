@@ -1,7 +1,6 @@
 package com.tom.cpm.client;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.function.Consumer;
 
 import net.minecraft.client.Minecraft;
@@ -64,7 +63,6 @@ public class CustomPlayerModelsClient extends ClientBase {
 				evt.getScreen() instanceof SkinCustomizationScreen) {
 			Button btn = new Button(0, 0, () -> Minecraft.getInstance().setScreen(new GuiImpl(EditorGui::new, evt.getScreen())));
 			evt.addListener(btn);
-			((List) evt.getScreen().children()).add(btn);
 		}
 	}
 

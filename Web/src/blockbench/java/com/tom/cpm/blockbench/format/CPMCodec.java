@@ -101,14 +101,24 @@ public class CPMCodec {
 
 		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_glow", "CPM Glow Effect", false, true);
 		createProperty(Clazz.CUBE, Type.NUMBER, "cpm_recolor", "CPM Recolor Effect", -1, true);
-		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_hidden", "CPM Hidden Effect", false, true);
 		createProperty(Clazz.CUBE, Type.BOOLEAN, "cpm_extrude", "CPM Extrude Effect", false, true);
+
+		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_hidden", "CPM Hidden Effect", false, true);
 		createProperty(Clazz.GROUP, Type.BOOLEAN, "cpm_dva", "CPM Disable Vanilla Animations Effect", false, true);
 		createProperty(Clazz.GROUP, Type.STRING, "cpm_copy_transform", "CPM Copy Transform Effect", Js.undefined(), true);
+
 		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_hideHeadIfSkull", "CPM Hide Head with Skull", true, false);
 		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_removeBedOffset", "CPM Remove Bed Offset", false, false);
+
 		createProperty(Clazz.ANIMATION, Type.STRING, "cpm_type", "CPM Animation Type", "custom_pose", true);
-		createProperty(Clazz.ANIMATION, Type.BOOLEAN, "cpm_additive", "CPM Animation Type", true, false);
+		createProperty(Clazz.ANIMATION, Type.BOOLEAN, "cpm_additive", "CPM Additive", true, false);
+		createProperty(Clazz.ANIMATION, Type.BOOLEAN, "cpm_layerCtrl", "CPM Layer Controlled", true, false);
+		createProperty(Clazz.ANIMATION, Type.BOOLEAN, "cpm_commandCtrl", "CPM Command Controlled", false, false);
+		createProperty(Clazz.ANIMATION, Type.NUMBER, "cpm_priority", "CPM Animation Priority", 0, false);
+		createProperty(Clazz.ANIMATION, Type.NUMBER, "cpm_order", "CPM Animation Button Order", 0, false);
+		createProperty(Clazz.ANIMATION, Type.BOOLEAN, "cpm_isProperty", "CPM Is Property", false, false);
+		createProperty(Clazz.ANIMATION, Type.STRING, "cpm_group", "CPM Animation Type", "", false);
+		createProperty(Clazz.ANIMATION, Type.NUMBER, "cpm_layerDefault", "CPM Layer Default Value", 0, false);
 
 		createProperty(Clazz.GROUP, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);
 		createProperty(Clazz.CUBE, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);

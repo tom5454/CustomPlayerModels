@@ -3,9 +3,6 @@ package com.tom.cpm;
 import java.io.File;
 import java.util.EnumSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -13,41 +10,26 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.SharedConstants;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.KeybindText;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 
 import com.tom.cpl.config.ModConfigFile;
-import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.text.TextStyle;
-import com.tom.cpl.util.ILogger;
-import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
 import com.tom.cpm.common.Command;
 import com.tom.cpm.common.ServerHandler;
-import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.util.IVersionCheck;
 import com.tom.cpm.shared.util.VersionCheck;
 
-public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer {
-	private ModConfigFile config;
-
-	public static final Logger LOG = LogManager.getLogger("CPM");
-	public static final ILogger log = new Log4JLogger(LOG);
-	public static CPMApiManager api;
+public class CustomPlayerModels extends CommonBase implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		api = new CPMApiManager();
-		config = new ModConfigFile(new File(FabricLoader.getInstance().getConfigDir().toFile(), "cpm.json"));
+		cfg = new ModConfigFile(new File(FabricLoader.getInstance().getConfigDir().toFile(), "cpm.json"));
 		MinecraftObjectHolder.setCommonObject(this);
 
 		ServerLifecycleEvents.SERVER_STARTED.register(s -> {
@@ -76,17 +58,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 		});
 		LOG.info("Customizable Player Models Initialized");
 		LOG.info(api.getPluginStatus());
-		api.buildCommon().player(PlayerEntity.class).init();
-	}
-
-	@Override
-	public ModConfigFile getConfig() {
-		return config;
-	}
-
-	@Override
-	public ILogger getLogger() {
-		return log;
+		apiInit();
 	}
 
 	private static final EnumSet<PlatformFeature> features = EnumSet.of(
@@ -97,11 +69,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 	@Override
 	public EnumSet<PlatformFeature> getSupportedFeatures() {
 		return features;
-	}
-
-	@Override
-	public String getMCVersion() {
-		return SharedConstants.getGameVersion().getName();
 	}
 
 	@Override
@@ -117,21 +84,11 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 	}
 
 	@Override
-	public TextRemapper<MutableText> getTextRemapper() {
-		return new TextRemapper<>(TranslatableText::new, LiteralText::new, MutableText::append, KeybindText::new,
-				CustomPlayerModels::styleText);
-	}
-
-	private static MutableText styleText(MutableText in, TextStyle style) {
+	protected IFormattableTextComponent styleText(IFormattableTextComponent in, TextStyle style) {
 		Style s = Style.EMPTY.withBold(style.bold).withItalic(style.italic);
-		if(style.underline)s = s.withFormatting(Formatting.UNDERLINE);
-		if(style.strikethrough)s = s.withFormatting(Formatting.STRIKETHROUGH);
+		if(style.underline)s = s.applyFormat(TextFormatting.UNDERLINE);
+		if(style.strikethrough)s = s.applyFormat(TextFormatting.STRIKETHROUGH);
 		return in.setStyle(s);
-	}
-
-	@Override
-	public CPMApiManager getApi() {
-		return api;
 	}
 
 	@Override

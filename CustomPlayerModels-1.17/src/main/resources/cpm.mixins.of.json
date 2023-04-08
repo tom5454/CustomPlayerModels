@@ -9,7 +9,8 @@
   ],
   "client": [
 	"AbstractTextureMixin_OF",
-	"ModelPartMixin_OF"
+	"ModelPartMixin_OF",
+	"BlockEntityWithoutLevelRendererMixin_OF"
   ],
   "injectors": {
     "defaultRequire": 1

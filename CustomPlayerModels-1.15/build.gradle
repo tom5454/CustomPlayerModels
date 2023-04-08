@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
@@ -28,7 +28,7 @@ minecraft {
     // stable_#            Stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'snapshot', version: '20210716-1.15.1'
+    mappings channel: "official", version: "1.15.2"
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -46,7 +46,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
+                cpm {
                     source sourceSets.main
                 }
             }
@@ -62,7 +62,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
+                cpm {
                     source sourceSets.main
                 }
             }
@@ -77,15 +77,26 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/')
+            args '--mod', 'cpm', '--all', '--output', file('src/generated/resources/')
 
             mods {
-                examplemod {
+                cpm {
                     source sourceSets.main
                 }
             }
         }
     }
+    
+    runs.each { run -> run.taskName = project.name + (run.taskName.startsWith("run") ? run.taskName.substring(3) : run.taskName) }
+}
+
+mixin {
+    add sourceSets.main, "cpm.mixins.refmap.json"
+    config 'cpm.mixins.json'
+    config 'cpm.mixins.of.json'
+    
+    debug.verbose = true
+    debug.export = true
 }
 
 sourceSets {
@@ -95,33 +106,22 @@ sourceSets {
 }
 
 repositories {
-    maven { url "http://dvs1.progwml6.com/files/maven" }
-    maven { url "https://tehnut.info/maven" }
+    maven { url "https://dvs1.progwml6.com/files/maven" }
     maven { // TOP
         name 'tterrag maven'
-        url "http://maven.tterrag.com/"
+        url "https://maven.tterrag.com/"
     }
     maven { // McJtyLib
-        url "http://maven.k-4u.nl"
+        url "https://maven.k-4u.nl"
     }
-    maven {
-        name = "CoFH Maven"
-        url = "http://maven.covers1624.net"
-    }
-    jcenter()
-	/*maven {
-		url "http://maven.shadowfacts.net/"
-	}*/
-	maven {
-		url "http://chickenbones.net/maven/"
-	}
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.15.2-31.2.47'
+    minecraft 'net.minecraftforge:forge:1.15.2-31.2.57'
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
@@ -140,6 +140,7 @@ dependencies {
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 	// compile against the JEI API but do not include it at runtime
   	compileOnly fg.deobf("mezz.jei:jei-1.15.2:6.0.0.2:api")
@@ -150,6 +151,8 @@ dependencies {
   	compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.15:1.15-2.0.0-3:api")
   	// at runtime, use the full TOP jar
   	runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.15:1.15-2.0.0-3")
+  	
+  	compileOnly files("of.jar")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -163,24 +166,31 @@ jar {
             "Implementation-Version": "${version}",
             "Implementation-Vendor" : "tom5454",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            "MixinConfigs": "assets/cpm/cpm.mixins.json"
+            "MixinConfigs": "cpm.mixins.json"
         ])
     }
 }
 
 sourceSets {
-	shared {
+	main {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
+			srcDir "src/platform-shared/java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
+			srcDir "src/platform-shared/resources"
 		}
 	}
-	main {
-        java.srcDirs += shared.java.srcDirs
-        resources.srcDirs += shared.resources.srcDirs
-    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
 }
 
 // Example configuration to allow publishing using the maven-publish task

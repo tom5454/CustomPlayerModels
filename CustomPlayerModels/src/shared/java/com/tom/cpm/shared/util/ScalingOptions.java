@@ -23,6 +23,9 @@ public enum ScalingOptions {
 	MOB_VISIBILITY("mob_vis", ServerCaps.ATTRIBUTE_SCALE, false),
 	WIDTH("width", ServerCaps.ATTRIBUTE_SCALE, false),
 	HEIGHT("height", ServerCaps.ATTRIBUTE_SCALE, false),
+	JUMP_HEIGHT("jump_height", ServerCaps.ATTRIBUTE_SCALE, false),
+	PROJECTILE_DMG("proj_dmg", ServerCaps.ATTRIBUTE_SCALE, false),
+	EXPLOSION_DMG("exp_dmg", ServerCaps.ATTRIBUTE_SCALE, false),
 	;
 	public static final ScalingOptions[] VALUES = values();
 

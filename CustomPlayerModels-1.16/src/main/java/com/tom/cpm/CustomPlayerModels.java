@@ -5,16 +5,8 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.function.Supplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SharedConstants;
 import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.KeybindTextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TranslationTextComponent;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -33,14 +25,10 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.versions.forge.ForgeVersion;
 
 import com.tom.cpl.config.ModConfigFile;
-import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.text.TextStyle;
-import com.tom.cpl.util.ILogger;
-import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.common.ServerHandler;
-import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
@@ -48,10 +36,9 @@ import com.tom.cpm.shared.util.IVersionCheck;
 import com.tom.cpm.shared.util.VersionCheck;
 
 @Mod("cpm")
-public class CustomPlayerModels implements MinecraftCommonAccess {
+public class CustomPlayerModels extends CommonBase {
 
 	public CustomPlayerModels() {
-		api = new CPMApiManager();
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
@@ -60,16 +47,9 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		MinecraftForge.EVENT_BUS.register(new ServerHandler());
 	}
 
-	public static final Logger LOG = LogManager.getLogger("CPM");
-	public static final ILogger log = new Log4JLogger(LOG);
-
-	public static CPMApiManager api;
-
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		CustomPlayerModelsClient.INSTANCE.init();
 	}
-
-	private ModConfigFile cfg;
 
 	public void setup(FMLCommonSetupEvent evt) {
 		cfg = new ModConfigFile(new File(FMLPaths.CONFIGDIR.get().toFile(), "cpm.json"));
@@ -90,13 +70,8 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 			}
 		});
 		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
-		api.buildCommon().player(PlayerEntity.class).init();
+		apiInit();
 		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> CustomPlayerModelsClient::apiInit);
-	}
-
-	@Override
-	public ModConfigFile getConfig() {
-		return cfg;
 	}
 
 	@SubscribeEvent
@@ -110,11 +85,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 		MinecraftObjectHolder.setServerObject(null);
 	}
 
-	@Override
-	public ILogger getLogger() {
-		return log;
-	}
-
 	private static final EnumSet<PlatformFeature> features = EnumSet.of(
 			PlatformFeature.EDITOR_HELD_ITEM,
 			PlatformFeature.EDITOR_SUPPORTED
@@ -123,11 +93,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public EnumSet<PlatformFeature> getSupportedFeatures() {
 		return features;
-	}
-
-	@Override
-	public String getMCVersion() {
-		return SharedConstants.getCurrentVersion().getName();
 	}
 
 	@Override
@@ -141,22 +106,12 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	}
 
 	@Override
-	public TextRemapper<IFormattableTextComponent> getTextRemapper() {
-		return new TextRemapper<>(TranslationTextComponent::new, StringTextComponent::new, IFormattableTextComponent::append,
-				KeybindTextComponent::new, CustomPlayerModels::styleText);
-	}
-
-	private static IFormattableTextComponent styleText(IFormattableTextComponent in, TextStyle style) {
-		return in.withStyle(Style.EMPTY.withBold(style.bold).withItalic(style.italic).setUnderlined(style.underline).setStrikethrough(style.strikethrough));
-	}
-
-	@Override
-	public CPMApiManager getApi() {
-		return api;
-	}
-
-	@Override
 	public IVersionCheck getVersionCheck() {
 		return VersionCheck.get(() -> ModList.get().getModContainerById("cpm").map(c -> VersionChecker.getResult(c.getModInfo()).changes).orElse(Collections.emptyMap()));
+	}
+
+	@Override
+	protected IFormattableTextComponent styleText(IFormattableTextComponent in, TextStyle style) {
+		return in.withStyle(Style.EMPTY.withBold(style.bold).withItalic(style.italic).withUnderlined(style.underline).setStrikethrough(style.strikethrough));
 	}
 }

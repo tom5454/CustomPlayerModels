@@ -6,14 +6,14 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "cpm.mixins.refmap.json",
   "mixins": [
-  	"ServerPlayNetHandlerMixin"
+  	"ServerGamePacketListenerImplMixin"
   ],
   "client": [
     "PlayerRendererMixin",
-    "ClientPlayNetHandlerMixin",
+    "ClientPacketListenerMixin",
 	"CapeLayerMixin",
 	"ElytraLayerMixin",
-	"BipedArmorLayerMixin",
+	"HumanoidArmorLayerMixin",
 	"SkullBlockRendererMixin",
 	"CustomHeadLayerMixin",
 	"BlockEntityWithoutLevelRendererMixin",

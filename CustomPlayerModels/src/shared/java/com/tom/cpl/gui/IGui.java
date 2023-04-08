@@ -18,18 +18,20 @@ import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.text.I18n;
 import com.tom.cpl.text.IText;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.util.ErrorLog;
 import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.Log;
 
-public interface IGui {
+public interface IGui extends I18n {
 	public static final Set<String> ALLOWED_PROTOCOLS = Sets.newHashSet("http", "https");
 
 	void drawBox(int x, int y, int w, int h, int color);
 	void drawGradientBox(int x, int y, int w, int h, int topLeft, int topRight, int bottomLeft, int bottomRight);
 	void drawText(int x, int y, String text, int color);
+	@Override
 	String i18nFormat(String key, Object... obj);
 	int textWidth(String text);
 	void drawTexture(int x, int y, int w, int h, int u, int v, String texture);

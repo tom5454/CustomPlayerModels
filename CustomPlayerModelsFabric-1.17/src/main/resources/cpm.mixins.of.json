@@ -4,11 +4,13 @@
   "package": "com.tom.cpm.mixin.of",
   "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "compatibilityLevel": "JAVA_16",
+  "refmap": "CustomPlayerModels-Fabric-1.17-refmap.json",
   "mixins": [
   ],
   "client": [
     "AbstractTextureMixin_OF",
-    "ModelPartMixin_OF"
+    "ModelPartMixin_OF",
+    "BlockEntityWithoutLevelRendererMixinFabric_OF"
   ],
   "injectors": {
     "defaultRequire": 1

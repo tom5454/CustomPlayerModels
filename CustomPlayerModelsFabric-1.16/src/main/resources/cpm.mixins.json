@@ -4,22 +4,24 @@
   "compatibilityLevel": "JAVA_8",
   "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "mixins": [
-  	"common.ServerPlayNetHandlerMixin",
-  	"common.PlayerManagerMixin",
+  	"ServerPlayNetHandlerMixin",
+  	"common.PlayerListMixin",
 	"common.PlayerEntityMixin",
-	"common.EntityTrackerEntryMixin"
+	"common.TrackedEntityMixin"
   ],
   "client": [
-    "PlayerRendererMixin",
-    "MinecraftClientMixin",
-    "SkullBlockEntityRendererMixin",
+	"PlayerRendererMixin",
+    "SkullTileEntityRendererMixin",
     "ClientPlayNetHandlerMixin",
-	"ArmorFeatureRendererMixin",
-	"ElytraFeatureRendererMixin",
-	"CapeFeatureRendererMixin",
-	"Matrix4fMixin",
-	"ShoulderParrotFeatureRendererMixin",
-	"ClientPlayerEntityMixin"
+	"CapeLayerMixin",
+	"ElytraLayerMixin",
+	"BipedArmorLayerMixin",
+	"ParrotVariantLayerMixin",
+	"ClientPlayerEntityMixin",
+	
+    "Matrix4fMixinFabric",
+    "MinecraftMixinFabric",
+    "PlayerRendererMixinFabric"
   ],
   "injectors": {
     "defaultRequire": 1
