@@ -352,7 +352,12 @@ public class GuiImpl implements IGui, EventHandler {
 		public void draw(int mouseX, int mouseY, float partialTicks, Box bounds) {
 			setBounds(bounds, focused);
 			if(!focused) {
-				this0.drawText(bounds.x + 2, bounds.y + bounds.h / 2 - 3, getText(), this0.getColors().label_text_color);
+				this0.pushMatrix();
+				this0.setPosOffset(bounds);
+				this0.setupCut();
+				this0.drawText(2, bounds.h / 2 - 3, getText(), this0.getColors().label_text_color);
+				this0.popMatrix();
+				this0.setupCut();
 			}
 		}
 

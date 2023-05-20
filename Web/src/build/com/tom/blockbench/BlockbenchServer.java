@@ -1,5 +1,6 @@
 package com.tom.blockbench;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,6 +60,10 @@ public class BlockbenchServer {
 							t.sendResponseHeaders(404, 0);
 						}
 					}
+				} else if(path.equals("log")) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					BuildBlockbench.copy(t.getRequestBody(), baos);
+					System.out.println(baos.toString("UTF-8"));
 				} else {
 					t.sendResponseHeaders(404, 0);
 				}

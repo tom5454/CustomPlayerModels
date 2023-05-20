@@ -159,7 +159,7 @@ public class AnimationWizard {
 			if(a.type.equals(AnimationType.LAYER.name().toLowerCase(Locale.ROOT)))
 				a.setLayerDefault(r.layerDefaultB ? 1 : 0);
 			else
-				a.setLayerDefault(r.layerDefaultF);
+				a.setLayerDefault(r.layerDefaultF[0]);
 
 			if(edit)Undo.finishEdit("Edit animation properties");
 			else Undo.finishEdit("Add animation", UndoData.make(a));
@@ -179,6 +179,7 @@ public class AnimationWizard {
 	private static class DialogResult {
 		public String name, loop, type, group;
 		public boolean add, layerCtrl, commandCtrl, prop, layerDefaultB;
-		public float priority, order, layerDefaultF;
+		public float priority, order;
+		public float[] layerDefaultF;
 	}
 }
