@@ -113,7 +113,7 @@ public class ExceptionUtil {
 				file.equals("cpmweb-0.js") ||
 				file.endsWith("cpm_plugin.js")
 				)) {
-			Mapping m = sourceMap.getMapping(Integer.parseInt(line), Integer.parseInt(col));
+			Mapping m = sourceMap.getMapping(Integer.parseInt(line) - 1, Integer.parseInt(col) - 1);
 			if(m != null) {
 				String src = m.getSourceFileName();
 				int i = src.lastIndexOf('.');

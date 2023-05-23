@@ -78,7 +78,13 @@ public class Animation {
 
 	@JsOverlay
 	public final float getLayerDefault() {
-		return Js.typeof(layerDefault_) == "undefined" ? 0 : Js.typeof(layerDefault_) == "object" ? Js.cast(layerDefault_) : layerDefault;
+		if(Js.typeof(layerDefault_) == "undefined")return 0;
+		if(Js.typeof(layerDefault_) == "array") {
+			float[] a = Js.cast(layerDefault_);
+			return a[0];
+		}
+		if(Js.typeof(layerDefault_) == "object")return Js.cast(layerDefault_);
+		return layerDefault;
 	}
 
 	@JsOverlay

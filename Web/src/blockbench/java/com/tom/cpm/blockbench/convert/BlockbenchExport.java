@@ -811,47 +811,49 @@ public class BlockbenchExport {
 
 		anims.forEach(a -> {
 			ModelElement me = uuidLookup.get(a.uuid);
-			Vec3f addPos = me.pos;
-			Vec3f addRot = me.rotation;
-			if(!ea.add && me.type == ElementType.ROOT_PART) {
-				PartValues pv;
-				VanillaModelPart part = (VanillaModelPart) me.typeData;
-				if(part instanceof RootModelType)pv = BBParts.getPart((RootModelType) part);
-				else pv = part.getDefaultSize(SkinType.DEFAULT);
-				if(pv instanceof BBPartValues) {
-					addRot = addRot.add(((BBPartValues)pv).getRotation());
+			if(me != null) {
+				Vec3f addPos = me.pos;
+				Vec3f addRot = me.rotation;
+				if(!ea.add && me.type == ElementType.ROOT_PART) {
+					PartValues pv;
+					VanillaModelPart part = (VanillaModelPart) me.typeData;
+					if(part instanceof RootModelType)pv = BBParts.getPart((RootModelType) part);
+					else pv = part.getDefaultSize(SkinType.DEFAULT);
+					if(pv instanceof BBPartValues) {
+						addRot = addRot.add(((BBPartValues)pv).getRotation());
+					}
+					addPos = addPos.add(pv.getPos());
 				}
-				addPos = addPos.add(pv.getPos());
-			}
 
-			JsVec3 pos = interpolate(a.position, ftime);
-			JsVec3 rot = interpolate(a.rotation, ftime);
-			JsVec3 scl = interpolate(a.scale, ftime);
+				JsVec3 pos = interpolate(a.position, ftime);
+				JsVec3 rot = interpolate(a.rotation, ftime);
+				JsVec3 scl = interpolate(a.scale, ftime);
 
-			FrameData dt = f.getComponents().get(me);
-			if(dt == null) {
-				dt = f.new FrameData(me);
-				f.getComponents().put(me, dt);
-			}
+				FrameData dt = f.getComponents().get(me);
+				if(dt == null) {
+					dt = f.new FrameData(me);
+					f.getComponents().put(me, dt);
+				}
 
-			if(pos != null) {
-				Vec3f v = pos.toVecF();
-				v.y *= -1;
-				if(!ea.add)v = v.add(addPos);
-				dt.setPos(v);
-			}
-			if(rot != null) {
-				Vec3f v = rot.toVecF();
-				if(!ea.add)v = v.add(addRot);
-				ActionBuilder.limitVec(v, 0, 360, true);
-				dt.setRot(v);
-				if(a.rotation_global)error[1] = true;
-			}
-			if(scl != null) {
-				if(me.type == ElementType.ROOT_PART)
-					error[0] = true;
-				else
-					dt.setScale(scl.toVecF());
+				if(pos != null) {
+					Vec3f v = pos.toVecF();
+					v.y *= -1;
+					if(!ea.add)v = v.add(addPos);
+					dt.setPos(v);
+				}
+				if(rot != null) {
+					Vec3f v = rot.toVecF();
+					if(!ea.add)v = v.add(addRot);
+					ActionBuilder.limitVec(v, 0, 360, true);
+					dt.setRot(v);
+					if(a.rotation_global)error[1] = true;
+				}
+				if(scl != null) {
+					if(me.type == ElementType.ROOT_PART)
+						error[0] = true;
+					else
+						dt.setScale(scl.toVecF());
+				}
 			}
 		});
 	}

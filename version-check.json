@@ -30,12 +30,13 @@
     "1.19.3-latest": "0.6.7a",
     "1.19.3-fabric-latest": "0.6.7a",
     "web-latest": "0.6.7a",
-    "blockbench-latest": "0.6.7_pre1",
+    "blockbench-latest": "0.6.7_pre3",
     "1.19.4-latest": "0.6.7a",
     "1.19.4-fabric-latest": "0.6.7a",
     "1.14.4-latest": "0.6.7a",
     "1.14.4-fabric-latest": "0.6.7a",
-    "1.15.2-fabric-latest": "0.6.7a"
+    "1.15.2-fabric-latest": "0.6.7a",
+    "1.20-fabric-latest": "0.6.7a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -459,7 +460,7 @@
     "0.6.7a": "Added jump height, projectile damage, explosion damage scaling\nAdded health, hunger, air animations\nAdded Using Container animation\nAdded fix additive quick action\nAdded scaling support for 1.10.2 and 1.12.2 using Chiseled Me or ArtemisLib\n\nBackport to 1.14.4, 1.15.2\nCode cleanup on 1.16.5, 1.17.1\nFixed fabric version not cleaning up on logout\nFixed vivecraft crash on 1.16"
   },
   "1.15.2": {
-	"0.0.0": "1.16.5",
+    "0.0.0": "1.16.5",
     "0.0.6a": "Editor gui cleanup\nAdded custom Animations tab in editor\nVariuos rendering fixes with the editor",
     "0.0.7a": "Fixed models not loading from skins.\nPlayer heads now show proper model (1.15+).\nFixed editor not loading player part rotations.",
     "0.0.7b": "Fixed player parts flying off",
@@ -837,7 +838,9 @@
     "0.6.5_pre1": "Added Duplicate animations and Mirror Animations actions\nUpdated Simplified Chinese translation (#368)\nAdded copy error message button\nAdded View in Blockbench under File in embedded editor\nAdded warnings for opening projects\n\nFixed some projects not opening (Closes #364)\nFixed some projects not exporting (Closes #365)\nFixed plugin not working in the web version of Blockbench",
     "0.6.6_pre1": "Added new keybinds: toggle editor visibility, toggle hidden by default\nAdded mirror part pose option\nAnimation copy and paste default keybinds changed\nAdded recover previous project on crash, saved into the autosaves folder\nSwimming (pre 1.13) renamed to In water and plays when in water and not 1.13+ swimming\n\nFixed UUID lock showing as Safety settings error\nFixed Reset Pose Activating a pose/gesture (Closes #371)\nFixed select animation popup not showing anything when searching\nFixed paste frame not pasting correctly in some cases\nFixed copy transform crashing the exporter\nFixed vivecraft crash (Closes #380)\nFixed scaling not working after death on fabric\nFixed CPM export turning black in some cases (Closes #391)",
     "0.6.6_pre2": "Animation support Beta (Closes #142)\nOnly works from Blockbench to CPM (you can\u0027t edit CPM animations yet)",
-  	"0.6.7_pre1": "Added jump height, projectile damage, explosion damage scaling\nAdded health, hunger, air animations\nAdded Using Container animation\nAdded fix additive quick action\nAdded Layer Controlled, Command Activated, Button Order, Priority, Layer Group and Layer Default options to animation editor\nFixed negative rotations not converting correctly\nFixed CPM/Add Parts rotations messed up"
+    "0.6.7_pre1": "Added jump height, projectile damage, explosion damage scaling\nAdded health, hunger, air animations\nAdded Using Container animation\nAdded fix additive quick action\nAdded Layer Controlled, Command Activated, Button Order, Priority, Layer Group and Layer Default options to animation editor\nFixed negative rotations not converting correctly\nFixed CPM/Add Parts rotations messed up",
+    "0.6.7_pre2": "Fixed plugin exporting a corrupted project file",
+    "0.6.7_pre3": "Fixed projects failing to export in some cases (Closes #414)\nFixed error messages showing incorrect stacktraces\nFixed embedded editor textfields not rendering correctly with long text"
   },
   "1.19.4-fabric": {
     "0.0.0": "1.19.3-fabric",
@@ -856,15 +859,18 @@
     "0.6.7a": "Added jump height, projectile damage, explosion damage scaling\nAdded health, hunger, air animations\nAdded Using Container animation\nAdded fix additive quick action\nAdded scaling support for 1.10.2 and 1.12.2 using Chiseled Me or ArtemisLib\n\nBackport to 1.14.4, 1.15.2\nCode cleanup on 1.16.5, 1.17.1\nFixed fabric version not cleaning up on logout\nFixed vivecraft crash on 1.16"
   },
   "1.14.4": {
-	"0.0.0": "1.15.2",
+    "0.0.0": "1.15.2",
     "0.6.7a": "Added jump height, projectile damage, explosion damage scaling\nAdded health, hunger, air animations\nAdded Using Container animation\nAdded fix additive quick action\nAdded scaling support for 1.10.2 and 1.12.2 using Chiseled Me or ArtemisLib\n\nBackport to 1.14.4, 1.15.2\nCode cleanup on 1.16.5, 1.17.1\nFixed fabric version not cleaning up on logout\nFixed vivecraft crash on 1.16"
   },
   "1.14.4-fabric": {
-	"0.0.0": "1.16.5-fabric",
+    "0.0.0": "1.16.5-fabric",
     "0.6.7a": "Added jump height, projectile damage, explosion damage scaling\nAdded health, hunger, air animations\nAdded Using Container animation\nAdded fix additive quick action\nAdded scaling support for 1.10.2 and 1.12.2 using Chiseled Me or ArtemisLib\n\nBackport to 1.14.4, 1.15.2\nCode cleanup on 1.16.5, 1.17.1\nFixed fabric version not cleaning up on logout\nFixed vivecraft crash on 1.16"
   },
   "1.15.2-fabric": {
-	"0.0.0": "1.16.5-fabric",
+    "0.0.0": "1.16.5-fabric",
     "0.6.7a": "Added jump height, projectile damage, explosion damage scaling\nAdded health, hunger, air animations\nAdded Using Container animation\nAdded fix additive quick action\nAdded scaling support for 1.10.2 and 1.12.2 using Chiseled Me or ArtemisLib\n\nBackport to 1.14.4, 1.15.2\nCode cleanup on 1.16.5, 1.17.1\nFixed fabric version not cleaning up on logout\nFixed vivecraft crash on 1.16"
+  },
+  "1.20-fabric": {
+    "0.6.7a": "1.20 Pre Release 1 port"
   }
 }
