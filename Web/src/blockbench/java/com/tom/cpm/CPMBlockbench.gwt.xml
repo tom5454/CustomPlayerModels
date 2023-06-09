@@ -6,7 +6,7 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.9.0//EN"
   "http://gwtproject.org/doctype/2.9.0/gwt-module.dtd">
 <module rename-to='cpmblockbench'>
-  <inherits name='com.tom.cpm.web.CPMjsCore'/>
+  <inherits name='com.tom.cpm.CPMjsCore'/>
   <inherits name='com.tom.ugwt.UGWT'/>
   
   <define-configuration-property name="cpm.pluginId" is-multi-valued='false' />

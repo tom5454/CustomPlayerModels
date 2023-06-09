@@ -26,6 +26,7 @@ public class ModelFormat {
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class FormatPage {
 		public FormatPageContent[] content;
+		public VueComponent component;
 
 		@JsOverlay
 		public static FormatPage create(FormatPageContent... contents) {

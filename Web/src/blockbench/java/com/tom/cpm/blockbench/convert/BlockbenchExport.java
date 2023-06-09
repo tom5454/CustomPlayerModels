@@ -535,6 +535,7 @@ public class BlockbenchExport {
 		editor.description = pd.description;
 		editor.hideHeadIfSkull = Project.hideHeadIfSkull;
 		editor.removeBedOffset = Project.removeBedOffset;
+		editor.enableInvisGlow = Project.invisGlow;
 
 		Project.animations.forEach(this::convertAnimation);
 
@@ -1066,7 +1067,7 @@ public class BlockbenchExport {
 					elem.faceUV.faces.remove(d);
 					continue;
 				}
-				Face f = elem.faceUV.faces.get(d);
+				Face f = elem.faceUV.faces.computeIfAbsent(d, __ -> new Face());
 				m.elems.add(new DecimalFixOp(cf.uv.sx, 2, m, a -> f.sx = a));
 				m.elems.add(new DecimalFixOp(cf.uv.sy, 3, m, a -> f.sy = a));
 				m.elems.add(new DecimalFixOp(cf.uv.ex, 2, m, a -> f.ex = a));

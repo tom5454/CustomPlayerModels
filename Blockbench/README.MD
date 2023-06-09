@@ -2,7 +2,7 @@
 **This plugin is in beta, some features are not supported yet**  
 - Animations only work from Blockbench to CPM (you can't edit CPM animations yet)  
 
-Tested with Blockbench desktop 4.6.5 portable
+Tested with Blockbench desktop 4.7.4 portable
 
 If you find a bug report it here [Bugtracker](https://github.com/tom5454/CustomPlayerModels/issues) / Click on issues, and create an issue with screenshots and your blockbench project attached in a .zip file.  
 

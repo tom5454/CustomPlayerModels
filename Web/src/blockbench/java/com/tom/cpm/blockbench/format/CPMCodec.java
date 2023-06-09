@@ -18,11 +18,11 @@ import com.tom.cpm.blockbench.proxy.Global;
 import com.tom.cpm.blockbench.proxy.Group;
 import com.tom.cpm.blockbench.proxy.ModelFormat;
 import com.tom.cpm.blockbench.proxy.ModelFormat.FormatPage;
-import com.tom.cpm.blockbench.proxy.ModelFormat.FormatPageContent;
 import com.tom.cpm.blockbench.proxy.Outliner;
 import com.tom.cpm.blockbench.proxy.Property;
 import com.tom.cpm.blockbench.proxy.Property.Clazz;
 import com.tom.cpm.blockbench.proxy.Property.Type;
+import com.tom.cpm.blockbench.proxy.VueComponent;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.util.I18n;
@@ -81,21 +81,29 @@ public class CPMCodec {
 		ctr.category = "minecraft";
 		GlobalFunc openEmbed = GlobalFunc.pushGlobalFunc(JsRunnable.class, EmbeddedEditor::open);
 		GlobalFunc importCPM = GlobalFunc.pushGlobalFunc(JsRunnable.class, ProjectConvert::open);
-		ctr.format_page = FormatPage.create(
-				FormatPageContent.create("h3", Global.translate("mode.start.format.informations")),
-				FormatPageContent.create("* " + I18n.get("bb-label.cpmInfo.export")),
-				FormatPageContent.create("* " + I18n.get("bb-label.cpmInfo.import")),
-				FormatPageContent.create("h3", Global.translate("mode.start.format.resources")),
-				FormatPageContent.create("* [Wiki](https://github.com/tom5454/CustomPlayerModels/wiki)"),
-				FormatPageContent.create("* [Discord](https://discord.gg/mKyXdEsMZD)"),
-				FormatPageContent.create("* [CPM on CurseForge](https://www.curseforge.com/minecraft/mc-mods/custom-player-models)"),
-				FormatPageContent.create("* [CPM on Modrinth](https://modrinth.com/mod/custom-player-models)<br>"),
-				FormatPageContent.create("<button onclick='" + importCPM + "()'><i class=\"material-icons\">folder_open</i> " + I18n.get("bb-button.openCPMProject") + " </button>"),
-				FormatPageContent.create("<button onclick='" + openEmbed + "()'><i class=\"material-icons\">launch</i> " + I18n.get("bb-button.openEmbeddedEditor") + " </button>"),
-				FormatPageContent.create("Version: " + WebMC.platform)
-				);
+		GlobalFunc newProject = GlobalFunc.pushGlobalFunc(JsRunnable.class, ProjectGenerator::newProject);
 		PluginStart.cleanup.add(openEmbed);
 		PluginStart.cleanup.add(importCPM);
+		PluginStart.cleanup.add(newProject);
+		ctr.format_page = new FormatPage();
+		ctr.format_page.component = new VueComponent();
+		ctr.format_page.component.template = "<div>"
+				+ "<p class=\"format_description\">" + I18n.get("bb-label.cpmCodecDesc") + "</p>"
+				+ "<p class=\"format_target\"><b>Target</b>:<span>Minecraft: Java Edition with Customizable Player Models mod</span></p>"
+				+ "<h3 class=\"markdown\">" + Global.translate("mode.start.format.informations") + "</h3>"
+				+ "<p class=\"markdown\"><ul><li>" + I18n.get("bb-label.cpmInfo.export") + "</li></ul></p>"
+				+ "<p class=\"markdown\"><ul><li>" + I18n.get("bb-label.cpmInfo.import") + "</li></ul></p>"
+				+ "<h3 class=\"markdown\">" + Global.translate("mode.start.format.resources") + "</h3>"
+				+ "<p class=\"markdown\"><ul><li><a href=\"https://github.com/tom5454/CustomPlayerModels/wiki\">Wiki</a></li></ul></p>"
+				+ "<p class=\"markdown\"><ul><li><a href=\"https://discord.gg/mKyXdEsMZD\">Discord</a></li></ul></p>"
+				+ "<p class=\"markdown\"><ul><li><a href=\"https://www.curseforge.com/minecraft/mc-mods/custom-player-models\">CPM on CurseForge</a></li></ul></p>"
+				+ "<p class=\"markdown\"><ul><li><a href=\"https://modrinth.com/mod/custom-player-models\">CPM on Modrinth</a><br></li></ul></p>"
+				+ "<p><button onclick='" + importCPM + "()'><i class=\"material-icons\">folder_open</i> " + I18n.get("bb-button.openCPMProject") + " </button></p>"
+				+ "<p><button onclick='" + openEmbed + "()'><i class=\"material-icons\">launch</i> " + I18n.get("bb-button.openEmbeddedEditor") + " </button></p>"
+				+ "<p class=\"markdown\"><p>Version: " + WebMC.platform + "</p>"
+				+ "<div class=\"button_bar\"><button id=\"create_new_model_button\" style=\"margin-top: 20px;\" onclick='" + newProject + "()'><i class=\"material-icons\">arrow_forward</i> Create New Model</button></div>"
+				+ "</div>";
+
 		format = new ModelFormat(ctr);
 		codec.format = format;
 		PluginStart.cleanup.add(() -> Global.getFormats().delete(FORMAT_ID));
@@ -110,6 +118,7 @@ public class CPMCodec {
 
 		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_hideHeadIfSkull", "CPM Hide Head with Skull", true, false);
 		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_removeBedOffset", "CPM Remove Bed Offset", false, false);
+		createProperty(Clazz.PROJECT, Type.BOOLEAN, "cpm_invisGlow", "CPM Invisible Glow", false, false);
 
 		createProperty(Clazz.ANIMATION, Type.STRING, "cpm_type", "CPM Animation Type", "custom_pose", true);
 		createProperty(Clazz.ANIMATION, Type.BOOLEAN, "cpm_additive", "CPM Additive", true, false);

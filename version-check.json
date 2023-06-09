@@ -30,7 +30,7 @@
     "1.19.3-latest": "0.6.8a",
     "1.19.3-fabric-latest": "0.6.8a",
     "web-latest": "0.6.8a",
-    "blockbench-latest": "0.6.8_pre1",
+    "blockbench-latest": "0.6.8_pre2",
     "1.19.4-latest": "0.6.8a",
     "1.19.4-fabric-latest": "0.6.8a",
     "1.14.4-latest": "0.6.8a",
@@ -863,7 +863,8 @@
     "0.6.7_pre1": "Added jump height, projectile damage, explosion damage scaling\nAdded health, hunger, air animations\nAdded Using Container animation\nAdded fix additive quick action\nAdded Layer Controlled, Command Activated, Button Order, Priority, Layer Group and Layer Default options to animation editor\nFixed negative rotations not converting correctly\nFixed CPM/Add Parts rotations messed up",
     "0.6.7_pre2": "Fixed plugin exporting a corrupted project file",
     "0.6.7_pre3": "Fixed projects failing to export in some cases (Closes #414)\nFixed error messages showing incorrect stacktraces\nFixed embedded editor textfields not rendering correctly with long text",
-    "0.6.8_pre1": "Added new animation: Invisible\nAdded new effect: Glowing parts rendering when invisible (disabled on vanilla servers, configurable on CPM servers)\nUpdated Simplified Chinese translation (#413)\n\nFixed models not rendering correctly when invisible (Closes #405)\nFixed crash on 1.20-pre6 (Closes #420)\nFixed some issues with ingame chat in CPM guis\nFixed test in-game blank screen (Closes #415)\nFixed CPM not working in Yarn Dev environments (Closes #422)\nFixed dedicated server crash in Forge Dev environments (#419)\nFixed Per-Face UV rendering deleted faces from 0, 0\nFixed rotations not rolling over with some actions\nFixed cape copy transform not working\nFixed copy transform button changing texture mode\nFixed first person hand rotation not working (Closes #428)"
+    "0.6.8_pre1": "Added new animation: Invisible\nAdded new effect: Glowing parts rendering when invisible (disabled on vanilla servers, configurable on CPM servers)\nUpdated Simplified Chinese translation (#413)\n\nFixed models not rendering correctly when invisible (Closes #405)\nFixed crash on 1.20-pre6 (Closes #420)\nFixed some issues with ingame chat in CPM guis\nFixed test in-game blank screen (Closes #415)\nFixed CPM not working in Yarn Dev environments (Closes #422)\nFixed dedicated server crash in Forge Dev environments (#419)\nFixed Per-Face UV rendering deleted faces from 0, 0\nFixed rotations not rolling over with some actions\nFixed cape copy transform not working\nFixed copy transform button changing texture mode\nFixed first person hand rotation not working (Closes #428)",
+    "0.6.8_pre2": "Fixed blockbench export not working (Closes #431)\nFixed open editor/project not working on Format Page"
   },
   "1.19.4-fabric": {
     "0.0.0": "1.19.3-fabric",

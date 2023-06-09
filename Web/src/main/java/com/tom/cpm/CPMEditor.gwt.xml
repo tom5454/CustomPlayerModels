@@ -6,13 +6,13 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.9.0//EN"
   "http://gwtproject.org/doctype/2.9.0/gwt-module.dtd">
 <module rename-to='cpmweb'>
-  <inherits name='com.tom.cpm.web.CPMjsCore'/>
+  <inherits name='com.tom.cpm.CPMjsCore'/>
 
   <!-- Specify the app entry point class.                         -->
-  <entry-point class='com.tom.cpm.web.client.entry.ViewerEntry'/>
+  <entry-point class='com.tom.cpm.web.client.entry.EditorEntry'/>
 
   <!-- Specify the paths for translatable code                    -->
-  <source path='client'/>
+  <source path='web/client'/>
 
   <!-- allow Super Dev Mode -->
   <add-linker name="ugwt"/>

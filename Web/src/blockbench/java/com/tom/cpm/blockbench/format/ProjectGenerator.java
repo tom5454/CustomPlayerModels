@@ -60,9 +60,13 @@ public class ProjectGenerator {
 		};
 		dialogNew = new Dialog(dctr);
 		CPMCodec.format.new_ = () -> {
-			dialogNew.show();
+			newProject();
 			return true;
 		};
+	}
+
+	public static void newProject() {
+		dialogNew.show();
 	}
 
 	public static void makeNewProject(DialogResult result) {

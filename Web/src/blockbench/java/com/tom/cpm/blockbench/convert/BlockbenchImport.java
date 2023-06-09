@@ -196,6 +196,9 @@ public class BlockbenchImport {
 		pd.rightHandPos = editor.rightHandPos;
 		pd.modelId = editor.modelId;
 		pd.removeArmorOffset = editor.removeArmorOffset;
+		Project.hideHeadIfSkull = editor.hideHeadIfSkull;
+		Project.removeBedOffset = editor.removeBedOffset;
+		Project.invisGlow = editor.enableInvisGlow;
 
 		for(TextureSheetType tx : TextureSheetType.VALUES) {
 			ETextures eTex = editor.textures.get(tx);

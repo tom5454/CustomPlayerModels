@@ -50,7 +50,7 @@ public class MainWrapper {
 			} else {
 				a.add("cpm.webApiEndpoint=/cpm/api");
 			}
-			a.add(mode.equals("Blockbench") ? "com.tom.cpm.CPMBlockbench" : "com.tom.cpm.web.CPM" + mode);
+			a.add("com.tom.cpm.CPM" + mode);
 		} else {
 			a.add("-style");
 			a.add("DETAILED");
@@ -64,7 +64,7 @@ public class MainWrapper {
 			a.add("8888");
 			a.add("-codeServerPort");
 			a.add("9997");
-			a.add("com.tom.cpm.web.CPM" + mode);
+			a.add("com.tom.cpm.CPM" + mode);
 
 			try(PrintWriter wr = new PrintWriter("cp.txt")) {
 				wr.println(ClasspathFix.getFixedClasspath());

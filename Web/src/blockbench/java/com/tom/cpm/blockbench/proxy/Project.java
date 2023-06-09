@@ -24,6 +24,9 @@ public class Project {
 	@JsProperty(name = "cpm_removeBedOffset")
 	public static boolean removeBedOffset;
 
+	@JsProperty(name = "cpm_invisGlow")
+	public static boolean invisGlow;
+
 	//UGWT won't replace unless in separate class
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
 	private static class G {
