@@ -460,7 +460,7 @@ public class EditorGui extends Frame {
 			return menu;
 		});
 
-		pp.addButton(gui.i18nFormat("button.cpm.file.exit"), gui::close);
+		pp.addButton(gui.i18nFormat("button.cpm.file.exit"), gui::closeGui);
 
 		MinecraftClientAccess.get().populatePlatformSettings("filePopup", pp);
 	}
@@ -641,6 +641,14 @@ public class EditorGui extends Frame {
 		});
 		editor.updateGui.add(() -> removeBedOffset.setSelected(editor.removeBedOffset));
 		removeBedOffset.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.removeBedOffset")));
+
+		Checkbox enableInvisGlow = pp.addCheckbox(gui.i18nFormat("label.cpm.effect.enableInvisGlow"), () -> {
+			editor.action("switch", "label.cpm.effect.enableInvisGlow").
+			updateValueOp(editor, editor.enableInvisGlow, !editor.enableInvisGlow, (a, b) -> a.enableInvisGlow = b).execute();
+			editor.updateGui();
+		});
+		editor.updateGui.add(() -> enableInvisGlow.setSelected(editor.enableInvisGlow));
+		enableInvisGlow.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.effect.enableInvisGlow")));
 
 		pp.add(new Label(gui, gui.i18nFormat("label.cpm.effect.textureEffects")).setBounds(new Box(5, 5, 0, 0)));
 
@@ -902,7 +910,7 @@ public class EditorGui extends Frame {
 	@Override
 	protected void onClosing() {
 		if(ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_ESC_EXIT, true))
-			gui.close();
+			gui.closeGui();
 	}
 
 	@Override

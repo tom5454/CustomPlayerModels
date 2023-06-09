@@ -500,7 +500,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			break;
 
 		case COPY_TRANSFORM:
-			editor.action("switch", "label.cpm.copyTransform").updateValueOp(this, this.texture, true, (a, b) -> a.texture = b).
+			editor.action("switch", "label.cpm.copyTransform").
 			updateValueOp(this, this.copyTransform, copyTransform == null ? new CopyTransformEffect(this) : null, (a, b) -> a.copyTransform = b, v -> editor.setCopyTransformEffect.accept(v != null)).
 			execute();
 			editor.updateGui();

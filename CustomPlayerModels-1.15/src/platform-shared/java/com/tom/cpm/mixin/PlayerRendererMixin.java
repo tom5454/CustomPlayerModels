@@ -15,19 +15,21 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import com.tom.cpm.client.ClientBase.PlayerNameTagRenderer;
 import com.tom.cpm.client.CustomPlayerModelsClient;
+import com.tom.cpm.client.LivingRendererAccess;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 @Mixin(value = PlayerRenderer.class, priority = 900)
-public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> implements PlayerNameTagRenderer<AbstractClientPlayerEntity> {
+public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> implements PlayerNameTagRenderer<AbstractClientPlayerEntity>, LivingRendererAccess {
 
 	public PlayerRendererMixin(EntityRendererManager rendererManager,
 			PlayerModel<AbstractClientPlayerEntity> entityModelIn, float shadowSizeIn) {
@@ -118,5 +120,22 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 	@Override
 	public EntityRendererManager cpm$entityRenderDispatcher() {
 		return entityRenderDispatcher;
+	}
+
+	@Override
+	public void cpm$onGetRenderType(LivingEntity player, boolean pTranslucent, CallbackInfoReturnable<RenderType> cbi) {
+		if(CustomPlayerModelsClient.mc.getPlayerRenderManager().isBound(getModel())) {
+			boolean r = CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolderSafe(getModel(), null, h -> h.setInvisState(), false, false);
+			if(pTranslucent)return;
+			boolean glowing = player.isGlowing();
+			if(!glowing && !r)return;
+			ResourceLocation tex = getTextureLocation((AbstractClientPlayerEntity) player);
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolderSafe(getModel(), null, h -> h.setInvis(glowing), false);
+			cbi.setReturnValue(
+					glowing ?
+							RenderType.outline(tex) :
+								RenderType.entityCutout(new ResourceLocation("cpm:textures/template/empty.png"))
+					);
+		}
 	}
 }

@@ -197,13 +197,13 @@ public class GuiBase extends Screen implements IGui {
 			KeyboardEvent evt = new KeyboardEvent(keyCode, scanCode, (char) -1, GLFW.glfwGetKeyName(keyCode, scanCode));
 			gui.keyPressed(evt);
 			if(!evt.isConsumed() && gui.enableChat()) {
-				if(minecraft.player != null && minecraft.options.keyChat.matches(keyCode, scanCode) && minecraft.options.chatVisibility != ChatVisibility.HIDDEN) {
-					CustomPlayerModelsClient.mc.getDefinitionLoader().execute(() -> Minecraft.getInstance().execute(() -> {
+				if(gui.enableChat() && minecraft.player != null && minecraft.options.keyChat.matches(keyCode, scanCode) && minecraft.options.chatVisibility != ChatVisibility.HIDDEN) {
+					Minecraft.getInstance().tell(() -> {
 						int scale = vanillaScale;
 						vanillaScale = -1;
 						minecraft.setScreen(new Overlay());
 						vanillaScale = scale;
-					}));
+					});
 					return true;
 				}
 			}
@@ -324,7 +324,7 @@ public class GuiBase extends Screen implements IGui {
 	}
 
 	@Override
-	public void close() {
+	public void closeGui() {
 		if(closeListener != null) {
 			closeListener.accept(this::onClose);
 		} else
@@ -709,5 +709,9 @@ public class GuiBase extends Screen implements IGui {
 	@Override
 	public void openURL0(String url) {
 		Util.getPlatform().openUri(url);
+	}
+
+	public void onOpened() {
+		vanillaScale = -1;
 	}
 }

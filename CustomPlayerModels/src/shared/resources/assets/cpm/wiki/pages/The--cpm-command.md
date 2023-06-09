@@ -5,6 +5,7 @@
 * [kick](#kick)
 * [scaling](#scaling)
 * [animate](#animate)
+* [effects](#effects)
 
 ## setskin
 Usage `/cpm setskin [-f|-t|-r] <target> <base64 model>`  
@@ -67,3 +68,9 @@ Enable Pehkui scaling for `scaling option`. Optionally can be set per player usi
 Usage: `/cpm animate <target> <animation name> [value (0-255)]`  
 Play the animation for the target player(s).  
 Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or leave empty to switch state.
+
+## effects
+Usage: `/cpm effects <effect> <options...>`  
+Available effects:  
+- `invisible_glow <true/false>`: Enable rendering the glowing layers for invisible players. On by default. Only has an effect after re-logging.  
+

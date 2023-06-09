@@ -76,7 +76,7 @@ public abstract class ClientBase {
 			return null;
 		});
 		netHandler.setGetClient(() -> minecraft.player);
-		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
+		netHandler.setGetNet(c -> ((LocalPlayer) c).connection);
 		netHandler.setDisplayText(t -> minecraft.player.displayClientMessage(t.remap(), false));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
 	}

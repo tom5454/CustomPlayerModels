@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.common.Mod;
@@ -18,6 +17,7 @@ import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.versions.forge.ForgeVersion;
 
@@ -67,7 +67,7 @@ public class CustomPlayerModels extends CommonBase {
 		});
 		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
 		apiInit();
-		DistExecutor.runWhenOn(Dist.CLIENT, () -> CustomPlayerModelsClient::apiInit);
+		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.apiInit();
 	}
 
 	@SubscribeEvent

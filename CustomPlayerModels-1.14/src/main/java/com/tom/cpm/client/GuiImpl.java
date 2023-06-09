@@ -23,7 +23,7 @@ public class GuiImpl extends GuiBase {
 		super.render(mouseX, mouseY, partialTicks);
 		if(minecraft.player != null && gui.enableChat()) {
 			GlStateManager.pushMatrix();
-			GlStateManager.translated(0.0D, minecraft.window.getGuiScaledHeight() - 48, 800);
+			GlStateManager.translated(0.0D, 0.0D, 800);
 			try {
 				Method m = ForgeIngameGui.class.getDeclaredMethod("renderChat", int.class, int.class);
 				m.setAccessible(true);

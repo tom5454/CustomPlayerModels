@@ -338,6 +338,8 @@ tooltip.cpm.animType.pose.hunger=Animation frame depends on Hunger level
 tooltip.cpm.animType.pose.air=Animation frame depends on Air level
 tooltip.cpm.animType.pose.in_menu=Displays while looking inside a container (Chest, Furnace, ...)
 tooltip.cpm.fixAdditiveToggle=Auto fix part transforms after editing additive animations
+tooltip.cpm.animType.pose.invisible=Plays when you have the Invisibility effect
+tooltip.cpm.effect.enableInvisGlow=Keep the "Glowing Eyes" parts visible\while having the Invisibility potion effect.\Always disabled on Vanilla servers.\Configurable on CPM servers (enabled by default) with:\/cpm effects invis_glow <enable>
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -768,6 +770,7 @@ label.cpm.uuidBlocked=UUID mismatch
 label.cpm.keybind.toggleVis=Toggle Show in Editor
 label.cpm.keybind.toggleHidden=Toggle Hidden by Default
 label.cpm.reopenProject=Reopen/recover previously open project?\%s
+label.cpm.effect.enableInvisGlow=Invisible Glowing
 
 label.cpm.paste.connecting.title=Connecting...
 label.cpm.paste.connecting.message=Connecting to paste site...
@@ -866,6 +869,7 @@ label.cpm.pose.health=Health
 label.cpm.pose.hunger=Hunger
 label.cpm.pose.air=Air
 label.cpm.pose.in_menu=Using Container
+label.cpm.pose.invisible=Invisible
 
 label.cpm.dir.up=Up
 label.cpm.dir.down=Down
@@ -934,6 +938,8 @@ commands.cpm.kickWOMod=Kick players without the mod
 commands.cpm.kickWOMod.msg=Kick message
 commands.cpm.numberOutOfBounds=Entered numbers out of bounds
 commands.cpm.animate.success=Playing animation %s for %s
+commands.cpm.effect.invisGlow=Invisible players keep glowing layers
+commands.cpm.requiresRelog=The affected users have to relog before the changes take effect.
 
 chat.cpm.skinForced=Can't change skin. Your skin was force set by the operators of the server.
 chat.cpm.serverSafetySettings=[CPM] The server has recommended safety settings. Open the Gestures menu [%s] to edit the safety settings.

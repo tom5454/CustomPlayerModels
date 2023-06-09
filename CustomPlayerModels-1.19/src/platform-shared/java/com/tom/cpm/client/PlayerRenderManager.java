@@ -88,6 +88,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			m.yRot = y;
 			m.zRot = z;
 		});
+		setRenderPart(new ModelPart(Collections.emptyList(), Collections.emptyMap()));
 	}
 
 	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, MultiBufferSource, ModelTexture, ModelPart> {

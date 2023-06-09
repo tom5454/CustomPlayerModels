@@ -39,6 +39,7 @@ public abstract class MinecraftMixinFabric {
 			cbi.cancel();
 			setScreen(new GuiImpl(EditorGui::new, screen));
 		}
+		if(screen instanceof GuiImpl i)i.onOpened();
 	}
 
 	@Inject(at = @At("HEAD"), method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V")

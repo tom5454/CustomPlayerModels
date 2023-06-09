@@ -352,14 +352,14 @@ public class Generators {
 		Vec3f s = e.size;
 		Vec3f v = new Vec3f(e.pos);
 		v.x = -v.x;
-		b.updateValueOp(e, e.pos, v, (a, c) -> a.pos = c);
+		b.updateValueOp(e, e.pos, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, c) -> a.pos = c, vec -> {});
 		v = new Vec3f(e.offset);
 		v.x = -v.x - s.x;
-		b.updateValueOp(e, e.offset, v, (a, c) -> a.offset = c);
+		b.updateValueOp(e, e.offset, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, c) -> a.offset = c, vec -> {});
 		v = new Vec3f(e.rotation);
 		v.y = 360 - v.y;
 		v.z = 360 - v.z;
-		b.updateValueOp(e, e.rotation, v, (a, c) -> a.rotation = c);
+		b.updateValueOp(e, e.rotation, v, 0, 360, true, (a, c) -> a.rotation = c, vec -> {});
 		e.children.forEach(p -> mirrorZ(p, b, mirrored));
 		b.onAction(() -> e.markDirty());
 	}
@@ -371,8 +371,8 @@ public class Generators {
 			editor.selectedAnim.getFrames().forEach(frm -> frm.getComponents().forEach((p, f) -> {
 				Vec3f pos = add ? f.getPosition().sub(p.pos) : f.getPosition().add(p.pos);
 				Vec3f rot = add ? f.getRotation().sub(p.rotation) : f.getRotation().add(p.rotation);
-				ab.updateValueOp(f, f.getPosition(), pos, FrameData::setPos);
-				ab.updateValueOp(f, f.getRotation(), rot, FrameData::setRot);
+				ab.updateValueOp(f, f.getPosition(), pos, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, FrameData::setPos, v -> {});
+				ab.updateValueOp(f, f.getRotation(), rot, 0, 360, true, FrameData::setRot, v -> {});
 			}));
 			ab.onAction(editor::updateGui);
 			ab.execute();

@@ -1,11 +1,10 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
         
@@ -18,7 +17,7 @@ version = project.mod_version
 group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "CustomPlayerModels-1.12.2"
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 minecraft {
     // The mappings can be changed at any time, and must be in the following format.
@@ -38,26 +37,20 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
+            property 'fml.coreMods.load', 'com.tom.cpmcore.CPMLoadingPlugin'
         }
 
         server {
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
+        	workingDirectory project.file('run')
+        
+            property 'fml.coreMods.load', 'com.tom.cpmcore.CPMLoadingPlugin'
         }
     }
+    
+    runs.each { run -> run.taskName = project.name + (run.taskName.startsWith("run") ? run.taskName.substring(3) : run.taskName) }
 }
 
 repositories {
-    maven { url "https://dvs1.progwml6.com/files/maven" }
     maven { // TOP
         name 'tterrag maven'
         url "https://maven.tterrag.com/"
@@ -146,23 +139,13 @@ jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
 
-processResources
-{
+processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", "1.12.2"
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion': "1.12.2"
-    }
-        
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+    
+    filesMatching(['mcmod.info']) {
+    	expand 'version':project.version, 'mcversion': "1.12.2"
     }
 }
 

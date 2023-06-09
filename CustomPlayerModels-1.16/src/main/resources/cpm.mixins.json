@@ -16,7 +16,8 @@
 	"ElytraLayerMixin",
 	"BipedArmorLayerMixin",
 	"ParrotVariantLayerMixin",
-	"ClientPlayerEntityMixin"
+	"ClientPlayerEntityMixin",
+	"LivingRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

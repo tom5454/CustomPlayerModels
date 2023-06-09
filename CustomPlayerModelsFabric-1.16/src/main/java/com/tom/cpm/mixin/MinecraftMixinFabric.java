@@ -31,14 +31,15 @@ public abstract class MinecraftMixinFabric {
 
 	@Inject(at = @At("HEAD"), method = "setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", cancellable = true)
 	public void onOpenScreen(Screen screen, CallbackInfo cbi) {
-		if(screen == null && screen instanceof GuiImpl.Overlay) {
+		if(screen == null && this.screen instanceof GuiImpl.Overlay) {
 			cbi.cancel();
-			setScreen(((GuiImpl.Overlay)screen).getGui());
+			setScreen(((GuiImpl.Overlay)this.screen).getGui());
 		}
 		if(screen instanceof MainMenuScreen && EditorGui.doOpenEditor()) {
 			cbi.cancel();
 			setScreen(new GuiImpl(EditorGui::new, screen));
 		}
+		if(screen instanceof GuiImpl)((GuiImpl)screen).onOpened();
 	}
 
 	@Inject(at = @At("HEAD"), method = "clearLevel(Lnet/minecraft/client/gui/screen/Screen;)V")

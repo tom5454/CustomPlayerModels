@@ -143,6 +143,7 @@ public class ClientProxy extends CommonProxy {
 		if(openGui.gui instanceof GuiMainMenu && !(minecraft.currentScreen instanceof GuiSelectWorld || minecraft.currentScreen instanceof GuiMainMenu) && EditorGui.doOpenEditor()) {
 			openGui.gui = new GuiImpl(EditorGui::new, openGui.gui);
 		}
+		if(openGui.gui instanceof GuiImpl)((GuiImpl)openGui.gui).onOpened();
 	}
 
 	@SubscribeEvent

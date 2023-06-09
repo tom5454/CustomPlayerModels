@@ -97,9 +97,9 @@ public class BBGui implements IGui {
 	}
 
 	@Override
-	public void close() {
+	public void closeGui() {
 		if(gui == null)return;
-		gui.close();
+		gui.closeGui();
 	}
 
 	@Override

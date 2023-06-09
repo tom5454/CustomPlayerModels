@@ -155,7 +155,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			KeyboardEvent evt = new KeyboardEvent(keyCode, 0, typedChar, Keyboard.getKeyName(keyCode));
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
-				if(mc.player != null && mc.gameSettings.keyBindChat.getKeyCode() == keyCode && mc.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN) {
+				if(gui.enableChat() && mc.player != null && mc.gameSettings.keyBindChat.getKeyCode() == keyCode && mc.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN) {
 					int scale = vanillaScale;
 					vanillaScale = -1;
 					mc.displayGuiScreen(new Overlay());
@@ -236,7 +236,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 	}
 
 	@Override
-	public void close() {
+	public void closeGui() {
 		if(closeListener != null) {
 			closeListener.accept(() -> this.mc.displayGuiScreen((GuiScreen)null));
 		} else
@@ -610,5 +610,9 @@ public class GuiImpl extends GuiScreen implements IGui {
 			Throwable throwable = throwable1.getCause();
 			Log.error("Couldn't open link: " + (throwable == null ? "<UNKNOWN>" : throwable.getMessage()));
 		}
+	}
+
+	public void onOpened() {
+		vanillaScale = -1;
 	}
 }

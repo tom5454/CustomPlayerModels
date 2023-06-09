@@ -58,6 +58,7 @@ public class ConfigKeys {
 	public static final String MODEL_PROPERTIES_VALUES = "values";
 	public static final String MODEL_PROPERTIES_SELECTED = "selected";
 	public static final String EDITOR_ESC_EXIT = "editorEscExit";
+	public static final String ENABLE_INVIS_GLOW = "enableInvisibleGlow";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

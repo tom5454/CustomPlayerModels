@@ -209,7 +209,7 @@ public class GuiBase extends Screen implements IGui {
 			KeyboardEvent evt = new KeyboardEvent(keyCode, scanCode, (char) -1, GLFW.glfwGetKeyName(keyCode, scanCode));
 			gui.keyPressed(evt);
 			if(!evt.isConsumed() && gui.enableChat()) {
-				if(minecraft.player != null && minecraft.options.keyChat.matches(keyCode, scanCode) && minecraft.options.chatVisibility != ChatVisibility.HIDDEN) {
+				if(gui.enableChat() && minecraft.player != null && minecraft.options.keyChat.matches(keyCode, scanCode) && minecraft.options.chatVisibility != ChatVisibility.HIDDEN) {
 					RenderSystem.recordRenderCall(() -> {
 						int scale = vanillaScale;
 						vanillaScale = -1;
@@ -345,7 +345,7 @@ public class GuiBase extends Screen implements IGui {
 	}
 
 	@Override
-	public void close() {
+	public void closeGui() {
 		if(closeListener != null) {
 			closeListener.accept(this::onClose);
 		} else
@@ -737,5 +737,9 @@ public class GuiBase extends Screen implements IGui {
 	@Override
 	public void openURL0(String url) {
 		Util.getPlatform().openUri(url);
+	}
+
+	public void onOpened() {
+		vanillaScale = -1;
 	}
 }

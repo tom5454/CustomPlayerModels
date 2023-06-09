@@ -46,7 +46,7 @@ public enum RootModelType implements VanillaModelPart {
 	}
 
 	@Override
-	public boolean storePrevFramePos() {
-		return true;
+	public boolean needsPoseSetup() {
+		return this == CAPE;
 	}
 }

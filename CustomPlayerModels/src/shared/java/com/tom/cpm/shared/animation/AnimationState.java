@@ -23,7 +23,7 @@ public class AnimationState {
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
 	public ArmPose leftArm = ArmPose.EMPTY, rightArm = ArmPose.EMPTY;
 	public HandAnimation usingAnimation = HandAnimation.NONE;
-	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing, inGui, firstPersonMod, voiceMuted;
+	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing, inGui, firstPersonMod, voiceMuted, invisible;
 	public byte[] gestureData;
 	public VRState vrState;
 	public AnimationMode animationMode;
@@ -50,6 +50,7 @@ public class AnimationState {
 		hurtTime = 0;
 		speakLevel = 0;
 		voiceMuted = false;
+		invisible = false;
 	}
 
 	public void resetModel() {
@@ -120,6 +121,7 @@ public class AnimationState {
 		h.accept(VanillaPose.HEALTH);
 		h.accept(VanillaPose.HUNGER);
 		h.accept(VanillaPose.AIR);
+		if(invisible)h.accept(VanillaPose.INVISIBLE);
 	}
 
 	private static VanillaPose getArmPose(ArmPose pose, boolean left) {

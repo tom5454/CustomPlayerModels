@@ -18,6 +18,7 @@
 	"BipedArmorLayerMixin",
 	"ParrotVariantLayerMixin",
 	"ClientPlayerEntityMixin",
+	"LivingRendererMixin",
 	
     "Matrix4fMixinFabric",
     "MinecraftMixinFabric",

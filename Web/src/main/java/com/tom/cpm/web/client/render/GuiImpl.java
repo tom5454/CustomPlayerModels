@@ -225,7 +225,7 @@ public class GuiImpl implements IGui, EventHandler {
 	}
 
 	@Override
-	public void close() {
+	public void closeGui() {
 		if(closeListener != null) {
 			closeListener.accept(WebMC::close);
 		} else

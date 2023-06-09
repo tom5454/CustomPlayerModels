@@ -1,5 +1,6 @@
 package com.tom.cpmcore;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
@@ -8,6 +9,7 @@ import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.RendererLivingEntity;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
@@ -114,5 +116,23 @@ public class CPMASMClientHooks {
 			}
 		}
 		return evtRC;
+	}
+
+	public static boolean onRenderPlayerModel(RenderPlayer this0, EntityLivingBase player0, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor) {
+		AbstractClientPlayer player = (AbstractClientPlayer) player0;
+		IPlayerRenderer this1 = (IPlayerRenderer) this0;
+		boolean pBodyVisible = !player.isInvisible();
+		boolean pTranslucent = !pBodyVisible && !player.isInvisibleToPlayer(Minecraft.getMinecraft().thePlayer);
+		if(!pBodyVisible && ClientProxy.mc.getPlayerRenderManager().isBound(this0.modelBipedMain)) {
+			boolean r = ClientProxy.mc.getPlayerRenderManager().getHolderSafe(this0.modelBipedMain, null, h -> h.setInvisState(), false, false);
+			if(pTranslucent)return false;
+			if(!r)return false;
+			this1.cpm$bindEntityTexture(player);
+
+			ClientProxy.mc.getPlayerRenderManager().getHolderSafe(this0.modelBipedMain, null, h -> h.setInvis(false), false);
+			this0.modelBipedMain.render(player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor);
+			return true;
+		}
+		return false;
 	}
 }

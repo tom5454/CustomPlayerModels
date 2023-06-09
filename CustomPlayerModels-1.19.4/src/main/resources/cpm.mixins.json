@@ -18,7 +18,8 @@
 	"CustomHeadLayerMixin",
 	"BlockEntityWithoutLevelRendererMixin",
 	"ParrotOnShoulderLayerMixin",
-	"LocalPlayerMixin"
+	"LocalPlayerMixin",
+	"LivingRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

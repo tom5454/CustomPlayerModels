@@ -25,9 +25,6 @@ public class PerFaceUV {
 	public Map<Direction, Face> faces = new HashMap<>();
 
 	public PerFaceUV() {
-		for (Direction d : Direction.VALUES) {
-			faces.put(d, new Face());
-		}
 	}
 
 	public PerFaceUV(ModelElement el) {

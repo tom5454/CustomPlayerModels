@@ -15,7 +15,7 @@ public interface VanillaModelPart {
 		return null;
 	}
 
-	default boolean storePrevFramePos() {
+	default boolean needsPoseSetup() {
 		return false;
 	}
 }

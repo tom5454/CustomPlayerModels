@@ -28,12 +28,12 @@ public class SettingsGui extends Frame {
 
 	@Override
 	public void initFrame(int width, int height) {
-		panel = new SettingsPanel(this, panel, width / 3 * 2, height / 3 * 2, gui::close);
+		panel = new SettingsPanel(this, panel, width / 3 * 2, height / 3 * 2, gui::closeGui);
 		panel.setBounds(new Box(width / 6, height / 6, width / 3 * 2, height / 3 * 2));
 		if(openTab != -1)panel.setOpenTab(openTab);
 		addElement(panel);
 
-		Button btn = new Button(gui, "X", gui::close);
+		Button btn = new Button(gui, "X", gui::closeGui);
 		btn.setBounds(new Box(width / 6 + width / 3 * 2 - 20, height / 6, 20, 20));
 		addElement(btn);
 	}

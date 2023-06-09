@@ -1,10 +1,12 @@
 package com.tom.cpm.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
@@ -63,5 +65,30 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 	@Override
 	public EntityRendererManager cpm$entityRenderDispatcher() {
 		return entityRenderDispatcher;
+	}
+
+	@Override
+	@Unique
+	public void renderModel(AbstractClientPlayerEntity p_77036_1_, float p_77036_2_, float p_77036_3_,
+			float p_77036_4_, float p_77036_5_, float p_77036_6_, float p_77036_7_) {
+		super.renderModel(p_77036_1_, p_77036_2_, p_77036_3_, p_77036_4_, p_77036_5_, p_77036_6_, p_77036_7_);
+	}
+
+	@Inject(at = @At("HEAD"), method = "(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;FFFFFF)V", cancellable = true)
+	public void onRenderModel(AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale, CallbackInfo cbi) {
+		boolean pBodyVisible = this.isVisible(player);
+		boolean pTranslucent = !pBodyVisible && !player.isInvisibleTo(Minecraft.getInstance().player);
+		if(!pBodyVisible && CustomPlayerModelsClient.mc.getPlayerRenderManager().isBound(getModel())) {
+			boolean r = CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolderSafe(getModel(), null, h -> h.setInvisState(), false, false);
+			if(pTranslucent)return;
+			boolean pGlowing = player.isGlowing();
+			if(!pGlowing && !r)return;
+			if (!this.bindTexture(player))return;
+
+			CustomPlayerModelsClient.mc.getPlayerRenderManager().getHolderSafe(getModel(), null, h -> h.setInvis(false), false);
+			this.model.render(player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+
+			cbi.cancel();
+		}
 	}
 }

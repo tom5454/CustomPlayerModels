@@ -85,6 +85,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 			m.yRot = y;
 			m.zRot = z;
 		});
+		setRenderPart(new ModelRenderer(0, 0, 0, 0));
 	}
 
 	public static abstract class RDH extends ModelRenderManager.RedirectHolder<Model, IRenderTypeBuffer, ModelTexture, ModelRenderer> {

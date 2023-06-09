@@ -160,6 +160,7 @@ public class NetHandler<RL, P, NET> {
 		setCap(data, ServerCaps.MODEL_EVENT_SUBS);
 		setCap(data, ServerCaps.GESTURES);
 		setCap(data, ServerCaps.PLUGIN_MESSAGES);
+		if(ModConfig.getWorldConfig().getBoolean(ConfigKeys.ENABLE_INVIS_GLOW, true))setCap(data, ServerCaps.INVIS_GLOW);
 		return data;
 	}
 
@@ -329,6 +330,10 @@ public class NetHandler<RL, P, NET> {
 			return true;
 		}
 		return false;
+	}
+
+	public boolean enableInvisGlow() {
+		return hasServerCap(ServerCaps.INVIS_GLOW);
 	}
 
 	public String getID(P pl) {

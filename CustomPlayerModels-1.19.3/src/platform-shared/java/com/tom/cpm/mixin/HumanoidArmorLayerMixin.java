@@ -1,7 +1,5 @@
 package com.tom.cpm.mixin;
 
-import javax.annotation.Nullable;
-
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +34,7 @@ public abstract class HumanoidArmorLayerMixin extends RenderLayer<LivingEntity, 
 
 	private @Final @Shadow HumanoidModel<LivingEntity> innerModel;
 	private @Final @Shadow HumanoidModel<LivingEntity> outerModel;
-	@Shadow abstract ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl, @Nullable String string);
+	@Shadow abstract ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl, String string);
 
 	@Inject(at = @At("HEAD"),
 			method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
@@ -57,7 +55,7 @@ public abstract class HumanoidArmorLayerMixin extends RenderLayer<LivingEntity, 
 
 	@Inject(at = @At("HEAD"), method = "renderModel(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 			+ "Lnet/minecraft/world/item/ArmorItem;ZLnet/minecraft/client/model/HumanoidModel;ZFFFLjava/lang/String;)V")
-	private void preRenderTexture(PoseStack p_117107_, MultiBufferSource p_117108_, int p_117109_, ArmorItem p_117110_, boolean p_117111_, HumanoidModel<LivingEntity> model, boolean p_117113_, float p_117114_, float p_117115_, float p_117116_, @Nullable String p_117117_, CallbackInfo cbi) {
+	private void preRenderTexture(PoseStack p_117107_, MultiBufferSource p_117108_, int p_117109_, ArmorItem p_117110_, boolean p_117111_, HumanoidModel<LivingEntity> model, boolean p_117113_, float p_117114_, float p_117115_, float p_117116_, String p_117117_, CallbackInfo cbi) {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(getArmorLocation(p_117110_, p_117113_, p_117117_), PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
 

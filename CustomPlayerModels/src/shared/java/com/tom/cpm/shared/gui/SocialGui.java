@@ -43,7 +43,7 @@ public class SocialGui extends Frame {
 
 		panel.addTab("errorLog", new ErrorLogPanel(this, width / 3 * 2, height / 3 * 2 - 20), 0);
 
-		Button btn = new Button(gui, "X", gui::close);
+		Button btn = new Button(gui, "X", gui::closeGui);
 		btn.setBounds(new Box(width / 6 + width / 3 * 2 - 20, height / 6, 20, 20));
 		addElement(btn);
 	}

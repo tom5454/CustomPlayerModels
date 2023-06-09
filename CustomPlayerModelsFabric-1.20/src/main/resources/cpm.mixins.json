@@ -19,6 +19,7 @@
 	"BlockEntityWithoutLevelRendererMixin",
 	"ParrotOnShoulderLayerMixin",
 	"LocalPlayerMixin",
+	"LivingRendererMixin",
 	
 	"GameRendererMixinFabric",
 	"MinecraftMixinFabric",

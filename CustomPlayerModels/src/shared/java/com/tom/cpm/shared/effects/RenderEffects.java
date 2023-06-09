@@ -21,6 +21,7 @@ public enum RenderEffects {
 	FIRST_PERSON_HAND(EffectFirstPersonHandPos::new),
 	DISABLE_VANILLA(EffectDisableVanilla::new),
 	REMOVE_BED_OFFSET(EffectRemoveBedOffset::new),
+	INVIS_GLOW(EffectInvisGlow::new),
 	;
 	public static final RenderEffects[] VALUES = values();
 	private Supplier<IRenderEffect> factory;

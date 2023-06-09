@@ -26,6 +26,7 @@ public class VBuffers {
 	}
 
 	public VertexBuffer getBuffer(NativeRenderType type) {
+		if(type == NativeRenderType.DISABLE)return VertexBuffer.NULL;
 		if(type.nativeType == null && normalBuffer != null) {
 			buffers.put(type, normalBuffer);
 			return new VBuf(normalBuffer, this, type);
@@ -52,6 +53,7 @@ public class VBuffers {
 	}
 
 	public static class NativeRenderType {
+		public static final NativeRenderType DISABLE = new NativeRenderType(0);
 		private final Object nativeType;
 		private int layer;
 

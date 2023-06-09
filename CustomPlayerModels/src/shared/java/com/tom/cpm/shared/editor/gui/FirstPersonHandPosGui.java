@@ -62,7 +62,7 @@ public class FirstPersonHandPosGui extends Frame {
 		TabFocusHandler tabHandler = new TabFocusHandler(gui);
 		FlowLayout layout = new FlowLayout(p, 4, 1);
 
-		addPart("rotation", p, tabHandler, 1, pp, pp2, PartPosition::getRRotation, PartPosition::setRRotation);
+		addPart("rotation", p, tabHandler, 1, pp, pp2, PartPosition::getRRotation, PartPosition::setRRotation, PartPosition::setRotationDeg);
 		addPart("position", p, tabHandler, 2, pp, pp2, PartPosition::getRPos, PartPosition::setRPos);
 		addPart("scale", p, tabHandler, 2, pp, pp2, PartPosition::getRScale, PartPosition::setRScale);
 
@@ -72,10 +72,14 @@ public class FirstPersonHandPosGui extends Frame {
 	}
 
 	private void addPart(String name, Panel panel, TabFocusHandler tabHandler, int dp, PartPosition pp, PartPosition pp2, Function<PartPosition, Vec3f> getter, BiConsumer<PartPosition, Vec3f> setter) {
+		addPart(name, panel, tabHandler, dp, pp, pp2, getter, setter, setter);
+	}
+
+	private void addPart(String name, Panel panel, TabFocusHandler tabHandler, int dp, PartPosition pp, PartPosition pp2, Function<PartPosition, Vec3f> getter, BiConsumer<PartPosition, Vec3f> setter, BiConsumer<PartPosition, Vec3f> setter2) {
 		PosPanel.addVec3(name, v -> {
 			e.action("set", "label.cpm." + name).updateValueOp(pp, getter.apply(pp), v, (a, p) -> {
 				setter.accept(pp, p);
-				setter.accept(pp2, p);
+				setter2.accept(pp2, p);
 			}).execute();
 		}, panel, UpdaterRegistry.makeStatic(() -> getter.apply(pp)), dp, tabHandler);
 	}

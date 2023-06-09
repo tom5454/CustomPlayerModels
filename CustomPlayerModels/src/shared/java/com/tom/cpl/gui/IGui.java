@@ -37,7 +37,7 @@ public interface IGui extends I18n {
 	void drawTexture(int x, int y, int w, int h, int u, int v, String texture);
 	void drawTexture(int x, int y, int w, int h, int u, int v, String texture, int color);
 	void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2);
-	void close();
+	void closeGui();
 	UIColors getColors();
 	void setCloseListener(Consumer<Runnable> listener);
 	boolean isShiftDown();

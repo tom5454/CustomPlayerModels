@@ -69,6 +69,7 @@ public enum VanillaPose implements IPose {
 	HUNGER(syncedState(s -> s.hunger)),
 	AIR(syncedState(s -> s.air)),
 	IN_MENU,
+	INVISIBLE,
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;

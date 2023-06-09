@@ -233,7 +233,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 	}
 
 	@Override
-	public void close() {
+	public void closeGui() {
 		if(closeListener != null) {
 			closeListener.accept(() -> this.mc.displayGuiScreen((GuiScreen)null));
 		} else
@@ -589,5 +589,9 @@ public class GuiImpl extends GuiScreen implements IGui {
 			Throwable throwable = throwable1.getCause();
 			Log.error("Couldn't open link: " + (throwable == null ? "<UNKNOWN>" : throwable.getMessage()));
 		}
+	}
+
+	public void onOpened() {
+		vanillaScale = -1;
 	}
 }

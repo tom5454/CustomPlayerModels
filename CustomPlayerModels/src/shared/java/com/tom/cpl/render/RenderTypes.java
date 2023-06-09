@@ -30,4 +30,12 @@ public class RenderTypes<E extends Enum<E>> {
 	public void putAll(RenderTypes<E> cbi) {
 		types.putAll(cbi.types);
 	}
+
+	public void disableType(E type) {
+		types.put(type, NativeRenderType.DISABLE);
+	}
+
+	public void bindToType(E to, E from) {
+		types.put(to, types.get(from));
+	}
 }

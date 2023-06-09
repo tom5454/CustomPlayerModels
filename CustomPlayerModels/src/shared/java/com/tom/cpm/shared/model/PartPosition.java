@@ -31,6 +31,10 @@ public class PartPosition {
 		this.rRotation = rRotation;
 	}
 
+	public void setRotationDeg(Vec3f r) {
+		this.rRotation = new Vec3f((float) Math.toRadians(r.x), (float) Math.toRadians(r.y), (float) Math.toRadians(r.z));
+	}
+
 	public void setRScale(Vec3f rScale) {
 		this.rScale = rScale;
 	}

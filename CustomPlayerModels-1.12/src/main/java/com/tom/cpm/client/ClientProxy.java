@@ -141,6 +141,7 @@ public class ClientProxy extends CommonProxy {
 		if(openGui.getGui() instanceof GuiMainMenu && EditorGui.doOpenEditor()) {
 			openGui.setGui(new GuiImpl(EditorGui::new, openGui.getGui()));
 		}
+		if(openGui.getGui() instanceof GuiImpl)((GuiImpl)openGui.getGui()).onOpened();
 	}
 
 	@SubscribeEvent

@@ -87,6 +87,7 @@ public class CustomPlayerModelsClient extends ClientBase {
 		if(openGui.getGui() instanceof MainMenuScreen && EditorGui.doOpenEditor()) {
 			openGui.setGui(new GuiImpl(EditorGui::new, openGui.getGui()));
 		}
+		if(openGui.getGui() instanceof GuiImpl)((GuiImpl)openGui.getGui()).onOpened();
 	}
 
 	@SubscribeEvent

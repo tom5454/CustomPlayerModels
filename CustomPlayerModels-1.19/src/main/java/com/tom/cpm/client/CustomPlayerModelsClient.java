@@ -101,6 +101,7 @@ public class CustomPlayerModelsClient extends ClientBase {
 		if(openGui.getScreen() instanceof TitleScreen && EditorGui.doOpenEditor()) {
 			openGui.setNewScreen(new GuiImpl(EditorGui::new, openGui.getScreen()));
 		}
+		if(openGui.getScreen() instanceof GuiImpl i)i.onOpened();
 	}
 
 	@SubscribeEvent

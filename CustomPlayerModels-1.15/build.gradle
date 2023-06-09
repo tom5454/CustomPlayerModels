@@ -106,7 +106,6 @@ sourceSets {
 }
 
 repositories {
-    maven { url "https://dvs1.progwml6.com/files/maven" }
     maven { // TOP
         name 'tterrag maven'
         url "https://maven.tterrag.com/"
@@ -115,6 +114,11 @@ repositories {
         url "https://maven.k-4u.nl"
     }
 	maven { url 'https://jitpack.io' }
+	maven {
+    	// location of the maven that hosts JEI files since January 2023
+    	name = "Jared's maven"
+    	url = "https://maven.blamejared.com/"
+  	}
 }
 
 dependencies {

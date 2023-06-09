@@ -62,6 +62,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, ModelRen
 			m.rotateAngleY = y;
 			m.rotateAngleZ = z;
 		});
+		setRenderPart(new ModelRenderer(new ModelBase() {}));
 	}
 
 	private static class RedirectHolderPlayer extends RDH {

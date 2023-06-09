@@ -68,6 +68,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, Renderer
 			m.yRot = y;
 			m.zRot = z;
 		});
+		setRenderPart(new RendererModel(new Model()));
 	}
 
 	public static abstract class RDH extends RedirectHolderRetro<Model, RendererModel> {

@@ -86,9 +86,23 @@ public class CommandCPM {
 												)
 										)
 								)
+						).
+				then(new LiteralCommandBuilder("effects").
+						then(new LiteralCommandBuilder("invisible_glow").
+								then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
+										run(c -> setInvisGlow(c, c.getArgument("enable")))
+										)
+								)
 						)
 				;
 		dispatcher.register(cpm);
+	}
+
+	private static void setInvisGlow(CommandCtx<?> context, boolean en) {
+		ModConfig.getWorldConfig().setBoolean(ConfigKeys.ENABLE_INVIS_GLOW, en);
+		ModConfig.getWorldConfig().save();
+		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("commands.cpm.effect.invisGlow"), en));
+		context.sendSuccess(new FormatText("commands.cpm.requiresRelog"));
 	}
 
 	private static void executeSetKickTimer(CommandCtx<?> context, int time) {
@@ -216,6 +230,7 @@ public class CommandCPM {
 			ce.setBoolean(ConfigKeys.ENABLED, en);
 			context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + o.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.enableX", en)));
 		}
+		context.sendSuccess(new FormatText("commands.cpm.requiresRelog"));
 		ModConfig.getWorldConfig().save();
 	}
 
@@ -229,6 +244,7 @@ public class CommandCPM {
 		e.setBoolean(ConfigKeys.ENABLED, en);
 		ModConfig.getWorldConfig().save();
 		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.enableX", en)));
+		context.sendSuccess(new FormatText("commands.cpm.requiresRelog"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -246,6 +262,7 @@ public class CommandCPM {
 		e.setFloat(ConfigKeys.MAX, max);
 		ModConfig.getWorldConfig().save();
 		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.rangeOf", min, max)));
+		context.sendSuccess(new FormatText("commands.cpm.requiresRelog"));
 	}
 
 	@SuppressWarnings("unchecked")

@@ -58,6 +58,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 			editor.modelId = data.getString("modelId");
 		}
 		editor.removeBedOffset = data.getBoolean("removeBedOffset", false);
+		editor.enableInvisGlow = data.getBoolean("enableInvisGlow", false);
 	}
 
 	protected static PartPosition loadPartPos(JsonMap fpHand, String name) {
@@ -101,6 +102,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 			data.put("modelId", editor.modelId);
 		}
 		data.put("removeBedOffset", editor.removeBedOffset);
+		data.put("enableInvisGlow", editor.enableInvisGlow);
 	}
 
 }

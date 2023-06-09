@@ -336,7 +336,7 @@ public class GuiBase extends Screen implements IGui {
 	}
 
 	@Override
-	public void close() {
+	public void closeGui() {
 		if(closeListener != null) {
 			closeListener.accept(this::onClose);
 		} else
@@ -721,5 +721,10 @@ public class GuiBase extends Screen implements IGui {
 
 	public GuiGraphics getMCGraphics() {
 		return graphics;
+	}
+
+	@Override
+	public void added() {
+		vanillaScale = -1;
 	}
 }

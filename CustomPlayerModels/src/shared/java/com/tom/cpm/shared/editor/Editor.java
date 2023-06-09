@@ -195,7 +195,7 @@ public class Editor {
 	public boolean customSkinType;
 	public ModelDescription description;
 	public String modelId;
-	public boolean hideHeadIfSkull, removeArmorOffset, removeBedOffset;
+	public boolean hideHeadIfSkull, removeArmorOffset, removeBedOffset, enableInvisGlow;
 	public Image vanillaSkin;
 	public boolean dirty, autoSaveDirty;
 	public long lastEdit;
@@ -431,6 +431,7 @@ public class Editor {
 		removeArmorOffset = true;
 		hideHeadIfSkull = true;
 		removeBedOffset = false;
+		enableInvisGlow = false;
 		modelId = null;
 		Player<?> profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.getTextures().load().thenRun(() -> {

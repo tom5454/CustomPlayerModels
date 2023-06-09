@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'fabric-loom' version '1.2-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -37,8 +37,8 @@ dependencies {
 	compileOnly files("of.jar")
 }
 
-minecraft {
-	accessWidener = file("src/main/resources/cpm.accesswidener")
+loom {
+	accessWidenerPath = file("src/main/resources/cpm.accesswidener")
 }
 
 sourceSets {

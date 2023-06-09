@@ -19,6 +19,7 @@ import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.render.VertexBuffer;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.IPlayerRenderManager;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.config.Player;
@@ -47,6 +48,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 	private ToFloatFunction<P> px, py, pz, rx, ry, rz;
 	private Predicate<P> getVis;
 	private BoolSetter<P> setVis;
+	private P renderPart;
 
 	public void setFactory(RedirectHolderFactory<D, S, P> factory) {
 		this.factory = factory;
@@ -71,6 +73,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.rx = x;
 		this.ry = y;
 		this.rz = z;
+	}
+
+	public void setRenderPart(P renderPart) {
+		this.renderPart = renderPart;
 	}
 
 	public void setVis(Predicate<P> getVis, BoolSetter<P> setVis) {
@@ -150,6 +156,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		this.rotSet.set(to, this.rx.apply(from), this.ry.apply(from), this.rz.apply(from));
 	}
 
+	public P getRenderAnyFor(MB model, String arg, VanillaModelPart part) {
+		return getHolderSafe(model, arg, h -> h.getRenderAny(part), renderPart, false);
+	}
+
 	public static interface RedirectHolderFactory<D, S, P> {
 		<M> RedirectHolder<?, D, S, P> create(M model, String arg);
 	}
@@ -171,6 +181,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		private boolean loggedWarning;
 		private RedirectHolder<M, D, S, P> parent;
 		public BatchedBuffers<D, ?, ?> batch;
+		private Map<VanillaModelPart, RedirectRenderer<P>> renderAnyMap;
 
 		public RedirectHolder(ModelRenderManager<D, S, P, M> mngr, M model) {
 			this.model = model;
@@ -179,6 +190,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			redirectRenderers = new ArrayList<>();
 			partData = new HashMap<>();
 			renderTypes = new RenderTypes<>(RenderMode.class);
+			renderAnyMap = new HashMap<>();
 		}
 
 		public void swapIn(RedirectHolder<M, D, S, P> h) {
@@ -197,6 +209,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				RedirectRenderer<P> rd = redirectRenderers.get(i);
 				field.set.accept(rd.swapIn());
 			}
+			renderAnyMap.values().forEach(RedirectRenderer::swapIn);
 			partData.values().forEach(RedirectDataHolder::reset);
 			this.playerObj = playerObj;
 			swappedIn = true;
@@ -216,6 +229,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				Field<P> field = modelFields.get(i);
 				field.set.accept(redirectRenderers.get(i).swapOut());
 			}
+			renderAnyMap.values().forEach(RedirectRenderer::swapOut);
 			swappedIn = false;
 		}
 
@@ -233,7 +247,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			if(def == null)return;
 			if(!preRenderSetup) {
 				preRenderSetup = true;
-				bindFirstSetup();
+				bindFirstSetup(true);
 			}
 		}
 
@@ -260,7 +274,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		protected void bindSkin() {}
 		protected void bindDefaultTexture(S cbi, TextureSheetType tex) {}
 
-		protected void bindFirstSetup() {
+		protected void bindFirstSetup(boolean isPoseSetup) {
 			if(playerObj != null) {
 				playerObj.updateFromModel(model);
 				mngr.animEngine.handleAnimation(playerObj, mode, def);
@@ -270,6 +284,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();
 				if(part == null)continue;
+				if(part.needsPoseSetup() && !isInGui() && !isPoseSetup)continue;
 				PartRoot elems = def.getModelElementFor(part);
 				if(elems == null)continue;
 				P tp = (P) re;
@@ -298,6 +313,13 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		protected RedirectRenderer<P> registerHead(Field<P> f) {
 			return register(f).setRenderPredicate(p -> !p.animState.hasSkullOnHead || !def.isHideHeadIfSkull());
+		}
+
+		private RedirectRenderer<P> register(VanillaModelPart part) {
+			RedirectRenderer<P> rd = mngr.redirectFactory.create(model, this, () -> mngr.renderPart, part);
+			partData.put(rd, new RedirectDataHolder<>());
+			if(swappedIn)rd.swapIn();
+			return rd;
 		}
 
 		public void copyModel(P from, P to) {
@@ -337,7 +359,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				Vec3f p = pos.getRPos();
 				Vec3f r = pos.getRRotation();
 				Vec3f s = pos.getRScale();
-				RedirectRenderer.translateRotate(p.x, p.y, p.z, (float) Math.toRadians(r.x), (float) Math.toRadians(r.y), (float) Math.toRadians(r.z), stack);
+				RedirectRenderer.translateRotate(p.x, p.y, p.z, r.x, r.y, r.z, stack);
 				float sx = s.x;
 				float sy = s.y;
 				float sz = s.z;
@@ -355,6 +377,32 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		public void flushBatch() {
 			if(batch != null)batch.flush();
+		}
+
+		public P getRenderAny(VanillaModelPart part) {
+			return (P) renderAnyMap.computeIfAbsent(part, this::register);
+		}
+
+		public void setInvis(boolean glow) {
+			if(glow) {
+				renderTypes.bindToType(RenderMode.COLOR, RenderMode.NORMAL);
+				renderTypes.bindToType(RenderMode.DEFAULT, RenderMode.NORMAL);
+			} else {
+				renderTypes.disableType(RenderMode.DEFAULT);
+				renderTypes.disableType(RenderMode.NORMAL);
+				renderTypes.disableType(RenderMode.COLOR);
+			}
+		}
+
+		public boolean setInvisState() {
+			if(playerObj != null)playerObj.animState.invisible = true;
+			if(def == null)return false;
+			if(!MinecraftClientAccess.get().getNetHandler().enableInvisGlow())return false;
+			return def.enableInvisGlow;
+		}
+
+		protected boolean enableParentRendering(VanillaModelPart part) {
+			return true;
 		}
 	}
 
@@ -401,7 +449,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 					VanillaModelPart part = getPart();
 					if(!holder.preRenderSetup) {
 						holder.preRenderSetup = true;
-						holder.bindFirstSetup();
+						holder.bindFirstSetup(false);
 					}
 					if(holder.def.getResolveState() != ModelLoadingState.LOADED)return;
 					if(!holder.skinBound) {
@@ -434,7 +482,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 								mngr.posSet.set(tp, elem.getPos());
 								mngr.rotSet.set(tp, elem.getRot());
 							}
-							if(elem.doDisplay() && doRender) {
+							if(elem.doDisplay() && doRender && holder.enableParentRendering(part)) {
 								holder.copyModel(tp, parent);
 								renderParent();
 							}

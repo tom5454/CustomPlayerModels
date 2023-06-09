@@ -18,7 +18,8 @@
 	"ParrotVariantLayerMixin",
 	"ClientPlayerEntityMixin",
 	"ArmorLayerMixin",
-	"ArmorLayerMixinForge"
+	"ArmorLayerMixinForge",
+	"LivingRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

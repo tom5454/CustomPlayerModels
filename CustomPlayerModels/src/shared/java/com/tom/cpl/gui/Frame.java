@@ -33,7 +33,7 @@ public abstract class Frame extends Panel {
 	}
 
 	protected void onClosing() {
-		gui.close();
+		gui.closeGui();
 	}
 
 	public final void init(int width, int height) {
