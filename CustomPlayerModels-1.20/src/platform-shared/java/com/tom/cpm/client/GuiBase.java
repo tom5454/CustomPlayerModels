@@ -470,16 +470,22 @@ public class GuiBase extends Screen implements IGui {
 
 		@Override
 		public void mouseClick(MouseEvent evt) {
-			if(evt.isConsumed()) {
-				field.mouseClicked(Integer.MIN_VALUE, Integer.MIN_VALUE, evt.btn);
+			if(evt.isConsumed() || !enabled) {
+				field.setFocused(false);
+				field.setHighlightPos(field.getCursorPosition());
 				return;
 			}
 			field.setX(bounds.x + currentOff.x);
 			field.setY(bounds.y + currentOff.y);
 			field.setWidth(bounds.w);
 			Platform.setHeight(field, bounds.h);
-			if(field.mouseClicked(evt.x + currentOff.x, evt.y + currentOff.y, evt.btn))
+			if(field.mouseClicked(evt.x + currentOff.x, evt.y + currentOff.y, evt.btn)) {
+				field.setFocused(true);
 				evt.consume();
+			} else {
+				field.setFocused(false);
+				field.setHighlightPos(field.getCursorPosition());
+			}
 		}
 
 		@Override

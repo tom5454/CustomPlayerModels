@@ -36,8 +36,8 @@
     "1.14.4-latest": "0.6.8a",
     "1.14.4-fabric-latest": "0.6.8a",
     "1.15.2-fabric-latest": "0.6.8a",
-    "1.20-fabric-latest": "0.6.8a",
-    "1.20-latest": "0.6.8a"
+    "1.20-fabric-latest": "0.6.8b",
+    "1.20-latest": "0.6.8b"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -901,9 +901,11 @@
   },
   "1.20-fabric": {
     "0.6.7a": "1.20 Pre Release 1 port",
-    "0.6.8a": "Ported to 1.20\nAdded new animation: Invisible\nAdded new effect: Glowing parts rendering when invisible (disabled on vanilla servers, configurable on CPM servers)\nUpdated Simplified Chinese translation (#413)\n\nFixed models not rendering correctly when invisible (Closes #405)\nFixed crash on 1.20-pre6 (Closes #420)\nFixed some issues with ingame chat in CPM guis\nFixed test in-game blank screen (Closes #415)\nFixed CPM not working in Yarn Dev environments (Closes #422)\nFixed dedicated server crash in Forge Dev environments (#419)\nFixed Per-Face UV rendering deleted faces from 0, 0\nFixed rotations not rolling over with some actions\nFixed cape copy transform not working\nFixed copy transform button changing texture mode\nFixed first person hand rotation not working (Closes #428)"
+    "0.6.8a": "Ported to 1.20\nAdded new animation: Invisible\nAdded new effect: Glowing parts rendering when invisible (disabled on vanilla servers, configurable on CPM servers)\nUpdated Simplified Chinese translation (#413)\n\nFixed models not rendering correctly when invisible (Closes #405)\nFixed crash on 1.20-pre6 (Closes #420)\nFixed some issues with ingame chat in CPM guis\nFixed test in-game blank screen (Closes #415)\nFixed CPM not working in Yarn Dev environments (Closes #422)\nFixed dedicated server crash in Forge Dev environments (#419)\nFixed Per-Face UV rendering deleted faces from 0, 0\nFixed rotations not rolling over with some actions\nFixed cape copy transform not working\nFixed copy transform button changing texture mode\nFixed first person hand rotation not working (Closes #428)",
+    "0.6.8b": "Fixed text fields not working in 1.20\nFixed armor not working in 1.20 forge"
   },
   "1.20": {
-    "0.6.8a": "Ported to 1.20\nAdded new animation: Invisible\nAdded new effect: Glowing parts rendering when invisible (disabled on vanilla servers, configurable on CPM servers)\nUpdated Simplified Chinese translation (#413)\n\nFixed models not rendering correctly when invisible (Closes #405)\nFixed crash on 1.20-pre6 (Closes #420)\nFixed some issues with ingame chat in CPM guis\nFixed test in-game blank screen (Closes #415)\nFixed CPM not working in Yarn Dev environments (Closes #422)\nFixed dedicated server crash in Forge Dev environments (#419)\nFixed Per-Face UV rendering deleted faces from 0, 0\nFixed rotations not rolling over with some actions\nFixed cape copy transform not working\nFixed copy transform button changing texture mode\nFixed first person hand rotation not working (Closes #428)"
+    "0.6.8a": "Ported to 1.20\nAdded new animation: Invisible\nAdded new effect: Glowing parts rendering when invisible (disabled on vanilla servers, configurable on CPM servers)\nUpdated Simplified Chinese translation (#413)\n\nFixed models not rendering correctly when invisible (Closes #405)\nFixed crash on 1.20-pre6 (Closes #420)\nFixed some issues with ingame chat in CPM guis\nFixed test in-game blank screen (Closes #415)\nFixed CPM not working in Yarn Dev environments (Closes #422)\nFixed dedicated server crash in Forge Dev environments (#419)\nFixed Per-Face UV rendering deleted faces from 0, 0\nFixed rotations not rolling over with some actions\nFixed cape copy transform not working\nFixed copy transform button changing texture mode\nFixed first person hand rotation not working (Closes #428)",
+    "0.6.8b": "Fixed text fields not working in 1.20\nFixed armor not working in 1.20 forge"
   }
 }
