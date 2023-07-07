@@ -1,5 +1,7 @@
 package com.tom.cpl.gui.elements;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +25,7 @@ public class Spinner extends GuiElement implements Focusable {
 		super(gui);
 		txtf = new TextField(gui);
 		txtf.setEventListener(this::updateTxtf);
-		txtf.setText(lastValue = String.format("%." + dp + "f", value));
+		txtf.setText(lastValue = roundValue(dp, value));
 	}
 
 	@Override
@@ -37,7 +39,7 @@ public class Spinner extends GuiElement implements Focusable {
 		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, 8, 8, enabled ? event.isHovered(bDown) ? 16 : 8 : 0, 8, "editor");
 		if(txtfNeedsUpdate && !txtf.isFocused()) {
 			txtfNeedsUpdate = false;
-			txtf.setText(lastValue = String.format("%." + dp + "f", value));
+			txtf.setText(lastValue = roundValue(dp, value));
 		}
 		if(event.isHovered(bounds) && txtf.isFocused() && error != null) {
 			new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.exp_error", error)).set();
@@ -57,12 +59,12 @@ public class Spinner extends GuiElement implements Focusable {
 				if(bUp.isInBounds(e.x, e.y)) {
 					value += v;
 					changeListeners.forEach(Runnable::run);
-					txtf.setText(lastValue = String.format("%." + dp + "f", value));
+					txtf.setText(lastValue = roundValue(dp, value));
 					e.consume();
 				} else if(bDown.isInBounds(e.x, e.y)) {
 					value -= v;
 					changeListeners.forEach(Runnable::run);
-					txtf.setText(lastValue = String.format("%." + dp + "f", value));
+					txtf.setText(lastValue = roundValue(dp, value));
 					e.consume();
 				}
 			}
@@ -90,17 +92,16 @@ public class Spinner extends GuiElement implements Focusable {
 	}
 
 	public void setValue(float value) {
-		double d = Math.pow(10, dp);
-		this.value = (float) (((int) (value * d)) / d);
+		this.value = value;
 		if(!txtf.isFocused())
-			txtf.setText(lastValue = String.format("%." + dp + "f", value));
+			txtf.setText(lastValue = roundValue(dp, value));
 		else txtfNeedsUpdate = true;
 		error = null;
 	}
 
 	public void setDp(int dp) {
 		this.dp = dp;
-		txtf.setText(lastValue = String.format("%." + dp + "f", value));
+		txtf.setText(lastValue = roundValue(dp, value));
 	}
 
 	@Override
@@ -112,9 +113,8 @@ public class Spinner extends GuiElement implements Focusable {
 	private void updateTxtf() {
 		if(lastValue.equals(txtf.getText()))return;
 		try {
-			float value = new ExpressionExt(txtf.getText().replace(',', '.')).eval();
-			double d = Math.pow(10, dp);
-			this.value = (float) (((int) (value * d)) / d);
+			float value = new ExpressionExt(txtf.getText().replace(',', '.').replace(';', ',')).eval();
+			this.value = value;
 			changeListeners.forEach(Runnable::run);
 			error = null;
 			txtfNeedsUpdate = true;
@@ -145,4 +145,8 @@ public class Spinner extends GuiElement implements Focusable {
 	public boolean isSelectable() {
 		return visible && enabled;
 	}
+
+	private String roundValue(int dp, float newValue) {
+		return new BigDecimal(value).setScale(dp, RoundingMode.HALF_UP).toPlainString();
+	};
 }
