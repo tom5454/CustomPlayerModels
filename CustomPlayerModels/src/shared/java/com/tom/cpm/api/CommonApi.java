@@ -130,4 +130,12 @@ public class CommonApi extends SharedApi implements ICommonAPI {
 		BiConsumer<Object, NBTTagCompound> h = pluginMessageHandlers.get(id);
 		h.accept(player, tag);
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <P> int getAnimationPlaying(Class<P> playerClass, P player, String name) {
+		if(checkClass(playerClass, Clazz.PLAYER))return -1;
+		NetHandler<?, P, ?> h = (NetHandler<?, P, ?>) MinecraftServerAccess.get().getNetHandler();
+		return h.getAnimationPlaying(player, name);
+	}
 }

@@ -3,7 +3,7 @@ package com.tom.cpm.shared.editor;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.tom.cpl.gui.IGui;
+import com.tom.cpl.text.I18n;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.project.JsonMap;
 
@@ -97,7 +97,7 @@ public class CopyTransformEffect {
 		});
 	}
 
-	public String getTooltip(IGui gui) {
+	public String getTooltip(I18n gui) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(gui.i18nFormat("label.cpm.copyTransform"));
 		if(from != null) {

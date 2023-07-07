@@ -88,7 +88,7 @@ public class Generators {
 					elem.texture = true;
 					elem.u = val.u2;
 					elem.v = val.v2;
-					elem.name = e.frame.getGui().i18nFormat("label.cpm.layer_" + val.layer.getLowerName());
+					elem.name = e.ui.i18nFormat("label.cpm.layer_" + val.layer.getLowerName());
 					elem.mcScale = 0.25F;
 					break;
 				}
@@ -225,7 +225,7 @@ public class Generators {
 			if(!added.contains(itemSlot)) {
 				ModelElement elem = new ModelElement(editor);
 				elem.itemRenderer = new ItemRenderer(itemSlot, 0);
-				elem.name = editor.gui().i18nFormat("label.cpm.elem.item." + itemSlot.name().toLowerCase(Locale.ROOT));
+				elem.name = editor.ui.i18nFormat("label.cpm.elem.item." + itemSlot.name().toLowerCase(Locale.ROOT));
 				elem.size = new Vec3f(0, 0, 0);
 				switch (itemSlot) {
 				case HEAD:
@@ -331,7 +331,7 @@ public class Generators {
 			}
 		});
 		b.execute();
-		editor.setQuickAction.accept(new QuickTask(editor.gui().i18nFormat("button.cpm.mirrorAnimations"), editor.gui().i18nFormat("tooltip.cpm.mirrorAnimations"), () -> {
+		editor.setQuickAction.accept(new QuickTask(editor.ui.i18nFormat("button.cpm.mirrorAnimations"), editor.ui.i18nFormat("tooltip.cpm.mirrorAnimations"), () -> {
 			ActionBuilder ab = eg.getEditor().action("i", "button.cpm.tools.mirror");
 			editor.animations.forEach(a -> a.getFrames().forEach(f -> mirrored.forEach(me -> {
 				FrameData dt = f.getComponents().get(me);

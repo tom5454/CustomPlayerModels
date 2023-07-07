@@ -38,6 +38,7 @@ public class NetworkUtil {
 	public static final String KICK_TIME = "kickTime";
 	public static final String SCALING = "scaling";
 	public static final String GESTURE = "gesture";
+	public static final String ANIMATIONS = "anims";
 
 	public static final FormatText FORCED_CHAT_MSG = new FormatText("chat.cpm.skinForced");
 

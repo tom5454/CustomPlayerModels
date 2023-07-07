@@ -11,9 +11,6 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
 
 import com.tom.cpl.command.StringCommandHandler;
 import com.tom.cpl.text.IText;
@@ -67,11 +64,6 @@ public class Command extends StringCommandHandler<MinecraftServer, ICommandSende
 		if(sender.sendCommandFeedback()) {
 			sender.addChatMessage(text.remap());
 		}
-	}
-
-	@Override
-	public void sendFail(ICommandSender sender, IText text) {
-		sender.addChatMessage(text.<IChatComponent>remap().setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED)));
 	}
 
 	@Override

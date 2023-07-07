@@ -19,7 +19,7 @@ public class GuiImpl extends GuiBase {
 		super.render(graphics, mouseX, mouseY, partialTicks);
 		if(minecraft.player != null && gui.enableChat()) {
 			graphics.pose().pushPose();
-			graphics.pose().translate(0, 0, 100);
+			graphics.pose().translate(0, 0, 800);
 			minecraft.gui.getChat().render(graphics, minecraft.gui.getGuiTicks(), mouseX, mouseY);
 			graphics.pose().popPose();
 		}

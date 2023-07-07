@@ -1,7 +1,6 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
 import com.tom.cpl.gui.Frame;
-import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.PopupPanel;
@@ -9,8 +8,8 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.math.Box;
 
 public class ExportStringResultPopup extends PopupPanel {
-	public ExportStringResultPopup(Frame frm, IGui gui, String resultName, String result) {
-		super(gui);
+	public ExportStringResultPopup(Frame frm, String resultName, String result) {
+		super(frm.getGui());
 
 		setBounds(new Box(0, 0, 260, 80));
 

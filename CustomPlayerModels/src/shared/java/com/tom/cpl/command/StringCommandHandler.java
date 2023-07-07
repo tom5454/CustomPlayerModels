@@ -1,7 +1,9 @@
 package com.tom.cpl.command;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -42,11 +44,10 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 		}
 
 		@SuppressWarnings("unchecked")
-		public void execute(S server, CS sender, String[] args) throws CE {
-			CommandCtx<CS> ctx = new CommandCtx<>(sender, StringCommandHandler.this);
+		private StringCtx parseCommand(S server, CS sender, String[] args) throws CE {
+			StringCtx ctx = new StringCtx(sender);
 			AbstractCommandBuilder<?> e = root;
 			AbstractCommandBuilder<?> prev = null;
-			CE lastExc = null;
 			for(int i = 0;i<args.length;i++) {
 				String arg = args[i];
 				if(e == prev)throw wrongUsage("commands.generic.parameter.invalid", arg);
@@ -68,7 +69,7 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 								e = next;
 								ctx.arg(r.getId(), pl);
 							} catch (Exception exc) {
-								lastExc = checkExc(exc);
+								ctx.lastExc = checkExc(exc);
 							}
 						}
 						break;
@@ -82,7 +83,7 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 								e = next;
 								ctx.arg(r.getId(), false);
 							} else {
-								lastExc = wrongUsage("commands.generic.boolean.invalid", arg);
+								ctx.lastExc = wrongUsage("commands.generic.boolean.invalid", arg);
 							}
 						}
 						break;
@@ -99,7 +100,7 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 								ctx.arg(r.getId(), v);
 								e = next;
 							} catch (NumberFormatException num) {
-								lastExc = wrongUsage("commands.generic.num.invalid", arg);
+								ctx.lastExc = wrongUsage("commands.generic.num.invalid", arg);
 							}
 						}
 						break;
@@ -116,15 +117,15 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 								ctx.arg(r.getId(), v);
 								e = next;
 							} catch (NumberFormatException num) {
-								lastExc = wrongUsage("commands.generic.num.invalid", arg);
+								ctx.lastExc = wrongUsage("commands.generic.num.invalid", arg);
 							}
 						}
 						break;
 
 						case STRING:
 						{
-							boolean greedyString = r.getSettings() == null || !((Boolean)r.getSettings());
-							if(greedyString) {
+							boolean normalString = r.getSettings() == null || !((Boolean)r.getSettings());
+							if(!normalString) {
 								StringBuilder b = new StringBuilder(arg);
 								for(i++;i<args.length;i++) {
 									b.append(' ');
@@ -133,8 +134,19 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 								e = next;
 								ctx.arg(r.getId(), b.toString());
 							} else {
-								e = next;
-								ctx.arg(r.getId(), arg);
+								if(arg.startsWith("\"")) {
+									StringBuilder b = new StringBuilder(arg);
+									for(i++;i<args.length;i++) {
+										b.append(' ');
+										b.append(args[i]);
+										if(args[i].endsWith("\""))break;
+									}
+									e = next;
+									ctx.arg(r.getId(), b.substring(1, b.length() - 1));
+								} else {
+									e = next;
+									ctx.arg(r.getId(), arg);
+								}
 							}
 						}
 						break;
@@ -148,38 +160,40 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 					}
 				}
 			}
-			if(e.getFunc() != null)e.getFunc().accept(ctx);
-			else if(lastExc != null)throw lastExc;
+			ctx.node = e;
+			return ctx;
+		}
+
+		public void execute(S server, CS sender, String[] args) throws CE {
+			StringCtx ctx = parseCommand(server, sender, args);
+			if(ctx.node.getFunc() != null) {
+				ctx.node.getFunc().accept(ctx);
+				if(ctx.getFail() != null)throw generic("commands." + getName() + ".genericFail", new Object[] {ctx.getFail().remap()});
+			} else if(ctx.lastExc != null)throw ctx.lastExc;
 			else throw wrongUsage("commands." + getName() + ".usage");
 		}
 
 		public List<String> getTabCompletions(S server, CS sender, String[] args) {
-			AbstractCommandBuilder<?> e = root;
-			AbstractCommandBuilder<?> prev = null;
-			for(int i = 0;i<args.length;i++) {
-				String arg = args[i];
-				prev = e;
-				for (AbstractCommandBuilder<?> next : e.getNext()) {
-					if(next instanceof LiteralCommandBuilder) {
-						LiteralCommandBuilder l = (LiteralCommandBuilder) next;
-						if(arg.equals(l.getName())) {
-							e = next;
-							break;
-						}
-					} else if(next instanceof RequiredCommandBuilder) {
-						e = next;
-						break;
-					}
-				}
+			StringCtx ctx;
+			try {
+				ctx = parseCommand(server, sender, Arrays.copyOf(args, Math.max(0, args.length - 1)));
+			} catch (Exception e) {
+				return Collections.emptyList();
 			}
 			List<String> compl = new ArrayList<>();
-			for (AbstractCommandBuilder<?> next : prev.getNext()) {
+			for (AbstractCommandBuilder<?> next : ctx.node.getNext()) {
 				if(next instanceof LiteralCommandBuilder) {
 					compl.add(((LiteralCommandBuilder)next).getName());
 				} else if(next instanceof RequiredCommandBuilder) {
 					RequiredCommandBuilder r = (RequiredCommandBuilder) next;
 					if(r.getPossibleValues() != null) {
-						compl.addAll(r.getPossibleValues().get());
+						List<String> s = r.getPossibleValues().apply(ctx);
+						for (String string : s) {
+							if(string.contains(" "))
+								compl.add("\"" + string + "\"");
+							else
+								compl.add(string);
+						}
 					} else if(r.getType() == ArgType.PLAYER) {
 						compl.addAll(getOnlinePlayers(server));
 					} else if(r.getType() == ArgType.BOOLEAN) {
@@ -210,5 +224,15 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 
 	public static boolean doesStringStartWith(String original, String region) {
 		return region.regionMatches(true, 0, original, 0, original.length());
+	}
+
+	private class StringCtx extends CommandCtx<CS> {
+		private AbstractCommandBuilder<?> node;
+		private CE lastExc;
+
+		public StringCtx(CS sender) {
+			super(sender, StringCommandHandler.this);
+		}
+
 	}
 }

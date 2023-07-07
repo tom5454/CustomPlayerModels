@@ -4,7 +4,6 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
-import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.Tooltip;
@@ -39,7 +38,7 @@ public class NewSkinPopup extends PopupPanel {
 
 		Checkbox customGridSize = new Checkbox(gui, gui.i18nFormat("label.cpm.customGridSize"));
 		customGridSize.setBounds(new Box(5, 50, 100, 20));
-		customGridSize.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.customGridSize")));
+		customGridSize.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.customGridSize")));
 		addElement(customGridSize);
 
 		Label lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
@@ -105,7 +104,7 @@ public class NewSkinPopup extends PopupPanel {
 				execute();
 				editor.updateGui();
 				if(editor.hasVanillaParts() && (size.x != 64 || size.y != 64)) {
-					editor.frame.openPopup(new MessagePopup(editor.frame, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts")));
+					gui.displayMessagePopup(gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.skin_has_vanilla_parts"));
 				}
 			}
 		});

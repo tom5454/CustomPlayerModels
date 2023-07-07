@@ -40,4 +40,11 @@ public class Vec4f {
 		this.z = matrixIn.m20 * f + matrixIn.m21 * f1 + matrixIn.m22 * f2 + matrixIn.m23 * f3;
 		this.w = matrixIn.m30 * f + matrixIn.m31 * f1 + matrixIn.m32 * f2 + matrixIn.m33 * f3;
 	}
+
+	public void mul(float f) {
+		this.x *= f;
+		this.y *= f;
+		this.z *= f;
+		this.w *= f;
+	}
 }

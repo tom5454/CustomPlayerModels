@@ -13,7 +13,6 @@ import com.tom.cpm.blockbench.proxy.electron.FileSystem;
 import com.tom.cpm.blockbench.proxy.electron.FileSystem.Buffer;
 import com.tom.cpm.web.client.FS.IFS;
 import com.tom.cpm.web.client.IFile;
-import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.java.io.FileNotFoundException;
 
@@ -28,7 +27,7 @@ public class BlockBenchFS implements IFS {
 	public static final FileSystem fs = Js.uncheckedCast(require("fs"));
 
 	@Override
-	public String getContent(String path) throws FileNotFoundException {
+	public String getContentSync(String path) throws FileNotFoundException {
 		try {
 			return fs.readFileSync(path).toString("base64");
 		} catch (Exception e) {
@@ -37,15 +36,23 @@ public class BlockBenchFS implements IFS {
 	}
 
 	@Override
-	public boolean setContent(String path, String content) {
-		try {
-			fs.writeFileSync(path, new Buffer(content, "base64"));
-			return true;
-		} catch (Throwable e) {
-			WebMC.getInstance().warn("Error saving file", e);
-			return false;
-		}
+	public Promise<String> getContent(String path) {
+		return new Promise<>((res, rej) -> {
+			fs.readFile(path, (err, dt) -> {
+				if(err != null)rej.onInvoke(new FileNotFoundException(err.toString()));
+				else res.onInvoke(dt.toString("base64"));
+			});
+		});
+	}
 
+	@Override
+	public Promise<Void> setContent(String path, String content) {
+		return new Promise<>((res, rej) -> {
+			fs.writeFile(path, Buffer.from(content, "base64"), err -> {
+				if(err != null)rej.onInvoke(new FileNotFoundException(err.toString()));
+				else res.onInvoke((Void) null);
+			});
+		});
 	}
 
 	@Override

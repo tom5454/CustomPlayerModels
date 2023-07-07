@@ -62,7 +62,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 			}
 		}
 
-		ListPicker<AnimType> typeDd = new ListPicker<>(editor.frame, ats);
+		ListPicker<AnimType> typeDd = new ListPicker<>(gui.getFrame(), ats);
 		typeDd.setListLoader(l -> {
 			l.setComparator(Comparator.comparing(AnimType::getType).thenComparing(Comparator.comparing(AnimType::toString)));
 			l.setRenderer(AnimType::draw);
@@ -100,7 +100,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 		filter(a -> a.pose == null && !a.type.isStaged() && (a.type != AnimationType.GESTURE || a.loop) && a.type != AnimationType.VALUE_LAYER).
 		map(a -> new AnimSel(a.getId(), a.getDisplayGroup())).distinct().forEach(selAnims::add);
 
-		ListPicker<AnimSel> dropDownAnimSel = new ListPicker<>(editor.frame, selAnims);
+		ListPicker<AnimSel> dropDownAnimSel = new ListPicker<>(gui.getFrame(), selAnims);
 		dropDownAnimSel.setBounds(new Box(5, 0, 190, 20));
 		dropDownAnimSel.setVisible(false);
 		addElement(dropDownAnimSel);
@@ -143,7 +143,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 
 		addElement(new Label(gui, gui.i18nFormat("label.cpm.animIntType")).setBounds(new Box(5, 0, 190, 10)));
 		NameMapper<InterpolatorType> intMap = new NameMapper<>(InterpolatorType.VALUES, e -> gui.i18nFormat("label.cpm.animIntType." + e.name().toLowerCase(Locale.ROOT)));
-		DropDownBox<NamedElement<InterpolatorType>> intBox = new DropDownBox<>(editor.frame, intMap.asList());
+		DropDownBox<NamedElement<InterpolatorType>> intBox = new DropDownBox<>(gui.getFrame(), intMap.asList());
 		intMap.setSetter(intBox::setSelected);
 		if(edit && editor.selectedAnim != null) {
 			intMap.setValue(editor.selectedAnim.intType);
@@ -182,7 +182,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 
 		if(edit && editor.selectedAnim != null)boxCommand.setSelected(editor.selectedAnim.command);
 		boxCommand.setBounds(new Box(5, 0, 190, 18));
-		boxCommand.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.anim_command")));
+		boxCommand.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.anim_command")));
 		boxCommand.setAction(() -> {
 			boxCommand.setSelected(!boxCommand.isSelected());
 		});
@@ -190,7 +190,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 
 		if(edit && editor.selectedAnim != null)boxLayerCtrl.setSelected(editor.selectedAnim.layerControlled);
 		else boxLayerCtrl.setSelected(true);
-		boxLayerCtrl.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.anim_layerCtrl")));
+		boxLayerCtrl.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.anim_layerCtrl")));
 		boxLayerCtrl.setBounds(new Box(5, 0, 190, 18));
 		boxLayerCtrl.setAction(() -> {
 			boxLayerCtrl.setSelected(!boxLayerCtrl.isSelected());
@@ -258,7 +258,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 			String name = toString();
 			String fullTip = name + "\\" + tooltip;
 			if(!tip.equals(desc))fullTip = fullTip + "\\" + desc;
-			return new Tooltip(editor.frame, fullTip);
+			return new Tooltip(gui.getFrame(), fullTip);
 		}
 
 		private void draw(int x, int y, int w, int h, boolean hovered, boolean selected) {
@@ -292,7 +292,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 
 		@Override
 		public String toString() {
-			if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(gui, null));
+			if(pose != null)return editor.ui.i18nFormat("label.cpm.anim_pose", pose.getName(gui, null));
 			return name;
 		}
 

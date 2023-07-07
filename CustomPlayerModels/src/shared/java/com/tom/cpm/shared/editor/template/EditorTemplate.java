@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
@@ -44,9 +45,6 @@ public class EditorTemplate extends Template implements TreeElement {
 		this.editor = editor;
 		loadPartToCubes();
 		name = (String) this.data.get("name");
-		if(this.data.containsKey("desc")) {
-			tooltip = new Tooltip(editor.frame, (String) this.data.get("desc"));
-		}
 		elems = new ArrayList<>();
 		editorArgs = new ArrayList<>();
 		List<Map<String, Object>> argsList = (List<Map<String, Object>>) this.data.get("args");
@@ -68,7 +66,7 @@ public class EditorTemplate extends Template implements TreeElement {
 
 				@Override
 				public String getName() {
-					if(n.equals(TexEditorArg.NAME))return editor.gui().i18nFormat("label.cpm.template_arg_tex");
+					if(n.equals(TexEditorArg.NAME))return editor.ui.i18nFormat("label.cpm.template_arg_tex");
 					return n;
 				}
 
@@ -105,7 +103,7 @@ public class EditorTemplate extends Template implements TreeElement {
 
 	@Override
 	public String getName() {
-		return editor.gui().i18nFormat("label.cpm.template_name", name);
+		return editor.ui.i18nFormat("label.cpm.template_name", name);
 	}
 
 	@Override
@@ -178,7 +176,10 @@ public class EditorTemplate extends Template implements TreeElement {
 	}
 
 	@Override
-	public Tooltip getTooltip() {
+	public Tooltip getTooltip(IGui gui) {
+		if(this.data.containsKey("desc") && tooltip == null) {
+			tooltip = new Tooltip(gui.getFrame(), (String) this.data.get("desc"));
+		}
 		return tooltip;
 	}
 }

@@ -11,9 +11,6 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
 
 import com.tom.cpl.command.StringCommandHandler;
 import com.tom.cpl.text.IText;
@@ -68,11 +65,6 @@ public class Command extends StringCommandHandler<MinecraftServer, ICommandSende
 		if(sender.sendCommandFeedback()) {
 			sender.sendMessage(text.remap());
 		}
-	}
-
-	@Override
-	public void sendFail(ICommandSender sender, IText text) {
-		sender.sendMessage(text.<ITextComponent>remap().setStyle(new Style().setColor(TextFormatting.RED)));
 	}
 
 	@Override

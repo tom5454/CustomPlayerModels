@@ -39,6 +39,9 @@ public class Property {
 
 		@JsProperty(name = "$$ugwt_m_Animation_$$")
 		public static Object animation;
+
+		@JsProperty(name = "$$ugwt_m_KeyframeDataPoint_$$")
+		public static Object keyframedatapoint;
 	}
 
 	@JsOverlay
@@ -59,6 +62,7 @@ public class Property {
 		FACE(G.face),
 		TEXTURE(G.texture),
 		ANIMATION(G.animation),
+		KEYFRAME_DATA(G.keyframedatapoint),
 		;
 		private Object obj;
 		private Clazz(Object obj) {

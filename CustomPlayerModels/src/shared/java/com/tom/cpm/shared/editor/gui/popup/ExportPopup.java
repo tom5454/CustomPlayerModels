@@ -68,7 +68,7 @@ public abstract class ExportPopup extends PopupPanel {
 	}
 
 	protected void export() {
-		if(Exporter.check(editorGui.getEditor(), editorGui, this::export)) {
+		if(Exporter.check(editorGui.getEditor(), editorGui.getGui(), this::export)) {
 			export0();
 			close();
 		}
@@ -126,7 +126,7 @@ public abstract class ExportPopup extends PopupPanel {
 			addElement(encSettings);
 
 			Button changeVanillaSkin = new Button(gui, gui.i18nFormat("button.cpm.change_vanilla_skin"), () -> {
-				SelectSkinPopup ssp = new SelectSkinPopup(editor.frame, skinType, (type, img) -> {
+				SelectSkinPopup ssp = new SelectSkinPopup(e, skinType, (type, img) -> {
 					skinType = type;
 					groupSkinType.accept(type);
 					editor.vanillaSkin = img;
@@ -134,7 +134,7 @@ public abstract class ExportPopup extends PopupPanel {
 					detectLink();
 				});
 				ssp.setOnClosed(() -> editor.displayViewport.accept(true));
-				editor.frame.openPopup(ssp);
+				e.openPopup(ssp);
 				editor.displayViewport.accept(false);
 			});
 			changeVanillaSkin.setBounds(new Box(bounds.w - 135, bounds.y + 150, 128, 20));
@@ -342,13 +342,13 @@ public abstract class ExportPopup extends PopupPanel {
 		private void export1() {
 			Editor e = editorGui.getEditor();
 			if(gist) {
-				Exporter.exportUpdate(e, editorGui, defLink);
+				Exporter.exportUpdate(e, gui, defLink);
 			} else if(upload) {
 				editorGui.openPopup(new ConfirmPopup(editorGui, gui.i18nFormat("label.cpm.export.upload"), gui.i18nFormat("label.cpm.export.upload.desc"), () -> {
-					Exporter.exportSkin(e, editorGui, img -> new SkinUploadPopup(editorGui, e.skinType, img).start(), forceLinkFile.isSelected());
+					Exporter.exportSkin(e, gui, img -> new SkinUploadPopup(editorGui, e.skinType, img).start(), forceLinkFile.isSelected());
 				}, null));
 			} else {
-				Exporter.exportSkin(e, editorGui, selFile, forceLinkFile.isSelected());
+				Exporter.exportSkin(e, gui, selFile, forceLinkFile.isSelected());
 			}
 		}
 	}
@@ -408,9 +408,9 @@ public abstract class ExportPopup extends PopupPanel {
 			editor.description.desc = descField.getText();
 			editor.markDirty();
 
-			Exporter.exportTemplate(editor, editorGui, editor.description,
+			Exporter.exportTemplate(editor, gui, editor.description,
 					t -> editorGui.openPopup(new CreateGistPopup(editorGui, gui, "template_export", t,
-							l -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "template", l.toString()))
+							l -> editorGui.openPopup(new ExportStringResultPopup(editorGui, "template", l.toString()))
 							)));
 		}
 
@@ -481,7 +481,7 @@ public abstract class ExportPopup extends PopupPanel {
 					e.markDirty();
 				}
 			}
-			Exporter.exportB64(editorGui.getEditor(), editorGui, b64 -> editorGui.openPopup(new ExportStringResultPopup(editorGui, gui, "base64_model", b64)), forceLinkFile.isSelected());
+			Exporter.exportB64(editorGui.getEditor(), gui, b64 -> editorGui.openPopup(new ExportStringResultPopup(editorGui, "base64_model", b64)), forceLinkFile.isSelected());
 		}
 
 	}
@@ -621,7 +621,7 @@ public abstract class ExportPopup extends PopupPanel {
 			if(descChanged)editor.markDirty();
 
 			if(gist) {
-				Exporter.exportUpdate(editor, editorGui, defLink);
+				Exporter.exportUpdate(editor, gui, defLink);
 			} else {
 				File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 				modelsDir.mkdirs();
@@ -629,10 +629,10 @@ public abstract class ExportPopup extends PopupPanel {
 				File selFile = new File(modelsDir, fileName);
 				if(selFile.exists()) {
 					editorGui.openPopup(new ConfirmPopup(editorGui, gui.i18nFormat("label.cpm.overwrite"), gui.i18nFormat("label.cpm.overwrite"),
-							() -> Exporter.exportModel(editor, editorGui, selFile, editor.description, skinCompat.isSelected()),
+							() -> Exporter.exportModel(editor, gui, selFile, editor.description, skinCompat.isSelected()),
 							null));
 				} else {
-					Exporter.exportModel(editor, editorGui, selFile, editor.description, skinCompat.isSelected());
+					Exporter.exportModel(editor, gui, selFile, editor.description, skinCompat.isSelected());
 				}
 			}
 		}

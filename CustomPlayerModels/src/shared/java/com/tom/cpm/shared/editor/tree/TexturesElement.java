@@ -14,7 +14,7 @@ public class TexturesElement implements TreeElement {
 
 	@Override
 	public String getName() {
-		return editor.gui().i18nFormat("label.cpm.tree.texture");
+		return editor.ui.i18nFormat("label.cpm.tree.texture");
 	}
 
 	@Override

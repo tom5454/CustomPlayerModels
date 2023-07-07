@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.Frame;
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Tree.TreeHandler.TreeElement;
 import com.tom.cpl.math.Box;
@@ -42,10 +43,10 @@ public class Tree<T> extends GuiElement {
 					elem.showChildren = !elem.showChildren;
 					if(sizeUpdate != null)sizeUpdate.accept(getSize());
 				} else {
-					handler.model.onClick(evt, elem.value);
+					handler.model.onClick(gui, evt, elem.value);
 				}
 			} else {
-				handler.model.onClick(evt, null);
+				handler.model.onClick(gui, evt, null);
 			}
 			handler.model.treeUpdated();
 			evt.consume();
@@ -78,18 +79,18 @@ public class Tree<T> extends GuiElement {
 	private void drawTree(MouseEvent event, int x, int[] y, TreeElement<T> e) {
 		int yp = y[0]++;
 		int textColor = gui.getColors().button_text_color;
-		int bg = e.value == null ? 0 : handler.model.bgColor(e.value);
+		int bg = e.value == null ? 0 : handler.model.bgColor(e.value, gui);
 		if(bg != 0) {
 			gui.drawBox(x * 5, yp * 10, bounds.w, 10, bg);
 		}
-		int txtc = e.value == null ? 0 : handler.model.textColor(e.value);
+		int txtc = e.value == null ? 0 : handler.model.textColor(e.value, gui);
 		if(txtc != 0) {
 			textColor = txtc;
 		}
 		int dropD = textColor;
 		if (event.isHovered(new Box(bounds.x, yp * 10, bounds.w, 10))) {
 			textColor = gui.getColors().button_text_hover;
-			Tooltip tt = handler.model.getTooltip(e.value);
+			Tooltip tt = handler.model.getTooltip(e.value, gui);
 			if(tt != null)tt.set();
 			if(event.isHovered(new Box(bounds.x, yp * 10, 5 + e.depth * 5, 10))) {
 				dropD = textColor;
@@ -128,13 +129,13 @@ public class Tree<T> extends GuiElement {
 	}
 
 	public static abstract class TreeModel<T> {
-		protected abstract int textColor(T val);
+		protected abstract int textColor(T val, IGui gui);
 		protected abstract void getElements(T parent, Consumer<T> c);
-		protected abstract int bgColor(T val);
+		protected abstract int bgColor(T val, IGui gui);
 		protected abstract void treeUpdated();
-		protected abstract void onClick(MouseEvent evt, T elem);
+		protected abstract void onClick(IGui gui, MouseEvent evt, T elem);
 		protected abstract String getName(T elem);
-		protected abstract Tooltip getTooltip(T elem);
+		protected abstract Tooltip getTooltip(T elem, IGui gui);
 		protected abstract void refresh(T elem);
 		protected abstract boolean isSelected(T elem);
 	}

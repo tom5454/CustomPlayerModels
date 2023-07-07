@@ -14,6 +14,7 @@ public class Project {
 	public static String name, geometry_name;
 	public static boolean box_uv;
 	public static JsArrayE<Animation> animations;
+	public static ModelFormat format;
 
 	@JsProperty(name = "cpm_data")
 	public static String pluginData;

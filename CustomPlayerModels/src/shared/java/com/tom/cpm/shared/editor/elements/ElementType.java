@@ -1,6 +1,5 @@
 package com.tom.cpm.shared.editor.elements;
 
-import com.tom.cpl.gui.IGui;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.FlatListView;
@@ -16,14 +15,14 @@ public enum ElementType {
 	NORMAL(new ElementBuilder() {
 
 		@Override
-		public void buildElement(IGui gui, Editor editor, ModelElement elem, Object typeData) {
+		public void buildElement(Editor editor, ModelElement elem, Object typeData) {
 			elem.offset = new Vec3f();
 			elem.pos = new Vec3f();
 			elem.size = new Vec3f(1, 1, 1);
 			elem.rotation = new Vec3f();
 			elem.scale = new Vec3f(1, 1, 1);
 			elem.textureSize = 1;
-			elem.name = "New Cube";
+			elem.name = editor.ui.i18nFormat("label.cpm.newCube");
 			elem.rc = new RenderedCube(elem) {
 				@Override
 				public boolean doDisplay() {
@@ -64,9 +63,9 @@ public enum ElementType {
 	ROOT_PART(new ElementBuilder(){
 
 		@Override
-		public void buildElement(IGui gui, Editor editor, ModelElement elem, Object typeData) {
+		public void buildElement(Editor editor, ModelElement elem, Object typeData) {
 			VanillaModelPart type = (VanillaModelPart) typeData;
-			elem.name = gui.i18nFormat("label.cpm.elem." + type.getName());
+			elem.name = editor.ui.i18nFormat("label.cpm.elem." + type.getName());
 			elem.pos = new Vec3f();
 			elem.rotation = new Vec3f();
 			elem.rc = new RootModelElement(type, editor.definition) {
@@ -114,8 +113,8 @@ public enum ElementType {
 		this.elementBuilder = elementBuilder;
 	}
 
-	public void buildElement(IGui gui, Editor e, ModelElement elem, Object typeData) {
-		elementBuilder.buildElement(gui, e, elem, typeData);
+	public void buildElement(Editor e, ModelElement elem, Object typeData) {
+		elementBuilder.buildElement(e, elem, typeData);
 	}
 
 	public void preRenderUpdate(ModelElement elem) {
@@ -123,7 +122,7 @@ public enum ElementType {
 	}
 
 	private static interface ElementBuilder {
-		void buildElement(IGui gui, Editor e, ModelElement elem, Object typeData);
+		void buildElement(Editor e, ModelElement elem, Object typeData);
 		void preRenderUpdate(ModelElement elem);
 	}
 }

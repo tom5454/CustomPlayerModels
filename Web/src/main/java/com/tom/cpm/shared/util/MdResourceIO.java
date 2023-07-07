@@ -21,10 +21,10 @@ public class MdResourceIO {
 
 	public static CompletableFuture<byte[]> fetch0(String url) {
 		String file = url.substring(url.lastIndexOf('/') + 1);
-		if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/wiki/")) {
-			return fetch("p:" + file);
-		} else if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/raw/master/screenshots/")) {
+		if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/wiki/images/")) {
 			return fetch("i:" + file);
+		} else if(url.startsWith("https://github.com/tom5454/CustomPlayerModels/wiki/")) {
+			return fetch("p:" + file);
 		} else if(url.startsWith("changelog")) {
 			return fetch("c:c.md");
 		}

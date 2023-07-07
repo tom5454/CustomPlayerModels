@@ -253,9 +253,9 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		private void bindTexture0(S cbi, TextureSheetType tex) {
 			if(def == null)return;
-			TextureProvider skin = def.getTexture(tex, isInGui());
+			TextureProvider skin = def.getTexture(tex, isDirectMode());
 			if(skin != null && skin.texture != null) {
-				bindTexture(cbi, skin);
+				bindTexture(cbi, skin, tex);
 				sheetX = skin.getSize().x;
 				sheetY = skin.getSize().y;
 			} else {
@@ -265,6 +265,10 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				bindDefaultTexture(cbi, tex);
 			}
 			setupRenderSystem(cbi, tex);
+		}
+
+		protected void bindTexture(S cbi, TextureProvider skin, TextureSheetType tex) {
+			bindTexture(cbi, skin);
 		}
 
 		protected void setupRenderSystem(S cbi, TextureSheetType tex) {}
@@ -284,7 +288,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 				RedirectRenderer<P> re = redirectRenderers.get(i);
 				VanillaModelPart part = re.getPart();
 				if(part == null)continue;
-				if(part.needsPoseSetup() && !isInGui() && !isPoseSetup)continue;
+				if(part.needsPoseSetup() && !isDirectMode() && !isPoseSetup)continue;
 				PartRoot elems = def.getModelElementFor(part);
 				if(elems == null)continue;
 				P tp = (P) re;
@@ -339,7 +343,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			}
 		}
 
-		protected boolean isInGui() {return false;}
+		protected boolean isDirectMode() {return false;}
 
 		protected void setupTransform(MatrixStack stack, RedirectRenderer<P> forPart, boolean pre) {
 			if(pre && def != null && def.getScale() != null && mode == AnimationMode.PLAYER) {
@@ -354,7 +358,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			}
 		}
 
-		protected void transform(MatrixStack stack, PartPosition pos) {
+		public void transform(MatrixStack stack, PartPosition pos) {
 			if(pos != null) {
 				Vec3f p = pos.getRPos();
 				Vec3f r = pos.getRRotation();
@@ -508,7 +512,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 			}
 		}
 
-		public static void translateRotate(RenderedCube rc, MatrixStack matrixStackIn) {
+		public default void translateRotate(RenderedCube rc, MatrixStack matrixStackIn) {
 			translateRotate(rc.pos.x, rc.pos.y, rc.pos.z, rc.rotation.x, rc.rotation.y, rc.rotation.z, matrixStackIn);
 			if(rc.renderScale.x != 1 || rc.renderScale.y != 1 || rc.renderScale.z != 1 ||
 					rc.renderScale.x > 0 || rc.renderScale.y > 0 || rc.renderScale.z > 0) {

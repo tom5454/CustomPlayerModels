@@ -124,7 +124,7 @@ public class EditorGui extends Frame {
 		rescaleGui = true;
 		if(toReopen != null) {
 			this.editor = toReopen;
-			this.editor.setGui(this);
+			this.editor.setUI(gui);
 			if(MinecraftClientAccess.get().getServerSideStatus() != ServerStatus.INSTALLED) {
 				toReopen = null;
 				ModConfig.getCommonConfig().clearValue(ConfigKeys.REOPEN_PROJECT);
@@ -132,7 +132,7 @@ public class EditorGui extends Frame {
 			}
 		} else {
 			this.editor = new Editor();
-			this.editor.setGui(this);
+			this.editor.setUI(gui);
 			this.editor.loadDefaultPlayerModel();
 		}
 		TestIngameManager.checkConfig();
@@ -579,7 +579,7 @@ public class EditorGui extends Frame {
 		editor.setReColor.add(boxReColor::updateState);
 		boxReColor.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.recolor")));
 
-		ColorButton colorBtn = new ColorButton(gui, editor.frame, editor::setColor);
+		ColorButton colorBtn = new ColorButton(gui, this, editor::setColor);
 		editor.setPartColor.add(c -> {
 			colorBtn.setEnabled(c != null);
 			if(c != null)colorBtn.setColor(c);

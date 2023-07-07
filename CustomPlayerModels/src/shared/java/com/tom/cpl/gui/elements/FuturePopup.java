@@ -12,6 +12,7 @@ public class FuturePopup<R> extends PopupPanel {
 	protected String title;
 	protected CompletableFuture<R> cf;
 	protected final Frame frame;
+	protected AtomicBoolean finished = new AtomicBoolean();
 	protected AtomicBoolean cancelled = new AtomicBoolean();
 	protected Button cancel;
 
@@ -20,17 +21,24 @@ public class FuturePopup<R> extends PopupPanel {
 		this.frame = frame;
 		this.title = title;
 		this.cf = cf;
-		cancel = new Button(gui, gui.i18nFormat("button.cpm.cancel"), () -> {
-			cancelled.set(true);
-			cf.completeExceptionally(new InterruptedException());
-		});
+		cancel = new Button(gui, gui.i18nFormat("button.cpm.cancel"), this::cancel);
 		addElement(cancel);
 
+		setOnClosed(() -> {
+			if(!finished.get())cancel();
+		});
+
 		cf.handleAsync((a, b) -> {
+			finished.set(true);
 			close();
 			return null;
 		}, gui::executeLater);
 		setupLabels(text);
+	}
+
+	private void cancel() {
+		cancelled.set(true);
+		cf.completeExceptionally(new InterruptedException());
 	}
 
 	protected List<GuiElement> setupLabels(String text) {

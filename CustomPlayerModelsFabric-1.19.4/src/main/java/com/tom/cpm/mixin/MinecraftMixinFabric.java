@@ -21,7 +21,6 @@ public abstract class MinecraftMixinFabric {
 	@Shadow private boolean pause;
 	@Shadow private float pausePartialTick;
 	@Shadow private Timer timer;
-	@Shadow public Screen screen;
 	@Shadow public abstract void setScreen(Screen screen);
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V"), method = "runTick(Z)V")
@@ -31,10 +30,6 @@ public abstract class MinecraftMixinFabric {
 
 	@Inject(at = @At("HEAD"), method = "setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", cancellable = true)
 	public void onSetScreen(Screen screen, CallbackInfo cbi) {
-		if(screen == null && this.screen instanceof GuiImpl.Overlay) {
-			cbi.cancel();
-			setScreen(((GuiImpl.Overlay)this.screen).getGui());
-		}
 		if(screen instanceof TitleScreen && EditorGui.doOpenEditor()) {
 			cbi.cancel();
 			setScreen(new GuiImpl(EditorGui::new, screen));

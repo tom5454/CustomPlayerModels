@@ -9,13 +9,16 @@ import com.tom.cpm.blockbench.convert.ProjectConvert;
 import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Condition;
 import com.tom.cpm.blockbench.proxy.Action.ConditionMethod;
+import com.tom.cpm.blockbench.proxy.Animation.AnimatorChannel;
 import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Blockbench.WriteProperties;
+import com.tom.cpm.blockbench.proxy.BoneAnimator;
 import com.tom.cpm.blockbench.proxy.Codec;
 import com.tom.cpm.blockbench.proxy.Codecs;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Global;
 import com.tom.cpm.blockbench.proxy.Group;
+import com.tom.cpm.blockbench.proxy.KeyframeDataPoint;
 import com.tom.cpm.blockbench.proxy.ModelFormat;
 import com.tom.cpm.blockbench.proxy.ModelFormat.FormatPage;
 import com.tom.cpm.blockbench.proxy.Outliner;
@@ -26,14 +29,15 @@ import com.tom.cpm.blockbench.proxy.VueComponent;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.util.I18n;
-import com.tom.ugwt.client.GlobalFunc;
-import com.tom.ugwt.client.JsRunnable;
 
+import elemental2.core.JsObject;
 import javaemul.internal.annotations.DoNotAutobox;
 import jsinterop.base.Js;
 
 public class CPMCodec {
 	public static final String FORMAT_ID = "cpm";
+	public static final String VISIBILITY = "cpm_visibility";
+	public static final String COLOR = "cpm_color";
 
 	public static Codec codec;
 	public static ModelFormat format;
@@ -79,15 +83,13 @@ public class CPMCodec {
 		}
 		ctr.codec = codec;
 		ctr.category = "minecraft";
-		GlobalFunc openEmbed = GlobalFunc.pushGlobalFunc(JsRunnable.class, EmbeddedEditor::open);
-		GlobalFunc importCPM = GlobalFunc.pushGlobalFunc(JsRunnable.class, ProjectConvert::open);
-		GlobalFunc newProject = GlobalFunc.pushGlobalFunc(JsRunnable.class, ProjectGenerator::newProject);
-		PluginStart.cleanup.add(openEmbed);
-		PluginStart.cleanup.add(importCPM);
-		PluginStart.cleanup.add(newProject);
 		ctr.format_page = new FormatPage();
 		ctr.format_page.component = new VueComponent();
-		ctr.format_page.component.template = "<div>"
+		ctr.format_page.component.methods = Js.uncheckedCast(new JsObject());
+		ctr.format_page.component.methods.set("create", ProjectGenerator::newProject);
+		ctr.format_page.component.methods.set("openembed", EmbeddedEditor::open);
+		ctr.format_page.component.methods.set("open", ProjectConvert::open);
+		ctr.format_page.component.template = "<div style=\"display:flex;flex-direction:column;height:100%\">"
 				+ "<p class=\"format_description\">" + I18n.get("bb-label.cpmCodecDesc") + "</p>"
 				+ "<p class=\"format_target\"><b>Target</b>:<span>Minecraft: Java Edition with Customizable Player Models mod</span></p>"
 				+ "<h3 class=\"markdown\">" + Global.translate("mode.start.format.informations") + "</h3>"
@@ -98,10 +100,10 @@ public class CPMCodec {
 				+ "<p class=\"markdown\"><ul><li><a href=\"https://discord.gg/mKyXdEsMZD\">Discord</a></li></ul></p>"
 				+ "<p class=\"markdown\"><ul><li><a href=\"https://www.curseforge.com/minecraft/mc-mods/custom-player-models\">CPM on CurseForge</a></li></ul></p>"
 				+ "<p class=\"markdown\"><ul><li><a href=\"https://modrinth.com/mod/custom-player-models\">CPM on Modrinth</a><br></li></ul></p>"
-				+ "<p><button onclick='" + importCPM + "()'><i class=\"material-icons\">folder_open</i> " + I18n.get("bb-button.openCPMProject") + " </button></p>"
-				+ "<p><button onclick='" + openEmbed + "()'><i class=\"material-icons\">launch</i> " + I18n.get("bb-button.openEmbeddedEditor") + " </button></p>"
+				+ "<p><button @click=\"open\"><i class=\"material-icons\">folder_open</i> " + I18n.get("bb-button.openCPMProject") + " </button></p>"
+				+ "<p><button @click=\"openembed\"><i class=\"material-icons\">launch</i> " + I18n.get("bb-button.openEmbeddedEditor") + " </button></p>"
 				+ "<p class=\"markdown\"><p>Version: " + WebMC.platform + "</p>"
-				+ "<div class=\"button_bar\"><button id=\"create_new_model_button\" style=\"margin-top: 20px;\" onclick='" + newProject + "()'><i class=\"material-icons\">arrow_forward</i> Create New Model</button></div>"
+				+ "<div class=\"button_bar\"><button id=\"create_new_model_button\" style=\"margin-top: 20px;\" @click=\"create\"><i class=\"material-icons\">arrow_forward</i> Create New Model</button></div>"
 				+ "</div>";
 
 		format = new ModelFormat(ctr);
@@ -134,6 +136,34 @@ public class CPMCodec {
 		createProperty(Clazz.CUBE, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);
 		createProperty(Clazz.PROJECT, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);
 
+		AnimatorChannel visCh = new AnimatorChannel();
+		visCh.name = I18n.get("label.cpm.visible");
+		visCh.mutable = true;
+		visCh.transform = false;
+		visCh.max_data_points = 1;
+		BoneAnimator.prototype.channels.set(VISIBILITY, visCh);
+		PluginStart.cleanup.add(() -> BoneAnimator.prototype.channels.delete(VISIBILITY));
+		addTranslatedEntry("timeline." + VISIBILITY, "CPM " + I18n.get("label.cpm.visible"));
+
+		AnimatorChannel colorCh = new AnimatorChannel();
+		colorCh.name = I18n.get("label.cpm.recolor");
+		colorCh.mutable = true;
+		colorCh.transform = true;
+		colorCh.max_data_points = 1;
+		BoneAnimator.prototype.channels.set(COLOR, colorCh);
+		PluginStart.cleanup.add(() -> BoneAnimator.prototype.channels.delete(COLOR));
+		addTranslatedEntry("timeline." + COLOR, "CPM " + I18n.get("label.cpm.recolor"));
+
+		createProperty(Clazz.KEYFRAME_DATA, Type.BOOLEAN, "cpm_visible", I18n.get("label.cpm.visible"), true, false).condition.method = a -> {
+			KeyframeDataPoint point = Js.uncheckedCast(a);
+			return point.keyframe.channel == VISIBILITY;
+		};
+
+		createProperty(Clazz.KEYFRAME_DATA, Type.BOOLEAN, "cpm_color_picker_place", "Color Picker", false, false).condition.method = a -> {
+			KeyframeDataPoint point = Js.uncheckedCast(a);
+			return point.keyframe.channel == COLOR;
+		};
+
 		PluginStart.addEventListener("update_selection", dt -> {
 			if(Global.getFormat() == CPMCodec.format) {
 				if(Outliner.selected.length == 1 && Outliner.selected[0] instanceof Cube) {
@@ -157,9 +187,15 @@ public class CPMCodec {
 		});*/
 	}
 
-	public static void createProperty(Clazz clz, Type type, String id, String label, @DoNotAutobox Object def, boolean hidden) {
+	public static Property createProperty(Clazz clz, Type type, String id, String label, @DoNotAutobox Object def, boolean hidden) {
 		Property p = Property.createProperty(clz, type, id, label, def, formatCPM(), hidden);
 		PluginStart.cleanup.add(p::delete);
+		return p;
+	}
+
+	public static void addTranslatedEntry(String key, String value) {
+		Global.getLang().set(key, value);
+		PluginStart.cleanup.add(() -> Global.getLang().delete(key));
 	}
 
 	public static Condition formatCPM() {

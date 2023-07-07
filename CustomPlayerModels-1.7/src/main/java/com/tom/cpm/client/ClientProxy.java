@@ -54,6 +54,7 @@ import com.tom.cpm.shared.model.RenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
@@ -111,6 +112,15 @@ public class ClientProxy extends CommonProxy {
 		manager.bindArmor(model, event.renderer.modelArmor, 2);
 		manager.bindSkin(event.renderer.modelArmorChestplate, TextureSheetType.ARMOR1);
 		manager.bindSkin(event.renderer.modelArmor, TextureSheetType.ARMOR2);
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+	public void playerRenderPreC(RenderPlayerEvent.Pre event) {
+		if(event.isCanceled()) {
+			manager.unbind(event.renderer.modelArmor);
+			manager.unbind(event.renderer.modelArmorChestplate);
+			manager.unbindClear(event.renderer.modelBipedMain);
+		}
 	}
 
 	@SubscribeEvent

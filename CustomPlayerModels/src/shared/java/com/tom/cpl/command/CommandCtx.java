@@ -13,6 +13,7 @@ public class CommandCtx<S> {
 	private Map<String, Object> arguments = new HashMap<>();
 	private Set<String> flagsSet = new HashSet<>();
 	private int result;
+	private IText fail;
 
 	public CommandCtx(S sender, CommandHandler<S> handler) {
 		this.sender = sender;
@@ -32,7 +33,7 @@ public class CommandCtx<S> {
 	}
 
 	public void fail(IText message) {
-		handler.sendFail(sender, message);
+		this.fail = message;
 	}
 
 	public int getResult() {
@@ -50,5 +51,9 @@ public class CommandCtx<S> {
 	@SuppressWarnings("unchecked")
 	public <T> T getArgument(String id) {
 		return (T) arguments.get(id);
+	}
+
+	public IText getFail() {
+		return fail;
 	}
 }

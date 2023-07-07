@@ -52,4 +52,9 @@ public class CommonApi implements ICommonAPI {
 
 	public void handlePacket(String id, NBTTagCompound tag, Object player) {
 	}
+
+	@Override
+	public <P> int getAnimationPlaying(Class<P> playerClass, P player, String name) {
+		return -1;
+	}
 }

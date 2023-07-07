@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import com.tom.cpm.web.client.FS;
+import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.util.ImageIO;
 import com.tom.cpm.web.client.util.JSZip;
 import com.tom.cpm.web.client.util.JSZip.ZipEntry;
@@ -146,8 +147,7 @@ public class ProjectFile implements IProject {
 			reader.onloadend = e -> {
 				String base64data = reader.result.asString();
 				String dt = base64data.substring(base64data.indexOf(',') + 1);
-				if(!FS.setContent(file.getAbsolutePath(), dt))cf.completeExceptionally(new IOException("Failed to write file"));
-				else cf.complete(null);
+				Java.promiseToCf(FS.setContent(file.getAbsolutePath(), dt), cf);
 				return null;
 			};
 			return null;

@@ -26,8 +26,8 @@ public abstract interface TreeElement {
 		}
 
 		@Override
-		protected int textColor(TreeElement val) {
-			return val.textColor();
+		protected int textColor(TreeElement val, IGui gui) {
+			return val.textColor(gui);
 		}
 
 		@Override
@@ -43,11 +43,11 @@ public abstract interface TreeElement {
 		}
 
 		@Override
-		protected int bgColor(TreeElement val) {
-			int bg = val.bgColor();
+		protected int bgColor(TreeElement val, IGui gui) {
+			int bg = val.bgColor(gui);
 			if(bg != 0)return bg;
-			if(moveElem != null && moveElem == val)return e.gui().getColors().move_background;
-			if(isSelected(val))return e.colors().select_background;
+			if(moveElem != null && moveElem == val)return gui.getColors().move_background;
+			if(isSelected(val))return gui.getColors().select_background;
 			return 0;
 		}
 
@@ -57,25 +57,25 @@ public abstract interface TreeElement {
 		}
 
 		@Override
-		protected void onClick(MouseEvent evt, TreeElement elem) {
+		protected void onClick(IGui gui, MouseEvent evt, TreeElement elem) {
 			if(evt.btn == 1 && elem != null) {
-				displayPopup(evt, elem);
+				displayPopup(gui, evt, elem);
 			} else {
 				if(elem != null)
-					elem.onClick(e, evt);
+					elem.onClick(gui, e, evt);
 				else
 					e.selectedElement = null;
 			}
 		}
 
-		public void displayPopup(MouseEvent evt, TreeElement elem) {
-			PopupMenu popup = new PopupMenu(e.gui(), e.frame);
+		public void displayPopup(IGui gui, MouseEvent evt, TreeElement elem) {
+			PopupMenu popup = new PopupMenu(gui, gui.getFrame());
 			if(elem.canMove() || (moveElem != null && elem.canAccept(moveElem))) {
 				String btnTxt;
 				if(moveElem != null) {
-					if(moveElem == elem)btnTxt = e.gui().i18nFormat("button.cpm.tree.cancelMove");
-					else btnTxt = e.gui().i18nFormat("button.cpm.tree.put");
-				} else btnTxt = e.gui().i18nFormat("button.cpm.tree.move");
+					if(moveElem == elem)btnTxt = gui.i18nFormat("button.cpm.tree.cancelMove");
+					else btnTxt = gui.i18nFormat("button.cpm.tree.put");
+				} else btnTxt = gui.i18nFormat("button.cpm.tree.move");
 				popup.addButton(btnTxt, () -> {
 					if(moveElem != null) {
 						if(moveElem != elem)
@@ -97,8 +97,8 @@ public abstract interface TreeElement {
 		}
 
 		@Override
-		protected Tooltip getTooltip(TreeElement elem) {
-			if(elem != null)return elem.getTooltip();
+		protected Tooltip getTooltip(TreeElement elem, IGui gui) {
+			if(elem != null)return elem.getTooltip(gui);
 			return null;
 		}
 
@@ -113,7 +113,7 @@ public abstract interface TreeElement {
 		}
 	}
 
-	public default void onClick(Editor e, MouseEvent evt) {
+	public default void onClick(IGui gui, Editor e, MouseEvent evt) {
 		e.selectedElement = this;
 	}
 
@@ -122,14 +122,14 @@ public abstract interface TreeElement {
 	}
 
 	public String getName();
-	public default int textColor() { return 0; }
-	public default int bgColor() { return 0; }
+	public default int textColor(IGui gui) { return 0; }
+	public default int bgColor(IGui gui) { return 0; }
 	public default void accept(TreeElement elem) { throw new UnsupportedOperationException(); }
 	public default boolean canAccept(TreeElement elem) { return false; }
 	public default boolean canMove() { return false; }
 	public default void getTreeElements(Consumer<TreeElement> c) {}
 	public default void populatePopup(PopupMenu popup) {}
-	public default Tooltip getTooltip() { return null; }
+	public default Tooltip getTooltip(IGui gui) { return null; }
 
 	public static enum VecType {
 		SIZE,

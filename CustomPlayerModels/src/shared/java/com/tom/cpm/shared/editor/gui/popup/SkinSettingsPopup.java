@@ -41,7 +41,7 @@ public class SkinSettingsPopup extends PopupPanel {
 		tex = editor.getTextureProvider();
 
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.openSkin"), () -> {
-			FileChooserPopup fc = new FileChooserPopup(editor.frame);
+			FileChooserPopup fc = new FileChooserPopup(e);
 			fc.setTitle(gui.i18nFormat("label.cpm.loadSkin"));
 			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
 			fc.setFilter(new FileFilter("png"));
@@ -55,7 +55,7 @@ public class SkinSettingsPopup extends PopupPanel {
 
 		Button saveSkin = new Button(gui, gui.i18nFormat("button.cpm.saveSkin"), () -> {
 			if(gui.isShiftDown() || tex.file == null) {
-				FileChooserPopup fc = new FileChooserPopup(editor.frame);
+				FileChooserPopup fc = new FileChooserPopup(e);
 				fc.setTitle(gui.i18nFormat("label.cpm.saveSkin"));
 				fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
 				fc.setFilter(new FileFilter("png"));

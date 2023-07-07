@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
@@ -16,16 +17,17 @@ import com.google.common.collect.Sets;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.GuiElement;
+import com.tom.cpl.gui.elements.MessagePopup;
+import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
-import com.tom.cpl.text.I18n;
 import com.tom.cpl.text.IText;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.util.ErrorLog;
 import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.Log;
 
-public interface IGui extends I18n {
+public interface IGui extends UI {
 	public static final Set<String> ALLOWED_PROTOCOLS = Sets.newHashSet("http", "https");
 
 	void drawBox(int x, int y, int w, int h, int color);
@@ -61,6 +63,7 @@ public interface IGui extends I18n {
 		drawBox((int) x, (int) y, (int) w, (int) h, color);
 	}
 
+	@Override
 	default void executeLater(Runnable r) {
 		MinecraftClientAccess.get().executeLater(() -> {
 			try {
@@ -146,6 +149,7 @@ public interface IGui extends I18n {
 		drawBox(x+w-1, y, 1, h, color);
 	}
 
+	@Override
 	default void onGuiException(String msg, Throwable e, boolean fatal) {
 		Log.error(msg, e);
 		ErrorLog.addLog(LogLevel.ERROR, msg, e);
@@ -251,5 +255,21 @@ public interface IGui extends I18n {
 
 	default <T> T getNativeGui() {
 		return (T) this;
+	}
+
+	@Override
+	default void displayMessagePopup(String title, String text, String closeBtn) {
+		getFrame().openPopup(new MessagePopup(getFrame(), title, text, closeBtn));
+	}
+
+	@Override
+	default void displayPopup(Function<Frame, PopupPanel> factory) {
+		getFrame().openPopup(factory.apply(getFrame()));
+	}
+
+	@Override
+	default void displayConfirm(String title, String msg, Runnable ok, Runnable cancel, String okTxt,
+			String cancelTxt) {
+		getFrame().openPopup(new ConfirmPopup(getFrame(), title, msg, ok, cancel, okTxt, cancelTxt));
 	}
 }

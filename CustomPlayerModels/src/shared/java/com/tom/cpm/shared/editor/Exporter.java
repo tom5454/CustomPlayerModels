@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import com.tom.cpl.gui.UI;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.util.Image;
@@ -33,7 +34,6 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
-import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
 import com.tom.cpm.shared.editor.gui.popup.ExportStringResultPopup;
 import com.tom.cpm.shared.editor.gui.popup.OverflowPopup;
@@ -92,39 +92,39 @@ import com.tom.cpm.shared.util.Log;
 public class Exporter {
 	public static final Gson sgson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
-	public static void exportSkin(Editor e, EditorGui gui, File f, boolean forceOut) {
+	public static void exportSkin(Editor e, UI gui, File f, boolean forceOut) {
 		exportSkin(e, gui, img -> {
 			img.storeTo(f);
-			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
+			gui.displayMessagePopup(gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.export_success.desc", f.getName()));
 		}, forceOut);
 	}
 
-	public static void exportSkin(Editor e, EditorGui gui, ThrowingConsumer<Image, IOException> out, boolean forceOut) {
+	public static void exportSkin(Editor e, UI gui, ThrowingConsumer<Image, IOException> out, boolean forceOut) {
 		if(e.vanillaSkin == null) {
-			gui.openPopup(new MessagePopup(gui, "Unknown Error", "Couldn't load vanilla skin"));
+			gui.displayMessagePopup("Unknown Error", "Couldn't load vanilla skin");
 			return;
 		}
 		if(e.vanillaSkin.getWidth() != 64 || e.vanillaSkin.getHeight() != 64) {
-			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("error.cpm.vanillaSkinSize")));
+			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.vanillaSkinSize"));
 			return;
 		}
 		Image img = new Image(e.vanillaSkin);
 		exportSkin0(e, gui,
 				new Result(() -> new SkinDataOutputStream(img, MinecraftClientAccess.get().getDefinitionLoader().getTemplate(), e.skinType.getChannel()),
-						() -> out.accept(img), (d, c) -> handleOverflow(d, c, "skin", gui)), forceOut);
+						() -> out.accept(img), (d, c) -> handleOverflow(d, c, "skin", gui, e)), forceOut);
 	}
 
-	public static void exportB64(Editor e, EditorGui gui, Consumer<String> b64Out, boolean forceOut) {
+	public static void exportB64(Editor e, UI gui, Consumer<String> b64Out, boolean forceOut) {
 		byte[] buffer = new byte[200];
 		int[] size = new int[] {0};
 		exportSkin0(e, gui, new Result(() -> {
 			size[0] = 0;
 			return new BAOS(buffer, size);
 		}, () -> b64Out.accept(Base64.getEncoder().encodeToString(Arrays.copyOf(buffer, size[0]))),
-				(d, c) -> handleOverflow(d, c, "b64", gui)), forceOut);
+				(d, c) -> handleOverflow(d, c, "b64", gui, e)), forceOut);
 	}
 
-	public static void exportUpdate(Editor e, EditorGui gui, Link linkToUpdate) {
+	public static void exportUpdate(Editor e, UI gui, Link linkToUpdate) {
 		try {
 			ModelPartDefinition def = prepareDefinition(e);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -139,33 +139,35 @@ public class Exporter {
 			if(linkToUpdate.getLoader().equals("p")) {
 				PastePopup.runRequest(gui, c -> c.updateFile(linkToUpdate.getPath(), b64.getBytes(StandardCharsets.UTF_8)),
 						() -> {
-							PopupPanel popup = new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.paste.updatedModel"));
-							popup.setOnClosed(MinecraftClientAccess.get().getDefinitionLoader()::clearCache);
-							gui.openPopup(popup);
+							gui.displayPopup(frame -> {
+								PopupPanel popup = new MessagePopup(frame, gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.paste.updatedModel"));
+								popup.setOnClosed(MinecraftClientAccess.get().getDefinitionLoader()::clearCache);
+								return popup;
+							});
 						}, () -> {}, "uploading");
 			} else {
-				gui.openPopup(new ExportStringResultPopup(gui, gui.getGui(), "skin_update", b64));
+				gui.displayPopup(frame -> new ExportStringResultPopup(frame, "skin_update", b64));
 			}
 		} catch (ExportException ex) {
-			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", gui.i18nFormat(ex.getMessage())));
 		} catch (Exception ex) {
-			gui.getGui().onGuiException("Error while exporting", ex, false);
+			gui.onGuiException("Error while exporting", ex, false);
 		}
 	}
 
-	public static void exportModel(Editor e, EditorGui gui, File f, ModelDescription desc, boolean skinCompat) {
+	public static void exportModel(Editor e, UI gui, File f, ModelDescription desc, boolean skinCompat) {
 		ModelWriter wr = new ModelWriter(gui, f, skinCompat);
 		wr.setDesc(desc.name, desc.desc, desc.icon);
 		exportSkin0(e, gui, new Result(wr::getOut, () -> {
 			if(wr.finish())
-				gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.export_success"), gui.getGui().i18nFormat("label.cpm.export_success.desc", f.getName())));
+				gui.displayMessagePopup(gui.i18nFormat("label.cpm.export_success"), gui.i18nFormat("label.cpm.export_success.desc", f.getName()));
 		}, (d, c) -> handleOverflow(d, l -> {
 			wr.setOverflow(d, l);
 			c.accept(l);
-		}, "model", gui)), false);
+		}, "model", gui, e)), false);
 	}
 
-	public static boolean exportTempModel(Editor e, EditorGui gui) {
+	public static boolean exportTempModel(Editor e, UI gui) {
 		File models = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 		models.mkdirs();
 		ModelWriter wr = new ModelWriter(gui, new File(models, TestIngameManager.TEST_MODEL_NAME), false);
@@ -289,7 +291,7 @@ public class Exporter {
 		return def;
 	}
 
-	private static boolean exportSkin0(Editor e, EditorGui gui, Result result, boolean forceOut) {
+	private static boolean exportSkin0(Editor e, UI gui, Result result, boolean forceOut) {
 		try {
 			ModelPartDefinition def = prepareDefinition(e);
 			if(forceOut) {
@@ -314,16 +316,16 @@ public class Exporter {
 			return true;
 		} catch (ExportException ex) {
 			Log.error("Export exception", ex);
-			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", gui.i18nFormat(ex.getMessage())));
 			return false;
 		} catch (Exception ex) {
-			gui.getGui().onGuiException("Error while exporting", ex, false);
-			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("tooltip.cpm.errorTooltip", gui.getGui().i18nFormat("error.cpm.unknownError"))));
+			gui.onGuiException("Error while exporting", ex, false);
+			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("tooltip.cpm.errorTooltip", gui.i18nFormat("error.cpm.unknownError")));
 			return false;
 		}
 	}
 
-	private static void writeOut(Editor e, EditorGui gui, ModelPartDefinition def, Result result) throws Exception {
+	private static void writeOut(Editor e, UI gui, ModelPartDefinition def, Result result) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		{
 			baos.write(ModelDefinitionLoader.HEADER);
@@ -345,14 +347,14 @@ public class Exporter {
 				}
 				result.close();
 			} catch (ExportException ex) {
-				gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", ex.getMessage())));
+				gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", ex.getMessage()));
 			} catch (Exception ex) {
-				gui.getGui().onGuiException("Error while exporting", ex, false);
+				gui.onGuiException("Error while exporting", ex, false);
 			}
 		});
 	}
 
-	public static void exportTemplate(Editor e, EditorGui gui, ModelDescription desc, Consumer<String> templateOut) {
+	public static void exportTemplate(Editor e, UI gui, ModelDescription desc, Consumer<String> templateOut) {
 		try {
 			List<Cube> flatList = new ArrayList<>();
 			walkElements(e.elements, new int[] {Template.TEMPLATE_ID_OFFSET}, flatList);
@@ -408,9 +410,9 @@ public class Exporter {
 			String result = sgson.toJson(data);
 			templateOut.accept(result);
 		} catch (ExportException ex) {
-			gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", gui.i18nFormat(ex.getMessage())));
 		} catch (Exception ex) {
-			gui.getGui().onGuiException("Error while exporting", ex, false);
+			gui.onGuiException("Error while exporting", ex, false);
 		}
 	}
 
@@ -447,18 +449,18 @@ public class Exporter {
 		}
 	}
 
-	public static boolean check(Editor editor, EditorGui editorGui, Runnable next) {
+	public static boolean check(Editor editor, UI gui, Runnable next) {
 		if(!editor.animations.isEmpty() && editor.animEnc == null && editor.animations.stream().anyMatch(EditorAnim::isCustom)) {
-			editorGui.openPopup(new AnimEncConfigPopup(editorGui.getGui(), editor, next));
+			gui.displayPopup(f -> new AnimEncConfigPopup(f.getGui(), editor, next));
 			return false;
 		}
 		return true;
 	}
 
-	private static void handleOverflow(byte[] data, Consumer<Link> linkC, String reason, EditorGui gui) {
+	private static void handleOverflow(byte[] data, Consumer<Link> linkC, String reason, UI gui, Editor e) {
 		String b64 = Base64.getEncoder().encodeToString(data);
 		Log.info(b64);
-		gui.openPopup(new OverflowPopup(gui, b64, reason, linkC));
+		gui.displayPopup(f -> new OverflowPopup(f, e, b64, reason, linkC));
 	}
 
 	public static class ExportException extends RuntimeException {
@@ -514,7 +516,7 @@ public class Exporter {
 	}
 
 	private static class ModelWriter {
-		private final EditorGui gui;
+		private final UI gui;
 		private byte[] buffer;
 		private int[] size = new int[] {0};
 		private byte[] overflow;
@@ -523,7 +525,7 @@ public class Exporter {
 		private Link l;
 		private Image icon;
 
-		public ModelWriter(EditorGui gui, File out, boolean skinCompat) {
+		public ModelWriter(UI gui, File out, boolean skinCompat) {
 			this.gui = gui;
 			this.out = out;
 			buffer = new byte[skinCompat ? 2*1024 : 30*1024];
@@ -568,9 +570,9 @@ public class Exporter {
 				cos.close();
 				return true;
 			} catch (ExportException ex) {
-				gui.openPopup(new MessagePopup(gui, gui.getGui().i18nFormat("label.cpm.error"), gui.getGui().i18nFormat("label.cpm.export_error", gui.getGui().i18nFormat(ex.getMessage()))));
+				gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", gui.i18nFormat(ex.getMessage())));
 			} catch (Exception ex) {
-				gui.getGui().onGuiException("Error while exporting", ex, false);
+				gui.onGuiException("Error while exporting", ex, false);
 			}
 			return false;
 		}

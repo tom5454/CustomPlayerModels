@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.ChooseElementPopup;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.util.NamedElement;
@@ -32,14 +33,13 @@ public class TemplateArgHandler implements TreeElement {
 		this.editor = e;
 		this.name = name;
 		this.desc = descIn;
-		this.tooltip = desc.isEmpty() ? null : new Tooltip(e.frame, desc);
 		this.type = type;
 		options = new ArrayList<>();
 		options.add(new TreeElement() {
 
 			@Override
 			public String getName() {
-				return editor.gui().i18nFormat("label.cpm.desc");
+				return editor.ui.i18nFormat("label.cpm.desc");
 			}
 
 			@Override
@@ -65,7 +65,7 @@ public class TemplateArgHandler implements TreeElement {
 
 				@Override
 				public String getName() {
-					return editor.gui().i18nFormat("label.cpm.arg_parts");
+					return editor.ui.i18nFormat("label.cpm.arg_parts");
 				}
 
 				@Override
@@ -75,9 +75,9 @@ public class TemplateArgHandler implements TreeElement {
 
 				@Override
 				public void addNew() {
-					editor.frame.openPopup(new ChooseElementPopup<>(editor.frame,
-							editor.gui().i18nFormat("label.cpm.arg_choose_part"),
-							editor.gui().i18nFormat("label.cpm.arg_choose_part.desc"),
+					editor.ui.displayPopup(frm -> new ChooseElementPopup<>(frm,
+							editor.ui.i18nFormat("label.cpm.arg_choose_part"),
+							editor.ui.i18nFormat("label.cpm.arg_choose_part.desc"),
 							Util.<ModelElement>listFromTree(c -> Editor.walkElements(editor.elements, c)).
 							stream().filter(e -> e.type == ElementType.NORMAL && !e.templateElement).
 							map(t -> new NamedElement<>(t, ModelElement::getName)).
@@ -111,7 +111,8 @@ public class TemplateArgHandler implements TreeElement {
 	}
 
 	@Override
-	public Tooltip getTooltip() {
+	public Tooltip getTooltip(IGui gui) {
+		if(tooltip == null && !desc.isEmpty())tooltip = new Tooltip(gui.getFrame(), desc);
 		return tooltip;
 	}
 
@@ -124,7 +125,7 @@ public class TemplateArgHandler implements TreeElement {
 	@Override
 	public void updateGui() {
 		editor.updateName.accept(name);
-		tooltip = desc.isEmpty() ? null : new Tooltip(editor.frame, desc);
+		tooltip = null;
 	}
 
 	@Override

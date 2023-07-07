@@ -11,6 +11,9 @@ public class NBTTagList extends NBTTag {
 	private List<NBTTag> tagList = new ArrayList<>();
 	private byte tagType = 0;
 
+	public NBTTagList() {
+	}
+
 	@Override
 	public void write(IOHelper output) throws IOException {
 		if (!this.tagList.isEmpty()) {

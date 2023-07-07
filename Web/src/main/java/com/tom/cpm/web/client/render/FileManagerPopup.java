@@ -15,6 +15,7 @@ import com.tom.cpm.web.client.java.io.FileNotFoundException;
 import com.tom.cpm.web.client.util.JSZip;
 import com.tom.cpm.web.client.util.JSZip.ZipFileProperties;
 import com.tom.cpm.web.client.util.JSZip.ZipWriteProperties;
+import com.tom.ugwt.client.PromiseArray;
 
 import elemental2.core.JsArray;
 import elemental2.dom.CSSProperties.HeightUnionType;
@@ -184,8 +185,9 @@ public class FileManagerPopup extends PopupPanel {
 			btn.onclick = ev -> {
 				JSZip zip = new JSZip();
 				try {
-					exportZip(zip, path.value);
-					zip.generateAsync(ZipWriteProperties.make()).
+					PromiseArray<Void> exports = new PromiseArray<>();
+					exportZip(zip, path.value, exports);
+					exports.all().then(__ -> zip.generateAsync(ZipWriteProperties.make())).
 					then(blob -> {
 						LocalStorageFS.saveAs(blob, "cpm_fs.zip");
 						return null;
@@ -199,13 +201,16 @@ public class FileManagerPopup extends PopupPanel {
 		};
 	}
 
-	private void exportZip(JSZip zip, String path) throws FileNotFoundException {
+	private void exportZip(JSZip zip, String path, List<Promise<Void>> exports) throws FileNotFoundException {
 		for(String f : fs.list(path)) {
 			String[] sp = f.split("/");
 			if(fs.isDir(f)) {
-				exportZip(zip.folder(sp[sp.length - 1]), f);
+				exportZip(zip.folder(sp[sp.length - 1]), f, exports);
 			} else {
-				zip.file(sp[sp.length - 1], FS.getContent(f), ZipFileProperties.make());
+				exports.add(FS.getContent(f).then(c -> {
+					zip.file(sp[sp.length - 1], c, ZipFileProperties.make());
+					return Promise.resolve((Void) null);
+				}));
 			}
 		}
 	}

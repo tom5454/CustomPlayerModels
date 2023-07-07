@@ -15,6 +15,7 @@ import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.config.BuiltInSafetyProfiles;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
+import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.ScalingOptions;
@@ -80,9 +81,21 @@ public class CommandCPM {
 				then(new LiteralCommandBuilder("animate").
 						then(new RequiredCommandBuilder("target", ArgType.PLAYER).
 								then(new RequiredCommandBuilder("animation", ArgType.STRING, false).
+										setPossibleValues(c -> getAnimationList(c, true)).
 										run(c -> setAnimation(c, -1)).
 										then(new RequiredCommandBuilder("value", ArgType.INT, Pair.of(0, 255)).
 												run(c -> setAnimation(c, c.getArgument("value")))
+												)
+										)
+								)
+						).
+				then(new LiteralCommandBuilder("detect").
+						then(new RequiredCommandBuilder("target", ArgType.PLAYER).
+								then(new RequiredCommandBuilder("animation", ArgType.STRING, false).
+										setPossibleValues(c -> getAnimationList(c, false)).
+										run(c -> getAnimation(c, -1)).
+										then(new RequiredCommandBuilder("value", ArgType.INT, Pair.of(0, 255)).
+												run(c -> getAnimation(c, c.getArgument("value")))
 												)
 										)
 								)
@@ -173,6 +186,14 @@ public class CommandCPM {
 			String name = o.name().toLowerCase(Locale.ROOT);
 			LiteralCommandBuilder s = new LiteralCommandBuilder(name);
 			s.then(new LiteralCommandBuilder("limit").
+					then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+							run(c -> setScalingLimit(c, null, o, o.getMin(), c.getArgument("max")))
+							).
+					then(new RequiredCommandBuilder("min", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+							then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
+									run(c -> setScalingLimit(c, null, o, c.getArgument("min"), c.getArgument("max")))
+									)
+							).
 					then(new RequiredCommandBuilder("target", ArgType.PLAYER).
 							then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
 									run(c -> setScalingLimit(c, c.getArgument("target"), o, o.getMin(), c.getArgument("max")))
@@ -182,37 +203,29 @@ public class CommandCPM {
 											run(c -> setScalingLimit(c, c.getArgument("target"), o, c.getArgument("min"), c.getArgument("max")))
 											)
 									)
-							).
-					then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
-							run(c -> setScalingLimit(c, null, o, o.getMin(), c.getArgument("max")))
-							).
-					then(new RequiredCommandBuilder("min", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
-							then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
-									run(c -> setScalingLimit(c, null, o, c.getArgument("min"), c.getArgument("max")))
-									)
 							)
 					).
 			then(new LiteralCommandBuilder("enabled").
+					then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
+							run(c -> setScalingEn(c, null, o, c.getArgument("enable")))
+							).
 					then(new RequiredCommandBuilder("target", ArgType.PLAYER).
 							then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
 									run(c -> setScalingEn(c, c.getArgument("target"), o, c.getArgument("enable")))
 									)
-							).
-					then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
-							run(c -> setScalingEn(c, null, o, c.getArgument("enable")))
 							)
 					);
 			l.add(s);
 		}
 		LiteralCommandBuilder all = new LiteralCommandBuilder("all");
 		all.then(new LiteralCommandBuilder("enabled").
+				then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
+						run(c -> setScalingEnAll(c, null, c.getArgument("enable")))
+						).
 				then(new RequiredCommandBuilder("target", ArgType.PLAYER).
 						then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
 								run(c -> setScalingEnAll(c, c.getArgument("target"), c.getArgument("enable")))
 								)
-						).
-				then(new RequiredCommandBuilder("enable", ArgType.BOOLEAN).
-						run(c -> setScalingEnAll(c, null, c.getArgument("enable")))
 						)
 				);
 		l.add(all);
@@ -272,5 +285,42 @@ public class CommandCPM {
 		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
 		h.playAnimation(player, animation, value);
 		context.sendSuccess(new FormatText("commands.cpm.animate.success", animation, context.handler.toStringPlayer(player)));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void getAnimation(CommandCtx<?> context, int value) {
+		Object player = context.getArgument("target");
+		String animation = context.getArgument("animation");
+		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
+		int d = h.getAnimationPlaying(player, animation);
+		if (d == -1)context.fail(new FormatText("commands.cpm.detect.notFound"));
+		else if(value != -1) {
+			if(d == value) {
+				context.success(1);
+				context.sendSuccess(new FormatText("commands.cpm.detect.success", context.handler.toStringPlayer(player), animation, d));
+			} else {
+				context.fail(new FormatText("commands.cpm.detect.success", context.handler.toStringPlayer(player), animation, 0));
+			}
+		} else if(d > 0) {
+			context.success(d);
+			context.sendSuccess(new FormatText("commands.cpm.detect.success", context.handler.toStringPlayer(player), animation, d));
+		} else {
+			context.fail(new FormatText("commands.cpm.detect.success", context.handler.toStringPlayer(player), animation, 0));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static List<String> getAnimationList(CommandCtx<?> context, boolean cc) {
+		Object player = context.getArgument("target");
+		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
+		PlayerData pd = h.getSNetH(player).cpm$getEncodedModelData();
+		List<String> l = new ArrayList<>();
+		if(cc)
+			pd.animNames.forEach((k, v) -> {
+				if(v.isCommandControlled())l.add(k);
+			});
+		else
+			l.addAll(pd.animNames.keySet());
+		return l;
 	}
 }

@@ -38,6 +38,7 @@ import net.minecraftforge.client.event.PlayerSPPushOutOfBlocksEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -111,6 +112,11 @@ public class ClientProxy extends CommonProxy {
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
 		manager.bindPlayer(event.getEntityPlayer(), null, event.getRenderer().getMainModel());
 		manager.bindSkin(event.getRenderer().getMainModel(), TextureSheetType.SKIN);
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+	public void playerRenderPreC(RenderPlayerEvent.Pre event) {
+		if(event.isCanceled())manager.unbindClear(event.getRenderer().getMainModel());
 	}
 
 	@SubscribeEvent

@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -20,12 +19,15 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Pair;
 
 public abstract class BrigadierCommandHandler<S> implements CommandHandler<S> {
+	private static final DynamicCommandExceptionType ERROR_FAILED = new DynamicCommandExceptionType(a -> new FormatText("commands.cpm.genericFail", a).remap());
 	private final CommandDispatcher<S> dispatcher;
 
 	public BrigadierCommandHandler(CommandDispatcher<S> dispatcher) {
@@ -39,39 +41,48 @@ public abstract class BrigadierCommandHandler<S> implements CommandHandler<S> {
 	public void register(LiteralCommandBuilder builder) {
 		LiteralArgumentBuilder<S> cmd = literal(builder.getName()).
 				requires(this::hasOPPermission);
-		build(cmd, builder, Collections.emptyList(), Collections.emptySet());
+		build(cmd, builder, Collections.emptyList(), cmd.getLiteral().toLowerCase(Locale.ROOT));
 		dispatcher.register(cmd);
 	}
 
-	private void build(ArgumentBuilder<S, ?> a, AbstractCommandBuilder<?> b, List<RequiredCommandBuilder> args, Set<String> setFlags) {
+	private void build(ArgumentBuilder<S, ?> a, AbstractCommandBuilder<?> b, List<RequiredCommandBuilder> args, String prefix) {
 		for(AbstractCommandBuilder<?> v : b.getNext()) {
 			if(v instanceof LiteralCommandBuilder) {
-				ArgumentBuilder<S, ?> n = literal(((LiteralCommandBuilder)v).getName());
-				build(n, v, args, setFlags);
+				LiteralArgumentBuilder<S> n = literal(((LiteralCommandBuilder)v).getName());
+				build(n, v, args, prefix + "_" + n.getLiteral().toLowerCase(Locale.ROOT));
 				a.then(n);
 			} else if(v instanceof RequiredCommandBuilder) {
 				RequiredCommandBuilder rcb = (RequiredCommandBuilder) v;
 				RequiredArgumentBuilder<S, ?> n = argument(rcb.getId(), getType(rcb.getType(), rcb.getSettings()));
 				List<RequiredCommandBuilder> newArgs = new ArrayList<>(args);
 				newArgs.add(rcb);
-				build(n, v, newArgs, setFlags);
-				a.then(n);
-				Supplier<List<String>> s = rcb.getPossibleValues();
+				String name = prefix + "_" + rcb.getId().toLowerCase(Locale.ROOT);
+				build(n, v, newArgs, name);
+				Function<CommandCtx<?>, List<String>> s = rcb.getPossibleValues();
 				if(s != null) {
-					n.suggests((c, bu) -> suggestMatching(s.get(), bu));
+					n.suggests((c, bu) -> suggestMatching(s.apply(new WrappedCtx(c, args)), bu));
 				}
+				a.then(n);
 			}
 		}
 		if(b.getFunc() != null) {
 			Consumer<CommandCtx<?>> cmd = b.getFunc();
 			a.executes(c -> {
-				CommandCtx<S> ctx = new CommandCtx<>(c.getSource(), this);
-				for (RequiredCommandBuilder arg : args) {
-					ctx.arg(arg.getId(), getValue(c, arg.getType(), arg.getId()));
-				}
+				CommandCtx<S> ctx = new WrappedCtx(c, args);
 				cmd.accept(ctx);
+				if(ctx.getFail() != null)throw ERROR_FAILED.create(ctx.getFail());
 				return ctx.getResult();
 			});
+		}
+	}
+
+	private class WrappedCtx extends CommandCtx<S> {
+
+		public WrappedCtx(CommandContext<S> ctx, List<RequiredCommandBuilder> args) throws CommandSyntaxException {
+			super(ctx.getSource(), BrigadierCommandHandler.this);
+			for (RequiredCommandBuilder arg : args) {
+				arg(arg.getId(), getValue(ctx, arg.getType(), arg.getId()));
+			}
 		}
 	}
 
@@ -99,7 +110,7 @@ public abstract class BrigadierCommandHandler<S> implements CommandHandler<S> {
 			}
 			else return (ArgumentType<T>) IntegerArgumentType.integer();
 		case STRING:
-			if(settings == null || !((Boolean)settings))return (ArgumentType<T>) StringArgumentType.word();
+			if(settings == null || !((Boolean)settings))return (ArgumentType<T>) StringArgumentType.string();
 			else return (ArgumentType<T>) StringArgumentType.greedyString();
 		case FLOAT:
 			if(settings != null) {

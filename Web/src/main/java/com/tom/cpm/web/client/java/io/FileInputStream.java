@@ -11,7 +11,7 @@ public class FileInputStream extends InputStream {
 	private ByteArrayInputStream bais;
 
 	public FileInputStream(File file) throws FileNotFoundException {
-		bais = new ByteArrayInputStream(Base64.getDecoder().decode(FS.getContent(file.getAbsolutePath())));
+		bais = new ByteArrayInputStream(Base64.getDecoder().decode(FS.getContentSync(file.getAbsolutePath())));
 	}
 
 	@Override

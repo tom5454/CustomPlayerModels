@@ -127,7 +127,8 @@ public class PropertiesPopup extends PopupPanel {
 				updateState.add(() -> chbx.setSelected(MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), g) != 0));
 				panel.addElement(chbx);
 			} else if(g.type == AnimationType.VALUE_LAYER) {
-				ComboSlider s = new ComboSlider(gui, null, null, null);
+				String nm = g.getName();
+				ComboSlider s = new ComboSlider(gui, a -> nm, a -> a * 100f, a -> a / 100f);
 				s.setBounds(new Box(5, 0, 150, 20));
 				s.getSpinner().setDp(0);
 				s.setAction(() -> {

@@ -7,8 +7,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.tom.cpl.gui.Frame;
-import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.gui.UI;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.FuturePopup;
@@ -47,13 +47,21 @@ public class PastePopup extends PopupPanel {
 		statusLbl.setBounds(new Box(100, 305, 200, 10));
 		addElement(statusLbl);
 
-		Button btnOpenBrowser = new Button(gui, gui.i18nFormat("button.cpm.paste.openBrowser"), () -> {
-			runRequest(frame, PasteClient::createBrowserLoginURL, id -> {
-				gui.openURL(client.getUrl() + "/login.html?id=" + id);
-			}, () -> {}, "openBrowser");
-		});
-		btnOpenBrowser.setBounds(new Box(275, 5, 120, 20));
-		addElement(btnOpenBrowser);
+		if (PasteClient.CAN_OPEN_BROWSER) {
+			Button btnOpenBrowser = new Button(gui, gui.i18nFormat("button.cpm.paste.openBrowser"), () -> {
+				runRequest(gui, PasteClient::createBrowserLoginURL, id -> {
+					gui.openURL(client.getUrl() + "/login.html?id=" + id);
+				}, () -> {}, "openBrowser");
+			});
+			btnOpenBrowser.setBounds(new Box(275, 5, 120, 20));
+			addElement(btnOpenBrowser);
+		} else {
+			Button btnOpenBrowser = new Button(gui, gui.i18nFormat("button.cpm.paste.logout"), () -> {
+				runRequest(gui, PasteClient::logout, __ -> close(), () -> {}, "logout");
+			});
+			btnOpenBrowser.setBounds(new Box(275, 5, 120, 20));
+			addElement(btnOpenBrowser);
+		}
 	}
 
 	public void open() {
@@ -61,23 +69,22 @@ public class PastePopup extends PopupPanel {
 		refreshGui();
 	}
 
-	private static void handleException(Frame frm, Runnable retry, Runnable close, Throwable e) {
+	private static void handleException(UI gui, Runnable retry, Runnable close, Throwable e) {
 		if(e instanceof InterruptedException)return;
-		IGui gui = frm.getGui();
 		if(e instanceof LocalizedIOException) {
-			frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.error"),
+			gui.displayConfirm(gui.i18nFormat("label.cpm.error"),
 					gui.i18nFormat("label.cpm.paste.error", ((LocalizedIOException) e).getLocalizedText().toString(gui)),
 					retry, () -> {
 						if(!client.isConnected())
 							close.run();
-					}, gui.i18nFormat("button.cpm.retry")));
+					}, gui.i18nFormat("button.cpm.retry"));
 		} else {
-			frm.openPopup(new ConfirmPopup(frm, gui.i18nFormat("label.cpm.error"),
+			gui.displayConfirm(gui.i18nFormat("label.cpm.error"),
 					gui.i18nFormat("error.cpm.paste.unknownNetworkError", e.toString()),
 					retry, () -> {
 						if(!client.isConnected())
 							close.run();
-					}, gui.i18nFormat("button.cpm.retry")));
+					}, gui.i18nFormat("button.cpm.retry"));
 		}
 	}
 
@@ -102,7 +109,7 @@ public class PastePopup extends PopupPanel {
 				}, "listing");
 	}
 
-	public static <T> void runRequest(Frame frm, Function<PasteClient, CompletableFuture<T>> task, Consumer<T> finish, Runnable close, String name) {
+	public static <T> void runRequest(UI frm, Function<PasteClient, CompletableFuture<T>> task, Consumer<T> finish, Runnable close, String name) {
 		if(!client.isConnected()) {
 			runRequest0(frm, PasteClient::connect, v -> runRequest0(frm, task, finish, close, name), close, "connecting.message");
 		} else {
@@ -110,26 +117,25 @@ public class PastePopup extends PopupPanel {
 		}
 	}
 
-	public static void runRequest(Frame frm, Function<PasteClient, CompletableFuture<Void>> task, Runnable finish, Runnable close, String name) {
+	public static void runRequest(UI frm, Function<PasteClient, CompletableFuture<Void>> task, Runnable finish, Runnable close, String name) {
 		runRequest(frm, task, v -> finish.run(), close, name);
 	}
 
-	private static <T> void runRequest0(Frame frm, Function<PasteClient, CompletableFuture<T>> task, Consumer<T> finish, Runnable close, String name) {
-		IGui gui = frm.getGui();
+	private static <T> void runRequest0(UI gui, Function<PasteClient, CompletableFuture<T>> task, Consumer<T> finish, Runnable close, String name) {
 		CompletableFuture<T> cf = task.apply(client);
-		frm.openPopup(new FuturePopup<>(frm, gui.i18nFormat("label.cpm.paste.connecting.title"), gui.i18nFormat("label.cpm.paste." + name), cf));
+		gui.displayPopup(frm -> new FuturePopup<>(frm, gui.i18nFormat("label.cpm.paste.connecting.title"), gui.i18nFormat("label.cpm.paste." + name), cf));
 		cf.thenAcceptAsync(finish, gui::executeLater).exceptionally(e -> {
-			gui.executeLater(() -> handleException(frm, () -> runRequest(frm, task, finish, close, name), close, e));
+			gui.executeLater(() -> handleException(gui, () -> runRequest(gui, task, finish, close, name), close, e));
 			return null;
 		});
 	}
 
 	private <T> void runRequest(Supplier<CompletableFuture<T>> task, Consumer<T> finish, String name) {
-		runRequest(frm, _c -> task.get(), finish, this::close, name);
+		runRequest(gui, _c -> task.get(), finish, this::close, name);
 	}
 
 	private void runRequest(Supplier<CompletableFuture<Void>> task, Runnable finish, String name) {
-		runRequest(frm, _c -> task.get(), finish, this::close, name);
+		runRequest(gui, _c -> task.get(), finish, this::close, name);
 	}
 
 	private class PastePanel extends Panel {

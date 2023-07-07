@@ -184,7 +184,7 @@ public class TextureEditorPanel extends GuiElement {
 						dragY = py;
 						TreeElement me = getElementUnderMouse(event);
 						if(me != null) {
-							me.onClick(editor, event);
+							me.onClick(gui, editor, event);
 							moveStart = new Vec2i();
 							Vec3f uv = me.getVec(VecType.TEXTURE);
 							moveStart.x = (int) uv.x;

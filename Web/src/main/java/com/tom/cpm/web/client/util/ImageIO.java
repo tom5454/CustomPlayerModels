@@ -20,7 +20,6 @@ import com.tom.cpm.shared.editor.project.ProjectFile.BAIS;
 import com.tom.cpm.web.client.FS;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.java.Java.ResourceInputStream;
-import com.tom.cpm.web.client.java.io.FileNotFoundException;
 import com.tom.cpm.web.client.render.RenderSystem;
 
 import ar.com.hjg.pngj.ImageInfo;
@@ -85,14 +84,7 @@ public class ImageIO implements IImageIO {
 			return f;
 		} catch (Exception e) {
 		}
-		String v;
-		try {
-			v = FS.getContent(file.getAbsolutePath());
-		} catch (FileNotFoundException e) {
-			f.completeExceptionally(e);
-			return f;
-		}
-		Java.promiseToCf(loadImage(v, true, false), f);
+		Java.promiseToCf(FS.getContent(file.getAbsolutePath()).then(v -> loadImage(v, true, false)), f);
 		return f;
 	}
 

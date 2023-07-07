@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.anim;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -241,12 +242,12 @@ public class EditorAnim implements IAnimation {
 
 	@Override
 	public String toString() {
-		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), getDisplayName()));
+		if(pose != null)return editor.ui.i18nFormat("label.cpm.anim_pose", pose.getName(editor.ui, getDisplayName()));
 		else if(type.isStaged()) {
 			EditorAnim anim = findLinkedAnim();
-			if(anim == null)return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getDisplayName());
-			return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), anim.toString());
-		} else return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getDisplayName());
+			if(anim == null)return editor.ui.i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getDisplayName());
+			return editor.ui.i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), anim.toString());
+		} else return editor.ui.i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getDisplayName());
 	}
 
 	public AnimFrame getSelectedFrame() {
@@ -319,12 +320,12 @@ public class EditorAnim implements IAnimation {
 	}
 
 	public String getDisplayGroup() {
-		if(pose != null)return editor.gui().i18nFormat("label.cpm.anim_pose", pose.getName(editor.gui(), getId()));
+		if(pose != null)return editor.ui.i18nFormat("label.cpm.anim_pose", pose.getName(editor.ui, getId()));
 		else if(type.isStaged()) {
 			EditorAnim anim = findLinkedAnim();
-			if(anim == null)return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getId());
-			return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), anim.getDisplayGroup());
-		} else return editor.gui().i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getId());
+			if(anim == null)return editor.ui.i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getId());
+			return editor.ui.i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), anim.getDisplayGroup());
+		} else return editor.ui.i18nFormat("label.cpm.anim_" + type.name().toLowerCase(Locale.ROOT), getId());
 	}
 
 	public EditorAnim findLinkedAnim() {
@@ -447,5 +448,20 @@ public class EditorAnim implements IAnimation {
 	@Override
 	public int getDuration() {
 		return duration;
+	}
+
+	public void reverseFrameOrder(ActionBuilder ab) {
+		List<AnimFrame> f = new ArrayList<>(frames);
+		List<AnimFrame> nf = new ArrayList<>(frames);
+		Collections.reverse(nf);
+		ab.onRun(() -> {
+			frames.clear();
+			frames.addAll(nf);
+		});
+		ab.onUndo(() -> {
+			frames.clear();
+			frames.addAll(f);
+		});
+		ab.onRun(editor::updateGui);
 	}
 }

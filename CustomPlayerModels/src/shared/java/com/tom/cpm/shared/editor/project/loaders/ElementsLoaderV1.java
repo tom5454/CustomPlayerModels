@@ -43,7 +43,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 			if (map.getBoolean("customPart", false)) {
 				for (RootModelType rmt : RootModelType.VALUES) {
 					if(rmt.getName().equalsIgnoreCase(key)) {
-						elem = new ModelElement(editor, ElementType.ROOT_PART, rmt, editor.gui());
+						elem = new ModelElement(editor, ElementType.ROOT_PART, rmt);
 						break;
 					}
 				}
@@ -52,7 +52,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 			} else if (map.getBoolean("dup", false)) {
 				for (ModelElement e : editor.elements) {
 					if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
-						elem = new ModelElement(editor, ElementType.ROOT_PART, e.typeData, editor.gui());
+						elem = new ModelElement(editor, ElementType.ROOT_PART, e.typeData);
 						elem.duplicated = true;
 						elem.storeID = map.getLong("storeID", 0);
 						if(e.typeData instanceof PlayerModelParts && elem.storeID == ((PlayerModelParts)e.typeData).ordinal()) {

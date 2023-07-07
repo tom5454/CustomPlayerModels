@@ -13,23 +13,23 @@ import elemental2.promise.Promise;
 public class FS {
 	private static IFS impl;
 
-	public static String getContent(String path) throws FileNotFoundException {
-		if(impl == null)throw new FileNotFoundException("File not found");
+	public static Promise<String> getContent(String path) {
+		if(impl == null)return Promise.reject(new FileNotFoundException());
 		return impl.getContent(path);
 	}
 
-	public static Promise<Response> getContentFuture(String path) {
-		return new Promise<>((res, rej) -> {
-			try {
-				res.onInvoke(DomGlobal.fetch("data:application/octet-binary;base64," + getContent(path)));
-			} catch (FileNotFoundException e) {
-				rej.onInvoke(e);
-			}
-		});
+	public static String getContentSync(String path) throws FileNotFoundException {
+		if(impl == null)throw new FileNotFoundException();
+		return impl.getContentSync(path);
 	}
 
-	public static boolean setContent(String path, String content) {
-		if(impl == null)return false;
+	public static Promise<Response> getContentFuture(String path) {
+		if(impl == null)return Promise.reject(new FileNotFoundException());
+		return impl.getContentBinary(path);
+	}
+
+	public static Promise<Void> setContent(String path, String content) {
+		if(impl == null)return Promise.reject(new FileNotFoundException());
 		return impl.setContent(path, content);
 	}
 
@@ -67,8 +67,23 @@ public class FS {
 	}
 
 	public static interface IFS {
-		String getContent(String path) throws FileNotFoundException;
-		boolean setContent(String path, String content);
+		String getContentSync(String path) throws FileNotFoundException;
+
+		default Promise<String> getContent(String path) {
+			return new Promise<>((res, rej) -> {
+				try {
+					res.onInvoke(getContentSync(path));
+				} catch (FileNotFoundException e) {
+					rej.onInvoke(e);
+				}
+			});
+		}
+
+		default Promise<Response> getContentBinary(String path) {
+			return getContent(path).then(v -> DomGlobal.fetch("data:application/octet-binary;base64," + v));
+		}
+
+		Promise<Void> setContent(String path, String content);
 		Promise<File> mount(elemental2.dom.File file);
 		void mount(String b64, String name);
 		boolean needFileManager();

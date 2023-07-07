@@ -19,8 +19,8 @@ public class RotationInterpolator implements DoubleUnaryOperator {
 			return value;
 		} else {
 			double v1 = Math.abs(value - prevVal);
-			double v2 = Math.abs(2 * Math.PI - prevVal + value);
-			double v3 = Math.abs(2 * Math.PI + prevVal - value);
+			double v2 = Math.abs(fullRot - prevVal + value);
+			double v3 = Math.abs(fullRot + prevVal - value);
 			prevVal = value;
 			if(v1 < v2 && v1 < v3) {
 				return value + mul;

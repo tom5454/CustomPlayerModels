@@ -28,10 +28,8 @@ import com.tom.cpm.blockbench.format.GroupData;
 import com.tom.cpm.blockbench.format.ProjectData;
 import com.tom.cpm.blockbench.format.ProjectGenerator;
 import com.tom.cpm.blockbench.proxy.Animation;
-import com.tom.cpm.blockbench.proxy.Animation.BoneAnimator;
 import com.tom.cpm.blockbench.proxy.Animation.GeneralAnimator;
-import com.tom.cpm.blockbench.proxy.Animation.Keyframe;
-import com.tom.cpm.blockbench.proxy.Blockbench;
+import com.tom.cpm.blockbench.proxy.BoneAnimator;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Cube.CubeFace;
 import com.tom.cpm.blockbench.proxy.Dialog;
@@ -44,7 +42,6 @@ import com.tom.cpm.blockbench.proxy.Texture;
 import com.tom.cpm.blockbench.proxy.Undo;
 import com.tom.cpm.blockbench.proxy.Undo.UndoData;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
-import com.tom.cpm.blockbench.util.BBPartValues;
 import com.tom.cpm.blockbench.util.JsonUtil;
 import com.tom.cpm.blockbench.util.PopupDialogs;
 import com.tom.cpm.shared.animation.AnimationType;
@@ -74,8 +71,9 @@ import com.tom.cpm.shared.model.PartPosition;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
-import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.DirectPartValues;
+import com.tom.cpm.shared.model.render.DirectParts;
 import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.PerFaceUV;
 import com.tom.cpm.shared.model.render.PerFaceUV.Face;
@@ -86,7 +84,6 @@ import com.tom.cpm.web.client.util.I18n;
 import com.tom.cpm.web.client.util.ImageIO;
 import com.tom.ugwt.client.JsArrayE;
 
-import elemental2.core.JsArray;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.FileReader;
 import elemental2.promise.Promise;
@@ -236,7 +233,7 @@ public class BlockbenchExport {
 					rootWarning(group);
 					return;
 				}
-				ModelElement e = new ModelElement(editor, ElementType.ROOT_PART, part, editor.frame.getGui());
+				ModelElement e = new ModelElement(editor, ElementType.ROOT_PART, part);
 				editor.elements.add(e);
 				me = e;
 			} else {
@@ -257,17 +254,15 @@ public class BlockbenchExport {
 			me.rotation.x = -group.rotation.x;
 			me.rotation.y = -group.rotation.y;
 			me.rotation.z = group.rotation.z;
-			PartValues pv;
-			if(part instanceof RootModelType)pv = BBParts.getPart((RootModelType) part);
-			else pv = part.getDefaultSize(SkinType.DEFAULT);
+			PartValues pv = DirectParts.getPartOverrides(part, editor.skinType);
 			o = o.sub(pv.getPos());
 			VanillaModelPart p = part.getCopyFrom();
 			if(p != null) {
 				ModelElement e = getPart(p);
 				me.rotation = me.rotation.sub(e.rotation);
 				o = o.sub(e.pos);
-			} else if(pv instanceof BBPartValues) {
-				me.rotation = me.rotation.sub(((BBPartValues)pv).getRotation());
+			} else if(pv instanceof DirectPartValues) {
+				me.rotation = me.rotation.sub(((DirectPartValues)pv).getRotation());
 			}
 			me.pos = o;
 			modelTree.put(group.uuid, new CPMElem(me));
@@ -432,10 +427,10 @@ public class BlockbenchExport {
 
 	private Group makeRoot(String root) {
 		VanillaModelPart part = part(root);
-		PartValues pv = part instanceof RootModelType ? BBParts.getPart((RootModelType) part) : part.getDefaultSize(editor.skinType);
+		PartValues pv = DirectParts.getPartOverrides(part, editor.skinType);
 		Vec3f rot = new Vec3f();
-		if(pv instanceof BBPartValues) {
-			rot = rot.add(((BBPartValues)pv).getRotation());
+		if(pv instanceof DirectPartValues) {
+			rot = rot.add(((DirectPartValues)pv).getRotation());
 		}
 		Vec3f pos = pv.getPos();
 		GroupProperties gp = new GroupProperties();
@@ -547,98 +542,6 @@ public class BlockbenchExport {
 		e.@com.tom.cpm.shared.editor.Editor::redoQueue.@java.util.Stack::clear()();
 	}-*/;
 
-	//Ported from timeline_animators.js
-	private static JsVec3 mapAxes(Function<String, Float> cb) {
-		JsVec3 v = new JsVec3();
-		v.x = cb.apply("x");
-		v.y = cb.apply("y");
-		v.z = cb.apply("z");
-		return v;
-	}
-
-	private static JsVec3 interpolate(JsArrayE<Keyframe> keyframes, float time) {
-		if(keyframes.length == 0)return null;
-		Keyframe before = null;
-		Keyframe after = null;
-		Keyframe result = null;
-		float epsilon = 1/1200f;
-
-		for (Keyframe keyframe : keyframes.array()) {
-			if (keyframe.time < time) {
-				if (before == null || keyframe.time > before.time) {
-					before = keyframe;
-				}
-			} else  {
-				if (after == null || keyframe.time < after.time) {
-					after = keyframe;
-				}
-			}
-		}
-		if (before != null && epsilon(before.time, time, epsilon)) {
-			result = before;
-		} else if (after != null && epsilon(after.time, time, epsilon)) {
-			result = after;
-		} else if (before != null && before.interpolation.equals("step")) {
-			result = before;
-		} else if (before != null && after == null) {
-			result = before;
-		} else if (after != null && before == null) {
-			result = after;
-		} else if (before == null && after == null) {
-			//
-		} else {
-			boolean no_interpolations = Blockbench.hasFlag("no_interpolations");
-			float alpha = getLerp(before.time, after.time, time);
-
-			if (no_interpolations || (
-					before.interpolation.equals("linear") &&
-					(after.interpolation.equals("linear") || after.interpolation.equals("step"))
-					)) {
-				if (no_interpolations) {
-					alpha = Math.round(alpha);
-				}
-
-				final Keyframe fbefore = before;
-				final Keyframe fafter = after;
-				final float falpha = alpha;
-				return mapAxes(axis -> fbefore.getLerp(fafter, axis, falpha, false));
-
-			} else if (before.interpolation.equals("catmullrom") || after.interpolation.equals("catmullrom")) {
-				JsArray<Keyframe> sorted = keyframes.slice().sort((kf1, kf2) -> (kf1.time - kf2.time));
-				int before_index = sorted.indexOf(before);
-				Keyframe before_plus = sorted.getAt(before_index-1);
-				Keyframe after_plus = sorted.getAt(before_index+2);
-
-				final Keyframe fbefore = before;
-				final Keyframe fafter = after;
-				final float falpha = alpha;
-				return mapAxes(axis -> fbefore.getCatmullromLerp(before_plus, fbefore, fafter, after_plus, axis, falpha));
-
-			} else if (before.interpolation.equals("bezier") || after.interpolation.equals("bezier")) {
-				// Bezier
-				final Keyframe fbefore = before;
-				final Keyframe fafter = after;
-				final float falpha = alpha;
-				return mapAxes(axis -> fbefore.getBezierLerp(fbefore, fafter, axis, falpha));
-			}
-		}
-		if (result != null && result instanceof Keyframe) {
-			Keyframe keyframe = result;
-			int dp_index = (keyframe.time > time || epsilon(keyframe.time, time, epsilon)) ? 0 : keyframe.data_points.length-1;
-
-			return mapAxes(axis -> keyframe.calc(axis, dp_index));
-		}
-		return null;
-	}
-
-	private static float getLerp(float a, float b, float m) {
-		return (m-a) / (b-a);
-	}
-
-	private static boolean epsilon(float a, float b, float epsilon) {
-		return Math.abs(b - a) < epsilon;
-	}
-
 	private static final int FRAME_TICKS = 10;
 
 	private void convertAnimation(Animation anim) {
@@ -655,7 +558,7 @@ public class BlockbenchExport {
 			GeneralAnimator ga = anim.animators.get(k);
 			if(ga instanceof BoneAnimator) {
 				BoneAnimator ba = (BoneAnimator) ga;
-				if(ba.position.length == 0 && ba.rotation.length == 0 && ba.scale.length == 0)return;
+				if(ba.position.length == 0 && ba.rotation.length == 0 && ba.scale.length == 0 && ba.visible.length == 0 && ba.color.length == 0)return;
 				anims.add(ba);
 			}
 		});
@@ -816,19 +719,19 @@ public class BlockbenchExport {
 				Vec3f addPos = me.pos;
 				Vec3f addRot = me.rotation;
 				if(!ea.add && me.type == ElementType.ROOT_PART) {
-					PartValues pv;
 					VanillaModelPart part = (VanillaModelPart) me.typeData;
-					if(part instanceof RootModelType)pv = BBParts.getPart((RootModelType) part);
-					else pv = part.getDefaultSize(SkinType.DEFAULT);
-					if(pv instanceof BBPartValues) {
-						addRot = addRot.add(((BBPartValues)pv).getRotation());
+					PartValues pv = DirectParts.getPartOverrides(part, editor.skinType);
+					if(pv instanceof DirectPartValues) {
+						addRot = addRot.add(((DirectPartValues)pv).getRotation());
 					}
 					addPos = addPos.add(pv.getPos());
 				}
 
-				JsVec3 pos = interpolate(a.position, ftime);
-				JsVec3 rot = interpolate(a.rotation, ftime);
-				JsVec3 scl = interpolate(a.scale, ftime);
+				JsVec3 pos = Animation.interpolate(a.position, ftime);
+				JsVec3 rot = Animation.interpolate(a.rotation, ftime);
+				JsVec3 scl = Animation.interpolate(a.scale, ftime);
+				JsVec3 color = me.recolor ? Animation.interpolate(a.color, ftime) : null;
+				boolean vis = Animation.interpolateVisible(a, ftime, !me.hidden);
 
 				FrameData dt = f.getComponents().get(me);
 				if(dt == null) {
@@ -854,6 +757,10 @@ public class BlockbenchExport {
 						error[0] = true;
 					else
 						dt.setScale(scl.toVecF());
+				}
+				dt.setShow(vis);
+				if(color != null) {
+					dt.setColor(color.toVecF().mul(1 / 256f));
 				}
 			}
 		});
@@ -1132,7 +1039,7 @@ public class BlockbenchExport {
 		for(ModelElement e : editor.elements) {
 			if(e.typeData == pmp)return e;
 		}
-		ModelElement e = new ModelElement(editor, ElementType.ROOT_PART, pmp, editor.frame.getGui());
+		ModelElement e = new ModelElement(editor, ElementType.ROOT_PART, pmp);
 		editor.elements.add(e);
 		if(pmp instanceof RootModelType) {
 			RootGroups rg = RootGroups.getGroup((RootModelType) pmp);

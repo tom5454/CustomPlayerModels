@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,21 +18,27 @@ import com.tom.cpm.blockbench.format.CubeData;
 import com.tom.cpm.blockbench.format.GroupData;
 import com.tom.cpm.blockbench.format.ProjectData;
 import com.tom.cpm.blockbench.format.ProjectGenerator;
+import com.tom.cpm.blockbench.proxy.Animation;
+import com.tom.cpm.blockbench.proxy.BoneAnimator;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Cube.CubeFace;
 import com.tom.cpm.blockbench.proxy.Cube.FaceUV;
 import com.tom.cpm.blockbench.proxy.Global;
 import com.tom.cpm.blockbench.proxy.Group;
 import com.tom.cpm.blockbench.proxy.Group.GroupProperties;
+import com.tom.cpm.blockbench.proxy.Keyframe;
+import com.tom.cpm.blockbench.proxy.KeyframeDataPoint;
 import com.tom.cpm.blockbench.proxy.Project;
 import com.tom.cpm.blockbench.proxy.Texture;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec2;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
-import com.tom.cpm.blockbench.util.BBPartValues;
 import com.tom.cpm.blockbench.util.JsonUtil;
+import com.tom.cpm.shared.animation.InterpolatorChannel;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
+import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
+import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.project.JsonList;
@@ -41,6 +48,8 @@ import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.DirectPartValues;
+import com.tom.cpm.shared.model.render.DirectParts;
 import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -62,7 +71,8 @@ public class BlockbenchImport {
 	private final Editor editor;
 	private Function<List<WarnEntry>, Promise<Void>> openWarn;
 	private List<WarnEntry> warnings = new ArrayList<>();
-	private boolean copyTrWarn;
+	private boolean copyTrWarn, importAnims;
+	private Map<String, Integer> groupNames = new HashMap<>();
 
 	public BlockbenchImport(Editor editor, Function<List<WarnEntry>, Promise<Void>> openWarn) {
 		this.editor = editor;
@@ -77,7 +87,18 @@ public class BlockbenchImport {
 			checkCompat(me.children);
 		}
 
-		return (!warnings.isEmpty() ? openWarn.apply(warnings) : Promise.resolve((Void) null)).then(__ -> {
+		Promise<Void> warns = !warnings.isEmpty() ? openWarn.apply(warnings) : Promise.resolve((Void) null);
+
+		if(!editor.animations.isEmpty()) {
+			warns = warns.then(__ -> new Promise<>((res, rej) -> {
+				editor.ui.displayConfirm("Import Animations", "Convert CPM animations into Blockbench animations or keep CPM animations\\The animation importer is in Beta and may not import every animation correctly.\\Using the keep option will store the animations separately in the CPM format inside the bbmodel.", () -> {
+					importAnims = true;
+					res.onInvoke((Void) null);
+				}, () -> res.onInvoke((Void) null), "Import", "Keep");
+			}));
+		}
+
+		return warns.then(__ -> {
 			Global.newProject(CPMCodec.format);
 			doImport0();
 			return null;
@@ -129,7 +150,7 @@ public class BlockbenchImport {
 
 		for (ModelElement me : editor.elements) {
 			VanillaModelPart part = (VanillaModelPart) me.typeData;
-			PartValues pv = part instanceof RootModelType ? BBParts.getPart((RootModelType) part) : part.getDefaultSize(editor.skinType);
+			PartValues pv = DirectParts.getPartOverrides(part, editor.skinType);
 			Vec3f pos = pv.getPos().add(me.pos);
 			Vec3f rot = me.rotation;
 			if(part.getCopyFrom() != null) {
@@ -138,8 +159,8 @@ public class BlockbenchImport {
 					pos = pos.add(c.pos);
 					rot = rot.add(c.rotation);
 				}
-			} else if(pv instanceof BBPartValues) {
-				rot = rot.add(((BBPartValues)pv).getRotation());
+			} else if(pv instanceof DirectPartValues) {
+				rot = rot.add(((DirectPartValues)pv).getRotation());
 			}
 			String name = part.getName();
 			if(me.duplicated) {
@@ -184,7 +205,8 @@ public class BlockbenchImport {
 		ProjectData pd = Project.getData();
 
 		if(!editor.animations.isEmpty()) {
-			new AnimEnc().write(pd.animations);
+			if(importAnims)editor.animations.forEach(this::convertAnim);
+			else new AnimEnc().write(pd.animations);
 		}
 
 		pd.scalingOpt.putAll(editor.scalingElem.scaling);
@@ -247,6 +269,104 @@ public class BlockbenchImport {
 		}
 	}
 
+	private void convertAnim(EditorAnim ea) {
+		Animation a = new Animation().add(false);
+		Animation.selected = a;
+		a.name = ea.toString();
+		a.loop = ea.loop ? "loop" : "once";
+		a.type = Animation.makeType(ea.type, ea.pose);
+		a.additive = ea.add;
+		a.commandCtrl = ea.command;
+		a.layerCtrl = ea.layerControlled;
+		a.setPriority(ea.priority);
+		a.setOrder(ea.order);
+		a.group = ea.group;
+		a.setLayerDefault(ea.layerDefault);
+		a.isProperty = ea.isProperty;
+		a.length = ea.duration / 1000f;
+		Map<ModelElement, BoneAnimator> an = new HashMap<>();
+		me2group.forEach((e, g) -> {
+			BoneAnimator be = new BoneAnimator(g.uuid, a);
+			an.put(e, be);
+			a.animators.set(g.uuid, be);
+		});
+		float ft = (ea.getFrames().size() < 2 ? ea.duration : ea.duration / (float) ea.getFrames().size()) / 1000f;
+		List<AnimFrame> fr = ea.getFrames();
+		List<ModelElement> components = ea.getComponentsFiltered();
+		float[][][] data = new float[fr.size()][components.size()][InterpolatorChannel.VALUES.length];
+		for (int component = 0; component < components.size(); component++) {
+			for (InterpolatorChannel channel : InterpolatorChannel.VALUES) {
+				float[] vals = AnimFrame.toArray(ea, components.get(component), channel);
+				DoubleUnaryOperator setup = channel.createInterpolatorSetup();
+
+				for (int i = 0; i < vals.length; i++) {
+					data[i][component][channel.ordinal()] = (float) setup.applyAsDouble(vals[i]);
+				}
+			}
+		}
+		for (int i = 0; i < data.length; i++) {
+			AnimFrame f = fr.get(i);
+			float[][] compDt = data[i];
+			for (int component = 0; component < components.size(); component++) {
+				float[] v = compDt[component];
+				ModelElement me = components.get(component);
+
+				Vec3f addPos = me.pos;
+				Vec3f addRot = me.rotation;
+				if(!ea.add && me.type == ElementType.ROOT_PART) {
+					VanillaModelPart part = (VanillaModelPart) me.typeData;
+					PartValues pv = DirectParts.getPartOverrides(part, editor.skinType);
+					if(pv instanceof DirectPartValues) {
+						addRot = addRot.add(((DirectPartValues)pv).getRotation());
+					}
+					addPos = addPos.add(pv.getPos());
+				}
+				Vec3f pos = new Vec3f(
+						v[InterpolatorChannel.POS_X.ordinal()],
+						v[InterpolatorChannel.POS_Y.ordinal()],
+						v[InterpolatorChannel.POS_Z.ordinal()]
+						);
+				Vec3f rot = new Vec3f(
+						(float) Math.toDegrees(v[InterpolatorChannel.ROT_X.ordinal()]),
+						(float) Math.toDegrees(v[InterpolatorChannel.ROT_Y.ordinal()]),
+						(float) Math.toDegrees(v[InterpolatorChannel.ROT_Z.ordinal()])
+						);
+				Vec3f scl = new Vec3f(
+						v[InterpolatorChannel.SCALE_X.ordinal()],
+						v[InterpolatorChannel.SCALE_Y.ordinal()],
+						v[InterpolatorChannel.SCALE_Z.ordinal()]
+						);
+				if(!ea.add) {
+					pos = pos.sub(addPos);
+					rot = rot.sub(addRot);
+				}
+				pos.y *= -1;
+
+				BoneAnimator be = an.get(me);
+				Keyframe kp = be.createKeyframe(ft * i, "position");
+				Keyframe kr = be.createKeyframe(ft * i, "rotation");
+				Keyframe ks = me.type == ElementType.ROOT_PART ? null : be.createKeyframe(ft * i, "scale");
+				Keyframe kv = be.createKeyframe(ft * i, CPMCodec.VISIBILITY);
+				Keyframe kc = be.createKeyframe(ft * i, CPMCodec.COLOR);
+				KeyframeDataPoint dp = kp.data_points.getAt(0);
+				KeyframeDataPoint dr = kr.data_points.getAt(0);
+				KeyframeDataPoint ds = me.type == ElementType.ROOT_PART ? null : ks.data_points.getAt(0);
+				KeyframeDataPoint dv = kv.data_points.getAt(0);
+				KeyframeDataPoint dc = kc.data_points.getAt(0);
+
+				dp.set(pos);
+				dr.set(rot);
+				if(me.type != ElementType.ROOT_PART)ds.set(scl);
+				dv.visible = f.getVisible(me);
+				dc.x = (int) (v[InterpolatorChannel.COLOR_R.ordinal()] * 255);
+				dc.y = (int) (v[InterpolatorChannel.COLOR_G.ordinal()] * 255);
+				dc.z = (int) (v[InterpolatorChannel.COLOR_B.ordinal()] * 255);
+			}
+		}
+
+		Animation.selected = null;
+	}
+
 	private ModelElement findElementById(Editor editor, VanillaModelPart copyFrom) {
 		for(ModelElement me : editor.elements) {
 			if(me.typeData == copyFrom && !me.duplicated)return me;
@@ -261,7 +381,8 @@ public class BlockbenchImport {
 			Cube cube;
 
 			GroupProperties gp = new GroupProperties();
-			gp.name = me.name;
+			int d = groupNames.merge(me.name, 1, Integer::sum) - 1;
+			gp.name = me.name + (d > 0 ? d : "");
 			gp.origin = JsVec3.make(0, 24, 0);
 			gr = new Group(gp).init();
 			gp = new GroupProperties();
@@ -346,7 +467,7 @@ public class BlockbenchImport {
 					}
 				}
 			} else if(me.singleTex || me.extrude) {
-				if (me.mcScale == 0 && (me.size.x == 0 || me.size.y == 0 || me.size.z == 0)) {
+				if ((me.mcScale == 0 || me.extrude) && (me.size.x == 0 || me.size.y == 0 || me.size.z == 0)) {
 					float texU = me.u * me.textureSize;
 					float texV = me.v * me.textureSize;
 					if (me.size.x == 0) {

@@ -14,6 +14,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -38,6 +39,11 @@ public class CustomPlayerModelsClient extends ClientBase {
 	@SubscribeEvent
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
 		playerRenderPre(event.getPlayer(), event.getBuffers(), event.getRenderer().getModel());
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+	public void playerRenderPreC(RenderPlayerEvent.Pre event) {
+		if(event.isCanceled())playerRenderPost(event.getBuffers(), event.getRenderer().getModel());
 	}
 
 	@SubscribeEvent

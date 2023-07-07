@@ -93,7 +93,7 @@ public class DrawToolsPanel extends Panel {
 			group.addElement(EditorTool.FILL, alphaSlider);
 			alphaSlider.setAction(() -> editor.alphaValue = (int) alphaSlider.getActualValue());
 			alphaSlider.setBounds(new Box(5, 0, w - 10, 20));
-			alphaSlider.setTooltip(new Tooltip(editor.frame, gui.i18nFormat("tooltip.cpm.brushAlpha")));
+			alphaSlider.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.brushAlpha")));
 			alphaSlider.getSpinner().setDp(0);
 			panel.addElement(alphaSlider);
 		}

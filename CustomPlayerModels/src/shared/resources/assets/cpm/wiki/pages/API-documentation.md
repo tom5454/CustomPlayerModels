@@ -359,8 +359,8 @@ Play the given command animation for a player (Server-side).
 
 Name: Animation name  
 `ICommonAPI.playAnimation(Player.class, playerObj, name);` or  
-Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or -1 to switch state
 `ICommonAPI.playAnimation(Player.class, playerObj, name, value);`  
+Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or -1 to switch state  
 [Player.class](#common-player-class)
 
 ### Server Networking (0.6.1+)
@@ -373,6 +373,12 @@ or broadcast to nearby players:
 `sender.sendMessageToTracking(player, message_tag, sendToSelf);`  
 Use the platform independent NBT implementation from `com.tom.cpl.nbt.*` package.  
 sendToSelf: Send message to the selected player in argument 1
+
+### Detect Animation (0.6.9+)
+Detect if an animation is playing for the player  
+`int value = ICommonAPI.getAnimationPlaying(Player.class, playerObj, name);`  
+Returns: The animation value (value layer: 0-255, other animations: 0-1), -1 if animation doesn't exist
+[Player.class](#common-player-class)  
 
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  

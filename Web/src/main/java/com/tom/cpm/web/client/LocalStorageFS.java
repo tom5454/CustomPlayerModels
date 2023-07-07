@@ -129,7 +129,7 @@ public class LocalStorageFS implements IFS {
 	}
 
 	@Override
-	public String getContent(String path) throws FileNotFoundException {
+	public String getContentSync(String path) throws FileNotFoundException {
 		if(path.startsWith("/mnt/")) {
 			String[] sp = path.split("/");
 			if(sp[1] == "mnt") {
@@ -146,27 +146,29 @@ public class LocalStorageFS implements IFS {
 	}
 
 	@Override
-	public boolean setContent(String path, String cont) {
-		if(path.startsWith("/mnt")) {
-			if(path.startsWith("/mnt/")) {
-				String[] sp = path.split("/");
-				DomGlobal.fetch("data:application/octet-binary;base64," + cont).
-				then(v -> v.blob()).then(b -> {
-					saveAs(b, sp[sp.length - 1]);
-					return null;
-				});
-				return true;
+	public Promise<Void> setContent(String path, String cont) {
+		return new Promise<>((res, rej) -> {
+			if(path.startsWith("/mnt")) {
+				if(path.startsWith("/mnt/")) {
+					String[] sp = path.split("/");
+					DomGlobal.fetch("data:application/octet-binary;base64," + cont).
+					then(v -> v.blob()).then(b -> {
+						saveAs(b, sp[sp.length - 1]);
+						return null;
+					});
+					res.onInvoke((Void) null);
+				}
+				rej.onInvoke(new FileNotFoundException());
 			}
-			return false;
-		}
-		if(!this.enable)return false;
-		String i = local.getItem("m:" + path);
-		if(i != null) {
-			if(Meta.parse(i).folder)return false;
-		} else
-			local.setItem("m:" + path, Global.JSON.stringify(Meta.make(false)));
-		local.setItem("f:" + path, cont);
-		return true;
+			if(!this.enable)rej.onInvoke(new FileNotFoundException("File system not enabled"));
+			String i = local.getItem("m:" + path);
+			if(i != null) {
+				if(Meta.parse(i).folder)rej.onInvoke(new FileNotFoundException("Directory exists with the same name"));
+			} else
+				local.setItem("m:" + path, Global.JSON.stringify(Meta.make(false)));
+			local.setItem("f:" + path, cont);
+			res.onInvoke((Void) null);
+		});
 	}
 
 	public void deleteFile(String path) {

@@ -708,6 +708,6 @@ public class GuiImpl implements IGui, EventHandler {
 
 	@Override
 	public void openURL0(String url) {
-		DomGlobal.window.open(url, "_blank").focus();
+		WebMC.getInstance().openURL(url);
 	}
 }

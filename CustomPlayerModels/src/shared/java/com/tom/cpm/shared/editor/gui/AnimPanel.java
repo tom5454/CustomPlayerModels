@@ -43,6 +43,7 @@ import com.tom.cpm.shared.gui.Keybinds;
 
 public class AnimPanel extends Panel {
 	private Editor editor;
+	private EditorGui frm;
 	private ListPicker<NamedElement<EditorAnim>> animSel;
 	private TabFocusHandler tabHandler;
 	private Button prevFrm, nextFrm, clearAnimData;
@@ -53,6 +54,7 @@ public class AnimPanel extends Panel {
 		super(gui);
 		tabHandler = new TabFocusHandler(gui);
 		editor = e.getEditor();
+		frm = e;
 		setBounds(new Box(0, 0, 170, 330));
 		setBackgroundColor(gui.getColors().panel_background);
 
@@ -134,6 +136,8 @@ public class AnimPanel extends Panel {
 							animPopup.addButton(gui.i18nFormat("button.cpm.mirrorFrameData"), this0::mirrorData).
 							setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.mirrorFrameData")));
 						}
+						animPopup.addButton(gui.i18nFormat("button.cpm.reverseAnimation"), this0::reverseAnim).
+						setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.reverseAnimation")));
 					}
 					if(animPopup.getY() != 0)
 						animPopup.display(p.x - evt.x + bounds.x / 2, p.y - evt.y + bounds.h + bounds.y, 160);
@@ -364,6 +368,14 @@ public class AnimPanel extends Panel {
 		}
 	}
 
+	private void reverseAnim() {
+		if(editor.selectedAnim != null) {
+			ActionBuilder ab = editor.action("i", "button.cpm.reverseAnimation");
+			editor.selectedAnim.reverseFrameOrder(ab);
+			ab.execute();
+		}
+	}
+
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -407,7 +419,7 @@ public class AnimPanel extends Panel {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		KeybindHandler h = editor.frame.getKeybindHandler();
+		KeybindHandler h = frm.getKeybindHandler();
 		h.registerKeybind(Keybinds.COPY_ANIM_FRAME, this::copyFrame);
 		h.registerKeybind(Keybinds.PASTE_ANIM_FRAME, this::pasteFrame);
 		h.registerKeybind(Keybinds.COPY_ANIM_PART, this::copyData);

@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Checkbox;
-import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
@@ -73,7 +72,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		this.parent = parent;
 		element.children.forEach(c -> children.add(new ModelElement(c, this)));
 		if(element.itemRenderer == null)
-			name = editor.gui().i18nFormat("label.cpm.dup", element.name);
+			name = editor.ui.i18nFormat("label.cpm.dup", element.name);
 		else
 			name = element.name;
 		showInEditor = element.showInEditor;
@@ -99,14 +98,19 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	}
 
 	public ModelElement(Editor editor) {
-		this(editor, ElementType.NORMAL, null, null);
+		this(editor, ElementType.NORMAL, null);
 	}
 
+	@Deprecated
 	public ModelElement(Editor editor, ElementType type, Object typeData, IGui gui) {
+		this(editor, type, typeData);
+	}
+
+	public ModelElement(Editor editor, ElementType type, Object typeData) {
 		this.type = type;
 		this.typeData = typeData;
 		this.editor = editor;
-		type.buildElement(gui, editor, this, typeData);
+		type.buildElement(editor, this, typeData);
 	}
 
 	public void preRender() {
@@ -150,10 +154,10 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public String getName() {
 		String name = this.name;
-		if(hidden)name = editor.gui().i18nFormat("label.cpm.tree.hidden", name);
-		if(copyTransform != null)name = editor.gui().i18nFormat("label.cpm.copyTransformFlag", name);
-		if(duplicated)name = editor.gui().i18nFormat("label.cpm.tree.duplicated", name);
-		if(disableVanillaAnim)name = editor.gui().i18nFormat("label.cpm.tree.disableVanillaAnim", name);
+		if(hidden)name = editor.ui.i18nFormat("label.cpm.tree.hidden", name);
+		if(copyTransform != null)name = editor.ui.i18nFormat("label.cpm.copyTransformFlag", name);
+		if(duplicated)name = editor.ui.i18nFormat("label.cpm.tree.duplicated", name);
+		if(disableVanillaAnim)name = editor.ui.i18nFormat("label.cpm.tree.disableVanillaAnim", name);
 		return name;
 	}
 
@@ -166,11 +170,11 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	}
 
 	@Override
-	public int textColor() {
+	public int textColor(IGui gui) {
 		if(itemRenderer != null && editor.definition.rendererObjectMap.get(itemRenderer) == itemRenderer) {
-			return editor.colors().link_normal;
+			return gui.getColors().link_normal;
 		}
-		return !showInEditor ? editor.colors().button_text_disabled : 0;
+		return !showInEditor ? gui.getColors().button_text_disabled : 0;
 	}
 
 	@Override
@@ -196,7 +200,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void setVec(Vec3f v, VecType object) {
 		if(type == ElementType.ROOT_PART && generated && object == VecType.POSITION && !movePopupShown) {
 			movePopupShown = true;
-			editor.frame.openPopup(new MessagePopup(editor.frame, editor.gui().i18nFormat("label.cpm.info"), editor.gui().i18nFormat("label.cpm.warnMoveGenPart")));
+			editor.ui.displayMessagePopup(editor.ui.i18nFormat("label.cpm.info"), editor.ui.i18nFormat("label.cpm.warnMoveGenPart"));
 		}
 		switch (object) {
 		case SIZE:
@@ -352,7 +356,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void modeSwitch() {
 		editor.action("switch", "action.cpm.cubeMode").updateValueOp(this, this.texture, !this.texture, (a, b) -> a.texture = b).
 		onAction(this::markDirty).execute();
-		editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
+		editor.setModeBtn.accept(this.texture ? editor.ui.i18nFormat("button.cpm.mode.tex") : editor.ui.i18nFormat("button.cpm.mode.color"));
 		editor.setModePanel.accept(texture ? ModeDisplayType.TEX : ModeDisplayType.COLOR);
 		editor.setTexturePanel.accept(this.texture ? new Vec3i(this.u, this.v, this.textureSize) : new Vec3i(this.rgb, 0, 0));
 		if(!this.texture || this.recolor)
@@ -376,7 +380,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			if(itemRenderer == null) {
 				editor.setMCScale.accept(this.mcScale);
 				editor.setMirror.accept(this.mirror);
-				editor.setModeBtn.accept(this.texture ? editor.gui().i18nFormat("button.cpm.mode.tex") : editor.gui().i18nFormat("button.cpm.mode.color"));
+				editor.setModeBtn.accept(this.texture ? editor.ui.i18nFormat("button.cpm.mode.tex") : editor.ui.i18nFormat("button.cpm.mode.color"));
 				editor.setModePanel.accept(this.faceUV != null ? ModeDisplayType.TEX_FACE : texture ? ModeDisplayType.TEX : ModeDisplayType.COLOR);
 				editor.setTexturePanel.accept(new Vec3i(this.u, this.v, this.textureSize));
 				if(!this.texture || this.recolor)
@@ -504,8 +508,9 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			updateValueOp(this, this.copyTransform, copyTransform == null ? new CopyTransformEffect(this) : null, (a, b) -> a.copyTransform = b, v -> editor.setCopyTransformEffect.accept(v != null)).
 			execute();
 			editor.updateGui();
-			if(copyTransform != null)
-				editor.frame.openPopup(new CopyTransformSettingsPopup(editor.frame, editor, copyTransform));
+			if(copyTransform != null) {
+				editor.ui.displayPopup(f -> new CopyTransformSettingsPopup(f, editor, copyTransform));
+			}
 			break;
 
 		case DISABLE_VANILLA_ANIM:
@@ -564,15 +569,15 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void populatePopup(PopupMenu popup) {
-		popup.addButton(editor.gui().i18nFormat("button.cpm.duplicate"), this::duplicate);
+		popup.addButton(editor.ui.i18nFormat("button.cpm.duplicate"), this::duplicate);
 		if(type == ElementType.NORMAL && copyTransform != null) {
-			popup.addButton(editor.gui().i18nFormat("button.cpm.editCopyTransform"), () -> {
-				editor.frame.openPopup(new CopyTransformSettingsPopup(editor.frame, editor, copyTransform));
+			popup.addButton(editor.ui.i18nFormat("button.cpm.editCopyTransform"), () -> {
+				popup.getGui().getFrame().openPopup(new CopyTransformSettingsPopup(popup.getGui().getFrame(), editor, copyTransform));
 			});
 		}
-		Checkbox boxHidden = popup.addCheckbox(editor.gui().i18nFormat("label.cpm.hidden_effect"), () -> switchEffect(Effect.HIDE));
+		Checkbox boxHidden = popup.addCheckbox(editor.ui.i18nFormat("label.cpm.hidden_effect"), () -> switchEffect(Effect.HIDE));
 		boxHidden.setSelected(hidden);
-		boxHidden.setTooltip(new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.hidden_effect")));
+		boxHidden.setTooltip(new Tooltip(popup.getGui().getFrame(), editor.ui.i18nFormat("tooltip.cpm.hidden_effect")));
 	}
 
 	private void duplicate() {
@@ -582,7 +587,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.selectedElement = elem;
 			editor.updateGui();
 		} else if(type == ElementType.ROOT_PART) {
-			ModelElement elem = new ModelElement(editor, ElementType.ROOT_PART, typeData, editor.gui());
+			ModelElement elem = new ModelElement(editor, ElementType.ROOT_PART, typeData);
 			elem.duplicated = true;
 			elem.storeID = Math.abs(new Random().nextLong());
 			editor.action("duplicate").addToList(editor.elements, elem).onUndo(() -> editor.selectedElement = null).execute();
@@ -591,7 +596,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		}
 		if(!editor.animations.isEmpty()) {
 			ModelElement el = editor.getSelectedElement();
-			editor.setQuickAction.accept(new QuickTask(editor.gui().i18nFormat("button.cpm.dupAnimations"), editor.gui().i18nFormat("tooltip.cpm.dupAnimations"), () -> {
+			editor.setQuickAction.accept(new QuickTask(editor.ui.i18nFormat("button.cpm.dupAnimations"), editor.ui.i18nFormat("tooltip.cpm.dupAnimations"), () -> {
 				ActionBuilder ab = editor.action("duplicate");
 				editor.animations.forEach(a -> a.getFrames().forEach(f -> dupAnim(ab, this, el, f)));
 				ab.onAction(() -> editor.animations.forEach(EditorAnim::clearCache));
@@ -611,8 +616,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	}
 
 	@Override
-	public int bgColor() {
-		return editor.selectedElement != this && editor.selectedAnim != null && editor.applyAnim && editor.selectedAnim.getComponentsFiltered().contains(this) ? editor.colors().anim_part_background : 0;
+	public int bgColor(IGui gui) {
+		return editor.selectedElement != this && editor.selectedAnim != null && editor.applyAnim && editor.selectedAnim.getComponentsFiltered().contains(this) ? gui.getColors().anim_part_background : 0;
 	}
 
 	public ModelElement getRoot() {
@@ -620,15 +625,15 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	}
 
 	@Override
-	public Tooltip getTooltip() {
+	public Tooltip getTooltip(IGui gui) {
 		StringBuilder sb = new StringBuilder();
-		if(copyTransform != null)sb.append(copyTransform.getTooltip(editor.gui()));
-		return sb.length() == 0 ? null : new Tooltip(editor.frame, sb.toString());
+		if(copyTransform != null)sb.append(copyTransform.getTooltip(editor.ui));
+		return sb.length() == 0 ? null : new Tooltip(gui.getFrame(), sb.toString());
 	}
 
 	@Override
-	public void onClick(Editor e, MouseEvent evt) {
-		if(e.gui().isCtrlDown()) {
+	public void onClick(IGui gui, Editor e, MouseEvent evt) {
+		if(gui.isCtrlDown()) {
 			if(e.selectedElement instanceof MultiSelector) {
 				if(((MultiSelector)e.selectedElement).add(this))e.selectedElement = null;
 			} else if(e.getSelectedElement() == null)e.selectedElement = this;

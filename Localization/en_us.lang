@@ -154,6 +154,10 @@ button.cpm.dupAnimations=Duplicate Animations
 button.cpm.mirrorAnimations=Mirror Animations
 button.cpm.mirrorFrameData=Mirror Part Pose
 button.cpm.fixAdditiveToggle=Fix Additive
+button.cpm.paste.logout=Logout
+button.cpm.reverseAnimation=Reverse Animation
+button.cpm.quick_key.bind=Quick Access %d
+button.cpm.quick_key.unbind=Unbind
 
 button.cpm.root_group.cape=Cape
 button.cpm.root_group.elytra=Elytra
@@ -340,6 +344,7 @@ tooltip.cpm.animType.pose.in_menu=Displays while looking inside a container (Che
 tooltip.cpm.fixAdditiveToggle=Auto fix part transforms after editing additive animations
 tooltip.cpm.animType.pose.invisible=Plays when you have the Invisibility effect
 tooltip.cpm.effect.enableInvisGlow=Keep the "Glowing Eyes" parts visible\while having the Invisibility potion effect.\Always disabled on Vanilla servers.\Configurable on CPM servers (enabled by default) with:\/cpm effects invis_glow <enable>
+tooltip.cpm.anim.reverseAnimation=Reverse Animation Frame Order
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -771,6 +776,7 @@ label.cpm.keybind.toggleVis=Toggle Show in Editor
 label.cpm.keybind.toggleHidden=Toggle Hidden by Default
 label.cpm.reopenProject=Reopen/recover previously open project?\%s
 label.cpm.effect.enableInvisGlow=Invisible Glowing
+label.cpm.newCube=New Cube
 
 label.cpm.paste.connecting.title=Connecting...
 label.cpm.paste.connecting.message=Connecting to paste site...
@@ -782,6 +788,7 @@ label.cpm.paste.name=Paste Name:
 label.cpm.paste.updatedModel=Successfully updated model
 label.cpm.paste.error=Error connecting to paste site\%s
 label.cpm.paste.openBrowser=Generating Login link...
+label.cpm.paste.logout=Logging out...
 
 label.cpm.elem.head=Head
 label.cpm.elem.body=Body
@@ -940,6 +947,9 @@ commands.cpm.numberOutOfBounds=Entered numbers out of bounds
 commands.cpm.animate.success=Playing animation %s for %s
 commands.cpm.effect.invisGlow=Invisible players keep glowing layers
 commands.cpm.requiresRelog=The affected users have to relog before the changes take effect.
+commands.cpm.detect.notFound=Animation not found
+commands.cpm.detect.success=%s's '%s' animation value is %d
+commands.cpm.genericFail=Command Failed: %s
 
 chat.cpm.skinForced=Can't change skin. Your skin was force set by the operators of the server.
 chat.cpm.serverSafetySettings=[CPM] The server has recommended safety settings. Open the Gestures menu [%s] to edit the safety settings.

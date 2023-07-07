@@ -105,4 +105,14 @@ public interface ICommonAPI extends ISharedAPI {
 		 * */
 		void sendMessageToTracking(P player, NBTTagCompound tag, boolean sendToSelf);
 	}
+
+	/**
+	 * Get the value for the given animation (value or toggle)
+	 *
+	 * @param playerClass The player entity class (Player.class)
+	 * @param player the player object
+	 * @param name animation name
+	 * @return The animation value (value layer: 0-255, other animations: 0-1), -1 if animation doesn't exist
+	 * */
+	<P> int getAnimationPlaying(Class<P> playerClass, P player, String name);
 }

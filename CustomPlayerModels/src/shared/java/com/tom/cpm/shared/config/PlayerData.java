@@ -19,6 +19,7 @@ public class PlayerData {
 	public final Map<ScalingOptions, Float> scale = new EnumMap<>(ScalingOptions.class);
 	public final EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
 	public byte[] gestureData = new byte[0];
+	public Map<String, AnimationInfo> animNames = new HashMap<>();
 	public final Map<String, NBTTagCompound> pluginStates = new HashMap<>();
 	public final ServerAnimationState state = new ServerAnimationState();
 
@@ -75,5 +76,18 @@ public class PlayerData {
 		sc.clear();
 		scale.forEach((k, v) -> sc.setFloat(k.getNetKey(), v));
 		ModConfig.getWorldConfig().save();
+	}
+
+	public static class AnimationInfo {
+		public final int type, id;
+
+		public AnimationInfo(int type, int id) {
+			this.type = type;
+			this.id = id;
+		}
+
+		public boolean isCommandControlled() {
+			return (type & 16) != 0;
+		}
 	}
 }

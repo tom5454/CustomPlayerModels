@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.tom.cpl.config.ConfigEntry;
-import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.text.I18n;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationState.VRState;
@@ -208,7 +208,7 @@ public class AnimationEngine {
 		}
 
 		@Override
-		public String getName(IGui gui, String display) {
+		public String getName(I18n gui, String display) {
 			return "value";
 		}
 
@@ -229,7 +229,7 @@ public class AnimationEngine {
 		}
 
 		@Override
-		public String getName(IGui gui, String display) {
+		public String getName(I18n gui, String display) {
 			return "value";
 		}
 

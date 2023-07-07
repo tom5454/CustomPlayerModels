@@ -53,7 +53,7 @@ public class TestIngameManager {
 			if(e.getEditor().animEnc == null) {
 				e.getEditor().animEnc = GetFreeSkinSlots.getDefault(e.getEditor());
 			}
-			if(!Exporter.exportTempModel(e.getEditor(), e))return false;
+			if(!Exporter.exportTempModel(e.getEditor(), e.getGui()))return false;
 			String model = ModConfig.getCommonConfig().getString(ConfigKeys.SELECTED_MODEL, null);
 			if(!TEST_MODEL_NAME.equals(model)) {
 				if(model != null) {

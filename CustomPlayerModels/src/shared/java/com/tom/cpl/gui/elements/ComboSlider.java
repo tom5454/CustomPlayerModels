@@ -6,6 +6,7 @@ import com.tom.cpl.function.FloatUnaryOperator;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.math.Box;
 
 public class ComboSlider extends Slider {
 	private Spinner spinner;
@@ -67,7 +68,7 @@ public class ComboSlider extends Slider {
 		if(event.isHovered(bounds)) {
 			if(event.btn == 1) {
 				spinner.setValue(getActualValue());
-				spinner.setBounds(bounds);
+				spinner.setBounds(new Box(bounds.x, bounds.y + bounds.h - 18, bounds.w, 18));
 				spinner.visible = true;
 				event.consume();
 			}
@@ -87,7 +88,10 @@ public class ComboSlider extends Slider {
 
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
-		if(spinner.visible)spinner.draw(event, partialTicks);
+		if(spinner.visible) {
+			gui.drawText(bounds.x, bounds.y, name, gui.getColors().button_text_color);
+			spinner.draw(event, partialTicks);
+		}
 		else super.draw(event, partialTicks);
 	}
 

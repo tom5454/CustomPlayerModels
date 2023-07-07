@@ -28,6 +28,12 @@ public class Cube extends OutlinerElement {
 	public float inflate;
 	public static JsArrayE<Cube> all;
 
+	@JsProperty(name = "cpm_default_visible")
+	public boolean defaultVisible;
+
+	@JsProperty(name = "cpm_animator_init")
+	public boolean animatorInit;
+
 	public ThreeMesh mesh;
 
 	@JsProperty(name = "cpm_glow")

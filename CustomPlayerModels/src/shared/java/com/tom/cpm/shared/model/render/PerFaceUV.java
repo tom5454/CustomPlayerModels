@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec4f;
@@ -313,8 +314,8 @@ public class PerFaceUV {
 			return new FaceArea(editor, parent) {
 
 				@Override
-				public void onClick(Editor e, MouseEvent evt) {
-					super.onClick(e, evt);
+				public void onClick(IGui gui, Editor e, MouseEvent evt) {
+					super.onClick(gui, e, evt);
 					e.perfaceFaceDir.accept(d);
 				}
 			};

@@ -32,7 +32,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	modImplementation("com.terraformersmc:modmenu:5.0.2") {
+	modImplementation("com.terraformersmc:modmenu:6.2.3") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	

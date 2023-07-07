@@ -43,6 +43,7 @@ import com.tom.cpm.shared.editor.anim.EditorAnim;
 
 public class AnimTestPanel extends Panel {
 	private Editor editor;
+	private EditorGui frm;
 	private DropDownPanel<IPose> poseSel;
 	private DropDownPanel<String> gestureSel;
 	private DropDownPanel<VanillaPose> mainPose;
@@ -58,6 +59,7 @@ public class AnimTestPanel extends Panel {
 	public AnimTestPanel(IGui gui, EditorGui e) {
 		super(gui);
 		editor = e.getEditor();
+		frm = e;
 		setBounds(new Box(0, 0, 170, 80));
 		setBackgroundColor(gui.getColors().panel_background);
 		FlowLayout layout = new FlowLayout(this, 5, 1);
@@ -254,7 +256,7 @@ public class AnimTestPanel extends Panel {
 			setBounds(new Box(0, 0, 170, 30));
 			addElement(new Label(gui, gui.i18nFormat(name)).setBounds(new Box(5, 2, 160, 10)));
 
-			dropDown = new DropDownBox<>(editor.frame, val);
+			dropDown = new DropDownBox<>(frm, val);
 			dropDown.setBounds(new Box(5, 10, 160, 20));
 			addElement(dropDown);
 		}

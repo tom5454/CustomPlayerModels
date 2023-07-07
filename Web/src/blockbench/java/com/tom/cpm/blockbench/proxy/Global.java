@@ -1,8 +1,10 @@
 package com.tom.cpm.blockbench.proxy;
 
 import com.tom.cpm.blockbench.proxy.MenuBar.BarItem;
+import com.tom.cpm.blockbench.proxy.electron.Shell;
 import com.tom.ugwt.client.JsArrayE;
 
+import elemental2.core.JsObject;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
@@ -19,6 +21,8 @@ public class Global {
 
 	@JsMethod(name = "tl")
 	public static native String translate(String key);
+
+	public static native JsObject require(String name);
 
 	//UGWT won't replace unless in separate class
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
@@ -38,6 +42,13 @@ public class Global {
 
 		@JsProperty(name = "$$ugwt_m_BarItems_$$")
 		public static JsPropertyMap<BarItem> barItems;
+
+		@JsProperty(name = "$$ugwt_m_Language.data_$$")
+		public static JsPropertyMap<String> lang;
+
+		@JsProperty(name = "$$ugwt_m_shell_$$")
+		public static Shell shell;
+
 	}
 
 	@JsOverlay
@@ -63,5 +74,15 @@ public class Global {
 	@JsOverlay
 	public static BarItem getBarItem(String id) {
 		return G.barItems.get(id);
+	}
+
+	@JsOverlay
+	public static JsPropertyMap<String> getLang() {
+		return G.lang;
+	}
+
+	@JsOverlay
+	public static void openExternal(String path) {
+		G.shell.openExternal(path);
 	}
 }

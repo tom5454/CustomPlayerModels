@@ -64,7 +64,7 @@ public class ColorEditorArg implements TemplateArg<ColorArg> {
 
 			@Override
 			public String getName() {
-				return editor.gui().i18nFormat("label.cpm.defaultColor");
+				return editor.ui.i18nFormat("label.cpm.defaultColor");
 			}
 
 			@Override

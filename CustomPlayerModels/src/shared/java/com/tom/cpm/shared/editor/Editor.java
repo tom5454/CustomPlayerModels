@@ -18,14 +18,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.tom.cpl.gui.Frame;
-import com.tom.cpl.gui.IGui;
-import com.tom.cpl.gui.UIColors;
+import com.tom.cpl.gui.UI;
 import com.tom.cpl.gui.UpdaterRegistry;
 import com.tom.cpl.gui.UpdaterRegistry.BooleanUpdater;
 import com.tom.cpl.gui.UpdaterRegistry.Updater;
 import com.tom.cpl.gui.UpdaterRegistry.UpdaterWithValue;
-import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Tree.TreeHandler;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MatrixStack;
@@ -179,7 +176,7 @@ public class Editor {
 	public AnimationEncodingData animEnc;
 	public BooleanUpdater showPreviousFrame = updaterReg.createBool(true);
 
-	public Frame frame;
+	public UI ui;
 	public TreeElement selectedElement;
 	public List<ModelElement> elements = new ArrayList<>();
 	public EditorAnim selectedAnim;
@@ -211,8 +208,8 @@ public class Editor {
 		textures.put(TextureSheetType.SKIN, new ETextures(this, TextureSheetType.SKIN, stitcher -> templates.forEach(e -> e.stitch(stitcher))));
 	}
 
-	public void setGui(Frame gui) {
-		this.frame = gui;
+	public void setUI(UI ui) {
+		this.ui = ui;
 	}
 
 	public void setVec(Vec3f v, VecType object) {
@@ -371,7 +368,7 @@ public class Editor {
 	}
 
 	private void markDirty0() {
-		setNameDisplay.accept((file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : file.getName()) + "*");
+		setNameDisplay.accept((file == null ? ui.i18nFormat("label.cpm.new_project") : file.getName()) + "*");
 		dirty = true;
 		if(!autoSaveDirty)lastEdit = System.currentTimeMillis();
 		autoSaveDirty = true;
@@ -386,7 +383,7 @@ public class Editor {
 		}
 		templates.forEach(EditorTemplate::applyToModel);
 		if(selectedElement != null)selectedElement.updateGui();
-		setNameDisplay.accept((file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : file.getName()) + (dirty ? "*" : ""));
+		setNameDisplay.accept((file == null ? ui.i18nFormat("label.cpm.new_project") : file.getName()) + (dirty ? "*" : ""));
 		setUndo.accept(undoQueue.empty() ? null : undoQueue.peek().getName());
 		setRedo.accept(redoQueue.empty() ? null : redoQueue.peek().getName());
 		if(selectedAnim != null)selectedAnim.updateGui();
@@ -453,7 +450,7 @@ public class Editor {
 		});
 		for(PlayerModelParts type : PlayerModelParts.values()) {
 			if(type != PlayerModelParts.CUSTOM_PART)
-				elements.add(new ModelElement(this, ElementType.ROOT_PART, type, frame.getGui()));
+				elements.add(new ModelElement(this, ElementType.ROOT_PART, type));
 		}
 		restitchTextures();
 	}
@@ -501,18 +498,18 @@ public class Editor {
 	}
 
 	public CompletableFuture<Void> save(File file) {
-		setInfoMsg.accept(Pair.of(200000, gui().i18nFormat("tooltip.cpm.saving", file.getName())));
+		setInfoMsg.accept(Pair.of(200000, ui.i18nFormat("tooltip.cpm.saving", file.getName())));
 		return save0(file).thenRunAsync(() -> {
 			this.file = file;
 			dirty = false;
 			autoSaveDirty = false;
-			setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.saveSuccess", file.getName())));
+			setInfoMsg.accept(Pair.of(2000, ui.i18nFormat("tooltip.cpm.saveSuccess", file.getName())));
 			updateGui();
-		}, gui()::executeLater);
+		}, ui::executeLater);
 	}
 
 	public CompletableFuture<Void> load(File file) {
-		setInfoMsg.accept(Pair.of(200000, gui().i18nFormat("tooltip.cpm.loading", file.getName())));
+		setInfoMsg.accept(Pair.of(200000, ui.i18nFormat("tooltip.cpm.loading", file.getName())));
 		loadDefaultPlayerModel();
 		return project.load(file).thenComposeAsync(v -> {
 			try {
@@ -526,9 +523,9 @@ public class Editor {
 			this.file = file;
 			restitchTextures();
 			updateGui();
-			setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.loadSuccess", file.getName())));
+			setInfoMsg.accept(Pair.of(2000, ui.i18nFormat("tooltip.cpm.loadSuccess", file.getName())));
 			return CompletableFuture.completedFuture(null);
-		}, gui()::executeLater);
+		}, ui::executeLater);
 	}
 
 	public void reloadSkin() {
@@ -542,7 +539,7 @@ public class Editor {
 	public void reloadSkin(ActionBuilder ab, ETextures tex, File file) {
 		Image.loadFrom(file).thenAcceptAsync(img -> {
 			if(img.getWidth() > 8192 || img.getHeight() > 8192) {
-				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", frame.getGui().i18nFormat("label.cpm.tex_size_too_big", 8192))));
+				ui.displayMessagePopup(ui.i18nFormat("label.cpm.error"), ui.i18nFormat("error.cpm.img_load_failed", ui.i18nFormat("label.cpm.tex_size_too_big", 8192)));
 				return;
 			}
 			if(ab != null) {
@@ -567,9 +564,9 @@ public class Editor {
 				tex.restitchTexture();
 			}
 			setSkinEdited.accept(true);
-		}, gui()::executeLater).exceptionally(e -> {
+		}, ui::executeLater).exceptionally(e -> {
 			Log.error("Failed to load image", e);
-			frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage())));
+			ui.displayMessagePopup(ui.i18nFormat("label.cpm.error"), ui.i18nFormat("error.cpm.img_load_failed", e.getLocalizedMessage()));
 			return null;
 		});
 	}
@@ -583,17 +580,17 @@ public class Editor {
 				updateGui();
 			} catch (IOException e) {
 				Log.error("Failed to save image", e);
-				frame.openPopup(new MessagePopup(frame, frame.getGui().i18nFormat("label.cpm.error"), frame.getGui().i18nFormat("error.cpm.img_save_failed", e.getLocalizedMessage())));
+				ui.displayMessagePopup(ui.i18nFormat("label.cpm.error"), ui.i18nFormat("error.cpm.img_save_failed", e.getLocalizedMessage()));
 			}
 		}
 	}
 
 	public ActionBuilder action(String name) {
-		return new ActionBuilder(this, gui().i18nFormat("action.cpm." + name));
+		return new ActionBuilder(this, ui.i18nFormat("action.cpm." + name));
 	}
 
 	public ActionBuilder action(String name, String arg) {
-		return new ActionBuilder(this, gui().i18nFormat("action.cpm." + name, gui().i18nFormat(arg)));
+		return new ActionBuilder(this, ui.i18nFormat("action.cpm." + name, ui.i18nFormat(arg)));
 	}
 
 	public void executeAction(Action a) {
@@ -695,7 +692,7 @@ public class Editor {
 			execute();
 			updateGui();
 			if(add != prop.add) {
-				setQuickAction.accept(new QuickTask(gui().i18nFormat("button.cpm.fixAdditiveToggle"), gui().i18nFormat("tooltip.cpm.fixAdditiveToggle"), () -> Generators.fixAdditive(this)));
+				setQuickAction.accept(new QuickTask(ui.i18nFormat("button.cpm.fixAdditiveToggle"), ui.i18nFormat("tooltip.cpm.fixAdditiveToggle"), () -> Generators.fixAdditive(this)));
 			}
 		}
 	}
@@ -789,10 +786,6 @@ public class Editor {
 		poseToApply = null;
 	}
 
-	public UIColors colors() {
-		return frame.getGui().getColors();
-	}
-
 	public boolean hasVanillaParts() {
 		for(PlayerModelParts p : PlayerModelParts.VALUES) {
 			for (ModelElement el : elements) {
@@ -802,10 +795,6 @@ public class Editor {
 			}
 		}
 		return false;
-	}
-
-	public IGui gui() {
-		return frame.getGui();
 	}
 
 	public ETextures getTextureProvider() {
@@ -852,18 +841,18 @@ public class Editor {
 			File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 			File autosaves = new File(modelsDir, "autosaves");
 			autosaves.mkdirs();
-			File file = new File(autosaves, String.format("autosave-%1$tY%1$tm%1$td-%1$tH%1$tM%1$tS-", System.currentTimeMillis()) + (this.file == null ? frame.getGui().i18nFormat("label.cpm.new_project") : this.file.getName()));
+			File file = new File(autosaves, String.format("autosave-%1$tY%1$tm%1$td-%1$tH%1$tM%1$tS-", System.currentTimeMillis()) + (this.file == null ? ui.i18nFormat("label.cpm.new_project") : this.file.getName()));
 			Log.info("Editor autosave: " + file.getName());
-			setInfoMsg.accept(Pair.of(5000, gui().i18nFormat("tooltip.cpm.autosaving", file.getName())));
+			setInfoMsg.accept(Pair.of(5000, ui.i18nFormat("tooltip.cpm.autosaving", file.getName())));
 			autoSaveDirty = false;
 			save0(file).handleAsync((v, e) -> {
 				if(e != null) {
-					frame.getGui().onGuiException("Failed to autosave", e, false);
+					ui.onGuiException("Failed to autosave", e, false);
 				} else {
-					setInfoMsg.accept(Pair.of(2000, gui().i18nFormat("tooltip.cpm.autoSaveSuccess", file.getName())));
+					setInfoMsg.accept(Pair.of(2000, ui.i18nFormat("tooltip.cpm.autoSaveSuccess", file.getName())));
 				}
 				return null;
-			}, gui()::executeLater);
+			}, ui::executeLater);
 		}
 	}
 
@@ -872,7 +861,7 @@ public class Editor {
 		for (int i = 0; i < group.types.length; i++) {
 			RootModelType type = group.types[i];
 			if(elements.stream().noneMatch(e -> e.type == ElementType.ROOT_PART && e.typeData == type)) {
-				ModelElement e = new ModelElement(this, ElementType.ROOT_PART, type, frame.getGui());
+				ModelElement e = new ModelElement(this, ElementType.ROOT_PART, type);
 				elems.add(e);
 			}
 		}
@@ -931,7 +920,7 @@ public class Editor {
 		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models");
 		File autosaves = new File(modelsDir, "autosaves");
 		autosaves.mkdirs();
-		File file = new File(autosaves, String.format("recovered-%1$tY%1$tm%1$td-%1$tH%1$tM%1$tS-", System.currentTimeMillis()) + (this.file == null ? gui().i18nFormat("label.cpm.new_project") : this.file.getName()));
+		File file = new File(autosaves, String.format("recovered-%1$tY%1$tm%1$td-%1$tH%1$tM%1$tS-", System.currentTimeMillis()) + (this.file == null ? ui.i18nFormat("label.cpm.new_project") : this.file.getName()));
 		save0(file).thenRun(() -> {
 			ModConfig.getCommonConfig().setString(ConfigKeys.REOPEN_PROJECT, file.getAbsolutePath());
 			ModConfig.getCommonConfig().save();

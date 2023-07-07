@@ -15,9 +15,11 @@ import com.tom.cpm.shared.gui.Keybinds;
 public class TreePanel extends Panel {
 	private Tree<TreeElement> tree;
 	private Editor editor;
+	private EditorGui frm;
 
 	public TreePanel(IGui gui, EditorGui e, int width, int height, boolean enableMod) {
 		super(gui);
+		frm = e;
 		setBounds(new Box(width - 150, 0, 150, height));
 		setBackgroundColor(gui.getColors().panel_background);
 		editor = e.getEditor();
@@ -68,7 +70,7 @@ public class TreePanel extends Panel {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		KeybindHandler h = editor.frame.getKeybindHandler();
+		KeybindHandler h = frm.getKeybindHandler();
 		h.registerKeybind(Keybinds.TREE_UP, () -> {
 			editor.selectedElement = tree.findUp(editor.selectedElement);
 			editor.updateGui();

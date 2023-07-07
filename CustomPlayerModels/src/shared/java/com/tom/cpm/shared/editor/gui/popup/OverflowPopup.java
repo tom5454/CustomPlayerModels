@@ -18,7 +18,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.util.LocalizedIOException;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
-import com.tom.cpm.shared.editor.gui.EditorGui;
+import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.paste.PastePopup;
 
 public class OverflowPopup extends PopupPanel {
@@ -26,7 +26,7 @@ public class OverflowPopup extends PopupPanel {
 	private TabbedPanelManager tabs;
 	private String reason;
 
-	public OverflowPopup(EditorGui frm, String text, String reason, Consumer<Link> ok) {
+	public OverflowPopup(Frame frm, Editor e, String text, String reason, Consumer<Link> ok) {
 		super(frm.getGui());
 		this.reason = reason;
 
@@ -55,7 +55,7 @@ public class OverflowPopup extends PopupPanel {
 			paste.addElement(lbl2);
 
 			TextField txtf = new TextField(gui);
-			File file = frm.getEditor().file;
+			File file = e.file;
 			String name = file == null ? gui.i18nFormat("label.cpm.new_project") : file.getName();
 			txtf.setText(name);
 			txtf.setBounds(new Box(5, 20, 205, 20));
@@ -63,7 +63,7 @@ public class OverflowPopup extends PopupPanel {
 
 			Button okBtn = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 				String fn = txtf.getText();
-				PastePopup.runRequest(frm, c -> c.uploadFile(fn, text.getBytes(StandardCharsets.UTF_8)),
+				PastePopup.runRequest(gui, c -> c.uploadFile(fn, text.getBytes(StandardCharsets.UTF_8)),
 						id -> ok.accept(new Link("p", id)), () -> {}, "uploading");
 				close();
 			});

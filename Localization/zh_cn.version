@@ -1115,5 +1115,15 @@
   "osc-label.cpmosc.oscTransmitAddr": "Address:",
   "osc-tooltip.cpmosc.oscSettings": "Open the OSC Settings and Debug Popup",
   "osc-tooltip.cpmosc.oscWizard": "Generate a new OSC Animation using a wizard",
-  "osc-tooltip.cpmosc.oscFirstArg": "Filter for the first string argument, leave empty for no filter\\Useful for VMC triggers"
+  "osc-tooltip.cpmosc.oscFirstArg": "Filter for the first string argument, leave empty for no filter\\Useful for VMC triggers",
+  "button.cpm.paste.logout": "Logout",
+  "button.cpm.reverseAnimation": "Reverse Animation",
+  "tooltip.cpm.anim.reverseAnimation": "Reverse Animation Frame Order",
+  "label.cpm.paste.logout": "Logging out...",
+  "label.cpm.newCube": "New Cube",
+  "commands.cpm.detect.notFound": "Animation not found",
+  "commands.cpm.detect.success": "%s\u0027s \u0027%s\u0027 animation value is %s",
+  "commands.cpm.genericFail": "Command Failed: %s",
+  "button.cpm.quick_key.bind": "Quick Access %s",
+  "button.cpm.quick_key.unbind": "Unbind"
 }

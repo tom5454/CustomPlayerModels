@@ -40,11 +40,6 @@ public class Command extends BrigadierCommandHandler<CommandSourceStack> {
 
 	@Override
 	public void sendSuccess(CommandSourceStack sender, IText text) {
-		sender.sendSuccess(text.remap(), true);
-	}
-
-	@Override
-	public void sendFail(CommandSourceStack sender, IText text) {
-		sender.sendFailure(text.remap());
+		sender.sendSuccess(() -> text.remap(), true);
 	}
 }

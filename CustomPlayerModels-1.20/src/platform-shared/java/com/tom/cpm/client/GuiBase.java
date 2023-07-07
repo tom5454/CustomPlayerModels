@@ -102,6 +102,7 @@ public class GuiBase extends Screen implements IGui {
 			this.graphics = graphics;
 			graphics.pose().pushPose();
 			stack = new CtxStack(width, height);
+			RenderSystem.disableDepthTest();
 			RenderSystem.runAsFancy(() -> this.gui.draw(mouseX, mouseY, partialTicks));
 		} catch (Throwable e) {
 			onGuiException("Error drawing gui", e, true);
@@ -173,6 +174,7 @@ public class GuiBase extends Screen implements IGui {
 		bufferbuilder.vertex(matrix, maxX, maxY, 0.0F).color(f, f1, f2, f3).endVertex();
 		bufferbuilder.vertex(matrix, maxX, minY, 0.0F).color(f, f1, f2, f3).endVertex();
 		bufferbuilder.vertex(matrix, minX, minY, 0.0F).color(f, f1, f2, f3).endVertex();
+		graphics.flush();
 	}
 
 	@Override
@@ -188,7 +190,7 @@ public class GuiBase extends Screen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		graphics.pose().pushPose();
-		graphics.pose().translate(0, 0, 100);
+		graphics.pose().translate(0, 0, 500);
 		graphics.drawString(font, text, x, y, color, false);
 		graphics.pose().popPose();
 	}
@@ -586,13 +588,15 @@ public class GuiBase extends Screen implements IGui {
 			GuiBase.this.render(gr, Integer.MIN_VALUE, Integer.MIN_VALUE, partialTicks);
 			gr.pose().popPose();
 			gr.pose().pushPose();
-			gr.pose().translate(0, 0, 50);
+			gr.pose().translate(0, 0, 500);
 			super.render(gr, mouseX, mouseY, partialTicks);
 			gr.pose().popPose();
 		}
 
-		public Screen getGui() {
-			return GuiBase.this;
+		@Override
+		public void removed() {
+			super.removed();
+			minecraft.tell(() -> minecraft.setScreen(GuiBase.this));
 		}
 	}
 
@@ -709,7 +713,7 @@ public class GuiBase extends Screen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		graphics.pose().pushPose();
-		graphics.pose().translate(x, y, 100);
+		graphics.pose().translate(x, y, 500);
 		graphics.pose().scale(scale, scale, scale);
 		graphics.drawString(font, text.<Component>remap(), 0, 0, color, false);
 		graphics.pose().popPose();

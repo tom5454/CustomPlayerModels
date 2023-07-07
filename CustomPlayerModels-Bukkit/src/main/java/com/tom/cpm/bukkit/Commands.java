@@ -28,16 +28,7 @@ public class Commands {
 		}
 	}
 
-	private static class Sender {
-		private CommandSender sender;
-		private boolean success;
-
-		public Sender(CommandSender sender) {
-			this.sender = sender;
-		}
-	}
-
-	public static class CommandHandler extends StringCommandHandler<Void, Sender, CommandException> {
+	public static class CommandHandler extends StringCommandHandler<Void, CommandSender, CommandException> {
 		private Map<String, CommandImpl> commands;
 
 		private CommandHandler(JavaPlugin pl, Map<String, CommandImpl> commands) {
@@ -52,17 +43,17 @@ public class Commands {
 			this(pl, new HashMap<>());
 		}
 
-		public boolean onCommand(CommandSender var1, Command var2, String var3, String[] var4) {
-			Sender s = new Sender(var1);
+		public boolean onCommand(CommandSender s, Command cmdIn, String name, String[] args) {
 			try {
-				CommandImpl cmd = commands.get(var2.getName());
+				CommandImpl cmd = commands.get(cmdIn.getName());
 				if(cmd != null) {
-					cmd.execute(null, s, var4);
+					cmd.execute(null, s, args);
 				}
 			} catch (CommandException e) {
-				sendFail(s, e.msg);
+				s.sendMessage(ChatColor.RED + e.msg.<String>remap());
+				return false;
 			}
-			return s.success;
+			return true;
 		}
 
 		public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -79,15 +70,8 @@ public class Commands {
 		}
 
 		@Override
-		public void sendSuccess(Sender sender, IText text) {
-			sender.sender.sendMessage(text.<String>remap());
-			sender.success = true;
-		}
-
-		@Override
-		public void sendFail(Sender sender, IText text) {
-			String c = text.remap();
-			sender.sender.sendMessage(ChatColor.RED + c);
+		public void sendSuccess(CommandSender sender, IText text) {
+			sender.sendMessage(text.<String>remap());
 		}
 
 		@Override
@@ -106,7 +90,7 @@ public class Commands {
 		}
 
 		@Override
-		public Object getPlayerObj(Void server, Sender sender, String name) throws CommandException {
+		public Object getPlayerObj(Void server, CommandSender sender, String name) throws CommandException {
 			return Bukkit.getPlayer(name);
 		}
 

@@ -1,6 +1,6 @@
 package com.tom.cpm.shared.animation;
 
-import com.tom.cpl.gui.IGui;
+import com.tom.cpl.text.I18n;
 import com.tom.cpm.shared.MinecraftClientAccess;
 
 public class CustomPose implements IPose, IManualGesture {
@@ -15,7 +15,7 @@ public class CustomPose implements IPose, IManualGesture {
 	}
 
 	@Override
-	public String getName(IGui gui, String display) {
+	public String getName(I18n gui, String display) {
 		return name;
 	}
 

@@ -177,8 +177,8 @@ public abstract class UVResizableArea {
 		}
 
 		@Override
-		public void onClick(Editor e, MouseEvent evt) {
-			if(e.gui().isCtrlDown()) {
+		public void onClick(IGui gui, Editor e, MouseEvent evt) {
+			if(gui.isCtrlDown()) {
 				if(e.selectedElement instanceof MultiFaceArea) {
 					if(((MultiFaceArea)e.selectedElement).add(this))e.selectedElement = null;
 				} else if(e.selectedElement instanceof FaceArea || e.selectedElement instanceof ModelElement) {

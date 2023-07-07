@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.DropDownBox;
 import com.tom.cpl.gui.elements.Label;
@@ -17,8 +18,8 @@ import com.tom.cpm.shared.editor.template.TemplateArgType;
 
 public class NewTemplateArgPopup extends PopupPanel {
 
-	public NewTemplateArgPopup(Editor e) {
-		super(e.gui());
+	public NewTemplateArgPopup(IGui gui, Editor e) {
+		super(gui);
 
 		TextField name = new TextField(gui);
 		TextField desc = new TextField(gui);
@@ -31,7 +32,7 @@ public class NewTemplateArgPopup extends PopupPanel {
 		addElement(name);
 		addElement(desc);
 
-		DropDownBox<NamedElement<TemplateArgType>> argType = new DropDownBox<>(e.frame, Arrays.stream(TemplateArgType.values()).
+		DropDownBox<NamedElement<TemplateArgType>> argType = new DropDownBox<>(gui.getFrame(), Arrays.stream(TemplateArgType.values()).
 				filter(t -> t.canBeAdded).
 				map(t -> new NamedElement<>(t, v -> gui.i18nFormat("label.cpm.template_arg." + v.name().toLowerCase(Locale.ROOT)))).
 				collect(Collectors.toList()));

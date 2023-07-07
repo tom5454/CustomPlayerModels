@@ -19,11 +19,13 @@ import com.tom.cpl.gui.elements.ComboSlider;
 import com.tom.cpl.gui.elements.DropDownBox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -66,35 +68,36 @@ public class GestureGui extends Frame {
 	@Override
 	public void keyPressed(KeyboardEvent event) {
 		if(hoveredBtn != null) {
-			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
-			String hoveredID = hoveredBtn.gesture.getGestureId();
 			String keybindPressed = null;
-			List<String> dup = new ArrayList<>();
 			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
 				if(kb.getName().startsWith("qa")) {
 					if(kb.isPressed(event)) {
 						keybindPressed = kb.getName();
-					} else {
-						String c = ce.getString(kb.getName(), null);
-						if(c != null && c.equals(hoveredID)) {
-							dup.add(kb.getName());
-						}
 					}
 				}
 			}
 			if(keybindPressed != null) {
-				ce.setString(keybindPressed, hoveredID);
-				ce.setString(keybindPressed + "_mode", !hoveredBtn.layer && gui.isCtrlDown() ? "hold" : "press");
-				for (String k : dup) {
-					ce.setString(k, "");
-				}
+				updateKeybind(keybindPressed, hoveredBtn.gesture.getGestureId(), !hoveredBtn.layer && gui.isCtrlDown());
 			}
-			panel.getElements().forEach(e -> {
-				if(e instanceof GestureButton)
-					((GestureButton)e).getKb();
-			});
 		}
 		super.keyPressed(event);
+	}
+
+	private void updateKeybind(String keybind, String gesture, boolean mode) {
+		ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
+		for(int j = 1;j<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;j++) {
+			String c = ce.getString("qa_" + j, null);
+			if(c != null && c.equals(gesture)) {
+				ce.setString("qa_" + j, "");
+			}
+		}
+		ce.setString(keybind, gesture);
+		ce.setString(keybind + "_mode", mode ? "hold" : "press");
+
+		panel.getElements().forEach(e -> {
+			if(e instanceof GestureButton)
+				((GestureButton)e).updateKb();
+		});
 	}
 
 	@Override
@@ -442,14 +445,9 @@ public class GestureGui extends Frame {
 			String nm = g.getName();
 			layer = g.getType() == AnimationType.LAYER;
 			value = g.getType() == AnimationType.VALUE_LAYER;
-			if(!(layer || value)) {
-				Button btn = new Button(gui, "", () -> setManualGesture(g));
-				btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
-				addElement(btn);
-			}
 			this.name = nm;
 			this.gesture = g;
-			getKb();
+			updateKb();
 			if(layer || value || !g.isLayerControlled()) {
 				if(!MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
 					setEnabled(false);
@@ -474,10 +472,14 @@ public class GestureGui extends Frame {
 					btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
 					addElement(btn);
 				}
+			} else {
+				Button btn = new Button(gui, "", () -> setManualGesture(g));
+				btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
+				addElement(btn);
 			}
 		}
 
-		public void getKb() {
+		public void updateKb() {
 			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
 			this.kb = null;
 			this.kbMode = null;
@@ -530,6 +532,7 @@ public class GestureGui extends Frame {
 						String k = kb.getBoundKey();
 						if(k.isEmpty())k = gui.i18nFormat("label.cpm.key_unbound");
 						boundKey = k;
+						w = gui.textWidth(k);
 						gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 + 4, k, color);
 						break;
 					}
@@ -547,6 +550,36 @@ public class GestureGui extends Frame {
 						new Tooltip(GestureGui.this, gui.i18nFormat("tooltip.cpm.gestureButton.mode", name, boundKey, kbMode)).set();
 				}
 			}
+		}
+
+		@Override
+		public void mouseClick(MouseEvent event) {
+			if(event.isHovered(bounds) && event.btn == 1 && !value) {
+				PopupMenu p = new PopupMenu(gui, GestureGui.this);
+
+				for(int i = 1;i<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;i++) {
+					String id = "qa_" + i;
+					p.addButton(gui.i18nFormat("button.cpm.quick_key.bind", i), () -> {
+						updateKeybind(id, gesture.getGestureId(), !this.layer && gui.isCtrlDown());
+					});
+				}
+
+				p.addButton(gui.i18nFormat("button.cpm.quick_key.unbind"), () -> {
+					ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
+					for(int j = 1;j<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;j++) {
+						String c = ce.getString("qa_" + j, null);
+						if(c != null && c.equals(gesture.getGestureId())) {
+							ce.setString("qa_" + j, "");
+						}
+					}
+					updateKb();
+				});
+
+				Vec2i pos = event.getPos();
+				p.display(pos.x, pos.y);
+				event.consume();
+			}
+			super.mouseClick(event);
 		}
 	}
 }

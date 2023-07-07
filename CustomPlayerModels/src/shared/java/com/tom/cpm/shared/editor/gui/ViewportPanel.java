@@ -326,12 +326,12 @@ public class ViewportPanel extends ViewportPanelBase3d {
 					else
 						oldValue = new Vec3f[] {getVec(draggingVec)};
 				}
-				hovered.elem.onClick(editor, event);
+				hovered.elem.onClick(gui, editor, event);
 				event.consume();
+				editor.updateGui();
 			} else {
 				dragged = -1;
 			}
-			editor.updateGui();
 		}
 		super.mouseClick(event);
 		if(event.btn == EditorGui.getSelectMouseButton() && !enableDrag && dragged == -1 && event.isConsumed())dragged = 0;
@@ -385,7 +385,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			event.consume();
 			ModelElement elem = editor.getSelectedElement();
 			if(elem != null) {
-				((ModelTree) editor.treeHandler.getModel()).displayPopup(event, elem);
+				((ModelTree) editor.treeHandler.getModel()).displayPopup(gui, event, elem);
 			}
 		}
 		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds) && dragged > 0 && canEdit()) {
@@ -509,7 +509,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			event.consume();
 			endGizmoDrag(false);
 		}
-		KeybindHandler h = editor.frame.getKeybindHandler();
+		KeybindHandler h = frame.getKeybindHandler();
 		h.registerKeybind(Keybinds.POSITION, () -> setVec(VecType.POSITION));
 		h.registerKeybind(Keybinds.OFFSET, () -> setVec(VecType.OFFSET));
 		h.registerKeybind(Keybinds.SIZE, () -> setVec(VecType.SIZE));

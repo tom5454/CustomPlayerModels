@@ -25,6 +25,7 @@ public class Dialog {
 	private Object object;
 	public CallbackConfirm onConfirm;
 	public CallbackCancel onCancel;
+	public VueComponent component;
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class DialogProperties {
@@ -39,6 +40,7 @@ public class Dialog {
 		public String[] lines, buttons;
 		public boolean singleButton;
 		public int width, confirmIndex, cancelIndex;
+		public VueComponent component;
 	}
 
 	@JsFunction

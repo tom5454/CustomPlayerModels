@@ -129,7 +129,7 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, Renderer
 		}
 
 		@Override
-		protected boolean isInGui() {
+		protected boolean isDirectMode() {
 			return true;
 		}
 	}

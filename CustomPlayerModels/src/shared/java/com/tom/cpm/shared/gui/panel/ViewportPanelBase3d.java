@@ -21,11 +21,8 @@ import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.DisplayItem;
-import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.gui.Keybinds;
 import com.tom.cpm.shared.gui.ViewportCamera;
-import com.tom.cpm.shared.model.SkinType;
-import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.builtin.BlockModel;
 import com.tom.cpm.shared.model.builtin.IItemModel;
 import com.tom.cpm.shared.model.builtin.IItemModel.ItemRenderTransform;
@@ -44,8 +41,6 @@ import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public abstract class ViewportPanelBase3d extends Panel3d {
 	public static final GuiModelRenderManager manager = new GuiModelRenderManager();
-	protected static final EnumMap<SkinType, VanillaPlayerModel> models = new EnumMap<>(SkinType.class);
-	protected static final VanillaPlayerModel defaultModel;
 	protected static final ParrotModel parrot = new ParrotModel();
 	protected static final ShieldModel shield = new ShieldModel();
 	protected static final BlockModel block = new BlockModel();
@@ -88,11 +83,6 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 	protected static final EnumMap<DisplayItem, IItemModel[]> itemModels = new EnumMap<>(DisplayItem.class);
 
 	static {
-		for (SkinType t : SkinType.VANILLA_TYPES) {
-			models.put(t, new VanillaPlayerModel(t));
-		}
-		defaultModel = models.get(SkinType.DEFAULT);
-		models.put(SkinType.UNKNOWN, defaultModel);
 		itemModels.put(DisplayItem.BLOCK, new IItemModel[] {block});
 		itemModels.put(DisplayItem.SHIELD, new IItemModel[] {shield});
 		itemModels.put(DisplayItem.TRIDENT, new IItemModel[] {trident});
@@ -124,14 +114,12 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 		stack.translate(0, -1.5f, 0);
 
 		ModelDefinition def = getDefinition();
-		VanillaPlayerModel p = models.get(def.getSkinType());
-		if(p == null)p = defaultModel;
+		VanillaPlayerModel p = manager.getModel(def.getSkinType());
 		VBuffers rp = buf.replay();
 
 		preRender(stack, rp);
 
-		manager.bindModel(p, GuiModelRenderManager.PLAYER, rp, def, null, getAnimMode());
-		manager.bindSkin(p, this, TextureSheetType.SKIN);
+		manager.setupSkin(this, p, rp, def, getAnimMode());
 
 		poseModel(p, stack, partialTicks);
 
@@ -195,8 +183,7 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 
 		for(PlayerModelLayer l : PlayerModelLayer.VALUES) {
 			if(layers.contains(l)) {
-				manager.bindModel(p, l.name(), rp, def, null, getAnimMode());
-				manager.bindSkin(p, this, RootGroups.getGroup(l.parts[0]).getTexSheet(l.parts[0]));
+				manager.setupLayer(this, l, p, rp, def, getAnimMode());
 				p.renderLayer(stack, rp.getBuffer(types, RenderMode.DEFAULT), l);
 				manager.unbindModel(p);
 			}

@@ -73,6 +73,7 @@ sourceSets {
 		}
 		resources {
 			srcDir "src/build"
+			if(!doBuild)exclude "com/ekotrope/gwt/emul/**"
 		}
 		compileClasspath = main.compileClasspath + files(main.java.srcDirs)
 	}
@@ -84,6 +85,15 @@ sourceSets {
 		resources {
 			srcDir "src/blockbench/resources"
 		}
+	}
+	main {
+		java {
+			srcDir "src/fbxtool/java"
+		}
+		resources {
+			srcDir "src/fbxtool/resources"
+		}
+		compileClasspath = main.compileClasspath + files(main.java.srcDirs)
 	}
 }
 
@@ -155,6 +165,11 @@ def getFixedClasspath() {
     return files(Arrays.stream(cp).sorted(Comparator.comparingInt(sortMap::get)).collect(Collectors.toList()))
 }
 
+task devMode(type:JavaExec, dependsOn: 'compileJava') {
+   main = "com.tom.cpm.web.gwt.MainWrapper"
+   classpath = getFixedClasspath()
+}
+
 task compileEditor(type:JavaExec, dependsOn: 'compileJava') {
    main = "com.tom.cpm.web.gwt.MainWrapper"
    classpath = getFixedClasspath()
@@ -180,6 +195,15 @@ task compileBlockbench(type:JavaExec, dependsOn: 'compileJava') {
    systemProperties = [ "ugwt.useContext":"true" ]
    
    args "--build", "${version}", "Blockbench"
+}
+
+task compileFBXTool(type:JavaExec, dependsOn: 'compileJava') {
+   main = "com.tom.cpm.web.gwt.MainWrapper"
+   classpath = getFixedClasspath()
+   
+   systemProperties = [ "ugwt.useStrongName":"true" ]
+   
+   args "--build", "${version}", "FBXTool"
 }
 
 task blockbenchDevServer(type:JavaExec, dependsOn: 'compileJava') {

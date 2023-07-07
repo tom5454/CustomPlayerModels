@@ -47,8 +47,13 @@ public class OldPluginConvert {
 	private static final String CPM_DT_GROUP = "CPM_data_DO_NOT_EDIT";
 	private static final String CPM_DT_MARKER = "|CPM:";
 
-	@SuppressWarnings("unchecked")
 	public static void convert() {
+		convertOldJs();
+
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void convertOldJs() {
 		if(Arrays.stream(Group.all).anyMatch(gr -> gr.parent == Group.ROOT && gr.name.equals(CPM_DT_GROUP)) || Cube.all.asList().stream().anyMatch(c -> c.name.contains(CPM_DT_MARKER))) {
 			try {
 				new ArrayList<>(Cube.all.asList()).stream().filter(c -> c.name.contains(CPM_DT_MARKER)).forEach(c -> {

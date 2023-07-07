@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.IGui;
-import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
@@ -39,7 +38,7 @@ public class ScalingElement implements TreeElement {
 
 	@Override
 	public String getName() {
-		return editor.gui().i18nFormat("label.cpm.effect.scaling");
+		return editor.ui.i18nFormat("label.cpm.effect.scaling");
 	}
 
 	@Override
@@ -48,8 +47,8 @@ public class ScalingElement implements TreeElement {
 	}
 
 	@Override
-	public Tooltip getTooltip() {
-		return new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.effect.scaling"));
+	public Tooltip getTooltip(IGui gui) {
+		return new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.effect.scaling"));
 	}
 
 	private class OptionElem implements TreeElement {
@@ -61,12 +60,12 @@ public class ScalingElement implements TreeElement {
 
 		@Override
 		public String getName() {
-			return editor.gui().i18nFormat("label.cpm.tree.scaling." + name);
+			return editor.ui.i18nFormat("label.cpm.tree.scaling." + name);
 		}
 
 		@Override
-		public Tooltip getTooltip() {
-			return new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.tree.scaling." + name));
+		public Tooltip getTooltip(IGui gui) {
+			return new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.tree.scaling." + name));
 		}
 	}
 
@@ -92,12 +91,11 @@ public class ScalingElement implements TreeElement {
 		}
 
 		@Override
-		public Tooltip getTooltip() {
-			IGui gui = editor.gui();
+		public Tooltip getTooltip(IGui gui) {
 			String tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling." + name);
 			if(opt != ScalingOptions.ENTITY)tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling.serverRequired", tooltip);
 			if(!opt.getDefualtEnabled())tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling.disabledByDefault", tooltip, name);
-			return new Tooltip(editor.frame, tooltip);
+			return new Tooltip(gui.getFrame(), tooltip);
 		}
 	}
 
@@ -118,7 +116,7 @@ public class ScalingElement implements TreeElement {
 		public void setVec(Vec3f v, VecType object) {
 			if(editor.elements.stream().anyMatch(e -> !e.hidden) && !editPopupShown) {
 				editPopupShown = true;
-				editor.frame.openPopup(new MessagePopup(editor.frame, editor.gui().i18nFormat("label.cpm.info"), editor.gui().i18nFormat("label.cpm.warnEditTransform")));
+				editor.ui.displayMessagePopup(editor.ui.i18nFormat("label.cpm.info"), editor.ui.i18nFormat("label.cpm.warnEditTransform"));
 			}
 			switch (object) {
 			case ROTATION:

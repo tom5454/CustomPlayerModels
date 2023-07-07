@@ -401,4 +401,12 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	public GuiImpl getGui() {
 		return currentGui;
 	}
+
+	public void openURL(String url) {
+		DomGlobal.window.open(url, "_blank").focus();
+	}
+
+	public String getAppID() {
+		return DomGlobal.document.title;
+	}
 }

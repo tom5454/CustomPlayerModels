@@ -39,6 +39,7 @@ import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -112,6 +113,11 @@ public class ClientProxy extends CommonProxy {
 	public void playerRenderPre(RenderPlayerEvent.Pre event) {
 		manager.bindPlayer(event.entityPlayer, null, event.renderer.getMainModel());
 		manager.bindSkin(event.renderer.getMainModel(), TextureSheetType.SKIN);
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+	public void playerRenderPreC(RenderPlayerEvent.Pre event) {
+		if(event.isCanceled())manager.unbindClear(event.renderer.getMainModel());
 	}
 
 	@SubscribeEvent

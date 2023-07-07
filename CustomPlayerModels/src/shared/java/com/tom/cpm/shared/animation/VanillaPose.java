@@ -3,7 +3,7 @@ package com.tom.cpm.shared.animation;
 import java.util.Locale;
 
 import com.tom.cpl.function.ToFloatFunction;
-import com.tom.cpl.gui.IGui;
+import com.tom.cpl.text.I18n;
 
 public enum VanillaPose implements IPose {
 	CUSTOM,
@@ -94,7 +94,7 @@ public enum VanillaPose implements IPose {
 	}
 
 	@Override
-	public String getName(IGui gui, String display) {
+	public String getName(I18n gui, String display) {
 		if(display == null)return gui.i18nFormat(i18nKey);
 		return gui.i18nFormat("label.cpm.vanilla_anim", gui.i18nFormat(i18nKey), display);
 	}

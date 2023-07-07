@@ -13,11 +13,11 @@ public class ConfirmPopup extends PopupPanel implements Runnable {
 	}
 
 	public ConfirmPopup(Frame frame, String title, String msg, Runnable ok, Runnable cancel) {
-		this(frame,title, msg, ok, cancel, frame.getGui().i18nFormat("button.cpm.ok"));
+		this(frame, title, msg, ok, cancel, frame.getGui().i18nFormat("button.cpm.ok"));
 	}
 
 	public ConfirmPopup(Frame frame, String title, String msg, Runnable ok, Runnable cancel, String okTxt) {
-		this(frame,title, msg, ok, cancel, okTxt, frame.getGui().i18nFormat("button.cpm.cancel"));
+		this(frame, title, msg, ok, cancel, okTxt, frame.getGui().i18nFormat("button.cpm.cancel"));
 	}
 
 	public ConfirmPopup(Frame frame, String title, String msg, Runnable ok, Runnable cancel, String okTxt, String cancelTxt) {

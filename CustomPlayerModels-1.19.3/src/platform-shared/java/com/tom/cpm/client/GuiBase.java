@@ -591,8 +591,10 @@ public class GuiBase extends Screen implements IGui {
 			super.render(st, mouseX, mouseY, partialTicks);
 		}
 
-		public Screen getGui() {
-			return GuiBase.this;
+		@Override
+		public void removed() {
+			super.removed();
+			minecraft.tell(() -> minecraft.setScreen(GuiBase.this));
 		}
 	}
 

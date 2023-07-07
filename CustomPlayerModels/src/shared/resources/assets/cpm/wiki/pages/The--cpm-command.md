@@ -6,6 +6,7 @@
 * [scaling](#scaling)
 * [animate](#animate)
 * [effects](#effects)
+* [detect](#detect)
 
 ## setskin
 Usage `/cpm setskin [-f|-t|-r] <target> <base64 model>`  
@@ -73,4 +74,9 @@ Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, tog
 Usage: `/cpm effects <effect> <options...>`  
 Available effects:  
 - `invisible_glow <true/false>`: Enable rendering the glowing layers for invisible players. On by default. Only has an effect after re-logging.  
+
+## detect
+Usage: `/cpm detect <target> <animation name> [value (0-255)]`  
+Detect if the given animation is playing  
+If the `value` parameter is present then the command checks if the animation value is equal to the parameter  
 

@@ -23,7 +23,7 @@ public class TemplateSettings implements TreeElement {
 
 	@Override
 	public String getName() {
-		return e.gui().i18nFormat("label.cpm.tree.template_settings");
+		return e.ui.i18nFormat("label.cpm.tree.template_settings");
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class TemplateSettings implements TreeElement {
 
 		@Override
 		public String getName() {
-			return e.gui().i18nFormat("label.cpm.tree.template_arguments");
+			return e.ui.i18nFormat("label.cpm.tree.template_arguments");
 		}
 
 		@Override
@@ -45,7 +45,7 @@ public class TemplateSettings implements TreeElement {
 
 		@Override
 		public void addNew() {
-			e.frame.openPopup(new NewTemplateArgPopup(e));
+			e.ui.displayPopup(frm -> new NewTemplateArgPopup(frm.getGui(), e));
 		}
 
 		@Override

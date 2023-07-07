@@ -30,7 +30,7 @@ import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.BoxRender;
-import com.tom.cpm.shared.model.render.GuiModelRenderManager.RedirectPartRenderer;
+import com.tom.cpm.shared.model.render.DirectModelRenderManager.DirectPartRenderer;
 import com.tom.cpm.shared.model.render.IExtraRenderDefinition;
 import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.Mesh;
@@ -107,7 +107,7 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 		return editor.elements.stream().map(e -> ((RootModelElement) e.rc).getPart()).anyMatch(t -> t == type);
 	}
 
-	private void drawSelectionBox(RedirectPartRenderer renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube, boolean doRenderElems) {
+	private void drawSelectionBox(DirectPartRenderer<?> renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube, boolean doRenderElems) {
 		if(!doRenderElems && !outlineOnly)return;
 		ElementSelectMode sel = cube.getSelected();
 		if(sel.isRenderOutline()) {
@@ -168,7 +168,7 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 			ModelElement me = (ModelElement) cube.getCube();
 			me.matrixPosition = stack.getLast().getMatrix().copy();
 		}
-		drawSelectionBox((RedirectPartRenderer) renderer, stack, buf, renderTypes, cube, doRenderElems);
+		drawSelectionBox((DirectPartRenderer<?>) renderer, stack, buf, renderTypes, cube, doRenderElems);
 		if(!doRenderElems || outlineOnly)return;
 		drawGizmo(cube, stack, buf, renderTypes);
 	}

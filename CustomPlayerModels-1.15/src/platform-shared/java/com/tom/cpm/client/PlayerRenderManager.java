@@ -163,7 +163,7 @@ public class PlayerRenderManager extends ModelRenderManager<IRenderTypeBuffer, M
 		}
 
 		@Override
-		protected boolean isInGui() {
+		protected boolean isDirectMode() {
 			return true;
 		}
 	}

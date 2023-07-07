@@ -122,7 +122,7 @@ public class AnimatedTex implements TreeElement {
 
 	@Override
 	public String getName() {
-		return editor.gui().i18nFormat("label.cpm.tree.animatedRegion");
+		return editor.ui.i18nFormat("label.cpm.tree.animatedRegion");
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class AnimatedTex implements TreeElement {
 
 		@Override
 		public String getName() {
-			return editor.gui().i18nFormat("label.cpm.tree.at." + name);
+			return editor.ui.i18nFormat("label.cpm.tree.at." + name);
 		}
 
 		@Override
@@ -197,8 +197,8 @@ public class AnimatedTex implements TreeElement {
 		}
 
 		@Override
-		public Tooltip getTooltip() {
-			return new Tooltip(editor.frame, editor.gui().i18nFormat("tooltip.cpm.tree.at." + name));
+		public Tooltip getTooltip(IGui gui) {
+			return new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.tree.at." + name));
 		}
 
 		protected AnimatedTex outer() {
@@ -302,7 +302,7 @@ public class AnimatedTex implements TreeElement {
 
 		@Override
 		public void updateGui() {
-			editor.setModeBtn.accept(editor.gui().i18nFormat("button.cpm.at." + name + "." + (get.getAsBoolean() ? "on" : "off")));
+			editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.at." + name + "." + (get.getAsBoolean() ? "on" : "off")));
 		}
 
 		@Override

@@ -45,6 +45,7 @@ public class Panel3dImpl extends Panel3dNative {
 
 	@Override
 	public void render(float partialTicks) {
+		RenderSystem.backupProjectionMatrix();
 		ViewportCamera cam = panel.getCamera();
 		float pitch = (float) Math.asin(cam.look.y);
 		float yaw = cam.look.getYaw();
@@ -61,8 +62,8 @@ public class Panel3dImpl extends Panel3dNative {
 
 		try {
 			guiGraphics.pose().pushPose();
-			guiGraphics.pose().translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 50.0);
-			guiGraphics.pose().mulPoseMatrix(new Matrix4f().scaling(size, size, -0.1F));
+			guiGraphics.pose().translate(off.x + bounds.w / 2, off.y + bounds.h / 2, 100.0f);
+			guiGraphics.pose().mulPoseMatrix(new Matrix4f().scaling(size, size, -size / 10f));
 			guiGraphics.pose().mulPose(quaternion);
 			Lighting.setupForEntityInInventory();
 

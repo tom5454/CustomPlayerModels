@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import com.tom.cpl.gui.elements.ConfirmPopup;
+import com.tom.cpl.gui.IGui;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.elements.ElementType;
@@ -140,7 +140,7 @@ public class ETextures implements TreeElement {
 
 	@Override
 	public String getName() {
-		return e.gui().i18nFormat("label.cpm.texture." + type.name().toLowerCase(Locale.ROOT));
+		return e.ui.i18nFormat("label.cpm.texture." + type.name().toLowerCase(Locale.ROOT));
 	}
 
 	@Override
@@ -161,8 +161,8 @@ public class ETextures implements TreeElement {
 	}
 
 	@Override
-	public int textColor() {
-		return isEdited() ? 0 : e.gui().getColors().button_text_disabled;
+	public int textColor(IGui gui) {
+		return isEdited() ? 0 : gui.getColors().button_text_disabled;
 	}
 
 	public void updateAnim() {
@@ -190,7 +190,7 @@ public class ETextures implements TreeElement {
 
 		@Override
 		public String getName() {
-			return e.gui().i18nFormat("label.cpm.tree.animatedTex");
+			return e.ui.i18nFormat("label.cpm.tree.animatedTex");
 		}
 
 		@Override
@@ -215,16 +215,16 @@ public class ETextures implements TreeElement {
 	@Override
 	public void delete() {
 		if(e.elements.stream().anyMatch(e -> e.type == ElementType.ROOT_PART && getTextureSheet((VanillaModelPart) e.typeData) == type)) {
-			ConfirmPopup.confirm(e.frame, e.gui().i18nFormat("label.cpm.confirm"), e.gui().i18nFormat("label.cpm.resetTextureSheet"), () ->  {
+			e.ui.displayConfirm(e.ui.i18nFormat("label.cpm.confirm"), e.ui.i18nFormat("label.cpm.resetTextureSheet"), () ->  {
 				e.action("delTexture").
 				updateValueOp(this, this.getImage(), this.copyDefaultImg(), ETextures::setImage).
 				updateValueOp(this, this.isEdited(), false, ETextures::setEdited).
 				execute();
-			}, e.gui().i18nFormat("button.cpm.resetTexture"));
+			}, null, e.ui.i18nFormat("button.cpm.resetTexture"));
 		} else {
-			ConfirmPopup.confirm(e.frame, e.gui().i18nFormat("label.cpm.confirm"), e.gui().i18nFormat("label.cpm.removeTextureSheet"), () -> {
+			e.ui.displayConfirm(e.ui.i18nFormat("label.cpm.confirm"), e.ui.i18nFormat("label.cpm.removeTextureSheet"), () -> {
 				e.action("remove", "label.cpm.textureSheet").removeFromMap(e.textures, type, this).execute();
-			});
+			}, null);
 		}
 	}
 

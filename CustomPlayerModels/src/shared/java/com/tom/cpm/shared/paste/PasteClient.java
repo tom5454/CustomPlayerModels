@@ -26,6 +26,7 @@ import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.MojangAPI;
 
 public class PasteClient {
+	public static final boolean CAN_OPEN_BROWSER = true;
 	public static final String URL = "https://paste.tom5454.com";
 	public static final String URL_CF = "https://cf-paste.tom5454.com";
 	private MojangAPI mojang;
@@ -178,6 +179,10 @@ public class PasteClient {
 			Map<String, Object> r = parseResponse(response);
 			cf.complete((String) r.get("id"));
 		});
+	}
+
+	public CompletableFuture<Void> logout() {
+		return null;
 	}
 
 	private HttpURLConnection createUrlConnection(URL url, CompletableFuture<?> cf) throws IOException {

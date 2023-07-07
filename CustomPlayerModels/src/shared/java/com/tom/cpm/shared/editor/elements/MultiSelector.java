@@ -50,11 +50,11 @@ public interface MultiSelector extends TreeElement {
 			if(elements.stream().noneMatch(e -> e.type == ElementType.ROOT_PART)) {
 				editor.setOffset.accept(getVec(VecType.OFFSET));
 				if(elements.stream().allMatch(e -> e.itemRenderer == null && e.texture && e.faceUV == null)) {
-					editor.setModeBtn.accept(editor.gui().i18nFormat("button.cpm.mode.tex"));
+					editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.mode.tex"));
 					editor.setModePanel.accept(ModeDisplayType.TEX);
 					editor.setTexturePanel.accept(getVecUV());
 				} else if(elements.stream().allMatch(e -> e.itemRenderer == null && !e.texture)) {
-					editor.setModeBtn.accept(editor.gui().i18nFormat("button.cpm.mode.color"));
+					editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.mode.color"));
 					editor.setModePanel.accept(ModeDisplayType.COLOR);
 					editor.setPartColor.accept(0);
 				}

@@ -106,7 +106,6 @@ public class RenderSystem implements RetroGLAccess<String> {
 	private static double ticker;
 	private static JsPropertyMap<Object> keyDown = JsPropertyMap.of();
 	private static String lastTyped;
-	//private static Map<String, Consumer<WindowMessageEvent>> windowEventListeners = new HashMap<>();
 	private static WebGLProgram usingProgram;
 
 	static {
@@ -185,12 +184,6 @@ public class RenderSystem implements RetroGLAccess<String> {
 					e.returnValue = "";
 				}
 			}, true);
-			/*addEventListener(window, "message", evIn -> {
-				MessageEvent<String> e = Js.uncheckedCast(evIn);
-				WindowMessageEvent evt = Js.cast(Global.JSON.parse(e.data));
-				Consumer<WindowMessageEvent> ec = windowEventListeners.get(evt.getUUID());
-				if(ec != null)ec.accept(evt);
-			}, true);*/
 			bindEventListeners(document, true);
 			addEventListener(document.body, "drop", ev -> {
 				ev.preventDefault();
@@ -294,8 +287,6 @@ public class RenderSystem implements RetroGLAccess<String> {
 			passEvent = false;
 			KeyboardEvent e = Js.uncheckedCast(evIn);
 
-			//DomGlobal.console.log("KeyDown", e, Js.isTruthy(keyDown.getAsAny(e.code)));
-
 			if(Js.isTruthy(keyDown.getAsAny(e.code)) && !e.key.equals("Tab"))
 				return;
 
@@ -310,7 +301,6 @@ public class RenderSystem implements RetroGLAccess<String> {
 		addEventListener(l, "keyup", evIn -> {
 			passEvent = false;
 			KeyboardEvent e = Js.uncheckedCast(evIn);
-			//DomGlobal.console.log("KeyUp", e);
 			keyDown.set(e.code, false);
 			lastTyped = null;
 		}, registerRemove);
@@ -1043,9 +1033,9 @@ public class RenderSystem implements RetroGLAccess<String> {
 	}
 
 	public static interface VertexBuffer2d {
-		VertexBuffer pos(float x, float y);
-		VertexBuffer tex(float u, float v);
-		VertexBuffer color(float red, float green, float blue, float alpha);
+		VertexBuffer2d pos(float x, float y);
+		VertexBuffer2d tex(float u, float v);
+		VertexBuffer2d color(float red, float green, float blue, float alpha);
 		void endVertex();
 		void finish();
 	}
@@ -1058,18 +1048,21 @@ public class RenderSystem implements RetroGLAccess<String> {
 		}
 
 		@Override
-		public VertexBuffer pos(float x, float y) {
-			return buf.pos(mat2d, x, y, blitOffset).normal(0, 0, 1);
+		public VertexBuffer2d pos(float x, float y) {
+			buf.pos(mat2d, x, y, blitOffset).normal(0, 0, 1);
+			return this;
 		}
 
 		@Override
-		public VertexBuffer tex(float u, float v) {
-			return buf.tex(u, v);
+		public VertexBuffer2d tex(float u, float v) {
+			buf.tex(u, v);
+			return this;
 		}
 
 		@Override
-		public VertexBuffer color(float red, float green, float blue, float alpha) {
-			return buf.color(red, green, blue, alpha);
+		public VertexBuffer2d color(float red, float green, float blue, float alpha) {
+			buf.color(red, green, blue, alpha);
+			return this;
 		}
 
 		@Override
@@ -1207,10 +1200,6 @@ public class RenderSystem implements RetroGLAccess<String> {
 		return Js.isTruthy(keyDown.getAsAny(JSKeyCodes.codeHack(key)));
 	}
 
-	/*public static void registerMessageListener(UUID uuid, Consumer<WindowMessageEvent> listener) {
-		windowEventListeners.put(uuid.toString(), listener);
-	}*/
-
 	public static HTMLDocument getDocument() {
 		return document;
 	}
@@ -1279,5 +1268,9 @@ public class RenderSystem implements RetroGLAccess<String> {
 			}
 			return img;
 		});
+	}
+
+	public static void renderCanvas(HTMLCanvasElement c, int x, int y, int w, int h) {
+		txtCtx.drawImage(c, x * displayRatio, y * displayRatio, w * displayRatio, h * displayRatio);
 	}
 }

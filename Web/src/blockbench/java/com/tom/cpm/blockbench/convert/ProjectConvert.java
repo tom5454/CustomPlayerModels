@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.tom.cpl.gui.Frame;
-import com.tom.cpm.blockbench.BBGui;
+import com.tom.cpm.blockbench.BBUI;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Blockbench.ExportProperties;
@@ -34,7 +34,7 @@ public class ProjectConvert {
 	public static Promise<Blob> compile(JsObject options) {
 		DomGlobal.console.log("Export");
 		Editor editor = new Editor();
-		editor.setGui(BBGui.makeFrame());
+		editor.setUI(new BBUI());
 		return exportWithWarnings(editor).then(__ -> {
 			try {
 				StoreIDGen storeIDgen = new StoreIDGen();
@@ -78,7 +78,7 @@ public class ProjectConvert {
 			CPMCodec.codec.dispatchEvent("parse", Js.cast(JsPropertyMap.of("arraybuffer", ab)));
 			return RenderSystem.withContext(() -> {
 				Editor editor = new Editor();
-				editor.setGui(BBGui.makeFrame());
+				editor.setUI(new BBUI());
 				editor.loadDefaultPlayerModel();
 				return new JSZip().loadAsync(ab).then(editor.project::load).then(__ -> {
 					return RenderSystem.withContext(() -> {

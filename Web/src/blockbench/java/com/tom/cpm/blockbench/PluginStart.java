@@ -60,6 +60,16 @@ public class PluginStart implements EntryPoint {
 						break;
 						}
 					}
+
+					@Override
+					public void openURL(String url) {
+						Global.openExternal(url);
+					}
+
+					@Override
+					public String getAppID() {
+						return "Blockbench CPM Plugin";
+					}
 				};
 				DomGlobal.console.log("CPM Plugin loading " + WebMC.platform);
 			} catch (Throwable e) {

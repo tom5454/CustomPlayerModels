@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.tom.cpl.gui.IGui;
-import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
 import com.tom.cpl.util.Image;
@@ -88,13 +87,13 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 
 			@Override
 			public String getName() {
-				return editor.gui().i18nFormat("label.cpm.template_tex_setup");
+				return editor.ui.i18nFormat("label.cpm.template_tex_setup");
 			}
 
 			@Override
 			public void updateGui() {
 				if(texSize != 0) {
-					editor.setModeBtn.accept(editor.gui().i18nFormat("button.cpm.template_remove_tex"));
+					editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.template_remove_tex"));
 				}
 				editor.setModePanel.accept(ModeDisplayType.TEX);
 				editor.setTexturePanel.accept(new Vec3i(u, v, texSize));
@@ -103,11 +102,11 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 			@Override
 			public void modeSwitch() {
 				if(texSize != 0) {
-					editor.frame.openPopup(new ConfirmPopup(editor.frame, editor.gui().i18nFormat("label.cpm.confirmDel"),
-							editor.gui().i18nFormat("label.cpm.template_remove_tex"), () -> {
+					editor.ui.displayConfirm(editor.ui.i18nFormat("label.cpm.confirmDel"),
+							editor.ui.i18nFormat("label.cpm.template_remove_tex"), () -> {
 								editor.action("i", "label.cpm.template_remove_tex").updateValueOp(TexEditorArg.this, texSize, 0, (a, b) -> a.texSize = b).execute();
 								editor.updateGui();
-							}, null));
+							}, null);
 				}
 			}
 
@@ -132,15 +131,15 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 
 			@Override
 			public String getName() {
-				return editor.gui().i18nFormat("label.cpm.template_place_tex");
+				return editor.ui.i18nFormat("label.cpm.template_place_tex");
 			}
 
 			@Override
 			public void modeSwitch() {
 				if(texSize == 0)texSize = 1;
-				editor.frame.openPopup(new ConfirmPopup(editor.frame,
-						editor.gui().i18nFormat("label.cpm.template_place_tex.title"),
-						editor.gui().i18nFormat("label.cpm.template_place_tex.desc"),
+				editor.ui.displayConfirm(
+						editor.ui.i18nFormat("label.cpm.template_place_tex.title"),
+						editor.ui.i18nFormat("label.cpm.template_place_tex.desc"),
 						() -> {
 							ETextures tex = editor.textures.get(TextureSheetType.SKIN);
 							ActionBuilder ab = editor.action("placeTex").
@@ -149,12 +148,12 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 							tex.getImage().draw(et.getTemplateTexture().getImage(), u, v);
 							ab.execute();
 							editor.updateGui();
-						}, null));
+						}, null);
 			}
 
 			@Override
 			public void updateGui() {
-				editor.setModeBtn.accept(editor.gui().i18nFormat("button.cpm.template_place_tex"));
+				editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.template_place_tex"));
 				editor.setModePanel.accept(ModeDisplayType.TEX);
 				editor.setTexturePanel.accept(new Vec3i(u, v, texSize));
 			}

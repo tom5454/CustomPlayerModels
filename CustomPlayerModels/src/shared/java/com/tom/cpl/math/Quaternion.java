@@ -80,6 +80,21 @@ public class Quaternion {
 		}
 	}
 
+	public Quaternion(float x, float y, float z, float w) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.w = w;
+	}
+
+	public Quaternion(Mat4f m) {
+		double w = Math.sqrt(1 + m.m00 + m.m11 + m.m22) / 2;
+		this.x = (float) ((m.m21 - m.m12) / (4 * w));
+		this.y = (float) ((m.m02 - m.m20) / (4 * w));
+		this.z = (float) ((m.m10 - m.m01) / (4 * w));
+		this.w = (float) w;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -174,8 +189,7 @@ public class Quaternion {
 		this.w = f3 * f7 - f * f4 - f1 * f5 - f2 * f6;
 	}
 
-	public static Vec3f reorder(Vec3f in, RotationOrder orderIn, RotationOrder to) {
-		Mat4f m = new Mat4f(new Quaternion(in.x, in.y, in.z, orderIn));
+	public static Vec3f matrixToRotation(Mat4f m, RotationOrder to) {
 		float a = m.m02;
 		float c = m.m12;
 		float d = m.m22;
@@ -241,6 +255,10 @@ public class Quaternion {
 			break;
 		}
 		return new Vec3f();
+	}
+
+	public static Vec3f reorder(Vec3f in, RotationOrder orderIn, RotationOrder to) {
+		return matrixToRotation(new Mat4f(new Quaternion(in.x, in.y, in.z, orderIn)), to);
 	}
 
 	public static enum RotationOrder {
