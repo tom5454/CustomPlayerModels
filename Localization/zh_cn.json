@@ -289,7 +289,7 @@
   "tooltip.cpm.config.advScalingSettings": "始终启用高级缩放设置。",
   "tooltip.cpm.effect.setFpHandPos": "设置第一人称手位置\\在游戏中转到文件/测试，在世界上一次\\按[%s]打开手势菜单\\打开左下角的手位置菜单。\\或按Ctrl+ 手势菜单",
   "tooltip.cpm.display.forceItemInAnim": "始终使用动画选项卡中选定的持有项目\\项目可能不会显示在正确的位置",
-  "tooltip.cpm.display.displayGizmo": "切换显示 gizmo\\Keybind：%s",
+  "tooltip.cpm.display.displayGizmo": "切换显示 gizmo\\快捷键：%s",
   "tooltip.cpm.disableVanillaAnim": "禁用所选部分的所有原版动画。",
   "tooltip.cpm.loading": "正在加载项目...",
   "tooltip.cpm.loadSuccess": "已加载项目：%s",
