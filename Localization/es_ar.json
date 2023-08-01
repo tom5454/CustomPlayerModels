@@ -1125,5 +1125,5 @@
   "osc-label.cpmosc.oscTransmitAddr": "Direcci\u00f3n:",
   "osc-tooltip.cpmosc.oscSettings": "Abre las opciones de OSC y Debug Popup",
   "osc-tooltip.cpmosc.oscWizard": "Genera una nueva animaci\u00f3n de OSC usando un wizard",
-  "osc-tooltip.cpmosc.oscFirstArg": "Filtra por el primer hilod e argumento, Deja vac\u00edo para ning\u00fan filtro\\\u00fatil para VMC triggers"
+  "osc-tooltip.cpmosc.oscFirstArg": "Filtra por el primer hilo de argumento, Deja vac\u00edo para ning\u00fan filtro\\\u00fatil para VMC triggers"
 }
