@@ -2,6 +2,8 @@ package com.tom.cpm.shared.animation;
 
 import java.util.function.Consumer;
 
+import com.tom.cpl.block.World;
+import com.tom.cpl.item.Inventory;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
@@ -12,14 +14,16 @@ import com.tom.cpm.shared.network.NetworkUtil;
 
 public class AnimationState {
 	public final ServerAnimationState serverState = new ServerAnimationState();
-	public final ServerAnimationState localState = new ServerAnimationState();//TODO integrate
+	public final ServerAnimationState localState = new ServerAnimationState();
+	public Inventory playerInventory;
+	public World world;
 	public int encodedState;
 	public long jumping;
 	public boolean hasSkullOnHead;
 	public boolean wearingHelm, wearingBody, wearingLegs, wearingBoots, wearingElytra;
 	public boolean sleeping, dying, riding, elytraFlying, swimming, retroSwimming, sprinting, sneaking, takingDmg, tridentSpin;
 	public float moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, pitch, speakLevel;
-	public int hurtTime;
+	public int hurtTime, skyLight, blockLight;
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
 	public ArmPose leftArm = ArmPose.EMPTY, rightArm = ArmPose.EMPTY;
 	public HandAnimation usingAnimation = HandAnimation.NONE;
@@ -27,6 +31,7 @@ public class AnimationState {
 	public byte[] gestureData;
 	public VRState vrState;
 	public AnimationMode animationMode;
+	public long dayTime;
 
 	public void resetPlayer() {
 		sleeping = false;
@@ -51,6 +56,7 @@ public class AnimationState {
 		speakLevel = 0;
 		voiceMuted = false;
 		invisible = false;
+		if(playerInventory != null)playerInventory.reset();
 	}
 
 	public void resetModel() {
@@ -122,6 +128,7 @@ public class AnimationState {
 		h.accept(VanillaPose.HUNGER);
 		h.accept(VanillaPose.AIR);
 		if(invisible)h.accept(VanillaPose.INVISIBLE);
+		h.accept(VanillaPose.LIGHT);
 	}
 
 	private static VanillaPose getArmPose(ArmPose pose, boolean left) {

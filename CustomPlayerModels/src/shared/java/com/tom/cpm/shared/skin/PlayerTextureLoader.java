@@ -89,6 +89,12 @@ public abstract class PlayerTextureLoader {
 		}
 	}
 
+	protected void defineTexture(TextureType type, String url, File file) {
+		Texture tx = textures.computeIfAbsent(type, Texture::new);
+		tx.url = url;
+		tx.cachedFile = file;
+	}
+
 	protected <Ty extends Enum<Ty>> void defineTexture(Ty type, String url) {
 		defineTexture(TextureType.valueOf(type.name()), url);
 	}

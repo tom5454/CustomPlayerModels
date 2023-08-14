@@ -61,6 +61,7 @@ sourceSets {
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 			srcDir "../CustomPlayerModels-1.16/src/platform-shared/resources"
+			exclude "**/*.lang"
 		}
 	}
 }

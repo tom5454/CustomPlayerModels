@@ -9,7 +9,7 @@ import java.util.Set;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class NBTTagCompound extends NBTTag {
-	private Map<String, NBTTag> tagMap = new HashMap<>();
+	protected Map<String, NBTTag> tagMap = new HashMap<>();
 
 	@Override
 	public byte getId() {
@@ -20,6 +20,7 @@ public class NBTTagCompound extends NBTTag {
 	public void write(IOHelper output) throws IOException {
 		for (String s : this.tagMap.keySet()) {
 			NBTTag nbtbase = this.tagMap.get(s);
+			nbtbase.loadLazy();
 			writeEntry(s, nbtbase, output);
 		}
 
@@ -81,6 +82,10 @@ public class NBTTagCompound extends NBTTag {
 
 	public void setIntArray(String key, int[] value) {
 		this.tagMap.put(key, new NBTTagIntArray(value));
+	}
+
+	public void setLongArray(String key, long[] value) {
+		this.tagMap.put(key, new NBTTagLongArray(value));
 	}
 
 	public void setBoolean(String key, boolean value) {
@@ -188,9 +193,19 @@ public class NBTTagCompound extends NBTTag {
 		}
 	}
 
+	public long[] getLongArray(String key) {
+		try {
+			return !this.hasKey(key, TAG_LONG_ARRAY) ? new long[0] : ((NBTTagLongArray)this.tagMap.get(key)).getLongArray();
+		} catch (ClassCastException ex) {
+			return new long[0];
+		}
+	}
+
 	public NBTTagCompound getCompoundTag(String key) {
 		try {
-			return !this.hasKey(key, TAG_COMPOUND) ? new NBTTagCompound() : (NBTTagCompound)this.tagMap.get(key);
+			NBTTagCompound tag = !this.hasKey(key, TAG_COMPOUND) ? new NBTTagCompound() : (NBTTagCompound)this.tagMap.get(key);
+			tag.loadLazy();
+			return tag;
 		} catch (ClassCastException ex) {
 			return new NBTTagCompound();
 		}
@@ -202,6 +217,7 @@ public class NBTTagCompound extends NBTTag {
 				return new NBTTagList();
 			} else {
 				NBTTagList nbttaglist = (NBTTagList)this.tagMap.get(key);
+				nbttaglist.loadLazy();
 				return nbttaglist.tagCount() > 0 && nbttaglist.getTagType() != type ? new NBTTagList() : nbttaglist;
 			}
 		} catch (ClassCastException ex) {
@@ -222,6 +238,7 @@ public class NBTTagCompound extends NBTTag {
 		StringBuilder stringbuilder = new StringBuilder("{");
 
 		for (Entry<String, NBTTag> entry : this.tagMap.entrySet()) {
+			entry.getValue().loadLazy();
 			if (stringbuilder.length() != 1) {
 				stringbuilder.append(',');
 			}
@@ -258,7 +275,7 @@ public class NBTTagCompound extends NBTTag {
 		return super.hashCode() ^ this.tagMap.hashCode();
 	}
 
-	private static void writeEntry(String name, NBTTag data, IOHelper output) throws IOException {
+	protected static void writeEntry(String name, NBTTag data, IOHelper output) throws IOException {
 		output.writeByte(data.getId());
 
 		if (data.getId() != TAG_END)

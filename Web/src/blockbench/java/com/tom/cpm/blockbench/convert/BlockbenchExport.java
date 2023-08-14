@@ -494,10 +494,10 @@ public class BlockbenchExport {
 			TextureSheetType tst = e.getKey();
 			if(tst.editable) {
 				ETextures tex = editor.textures.get(tst);
-				while(tex.provider.size.x < 16384 && m.elems.stream().anyMatch(DecimalFixOp::needsFix)) {
-					tex.provider.size.x *= 2;
-					tex.provider.size.y *= 2;
-					m.elems.forEach(d -> d.baseMul *= 2);
+				if (tex.provider.size.x * 16 < 16384 && tex.provider.size.y * 16 < 16384 && m.elems.stream().anyMatch(DecimalFixOp::needsFix)) {
+					tex.provider.size.x *= 16;
+					tex.provider.size.y *= 16;
+					m.elems.forEach(d -> d.baseMul *= 16);
 				}
 			}
 			m.elems.forEach(DecimalFixOp::apply);
@@ -1020,8 +1020,10 @@ public class BlockbenchExport {
 		public void apply() {
 			if((mode & 4) != 0) {
 				set.accept(baseMul);
-			} else
+			} else if((mode & 2) != 0) {
 				set.accept((int) (val * baseMul * ((mode & 1) != 0 ? mul.y : mul.x)));
+			} else
+				set.accept((int) (val * ((mode & 1) != 0 ? mul.y : mul.x)));
 		}
 	}
 

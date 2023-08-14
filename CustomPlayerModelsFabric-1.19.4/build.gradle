@@ -42,7 +42,13 @@ dependencies {
 	
 	compileOnly files("../CustomPlayerModels-1.19.4/of.jar")
 	
-    modCompileOnly('curse.maven:vivecraft-667903:4462687')
+    modCompileOnly('curse.maven:vivecraft-667903:4684116')
+    implementation('com.electronwill.night-config:toml:3.6.6')
+    implementation('com.electronwill.night-config:core:3.6.6')
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
 }
 
 loom {
@@ -58,6 +64,7 @@ sourceSets {
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 			srcDir "../CustomPlayerModels-1.19.4/src/platform-shared/resources"
+			exclude "**/*.lang"
 		}
 	}
 }

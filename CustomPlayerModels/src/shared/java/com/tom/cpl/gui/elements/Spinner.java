@@ -148,5 +148,5 @@ public class Spinner extends GuiElement implements Focusable {
 
 	private String roundValue(int dp, float newValue) {
 		return new BigDecimal(value).setScale(dp, RoundingMode.HALF_UP).toPlainString();
-	};
+	}
 }

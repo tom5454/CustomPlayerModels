@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
+import com.tom.cpl.block.BlockStateHandler;
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
@@ -17,7 +18,9 @@ import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.ScrollPanel;
+import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.render.RenderTypeBuilder;
+import com.tom.cpl.tag.AllTagManagers;
 import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.ILogger;
@@ -42,6 +45,8 @@ import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.IVersionCheck;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.MojangAPI;
+import com.tom.cpm.web.client.item.BlockStateHandlerImpl;
+import com.tom.cpm.web.client.item.ItemStackHandlerImpl;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.FileManagerPopup;
 import com.tom.cpm.web.client.render.GuiImpl;
@@ -67,6 +72,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	private boolean canExit, versionCheck;
 	private static boolean firstOpen = true;
 	private GuiImpl currentGui;
+	private AllTagManagers tags;
 
 	public WebMC(ModConfigFile config, boolean canExit, boolean versionCheck) {
 		this.versionCheck = versionCheck;
@@ -81,6 +87,8 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		profile = new GameProfile(UUID.randomUUID(), "Web");
 		this.config = config;
 		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId, GameProfile::getName);
+
+		tags = new AllTagManagers();
 	}
 
 	protected String buildPlatformString() {
@@ -408,5 +416,20 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 
 	public String getAppID() {
 		return DomGlobal.document.title;
+	}
+
+	@Override
+	public BlockStateHandler<?> getBlockStateHandler() {
+		return BlockStateHandlerImpl.impl;
+	}
+
+	@Override
+	public ItemStackHandler<?> getItemStackHandler() {
+		return ItemStackHandlerImpl.impl;
+	}
+
+	@Override
+	public AllTagManagers getBuiltinTags() {
+		return tags;
 	}
 }

@@ -1,7 +1,7 @@
 package com.tom.cpm.client.vr;
 
-import org.vivecraft.render.VRPlayerModel;
-import org.vivecraft.render.VRPlayerModel_WithArms;
+import org.vivecraft.client.render.VRPlayerModel;
+import org.vivecraft.client.render.VRPlayerModel_WithArms;
 
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;

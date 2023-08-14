@@ -6,9 +6,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
-import com.illposed.osc.OSCMessage;
-import com.illposed.osc.OSCSerializeException;
-import com.illposed.osc.transport.OSCPortOut;
+import com.tom.cpmoscc.external.com.illposed.osc.OSCMessage;
+import com.tom.cpmoscc.external.com.illposed.osc.OSCSerializeException;
+import com.tom.cpmoscc.external.com.illposed.osc.transport.OSCPortOut;
 
 public class OSCTransmitter implements Closeable {
 	private final OSCPortOut oscOut;

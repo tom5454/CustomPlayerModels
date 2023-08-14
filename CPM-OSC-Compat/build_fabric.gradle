@@ -37,8 +37,6 @@ dependencies {
 
     compileOnly "${project.cpm_source}:CustomPlayerModels-API:${project.cpm_api_version}"
 	modRuntimeOnly "${project.cpm_source}:CustomPlayerModels-Fabric-1.18:${project.cpm_runtime_version}"
-	
-	compileOnly "com.illposed.osc:javaosc-core:0.8"
 }
 
 processResources {
@@ -60,6 +58,7 @@ sourceSets {
 		}
 		resources {
 			srcDir "src/shared/resources"
+			exclude "**/*.lang"
 		}
 	}
     main {

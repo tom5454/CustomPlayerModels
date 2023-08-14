@@ -3,10 +3,12 @@ package com.tom.cpmoscc;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import com.tom.cpl.block.BlockState;
+import com.tom.cpl.item.Inventory;
+import com.tom.cpl.item.NamedSlot;
+import com.tom.cpl.item.Stack;
 import com.tom.cpm.api.IClientAPI;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
@@ -26,7 +28,7 @@ import com.tom.cpm.shared.util.ErrorLog;
 import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 
 public class CPMOSC {
-	public static final Logger LOGGER = LogManager.getLogger("CPM-OSC Compat");
+	public static final OSCLog LOGGER = OSCLog.getLogger("OSC");
 
 	public static final String OSC_ENABLE = "cpmosc_enable";
 	public static final String OSC_ENABLE_TRANSMIT = "cpmosc_enable_transmit";
@@ -34,22 +36,14 @@ public class CPMOSC {
 	public static final String OSC_OUT_KEY = "cpmosc_transmit_port";
 
 	public static final String MOD_ID = "cpmoscc";
+	public static final String VERSION_CHECK_URL = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/CPM-OSC-Compat/version-check.json";
 	public static IClientAPI api;
 	private static OSCReceiver osc;
 	private static OSCTransmitter transmit;
 	public static WeakReference<ModelDefinition> currentDefinition = new WeakReference<>(null);
 	public static OSCMessageManager manager = new OSCMessageManager();
 	private static final Field[] outputFields = AnimationState.class.getDeclaredFields();
-	private static final Field[] outputFields2;
-	static {//TODO move this to a normal field in CPM 0.7.0
-		Field[] f;
-		try {
-			f = ServerAnimationState.class.getDeclaredFields();
-		} catch (Throwable e) {
-			f = new Field[0];
-		}
-		outputFields2 = f;
-	}
+	private static final Field[] outputFields2 = ServerAnimationState.class.getDeclaredFields();
 
 	public static void tick(Object playerIn) {
 		if(MinecraftClientAccess.get() != null && MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED && api != null && isEnabled()) {
@@ -126,6 +120,21 @@ public class CPMOSC {
 								transmit.send("/cpm/pose/name", p.getId());
 								transmit.send("/cpm/pose/id", -1);
 							}
+							if (player.animState.playerInventory != null) {
+								Inventory i = player.animState.playerInventory;
+								sendItem(def, "held_item", i.getStack(i.getNamedSlotId(NamedSlot.MAIN_HAND)));
+								sendItem(def, "armor/helmet", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_HELMET)));
+								sendItem(def, "armor/chestplate", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_CHESTPLATE)));
+								sendItem(def, "armor/leggings", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_LEGGINGS)));
+								sendItem(def, "armor/boots", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_BOOTS)));
+								sendItem(def, "off_hand", i.getStack(i.getNamedSlotId(NamedSlot.OFF_HAND)));
+								transmit.send("/cpm/heldSlot", i.getNamedSlotId(NamedSlot.MAIN_HAND));
+							}
+							if (player.animState.world != null) {
+								sendBlock(def, "below", player.animState.world.getBlock(0, -1, 0));
+								sendBlock(def, "feet", player.animState.world.getBlock(0, 0, 0));
+								sendBlock(def, "head", player.animState.world.getBlock(0, 1, 0));
+							}
 						}
 						transmit.send("/cpm/gameTime", time);
 					} catch (Exception e) {
@@ -134,6 +143,18 @@ public class CPMOSC {
 				}
 			}
 		}
+	}
+
+	private static void sendBlock(ModelDefinition def, String name, BlockState st) throws IOException {
+		transmit.send("/cpm/world/" + name + "/id", st.getBlockId());
+		transmit.send("/cpm/world/" + name + "/tags", def.modelTagManager.getBlockTags().listStackTags(st).stream().map(t -> t.getId()).collect(Collectors.toList()));
+	}
+
+	private static void sendItem(ModelDefinition def, String name, Stack stack) throws IOException {
+		transmit.send("/cpm/" + name + "/id", stack.getItemId());
+		transmit.send("/cpm/" + name + "/count", stack.getCount(), stack.getMaxCount());
+		transmit.send("/cpm/" + name + "/damage", stack.getDamage(), stack.getMaxDamage());
+		transmit.send("/cpm/" + name + "/tags", def.modelTagManager.getItemTags().listStackTags(stack).stream().map(t -> t.getId()).collect(Collectors.toList()));
 	}
 
 	private static void send(Object inst, Field f) throws Exception {

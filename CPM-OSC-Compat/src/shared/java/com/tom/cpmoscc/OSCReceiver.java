@@ -4,10 +4,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 
-import com.illposed.osc.MessageSelector;
-import com.illposed.osc.OSCMessageEvent;
-import com.illposed.osc.OSCMessageListener;
-import com.illposed.osc.transport.OSCPortIn;
+import com.tom.cpmoscc.external.com.illposed.osc.MessageSelector;
+import com.tom.cpmoscc.external.com.illposed.osc.OSCMessageEvent;
+import com.tom.cpmoscc.external.com.illposed.osc.OSCMessageListener;
+import com.tom.cpmoscc.external.com.illposed.osc.transport.OSCPortIn;
 
 public class OSCReceiver implements MessageSelector, OSCMessageListener, Closeable {
 	private final OSCPortIn oscIn;

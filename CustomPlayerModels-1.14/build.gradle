@@ -166,6 +166,7 @@ sourceSets {
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 			srcDir "src/platform-shared/resources"
+			exclude "**/*.lang"
 		}
 	}
 }

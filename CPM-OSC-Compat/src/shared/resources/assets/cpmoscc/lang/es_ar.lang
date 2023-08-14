@@ -1,0 +1,25 @@
+# =====================================================
+# Auto-generated file DO NOT EDIT! See template jsons in the Localization folder of the GitHub Repo.
+# =====================================================
+
+osc-button.cpmosc.oscSettings=Opciones de OSC
+osc-button.cpmosc.oscWizard=OSC Animation Wizard
+osc-button.cpmosc.copyName=Copiar Nombre
+osc-button.cpmosc.selectFromInputs=Seleccionar desde entradas existentes
+osc-button.cpmosc.importFromSelected=Importar desde animación seleccionada
+osc-button.cpmosc.createNew=Crear Nuevo
+osc-button.cpmosc.editSelected=Editar Seleccionado
+osc-label.cpmosc.oscPath=Dirección de OSC:
+osc-label.cpmosc.oscFirstArg=Primer Argumento:
+osc-label.cpmosc.oscArgId=ID de Argumento:
+osc-label.cpmosc.valueRange=Rango de Valor:
+osc-label.cpmosc.noOscData=No se recibió data de OSC\Revisa tus opciones de programa de envío\Puede que tengas que reiniciar tu programa de envío\Si lo abriste antes de abrir esta intefaz
+osc-label.cpmosc.oscEnable=OSC Habilitado
+osc-label.cpmosc.oscDisabled=OSC está deshabilitado, por favor habilitalo usando la casilla y presiona guardar
+osc-label.cpmosc.oscPort=Porte:
+osc-label.cpmosc.oscDebugger=OSC Debugger
+osc-label.cpmosc.oscEnableTransmit=Habilitar Transmisión
+osc-label.cpmosc.oscTransmitAddr=Dirección:
+osc-tooltip.cpmosc.oscSettings=Abre las opciones de OSC y Debug Popup
+osc-tooltip.cpmosc.oscWizard=Genera una nueva animación de OSC usando un wizard
+osc-tooltip.cpmosc.oscFirstArg=Filtra por el primer hilo de argumento, Deja vacío para ningún filtro\útil para VMC triggers

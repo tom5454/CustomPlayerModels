@@ -6,7 +6,7 @@ public class VRDetector {
 		try {
 			//do not load other vivecraft classes that loads vanilla classes
 			//that would load the class before mixin
-			Class.forName("org.vivecraft.utils.lwjgl.Matrix");
+			Class.forName("org.vivecraft.common.utils.lwjgl.Matrix");
 			return true;
 		}
 		catch (ClassNotFoundException e) {

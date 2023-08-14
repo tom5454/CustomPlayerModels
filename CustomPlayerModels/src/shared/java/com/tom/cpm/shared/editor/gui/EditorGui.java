@@ -805,6 +805,7 @@ public class EditorGui extends Frame {
 				ErrorLog.addFormattedLog(LogLevel.ERROR, "label.cpm.error.save", e);
 				showError("save", e.toString());
 				editor.setInfoMsg.accept(Pair.of(0, ""));
+				return null;
 			}
 			if(TestIngameManager.isTesting()) {
 				if(TestIngameManager.openTestIngame(this, true)) {

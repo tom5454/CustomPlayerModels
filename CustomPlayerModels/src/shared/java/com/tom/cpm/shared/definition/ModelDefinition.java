@@ -17,11 +17,13 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.tag.AllTagManagers;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.LocalizedException;
 import com.tom.cpl.util.StringBuilderStream;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -74,6 +76,7 @@ public class ModelDefinition {
 	public boolean hideHeadIfSkull = true, removeArmorOffset, removeBedOffset, enableInvisGlow;
 	public ModelPartCloneable cloneable;
 	private Throwable error;
+	public AllTagManagers modelTagManager = new AllTagManagers(MinecraftClientAccess.get().getBuiltinTags());
 
 	public ModelDefinition(ModelDefinitionLoader<?> loader, Player<?> player) {
 		this.loader = loader;

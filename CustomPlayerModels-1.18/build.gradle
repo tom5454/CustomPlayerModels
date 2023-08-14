@@ -157,7 +157,7 @@ mixin {
     debug.verbose = true
     debug.export = true
     
-    extraMappings file("vivecraft-667903-4409423.tsrg")
+    extraMappings file("vivecraft-667903-4684110.tsrg")
 }
 
 dependencies {
@@ -183,7 +183,7 @@ dependencies {
     compileOnly files("of.jar")
     
     compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.0-1.18.2-forge")
-    compileOnly fg.deobf('curse.maven:vivecraft-667903:4409423')
+    compileOnly fg.deobf('curse.maven:vivecraft-667903:4684110')
 }
 
 sourceSets {
@@ -195,6 +195,7 @@ sourceSets {
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 			srcDir "src/platform-shared/resources"
+			exclude "**/*.lang"
 		}
 	}
 }

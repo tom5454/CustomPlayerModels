@@ -27,6 +27,7 @@ import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.render.RenderTypeBuilder;
+import com.tom.cpl.tag.AllTagManagers;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
@@ -43,6 +44,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 	private final Minecraft mc;
 	private final ModelDefinitionLoader<GameProfile> loader;
 	private final PlayerRenderManager prm;
+	private final AllTagManagers tags;
 	public RenderTypeBuilder<ResourceLocation, RenderType> renderBuilder;
 
 	public MinecraftObject(Minecraft mc) {
@@ -56,6 +58,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 		renderBuilder.register(RenderMode.COLOR, CustomRenderTypes::entityColorTranslucent, 0);
 		renderBuilder.register(RenderMode.COLOR_GLOW, CustomRenderTypes::entityColorEyes, 1);
 		renderBuilder.register(RenderMode.OUTLINE, CustomRenderTypes::linesNoDepth, 2);
+		tags = new AllTagManagers(mc, CPMTagLoader::new);
 	}
 
 	@Override
@@ -226,5 +229,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public RenderTypeBuilder<?, ?> getRenderBuilder() {
 		return renderBuilder;
+	}
+
+	@Override
+	public AllTagManagers getBuiltinTags() {
+		return tags;
 	}
 }

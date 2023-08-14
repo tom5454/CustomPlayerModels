@@ -24,6 +24,8 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
+import com.tom.cpm.common.PlayerInventory;
+import com.tom.cpm.common.WorldImpl;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
@@ -111,6 +113,8 @@ public class PlayerProfile extends Player<EntityPlayer> {
 		animState.isOnLadder = player.isOnLadder();
 		animState.isBurning = player.canRenderOnFire();
 		animState.inGui = inGui;
+		PlayerInventory.setInv(animState, player.inventory);
+		WorldImpl.setWorld(animState, player);
 
 		if(player.getActiveItemStack() != null && player.getActiveItemStack().getItem() instanceof ItemBow) {
 			float f = 20F;

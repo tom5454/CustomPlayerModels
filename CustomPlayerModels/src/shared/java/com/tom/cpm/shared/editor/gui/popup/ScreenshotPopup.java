@@ -3,6 +3,8 @@ package com.tom.cpm.shared.editor.gui.popup;
 import java.util.function.Consumer;
 
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.FileChooserPopup;
+import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MatrixStack;
@@ -22,6 +24,7 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureProvider;
+import com.tom.cpm.shared.util.Log;
 
 public class ScreenshotPopup extends PopupPanel {
 
@@ -38,7 +41,38 @@ public class ScreenshotPopup extends PopupPanel {
 		camPanel.setBounds(new Box(12, 10, 256, 256));
 		addElement(camPanel);
 
-		Button take = new Button(gui, gui.i18nFormat("button.cpm.takeScreenshot"), () -> {
+		Button openFile = new Button(gui, gui.i18nFormat("button.cpm.importIconImage"), () -> {
+			FileChooserPopup fc = new FileChooserPopup(eg);
+			fc.setTitle(gui.i18nFormat("button.cpm.importIconImage"));
+			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
+			fc.setFilter(new FileFilter("png"));
+			fc.setExtAdder(n -> n + ".png");
+			fc.setAccept(f -> {
+				Image.loadFrom(f).thenAcceptAsync(img -> {
+					Image i;
+					if(img.getWidth() != 256 || img.getHeight() != 256) {
+						i = new Image(256, 256);
+						i.draw(img, 0, 0, 256, 256);
+					} else i = img;
+					if(e.description == null)e.description = new ModelDescription();
+					e.description.camera = cam;
+					e.description.icon = i;
+					setter.accept(e.description.icon);
+					e.markDirty();
+					close();
+				}, gui::executeLater).exceptionally(ex -> {
+					Log.error("Failed to load image", ex);
+					gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("error.cpm.img_load_failed", ex.getLocalizedMessage()));
+					return null;
+				});
+			});
+			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
+			eg.openPopup(fc);
+		});
+		openFile.setBounds(new Box(40, 270, 100, 20));
+		addElement(openFile);
+
+		Button takeScreenshot = new Button(gui, gui.i18nFormat("button.cpm.takeScreenshot"), () -> {
 			if(e.description == null)e.description = new ModelDescription();
 			e.description.camera = cam;
 			e.description.icon = camPanel.takeScreenshot(new Vec2i(256, 256));
@@ -46,8 +80,8 @@ public class ScreenshotPopup extends PopupPanel {
 			e.markDirty();
 			close();
 		});
-		take.setBounds(new Box(90, 270, 100, 20));
-		addElement(take);
+		takeScreenshot.setBounds(new Box(145, 270, 100, 20));
+		addElement(takeScreenshot);
 
 		setBounds(new Box(0, 0, 280, 300));
 	}

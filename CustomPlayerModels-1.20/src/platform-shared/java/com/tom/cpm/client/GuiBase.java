@@ -453,7 +453,7 @@ public class GuiBase extends Screen implements IGui {
 				updateField = false;
 			}
 			graphics.pose().pushPose();
-			graphics.pose().translate(0, 0, 80);
+			graphics.pose().translate(0, 0, 400);
 			field.render(graphics, mouseX, mouseY, partialTicks);
 			graphics.pose().popPose();
 		}
@@ -630,20 +630,13 @@ public class GuiBase extends Screen implements IGui {
 		float rbr = (bottomRight >> 16 & 255) / 255.0F;
 		float gbr = (bottomRight >> 8 & 255) / 255.0F;
 		float bbr = (bottomRight & 255) / 255.0F;
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		Tesselator tessellator = Tesselator.getInstance();
-		BufferBuilder bufferbuilder = tessellator.getBuilder();
+		VertexConsumer bufferbuilder = graphics.bufferSource().getBuffer(RenderType.guiOverlay());
 		Matrix4f mat = graphics.pose().last().pose();
-		bufferbuilder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		float bo = 0;
 		bufferbuilder.vertex(mat, right, top, bo).color(rtr, gtr, btr, atr).endVertex();
 		bufferbuilder.vertex(mat, left, top, bo).color(rtl, gtl, btl, atl).endVertex();
 		bufferbuilder.vertex(mat, left, bottom, bo).color(rbl, gbl, bbl, abl).endVertex();
 		bufferbuilder.vertex(mat, right, bottom, bo).color(rbr, gbr, bbr, abr).endVertex();
-		tessellator.end();
-		RenderSystem.disableBlend();
 	}
 
 	@Override

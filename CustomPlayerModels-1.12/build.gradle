@@ -111,6 +111,7 @@ sourceSets {
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
+			exclude "assets/*/lang/*.json"
 		}
 	}
 }

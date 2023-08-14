@@ -13,4 +13,7 @@ public class Menu {
 	public Menu(Object[] opt) {}
 
 	public native void open(EventTarget target);
+
+	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_MenuSeparator_$$")
+	public static class MenuSeparator {}
 }

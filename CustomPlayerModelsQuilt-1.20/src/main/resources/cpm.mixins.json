@@ -1,0 +1,31 @@
+{
+  "required": true,
+  "package": "com.tom.cpm.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  	"common.PlayerListMixin",
+	"common.PlayerMixin",
+	"common.ServerEntityMixin",
+	"ServerGamePacketListenerImplMixin"
+  ],
+  "client": [
+    "PlayerRendererMixin",
+    "ClientPacketListenerMixin",
+	"CapeLayerMixin",
+	"ElytraLayerMixin",
+	"HumanoidArmorLayerMixin",
+	"SkullBlockRendererMixin",
+	"CustomHeadLayerMixin",
+	"BlockEntityWithoutLevelRendererMixin",
+	"ParrotOnShoulderLayerMixin",
+	"LocalPlayerMixin",
+	"LivingRendererMixin",
+	
+	"GameRendererMixinFabric",
+	"MinecraftMixinFabric",
+	"PlayerRendererMixinFabric"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

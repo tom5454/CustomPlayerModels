@@ -28,6 +28,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
+import com.tom.cpm.common.PlayerInventory;
+import com.tom.cpm.common.WorldImpl;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
@@ -146,6 +148,8 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 		animState.isFreezing = player.getTicksFrozen() > 0;
 		animState.inGui = inGui;
 		animState.firstPersonMod = inFirstPerson.getAsBoolean();
+		PlayerInventory.setInv(animState, player.getInventory());
+		WorldImpl.setWorld(animState, player);
 
 		if(player.getUseItem().getItem() instanceof CrossbowItem) {
 			float f = CrossbowItem.getChargeDuration(player.getUseItem());

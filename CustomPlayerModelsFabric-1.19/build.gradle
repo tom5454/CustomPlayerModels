@@ -24,6 +24,17 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -45,12 +56,18 @@ dependencies {
 	
 	compileOnly files("../CustomPlayerModels-1.19/of.jar")
 	
-	//modImplementation ('curse.maven:sodium-394468:3957319')
-    //modImplementation ('curse.maven:irisshaders-455508:3957332')
-    /*implementation("org.joml:joml:1.10.4")
-    implementation("org.anarres:jcpp:1.4.14")
+	/*modImplementation ('maven.modrinth:sodium:mc1.19.2-0.4.4')
+    modImplementation ('maven.modrinth:iris:1.6.4+1.19.2')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     modImplementation (files('firstperson-fabric-2.1.2-mc1.19.1.jar'))*/
-    modCompileOnly('curse.maven:vivecraft-667903:4409428')
+    
+    modCompileOnly('curse.maven:vivecraft-667903:4684112')
+    implementation('com.electronwill.night-config:toml:3.6.6')
+    implementation('com.electronwill.night-config:core:3.6.6')
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
 }
 
 loom {
@@ -66,6 +83,7 @@ sourceSets {
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
 			srcDir "../CustomPlayerModels-1.19/src/platform-shared/resources"
+			exclude "**/*.lang"
 		}
 	}
 }

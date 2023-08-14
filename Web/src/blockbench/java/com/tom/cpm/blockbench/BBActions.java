@@ -294,7 +294,7 @@ public class BBActions {
 		Animation.menu.structure.forEach(v -> {
 			if(!(v instanceof String)) {
 				Action ac = Js.uncheckedCast(v);
-				if(ac.name.equals("menu.animation.properties")) {
+				if(ac.name != null && ac.name.equals("menu.animation.properties")) {
 					ConditionUtil.and(ac.condition, a -> ac.condition = a, CPMCodec.notCPM());
 				}
 			}

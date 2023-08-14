@@ -1,0 +1,25 @@
+tsrg2 left right
+org/vivecraft/client_vr/render/VRArmRenderer org/vivecraft/client_vr/render/VRArmRenderer
+	<init> (Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;Z)V <init>
+	renderRightHand (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V m_117770_
+	renderLeftHand (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V m_117813_
+	renderItem (Lorg/vivecraft/client_vr/provider/ControllerType;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;)V renderItem
+org/vivecraft/client/render/VRPlayerModel_WithArms org/vivecraft/client/render/VRPlayerModel_WithArms
+	slim slim
+	leftShoulder leftShoulder
+	rightShoulder rightShoulder
+	leftShoulder_sleeve leftShoulder_sleeve
+	rightShoulder_sleeve rightShoulder_sleeve
+	leftHand leftHand
+	rightHand rightHand
+	rotInfo rotInfo
+	laying laying
+	<init> (Lnet/minecraft/client/model/geom/ModelPart;Z)V <init>
+	copyUV (Lnet/minecraft/client/model/geom/ModelPart$Polygon;Lnet/minecraft/client/model/geom/ModelPart$Polygon;)V copyUV
+	createMesh (Lnet/minecraft/client/model/geom/builders/CubeDeformation;Z)Lnet/minecraft/client/model/geom/builders/MeshDefinition; createMesh
+	bodyParts ()Ljava/lang/Iterable; m_5608_
+	setupAnim (Lnet/minecraft/world/entity/LivingEntity;FFFFF)V m_6973_
+	setAllVisible (Z)V m_8009_
+	getArm (Lnet/minecraft/world/entity/HumanoidArm;)Lnet/minecraft/client/model/geom/ModelPart; m_102851_
+	translateToHand (Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V m_6002_
+	setupAnim (Lnet/minecraft/world/entity/Entity;FFFFF)V m_6973_

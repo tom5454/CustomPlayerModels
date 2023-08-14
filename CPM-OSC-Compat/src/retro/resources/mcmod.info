@@ -1,0 +1,11 @@
+[
+{
+  "modid" : "cpmoscc",
+  "name" : "CPM OSC Compat",
+  "description": "A Customizable Player Models, OSC/VMC protocol compat mod.",
+  "version": "${version}",
+  "url" : "https://www.curseforge.com/minecraft/mc-mods/cpmoscc",
+  "authorList": ["tom5454"],
+  "logoFile" : "icon.png"
+}
+]

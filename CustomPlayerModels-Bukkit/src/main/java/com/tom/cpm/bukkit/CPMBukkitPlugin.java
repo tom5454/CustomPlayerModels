@@ -13,7 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.tom.cpl.block.BlockStateHandler;
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
@@ -125,6 +127,16 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			@Override
 			public String getModVersion() {
 				return getDescription().getVersion();
+			}
+
+			@Override
+			public ItemStackHandler<?> getItemStackHandler() {
+				return null;
+			}
+
+			@Override
+			public BlockStateHandler<?> getBlockStateHandler() {
+				return null;
 			}
 		});
 		MinecraftObjectHolder.setServerObject(new MinecraftServerAccess() {

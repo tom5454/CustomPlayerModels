@@ -69,6 +69,7 @@ public enum AnimationDisplayData {
 	AIR(VanillaPose.AIR, null, null, Type.LAYERS),
 	IN_MENU(VanillaPose.IN_MENU, null, null, Type.LAYERS),
 	INVISIBLE(VanillaPose.INVISIBLE, null, null, Type.LAYERS),
+	LIGHT(VanillaPose.LIGHT, null, null, Type.LAYERS),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;

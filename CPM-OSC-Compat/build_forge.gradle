@@ -1,7 +1,6 @@
 plugins {
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '5.1.+'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 project.buildDir = '/build_forge'
@@ -157,8 +156,6 @@ dependencies {
   	runtimeOnly fg.deobf("${project.cpm_source}:CustomPlayerModels-1.16:${project.cpm_runtime_version}")
   	
   	compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.1.0-1.16.5-forge")
-  	
-  	shade "com.illposed.osc:javaosc-core:0.8"
 }
 
 sourceSets {
@@ -168,6 +165,7 @@ sourceSets {
 		}
 		resources {
 			srcDir "src/shared/resources"
+			exclude "**/*.lang"
 		}
 	}
 	main {
@@ -193,48 +191,13 @@ jar {
     }
 }
 
-
 // Example configuration to allow publishing using the maven-publish task
 // This is the preferred method to reobfuscate your jar file
-tasks.named('jar', Jar).configure {
-    finalizedBy 'reobfJar'
-    archiveClassifier.set('lite')
-}
+jar.finalizedBy('reobfJar') 
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
 
-tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar).configure {
-	configurations = [project.configurations.shade]
-	archiveClassifier.set('')
-  
-	relocate 'com.illposed.osc', 'com.tom.cpmoscc.external.com.illposed.osc'
-  
-	exclude 'log4j-dev.properties'
-
-	dependencies {
-		exclude(dependency('log4j:log4j:'))
-		exclude(dependency(':slf4j-api:'))
-		exclude(dependency(':slf4j-ext:'))
-		exclude(dependency(':slf4j-log4j12:'))
-	}
-	
-	finalizedBy 'reobfShadowJar'
-}
-
-tasks.named('assemble') {
-    dependsOn shadowJar
-}
-
-reobf {
-    shadowJar {}
-}
-
-// Without these two, Gradle will issue warnings about task inputs from other tasks outputs without declaring dependencies
-tasks.named('reobfShadowJar') { dependsOn tasks.named('jar') }
-tasks.named('shadowJar') { dependsOn 'reobfJar' }
-
 task sourcesJar(type: Jar, dependsOn: classes) {
-	duplicatesStrategy = "exclude"
     classifier = 'sources'
     from sourceSets.main.allSource
 }

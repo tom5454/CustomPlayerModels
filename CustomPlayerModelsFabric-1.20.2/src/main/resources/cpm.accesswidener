@@ -1,0 +1,58 @@
+accessWidener	v1	named
+mutable field net/minecraft/client/model/PlayerModel leftSleeve Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel rightSleeve Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel leftPants Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel rightPants Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel jacket Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel cloak Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/PlayerModel cloak Lnet/minecraft/client/model/geom/ModelPart;
+
+extendable class net/minecraft/client/model/geom/ModelPart
+mutable field net/minecraft/client/model/HumanoidModel head Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel hat Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel body Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel rightArm Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel leftArm Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel rightLeg Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel leftLeg Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible field net/minecraft/client/model/geom/ModelPart cubes Ljava/util/List;
+accessible field net/minecraft/client/model/geom/ModelPart children Ljava/util/Map;
+
+accessible field net/minecraft/client/gui/components/AbstractWidget height I
+
+accessible field net/minecraft/client/Options modelParts Ljava/util/Set;
+
+accessible field net/minecraft/client/model/SkullModel root Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/SkullModel head Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/SkullModel root Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/SkullModel head Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible field net/minecraft/client/model/ElytraModel rightWing Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/ElytraModel leftWing Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/ElytraModel rightWing Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/ElytraModel leftWing Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
+accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
+
+accessible class net/minecraft/server/level/ChunkMap$TrackedEntity
+accessible field net/minecraft/server/level/ChunkMap entityMap Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
+accessible field net/minecraft/server/level/ChunkMap$TrackedEntity seenBy Ljava/util/Set;
+accessible field net/minecraft/server/level/ChunkMap$TrackedEntity entity Lnet/minecraft/world/entity/Entity;
+
+accessible method net/minecraft/world/level/storage/LevelResource <init> (Ljava/lang/String;)V
+
+accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
+
+accessible field net/minecraft/client/gui/components/EditBox highlightPos I
+
+accessible field net/minecraft/server/network/ServerCommonPacketListenerImpl server Lnet/minecraft/server/MinecraftServer;
+
+accessible field net/minecraft/client/renderer/texture/HttpTexture file Ljava/io/File;
+accessible field net/minecraft/client/renderer/texture/HttpTexture urlString Ljava/lang/String;
+
+accessible field net/minecraft/network/protocol/common/ClientboundCustomPayloadPacket KNOWN_TYPES Ljava/util/Map;
+mutable field net/minecraft/network/protocol/common/ClientboundCustomPayloadPacket KNOWN_TYPES Ljava/util/Map;
+accessible field net/minecraft/network/protocol/common/ServerboundCustomPayloadPacket KNOWN_TYPES Ljava/util/Map;
+mutable field net/minecraft/network/protocol/common/ServerboundCustomPayloadPacket KNOWN_TYPES Ljava/util/Map;

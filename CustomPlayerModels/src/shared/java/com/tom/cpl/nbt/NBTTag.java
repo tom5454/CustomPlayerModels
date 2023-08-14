@@ -17,12 +17,15 @@ public abstract class NBTTag {
 	public static final int TAG_LIST        = 9;
 	public static final int TAG_COMPOUND    = 10;
 	public static final int TAG_INT_ARRAY   = 11;
+	public static final int TAG_LONG_ARRAY  = 12;
 	public static final int TAG_ANY_NUMERIC = 99;
 
 	public abstract byte getId();
 	public abstract void write(IOHelper o) throws IOException;
 	public abstract void read(IOHelper i) throws IOException;
 	public abstract NBTTag copy();
+
+	protected void loadLazy() {}
 
 	@Override
 	public int hashCode() {

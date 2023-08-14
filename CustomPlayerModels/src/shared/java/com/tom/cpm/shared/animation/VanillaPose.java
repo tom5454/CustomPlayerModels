@@ -70,6 +70,7 @@ public enum VanillaPose implements IPose {
 	AIR(syncedState(s -> s.air)),
 	IN_MENU,
 	INVISIBLE,
+	LIGHT(s -> Math.max(s.skyLight, s.blockLight) / 15f),
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;

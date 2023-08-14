@@ -2,7 +2,9 @@ package com.tom.cpm.shared;
 
 import java.util.EnumSet;
 
+import com.tom.cpl.block.BlockStateHandler;
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
@@ -32,4 +34,7 @@ public interface MinecraftCommonAccess {
 	default IVersionCheck getVersionCheck() {
 		return VersionCheck.get(getMCVersion(), getModVersion());
 	}
+
+	ItemStackHandler<?> getItemStackHandler();
+	BlockStateHandler<?> getBlockStateHandler();
 }

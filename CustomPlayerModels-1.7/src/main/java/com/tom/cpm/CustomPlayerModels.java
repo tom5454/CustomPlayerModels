@@ -14,13 +14,17 @@ import net.minecraft.util.IChatComponent;
 
 import net.minecraftforge.common.MinecraftForge;
 
+import com.tom.cpl.block.BlockStateHandler;
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.text.TextStyle;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
+import com.tom.cpm.common.BlockStateHandlerImpl;
 import com.tom.cpm.common.Command;
+import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -146,5 +150,15 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public CPMApiManager getApi() {
 		return api;
+	}
+
+	@Override
+	public BlockStateHandler<?> getBlockStateHandler() {
+		return BlockStateHandlerImpl.impl;
+	}
+
+	@Override
+	public ItemStackHandler<?> getItemStackHandler() {
+		return ItemStackHandlerImpl.impl;
 	}
 }

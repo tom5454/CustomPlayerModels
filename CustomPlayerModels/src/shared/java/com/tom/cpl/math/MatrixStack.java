@@ -45,11 +45,13 @@ public class MatrixStack {
 			e.normal.mul(-1.0F);
 		}
 
-		float f = 1.0F / x;
-		float f1 = 1.0F / y;
-		float f2 = 1.0F / z;
-		float f3 = MathHelper.fastInvCubeRoot(f * f1 * f2);
-		e.normal.mul(Mat3f.makeScaleMatrix(f3 * f, f3 * f1, f3 * f2));
+		if (x < 0 || y < 0 || z < 0) {
+			float f = 1.0F / x;
+			float f1 = 1.0F / y;
+			float f2 = 1.0F / z;
+			float f3 = MathHelper.fastInvCubeRoot(f * f1 * f2);
+			e.normal.mul(Mat3f.makeScaleMatrix(f3 * f, f3 * f1, f3 * f2));
+		}
 	}
 
 	public void rotate(Quaternion quaternion) {

@@ -11,8 +11,7 @@
     "AbstractTextureMixin_OF",
     "ModelPartMixin_OF",
     "BlockEntityWithoutLevelRendererMixinFabric_OF",
-	"VRArmRendererMixin_VR",
-	"VRPlayerModelWithArmsMixin_VR"
+	"VRArmRendererMixin_VR"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -11,11 +11,15 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 
+import com.tom.cpl.block.BlockStateHandler;
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.text.TextRemapper;
 import com.tom.cpl.text.TextStyle;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
+import com.tom.cpm.common.BlockStateHandlerImpl;
+import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 
 public abstract class CommonBase implements MinecraftCommonAccess {
@@ -62,5 +66,15 @@ public abstract class CommonBase implements MinecraftCommonAccess {
 	@Override
 	public String getMCVersion() {
 		return SharedConstants.getCurrentVersion().getName();
+	}
+
+	@Override
+	public BlockStateHandler<?> getBlockStateHandler() {
+		return BlockStateHandlerImpl.impl;
+	}
+
+	@Override
+	public ItemStackHandler<?> getItemStackHandler() {
+		return ItemStackHandlerImpl.impl;
 	}
 }

@@ -10,6 +10,7 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.render.RenderTypeBuilder;
+import com.tom.cpl.tag.AllTagManagers;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.ImageIO.IImageIO;
 import com.tom.cpm.shared.config.Player;
@@ -87,4 +88,6 @@ public interface MinecraftClientAccess {
 
 	default void populatePlatformSettings(String group, Panel panel) {
 	}
+
+	AllTagManagers getBuiltinTags();
 }

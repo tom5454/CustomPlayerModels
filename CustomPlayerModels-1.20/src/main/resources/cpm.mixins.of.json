@@ -10,8 +10,7 @@
   "client": [
 	"AbstractTextureMixin_OF",
 	"ModelPartMixin_OF",
-	"VRArmRendererMixin_VR",
-	"VRPlayerModelWithArmsMixin_VR"
+	"VRArmRendererMixin_VR"
   ],
   "injectors": {
     "defaultRequire": 1

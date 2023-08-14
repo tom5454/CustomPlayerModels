@@ -1125,5 +1125,8 @@
   "commands.cpm.detect.success": "%s\u0027s \u0027%s\u0027 animation value is %s",
   "commands.cpm.genericFail": "Command Failed: %s",
   "button.cpm.quick_key.bind": "Quick Access %s",
-  "button.cpm.quick_key.unbind": "Unbind"
+  "button.cpm.quick_key.unbind": "Unbind",
+  "button.cpm.importIconImage": "Import Image",
+  "tooltip.cpm.animType.pose.light": "Animation frame depends on the light level at the player\u0027s feet",
+  "label.cpm.pose.light": "Light Level"
 }

@@ -158,6 +158,7 @@ button.cpm.paste.logout=Logout
 button.cpm.reverseAnimation=Reverse Animation
 button.cpm.quick_key.bind=Quick Access %d
 button.cpm.quick_key.unbind=Unbind
+button.cpm.importIconImage=Import Image
 
 button.cpm.root_group.cape=Cape
 button.cpm.root_group.elytra=Elytra
@@ -345,6 +346,7 @@ tooltip.cpm.fixAdditiveToggle=Auto fix part transforms after editing additive an
 tooltip.cpm.animType.pose.invisible=Plays when you have the Invisibility effect
 tooltip.cpm.effect.enableInvisGlow=Keep the "Glowing Eyes" parts visible\while having the Invisibility potion effect.\Always disabled on Vanilla servers.\Configurable on CPM servers (enabled by default) with:\/cpm effects invis_glow <enable>
 tooltip.cpm.anim.reverseAnimation=Reverse Animation Frame Order
+tooltip.cpm.animType.pose.light=Animation frame depends on the light level at the player's feet
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -877,6 +879,7 @@ label.cpm.pose.hunger=Hunger
 label.cpm.pose.air=Air
 label.cpm.pose.in_menu=Using Container
 label.cpm.pose.invisible=Invisible
+label.cpm.pose.light=Light Level
 
 label.cpm.dir.up=Up
 label.cpm.dir.down=Down
