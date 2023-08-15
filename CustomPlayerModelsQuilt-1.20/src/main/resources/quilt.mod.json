@@ -48,6 +48,6 @@
 			}
 		]
 	},
-	"accessWidener": "cpm.accesswidener",
+	"access_widener": "cpm.accesswidener",
 	"mixin": "cpm.mixins.json"
 }

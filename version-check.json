@@ -41,8 +41,8 @@
     "1.20.1-latest": "0.6.10a",
     "1.20.1-fabric-latest": "0.6.10a",
     "1.20.2-fabric-latest": "0.6.10a",
-    "1.20-quilt-latest": "0.6.10a",
-    "1.20.1-quilt-latest": "0.6.10a"
+    "1.20-quilt-latest": "0.6.10b",
+    "1.20.1-quilt-latest": "0.6.10b"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -983,9 +983,11 @@
     "0.6.10a": "Added: set custom icon for .cpmmodel files\nAdded item and block tag system\n- Only available through OSC for now\nNew animation: Light Level\nPorted to Quilt 1.20\nPorted to Fabric 23w32a\n\nUpdated ViveCraft support\nUpdated Chinese Translation (#457)\nAdded Spanish translations (#466)\nFixed text fields not rendering correctly on 1.20 (Closes #461)\nFixed rounding and made functions runnable in spinners (#456)\nFixed color picker not rendering correctly on 1.20\nFixed pencil not working correctly on 1.20\nFixed render scale effecting part lighting"
   },
   "1.20-quilt": {
-    "0.6.10a": "Added: set custom icon for .cpmmodel files\nAdded item and block tag system\n- Only available through OSC for now\nNew animation: Light Level\nPorted to Quilt 1.20\nPorted to Fabric 23w32a\n\nUpdated ViveCraft support\nUpdated Chinese Translation (#457)\nAdded Spanish translations (#466)\nFixed text fields not rendering correctly on 1.20 (Closes #461)\nFixed rounding and made functions runnable in spinners (#456)\nFixed color picker not rendering correctly on 1.20\nFixed pencil not working correctly on 1.20\nFixed render scale effecting part lighting"
+    "0.6.10a": "Added: set custom icon for .cpmmodel files\nAdded item and block tag system\n- Only available through OSC for now\nNew animation: Light Level\nPorted to Quilt 1.20\nPorted to Fabric 23w32a\n\nUpdated ViveCraft support\nUpdated Chinese Translation (#457)\nAdded Spanish translations (#466)\nFixed text fields not rendering correctly on 1.20 (Closes #461)\nFixed rounding and made functions runnable in spinners (#456)\nFixed color picker not rendering correctly on 1.20\nFixed pencil not working correctly on 1.20\nFixed render scale effecting part lighting",
+    "0.6.10b": "Fixed crash on Quilt (Closes #475)"
   },
   "1.20.1-quilt": {
-    "0.6.10a": "Added: set custom icon for .cpmmodel files\nAdded item and block tag system\n- Only available through OSC for now\nNew animation: Light Level\nPorted to Quilt 1.20\nPorted to Fabric 23w32a\n\nUpdated ViveCraft support\nUpdated Chinese Translation (#457)\nAdded Spanish translations (#466)\nFixed text fields not rendering correctly on 1.20 (Closes #461)\nFixed rounding and made functions runnable in spinners (#456)\nFixed color picker not rendering correctly on 1.20\nFixed pencil not working correctly on 1.20\nFixed render scale effecting part lighting"
+    "0.6.10a": "Added: set custom icon for .cpmmodel files\nAdded item and block tag system\n- Only available through OSC for now\nNew animation: Light Level\nPorted to Quilt 1.20\nPorted to Fabric 23w32a\n\nUpdated ViveCraft support\nUpdated Chinese Translation (#457)\nAdded Spanish translations (#466)\nFixed text fields not rendering correctly on 1.20 (Closes #461)\nFixed rounding and made functions runnable in spinners (#456)\nFixed color picker not rendering correctly on 1.20\nFixed pencil not working correctly on 1.20\nFixed render scale effecting part lighting",
+    "0.6.10b": "Fixed crash on Quilt (Closes #475)"
   }
 }
