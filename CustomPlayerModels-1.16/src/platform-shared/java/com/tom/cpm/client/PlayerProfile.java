@@ -20,16 +20,19 @@ import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import com.tom.cpl.block.entity.ActiveEffect;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
 import com.tom.cpm.client.vr.VRPlayerRenderer;
+import com.tom.cpm.common.EntityTypeHandlerImpl;
 import com.tom.cpm.common.PlayerInventory;
 import com.tom.cpm.common.WorldImpl;
 import com.tom.cpm.shared.config.Player;
@@ -125,6 +128,7 @@ public class PlayerProfile extends Player<PlayerEntity> {
 		animState.moveAmountZ = (float) (player.getZ() - player.zo);
 		animState.yaw = player.yRot;
 		animState.pitch = player.xRot;
+		animState.bodyYaw = player.yBodyRot;
 
 		if(player.isModelPartShown(PlayerModelPart.HAT))animState.encodedState |= 1;
 		if(player.isModelPartShown(PlayerModelPart.JACKET))animState.encodedState |= 2;
@@ -151,6 +155,8 @@ public class PlayerProfile extends Player<PlayerEntity> {
 		animState.firstPersonMod = inFirstPerson.getAsBoolean();
 		PlayerInventory.setInv(animState, player.inventory);
 		WorldImpl.setWorld(animState, player);
+		if (player.getVehicle() != null)animState.vehicle = EntityTypeHandlerImpl.impl.wrap(player.getVehicle().getType());
+		player.getActiveEffects().forEach(e -> animState.allEffects.add(new ActiveEffect(Registry.MOB_EFFECT.getKey(e.getEffect()).toString(), e.getAmplifier(), e.getDuration(), !e.isVisible())));
 
 		if(player.getUseItem().getItem() instanceof CrossbowItem) {
 			float f = CrossbowItem.getChargeDuration(player.getUseItem());

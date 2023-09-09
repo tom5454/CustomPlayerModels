@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.text.I18n;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
@@ -15,6 +17,7 @@ import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.network.ServerCaps;
 import com.tom.cpm.shared.network.packet.GestureC2S;
@@ -30,6 +33,7 @@ public class AnimationEngine {
 	private boolean[] quickAccessPressed = new boolean[IKeybind.QUICK_ACCESS_KEYBINDS_COUNT];
 	private int gestureAutoResetTimer = -1;
 	private byte[] gestureData = new byte[2];
+	private boolean checkedUUID;
 
 	public void tick() {
 		tickCounter++;
@@ -85,7 +89,17 @@ public class AnimationEngine {
 			if(gestureAutoResetTimer == 0 && def != null) {
 				playGesture(def.getAnimations(), null);
 			}
+			if (!checkedUUID) {
+				checkedUUID = true;
+				ModelDefinitionLoader<Object> dl = MinecraftClientAccess.get().getDefinitionLoader();
+				UUID client = dl.getGP_UUID(MinecraftClientAccess.get().getPlayerIDObject());
+				UUID server = dl.getGP_UUID(MinecraftClientAccess.get().getCurrentPlayerIDObject());
+				if (!Objects.equals(client, server)) {
+					MinecraftClientAccess.get().getNetHandler().displayText(new FormatText("chat.cpm.clientUUIDMismatch"));
+				}
+			}
 		} else {
+			checkedUUID = false;
 			modelScale = null;
 			Arrays.fill(quickAccessPressed, false);
 			gestureAutoResetTimer = -1;

@@ -1,8 +1,12 @@
 package com.tom.cpm.shared.animation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.tom.cpl.block.World;
+import com.tom.cpl.block.entity.ActiveEffect;
+import com.tom.cpl.block.entity.EntityType;
 import com.tom.cpl.item.Inventory;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.util.Hand;
@@ -17,12 +21,13 @@ public class AnimationState {
 	public final ServerAnimationState localState = new ServerAnimationState();
 	public Inventory playerInventory;
 	public World world;
+	public EntityType vehicle;
 	public int encodedState;
 	public long jumping;
 	public boolean hasSkullOnHead;
 	public boolean wearingHelm, wearingBody, wearingLegs, wearingBoots, wearingElytra;
 	public boolean sleeping, dying, riding, elytraFlying, swimming, retroSwimming, sprinting, sneaking, takingDmg, tridentSpin;
-	public float moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, pitch, speakLevel;
+	public float moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, bodyYaw, pitch, speakLevel;
 	public int hurtTime, skyLight, blockLight;
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
 	public ArmPose leftArm = ArmPose.EMPTY, rightArm = ArmPose.EMPTY;
@@ -32,6 +37,7 @@ public class AnimationState {
 	public VRState vrState;
 	public AnimationMode animationMode;
 	public long dayTime;
+	public List<ActiveEffect> allEffects = new ArrayList<>();
 
 	public void resetPlayer() {
 		sleeping = false;
@@ -51,11 +57,14 @@ public class AnimationState {
 		bowPullback = 0;
 		crossbowPullback = 0;
 		yaw = 0;
+		bodyYaw = 0;
 		pitch = 0;
 		hurtTime = 0;
 		speakLevel = 0;
 		voiceMuted = false;
 		invisible = false;
+		vehicle = null;
+		allEffects.clear();
 		if(playerInventory != null)playerInventory.reset();
 	}
 
@@ -129,6 +138,8 @@ public class AnimationState {
 		h.accept(VanillaPose.AIR);
 		if(invisible)h.accept(VanillaPose.INVISIBLE);
 		h.accept(VanillaPose.LIGHT);
+		h.accept(VanillaPose.HEAD_ROTATION_YAW);
+		h.accept(VanillaPose.HEAD_ROTATION_PITCH);
 	}
 
 	private static VanillaPose getArmPose(ArmPose pose, boolean left) {
@@ -151,6 +162,8 @@ public class AnimationState {
 			return left ? VanillaPose.TRIDENT_LEFT : VanillaPose.TRIDENT_RIGHT;
 		case TOOT_HORN:
 			return left ? VanillaPose.TOOT_HORN_LEFT : VanillaPose.TOOT_HORN_RIGHT;
+		case BRUSH:
+			return left ? VanillaPose.BRUSH_LEFT : VanillaPose.BRUSH_RIGHT;
 		default:
 			break;
 		}

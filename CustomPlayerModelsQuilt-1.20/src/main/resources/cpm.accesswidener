@@ -50,3 +50,6 @@ accessible field net/minecraft/client/gui/components/EditBox highlightPos I
 accessible field net/minecraft/client/resources/SkinManager skinsDirectory Ljava/io/File;
 
 accessible field net/minecraft/server/network/ServerGamePacketListenerImpl server Lnet/minecraft/server/MinecraftServer;
+
+accessible class net/minecraft/world/level/biome/Biome$ClimateSettings 
+accessible field net/minecraft/world/level/biome/Biome climateSettings Lnet/minecraft/world/level/biome/Biome$ClimateSettings;

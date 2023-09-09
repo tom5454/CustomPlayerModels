@@ -2,6 +2,7 @@ package com.tom.cpm.shared.paste;
 
 import java.util.Comparator;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -70,8 +71,9 @@ public class PastePopup extends PopupPanel {
 	}
 
 	private static void handleException(UI gui, Runnable retry, Runnable close, Throwable e) {
-		if(e instanceof InterruptedException)return;
-		if(e instanceof LocalizedIOException) {
+		if (e instanceof CompletionException)e = ((CompletionException)e).getCause();
+		if (e instanceof InterruptedException)return;
+		if (e instanceof LocalizedIOException) {
 			gui.displayConfirm(gui.i18nFormat("label.cpm.error"),
 					gui.i18nFormat("label.cpm.paste.error", ((LocalizedIOException) e).getLocalizedText().toString(gui)),
 					retry, () -> {

@@ -5,7 +5,9 @@ import java.io.File;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.dimension.DimensionType;
 
+import com.tom.cpl.block.BiomeHandler;
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpm.common.BiomeHandlerImpl;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftServerAccess;
 import com.tom.cpm.shared.network.NetHandler;
@@ -31,5 +33,10 @@ public class MinecraftServerObject implements MinecraftServerAccess {
 
 	public MinecraftServer getServer() {
 		return server;
+	}
+
+	@Override
+	public BiomeHandler<?> getBiomeHandler() {
+		return BiomeHandlerImpl.impl;
 	}
 }

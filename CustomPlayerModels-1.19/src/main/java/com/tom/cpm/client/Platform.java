@@ -1,8 +1,5 @@
 package com.tom.cpm.client;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.Connection;
 import net.minecraft.world.entity.player.Player;
@@ -14,24 +11,6 @@ import com.mojang.math.Matrix4f;
 import io.netty.channel.Channel;
 
 public class Platform {
-
-	public static void initPlayerProfile() {
-		if(ModList.get().isLoaded("firstpersonmod")) {
-			try {
-				MethodHandle h = MethodHandles.lookup().unreflectGetter(Class.forName("dev.tr7zw.firstperson.FirstPersonModelCore").getDeclaredField("isRenderingPlayer"));
-				PlayerProfile.inFirstPerson = () -> {
-					try {
-						return (boolean) h.invoke();
-					} catch (Throwable e) {
-						PlayerProfile.inFirstPerson = () -> false;
-						return false;
-					}
-				};
-				PlayerProfile.inFirstPerson.getAsBoolean();
-			} catch (Throwable e) {
-			}
-		}
-	}
 
 	public static Matrix4f createMatrix(float[] array) {
 		return new Matrix4f(array);
@@ -47,5 +26,9 @@ public class Platform {
 
 	public static Channel getChannel(Connection conn) {
 		return conn.channel();
+	}
+
+	public static boolean isModLoaded(String id) {
+		return ModList.get().isLoaded(id);
 	}
 }

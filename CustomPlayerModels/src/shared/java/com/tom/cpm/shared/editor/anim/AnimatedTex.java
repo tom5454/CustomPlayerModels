@@ -61,11 +61,6 @@ public class AnimatedTex implements TreeElement {
 			public List<TreeSettingElement> getSettingsElements() {
 				return region.elements;
 			}
-
-			@Override
-			public Box getTextureBox() {
-				return null;
-			}
 		};
 		region = new RegionSize();
 		options.add(startDrag);
@@ -138,6 +133,28 @@ public class AnimatedTex implements TreeElement {
 			gui.drawBox(x + (animStart.x + uvSize.x) * xs, y + animStart.y * ys, (uvSize.x * (frameCount - 1)) * xs, uvSize.y * ys, 0x80aaaaaa);
 		else
 			gui.drawBox(x + animStart.x * xs, y + (animStart.y + uvSize.y) * ys, uvSize.x * xs, (uvSize.y * (frameCount - 1)) * ys, 0x80aaaaaa);
+
+		Box b = getOverlap();
+		if (b.w > 0 && b.h > 0) {
+			gui.drawBox(x + b.x * xs, y + b.y * ys, b.w * xs, b.h * ys, 0x80ff0000);
+		}
+	}
+
+	private Box getOverlap() {
+		Box b = new Box(animStart.x, animStart.y, (anX ? frameCount : 1) * uvSize.x, (anX ? 1 : frameCount) * uvSize.y);
+		return new Box(uvStart.x, uvStart.y, uvSize.x, uvSize.y).intersect(b);
+	}
+
+	@Override
+	public int textColor(IGui gui) {
+		Box b = getOverlap();
+		return b.w > 0 && b.h > 0 ? 0xffff0000 : 0;
+	}
+
+	@Override
+	public Tooltip getTooltip(IGui gui) {
+		Box b = getOverlap();
+		return b.w > 0 && b.h > 0 ? new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.animatedTexOverlap")) : null;
 	}
 
 	@Override

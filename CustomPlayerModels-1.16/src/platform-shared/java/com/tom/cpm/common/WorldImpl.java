@@ -4,19 +4,21 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 
+import com.tom.cpl.block.Biome;
 import com.tom.cpl.block.BlockState;
 import com.tom.cpl.block.World;
+import com.tom.cpl.util.WeakStorage;
 import com.tom.cpm.shared.animation.AnimationState;
 
 public class WorldImpl implements World {
-	public net.minecraft.world.World level;
+	public WeakStorage<net.minecraft.world.World> level = new WeakStorage<>();
 	public BlockPos base;
 
 	public static void setWorld(AnimationState a, Entity ent) {
 		if(!(a.world instanceof WorldImpl))a.world = new WorldImpl();
 		WorldImpl i = (WorldImpl) a.world;
 		net.minecraft.world.World l = ent.level;
-		i.level = l;
+		i.level.set(l);
 		i.base = ent.blockPosition();
 		a.dayTime = l.dayTime();
 		a.skyLight = l.getBrightness(LightType.SKY, i.base);
@@ -25,6 +27,41 @@ public class WorldImpl implements World {
 
 	@Override
 	public BlockState getBlock(int x, int y, int z) {
-		return BlockStateHandlerImpl.impl.wrap(level.getBlockState(base.offset(x, y, z)));
+		return level.call(l -> BlockStateHandlerImpl.impl.wrap(l.getBlockState(base.offset(x, y, z))), BlockState.AIR);
+	}
+
+	@Override
+	public boolean isCovered() {
+		return level.call(l -> l.canSeeSky(base), false);
+	}
+
+	@Override
+	public int getYHeight() {
+		return base.getY();
+	}
+
+	@Override
+	public int getMaxHeight() {
+		return level.call(l -> l.getMaxBuildHeight(), 0);
+	}
+
+	@Override
+	public int getMinHeight() {
+		return 0;
+	}
+
+	@Override
+	public WeatherType getWeather() {
+		return level.call(l -> l.isThundering() ? WeatherType.THUNDER : l.isRaining() ? WeatherType.RAIN : WeatherType.CLEAR, WeatherType.CLEAR);
+	}
+
+	@Override
+	public Biome getBiome() {
+		return level.call(l -> BiomeHandlerImpl.getImpl(l).wrap(l.getBiome(base)), null);
+	}
+
+	@Override
+	public String getDimension() {
+		return level.call(l -> l.dimension().location().toString(), null);
 	}
 }

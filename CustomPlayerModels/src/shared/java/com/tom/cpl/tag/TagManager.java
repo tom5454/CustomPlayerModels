@@ -20,8 +20,8 @@ public class TagManager<T> {
 		this.nativeManager = nativeManager;
 	}
 
-	public TagManager(NativeTagManager<T> nativeManager, TagManager<T> parent) {
-		this.nativeManager = nativeManager;
+	public TagManager(TagManager<T> parent) {
+		this.nativeManager = parent.nativeManager;
 		this.parent = parent;
 	}
 

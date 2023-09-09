@@ -138,6 +138,7 @@ public class Tree<T> extends GuiElement {
 		protected abstract Tooltip getTooltip(T elem, IGui gui);
 		protected abstract void refresh(T elem);
 		protected abstract boolean isSelected(T elem);
+		protected abstract boolean canSelect(T elem);
 	}
 
 	public static class TreeHandler<T> {
@@ -229,7 +230,12 @@ public class Tree<T> extends GuiElement {
 
 	public T findDown(T curr) {
 		TreeElement<T> p = find(curr);
-		if(p != null && !p.children.isEmpty())return p.children.get(0).value;
+		if(p != null && !p.children.isEmpty()) {
+			for (TreeElement<T> e : p.children) {
+				if (handler.model.canSelect(e.value))
+					return e.value;
+			}
+		}
 		return curr;
 	}
 
@@ -238,8 +244,12 @@ public class Tree<T> extends GuiElement {
 		TreeElement<T> p = findParent(c);
 		if(c != null && p != null) {
 			int i = p.children.indexOf(c);
-			if(i != -1 && i + 1 < p.children.size()) {
-				return p.children.get(i + 1).value;
+			if(i != -1) {
+				for(i++;i < p.children.size();i++) {
+					TreeElement<T> e = p.children.get(i);
+					if (handler.model.canSelect(e.value))
+						return e.value;
+				}
 			}
 		}
 		return curr;
@@ -250,8 +260,10 @@ public class Tree<T> extends GuiElement {
 		TreeElement<T> p = findParent(c);
 		if(c != null && p != null) {
 			int i = p.children.indexOf(c);
-			if(i > 0) {
-				return p.children.get(i - 1).value;
+			for(i--;i >= 0;i--) {
+				TreeElement<T> e = p.children.get(i);
+				if (handler.model.canSelect(e.value))
+					return e.value;
 			}
 		}
 		return curr;

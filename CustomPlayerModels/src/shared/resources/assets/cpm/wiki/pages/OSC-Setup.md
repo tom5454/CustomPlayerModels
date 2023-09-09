@@ -11,3 +11,11 @@ CPM requires normalized values (0-1), set the Minimum and Maximum value using th
 `mapped_value = (osc_value - minimum_value) / (maximum_value - minimum_value)`  
 
 CPM is compatible with OSC/VMC values.
+
+## Scripting
+You can use [TouchOSC](https://hexler.net/touchosc#get) to run lua scripts that react to OSC commands. [TouchOSC scripting examples](https://hexler.net/touchosc/manual/script-examples)  
+Python library for OSC: [python-osc](https://github.com/attwad/python-osc)  
+
+## Other applications
+Face tracking: [VSeeFace](https://www.vseeface.icu/)  
+Most OSC sending applications will work that works with VRChat. [VRChat OSC Resources](https://docs.vrchat.com/docs/osc-resources)  

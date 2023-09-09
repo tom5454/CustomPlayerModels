@@ -65,7 +65,7 @@ public class AnimTestPanel extends Panel {
 		FlowLayout layout = new FlowLayout(this, 5, 1);
 
 		List<NamedElement<IPose>> poses = new ArrayList<>();
-		poses.add(new NamedElement<IPose>(VanillaPose.STANDING, this::poseToString));
+		poses.add(new NamedElement<>(VanillaPose.STANDING, this::poseToString));
 		List<NamedElement<String>> gestures = new ArrayList<>();
 		gestures.add(new NamedElement<>(null, k -> gui.i18nFormat("label.cpm.no_gesture")));
 		editor.updateGui.add(() -> {
@@ -77,7 +77,7 @@ public class AnimTestPanel extends Panel {
 				if(p == VanillaPose.CUSTOM || p == VanillaPose.GLOBAL)continue;
 				AnimationDisplayData d = AnimationDisplayData.getFor(p);
 				if(d.type == Type.POSE || d.type == Type.POSE_SERVER)
-					poses.add(new NamedElement<IPose>(p, this::poseToString));
+					poses.add(new NamedElement<>(p, this::poseToString));
 			}
 
 			animations = editor.animations.stream().map(a -> Pair.of(new AnimKey(a), a)).filter(a -> a.getKey().type != null).
@@ -133,7 +133,7 @@ public class AnimTestPanel extends Panel {
 			if(d == null || d.layerSlot == null)continue;
 			slots.computeIfAbsent(d.layerSlot, __ -> {
 				List<NamedElement<VanillaPose>> l = new ArrayList<>();
-				l.add(new NamedElement<VanillaPose>(null, ___ -> gui.i18nFormat("label.cpm.no_elements")));
+				l.add(new NamedElement<>(null, ___ -> gui.i18nFormat("label.cpm.no_elements")));
 				return l;
 			}).add(new NamedElement<>(p, this::poseToString));
 		}
@@ -145,7 +145,11 @@ public class AnimTestPanel extends Panel {
 		slots.get(Slot.RIGHT_HAND).stream().filter(i -> i.getElem() != null).forEach(handItems::add);
 		handItems.add(new NamedElement<>(VanillaPose.PUNCH_LEFT, this::poseToString));
 		handItems.add(new NamedElement<>(VanillaPose.PUNCH_RIGHT, this::poseToString));
-		handItems.add(new NamedElement<>(VanillaPose.SPEAKING, this::poseToString));
+		for (VanillaPose p : VanillaPose.VALUES) {
+			AnimationDisplayData d = AnimationDisplayData.getFor(p);
+			if(d == null || d.type != Type.PROGRESS)continue;
+			handItems.add(new NamedElement<>(p, this::poseToString));
+		}
 		handItems.sort(Comparator.comparing(NamedElement::toString));
 		mainPose = createDropDown("label.cpm.animSlot.heldItem", handItems);
 		mainPose.dropDown.setAction(() -> {
@@ -171,11 +175,11 @@ public class AnimTestPanel extends Panel {
 		List<NamedElement<VanillaPose>> handItemsOtherLeft = slots.get(Slot.LEFT_HAND).stream().
 				filter(i -> i.getElem() != null && !AnimationDisplayData.getFor(i.getElem()).item.pose.isTwoHanded()).
 				collect(Collectors.toList());
-		handItemsOtherLeft.add(0, new NamedElement<VanillaPose>(null, ___ -> gui.i18nFormat("label.cpm.no_elements")));
+		handItemsOtherLeft.add(0, new NamedElement<>(null, ___ -> gui.i18nFormat("label.cpm.no_elements")));
 		List<NamedElement<VanillaPose>> handItemsOtherRight = slots.get(Slot.RIGHT_HAND).stream().
 				filter(i -> i.getElem() != null && !AnimationDisplayData.getFor(i.getElem()).item.pose.isTwoHanded()).
 				collect(Collectors.toList());
-		handItemsOtherRight.add(0, new NamedElement<VanillaPose>(null, ___ -> gui.i18nFormat("label.cpm.no_elements")));
+		handItemsOtherRight.add(0, new NamedElement<>(null, ___ -> gui.i18nFormat("label.cpm.no_elements")));
 
 		otherHandLeft = createDropDown("label.cpm.animSlot.left_hand", handItemsOtherLeft);
 		otherHandLeft.setVisible(false);

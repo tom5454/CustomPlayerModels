@@ -2,6 +2,7 @@ package com.tom.cpm.client;
 
 import java.util.function.Consumer;
 
+import net.coderbot.batchedentityrendering.impl.Groupable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -11,7 +12,6 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -35,8 +35,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.common.PlayerAnimUpdater;
+import com.tom.cpm.mixinplugin.IrisDetector;
 import com.tom.cpm.mixinplugin.OFDetector;
-import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.RenderManager;
 import com.tom.cpm.shared.network.NetHandler;
@@ -56,9 +56,11 @@ public class ClientBase {
 		minecraft = Minecraft.getInstance();
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();
-		vrLoaded = VRDetector.doApply();
+		vrLoaded = Platform.isModLoaded("vivecraft");
+		irisLoaded = IrisDetector.doApply();
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
 		if(vrLoaded)Log.info("ViveCraft detected, enabling ViveCraft compatibility");
+		if(irisLoaded)Log.info("Iris detected, enabling iris compatibility");
 	}
 
 	public void init1() {
@@ -185,17 +187,17 @@ public class ClientBase {
 	}
 
 	public void playerRenderPost(MultiBufferSource buffer, PlayerModel model) {
-		if(buffer instanceof BufferSource i)i.endBatch();
 		manager.unbindClear(model);
 	}
 
 	public void renderHand(MultiBufferSource buffer, PlayerModel model) {
-		manager.bindHand(Minecraft.getInstance().player, buffer, model);
+		manager.bindHand(minecraft.player, buffer, model);
+		if (irisLoaded && buffer instanceof Groupable gr)gr.startGroup();
 	}
 
 	public void renderHandPost(MultiBufferSource buffer, HumanoidModel model) {
-		if(buffer instanceof BufferSource i)i.endBatch();
 		manager.unbindClear(model);
+		if (irisLoaded && buffer instanceof Groupable gr)gr.endGroup();
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, MultiBufferSource buffer) {
@@ -203,7 +205,6 @@ public class ClientBase {
 	}
 
 	public void renderSkullPost(MultiBufferSource buffer, Model model) {
-		if(buffer instanceof BufferSource i)i.endBatch();
 		manager.unbindFlush(model);
 	}
 

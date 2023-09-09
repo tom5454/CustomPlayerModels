@@ -111,6 +111,11 @@ public abstract interface TreeElement {
 		protected boolean isSelected(TreeElement elem) {
 			return e.selectedElement != null && e.selectedElement.isSelected(e, elem);
 		}
+
+		@Override
+		protected boolean canSelect(TreeElement elem) {
+			return elem.canSelect();
+		}
 	}
 
 	public default void onClick(IGui gui, Editor e, MouseEvent evt) {
@@ -164,6 +169,7 @@ public abstract interface TreeElement {
 	public default void setVecTemp(VecType type, Vec3f vec) {}
 	public default Vec3f getVec(VecType type) {return Vec3f.ZERO;}
 	public default boolean canEditVec(VecType type) {return false;}
+	public default boolean canSelect() {return true;}
 
 	public static interface TreeSettingElement extends TreeElement {
 		TreeElement getParent();

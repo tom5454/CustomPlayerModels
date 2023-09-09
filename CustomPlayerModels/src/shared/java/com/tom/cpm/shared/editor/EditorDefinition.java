@@ -137,6 +137,7 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 		if(cube.getCube() instanceof ModelElement && editor.displayGizmo.get()) {
 			Mesh mesh = cube.renderObject;
 			ModelElement me = (ModelElement) cube.getCube();
+			if (me.locked)return;
 			EditorRenderer.Bounds b = new EditorRenderer.Bounds();
 			b.elem = me;
 			BoxBuilder builder = TriangleBoundingBox.builder();

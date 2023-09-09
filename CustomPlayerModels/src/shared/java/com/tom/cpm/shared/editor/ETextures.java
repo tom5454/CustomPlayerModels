@@ -202,6 +202,24 @@ public class ETextures implements TreeElement {
 		public ETextures getTexture() {
 			return ETextures.this;
 		}
+
+		@Override
+		public void updateGui() {
+			if (isEditable())
+				e.setAddEn.accept(true);
+		}
+
+		@Override
+		public void addNew() {
+			addAnimTex();
+		}
+	}
+
+	public void addAnimTex() {
+		if (isEditable()) {
+			e.action("add", "action.cpm.animTex").addToList(animatedTexs, new AnimatedTex(e, getType())).execute();
+			e.updateGui();
+		}
 	}
 
 	public TextureSheetType getType() {

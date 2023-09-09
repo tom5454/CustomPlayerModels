@@ -42,7 +42,7 @@ public class ViewportPanelAnim extends ViewportPanel {
 		anims = null;
 		if(editor.playFullAnim) {
 			anims = editor.testPoses.stream().map(p -> AnimationDisplayData.getFor(p)).
-					filter(d -> d.type == Type.LAYERS || d.type == Type.HAND).collect(Collectors.toList());
+					filter(d -> d.type == Type.LAYERS || d.type == Type.HAND || d.type == Type.PROGRESS).collect(Collectors.toList());
 		}
 		editor.applyAnim = true;
 		super.draw(event, partialTicks);

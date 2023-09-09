@@ -89,7 +89,7 @@ public class Cube {
 		map.put("pos", cube.pos.toMap());
 		map.put("rotation", cube.rotation.toMap());
 		map.put("size", cube.size.toMap());
-		map.put("scale", cube.scale.toMap());
+		if (cube.scale != null)map.put("scale", cube.scale.toMap());
 		map.put("u", cube.u);
 		map.put("v", cube.v);
 		map.put("color", Integer.toHexString(cube.rgb));

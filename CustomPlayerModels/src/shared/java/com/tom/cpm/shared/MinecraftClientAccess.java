@@ -5,6 +5,7 @@ import java.net.Proxy;
 import java.util.List;
 import java.util.function.Function;
 
+import com.tom.cpl.block.BiomeHandler;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
@@ -90,4 +91,5 @@ public interface MinecraftClientAccess {
 	}
 
 	AllTagManagers getBuiltinTags();
+	BiomeHandler<?> getBiomeHandler();
 }

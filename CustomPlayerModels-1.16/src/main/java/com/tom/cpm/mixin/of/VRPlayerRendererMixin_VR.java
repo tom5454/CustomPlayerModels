@@ -123,7 +123,7 @@ public abstract class VRPlayerRendererMixin_VR extends LivingRenderer<AbstractCl
 	}, remap = false)
 	public void onRenderName2(AbstractClientPlayerEntity entityIn, ITextComponent displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(Player.isEnableLoadingInfo())
-			CustomPlayerModelsClient.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
+			CustomPlayerModelsClient.INSTANCE.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
 	}
 
 	@Redirect(at =

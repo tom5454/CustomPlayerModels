@@ -49,6 +49,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 				}
 				editor.elements.add(elem);
 				elem.storeID = map.getLong("storeID", 0);
+				elem.duplicated = map.getBoolean("dup", false);
 			} else if (map.getBoolean("dup", false)) {
 				for (ModelElement e : editor.elements) {
 					if(((VanillaModelPart) e.typeData).getName().equalsIgnoreCase(key)) {
@@ -158,6 +159,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		map.put("hidden", elem.hidden);
 		map.put("singleTex", elem.singleTex);
 		map.put("extrude", elem.extrude);
+		map.put("locked", elem.locked);
 		if(elem.faceUV != null)map.put("faceUV", elem.faceUV.toMap());
 		if(elem.itemRenderer != null)map.put("itemRenderer", elem.itemRenderer.slot.name().toLowerCase(Locale.ROOT));
 		if(elem.copyTransform != null)map.put("copyTransform", elem.copyTransform.toMap());
@@ -183,6 +185,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		elem.hidden = map.getBoolean("hidden", false);
 		elem.singleTex = map.getBoolean("singleTex", false);
 		elem.extrude = map.getBoolean("extrude", false);
+		elem.locked = map.getBoolean("locked", false);
 		if(map.containsKey("faceUV"))elem.faceUV = new PerFaceUV(map.getMap("faceUV"));
 		if(map.containsKey("itemRenderer")) {
 			String name = map.getString("itemRenderer");

@@ -41,7 +41,6 @@ import io.netty.buffer.Unpooled;
 public class ClientBase {
 	public static final ResourceLocation DEFAULT_CAPE = new ResourceLocation("cpm:textures/template/cape.png");
 	public static boolean optifineLoaded, irisLoaded;
-	public static final CustomPlayerModelsClient INSTANCE = new CustomPlayerModelsClient();
 	public static MinecraftObject mc;
 	public Minecraft minecraft;
 	public RenderManager<GameProfile, PlayerEntity, Model, IRenderTypeBuffer> manager;
@@ -95,7 +94,7 @@ public class ClientBase {
 
 	public void renderHandPost(IRenderTypeBuffer buffer, BipedModel model) {
 		if(buffer instanceof IRenderTypeBuffer.Impl)((IRenderTypeBuffer.Impl)buffer).endBatch();
-		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(model);
+		manager.unbindClear(model);
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, IRenderTypeBuffer buffer) {
@@ -104,7 +103,7 @@ public class ClientBase {
 
 	public void renderSkullPost(IRenderTypeBuffer buffer, Model model) {
 		if(buffer instanceof IRenderTypeBuffer.Impl)((IRenderTypeBuffer.Impl)buffer).endBatch();
-		CustomPlayerModelsClient.INSTANCE.manager.unbindFlush(model);
+		manager.unbindFlush(model);
 	}
 
 	public void renderElytra(BipedModel<LivingEntity> player, ElytraModel<LivingEntity> model) {
@@ -197,10 +196,10 @@ public class ClientBase {
 		EntityRendererManager cpm$entityRenderDispatcher();
 	}
 
-	public static <E extends Entity> void renderNameTag(PlayerNameTagRenderer<E> r, E entityIn, GameProfile gprofile, String unique, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
+	public <E extends Entity> void renderNameTag(PlayerNameTagRenderer<E> r, E entityIn, GameProfile gprofile, String unique, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
 		double d0 = r.cpm$entityRenderDispatcher().distanceToSqr(entityIn);
 		if (d0 < 32*32) {
-			FormatText st = INSTANCE.manager.getStatus(gprofile, unique);
+			FormatText st = manager.getStatus(gprofile, unique);
 			if(st != null) {
 				matrixStackIn.pushPose();
 				matrixStackIn.translate(0.0D, 1.3F, 0.0D);

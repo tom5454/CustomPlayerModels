@@ -1,5 +1,7 @@
 package com.tom.cpm.blockbench.proxy;
 
+import com.tom.ugwt.client.JsRunnable;
+
 import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
@@ -21,6 +23,7 @@ public class ModelFormat {
 		public boolean bone_rig, box_uv, optional_box_uv, centered_grid, single_texture, rotate_cubes, animation_mode, animation_controllers, animation_files, bone_binding_expression, uv_rotation;
 		public Codec codec;
 		public FormatPage format_page;
+		public JsRunnable onActivation, onDeactivation;
 	}
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")

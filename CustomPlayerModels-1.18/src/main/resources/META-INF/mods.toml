@@ -56,6 +56,6 @@ Customize your minecraft avatar!
 [[dependencies.cpm]]
     modId="vivecraft"
     mandatory=false
-    versionRange="[0.0.14,)"
+    versionRange="[1.0.0,)"
     ordering="NONE"
     side="CLIENT"

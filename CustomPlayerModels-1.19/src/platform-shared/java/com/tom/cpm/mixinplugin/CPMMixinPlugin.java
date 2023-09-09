@@ -1,6 +1,7 @@
 package com.tom.cpm.mixinplugin;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.objectweb.asm.tree.ClassNode;
@@ -11,7 +12,6 @@ public class CPMMixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void onLoad(String mixinPackage) {
-
 	}
 
 	@Override
@@ -22,12 +22,23 @@ public class CPMMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		if(mixinClassName.contains("_")) {
-			try {
-				return (boolean) Class.forName("com.tom.cpm.mixinplugin." + mixinClassName.split("_")[1] + "Detector").getDeclaredMethod("doApply").invoke(null);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return true;
+			String[] sp = mixinClassName.split("_");
+			for (int i = 1; i < sp.length; i++) {
+				String string = sp[i];
+				if (string.startsWith("$")) {
+					if(!MixinModLoaded.isLoaded(string.substring(1).replace('$', '_').toLowerCase(Locale.ROOT)))
+						return false;
+				} else {
+					try {
+						if(!(boolean) Class.forName("com.tom.cpm.mixinplugin." + string + "Detector").getDeclaredMethod("doApply").invoke(null))
+							return false;
+					} catch (Exception e) {
+						e.printStackTrace();
+						return true;
+					}
+				}
 			}
+			return true;
 		} else return true;
 	}
 

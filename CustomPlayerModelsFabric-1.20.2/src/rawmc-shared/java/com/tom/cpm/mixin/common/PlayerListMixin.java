@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.network.Connection;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
 
 import com.tom.cpm.common.ServerHandler;
@@ -14,8 +15,8 @@ import com.tom.cpm.common.ServerHandler;
 @Mixin(PlayerList.class)
 public class PlayerListMixin {
 
-	@Inject(at = @At("RETURN"), method = "placeNewPlayer(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;I)V")
-	public void onOnPlayerConnect(Connection connection, ServerPlayer player, int ping, CallbackInfo cbi) {
+	@Inject(at = @At("RETURN"), method = "placeNewPlayer(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/server/network/CommonListenerCookie;)V")
+	public void onOnPlayerConnect(Connection connection, ServerPlayer player, CommonListenerCookie commonListenerCookie, CallbackInfo cbi) {
 		ServerHandler.onPlayerJoin(player);
 	}
 }

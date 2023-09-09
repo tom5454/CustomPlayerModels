@@ -8,13 +8,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -39,9 +39,9 @@ public class CustomHeadLayerMixin {
 					+ "Lnet/minecraft/client/renderer/RenderType;"
 			),
 			method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
-					+ "Lnet/minecraft/world/entity/LivingEntity;FFFFFF)V")
-	public void onRender(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, LivingEntity livingEntity, float f, float g, float h, float j, float k, float l, CallbackInfo ci) {
-		ItemStack itemstack = livingEntity.getItemBySlot(EquipmentSlot.HEAD);
+					+ "Lnet/minecraft/world/entity/LivingEntity;FFFFFF)V",
+					locals = LocalCapture.CAPTURE_FAILHARD)
+	public void onRender(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, LivingEntity livingEntity, float f, float g, float h, float j, float k, float l, CallbackInfo ci, ItemStack itemstack) {
 		Item item = itemstack.getItem();
 		SkullBlock.Type skullType = ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType();
 		if(skullType == SkullBlock.Types.PLAYER) {

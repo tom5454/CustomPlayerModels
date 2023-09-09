@@ -3,12 +3,17 @@ package com.tom.cpmoscc;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.tom.cpl.block.Biome;
 import com.tom.cpl.block.BlockState;
+import com.tom.cpl.block.World;
 import com.tom.cpl.item.Inventory;
 import com.tom.cpl.item.NamedSlot;
 import com.tom.cpl.item.Stack;
+import com.tom.cpl.tag.TagManager;
 import com.tom.cpm.api.IClientAPI;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
@@ -67,12 +72,13 @@ public class CPMOSC {
 					}
 					player.updatePlayer(playerIn);
 					long time = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
+					AnimationState st = player.animState;
 					try {
 						for (Field f : outputFields) {
-							send(player.animState, f);
+							send(st, f);
 						}
 						for (Field f : outputFields2) {
-							send(player.animState.localState, f);
+							send(st.localState, f);
 						}
 						if(def != null) {
 							AnimationRegistry reg = def.getAnimations();
@@ -80,11 +86,11 @@ public class CPMOSC {
 								if(g.command)return;
 								String gid = g.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "");
 								try {
-									if(player.animState.gestureData.length > id) {
+									if(st.gestureData.length > id) {
 										if(g.type == AnimationType.VALUE_LAYER)
-											transmit.send("/cpm/layer/" + gid + "/value", player.animState.gestureData[id]);
+											transmit.send("/cpm/layer/" + gid + "/value", st.gestureData[id]);
 										else
-											transmit.send("/cpm/layer/" + gid + "/toggle", player.animState.gestureData[id] != 0);
+											transmit.send("/cpm/layer/" + gid + "/toggle", st.gestureData[id] != 0);
 									} else {
 										if(g.type == AnimationType.VALUE_LAYER)
 											transmit.send("/cpm/layer/" + gid + "/value", g.defVal);
@@ -94,20 +100,20 @@ public class CPMOSC {
 								} catch (IOException e) {
 								}
 							});
-							int gesture = player.animState.encodedState;
+							int gesture = st.encodedState;
 							Gesture g = null;
-							if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES) && player.animState.gestureData != null && player.animState.gestureData.length > 1) {
-								g = reg.getGesture(player.animState.gestureData[1]);
+							if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES) && st.gestureData != null && st.gestureData.length > 1) {
+								g = reg.getGesture(st.gestureData[1]);
 							} else {
 								g = reg.getGesture(gesture);
 							}
 							transmit.send("/cpm/gesture", g != null ? g.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") : "null");
-							VanillaPose pose = player.animState.getMainPose(time, reg);
+							VanillaPose pose = st.getMainPose(time, reg);
 							sendEnum("/cpm/vanilla_pose", pose);
 							IPose currentPose = pose;
-							if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES) && player.animState.gestureData != null && player.animState.gestureData.length > 1) {
-								if(player.animState.gestureData[0] != 0) {
-									currentPose = reg.getPose(player.animState.gestureData[0], player.currentPose);
+							if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES) && st.gestureData != null && st.gestureData.length > 1) {
+								if(st.gestureData[0] != 0) {
+									currentPose = reg.getPose(st.gestureData[0], player.currentPose);
 								}
 							} else {
 								currentPose = reg.getPose(gesture, player.currentPose);
@@ -120,8 +126,8 @@ public class CPMOSC {
 								transmit.send("/cpm/pose/name", p.getId());
 								transmit.send("/cpm/pose/id", -1);
 							}
-							if (player.animState.playerInventory != null) {
-								Inventory i = player.animState.playerInventory;
+							if (st.playerInventory != null) {
+								Inventory i = st.playerInventory;
 								sendItem(def, "held_item", i.getStack(i.getNamedSlotId(NamedSlot.MAIN_HAND)));
 								sendItem(def, "armor/helmet", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_HELMET)));
 								sendItem(def, "armor/chestplate", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_CHESTPLATE)));
@@ -130,11 +136,29 @@ public class CPMOSC {
 								sendItem(def, "off_hand", i.getStack(i.getNamedSlotId(NamedSlot.OFF_HAND)));
 								transmit.send("/cpm/heldSlot", i.getNamedSlotId(NamedSlot.MAIN_HAND));
 							}
-							if (player.animState.world != null) {
-								sendBlock(def, "below", player.animState.world.getBlock(0, -1, 0));
-								sendBlock(def, "feet", player.animState.world.getBlock(0, 0, 0));
-								sendBlock(def, "head", player.animState.world.getBlock(0, 1, 0));
+							World w = st.world;
+							if (w != null) {
+								sendBlock(def, "below", w.getBlock(0, -1, 0));
+								sendBlock(def, "feet", w.getBlock(0, 0, 0));
+								sendBlock(def, "head", w.getBlock(0, 1, 0));
+								transmit.send("/cpm/world/canSeeSky", w.isCovered());
+								sendEnum("/cpm/world/weather", w.getWeather());
+								transmit.send("/cpm/world/y", (w.getYHeight() - w.getMinHeight()) / (float) (w.getMaxHeight() - w.getMinHeight()), w.getYHeight(), w.getMinHeight(), w.getMaxHeight());
+								Biome b = w.getBiome();
+								transmit.send("/cpm/world/biome/id", b.getBiomeId());
+								transmit.send("/cpm/world/biome/tags", listTags(def.modelTagManager.getBiomeTags(), b));
+								sendEnum("/cpm/world/biome/rainType", b.getRainType());
+								transmit.send("/cpm/world/biome/temperature", b.getTemperature());
+								transmit.send("/cpm/world/biome/humidity", b.getHumidity());
 							}
+							if (st.vehicle != null) {
+								transmit.send("/cpm/vehicle/id", st.vehicle.getId());
+								transmit.send("/cpm/vehicle/tags", listTags(def.modelTagManager.getEntityTags(), st.vehicle));
+							} else {
+								transmit.send("/cpm/vehicle/id", "null");
+								transmit.send("/cpm/vehicle/tags");
+							}
+							transmit.send("/cpm/potion", st.allEffects.stream().flatMap(e -> Stream.of(e.effectId, e.amplifier, e.duration, e.hidden)).toArray());
 						}
 						transmit.send("/cpm/gameTime", time);
 					} catch (Exception e) {
@@ -145,16 +169,20 @@ public class CPMOSC {
 		}
 	}
 
+	private static <T> List<String> listTags(TagManager<T> mngr, T e) {
+		return mngr.listStackTags(e).stream().map(t -> t.getId()).collect(Collectors.toList());
+	}
+
 	private static void sendBlock(ModelDefinition def, String name, BlockState st) throws IOException {
 		transmit.send("/cpm/world/" + name + "/id", st.getBlockId());
-		transmit.send("/cpm/world/" + name + "/tags", def.modelTagManager.getBlockTags().listStackTags(st).stream().map(t -> t.getId()).collect(Collectors.toList()));
+		transmit.send("/cpm/world/" + name + "/tags", listTags(def.modelTagManager.getBlockTags(), st));
 	}
 
 	private static void sendItem(ModelDefinition def, String name, Stack stack) throws IOException {
 		transmit.send("/cpm/" + name + "/id", stack.getItemId());
 		transmit.send("/cpm/" + name + "/count", stack.getCount(), stack.getMaxCount());
 		transmit.send("/cpm/" + name + "/damage", stack.getDamage(), stack.getMaxDamage());
-		transmit.send("/cpm/" + name + "/tags", def.modelTagManager.getItemTags().listStackTags(stack).stream().map(t -> t.getId()).collect(Collectors.toList()));
+		transmit.send("/cpm/" + name + "/tags", listTags(def.modelTagManager.getItemTags(), stack));
 	}
 
 	private static void send(Object inst, Field f) throws Exception {

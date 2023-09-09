@@ -14,6 +14,7 @@ public enum DisplayItem {
 	FOOD(ArmPose.ITEM, false),
 	SPYGLASS(ArmPose.SPYGLASS, false),
 	GOAT_HORN(ArmPose.TOOT_HORN, false),
+	BRUSH(ArmPose.BRUSH, false),
 	;
 	public static final DisplayItem[] VALUES = values();
 

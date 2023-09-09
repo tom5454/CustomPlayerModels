@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
+import com.tom.cpl.block.BiomeHandler;
 import com.tom.cpl.block.BlockStateHandler;
+import com.tom.cpl.block.entity.EntityTypeHandler;
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
@@ -431,5 +433,15 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	@Override
 	public AllTagManagers getBuiltinTags() {
 		return tags;
+	}
+
+	@Override
+	public BiomeHandler<?> getBiomeHandler() {
+		return null;
+	}
+
+	@Override
+	public EntityTypeHandler<?> getEntityTypeHandler() {
+		return null;
 	}
 }

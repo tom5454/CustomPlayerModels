@@ -1,7 +1,6 @@
 package com.tom.cpm.client;
 
 import org.quiltmc.loader.api.ModContainer;
-import org.quiltmc.loader.api.QuiltLoader;
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 import org.quiltmc.qsl.lifecycle.api.client.event.ClientTickEvents;
 import org.quiltmc.qsl.screen.api.client.QuiltScreen;
@@ -19,7 +18,6 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
-import com.tom.cpm.shared.util.Log;
 
 public class CustomPlayerModelsClient extends ClientBase implements ClientModInitializer {
 	public static CustomPlayerModelsClient INSTANCE;
@@ -29,8 +27,6 @@ public class CustomPlayerModelsClient extends ClientBase implements ClientModIni
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Init started");
 		INSTANCE = this;
 		init0();
-		irisLoaded = QuiltLoader.isModLoaded("iris");
-		if(irisLoaded)Log.info("Iris detected, enabling iris compatibility");
 		ClientTickEvents.START.register(cl -> {
 			if(!cl.isPaused())
 				mc.getPlayerRenderManager().getAnimationEngine().tick();

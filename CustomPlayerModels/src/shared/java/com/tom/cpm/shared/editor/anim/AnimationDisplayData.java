@@ -54,7 +54,7 @@ public enum AnimationDisplayData {
 	FREEZING(VanillaPose.FREEZING, null, null, Type.LAYERS),
 	ON_LADDER(VanillaPose.ON_LADDER, null, null, Type.POSE),
 	CLIMBING_ON_LADDER(VanillaPose.CLIMBING_ON_LADDER, null, null, Type.POSE),
-	SPEAKING(VanillaPose.SPEAKING, null, null, Type.LAYERS),
+	SPEAKING(VanillaPose.SPEAKING, null, null, Type.PROGRESS),
 	TOOT_HORN_LEFT(VanillaPose.TOOT_HORN_LEFT, ItemSlot.LEFT_HAND, DisplayItem.GOAT_HORN, Type.HAND),
 	TOOT_HORN_RIGHT(VanillaPose.TOOT_HORN_RIGHT, ItemSlot.RIGHT_HAND, DisplayItem.GOAT_HORN, Type.HAND),
 	IN_GUI(VanillaPose.IN_GUI, null, null, Type.LAYERS),
@@ -64,12 +64,16 @@ public enum AnimationDisplayData {
 	VR_THIRD_PERSON_SITTING(VanillaPose.VR_THIRD_PERSON_SITTING, null, null, Type.LAYERS),
 	VR_THIRD_PERSON_STANDING(VanillaPose.VR_THIRD_PERSON_STANDING, null, null, Type.LAYERS),
 	FIRST_PERSON_HAND(VanillaPose.FIRST_PERSON_HAND, null, null, Type.LAYERS),
-	HEALTH(VanillaPose.HEALTH, null, null, Type.LAYERS),
-	HUNGER(VanillaPose.HUNGER, null, null, Type.LAYERS),
-	AIR(VanillaPose.AIR, null, null, Type.LAYERS),
+	HEALTH(VanillaPose.HEALTH, null, null, Type.PROGRESS),
+	HUNGER(VanillaPose.HUNGER, null, null, Type.PROGRESS),
+	AIR(VanillaPose.AIR, null, null, Type.PROGRESS),
 	IN_MENU(VanillaPose.IN_MENU, null, null, Type.LAYERS),
 	INVISIBLE(VanillaPose.INVISIBLE, null, null, Type.LAYERS),
-	LIGHT(VanillaPose.LIGHT, null, null, Type.LAYERS),
+	LIGHT(VanillaPose.LIGHT, null, null, Type.PROGRESS),
+	HEAD_ROTATION_YAW(VanillaPose.HEAD_ROTATION_YAW, null, null, Type.PROGRESS),
+	HEAD_ROTATION_PITCH(VanillaPose.HEAD_ROTATION_PITCH, null, null, Type.PROGRESS),
+	BRUSH_LEFT(VanillaPose.BRUSH_LEFT, ItemSlot.LEFT_HAND, DisplayItem.BRUSH, Type.HAND),
+	BRUSH_RIGHT(VanillaPose.BRUSH_RIGHT, ItemSlot.RIGHT_HAND, DisplayItem.BRUSH, Type.HAND),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;
@@ -113,6 +117,7 @@ public enum AnimationDisplayData {
 		POSE_SERVER(0x00FF00),
 		LAYERS(0x00FFFF),
 		HAND(0xFF0000),
+		PROGRESS(0x00FF66),
 		;
 		public final int color;
 		private Type(int color) {

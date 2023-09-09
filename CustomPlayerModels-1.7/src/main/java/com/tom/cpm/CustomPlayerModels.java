@@ -15,6 +15,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.MinecraftForge;
 
 import com.tom.cpl.block.BlockStateHandler;
+import com.tom.cpl.block.entity.EntityTypeHandler;
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.text.TextRemapper;
@@ -24,6 +25,7 @@ import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.ICPMPlugin;
 import com.tom.cpm.common.BlockStateHandlerImpl;
 import com.tom.cpm.common.Command;
+import com.tom.cpm.common.EntityTypeHandlerImpl;
 import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
@@ -160,5 +162,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@Override
 	public ItemStackHandler<?> getItemStackHandler() {
 		return ItemStackHandlerImpl.impl;
+	}
+
+	@Override
+	public EntityTypeHandler<?> getEntityTypeHandler() {
+		return EntityTypeHandlerImpl.impl;
 	}
 }

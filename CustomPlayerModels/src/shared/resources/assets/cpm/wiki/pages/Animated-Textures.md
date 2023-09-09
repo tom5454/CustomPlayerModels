@@ -18,4 +18,5 @@ The layout of the animation frames.
 Interpolate between frames.  
 ![Animated texture in skin panel](https://github.com/tom5454/CustomPlayerModels/wiki/images/animated_tex.png)  
 The yellow region will be animated. The white area are the animation frames.  
-Example project: [Link](https://github.com/tom5454/CustomPlayerModels/raw/master/examples/animated_texture.cpmproject)
+Example project: [Link](https://github.com/tom5454/CustomPlayerModels/raw/master/examples/animated_texture.cpmproject)  
+The animated region shouldn't overlap with the animated texture frames area. This will cause visual glitches in-game.

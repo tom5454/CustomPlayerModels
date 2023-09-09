@@ -17,13 +17,17 @@ import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
+import com.tom.cpl.block.entity.ActiveEffect;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
+import com.tom.cpm.common.EntityTypeHandlerImpl;
 import com.tom.cpm.common.PlayerInventory;
 import com.tom.cpm.common.WorldImpl;
 import com.tom.cpm.shared.config.Player;
@@ -88,8 +92,9 @@ public class PlayerProfile extends Player<EntityPlayer> {
 		animState.moveAmountX = (float) (player.posX - player.prevPosX);
 		animState.moveAmountY = (float) (player.posY - player.prevPosY);
 		animState.moveAmountZ = (float) (player.posZ - player.prevPosZ);
-		animState.yaw = player.rotationYaw;
+		animState.yaw = player.rotationYawHead * 2 - player.renderYawOffset;
 		animState.pitch = player.rotationPitch;
+		animState.bodyYaw = player.rotationYawHead;
 
 		if(player.isWearing(EnumPlayerModelParts.HAT))animState.encodedState |= 1;
 		if(player.isWearing(EnumPlayerModelParts.JACKET))animState.encodedState |= 2;
@@ -115,6 +120,8 @@ public class PlayerProfile extends Player<EntityPlayer> {
 		animState.inGui = inGui;
 		PlayerInventory.setInv(animState, player.inventory);
 		WorldImpl.setWorld(animState, player);
+		if (player.getRidingEntity() != null)animState.vehicle = EntityTypeHandlerImpl.impl.wrap(player.getRidingEntity().getClass());
+		player.getActivePotionEffects().forEach(e -> animState.allEffects.add(new ActiveEffect(ForgeRegistries.POTIONS.getKey(e.getPotion()).toString(), e.getAmplifier(), e.getDuration(), !e.doesShowParticles())));
 
 		if(player.getActiveItemStack() != null && player.getActiveItemStack().getItem() instanceof ItemBow) {
 			float f = 20F;

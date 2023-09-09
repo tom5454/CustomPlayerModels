@@ -47,7 +47,8 @@ If the launcher says unable to load skin then try restarting it.
 The model will load for everybody who has the mod installed on multiplayer servers.
 
 ## Exporting as local model
-You can export models as a local model. You can change these models in the Gestures Menu/Models when on servers with Customizable Player Models installed or in singleplayer, even while in-game.
+You can export models as a local model. You can change these models in the Gestures Menu/Models when on servers with Customizable Player Models installed or in singleplayer, even while in-game.  
+![Image: Export Model Gui](https://github.com/tom5454/CustomPlayerModels/wiki/images/export_model.png)  
 You can export a local model in File/Export and press the 'Export: ???' button to 'Export: Model'.  
 The name will be used for the file name. You can set an icon for your model.
 Click Export.  

@@ -24,6 +24,7 @@ import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
 
+import com.tom.cpl.block.BiomeHandler;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
@@ -33,6 +34,7 @@ import com.tom.cpl.util.AWTImageIO;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
+import com.tom.cpm.common.BiomeHandlerImpl;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -219,5 +221,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public AllTagManagers getBuiltinTags() {
 		return tags;
+	}
+
+	@Override
+	public BiomeHandler<?> getBiomeHandler() {
+		return BiomeHandlerImpl.impl;
 	}
 }

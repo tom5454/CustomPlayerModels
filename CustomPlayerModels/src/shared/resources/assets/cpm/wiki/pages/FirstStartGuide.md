@@ -28,10 +28,13 @@ Use the `Reload` button to update the texture from the saved file.
 ## Modeling & Texturing
 [Modeling](https://github.com/tom5454/CustomPlayerModels/wiki/Modelling) (Opens in game.)  
 [Texturing](https://github.com/tom5454/CustomPlayerModels/wiki/Texturing) (Opens in game.)  
-See [#community-tutorials](https://discord.com/channels/811508670205788211/844561618281168968) on Discord or [Comprehensive CPM User Guide](https://docs.google.com/presentation/d/117GBWxtyNT6L3a69cENXz1Gjx-MplB1UC9l_uISn6oQ/edit?usp=sharing) by `The Weeb Guy` for more info.  
+See [#community-tutorials on Discord](https://discord.com/channels/811508670205788211/844561618281168968) or [Comprehensive CPM User Guide](https://docs.google.com/presentation/d/117GBWxtyNT6L3a69cENXz1Gjx-MplB1UC9l_uISn6oQ/edit?usp=sharing) (Google Docs) by `@w3eb on Discord` for more info.  
 
 ## Using your model in-game
 Quickly test your model using `File/Test ingame`.  
 
 To use your model without `Test ingame`, and use it on servers, you have to export it.  
 More info in the wiki article: [Here](https://github.com/tom5454/CustomPlayerModels/wiki/Exporting) (Opens in game.)
+
+## Frequently Asked Questions
+[Here](https://github.com/tom5454/CustomPlayerModels/wiki/FAQ) (Opens in game.)

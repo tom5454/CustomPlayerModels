@@ -133,7 +133,6 @@ public class EditorGui extends Frame {
 		} else {
 			this.editor = new Editor();
 			this.editor.setUI(gui);
-			this.editor.loadDefaultPlayerModel();
 		}
 		TestIngameManager.checkConfig();
 		gui.setCloseListener(c -> {
@@ -160,7 +159,7 @@ public class EditorGui extends Frame {
 			}
 		}
 
-		editor.updaterReg.reset();
+		editor.reinit();
 		viewType = ViewType.MODEL;
 
 		tabs = new TabbedPanelManager(gui);
@@ -554,6 +553,8 @@ public class EditorGui extends Frame {
 		pp.addButton(gui.i18nFormat("label.cpm.wiki.title"), () -> openPopup(new WikiBrowserPopup(gui)));
 
 		pp.addButton(gui.i18nFormat("label.cpm.changelog.title"), () -> openPopup(new ChangelogPopup(gui, null)));
+
+		MinecraftClientAccess.get().populatePlatformSettings("editPopup", pp);
 	}
 
 	private void initEffectMenu() {
@@ -655,6 +656,8 @@ public class EditorGui extends Frame {
 		Button btnAddAnimTex = pp.addButton(gui.i18nFormat("button.cpm.addAnimatedTex"), editor::addAnimTex);
 		btnAddAnimTex.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.addAnimatedTex")));
 		editor.setEnAddAnimTex.add(btnAddAnimTex::setEnabled);
+
+		MinecraftClientAccess.get().populatePlatformSettings("effectsPopup", pp);
 	}
 
 	private void initDisplayMenu() {
@@ -754,6 +757,8 @@ public class EditorGui extends Frame {
 
 				editor.drawParrots.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.drawParrots"));
 			}
+
+			MinecraftClientAccess.get().populatePlatformSettings("displayPopup", pp);
 
 			pp.display(x, 20);
 		}));

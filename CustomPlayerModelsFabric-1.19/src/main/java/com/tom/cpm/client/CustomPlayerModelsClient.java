@@ -4,7 +4,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.SkinCustomizationScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -16,7 +15,6 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
-import com.tom.cpm.shared.util.Log;
 
 public class CustomPlayerModelsClient extends ClientBase implements ClientModInitializer {
 	public static CustomPlayerModelsClient INSTANCE;
@@ -26,8 +24,6 @@ public class CustomPlayerModelsClient extends ClientBase implements ClientModIni
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Init started");
 		INSTANCE = this;
 		init0();
-		irisLoaded = FabricLoader.getInstance().isModLoaded("iris");
-		if(irisLoaded)Log.info("Iris detected, enabling iris compatibility");
 		ClientTickEvents.START_CLIENT_TICK.register(cl -> {
 			if(!cl.isPaused())
 				mc.getPlayerRenderManager().getAnimationEngine().tick();

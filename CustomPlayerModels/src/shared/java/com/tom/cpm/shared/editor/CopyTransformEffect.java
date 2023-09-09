@@ -132,4 +132,17 @@ public class CopyTransformEffect {
 		}
 		return false;
 	}
+
+	public void setAll(boolean v) {
+		copyPX = v;
+		copyPY = v;
+		copyPZ = v;
+		copyRX = v;
+		copyRY = v;
+		copyRZ = v;
+		copySX = v;
+		copySY = v;
+		copySZ = v;
+		copyVis = v;
+	}
 }

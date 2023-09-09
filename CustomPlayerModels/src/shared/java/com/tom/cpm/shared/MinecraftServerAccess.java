@@ -1,5 +1,6 @@
 package com.tom.cpm.shared;
 
+import com.tom.cpl.block.BiomeHandler;
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpm.shared.network.NetHandler;
 
@@ -11,4 +12,5 @@ public interface MinecraftServerAccess {
 
 	ModConfigFile getConfig();
 	NetHandler<?, ?, ?> getNetHandler();
+	BiomeHandler<?> getBiomeHandler();
 }

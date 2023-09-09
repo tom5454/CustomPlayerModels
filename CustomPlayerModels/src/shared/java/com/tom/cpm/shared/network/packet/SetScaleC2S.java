@@ -36,8 +36,8 @@ public class SetScaleC2S extends NBTC2S {
 			float newV = selNewV;
 			Pair<Float, Float> l = NetworkUtil.getScalingLimits(e.getKey(), handler.getID(pl));
 			newV = newV == 0 || l == null ? 1F : MathHelper.clamp(newV, l.getKey(), l.getValue());
-			Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
 			if(newV != oldV) {
+				Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
 				e.getValue().accept(pl, newV);
 				pd.scale.put(e.getKey(), newV);
 			}

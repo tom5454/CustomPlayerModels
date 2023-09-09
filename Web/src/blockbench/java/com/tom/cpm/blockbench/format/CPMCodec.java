@@ -22,6 +22,7 @@ import com.tom.cpm.blockbench.proxy.KeyframeDataPoint;
 import com.tom.cpm.blockbench.proxy.ModelFormat;
 import com.tom.cpm.blockbench.proxy.ModelFormat.FormatPage;
 import com.tom.cpm.blockbench.proxy.Outliner;
+import com.tom.cpm.blockbench.proxy.Project;
 import com.tom.cpm.blockbench.proxy.Property;
 import com.tom.cpm.blockbench.proxy.Property.Clazz;
 import com.tom.cpm.blockbench.proxy.Property.Type;
@@ -41,6 +42,7 @@ public class CPMCodec {
 
 	public static Codec codec;
 	public static ModelFormat format;
+	private static boolean addedAnimators;
 
 	public static void init() {
 		Codec.CodecProperties prop = new Codec.CodecProperties();
@@ -93,18 +95,48 @@ public class CPMCodec {
 				+ "<p class=\"format_description\">" + I18n.get("bb-label.cpmCodecDesc") + "</p>"
 				+ "<p class=\"format_target\"><b>Target</b>:<span>Minecraft: Java Edition with Customizable Player Models mod</span></p>"
 				+ "<h3 class=\"markdown\">" + Global.translate("mode.start.format.informations") + "</h3>"
-				+ "<p class=\"markdown\"><ul><li>" + I18n.get("bb-label.cpmInfo.export") + "</li></ul></p>"
-				+ "<p class=\"markdown\"><ul><li>" + I18n.get("bb-label.cpmInfo.import") + "</li></ul></p>"
+				+ "<p class=\"markdown\">"
+				+ "<ul><li>" + I18n.get("bb-label.cpmInfo.export") + "</li></ul>"
+				+ "<ul><li>" + I18n.get("bb-label.cpmInfo.import") + "</li></ul>"
+				+ "</p>"
 				+ "<h3 class=\"markdown\">" + Global.translate("mode.start.format.resources") + "</h3>"
-				+ "<p class=\"markdown\"><ul><li><a href=\"https://github.com/tom5454/CustomPlayerModels/wiki\">Wiki</a></li></ul></p>"
-				+ "<p class=\"markdown\"><ul><li><a href=\"https://discord.gg/mKyXdEsMZD\">Discord</a></li></ul></p>"
-				+ "<p class=\"markdown\"><ul><li><a href=\"https://www.curseforge.com/minecraft/mc-mods/custom-player-models\">CPM on CurseForge</a></li></ul></p>"
-				+ "<p class=\"markdown\"><ul><li><a href=\"https://modrinth.com/mod/custom-player-models\">CPM on Modrinth</a><br></li></ul></p>"
+				+ "<p class=\"markdown\">"
+				+ "<ul><li><a href=\"https://github.com/tom5454/CustomPlayerModels/wiki\">Wiki</a></li></ul>"
+				+ "<ul><li><a href=\"https://discord.gg/mKyXdEsMZD\">Discord</a></li></ul>"
+				+ "<ul><li><a href=\"https://www.curseforge.com/minecraft/mc-mods/custom-player-models\">CPM on CurseForge</a></li></ul>"
+				+ "<ul><li><a href=\"https://modrinth.com/mod/custom-player-models\">CPM on Modrinth</a><br></li></ul>"
+				+ "<ul><li><a href=\"https://github.com/tom5454/CustomPlayerModels/issues\">Bug tracker</a><br></li></ul>"
+				+ "</p>"
 				+ "<p><button @click=\"open\"><i class=\"material-icons\">folder_open</i> " + I18n.get("bb-button.openCPMProject") + " </button></p>"
 				+ "<p><button @click=\"openembed\"><i class=\"material-icons\">launch</i> " + I18n.get("bb-button.openEmbeddedEditor") + " </button></p>"
 				+ "<p class=\"markdown\"><p>Version: " + WebMC.platform + "</p>"
 				+ "<div class=\"button_bar\"><button id=\"create_new_model_button\" style=\"margin-top: 20px;\" @click=\"create\"><i class=\"material-icons\">arrow_forward</i> Create New Model</button></div>"
 				+ "</div>";
+
+		AnimatorChannel visCh = new AnimatorChannel();
+		visCh.name = I18n.get("label.cpm.visible");
+		visCh.mutable = true;
+		visCh.transform = false;
+		visCh.max_data_points = 1;
+
+		AnimatorChannel colorCh = new AnimatorChannel();
+		colorCh.name = I18n.get("label.cpm.recolor");
+		colorCh.mutable = true;
+		colorCh.transform = true;
+		colorCh.max_data_points = 1;
+
+		ctr.onActivation = () -> {
+			if(addedAnimators)return;
+			addedAnimators = true;
+			BoneAnimator.prototype.channels.set(VISIBILITY, visCh);
+			BoneAnimator.prototype.channels.set(COLOR, colorCh);
+		};
+		ctr.onDeactivation = () -> {
+			if(!addedAnimators)return;
+			addedAnimators = false;
+			BoneAnimator.prototype.channels.delete(VISIBILITY);
+			BoneAnimator.prototype.channels.delete(COLOR);
+		};
 
 		format = new ModelFormat(ctr);
 		codec.format = format;
@@ -136,23 +168,17 @@ public class CPMCodec {
 		createProperty(Clazz.CUBE, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);
 		createProperty(Clazz.PROJECT, Type.STRING, "cpm_data", "CPM Data", Js.undefined(), true);
 
-		AnimatorChannel visCh = new AnimatorChannel();
-		visCh.name = I18n.get("label.cpm.visible");
-		visCh.mutable = true;
-		visCh.transform = false;
-		visCh.max_data_points = 1;
-		BoneAnimator.prototype.channels.set(VISIBILITY, visCh);
 		PluginStart.cleanup.add(() -> BoneAnimator.prototype.channels.delete(VISIBILITY));
 		addTranslatedEntry("timeline." + VISIBILITY, "CPM " + I18n.get("label.cpm.visible"));
 
-		AnimatorChannel colorCh = new AnimatorChannel();
-		colorCh.name = I18n.get("label.cpm.recolor");
-		colorCh.mutable = true;
-		colorCh.transform = true;
-		colorCh.max_data_points = 1;
-		BoneAnimator.prototype.channels.set(COLOR, colorCh);
 		PluginStart.cleanup.add(() -> BoneAnimator.prototype.channels.delete(COLOR));
 		addTranslatedEntry("timeline." + COLOR, "CPM " + I18n.get("label.cpm.recolor"));
+
+		if (Project.format != null && Project.format.id == FORMAT_ID) {
+			addedAnimators = true;
+			BoneAnimator.prototype.channels.set(VISIBILITY, visCh);
+			BoneAnimator.prototype.channels.set(COLOR, colorCh);
+		}
 
 		createProperty(Clazz.KEYFRAME_DATA, Type.BOOLEAN, "cpm_visible", I18n.get("label.cpm.visible"), true, false).condition.method = a -> {
 			KeyframeDataPoint point = Js.uncheckedCast(a);

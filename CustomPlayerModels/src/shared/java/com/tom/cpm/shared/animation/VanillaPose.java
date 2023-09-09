@@ -3,6 +3,7 @@ package com.tom.cpm.shared.animation;
 import java.util.Locale;
 
 import com.tom.cpl.function.ToFloatFunction;
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.text.I18n;
 
 public enum VanillaPose implements IPose {
@@ -71,6 +72,10 @@ public enum VanillaPose implements IPose {
 	IN_MENU,
 	INVISIBLE,
 	LIGHT(s -> Math.max(s.skyLight, s.blockLight) / 15f),
+	HEAD_ROTATION_YAW(s -> MathHelper.clamp((s.yaw - s.bodyYaw + 90) / 180f, 0, 1)),
+	HEAD_ROTATION_PITCH(s -> MathHelper.clamp((s.pitch + 90) / 180f, 0, 1)),
+	BRUSH_LEFT,
+	BRUSH_RIGHT,
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;

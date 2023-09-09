@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
@@ -51,4 +52,8 @@ public class EffectScaling implements IRenderEffect {
 		return RenderEffects.SCALING;
 	}
 
+	@Override
+	public String toString() {
+		return scaling.entrySet().stream().map(e -> e.getKey().name() + ": " + e.getValue()).collect(Collectors.joining("\n", "Scaling:\n", "\n"));
+	}
 }

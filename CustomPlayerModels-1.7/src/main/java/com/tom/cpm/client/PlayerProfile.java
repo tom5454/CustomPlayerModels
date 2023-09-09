@@ -1,5 +1,6 @@
 package com.tom.cpm.client;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -11,16 +12,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
+import com.tom.cpl.block.entity.ActiveEffect;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
 import com.tom.cpl.util.TriConsumer;
+import com.tom.cpm.common.EntityTypeHandlerImpl;
 import com.tom.cpm.common.PlayerInventory;
 import com.tom.cpm.common.WorldImpl;
 import com.tom.cpm.shared.config.Player;
@@ -112,6 +116,7 @@ public class PlayerProfile extends Player<EntityPlayer> {
 		return profile.getId();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updateFromPlayer(EntityPlayer player) {
 		animState.resetPlayer();
@@ -127,8 +132,9 @@ public class PlayerProfile extends Player<EntityPlayer> {
 		animState.moveAmountX = (float) (player.posX - player.prevPosX);
 		animState.moveAmountY = (float) (player.posY - player.prevPosY);
 		animState.moveAmountZ = (float) (player.posZ - player.prevPosZ);
-		animState.yaw = player.rotationYaw;
+		animState.yaw = player.rotationYawHead * 2 - player.renderYawOffset;
 		animState.pitch = player.rotationPitch;
+		animState.bodyYaw = player.rotationYawHead;
 
 		animState.encodedState = encGesture;
 
@@ -146,6 +152,10 @@ public class PlayerProfile extends Player<EntityPlayer> {
 		animState.inGui = inGui;
 		PlayerInventory.setInv(animState, player.inventory);
 		WorldImpl.setWorld(animState, player);
+		if (player.ridingEntity != null)animState.vehicle = EntityTypeHandlerImpl.impl.wrap(player.ridingEntity.getClass());
+		((Collection<PotionEffect>) player.getActivePotionEffects()).forEach(e -> {
+			animState.allEffects.add(new ActiveEffect(e.getEffectName(), e.getAmplifier(), e.getDuration(), false));
+		});
 
 		if(player.getItemInUse() != null && player.getItemInUse().getItem() instanceof ItemBow) {
 			float f = 20F;

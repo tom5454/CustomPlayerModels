@@ -290,6 +290,7 @@ public class PlayerModelSetup {
 		CROSSBOW_HOLD(true),
 		SPYGLASS(false),
 		TOOT_HORN(false),
+		BRUSH(false),
 		;
 
 		public static final ArmPose[] VALUES = values();

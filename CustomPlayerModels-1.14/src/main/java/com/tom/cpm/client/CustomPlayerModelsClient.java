@@ -27,6 +27,7 @@ import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.gui.SettingsGui;
 
 public class CustomPlayerModelsClient extends ClientBase {
+	public static final CustomPlayerModelsClient INSTANCE = new CustomPlayerModelsClient();
 
 	public void init() {
 		init0();

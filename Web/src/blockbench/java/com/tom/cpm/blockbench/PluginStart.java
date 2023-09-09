@@ -94,21 +94,19 @@ public class PluginStart implements EntryPoint {
 	}
 
 	public static void onLoad() {
-		DomGlobal.console.log("On Load");
-
 		CPMCodec.init();
 		ProjectGenerator.initDialog();
 		BBActions.load();
 	}
 
 	public static void onUnload() {
-		DomGlobal.console.log("On Unload");
 		cleanup.forEach(r -> {
 			try {
 				r.run();
 			} catch (Throwable e) {
 			}
 		});
+		DomGlobal.console.log("Unloaded CPM Plugin");
 	}
 
 	public static void addEventListener(String id, CallbackEvent cb) {

@@ -1128,5 +1128,20 @@
   "osc-label.cpmosc.oscTransmitAddr": "Address:",
   "osc-tooltip.cpmosc.oscSettings": "Open the OSC Settings and Debug Popup",
   "osc-tooltip.cpmosc.oscWizard": "Generate a new OSC Animation using a wizard",
-  "osc-tooltip.cpmosc.oscFirstArg": "Filter for the first string argument, leave empty for no filter\\Useful for VMC triggers"
+  "osc-tooltip.cpmosc.oscFirstArg": "Filter for the first string argument, leave empty for no filter\\Useful for VMC triggers",
+  "chat.cpm.clientUUIDMismatch": "[CPM] Your in-game UUID is incorrect, the server is probably in offline mode. Models may not load.",
+  "error.cpm.corruptedInstall": "Your Minecraft installation is corrupted\\Please reinstall your game\\Error:",
+  "button.cpm.lock": "Lock",
+  "button.cpm.unlock": "Unlock",
+  "tooltip.cpm.animatedTexOverlap": "The animated texture regions overlap\\This will cause texture glitches when in-game",
+  "label.cpm.tree.locked": "%s [L]",
+  "tooltip.cpm.pose.head_rotation_yaw": "Animation frame is based on the head yaw rotation",
+  "tooltip.cpm.pose.head_rotation_pitch": "Animation frame is based on the head pitch rotation",
+  "label.cpm.pose.head_rotation_yaw": "Head Yaw",
+  "label.cpm.pose.head_rotation_pitch": "Head Pitch",
+  "label.cpm.pose.brush_left": "Brush Left",
+  "label.cpm.pose.brush_right": "Brush Right",
+  "tooltip.cpm.animType.group.progress": "The animation frame depends on the animation\u0027s current value",
+  "button.cpm.copyFromOriginal": "CT From Original",
+  "tooltip.cpm.copyFromOriginal": "Adds copy transforms to the duplicated parts."
 }

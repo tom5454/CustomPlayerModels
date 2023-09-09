@@ -247,7 +247,7 @@ public class Exporter {
 		}
 		otherParts.addAll(otherParts2);
 		if(!e.animations.isEmpty()) {
-			otherParts.add(new ModelPartAnimation(e));
+			otherParts.add(new ModelPartAnimation(e, otherParts));
 		}
 		e.textures.forEach((type, tex) -> {
 			if(type.editable) {

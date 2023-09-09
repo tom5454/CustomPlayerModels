@@ -92,7 +92,7 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 			method = "renderNameTag(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;Ljava/lang/String;Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V")
 	public void onRenderName2(AbstractClientPlayerEntity entityIn, String displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, CallbackInfo cbi) {
 		if(Player.isEnableLoadingInfo())
-			CustomPlayerModelsClient.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
+			CustomPlayerModelsClient.INSTANCE.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, matrixStackIn, bufferIn, packedLightIn);
 	}
 
 	@Redirect(at =

@@ -3,6 +3,7 @@ package com.tom.cpm.shared;
 import java.util.EnumSet;
 
 import com.tom.cpl.block.BlockStateHandler;
+import com.tom.cpl.block.entity.EntityTypeHandler;
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.text.TextRemapper;
@@ -37,4 +38,5 @@ public interface MinecraftCommonAccess {
 
 	ItemStackHandler<?> getItemStackHandler();
 	BlockStateHandler<?> getBlockStateHandler();
+	EntityTypeHandler<?> getEntityTypeHandler();
 }

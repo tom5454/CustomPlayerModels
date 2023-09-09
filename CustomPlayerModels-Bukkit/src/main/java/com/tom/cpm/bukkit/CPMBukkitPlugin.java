@@ -13,7 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.tom.cpl.block.BiomeHandler;
 import com.tom.cpl.block.BlockStateHandler;
+import com.tom.cpl.block.entity.EntityTypeHandler;
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.text.TextRemapper;
@@ -138,6 +140,11 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			public BlockStateHandler<?> getBlockStateHandler() {
 				return null;
 			}
+
+			@Override
+			public EntityTypeHandler<?> getEntityTypeHandler() {
+				return null;
+			}
 		});
 		MinecraftObjectHolder.setServerObject(new MinecraftServerAccess() {
 
@@ -149,6 +156,11 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			@Override
 			public NetHandler<?, ?, ?> getNetHandler() {
 				return net.netHandler;
+			}
+
+			@Override
+			public BiomeHandler<?> getBiomeHandler() {
+				return null;
 			}
 		});
 		net = new Network(this);

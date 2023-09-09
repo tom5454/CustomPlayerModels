@@ -26,7 +26,7 @@
       "com.tom.cpm.client.CustomPlayerModelsClient"
     ],
 	"preLaunch": [
-      "com.tom.cpm.LaunchMixinWithOptifineRunnable"
+      "com.tom.cpm.LoadCompatMixins"
     ],
 	"modmenu": [
       "com.tom.cpm.ModMenu"
@@ -38,10 +38,10 @@
   "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.7.4",
-    "fabric": "*",
+    "fabric-api": "*",
     "minecraft": ">=1.19 <=1.19.2"
   },
   "suggests": {
-	"vivecraft": ">=0.0.14"
+	"vivecraft": ">=1.0.0"
   }
 }

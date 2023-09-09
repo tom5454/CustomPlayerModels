@@ -54,7 +54,7 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 	@Inject(at = @At(value = "RETURN"), method = "renderNameTags(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;DDDLjava/lang/String;D)V")
 	public void onRenderName2(AbstractClientPlayerEntity entityIn, double x, double y, double z, String displayNameIn, double dst, CallbackInfo cbi) {
 		if(Player.isEnableLoadingInfo())
-			CustomPlayerModelsClient.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, x, y, z, dst);
+			CustomPlayerModelsClient.INSTANCE.renderNameTag(this, entityIn, entityIn.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE, x, y, z, dst);
 	}
 
 	@Override

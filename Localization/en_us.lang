@@ -159,6 +159,9 @@ button.cpm.reverseAnimation=Reverse Animation
 button.cpm.quick_key.bind=Quick Access %d
 button.cpm.quick_key.unbind=Unbind
 button.cpm.importIconImage=Import Image
+button.cpm.lock=Lock
+button.cpm.unlock=Unlock
+button.cpm.copyFromOriginal=CT From Original
 
 button.cpm.root_group.cape=Cape
 button.cpm.root_group.elytra=Elytra
@@ -347,6 +350,11 @@ tooltip.cpm.animType.pose.invisible=Plays when you have the Invisibility effect
 tooltip.cpm.effect.enableInvisGlow=Keep the "Glowing Eyes" parts visible\while having the Invisibility potion effect.\Always disabled on Vanilla servers.\Configurable on CPM servers (enabled by default) with:\/cpm effects invis_glow <enable>
 tooltip.cpm.anim.reverseAnimation=Reverse Animation Frame Order
 tooltip.cpm.animType.pose.light=Animation frame depends on the light level at the player's feet
+tooltip.cpm.animatedTexOverlap=The animated texture regions overlap\This will cause texture glitches when in-game
+tooltip.cpm.pose.head_rotation_yaw=Animation frame is based on the head yaw rotation
+tooltip.cpm.pose.head_rotation_pitch=Animation frame is based on the head pitch rotation
+tooltip.cpm.animType.group.progress=The animation frame depends on the animation's current value
+tooltip.cpm.copyFromOriginal=Adds copy transforms to the duplicated parts.
 
 tab.cpm.model=Model
 tab.cpm.texture=Texture
@@ -779,6 +787,7 @@ label.cpm.keybind.toggleHidden=Toggle Hidden by Default
 label.cpm.reopenProject=Reopen/recover previously open project?\%s
 label.cpm.effect.enableInvisGlow=Invisible Glowing
 label.cpm.newCube=New Cube
+label.cpm.tree.locked=%s [L]
 
 label.cpm.paste.connecting.title=Connecting...
 label.cpm.paste.connecting.message=Connecting to paste site...
@@ -880,6 +889,10 @@ label.cpm.pose.air=Air
 label.cpm.pose.in_menu=Using Container
 label.cpm.pose.invisible=Invisible
 label.cpm.pose.light=Light Level
+label.cpm.pose.head_rotation_yaw=Head Yaw
+label.cpm.pose.head_rotation_pitch=Head Pitch
+label.cpm.pose.brush_left=Brush Left
+label.cpm.pose.brush_right=Brush Right
 
 label.cpm.dir.up=Up
 label.cpm.dir.down=Down
@@ -916,6 +929,7 @@ error.cpm.paste.unknownNetworkError=Unknown network error, while connecting to t
 error.cpm.malformedURL=Malformed URL
 error.cpm.unknownURL=Unknown URL
 error.cpm.testModel=Test in-game model
+error.cpm.corruptedInstall=Your Minecraft installation is corrupted\Please reinstall your game\Error:
 
 error.paste.unknown=Unknown paste server error
 error.paste.outOfSpace=Out of space on the paste site.\Try clearing unused pastes using 'Edit/Pastes' menu.
@@ -958,6 +972,7 @@ chat.cpm.skinForced=Can't change skin. Your skin was force set by the operators 
 chat.cpm.serverSafetySettings=[CPM] The server has recommended safety settings. Open the Gestures menu [%s] to edit the safety settings.
 chat.cpm.serverRequiresCPM=The server requires CPM to be installed and communication enabled. Currently the 'Disable server communication' setting is set to 'true', and you will be kicked from the server. Open the Gestures menu [%s] to edit the settings. 
 chat.cpm.scalingBlocked=[CPM] Some scaling settings were blocked, ask an admin to enable scaling.
+chat.cpm.clientUUIDMismatch=[CPM] Your in-game UUID is incorrect, the server is probably in offline mode. Models may not load.
 
 action.cpm.switch=Switch %s
 action.cpm.set=Set %s

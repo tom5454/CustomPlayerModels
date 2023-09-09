@@ -45,7 +45,6 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.editor.actions.Action;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
-import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.anim.AnimationEncodingData;
 import com.tom.cpm.shared.editor.anim.AnimationProperties;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
@@ -177,6 +176,7 @@ public class Editor {
 	public BooleanUpdater showPreviousFrame = updaterReg.createBool(true);
 
 	public UI ui;
+	private boolean initialized;
 	public TreeElement selectedElement;
 	public List<ModelElement> elements = new ArrayList<>();
 	public EditorAnim selectedAnim;
@@ -410,7 +410,12 @@ public class Editor {
 		redoQueue.clear();
 		leftHandPos = new PartPosition();
 		rightHandPos = new PartPosition();
-		skinType = MinecraftClientAccess.get().getSkinType();
+		try {
+			skinType = MinecraftClientAccess.get().getSkinType();
+		} catch (NullPointerException e) {
+			ui.onGuiException(ui.i18nFormat("error.cpm.corruptedInstall"), e, true);
+			return;
+		}
 		Image skin = skinType.getSkinTexture();
 		this.vanillaSkin = skin;
 		skinTex.setDefaultImg(vanillaSkin);
@@ -899,10 +904,7 @@ public class Editor {
 	public void addAnimTex() {
 		if(selectedElement != null) {
 			ETextures tex = selectedElement.getTexture();
-			if(tex != null && tex.isEditable()) {
-				action("add", "action.cpm.animTex").addToList(tex.animatedTexs, new AnimatedTex(this, tex.getType())).execute();
-				updateGui();
-			}
+			if(tex != null)tex.addAnimTex();
 		}
 	}
 
@@ -935,5 +937,13 @@ public class Editor {
 			from = from.parent;
 		}
 		list.forEach(c);
+	}
+
+	public void reinit() {
+		updaterReg.reset();
+		if (!initialized) {
+			initialized = true;
+			loadDefaultPlayerModel();
+		}
 	}
 }

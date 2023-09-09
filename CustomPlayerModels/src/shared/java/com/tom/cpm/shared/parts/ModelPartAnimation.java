@@ -41,8 +41,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 	private String modelProfilesId;
 
 	public ModelPartAnimation(IOHelper din, ModelDefinition def) throws IOException {
-		boolean done = false;
-		while(!done) {
+		while(true) {
 			Type type = din.readEnum(Type.VALUES);
 			if(type == Type.END)break;
 			IOHelper block = din.readNextBlock();
@@ -255,7 +254,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		}
 	}
 
-	public ModelPartAnimation(Editor e) {
+	public ModelPartAnimation(Editor e, List<IModelPart> otherParts) {
 		int[] idc = new int[] {0, 1};
 		int valMask = e.animEnc == null ? 0 :  PlayerSkinLayer.encode(e.animEnc.freeLayers);
 		int defMask = e.animEnc == null ? 0 : (PlayerSkinLayer.encode(e.animEnc.defaultLayerValue) & (~valMask));
@@ -269,6 +268,14 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		Set<String> addedGestures = new HashSet<>();
 		e.animations.forEach(ea -> {
 			int id = idc[0]++;
+			if (id > 250) {
+				idc[0] = 1;
+				id = 0;
+				ModelPartAnimation part = new ModelPartAnimation();
+				part.parsedData = parsedData;
+				parsedData = new HashMap<>();
+				otherParts.add(part);
+			}
 			ResolvedData rd;
 			if(ea.pose instanceof VanillaPose) {
 				rd = new ResolvedData((VanillaPose) ea.pose, ea.add);
@@ -351,6 +358,9 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			if(n == resetId)n = idc[1]++;//Skip reset id
 			rd.gid = n;
 		});
+	}
+
+	public ModelPartAnimation() {
 	}
 
 	private static void resolveEncID(ResolvedData rd, int id, List<PlayerSkinLayer> allLayers) {
