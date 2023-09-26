@@ -91,7 +91,7 @@ public class BlockStateHandlerImpl extends BlockStateHandler<IBlockState> {
 	}
 
 	@Override
-	public List<com.tom.cpl.block.BlockState> getAllBlocks() {
+	public List<com.tom.cpl.block.BlockState> getAllElements() {
 		return ForgeRegistries.BLOCKS.getValuesCollection().stream().map(b -> wrap(b.getDefaultState())).collect(Collectors.toList());
 	}
 

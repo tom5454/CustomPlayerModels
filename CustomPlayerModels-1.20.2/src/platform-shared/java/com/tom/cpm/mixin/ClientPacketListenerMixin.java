@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.common.ByteArrayPayload;
@@ -33,5 +34,10 @@ public class ClientPacketListenerMixin implements NetH {
 			CustomPlayerModelsClient.INSTANCE.netHandler.receiveClient(packet.id(), new FastByteArrayInputStream(p.data()), this);
 			cbi.cancel();
 		}
+	}
+
+	@Inject(at = @At("RETURN"), method = "handleConfigurationStart(Lnet/minecraft/network/protocol/game/ClientboundStartConfigurationPacket;)V", cancellable = true)
+	public void onReconfigure(ClientboundStartConfigurationPacket packet, CallbackInfo cbi) {
+		CustomPlayerModelsClient.mc.onLogOut();
 	}
 }

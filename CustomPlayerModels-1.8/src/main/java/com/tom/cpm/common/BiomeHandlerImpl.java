@@ -39,7 +39,7 @@ public class BiomeHandlerImpl extends BiomeHandler<BiomeGenBase> {
 	}
 
 	@Override
-	public List<com.tom.cpl.block.Biome> getAllBiomes() {
+	public List<com.tom.cpl.block.Biome> getAllElements() {
 		return BiomeGenBase.BIOME_ID_MAP.values().stream().map(this::wrap).collect(Collectors.toList());
 	}
 
@@ -66,5 +66,10 @@ public class BiomeHandlerImpl extends BiomeHandler<BiomeGenBase> {
 	@Override
 	public RainType getRainType(BiomeGenBase state) {
 		return state.isSnowyBiome() ? RainType.SNOW : state.canSpawnLightningBolt() ? RainType.RAIN : RainType.NONE;
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return true;
 	}
 }

@@ -16,6 +16,7 @@ import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
 import com.tom.cpm.shared.editor.project.loaders.DescriptionLoaderV1;
 import com.tom.cpm.shared.editor.project.loaders.ElementsLoaderV1;
 import com.tom.cpm.shared.editor.project.loaders.PropertiesLoaderV1;
+import com.tom.cpm.shared.editor.project.loaders.TagsLoaderV1;
 import com.tom.cpm.shared.editor.project.loaders.TemplateLoaderV1;
 import com.tom.cpm.shared.editor.project.loaders.TexturesLoaderV1;
 
@@ -57,6 +58,7 @@ public class ProjectIO {
 		l.add(new PropertiesLoaderV1());
 		l.add(new TemplateLoaderV1());
 		l.add(new TexturesLoaderV1());
+		l.add(new TagsLoaderV1());
 	}
 
 	public ProjectIO(ProjectIO pl) {

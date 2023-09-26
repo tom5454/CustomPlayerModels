@@ -4,6 +4,7 @@ import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.config.ConfigKeys;
 
@@ -13,17 +14,19 @@ public class MouseControlsPanel extends Panel {
 	private Button buttonDMB;
 	private Button buttonMMB;
 	private Button buttonSMB;
+	private Slider wheelS;
 
 	public MouseControlsPanel(IGui gui, ConfigEntry ce) {
 		super(gui);
 		this.ce = ce;
 
-		setBounds(new Box(5, 0, 250, 95));
+		setBounds(new Box(5, 0, 250, 120));
 
 		buttonRMB = new Button(gui, "", null);
 		buttonDMB = new Button(gui, "", null);
 		buttonMMB = new Button(gui, "", null);
 		buttonSMB = new Button(gui, "", null);
+		wheelS = new Slider(gui, "");
 
 		buttonRMB.setAction(() -> {
 			int b = ce.getSetInt(ConfigKeys.EDITOR_ROTATE_MOUSE_BUTTON, 2) - 1;
@@ -69,7 +72,21 @@ public class MouseControlsPanel extends Panel {
 		buttonSMB.setBounds(new Box(0, 75, 250, 20));
 		addElement(buttonSMB);
 
+		wheelS.setAction(() -> {
+			updateWheelS();
+			ce.setInt(ConfigKeys.MOUSE_WHEEL_SENSITIVITY, (int) ((wheelS.getValue() * 3.75F + 0.25F) * 100));
+		});
+		float wsv = ce.getInt(ConfigKeys.MOUSE_WHEEL_SENSITIVITY, 100) / 100f;
+		wheelS.setValue((wsv - 0.5F) / 1.5F);
+		wheelS.setBounds(new Box(0, 100, 250, 20));
+		addElement(wheelS);
+
 		updateMouseButtons();
+		updateWheelS();
+	}
+
+	private void updateWheelS() {
+		wheelS.setText(gui.i18nFormat("label.cpm.mouseWheelSensitivity", (int) ((wheelS.getValue() * 3.75F + 0.25F) * 100)));
 	}
 
 	private void updateMouseButtons() {

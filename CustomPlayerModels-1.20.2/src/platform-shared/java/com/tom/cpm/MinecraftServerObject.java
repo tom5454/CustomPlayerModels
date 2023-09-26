@@ -3,7 +3,9 @@ package com.tom.cpm;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
+import com.tom.cpl.block.BiomeHandler;
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpm.common.BiomeHandlerImpl;
 import com.tom.cpm.common.NetworkInit;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftServerAccess;
@@ -32,5 +34,10 @@ public class MinecraftServerObject implements MinecraftServerAccess {
 
 	public MinecraftServer getServer() {
 		return server;
+	}
+
+	@Override
+	public BiomeHandler<?> getBiomeHandler() {
+		return BiomeHandlerImpl.serverImpl;
 	}
 }

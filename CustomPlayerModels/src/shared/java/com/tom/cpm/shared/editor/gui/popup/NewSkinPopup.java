@@ -19,16 +19,16 @@ public class NewSkinPopup extends PopupPanel {
 		super(gui);
 
 		Label lblW = new Label(gui, gui.i18nFormat("label.cpm.width"));
-		lblW.setBounds(new Box(5, 15, 40, 18));
+		lblW.setBounds(new Box(5, 15, 40, 20));
 		Label lblH = new Label(gui, gui.i18nFormat("label.cpm.height"));
-		lblH.setBounds(new Box(75, 15, 40, 18));
+		lblH.setBounds(new Box(75, 15, 40, 20));
 
 		Spinner spinnerW = new Spinner(gui);
 		Spinner spinnerH = new Spinner(gui);
 		spinnerW.setDp(0);
 		spinnerH.setDp(0);
-		spinnerW.setBounds(new Box(5, 25, 65, 18));
-		spinnerH.setBounds(new Box(75, 25, 65, 18));
+		spinnerW.setBounds(new Box(5, 25, 65, 20));
+		spinnerH.setBounds(new Box(75, 25, 65, 20));
 		addElement(spinnerW);
 		addElement(spinnerH);
 		addElement(lblW);
@@ -42,14 +42,14 @@ public class NewSkinPopup extends PopupPanel {
 		addElement(customGridSize);
 
 		Label lblTW = new Label(gui, gui.i18nFormat("label.cpm.width"));
-		lblTW.setBounds(new Box(5, 75, 40, 18));
+		lblTW.setBounds(new Box(5, 75, 40, 20));
 		Label lblTH = new Label(gui, gui.i18nFormat("label.cpm.height"));
-		lblTH.setBounds(new Box(75, 75, 40, 18));
+		lblTH.setBounds(new Box(75, 75, 40, 20));
 
 		Spinner spinnerTW = new Spinner(gui);
 		Spinner spinnerTH = new Spinner(gui);
-		spinnerTW.setBounds(new Box(5, 85, 65, 18));
-		spinnerTH.setBounds(new Box(75, 85, 65, 18));
+		spinnerTW.setBounds(new Box(5, 85, 65, 20));
+		spinnerTH.setBounds(new Box(75, 85, 65, 20));
 		spinnerTW.setDp(0);
 		spinnerTH.setDp(0);
 		spinnerTW.setEnabled(false);

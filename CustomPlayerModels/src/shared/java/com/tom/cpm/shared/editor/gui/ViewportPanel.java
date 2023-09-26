@@ -241,11 +241,6 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				p.riding = true;
 				PlayerModelSetup.setRotationAngles(p, 0, 0, hand, false);
 				break;
-			case CUSTOM:
-			case DYING:
-			case FALLING:
-			case STANDING:
-				break;
 
 			case FLYING:
 			case TRIDENT_SPIN:
@@ -272,6 +267,24 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				p.setAllVisible(false);
 				p.head.visible = true;
 				matrixstack.translate(0.0D, 1.501F, 0.0D);
+				break;
+
+			case HEAD_ROTATION_YAW:
+				if (editor.selectedAnim != null) {
+					int f = editor.selectedAnim.getSelectedFrameIndex();
+					int frms = editor.selectedAnim.getFrames().size() - 1;
+					if(f < 0 || frms < 1)break;
+					p.head.yRot = (float) Math.toRadians((f / (float) frms) * 180 - 90);
+				}
+				break;
+
+			case HEAD_ROTATION_PITCH:
+				if (editor.selectedAnim != null) {
+					int f = editor.selectedAnim.getSelectedFrameIndex();
+					int frms = editor.selectedAnim.getFrames().size() - 1;
+					if(f < 0 || frms < 1)break;
+					p.head.xRot = (float) Math.toRadians((1f - f / (float) frms) * 180 - 90);
+				}
 				break;
 
 			default:
@@ -388,7 +401,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				((ModelTree) editor.treeHandler.getModel()).displayPopup(gui, event, elem);
 			}
 		}
-		if(event.btn == EditorGui.getSelectMouseButton() && event.isHovered(bounds) && dragged > 0 && canEdit()) {
+		if(event.btn == EditorGui.getSelectMouseButton() && dragged > 0 && canEdit()) {
 			event.consume();
 			endGizmoDrag(true);
 		}
@@ -519,6 +532,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 		h.registerKeybind(Keybinds.FOCUS_CAMERA, this::focusOnSelected);
 		h.registerKeybind(Keybinds.TOGGLE_HIDDEN_ACTION, () -> editor.switchEffect(Effect.HIDE));
 		h.registerKeybind(Keybinds.TOGGLE_VIS_ACTION, editor::switchVis);
+		h.registerKeybind(Keybinds.TOGGLE_LOCK_ACTION, editor::switchLock);
 		super.keyPressed(event);
 	}
 

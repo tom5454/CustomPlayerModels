@@ -58,7 +58,7 @@ public class BiomeHandlerImpl extends BiomeHandler<Biome> {
 	}
 
 	@Override
-	public List<com.tom.cpl.block.Biome> getAllBiomes() {
+	public List<com.tom.cpl.block.Biome> getAllElements() {
 		return registry.get().stream().map(this::wrap).collect(Collectors.toList());
 	}
 
@@ -85,5 +85,14 @@ public class BiomeHandlerImpl extends BiomeHandler<Biome> {
 	@Override
 	public RainType getRainType(Biome state) {
 		return RainType.get(state.getPrecipitation().name());
+	}
+
+	@Override
+	public boolean isAvailable() {
+		try {
+			return registry.get() != null;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 }

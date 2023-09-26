@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.editor;
 
+import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 
 public enum DisplayItem {
@@ -12,7 +13,7 @@ public enum DisplayItem {
 	TRIDENT(ArmPose.THROW_SPEAR, false),
 	SHIELD(ArmPose.BLOCK, false),
 	FOOD(ArmPose.ITEM, false),
-	SPYGLASS(ArmPose.SPYGLASS, false),
+	SPYGLASS(ArmPose.SPYGLASS, false, ItemSlot.HEAD),
 	GOAT_HORN(ArmPose.TOOT_HORN, false),
 	BRUSH(ArmPose.BRUSH, false),
 	;
@@ -20,9 +21,17 @@ public enum DisplayItem {
 
 	public final ArmPose pose;
 	public final boolean canBeOnHead;
+	public final ItemSlot positionOverride;
 
 	private DisplayItem(ArmPose pose, boolean canBeOnHead) {
 		this.pose = pose;
 		this.canBeOnHead = canBeOnHead;
+		this.positionOverride = null;
+	}
+
+	private DisplayItem(ArmPose pose, boolean canBeOnHead, ItemSlot positionOverride) {
+		this.pose = pose;
+		this.canBeOnHead = canBeOnHead;
+		this.positionOverride = positionOverride;
 	}
 }

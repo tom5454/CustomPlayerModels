@@ -63,11 +63,11 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 
 	@Override
 	public List<String> listNativeTags() {
-		return Arrays.stream(OreDictionary.getOreNames()).map(t -> "oredict:" + t).collect(Collectors.toList());
+		return Arrays.stream(OreDictionary.getOreNames()).map(t -> "#oredict:" + t).collect(Collectors.toList());
 	}
 
 	@Override
-	public List<Stack> getAllItems() {
+	public List<Stack> getAllElements() {
 		NonNullList<ItemStack> stacks = NonNullList.create();
 		ForgeRegistries.ITEMS.forEach(e -> e.getSubItems(CreativeTabs.SEARCH, stacks));
 		return stacks.stream().map(this::wrap).collect(Collectors.toList());
@@ -243,5 +243,10 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 	@Override
 	public Stack emptyObject() {
 		return wrap(ItemStack.EMPTY);
+	}
+
+	@Override
+	public String getItemDisplayName(ItemStack stack) {
+		return stack.getDisplayName();
 	}
 }

@@ -1,22 +1,36 @@
 package com.tom.cpl.tag;
 
+import java.util.Collections;
 import java.util.List;
 
 public class CPMTag<T> implements Tag<T> {
-	private final TagManager manager;
-	private List<T> stacks;
-	private final List<String> entries;
-	private final String id;
+	private final TagManager<T> manager;
+	protected List<T> stacks;
+	protected final List<String> entries;
+	protected final String id;
+	protected final boolean builtin;
 
-	public CPMTag(TagManager manager, String id, List<String> entries) {
+	public CPMTag(TagManager<T> manager, String id, List<String> entries) {
 		this.manager = manager;
 		this.id = id;
 		this.entries = entries;
+		this.builtin = false;
+	}
+
+	public CPMTag(TagManager<T> manager, String id, List<String> entries, boolean builtin) {
+		this.manager = manager;
+		this.id = id;
+		this.entries = builtin ? Collections.unmodifiableList(entries) : entries;
+		this.builtin = builtin;
 	}
 
 	@Override
 	public List<T> getAllStacks() {
-		if(stacks == null)stacks = manager.listStacks(entries);
+		return getAllStacksInt(null);
+	}
+
+	protected List<T> getAllStacksInt(List<CPMTag<T>> dejavu) {
+		if(stacks == null)stacks = manager.listStacksInt(entries, dejavu);
 		return stacks;
 	}
 
@@ -47,6 +61,14 @@ public class CPMTag<T> implements Tag<T> {
 
 	@Override
 	public String getId() {
-		return id;
+		return "$" + id;
+	}
+
+	public List<String> getEntries() {
+		return entries;
+	}
+
+	public boolean isBuiltin() {
+		return builtin;
 	}
 }

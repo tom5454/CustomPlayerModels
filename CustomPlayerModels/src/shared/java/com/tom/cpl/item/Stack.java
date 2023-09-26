@@ -50,6 +50,11 @@ public class Stack {
 		return handler.itemEquals(stack, other.stack);
 	}
 
+	@Override
+	public int hashCode() {
+		return getItemId().hashCode();
+	}
+
 	public boolean isInNativeTag(String e) {
 		return handler.isInTag(e, this);
 	}
@@ -68,5 +73,13 @@ public class Stack {
 
 	protected Object getStack() {
 		return stack;
+	}
+
+	public String getDisplayName() {
+		return handler.getItemDisplayName(stack);
+	}
+
+	public String getModId() {
+		return getItemId().split(":", 2)[0];
 	}
 }

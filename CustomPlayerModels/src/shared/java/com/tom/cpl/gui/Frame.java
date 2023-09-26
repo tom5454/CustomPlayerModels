@@ -4,12 +4,14 @@ import java.io.File;
 import java.util.List;
 
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.MathHelper;
 
 public abstract class Frame extends Panel {
 	protected PopupPanels popup;
@@ -163,8 +165,9 @@ public abstract class Frame extends Panel {
 	public class PopupLayer extends Panel {
 		private Button close;
 		private PopupPanel popup;
-		private Label title;
+		private TitleBar title;
 		private boolean closing, rendering;
+		private int highlightPopup;
 
 		public PopupLayer(PopupPanel panel) {
 			super(Frame.this.gui);
@@ -172,11 +175,12 @@ public abstract class Frame extends Panel {
 			this.popup = panel;
 
 			if(panel.hasDecoration()) {
-				close = new Button(gui, "X", popup::close);
+				close = new ButtonIcon(gui, "editor", 16, 0, true, popup::close);
 				addElement(close);
-				title = new Label(gui, panel.getTitle());
+
+				title = new TitleBar(gui, panel.getTitle());
 				addElement(title);
-				title.setBounds(new Box(2, 2, 0, 0));
+				title.setBounds(new Box(1, 1, 0, 0));
 			}
 
 			addElement(panel);
@@ -200,6 +204,7 @@ public abstract class Frame extends Panel {
 				setBounds(new Box(bounds.w / 2 - pb.w / 2 - 1, bounds.h / 2 - pb.h / 2 - 6, pb.w + 2, pb.h + 12));
 				popup.setBounds(new Box(1, 12, pb.w, pb.h));
 				close.setBounds(new Box(pb.w - 10, 0, 12, 12));
+				title.setBounds(new Box(1, 1, pb.w - 12, 10));
 			}
 		}
 
@@ -213,7 +218,7 @@ public abstract class Frame extends Panel {
 			gui.pushMatrix();
 			gui.setPosOffset(bounds);
 			gui.setupCut();
-			gui.drawBox(0, 0, bounds.w, bounds.h, gui.getColors().popup_border);
+			gui.drawBox(0, 0, bounds.w, bounds.h, highlightPopup % 10 > 5 ? gui.getColors().popup_border_notify : gui.getColors().popup_border);
 			gui.drawBox(1, 1, bounds.w - 2, bounds.h - 2, gui.getColors().popup_background);
 			for (GuiElement guiElement : elements) {
 				if(guiElement.isVisible())
@@ -222,11 +227,15 @@ public abstract class Frame extends Panel {
 			gui.popMatrix();
 			gui.setupCut();
 			rendering = false;
+			if(highlightPopup > 0)highlightPopup--;
 		}
 
 		@Override
 		public void mouseClick(MouseEvent event) {
 			super.mouseClick(event);
+			if (!event.isConsumed() && !event.isInBounds(bounds)) {
+				highlightPopup = 20;
+			}
 			event.consume();
 		}
 
@@ -277,6 +286,54 @@ public abstract class Frame extends Panel {
 		public void updateTitle() {
 			title.setText(popup.getTitle());
 		}
+
+		private class TitleBar extends Panel {
+			private Label titleLbl;
+			private boolean dragging;
+			private int dragX, dragY;
+
+			public TitleBar(IGui gui, String title) {
+				super(gui);
+				titleLbl = new Label(gui, title);
+				titleLbl.setBounds(new Box(1, 1, 0, 0));
+				addElement(titleLbl);
+			}
+
+			public void setText(String title) {
+				titleLbl.setText(title);
+			}
+
+			@Override
+			public void mouseClick(MouseEvent event) {
+				if (event.btn == 0 && event.isInBounds(bounds)) {
+					dragging = true;
+					dragX = event.x;
+					dragY = event.y;
+					event.consume();
+				}
+			}
+
+			@Override
+			public void mouseDrag(MouseEvent event) {
+				if (dragging) {
+					Box b = PopupLayer.this.getBounds();
+					int x = b.x + event.x - dragX;
+					int y = b.y + event.y - dragY;
+					x = MathHelper.clamp(x, 0, Frame.this.bounds.w - b.w);
+					y = MathHelper.clamp(y, 0, Frame.this.bounds.h - b.h);
+					PopupLayer.this.setBounds(new Box(x, y, b.w, b.h));
+					event.consume();
+				}
+			}
+
+			@Override
+			public void mouseRelease(MouseEvent event) {
+				if (event.btn == 0 && dragging) {
+					dragging = false;
+					event.consume();
+				}
+			}
+		}
 	}
 
 	public void setTooltip(Tooltip tooltip) {
@@ -303,5 +360,9 @@ public abstract class Frame extends Panel {
 
 	public void onCrashed(String msg, Throwable e) {
 
+	}
+
+	public boolean hasPopupOpen() {
+		return !popup.getElements().isEmpty();
 	}
 }

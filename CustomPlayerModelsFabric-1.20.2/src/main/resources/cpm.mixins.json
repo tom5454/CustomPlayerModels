@@ -6,7 +6,8 @@
   	"common.PlayerListMixin",
 	"common.PlayerMixin",
 	"common.ServerEntityMixin",
-	"ServerGamePacketListenerImplMixin"
+	"ServerGamePacketListenerImplMixin",
+	"ServerCommonPacketListenerImplMixin"
   ],
   "client": [
     "PlayerRendererMixin",
@@ -20,9 +21,6 @@
 	"ParrotOnShoulderLayerMixin",
 	"LocalPlayerMixin",
 	"LivingRendererMixin",
-	
-	"ServerCommonPacketListenerImplMixin",
-	
 	"GameRendererMixinFabric",
 	"MinecraftMixinFabric",
 	"PlayerRendererMixinFabric"

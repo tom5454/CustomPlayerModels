@@ -63,4 +63,9 @@ public abstract class HumanoidArmorLayerMixin extends RenderLayer<LivingEntity, 
 	private void preRenderTexture(PoseStack p_289664_, MultiBufferSource p_289689_, int p_289681_, ArmorItem p_289650_, net.minecraft.client.model.Model model, boolean p_289668_, float p_289678_, float p_289674_, float p_289693_, ResourceLocation resLoc, CallbackInfo cbi) {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
+
+	@Inject(at = @At("HEAD"), target = @Desc(value = "renderModel", args = {PoseStack.class, MultiBufferSource.class, int.class, ArmorItem.class, HumanoidModel.class, boolean.class, float.class, float.class, float.class, ResourceLocation.class}), remap = false, require = 0, expect = 0)
+	private void preRenderTexture(PoseStack p_289664_, MultiBufferSource p_289689_, int p_289681_, ArmorItem p_289650_, HumanoidModel model, boolean p_289668_, float p_289678_, float p_289674_, float p_289693_, ResourceLocation resLoc, CallbackInfo cbi) {
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
+	}
 }

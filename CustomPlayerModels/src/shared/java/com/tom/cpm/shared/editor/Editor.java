@@ -36,10 +36,8 @@ import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
-import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -58,6 +56,7 @@ import com.tom.cpm.shared.editor.gui.ViewportPanel;
 import com.tom.cpm.shared.editor.project.ProjectFile;
 import com.tom.cpm.shared.editor.project.ProjectIO;
 import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
+import com.tom.cpm.shared.editor.tags.EditorTags;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateArgHandler;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
@@ -96,7 +95,7 @@ public class Editor {
 	public Updater<String> setModeBtn = updaterReg.create(null);
 	public Updater<ModeDisplayType> setModePanel = updaterReg.create(ModeDisplayType.NULL);
 	public Updater<Vec3i> setTexturePanel = updaterReg.create(null);
-	public Updater<Boolean> setVis = updaterReg.create(false);
+	public Updater<Boolean> setVis = updaterReg.create(null);
 	public Updater<Boolean> setDelEn = updaterReg.create(false);
 	public Updater<Boolean> setAddEn = updaterReg.create(false);
 	public Updater<Boolean> setGlow = updaterReg.create(null);
@@ -155,6 +154,7 @@ public class Editor {
 	public boolean displayAdvScaling = ModConfig.getCommonConfig().getBoolean(ConfigKeys.ADV_SCALING_SETTINGS, false);
 	public BooleanUpdater forceHeldItemInAnim = updaterReg.createBool(false);
 	public BooleanUpdater displayGizmo = updaterReg.createBool(true);
+	public BooleanUpdater showOutlines = updaterReg.createBool(true);
 	public EnumMap<ItemSlot, DisplayItem> handDisplay = new EnumMap<>(ItemSlot.class);
 	public Set<PlayerModelLayer> modelDisplayLayers = new HashSet<>();
 	public Map<String, Float> animTestSliders = new HashMap<>();
@@ -199,6 +199,7 @@ public class Editor {
 	public EditorDefinition definition;
 	public Map<TextureSheetType, ETextures> textures = new HashMap<>();
 	public TextureProvider textureEditorBg = new TextureProvider(new Image(2, 2), new Vec2i(2, 2));
+	public EditorTags tags = new EditorTags(this);
 	public File file;
 	public ProjectFile project = new ProjectFile();
 	public int exportSize;
@@ -268,6 +269,14 @@ public class Editor {
 
 	public void switchEffect(Effect e) {
 		if(selectedElement != null)selectedElement.switchEffect(e);
+	}
+
+	public void switchLock() {
+		ModelElement me = getSelectedElement();
+		if (me != null) {
+			me.locked = !me.locked;
+			updateGui();
+		}
 	}
 
 	public void setTexSize(int x, int y) {
@@ -435,6 +444,7 @@ public class Editor {
 		removeBedOffset = false;
 		enableInvisGlow = false;
 		modelId = null;
+		tags.clear();
 		Player<?> profile = MinecraftClientAccess.get().getClientPlayer();
 		profile.getTextures().load().thenRun(() -> {
 			if(!customSkinType)skinType = profile.getSkinType();
@@ -671,11 +681,6 @@ public class Editor {
 		if(selectedAnim != null) {
 			selectedAnim.setScale(v);
 		}
-	}
-
-	@Deprecated //Used by OSC addon remove in 0.7.0
-	public void addNewAnim(IPose pose, String displayName, AnimationType type, boolean add, boolean loop, InterpolatorType it, boolean command) {
-		addNewAnim(new AnimationProperties(pose, displayName, type, add, loop, it, command));
 	}
 
 	public void addNewAnim(AnimationProperties prop) {

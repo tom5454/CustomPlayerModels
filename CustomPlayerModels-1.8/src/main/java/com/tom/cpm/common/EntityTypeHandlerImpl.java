@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import net.minecraft.entity.EntityList;
+import net.minecraft.util.ResourceLocation;
+
+import net.minecraftforge.fml.common.registry.GameData;
 
 import com.tom.cpl.block.entity.EntityType;
 import com.tom.cpl.block.entity.EntityTypeHandler;
@@ -46,7 +49,7 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<Class<?>> {
 	}
 
 	@Override
-	public List<EntityType> getAllTypes() {
+	public List<EntityType> getAllElements() {
 		return EntityList.classToStringMapping.keySet().stream().map(this::wrap).collect(Collectors.toList());
 	}
 
@@ -58,5 +61,10 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<Class<?>> {
 	@Override
 	public String getEntityId(Class<?> state) {
 		return EntityList.classToStringMapping.get(state);
+	}
+
+	@Override
+	public List<String> listAllActiveEffectTypes() {
+		return GameData.getPotionRegistry().getKeys().stream().map(ResourceLocation::toString).collect(Collectors.toList());
 	}
 }

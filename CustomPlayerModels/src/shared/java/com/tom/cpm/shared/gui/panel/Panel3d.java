@@ -13,9 +13,7 @@ import com.tom.cpl.render.RenderTypeBuilder;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.util.Image;
-import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.model.render.RenderMode;
 
@@ -43,7 +41,6 @@ public abstract class Panel3d extends Panel {
 		public abstract RenderTypes<RenderMode> getRenderTypes();
 		public abstract RenderTypes<RenderMode> getRenderTypes(String tex);
 		public abstract Image takeScreenshot(Vec2i size);
-		public abstract void renderItem(MatrixStack stack, ItemSlot hand, DisplayItem item);
 
 		@SuppressWarnings("unchecked")
 		protected <RL> RenderTypes<RenderMode> getRenderTypes0(RL rl) {
@@ -116,10 +113,6 @@ public abstract class Panel3d extends Panel {
 
 	public Image takeScreenshot(Vec2i size) {
 		return nat.takeScreenshot(size);
-	}
-
-	public void renderItem(MatrixStack stack, ItemSlot hand, DisplayItem item) {
-		nat.renderItem(stack, hand, item);
 	}
 
 	public Mat4f getView() {

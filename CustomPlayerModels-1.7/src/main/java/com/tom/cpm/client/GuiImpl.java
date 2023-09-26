@@ -18,9 +18,11 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 
@@ -38,12 +40,14 @@ import com.tom.cpl.gui.UIColors;
 import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
+import com.tom.cpl.item.Stack;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.text.IText;
 import com.tom.cpl.util.AWTChooser;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.client.RetroGL.RetroTessellator;
+import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 import com.tom.cpm.shared.util.Log;
 
@@ -593,5 +597,26 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	public void onOpened() {
 		vanillaScale = -1;
+	}
+
+	@Override
+	public void drawStack(int x, int y, Stack stack) {
+		x += getOffset().x;
+		y += getOffset().y;
+		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glPushMatrix();
+		GL11.glTranslatef(0, 0, 100);
+		RenderHelper.enableGUIStandardItemLighting();
+		itemRender.renderItemAndEffectIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), s, x, y);
+		itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), s, x, y, null);
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glPopMatrix();
+	}
+
+	@Override
+	public void drawStackTooltip(int mx, int my, Stack stack) {
+		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
+		renderToolTip(s, mx, my);
 	}
 }

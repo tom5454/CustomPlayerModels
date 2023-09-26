@@ -9,6 +9,7 @@ import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.PlayerModelPart;
@@ -22,12 +23,14 @@ import net.minecraft.world.level.block.AbstractSkullBlock;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import com.tom.cpl.block.entity.ActiveEffect;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
-import com.tom.cpm.client.vr.VRPlayerRenderer;
+import com.tom.cpm.common.EntityTypeHandlerImpl;
 import com.tom.cpm.common.PlayerInventory;
 import com.tom.cpm.common.WorldImpl;
+import com.tom.cpm.mixinplugin.FPMDetector;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
@@ -39,7 +42,9 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 	public static BooleanSupplier inFirstPerson;
 	static {
 		inFirstPerson = () -> false;
-		Platform.initPlayerProfile();
+		if (FPMDetector.doApply()) {
+			FirstPersonDetector.init();
+		}
 	}
 
 	private final GameProfile profile;
@@ -122,6 +127,7 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 		animState.moveAmountZ = (float) (player.getZ() - player.zo);
 		animState.yaw = player.getYRot();
 		animState.pitch = player.getXRot();
+		animState.bodyYaw = player.yBodyRot;
 
 		if(player.isModelPartShown(PlayerModelPart.HAT))animState.encodedState |= 1;
 		if(player.isModelPartShown(PlayerModelPart.JACKET))animState.encodedState |= 2;
@@ -149,6 +155,8 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 		animState.firstPersonMod = inFirstPerson.getAsBoolean();
 		PlayerInventory.setInv(animState, player.getInventory());
 		WorldImpl.setWorld(animState, player);
+		if (player.getVehicle() != null)animState.vehicle = EntityTypeHandlerImpl.impl.wrap(player.getVehicle().getType());
+		player.getActiveEffects().forEach(e -> animState.allEffects.add(new ActiveEffect(BuiltInRegistries.MOB_EFFECT.getKey(e.getEffect()).toString(), e.getAmplifier(), e.getDuration(), !e.isVisible())));
 
 		if(player.getUseItem().getItem() instanceof CrossbowItem) {
 			float f = CrossbowItem.getChargeDuration(player.getUseItem());
@@ -175,8 +183,8 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 			animState.swimAmount = m.swimAmount;
 			animState.leftArm = ArmPose.of(m.leftArmPose);
 			animState.rightArm = ArmPose.of(m.rightArmPose);
-			if(CustomPlayerModelsClient.vrLoaded)
-				animState.vrState = VRPlayerRenderer.getVRState(animState.animationMode, model);
+			/*if(CustomPlayerModelsClient.vrLoaded)
+				animState.vrState = VRPlayerRenderer.getVRState(animState.animationMode, model);*/
 		}
 	}
 

@@ -61,6 +61,7 @@ import com.tom.cpm.shared.editor.gui.popup.FirstStartPopup;
 import com.tom.cpm.shared.editor.gui.popup.ModelsPopup;
 import com.tom.cpm.shared.editor.gui.popup.SettingsPopup;
 import com.tom.cpm.shared.editor.gui.popup.WikiBrowserPopup;
+import com.tom.cpm.shared.editor.tags.TagEditorPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.gui.Keybinds;
@@ -112,7 +113,13 @@ public class EditorGui extends Frame {
 		ModConfig.getCommonConfig().save();
 	}
 
-	private static void flushRecent() {
+	private static void addRecent(File file) {
+		if(recent.contains(file)) {
+			recent.remove(file);
+		}
+		while(recent.size() > 10)recent.remove(0);
+		recent.add(file);
+
 		ConfigEntryList ce = ModConfig.getCommonConfig().getEntryList(ConfigKeys.EDITOR_RECENT_PROJECTS);
 		ce.clear();
 		recent.stream().filter(File::exists).map(File::getAbsolutePath).forEach(ce::add);
@@ -294,7 +301,7 @@ public class EditorGui extends Frame {
 		treePanel.setBounds(new Box(width - treeW, height / 2, treeW, height / 2));
 		textureEditor.addElement(treePanel);
 
-		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - treeW, height / 2));
+		textureEditor.addElement(new DrawToolsPanel(this, width - height / 2, height / 2, height / 2 - treeW, height / 2 - 19));
 
 		Panel uvPanel = new Panel(gui);
 		uvPanel.setBounds(new Box(0, height, 175, 0));
@@ -537,6 +544,8 @@ public class EditorGui extends Frame {
 
 		parts.addButton(gui.i18nFormat("button.cpm.root_group.parrots"), () -> Generators.addParrots(editor));
 
+		pp.addButton(gui.i18nFormat("button.cpm.tags"), () -> openPopup(new TagEditorPopup(this)));
+
 		pp.add(new Label(gui, "=========").setBounds(new Box(5, 5, 0, 0)));
 
 		pp.addButton(gui.i18nFormat("button.cpm.edit.settings"), () -> openPopup(new SettingsPopup(this)));
@@ -715,6 +724,9 @@ public class EditorGui extends Frame {
 			editor.displayGizmo.add(editor::updateGui);
 			chxbxDisplayGizmo.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.displayGizmo", Keybinds.TOGGLE_GIZMO.getSetKey(gui))));
 
+			Checkbox chxbxShowOutlines = editor.showOutlines.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.showOutlines"));
+			chxbxShowOutlines.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.showOutlines")));
+
 			if(viewType == ViewType.ANIMATION) {
 				Checkbox chxbxShowPreviousFrame = editor.showPreviousFrame.makeCheckbox(pp, gui.i18nFormat("label.cpm.display.showPreviousFrame"));
 				chxbxShowPreviousFrame.setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.display.showPreviousFrame")));
@@ -793,12 +805,7 @@ public class EditorGui extends Frame {
 				editor.loadDefaultPlayerModel();
 				editor.updateGui();
 			}
-			if(recent.contains(file)) {
-				recent.remove(file);
-			}
-			while(recent.size() > 10)recent.remove(0);
-			recent.add(file);
-			flushRecent();
+			addRecent(file);
 			return null;
 		}, gui::executeLater);
 	}
@@ -817,12 +824,7 @@ public class EditorGui extends Frame {
 					editor.setInfoMsg.accept(Pair.of(2000, gui.i18nFormat("tooltip.cpm.saveSuccess", file.getName()) + "\\" + gui.i18nFormat("label.cpm.test_model_exported")));
 				}
 			}
-			if(recent.contains(file)) {
-				recent.remove(file);
-			}
-			while(recent.size() > 10)recent.remove(0);
-			recent.add(file);
-			flushRecent();
+			addRecent(file);
 			return null;
 		}, gui::executeLater);
 	}
@@ -858,6 +860,9 @@ public class EditorGui extends Frame {
 		getKeybindHandler().registerKeybind(Keybinds.TOGGLE_GIZMO, editor.displayGizmo::toggle);
 		getKeybindHandler().registerKeybind(Keybinds.RUN_QUICK_ACTION, () -> {
 			if(editor.setQuickAction.get() != null)editor.setQuickAction.get().runTask();
+		});
+		getKeybindHandler().registerKeybind(Keybinds.FIND_ELEMENT, () -> {
+			if (!hasPopupOpen())openPopup(new PartSearchPopup(gui, editor));
 		});
 		if(event.matches(gui.getKeyCodes().KEY_F5)) {
 			editor.refreshCaches();

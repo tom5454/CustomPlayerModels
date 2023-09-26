@@ -372,6 +372,7 @@ public class AnimFrame {
 	}
 
 	public void dragVal(VecType type, Vec3f vec) {
+		if (draggingElem == null)return;
 		switch (type) {
 		case POSITION:
 			draggingElem.setPos(vec);

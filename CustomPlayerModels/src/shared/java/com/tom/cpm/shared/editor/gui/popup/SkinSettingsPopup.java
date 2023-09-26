@@ -111,8 +111,8 @@ public class SkinSettingsPopup extends PopupPanel {
 
 		Spinner spinnerTW = new Spinner(gui);
 		Spinner spinnerTH = new Spinner(gui);
-		spinnerTW.setBounds(new Box(5, 115, 65, 18));
-		spinnerTH.setBounds(new Box(75, 115, 65, 18));
+		spinnerTW.setBounds(new Box(5, 115, 65, 20));
+		spinnerTH.setBounds(new Box(75, 115, 65, 20));
 		spinnerTW.setDp(0);
 		spinnerTH.setDp(0);
 		spinnerTW.setEnabled(tex.customGridSize);

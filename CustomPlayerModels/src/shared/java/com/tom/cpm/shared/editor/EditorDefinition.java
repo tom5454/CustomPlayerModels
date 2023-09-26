@@ -48,6 +48,7 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 
 	public EditorDefinition(Editor editor) {
 		this.editor = editor;
+		this.modelTagManager = editor.tags;
 		this.setScale(new ScaleData(new HashMap<>()) {
 
 			@Override
@@ -110,7 +111,7 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 	private void drawSelectionBox(DirectPartRenderer<?> renderer, MatrixStack stack, VBuffers buf, RenderTypes<RenderMode> renderTypes, RenderedCube cube, boolean doRenderElems) {
 		if(!doRenderElems && !outlineOnly)return;
 		ElementSelectMode sel = cube.getSelected();
-		if(sel.isRenderOutline()) {
+		if((editor.showOutlines.get() || (outlineOnly && sel == ElementSelectMode.SELECTED)) && sel.isRenderOutline()) {
 			boolean s = sel == ElementSelectMode.SELECTED;
 			if(s)BoxRender.drawOrigin(stack, buf.getBuffer(renderTypes, RenderMode.OUTLINE), 0, 0, 0, outlineOnly ? 0.5f : 1);
 			Cube c = cube.getCube();

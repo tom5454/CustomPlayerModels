@@ -9,7 +9,6 @@ public abstract class ItemStackHandler<S> implements NativeTagManager<Stack> {
 	public abstract List<String> listTags(S stack);
 	@Override
 	public abstract List<String> listNativeTags();
-	public abstract List<Stack> getAllItems();
 	public abstract int getCount(S stack);
 	public abstract int getMaxCount(S stack);
 	public abstract int getDamage(S stack);
@@ -19,6 +18,7 @@ public abstract class ItemStackHandler<S> implements NativeTagManager<Stack> {
 	public abstract NBTTagCompound getTag(S stack);
 	public abstract boolean isInTag(String tag, S stack);
 	public abstract String getItemId(S stack);
+	public abstract String getItemDisplayName(S stack);
 
 	public Stack wrap(S stack) {
 		return new Stack(stack);
@@ -37,5 +37,10 @@ public abstract class ItemStackHandler<S> implements NativeTagManager<Stack> {
 	@Override
 	public boolean isInNativeTag(String tag, Stack stack) {
 		return isInTag(tag, unwrap(stack));
+	}
+
+	@Override
+	public String getId(Stack type) {
+		return type.getItemId();
 	}
 }

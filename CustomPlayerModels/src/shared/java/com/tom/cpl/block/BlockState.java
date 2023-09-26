@@ -32,6 +32,11 @@ public class BlockState {
 		return handler.equals(state, other.state);
 	}
 
+	@Override
+	public int hashCode() {
+		return getBlockId().hashCode();
+	}
+
 	public List<String> getBlockStates() {
 		return handler.getBlockStates(state);
 	}

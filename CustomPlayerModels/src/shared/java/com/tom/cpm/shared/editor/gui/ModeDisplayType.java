@@ -70,7 +70,7 @@ public enum ModeDisplayType {
 			setBounds(new Box(0, 0, 170, 20));
 
 			spinnerS = new Spinner(gui);
-			spinnerS.setBounds(new Box(5, 0, 160, 18));
+			spinnerS.setBounds(new Box(5, 0, 160, 20));
 			spinnerS.setDp(2);
 			spinnerS.addChangeListener(() -> editor.setValue(spinnerS.getValue()));
 			editor.setValue.add(spinnerS::setValue);

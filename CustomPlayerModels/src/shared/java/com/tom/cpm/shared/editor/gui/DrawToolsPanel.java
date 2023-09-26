@@ -5,6 +5,7 @@ import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.ComboSlider;
 import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.Panel;
+import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.ElementGroup;
@@ -28,9 +29,12 @@ public class DrawToolsPanel extends Panel {
 		setBounds(new Box(x, y, w, h));
 		setBackgroundColor(gui.getColors().panel_background);
 
+		ScrollPanel scp = new ScrollPanel(gui);
 		Panel panel = new Panel(gui);
-		panel.setBounds(new Box(0, 5, w, h));
-		addElement(panel);
+		scp.setDisplay(panel);
+		scp.setBounds(new Box(0, 5, w, h - 5));
+		panel.setBounds(new Box(0, 0, w, 0));
+		addElement(scp);
 		FlowLayout layout = new FlowLayout(panel, 5, 1);
 
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.skinSettings"), () -> SkinSettingsPopup.showPopup(e));

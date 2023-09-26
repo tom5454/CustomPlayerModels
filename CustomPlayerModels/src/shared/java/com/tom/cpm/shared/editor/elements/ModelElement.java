@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
@@ -42,6 +44,7 @@ import com.tom.cpm.shared.model.render.PerFaceUV;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class ModelElement extends Cube implements IElem, TreeElement {
+	private static final Pattern DUP_PATTERN = Pattern.compile("(.*) \\((\\d+)\\)$");
 	private static boolean movePopupShown = false;
 	public Editor editor;
 	public String name;
@@ -72,9 +75,23 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		this(element.editor);
 		this.parent = parent;
 		element.children.forEach(c -> children.add(new ModelElement(c, this)));
-		if(element.itemRenderer == null)
-			name = editor.ui.i18nFormat("label.cpm.dup", element.name);
-		else
+		if(element.itemRenderer == null) {
+			Matcher m = DUP_PATTERN.matcher(element.name);
+			String nm;
+			int count;
+			if (m.find()) {
+				nm = m.group(1);
+				try {
+					count = Integer.parseInt(m.group(2)) + 1;
+				} catch (NumberFormatException e) {
+					count = 2;
+				}
+			} else {
+				nm = element.name;
+				count = 2;
+			}
+			name = nm + " (" + count + ")";
+		} else
 			name = element.name;
 		showInEditor = element.showInEditor;
 		texture = element.texture;
@@ -159,7 +176,6 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		if(copyTransform != null)name = editor.ui.i18nFormat("label.cpm.copyTransformFlag", name);
 		if(duplicated)name = editor.ui.i18nFormat("label.cpm.tree.duplicated", name);
 		if(disableVanillaAnim)name = editor.ui.i18nFormat("label.cpm.tree.disableVanillaAnim", name);
-		if(locked)name = editor.ui.i18nFormat("label.cpm.tree.locked", name);
 		return name;
 	}
 
@@ -699,5 +715,17 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public boolean canSelect() {
 		return !locked;
+	}
+
+	@Override
+	public void drawName(IGui gui, int x, int y, int color) {
+		if(locked) {
+			gui.drawTexture(x, y, 8, 8, 16, 8, "editor", color);
+		}
+	}
+
+	@Override
+	public int getExtraWidth(IGui gui) {
+		return locked ? 10 : 0;
 	}
 }

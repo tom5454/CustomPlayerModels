@@ -30,7 +30,7 @@ public class PerfaceUVPanel extends Panel {
 
 	public PerfaceUVPanel(Frame frm, Editor editor, TabFocusHandler tabHandler) {
 		super(frm.getGui());
-		setBounds(new Box(0, 0, 170, 95));
+		setBounds(new Box(0, 0, 170, 100));
 
 		NameMapper<Direction> dirMap = new NameMapper<>(Direction.VALUES, dir -> gui.i18nFormat("label.cpm.dir." + dir.name().toLowerCase(Locale.ROOT)));
 		DropDownBox<NamedElement<Direction>> faces = new DropDownBox<>(frm, dirMap.asList());
@@ -48,10 +48,10 @@ public class PerfaceUVPanel extends Panel {
 		spinnerEU = new Spinner(gui);
 		spinnerEV = new Spinner(gui);
 
-		spinnerSU.setBounds(new Box(5, 25, 35, 18));
-		spinnerSV.setBounds(new Box(45, 25, 35, 18));
-		spinnerEU.setBounds(new Box(85, 25, 35, 18));
-		spinnerEV.setBounds(new Box(125, 25, 35, 18));
+		spinnerSU.setBounds(new Box(5, 25, 35, 20));
+		spinnerSV.setBounds(new Box(45, 25, 35, 20));
+		spinnerEU.setBounds(new Box(90, 25, 35, 20));
+		spinnerEV.setBounds(new Box(130, 25, 35, 20));
 		spinnerSU.setDp(0);
 		spinnerSV.setDp(0);
 		spinnerEU.setDp(0);
@@ -109,7 +109,7 @@ public class PerfaceUVPanel extends Panel {
 		NameMapper<Rot> rotMap = new NameMapper<>(Rot.VALUES, rot -> gui.i18nFormat("label.cpm.rot." + rot.name().toLowerCase(Locale.ROOT)));
 		DropDownBox<NamedElement<Rot>> rots = new DropDownBox<>(frm, new ArrayList<>(rotMap.asList()));
 		rotMap.setSetter(rots::setSelected);
-		rots.setBounds(new Box(5, 45, 80, 20));
+		rots.setBounds(new Box(5, 50, 80, 20));
 		rots.setAction(() -> {
 			ModelElement el = editor.getSelectedElement();
 			if(el != null && el.faceUV != null) {
@@ -141,11 +141,11 @@ public class PerfaceUVPanel extends Panel {
 				ab.execute();
 			}
 		});
-		autoUV.setBounds(new Box(5, 70, 60, 18));
+		autoUV.setBounds(new Box(5, 75, 60, 20));
 		editor.setAutoUV.add(autoUV::updateState);
 		addElement(autoUV);
 
-		ButtonIcon delBtn = new ButtonIcon(gui, "editor", 14, 16, () -> {
+		ButtonIcon delBtn = new ButtonIcon(gui, "editor", 16, 16, () -> {
 			ModelElement el = editor.getSelectedElement();
 			if(el != null && el.faceUV != null) {
 				Face f = el.faceUV.faces.get(editor.perfaceFaceDir.get());
@@ -155,7 +155,7 @@ public class PerfaceUVPanel extends Panel {
 				}
 			}
 		});
-		delBtn.setBounds(new Box(70, 70, 18, 18));
+		delBtn.setBounds(new Box(70, 75, 20, 20));
 		delBtn.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.deleteFace")));
 		addElement(delBtn);
 
@@ -175,7 +175,7 @@ public class PerfaceUVPanel extends Panel {
 				}
 			}
 		});
-		toAllUVs.setBounds(new Box(92, 70, 70, 18));
+		toAllUVs.setBounds(new Box(95, 75, 70, 20));
 		toAllUVs.setTooltip(new Tooltip(frm, gui.i18nFormat("tooltip.cpm.toAllFaces")));
 		addElement(toAllUVs);
 	}

@@ -29,7 +29,7 @@ public class Checkbox extends GuiElement {
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.h-2, bounds.h-2, bgColor);
 		gui.drawText(bounds.x + bounds.h + 3, bounds.y + bounds.h / 2 - 4, name, color);
 		if(selected) {
-			gui.drawText(bounds.x + bounds.h / 2 - 4, bounds.y + bounds.h / 2 - 4, "X", color);
+			gui.drawTexture(bounds.x + 2, bounds.y + 2, 16, 16, 32, 0, "editor", color);
 		}
 	}
 

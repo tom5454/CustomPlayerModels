@@ -29,7 +29,6 @@ import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.RedirectModelRendererOF;
 import com.tom.cpm.client.optifine.proxy.ModelPartOF;
-import com.tom.cpm.client.vr.VRPlayerRenderer;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -51,8 +50,8 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 					M model, String arg) {
 				if ("api".equals(arg) && model instanceof HumanoidModel) {
 					return new RedirectHolderApi(PlayerRenderManager.this, (HumanoidModel<LivingEntity>) model);
-				} else if(CustomPlayerModelsClient.vrLoaded && VRPlayerRenderer.isVRPlayer(model)) {
-					return VRPlayerRenderer.createVRPlayer(PlayerRenderManager.this, model);
+					/*} else if(CustomPlayerModelsClient.vrLoaded && VRPlayerRenderer.isVRPlayer(model)) {
+					return VRPlayerRenderer.createVRPlayer(PlayerRenderManager.this, model);*/
 				} else if(model instanceof PlayerModel) {
 					return new RedirectHolderPlayer(PlayerRenderManager.this, (PlayerModel<LivingEntity>) model);
 				} else if(model instanceof SkullModel) {

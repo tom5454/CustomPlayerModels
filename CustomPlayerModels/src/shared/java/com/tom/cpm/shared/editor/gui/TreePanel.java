@@ -40,30 +40,36 @@ public class TreePanel extends Panel {
 			int h = Math.max(s.y, height - 34);
 			tp.setBounds(new Box(0, 0, w, h));
 			tree.setBounds(new Box(0, 0, w, h));
+			treePanel.onDisplayResize();
+
+			int y = tree.getElementY(editor.selectedElement);
+			if (y != -1 && (y < treePanel.getScrollY() || y > treePanel.getScrollY() + treePanel.getBounds().h)) {
+				treePanel.setScrollY(y);
+			}
 		});
 
 		if(enableMod) {
 			ButtonIcon newBtn = new ButtonIcon(gui, "editor", 0, 16, editor::addNew);
-			newBtn.setBounds(new Box(5, height - 24, 18, 18));
+			newBtn.setBounds(new Box(5, height - 25, 20, 20));
 			addElement(newBtn);
 			editor.setAddEn.add(newBtn::setEnabled);
 
-			ButtonIcon delBtn = new ButtonIcon(gui, "editor", 14, 16, editor::deleteSel);
-			delBtn.setBounds(new Box(25, height - 24, 18, 18));
+			ButtonIcon delBtn = new ButtonIcon(gui, "editor", 16, 16, editor::deleteSel);
+			delBtn.setBounds(new Box(30, height - 25, 20, 20));
 			addElement(delBtn);
 			editor.setDelEn.add(delBtn::setEnabled);
 		}
 
-		ButtonIcon visBtn = new ButtonIcon(gui, "editor", 42, 16, editor::switchVis);
-		visBtn.setBounds(new Box(enableMod ? 45 : 5, height - 24, 18, 18));
+		ButtonIcon visBtn = new ButtonIcon(gui, "editor", 48, 16, editor::switchVis);
+		visBtn.setBounds(new Box(enableMod ? 55 : 5, height - 25, 20, 20));
 		addElement(visBtn);
 		editor.setVis.add(b -> {
 			if(b == null) {
 				visBtn.setEnabled(false);
-				visBtn.setU(42);
+				visBtn.setU(32);
 			} else {
 				visBtn.setEnabled(true);
-				visBtn.setU(b ? 42 : 28);
+				visBtn.setU(b ? 48 : 32);
 			}
 		});
 	}

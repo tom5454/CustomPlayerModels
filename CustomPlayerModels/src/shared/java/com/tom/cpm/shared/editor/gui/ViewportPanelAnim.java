@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.render.VBuffers;
@@ -46,6 +47,34 @@ public class ViewportPanelAnim extends ViewportPanel {
 		}
 		editor.applyAnim = true;
 		super.draw(event, partialTicks);
+		if (editor.selectedAnim != null && editor.selectedAnim.pose instanceof VanillaPose) {
+			int spr = -1;
+			switch ((VanillaPose) editor.selectedAnim.pose) {
+
+			case HEALTH:
+				spr = 0;
+				break;
+
+			case HUNGER:
+				spr = 1;
+				break;
+
+			case AIR:
+				spr = 2;
+				break;
+
+			default:
+				break;
+			}
+			if (spr != -1) {
+				int frms = editor.selectedAnim.getFrames().size();
+				int val = (int) (frms > 1 ? (editor.selectedAnim.getSelectedFrameIndex() / (float) (frms - 1) * 20) : 20);
+				for (int i = 0;i<10;i++) {
+					int sy = MathHelper.clamp(val - i * 2, 0, 2);
+					gui.drawTexture(bounds.x + i * 9 + 1, bounds.y + bounds.h - 10, 9, 9, spr * 9, sy * 9 + 64, "editor");
+				}
+			}
+		}
 		editor.applyAnim = false;
 		anims = null;
 	}

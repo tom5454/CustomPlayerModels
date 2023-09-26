@@ -6,12 +6,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -40,9 +42,19 @@ public class BlockEntityWithoutLevelRendererMixin {
 					+ "Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V",
 					locals = LocalCapture.CAPTURE_FAILHARD,
 					require = 0)//Optifine
+	@Surrogate
 	public void onRender(ItemStack stack, ItemDisplayContext arg1, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int arg5, CallbackInfo ci, Item item, Block block, AbstractSkullBlock abstractSkullBlock, GameProfile gameProfile, SkullModelBase model) {
 		RefHolder.CPM_MODELS = skullModels;
 		if(abstractSkullBlock.getType() == SkullBlock.Types.PLAYER && gameProfile != null) {
+			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
+		}
+	}
+
+	@Surrogate
+	public void onRender(ItemStack stack, ItemDisplayContext arg1, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int arg5, CallbackInfo ci, Item item, Block block, AbstractSkullBlock abstractSkullBlock, CompoundTag tag, GameProfile gameProfile) {
+		RefHolder.CPM_MODELS = skullModels;
+		if(abstractSkullBlock.getType() == SkullBlock.Types.PLAYER && gameProfile != null) {
+			SkullModelBase model = this.skullModels.get(abstractSkullBlock.getType());
 			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
 		}
 	}

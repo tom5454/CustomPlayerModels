@@ -21,15 +21,15 @@ public class UVPanel extends ModePanel {
 		spinnerV = new Spinner(gui);
 		spinnerT = new Spinner(gui);
 		Label lblU = new Label(gui, "U:");
-		lblU.setBounds(new Box(5, 25, 50, 18));
+		lblU.setBounds(new Box(5, 25, 50, 20));
 		Label lblV = new Label(gui, "V:");
-		lblV.setBounds(new Box(60, 25, 50, 18));
+		lblV.setBounds(new Box(60, 25, 50, 20));
 		Label lblT = new Label(gui, gui.i18nFormat("label.cpm.texSize"));
-		lblT.setBounds(new Box(115, 25, 50, 18));
+		lblT.setBounds(new Box(115, 25, 50, 20));
 
-		spinnerU.setBounds(new Box(5, 35, 50, 18));
-		spinnerV.setBounds(new Box(60, 35, 50, 18));
-		spinnerT.setBounds(new Box(115, 35, 50, 18));
+		spinnerU.setBounds(new Box(5, 35, 50, 20));
+		spinnerV.setBounds(new Box(60, 35, 50, 20));
+		spinnerT.setBounds(new Box(115, 35, 50, 20));
 		spinnerU.setDp(0);
 		spinnerV.setDp(0);
 		spinnerT.setDp(0);

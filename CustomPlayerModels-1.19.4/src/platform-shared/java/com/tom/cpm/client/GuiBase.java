@@ -25,6 +25,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.ChatVisiblity;
+import net.minecraft.world.item.ItemStack;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -45,10 +46,12 @@ import com.tom.cpl.gui.UIColors;
 import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
+import com.tom.cpl.item.Stack;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.text.IText;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 
@@ -728,5 +731,26 @@ public class GuiBase extends Screen implements IGui {
 	@Override
 	public void added() {
 		vanillaScale = -1;
+	}
+
+	@Override
+	public void drawStack(int x, int y, Stack stack) {
+		x += getOffset().x;
+		y += getOffset().y;
+		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
+		matrixStack.pushPose();
+		matrixStack.translate(0, 0, 0);
+		this.itemRenderer.renderAndDecorateItem(matrixStack, s, x, y, 0, 0);
+		this.itemRenderer.renderGuiItemDecorations(matrixStack, font, s, x, y, null);
+		matrixStack.popPose();
+	}
+
+	@Override
+	public void drawStackTooltip(int mx, int my, Stack stack) {
+		matrixStack.pushPose();
+		matrixStack.translate(0, 0, -230);
+		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
+		renderTooltip(matrixStack, s, mx, my);
+		matrixStack.popPose();
 	}
 }

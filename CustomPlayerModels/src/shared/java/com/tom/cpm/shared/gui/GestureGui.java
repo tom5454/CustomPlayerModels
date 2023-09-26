@@ -67,7 +67,7 @@ public class GestureGui extends Frame {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		if(hoveredBtn != null) {
+		if(hoveredBtn != null && !hoveredBtn.value) {
 			String keybindPressed = null;
 			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
 				if(kb.getName().startsWith("qa")) {
@@ -78,6 +78,23 @@ public class GestureGui extends Frame {
 			}
 			if(keybindPressed != null) {
 				updateKeybind(keybindPressed, hoveredBtn.gesture.getGestureId(), !hoveredBtn.layer && gui.isCtrlDown());
+				event.consume();
+			}
+		}
+		if(Keybinds.RESET_VALUE_LAYER.isPressed(gui, event)) {
+			if(gui.isCtrlDown()) {
+				panel.getElements().forEach(e -> {
+					if(e instanceof GestureButton) {
+						GestureButton b = (GestureButton) e;
+						if (b.gesture.getType() == AnimationType.VALUE_LAYER) {
+							b.setLayerValue(b.gesture.getDefaultValue());
+						}
+					}
+				});
+				event.consume();
+			} else if(hoveredBtn != null && hoveredBtn.gesture.getType() == AnimationType.VALUE_LAYER) {
+				hoveredBtn.setLayerValue(hoveredBtn.gesture.getDefaultValue());
+				event.consume();
 			}
 		}
 		super.keyPressed(event);
@@ -173,6 +190,7 @@ public class GestureGui extends Frame {
 			qk.setBounds(new Box(10, 0, 200, i * 10));
 
 			Label lbl = new Label(gui, "");
+			tt += "\\" + gui.i18nFormat("tooltip.cpm.gesture.valueReset", Keybinds.RESET_VALUE_LAYER.getSetKey(gui));
 			lbl.setTooltip(new Tooltip(this, tt));
 			qk.addElement(lbl.setBounds(new Box(0, 0, 200, i * 10)));
 			p.addElement(qk);
@@ -186,6 +204,8 @@ public class GestureGui extends Frame {
 			tt.append(gui.i18nFormat("label.cpm.quick_key_info"));
 			tt.append("\\\\");
 			tt.append(gui.i18nFormat("tooltip.cpm.gestureQuickAccess"));
+			tt.append("\\");
+			tt.append(gui.i18nFormat("tooltip.cpm.gesture.valueReset", Keybinds.RESET_VALUE_LAYER.getSetKey(gui)));
 			String text = gui.i18nFormat("label.cpm.quick_key_short");
 			Label lbl = new Label(gui, text);
 			lbl.setTooltip(new Tooltip(this, tt.toString()));
@@ -434,6 +454,7 @@ public class GestureGui extends Frame {
 		private IManualGesture gesture;
 		private String kb, kbMode, name;
 		private boolean layer, value;
+		private ComboSlider slider;
 
 		public GestureButton(int id) {
 			super(GestureGui.this.gui);
@@ -457,16 +478,14 @@ public class GestureGui extends Frame {
 					s.setTooltip(new Tooltip(GestureGui.this, gui.i18nFormat("label.cpm.feature_unavailable")));
 					addElement(s);
 				} else if(value) {
-					ComboSlider s = new ComboSlider(gui, a -> nm, a -> a * 100f, a -> a / 100f);
-					s.getSpinner().setDp(0);
-					s.setBounds(new Box(0, 0, bounds.w, bounds.h));
-					s.setAction(() -> {
-						if(def != null)
-							MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setLayerValue(def.getAnimations(), (Gesture) g, s.getValue());
-					});
+					slider = new ComboSlider(gui, a -> nm, a -> a * 100f, a -> a / 100f);
+					slider.getSpinner().setDp(0);
+					slider.setBounds(new Box(0, 0, bounds.w, bounds.h));
+					slider.setAction(() -> setLayerValue(slider.getValue()));
 					if(def != null)
-						s.setValue(Byte.toUnsignedInt(MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), (Gesture) g)) / 255f);
-					addElement(s);
+						slider.setValue(Byte.toUnsignedInt(MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), (Gesture) g)) / 255f);
+					slider.setTooltip(new Tooltip(GestureGui.this, gui.i18nFormat("tooltip.cpm.gesture.valueDefaultValue", (int) (g.getDefaultValue() * 100), Keybinds.RESET_VALUE_LAYER.getSetKey(gui))));
+					addElement(slider);
 				} else if(layer) {
 					Button btn = new Button(gui, "", () -> setManualGesture(g));
 					btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
@@ -477,6 +496,12 @@ public class GestureGui extends Frame {
 				btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
 				addElement(btn);
 			}
+		}
+
+		protected void setLayerValue(float value) {
+			slider.setValue(value);
+			if(def != null)
+				MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setLayerValue(def.getAnimations(), (Gesture) gesture, value);
 		}
 
 		public void updateKb() {
@@ -501,6 +526,7 @@ public class GestureGui extends Frame {
 		public void draw(MouseEvent event, float partialTicks) {
 			if(value) {
 				super.draw(event, partialTicks);
+				if(event.isHovered(bounds) && enabled)hoveredBtn = this;
 				return;
 			}
 			int w = gui.textWidth(name);

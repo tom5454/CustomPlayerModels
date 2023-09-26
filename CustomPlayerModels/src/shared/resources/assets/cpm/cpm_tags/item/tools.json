@@ -1,0 +1,12 @@
+{
+	"builtin": true,
+	"entries": [
+		"$cpm:item/swords",
+		"$cpm:item/axes",
+		"$cpm:item/pickaxes",
+		"$cpm:item/shovels",
+		"$cpm:item/hoes",
+		"minecraft:trident",
+		"#minecraft:tools"
+	]
+}

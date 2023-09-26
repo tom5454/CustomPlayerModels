@@ -27,12 +27,17 @@ public abstract class BiomeHandler<B> implements NativeTagManager<Biome> {
 
 	public abstract boolean isInTag(String tag, B state);
 	public abstract List<String> listTags(B state);
-	public abstract List<Biome> getAllBiomes();
 	public abstract boolean equals(B a, B b);
 	public abstract String getBiomeId(B state);
 	public abstract float getTemperature(B state);
 	public abstract float getHumidity(B state);
 	public abstract RainType getRainType(B state);
+	public abstract boolean isAvailable();
+
+	@Override
+	public String getId(Biome type) {
+		return type.getBiomeId();
+	}
 
 	public static enum RainType {
 		NONE,

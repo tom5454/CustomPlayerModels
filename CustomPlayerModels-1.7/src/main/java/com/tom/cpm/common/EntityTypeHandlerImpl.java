@@ -1,11 +1,13 @@
 package com.tom.cpm.common;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import net.minecraft.entity.EntityList;
+import net.minecraft.potion.Potion;
 
 import com.tom.cpl.block.entity.EntityType;
 import com.tom.cpl.block.entity.EntityTypeHandler;
@@ -48,7 +50,7 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<Class<?>> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<EntityType> getAllTypes() {
+	public List<EntityType> getAllElements() {
 		return ((Set<Class<?>>) EntityList.classToStringMapping.keySet()).stream().map(this::wrap).collect(Collectors.toList());
 	}
 
@@ -60,5 +62,10 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<Class<?>> {
 	@Override
 	public String getEntityId(Class<?> state) {
 		return (String) EntityList.classToStringMapping.get(state);
+	}
+
+	@Override
+	public List<String> listAllActiveEffectTypes() {
+		return Arrays.stream(Potion.potionTypes).map(Potion::getName).collect(Collectors.toList());
 	}
 }

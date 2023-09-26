@@ -9,18 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Mat4f;
@@ -29,9 +18,7 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.util.Image;
-import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 import com.tom.cpm.shared.gui.panel.Panel3d.Panel3dNative;
@@ -117,84 +104,6 @@ public class Panel3dImpl extends Panel3dNative {
 		Image rImg = new Image(size.x, size.y);
 		rImg.draw(img, 0, 0, size.x, size.y);
 		return rImg;
-	}
-
-	@Override
-	public void renderItem(MatrixStack stack, ItemSlot hand, DisplayItem item) {
-		renderItem(stack, getHandStack(item), hand);
-	}
-
-	private void renderItem(MatrixStack stack, ItemStack itemstack, ItemSlot hand) {
-		if (!itemstack.isEmpty()) {
-			GlStateManager.pushMatrix();
-
-			PlayerRenderManager.multiplyStacks(stack.getLast());
-			ItemCameraTransforms.TransformType view = ItemCameraTransforms.TransformType.FIXED;
-			boolean flag = false;
-			if(hand == ItemSlot.LEFT_HAND || hand == ItemSlot.RIGHT_HAND) {
-				GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
-				flag = hand == ItemSlot.LEFT_HAND;
-				view = flag ? ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND : ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND;
-				GlStateManager.translate((flag ? -1 : 1) / 16.0F, 0.125F, -0.625F);
-			} else if(hand == ItemSlot.HEAD) {
-				Item item = itemstack.getItem();
-				if (item == Items.SKULL) {
-					GlStateManager.scale(1.1875F, -1.1875F, -1.1875F);
-					TileEntitySkullRenderer.instance.renderSkull(-0.5F, 0.0F, -0.5F, EnumFacing.UP, 180.0F, itemstack.getMetadata(), null, -1, 0);
-					GlStateManager.popMatrix();
-					return;
-				} else {
-					GlStateManager.translate(0.0F, -0.25F, 0.0F);
-					GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
-					GlStateManager.scale(0.625F, -0.625F, -0.625F);
-					view = ItemCameraTransforms.TransformType.HEAD;
-				}
-			}
-			IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, (World)null, (EntityLivingBase)null);
-			renderItemModel(itemstack, ibakedmodel, view, flag);
-			GlStateManager.popMatrix();
-		}
-	}
-
-	/** Copy of {@link net.minecraft.client.renderer.RenderItem#renderItemModel}*/
-	private void renderItemModel(ItemStack stack, IBakedModel bakedmodel, ItemCameraTransforms.TransformType transform, boolean leftHanded) {
-		if (!stack.isEmpty()) {
-			mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-			mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
-			GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager.enableRescaleNormal();
-			GlStateManager.alphaFunc(516, 0.1F);
-			GlStateManager.enableBlend();
-			GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-			GlStateManager.pushMatrix();
-			// TODO: check if negative scale is a thing
-			bakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(bakedmodel, transform, leftHanded);
-
-			mc.getRenderItem().renderItem(stack, bakedmodel);
-			GlStateManager.cullFace(GlStateManager.CullFace.BACK);
-			GlStateManager.popMatrix();
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.disableBlend();
-			mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-			mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
-		}
-	}
-
-	private ItemStack getHandStack(DisplayItem item) {
-		switch (item) {
-		case BLOCK:
-			return new ItemStack(Blocks.STONE);
-		case NONE:
-			break;
-		case SWORD:
-			return new ItemStack(Items.DIAMOND_SWORD);
-		case SKULL:
-			return new ItemStack(Items.SKULL, 2);
-		default:
-			break;
-		}
-		return ItemStack.EMPTY;
 	}
 
 	@Override

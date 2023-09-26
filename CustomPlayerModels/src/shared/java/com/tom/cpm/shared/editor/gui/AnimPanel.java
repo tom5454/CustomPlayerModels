@@ -77,7 +77,6 @@ public class AnimPanel extends Panel {
 					);
 			l.setGetTooltip(n -> n.getElem() == null ? null : new Tooltip(e, n.getElem().toString()));
 		});
-		addElement(animSel);
 		animSel.setAction(() -> {
 			editor.selectedAnim = animSel.getSelected().getElem();
 			editor.updateGui();
@@ -88,20 +87,25 @@ public class AnimPanel extends Panel {
 		});
 
 		Panel p = new Panel(gui);
-		p.setBounds(new Box(0, 0, bounds.w, 18));
+		p.setBounds(new Box(0, 0, bounds.w, 25));
+		p.addElement(animSel);
+		addElement(p);
+
+		p = new Panel(gui);
+		p.setBounds(new Box(0, 0, bounds.w, 20));
 		addElement(p);
 
 		ButtonIcon newAnimBtn = new ButtonIcon(gui, "editor", 0, 16, () -> e.openPopup(new AnimationSettingsPopup(gui, editor, false)));
-		newAnimBtn.setBounds(new Box(5, 0, 18, 18));
+		newAnimBtn.setBounds(new Box(5, 0, 20, 20));
 		p.addElement(newAnimBtn);
 
-		ButtonIcon delAnimBtn = new ButtonIcon(gui, "editor", 14, 16, ConfirmPopup.confirmHandler(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnim));
-		delAnimBtn.setBounds(new Box(25, 0, 18, 18));
+		ButtonIcon delAnimBtn = new ButtonIcon(gui, "editor", 16, 16, ConfirmPopup.confirmHandler(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnim));
+		delAnimBtn.setBounds(new Box(30, 0, 20, 20));
 		p.addElement(delAnimBtn);
 		editor.setAnimDelEn.add(delAnimBtn::setEnabled);
 
 		Button editBtn = new Button(gui, gui.i18nFormat("button.cpm.edit"), () -> e.openPopup(new AnimationSettingsPopup(gui, editor, true)));
-		editBtn.setBounds(new Box(45, 0, 80, 18));
+		editBtn.setBounds(new Box(55, 0, 80, 20));
 		p.addElement(editBtn);
 		editor.setAnimDelEn.add(editBtn::setEnabled);
 
@@ -132,6 +136,9 @@ public class AnimPanel extends Panel {
 							if(cpyData != null) {
 								animPopup.addButton(gui.i18nFormat("button.cpm.pasteAnimFrameData"), this0::pasteData).
 								setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.pasteData", Keybinds.PASTE_ANIM_PART)));
+
+								animPopup.addButton(gui.i18nFormat("button.cpm.pasteAnimFrameDataAll"), this0::pasteDataAll).
+								setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.pasteDataAll")));
 							}
 							animPopup.addButton(gui.i18nFormat("button.cpm.mirrorFrameData"), this0::mirrorData).
 							setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.mirrorFrameData")));
@@ -145,12 +152,12 @@ public class AnimPanel extends Panel {
 				}
 			}
 		};
-		optBtn.setBounds(new Box(130, 0, 30, 18));
+		optBtn.setBounds(new Box(140, 0, 25, 20));
 		editor.setAnimDelEn.add(optBtn::setEnabled);
 		p.addElement(optBtn);
 
 		p = new Panel(gui);
-		p.setBounds(new Box(0, 0, bounds.w, 18));
+		p.setBounds(new Box(0, 0, bounds.w, 20));
 		addElement(p);
 
 		Label currFrame = new Label(gui, "");
@@ -161,52 +168,52 @@ public class AnimPanel extends Panel {
 			if(gui.isCtrlDown())editor.animMoveFrame(-1);
 			else editor.animPrevFrm();
 		});
-		prevFrm.setBounds(new Box(5, 0, 18, 18));
+		prevFrm.setBounds(new Box(5, 0, 20, 20));
 		p.addElement(prevFrm);
 
 		nextFrm = new Button(gui, ">", () -> {
 			if(gui.isCtrlDown())editor.animMoveFrame(1);
 			else editor.animNextFrm();
 		});
-		nextFrm.setBounds(new Box(145, 0, 18, 18));
+		nextFrm.setBounds(new Box(145, 0, 20, 20));
 		p.addElement(nextFrm);
 
 		editor.setAnimFrame.add(i -> {
 			prevFrm.setEnabled(i != null);
 			nextFrm.setEnabled(i != null);
 			if(i != null) {
-				currFrame.setText(gui.i18nFormat("label.cpm.anim_frame_x", i));
+				currFrame.setText(gui.i18nFormat("label.cpm.anim_frame_x", i + 1));
 			} else {
 				currFrame.setText(gui.i18nFormat("label.cpm.anim_frame_none"));
 			}
 		});
 
 		p = new Panel(gui);
-		p.setBounds(new Box(0, 0, bounds.w, 18));
+		p.setBounds(new Box(0, 0, bounds.w, 20));
 		addElement(p);
 
 		ButtonIcon newFrmBtn = new ButtonIcon(gui, "editor", 0, 16, editor::addNewAnimFrame);
-		newFrmBtn.setBounds(new Box(5, 0, 18, 18));
+		newFrmBtn.setBounds(new Box(5, 0, 20, 20));
 		p.addElement(newFrmBtn);
 		editor.setFrameAddEn.add(newFrmBtn::setEnabled);
 
-		ButtonIcon delFrmBtn = new ButtonIcon(gui, "editor", 14, 16, ConfirmPopup.confirmHandler(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimFrame));
-		delFrmBtn.setBounds(new Box(25, 0, 18, 18));
+		ButtonIcon delFrmBtn = new ButtonIcon(gui, "editor", 16, 16, ConfirmPopup.confirmHandler(e, gui.i18nFormat("label.cpm.confirmDel"), editor::delSelectedAnimFrame));
+		delFrmBtn.setBounds(new Box(30, 0, 20, 20));
 		p.addElement(delFrmBtn);
 		editor.setFrameDelEn.add(delFrmBtn::setEnabled);
 
-		ButtonIcon playBtn = new ButtonIcon(gui, "editor", 56, 16, true, () -> {
+		ButtonIcon playBtn = new ButtonIcon(gui, "editor", 64, 16, true, () -> {
 			editor.playFullAnim = !editor.playFullAnim;
 			editor.playStartTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
 			editor.setAnimPlay.accept(editor.playFullAnim);
 		});
-		playBtn.setBounds(new Box(45, 0, 18, 18));
+		playBtn.setBounds(new Box(55, 0, 20, 20));
 		p.addElement(playBtn);
 		editor.setAnimPlayEn.add(playBtn::setEnabled);
-		editor.setAnimPlay.add(v -> playBtn.setU(v ? 72 : 56));
+		editor.setAnimPlay.add(v -> playBtn.setU(v ? 80 : 64));
 
 		p = new Panel(gui);
-		p.setBounds(new Box(0, 0, bounds.w, 28));
+		p.setBounds(new Box(0, 0, bounds.w, 30));
 		addElement(p);
 
 		Label lblDuration = new Label(gui, gui.i18nFormat("label.cpm.duration"));
@@ -215,7 +222,7 @@ public class AnimPanel extends Panel {
 
 		Spinner duration = new Spinner(gui);
 		duration.setDp(0);
-		duration.setBounds(new Box(5, 10, 100, 18));
+		duration.setBounds(new Box(5, 10, 100, 20));
 		p.addElement(duration);
 		editor.setAnimDuration.add(i -> {
 			duration.setEnabled(i != null);
@@ -251,7 +258,7 @@ public class AnimPanel extends Panel {
 		addElement(colorBtn);
 
 		Checkbox boxShow = new Checkbox(gui, gui.i18nFormat("label.cpm.visible"));
-		boxShow.setBounds(new Box(5, 0, 60, 18));
+		boxShow.setBounds(new Box(5, 0, 60, 20));
 		boxShow.setAction(editor::switchAnimShow);
 		editor.setAnimShow.add(boxShow::updateState);
 		addElement(boxShow);
@@ -261,7 +268,7 @@ public class AnimPanel extends Panel {
 		addElement(encSettings);
 
 		p = new Panel(gui);
-		p.setBounds(new Box(0, 0, bounds.w, 28));
+		p.setBounds(new Box(0, 0, bounds.w, 30));
 		addElement(p);
 
 		Label lblPri = new Label(gui, gui.i18nFormat("label.cpm.anim_priority"));
@@ -275,7 +282,7 @@ public class AnimPanel extends Panel {
 			if(v != null)animPriority.setValue(v);
 			else animPriority.setValue(0);
 		});
-		animPriority.setBounds(new Box(5, 10, 100, 18));
+		animPriority.setBounds(new Box(5, 10, 100, 20));
 		animPriority.setDp(0);
 		animPriority.addChangeListener(() -> editor.setAnimPriority((int) animPriority.getValue()));
 		p.addElement(animPriority);
@@ -297,7 +304,7 @@ public class AnimPanel extends Panel {
 		});
 
 		p = new Panel(gui);
-		p.setBounds(new Box(0, 0, bounds.w, 28));
+		p.setBounds(new Box(0, 0, bounds.w, 30));
 		addElement(p);
 
 		Label lblOrder = new Label(gui, gui.i18nFormat("label.cpm.anim_order"));
@@ -311,7 +318,7 @@ public class AnimPanel extends Panel {
 			if(v != null)animOrder.setValue(v);
 			else animOrder.setValue(0);
 		});
-		animOrder.setBounds(new Box(5, 10, 100, 18));
+		animOrder.setBounds(new Box(5, 10, 100, 20));
 		animOrder.setDp(0);
 		animOrder.addChangeListener(() -> editor.setAnimOrder((int) animOrder.getValue()));
 		p.addElement(animOrder);
@@ -350,6 +357,17 @@ public class AnimPanel extends Panel {
 		if(editor.selectedAnim != null && cpyData != null && me != null) {
 			ActionBuilder ab = editor.action("setAnim", "action.cpm.value");
 			editor.selectedAnim.getSelectedFrame().importFrameData(ab, me, cpyData);
+			ab.execute();
+			cpyData = null;
+			editor.updateGui();
+		}
+	}
+
+	private void pasteDataAll() {
+		ModelElement me = editor.getSelectedElement();
+		if(editor.selectedAnim != null && cpyData != null && me != null) {
+			ActionBuilder ab = editor.action("setAnim", "action.cpm.value");
+			editor.selectedAnim.getFrames().forEach(f -> f.importFrameData(ab, me, cpyData));
 			ab.execute();
 			cpyData = null;
 			editor.updateGui();

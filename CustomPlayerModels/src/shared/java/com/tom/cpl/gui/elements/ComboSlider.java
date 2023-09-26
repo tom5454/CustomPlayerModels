@@ -68,14 +68,12 @@ public class ComboSlider extends Slider {
 		if(event.isHovered(bounds)) {
 			if(event.btn == 1) {
 				spinner.setValue(getActualValue());
-				spinner.setBounds(new Box(bounds.x, bounds.y + bounds.h - 18, bounds.w, 18));
+				spinner.setBounds(new Box(bounds.x, bounds.y + bounds.h - 20, bounds.w, 20));
 				spinner.visible = true;
 				event.consume();
 			}
 		} else if(!event.isConsumed() && spinner.visible) {
-			spinner.visible = false;
-			setActualValue(spinner.getValue());
-			onAction();
+			hideSpinner();
 			event.consume();
 		}
 		super.mouseClick(event);
@@ -83,7 +81,21 @@ public class ComboSlider extends Slider {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
-		if(spinner.visible)spinner.keyPressed(event);
+		if(spinner.visible) {
+			if(event.keyCode == gui.getKeyCodes().KEY_ESCAPE) {
+				hideSpinner();
+				event.consume();
+			} else
+				spinner.keyPressed(event);
+		}
+	}
+
+	public void hideSpinner() {
+		if (spinner.visible) {
+			spinner.visible = false;
+			setActualValue(spinner.getValue());
+			onAction();
+		}
 	}
 
 	@Override

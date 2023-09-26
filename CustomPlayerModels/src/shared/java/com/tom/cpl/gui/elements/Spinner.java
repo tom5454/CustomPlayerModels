@@ -33,10 +33,15 @@ public class Spinner extends GuiElement implements Focusable {
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x + 1, bounds.y + 1, bounds.w - 2, bounds.h - 2, enabled ? gui.getColors().button_fill : gui.getColors().button_disabled);
 		txtf.draw(event, partialTicks);
-		Box bUp = new Box(bounds.x + bounds.w - 9, bounds.y, 9, bounds.h / 2);
-		Box bDown = new Box(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, 9, bounds.h / 2);
-		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + 1, 8, 8, enabled ? event.isHovered(bUp) ? 16 : 8 : 0, 0, "editor");
-		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, 8, 8, enabled ? event.isHovered(bDown) ? 16 : 8 : 0, 8, "editor");
+		Box bUp = new Box(bounds.x + bounds.w - 10, bounds.y, 10, bounds.h / 2);
+		Box bDown = new Box(bounds.x + bounds.w - 10, bounds.y + bounds.h / 2, 10, bounds.h / 2);
+		boolean upH = event.isHovered(bUp);
+		boolean downH = event.isHovered(bDown);
+		gui.drawBox(bounds.x + bounds.w - 10, bounds.y + bounds.h / 2 - 0.5f, 10, 1, gui.getColors().button_border);
+		if(enabled && upH)gui.drawBox(bounds.x + bounds.w - 10, bounds.y + 1, 9, 8.5f, gui.getColors().button_hover);
+		if(enabled && downH)gui.drawBox(bounds.x + bounds.w - 10, bounds.y + bounds.h / 2 + 0.5f, 9, 8.5f, gui.getColors().button_hover);
+		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + 2, 8, 8, 8, 8, "editor", enabled ? upH ? gui.getColors().button_text_hover : gui.getColors().button_text_color : gui.getColors().button_text_disabled);
+		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2 + 1, 8, 8, 0, 8, "editor", enabled ? downH ? gui.getColors().button_text_hover : gui.getColors().button_text_color : gui.getColors().button_text_disabled);
 		if(txtfNeedsUpdate && !txtf.isFocused()) {
 			txtfNeedsUpdate = false;
 			txtf.setText(lastValue = roundValue(dp, value));

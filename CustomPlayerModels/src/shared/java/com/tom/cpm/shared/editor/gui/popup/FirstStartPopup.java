@@ -35,8 +35,8 @@ public class FirstStartPopup extends PopupPanel {
 		addElement(mdr.setBounds(new Box(5, 5, 100, 100)));
 		mdr.registerCustomElement("mouseControls", (r, c, a) -> {
 			MouseControlsPanel mcp = new MouseControlsPanel(gui, ModConfig.getCommonConfig());
-			mcp.setBounds(c.bounds(5, 0, 250, 95));
-			c.y += 100;
+			mcp.setBounds(c.bounds(5, 0, 250, 120));
+			c.y += 120;
 			return Arrays.asList(mcp);
 		});
 		mdr.registerCustomElement("guiScale", (r, c, a) -> {

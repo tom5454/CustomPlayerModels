@@ -37,11 +37,11 @@ public class PosPanel extends Panel {
 		{
 			Panel panel = new Panel(gui);
 			addElement(panel);
-			panel.setBounds(new Box(0, 0, 170, 30));
+			panel.setBounds(new Box(0, 0, 170, 35));
 
-			panel.addElement(new Label(gui, gui.i18nFormat("label.cpm.name")).setBounds(new Box(5, 0, 0, 0)));
+			panel.addElement(new Label(gui, gui.i18nFormat("label.cpm.name")).setBounds(new Box(5, 5, 0, 0)));
 			TextField nameField = new TextField(gui);
-			nameField.setBounds(new Box(5, 10, 160, 20));
+			nameField.setBounds(new Box(5, 15, 160, 20));
 			editor.updateName.add(t -> {
 				nameField.setEnabled(t != null);
 				if(t != null)nameField.setText(t);
@@ -69,7 +69,7 @@ public class PosPanel extends Panel {
 
 			panel.addElement(new Label(gui, gui.i18nFormat("label.cpm.mcScale")).setBounds(new Box(5, 0, 0, 0)));
 			Spinner spinnerS = new Spinner(gui);
-			spinnerS.setBounds(new Box(5, 10, 70, 18));
+			spinnerS.setBounds(new Box(5, 10, 70, 20));
 			editor.setMCScale.add(f -> {
 				spinnerS.setEnabled(f != null);
 				if(f != null)spinnerS.setValue(f);
@@ -81,7 +81,7 @@ public class PosPanel extends Panel {
 			tabHandler.add(spinnerS);
 
 			Checkbox box = new Checkbox(gui, gui.i18nFormat("label.cpm.mirror"));
-			box.setBounds(new Box(80, 10, 70, 18));
+			box.setBounds(new Box(80, 10, 70, 20));
 			box.setAction(() -> editor.switchEffect(Effect.MIRROR));
 			editor.setMirror.add(box::updateState);
 			panel.addElement(box);
@@ -139,9 +139,9 @@ public class PosPanel extends Panel {
 		Spinner spinnerY = new Spinner(gui);
 		Spinner spinnerZ = new Spinner(gui);
 
-		spinnerX.setBounds(new Box(5, 10, 50, 18));
-		spinnerY.setBounds(new Box(60, 10, 50, 18));
-		spinnerZ.setBounds(new Box(115, 10, 50, 18));
+		spinnerX.setBounds(new Box(5, 10, 50, 20));
+		spinnerY.setBounds(new Box(60, 10, 50, 20));
+		spinnerZ.setBounds(new Box(115, 10, 50, 20));
 		spinnerX.setDp(dp);
 		spinnerY.setDp(dp);
 		spinnerZ.setDp(dp);

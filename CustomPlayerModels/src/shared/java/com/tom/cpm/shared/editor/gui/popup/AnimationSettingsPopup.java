@@ -75,13 +75,13 @@ public class AnimationSettingsPopup extends PopupPanel {
 		Checkbox boxAdd = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_additive"));
 		if(edit && editor.selectedAnim != null)boxAdd.setSelected(editor.selectedAnim.add);
 		else boxAdd.setSelected(true);
-		boxAdd.setBounds(new Box(5, 0, 60, 18));
+		boxAdd.setBounds(new Box(5, 0, 60, 20));
 		this.addElement(boxAdd);
 		boxAdd.setAction(() -> boxAdd.setSelected(!boxAdd.isSelected()));
 
 		Checkbox boxLoop = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_loop"));
 		if(edit && editor.selectedAnim != null)boxLoop.setSelected(editor.selectedAnim.loop);
-		boxLoop.setBounds(new Box(5, 0, 60, 18));
+		boxLoop.setBounds(new Box(5, 0, 60, 20));
 		this.addElement(boxLoop);
 
 		this.addElement(new Label(gui, gui.i18nFormat("label.cpm.name")).setBounds(new Box(5, 0, 190, 10)));
@@ -181,7 +181,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 		});
 
 		if(edit && editor.selectedAnim != null)boxCommand.setSelected(editor.selectedAnim.command);
-		boxCommand.setBounds(new Box(5, 0, 190, 18));
+		boxCommand.setBounds(new Box(5, 0, 190, 20));
 		boxCommand.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.anim_command")));
 		boxCommand.setAction(() -> {
 			boxCommand.setSelected(!boxCommand.isSelected());
@@ -191,7 +191,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 		if(edit && editor.selectedAnim != null)boxLayerCtrl.setSelected(editor.selectedAnim.layerControlled);
 		else boxLayerCtrl.setSelected(true);
 		boxLayerCtrl.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.anim_layerCtrl")));
-		boxLayerCtrl.setBounds(new Box(5, 0, 190, 18));
+		boxLayerCtrl.setBounds(new Box(5, 0, 190, 20));
 		boxLayerCtrl.setAction(() -> {
 			boxLayerCtrl.setSelected(!boxLayerCtrl.isSelected());
 		});

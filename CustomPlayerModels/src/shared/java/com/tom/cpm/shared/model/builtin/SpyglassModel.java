@@ -33,14 +33,10 @@ public class SpyglassModel extends SimpleModel implements IItemModel {
 	@Override
 	public void render(MatrixStack stack, VertexBuffer buf, ItemSlot inSlot) {
 		stack.push();
-		float rz = inSlot == ItemSlot.LEFT_HAND ? -16.0F : 16.0F;
-		float ry = inSlot == ItemSlot.LEFT_HAND ? -5F : 5F;
-		stack.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(18.5F));
-		stack.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rz));
-		stack.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(ry));
-		float x = inSlot == ItemSlot.LEFT_HAND ? -0.19F : 0.19F;
-		stack.translate(x, -0.56F, -0.31F);
-		new SpyglassModel().render(stack, buf);
+		stack.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(-90f));
+		float x = inSlot == ItemSlot.LEFT_HAND ? 0.1F : -0.1F;
+		stack.translate(x, -0.56F, -0.2F);
+		render(stack, buf);
 		stack.pop();
 	}
 }

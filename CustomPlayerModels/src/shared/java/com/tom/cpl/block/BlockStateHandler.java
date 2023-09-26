@@ -24,12 +24,16 @@ public abstract class BlockStateHandler<S> implements NativeTagManager<BlockStat
 
 	@Override
 	public abstract List<String> listNativeTags();
-	public abstract List<BlockState> getAllBlocks();
 	public abstract boolean equals(S a, S b);
 	public abstract boolean equalsFull(S a, S b);
 	public abstract Stack getStackFromState(S state);
 	public abstract boolean isInTag(String tag, S state);
 	public abstract List<String> listTags(S state);
+
+	@Override
+	public String getId(BlockState type) {
+		return type.getBlockId();
+	}
 
 	@Override
 	public List<String> listNativeTags(BlockState state) {

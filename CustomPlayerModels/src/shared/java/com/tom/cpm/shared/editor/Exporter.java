@@ -25,6 +25,7 @@ import com.google.gson.GsonBuilder;
 import com.tom.cpl.gui.UI;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.tag.TagType;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -82,6 +83,7 @@ import com.tom.cpm.shared.parts.ModelPartRenderEffect;
 import com.tom.cpm.shared.parts.ModelPartRoot;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinType;
+import com.tom.cpm.shared.parts.ModelPartTags;
 import com.tom.cpm.shared.parts.ModelPartTemplate;
 import com.tom.cpm.shared.parts.ModelPartTexture;
 import com.tom.cpm.shared.parts.ModelPartUUIDLockout;
@@ -271,6 +273,11 @@ public class Exporter {
 		if(e.enableInvisGlow)otherParts.add(new ModelPartRenderEffect(new EffectInvisGlow()));
 		if(e.leftHandPos.isChanged() || e.rightHandPos.isChanged())
 			otherParts.add(new ModelPartRenderEffect(new EffectFirstPersonHandPos(e.leftHandPos, e.rightHandPos)));
+		for (TagType t : TagType.VALUES) {
+			if (e.tags.getByType(t).hasTags()) {
+				otherParts.add(new ModelPartTags(t, e.tags.getByType(t)));
+			}
+		}
 
 		if(e.description != null) {
 			switch (e.description.copyProtection) {

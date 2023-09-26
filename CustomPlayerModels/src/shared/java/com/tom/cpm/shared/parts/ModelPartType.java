@@ -20,6 +20,7 @@ public enum ModelPartType {
 	@Deprecated SCALE(ModelPartScale::new),
 	TEXTURE(ModelPartTexture::new),
 	ANIMATED_TEX(ModelPartAnimatedTexture::new),
+	TAGS(ModelPartTags::new),
 	;
 	public static final ModelPartType[] VALUES = values();
 	private final IModelPart.Factory factory;

@@ -56,16 +56,16 @@ public class Tree<T> extends GuiElement {
 
 	public Vec2i getSize() {
 		int[] s = new int[2];
-		walk(s, handler.root, 0);
+		walk_getSize(s, handler.root, 0);
 		return new Vec2i(s[0], s[1] * 10);
 	}
 
-	private void walk(int[] s, TreeElement<T> e, int layer) {
+	private void walk_getSize(int[] s, TreeElement<T> e, int layer) {
 		s[1]++;
-		s[0] = Math.max(s[0], layer * 5 + gui.textWidth(e.display) + 5);
+		s[0] = Math.max(s[0], layer * 5 + gui.textWidth(e.display) + 5 + handler.model.getExtraWidth(e.value, gui));
 		if(e.showChildren) {
 			for (TreeElement<T> i : e.children) {
-				walk(s, i, layer + 1);
+				walk_getSize(s, i, layer + 1);
 			}
 		}
 	}
@@ -97,27 +97,29 @@ public class Tree<T> extends GuiElement {
 			}
 		}
 		map.put(yp, e);
+		int tw = gui.textWidth(e.display);
 		gui.drawText(x * 5 + 3, yp * 10, e.display, textColor);
+		handler.model.drawName(e.value, gui, x * 5 + 3 + tw + 1, yp * 10, textColor);
 		e.depth = x;
 		if(e.showChildren) {
-			if(e != handler.root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 24, 8, "editor", dropD);
+			if(e != handler.root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 0, 8, "editor", dropD);
 			for (TreeElement<T> i : e.children) {
 				drawTree(event, x + 1, y, i);
 			}
 		} else {
-			if(e != handler.root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 24, 0, "editor", dropD);
+			if(e != handler.root && !e.children.isEmpty())gui.drawTexture(x * 5 - 5, yp * 10, 8, 8, 0, 0, "editor", dropD);
 		}
 	}
 
 	public void updateTree() {
-		walk(handler.root);
+		walk_updateTree(handler.root);
 		if(sizeUpdate != null)sizeUpdate.accept(getSize());
 	}
 
-	private boolean walk(TreeElement<T> e) {
+	private boolean walk_updateTree(TreeElement<T> e) {
 		boolean r = handler.model.isSelected(e.value);
 		for (TreeElement<T> i : e.children) {
-			boolean w = walk(i);
+			boolean w = walk_updateTree(i);
 			e.showChildren |= w;
 			r |= w;
 		}
@@ -139,6 +141,8 @@ public class Tree<T> extends GuiElement {
 		protected abstract void refresh(T elem);
 		protected abstract boolean isSelected(T elem);
 		protected abstract boolean canSelect(T elem);
+		protected abstract void drawName(T elem, IGui gui, int x, int y, int color);
+		protected abstract int getExtraWidth(T value, IGui gui);
 	}
 
 	public static class TreeHandler<T> {
@@ -202,6 +206,30 @@ public class Tree<T> extends GuiElement {
 		public TreeModel<T> getModel() {
 			return model;
 		}
+
+		public List<T> getOpenElements() {
+			List<T> l = new ArrayList<>();
+			walk_getOpenElements(root, l);
+			return l;
+		}
+
+		private void walk_getOpenElements(TreeElement<T> e, List<T> l) {
+			for (TreeElement<T> i : e.children) {
+				if (i.showChildren)l.add(i.value);
+				walk_getOpenElements(i, l);
+			}
+		}
+
+		public void setOpenElements(List<T> list) {
+			walk_setOpenElements(root, list);
+		}
+
+		private void walk_setOpenElements(TreeElement<T> e, List<T> l) {
+			for (TreeElement<T> i : e.children) {
+				i.showChildren = l.contains(i.value);
+				walk_setOpenElements(i, l);
+			}
+		}
 	}
 
 	private TreeElement<T> find(T elem) {
@@ -210,13 +238,13 @@ public class Tree<T> extends GuiElement {
 
 	private TreeElement<T> findParent(TreeElement<T> elem) {
 		if(elem == null)return null;
-		return walk(handler.root, elem);
+		return walk_findParent(handler.root, elem);
 	}
 
-	private TreeElement<T> walk(TreeElement<T> e, TreeElement<T> toFind) {
+	private TreeElement<T> walk_findParent(TreeElement<T> e, TreeElement<T> toFind) {
 		for (TreeElement<T> i : e.children) {
 			if(i == toFind)return e;
-			TreeElement<T> d = walk(i, toFind);
+			TreeElement<T> d = walk_findParent(i, toFind);
 			if(d != null)return d;
 		}
 		return null;
@@ -267,5 +295,24 @@ public class Tree<T> extends GuiElement {
 			}
 		}
 		return curr;
+	}
+
+	public int getElementY(T elem) {
+		int[] c = new int[] {1, 0};
+		walk_getElementY(handler.root, elem, c);
+		return c[0] * 10;
+	}
+
+	private void walk_getElementY(TreeElement<T> e, T elem, int[] c) {
+		for (TreeElement<T> i : e.children) {
+			if (c[1] != 0)return;
+			if (i.value == elem) {
+				c[1] = 1;
+				return;
+			}
+			c[0]++;
+			if(i.showChildren)
+				walk_getElementY(i, elem, c);
+		}
 	}
 }

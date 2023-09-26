@@ -76,7 +76,7 @@ public class BiomeHandlerImpl extends BiomeHandler<BiomeInfo> {
 	}
 
 	@Override
-	public List<com.tom.cpl.block.Biome> getAllBiomes() {
+	public List<com.tom.cpl.block.Biome> getAllElements() {
 		return StreamSupport.stream(registry.get().asHolderIdMap().spliterator(), false).map(e -> wrap(new BiomeInfo(e, SEA_LEVEL))).collect(Collectors.toList());
 	}
 
@@ -103,5 +103,14 @@ public class BiomeHandlerImpl extends BiomeHandler<BiomeInfo> {
 	@Override
 	public RainType getRainType(BiomeInfo state) {
 		return RainType.get(state.value().getPrecipitationAt(state.at()).name());
+	}
+
+	@Override
+	public boolean isAvailable() {
+		try {
+			return registry.get() != null;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 }

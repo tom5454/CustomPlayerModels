@@ -85,15 +85,17 @@ public class CPMOSC {
 							reg.forEachLayer((g, id) -> {
 								if(g.command)return;
 								String gid = g.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "");
+								if (gid.isEmpty())
+									gid = "unnamed" + id;
 								try {
 									if(st.gestureData.length > id) {
 										if(g.type == AnimationType.VALUE_LAYER)
-											transmit.send("/cpm/layer/" + gid + "/value", st.gestureData[id]);
+											transmit.send("/cpm/layer/" + gid + "/value", Integer.valueOf(st.gestureData[id]));
 										else
 											transmit.send("/cpm/layer/" + gid + "/toggle", st.gestureData[id] != 0);
 									} else {
 										if(g.type == AnimationType.VALUE_LAYER)
-											transmit.send("/cpm/layer/" + gid + "/value", g.defVal);
+											transmit.send("/cpm/layer/" + gid + "/value", Integer.valueOf(g.defVal));
 										else
 											transmit.send("/cpm/layer/" + gid + "/toggle", g.defVal != 0);
 									}

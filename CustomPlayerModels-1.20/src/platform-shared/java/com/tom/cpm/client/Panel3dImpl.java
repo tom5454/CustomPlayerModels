@@ -13,9 +13,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -27,9 +24,7 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.util.Image;
-import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 import com.tom.cpm.shared.gui.panel.Panel3d.Panel3dNative;
@@ -114,31 +109,6 @@ public class Panel3dImpl extends Panel3dNative {
 		Image rImg = new Image(size.x, size.y);
 		rImg.draw(img, 0, 0, size.x, size.y);
 		return rImg;
-	}
-
-	@Override
-	public void renderItem(com.tom.cpl.math.MatrixStack stack, ItemSlot hand, DisplayItem item) {
-		this.renderItem(stack, getHandStack(item), hand);
-	}
-
-	private ItemStack getHandStack(DisplayItem item) {
-		switch (item) {
-		case BLOCK:
-			return new ItemStack(Blocks.STONE);
-		case NONE:
-			break;
-		case SWORD:
-			return new ItemStack(Items.NETHERITE_SWORD);
-		case SKULL:
-			return new ItemStack(Items.CREEPER_HEAD);
-		default:
-			break;
-		}
-		return ItemStack.EMPTY;
-	}
-
-	private void renderItem(com.tom.cpl.math.MatrixStack stack, ItemStack itemstack, ItemSlot hand) {
-		//TODO later
 	}
 
 	@Override

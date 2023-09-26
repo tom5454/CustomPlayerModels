@@ -94,7 +94,7 @@ public class BlockStateHandlerImpl extends BlockStateHandler<BlockState> {
 	}
 
 	@Override
-	public List<com.tom.cpl.block.BlockState> getAllBlocks() {
+	public List<com.tom.cpl.block.BlockState> getAllElements() {
 		return Registry.BLOCK.stream().map(b -> wrap(b.defaultBlockState())).collect(Collectors.toList());
 	}
 

@@ -58,6 +58,8 @@ public interface IGui extends UI {
 	void drawFormattedText(float x, float y, IText text, int color, float scale);
 	int textWidthFormatted(IText text);
 	void openURL0(String uri);
+	void drawStack(int x, int y, com.tom.cpl.item.Stack stack);
+	void drawStackTooltip(int mx, int my, com.tom.cpl.item.Stack stack);
 
 	default void drawBox(float x, float y, float w, float h, int color) {
 		drawBox((int) x, (int) y, (int) w, (int) h, color);

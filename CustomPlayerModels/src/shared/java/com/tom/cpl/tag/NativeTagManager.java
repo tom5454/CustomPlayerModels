@@ -7,8 +7,10 @@ public interface NativeTagManager<T> {
 	public abstract List<String> listNativeTags(T stack);
 	public abstract List<T> listNativeEntries(String tag);
 	public abstract List<String> listNativeTags();
+	public abstract List<T> getAllElements();
 	public abstract boolean isInNativeTag(String tag, T stack);
 	public abstract T emptyObject();
+	public abstract String getId(T type);
 
 	public static final NativeTagManager<?> EMPTY = new NativeTagManager<Object>() {
 
@@ -35,6 +37,16 @@ public interface NativeTagManager<T> {
 		@Override
 		public Object emptyObject() {
 			return null;
+		}
+
+		@Override
+		public List<Object> getAllElements() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public String getId(Object type) {
+			return "";
 		}
 	};
 

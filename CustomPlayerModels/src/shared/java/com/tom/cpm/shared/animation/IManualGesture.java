@@ -12,4 +12,8 @@ public interface IManualGesture {
 	default boolean isProperty() {
 		return false;
 	}
+
+	default float getDefaultValue() {
+		return 0;
+	}
 }

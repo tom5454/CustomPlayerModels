@@ -27,6 +27,15 @@ public class Biome {
 		return handler == other.handler && handler.equals(biome, other.biome);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + getBiomeId().hashCode();
+		result = prime * result + handler.hashCode();
+		return result;
+	}
+
 	public boolean isInTag(String tag) {
 		return handler.isInTag(tag, biome);
 	}

@@ -409,9 +409,9 @@ public class SettingsPanel extends Panel {
 			}, null));
 		});
 		newBtn.setEnabled(enableAdd);
-		newBtn.setBounds(new Box(5, panel.getBounds().h - 25, 18, 18));
+		newBtn.setBounds(new Box(5, panel.getBounds().h - 25, 20, 20));
 
-		ButtonIcon delBtn = new ButtonIcon(gui, "editor", 14, 16, () -> {
+		ButtonIcon delBtn = new ButtonIcon(gui, "editor", 16, 16, () -> {
 			E elem = playerList.getSelected();
 			if(elem != null) {
 				ConfirmPopup.confirm(frm, gui.i18nFormat("label.cpm.confirmDel"), () -> {
@@ -423,7 +423,7 @@ public class SettingsPanel extends Panel {
 				});
 			}
 		});
-		delBtn.setBounds(new Box(30, panel.getBounds().h - 25, 18, 18));
+		delBtn.setBounds(new Box(30, panel.getBounds().h - 25, 20, 20));
 
 		panel.addElement(playerList);
 		panel.addElement(newBtn);

@@ -50,7 +50,7 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<EntityEntry> {
 	}
 
 	@Override
-	public List<EntityType> getAllTypes() {
+	public List<EntityType> getAllElements() {
 		return ForgeRegistries.ENTITIES.getValuesCollection().stream().map(this::wrap).collect(Collectors.toList());
 	}
 
@@ -62,5 +62,10 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<EntityEntry> {
 	@Override
 	public String getEntityId(EntityEntry state) {
 		return ForgeRegistries.ENTITIES.getKey(state).toString();
+	}
+
+	@Override
+	public List<String> listAllActiveEffectTypes() {
+		return ForgeRegistries.POTIONS.getKeys().stream().map(ResourceLocation::toString).collect(Collectors.toList());
 	}
 }

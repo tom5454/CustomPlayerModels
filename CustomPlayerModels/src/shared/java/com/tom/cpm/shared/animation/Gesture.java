@@ -61,4 +61,9 @@ public class Gesture implements IManualGesture {
 	public boolean isLayerControlled() {
 		return layerCtrl;
 	}
+
+	@Override
+	public float getDefaultValue() {
+		return defVal / 255f;
+	}
 }

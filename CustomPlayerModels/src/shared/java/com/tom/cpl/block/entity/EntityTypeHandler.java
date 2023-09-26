@@ -25,9 +25,14 @@ public abstract class EntityTypeHandler<E> implements NativeTagManager<EntityTyp
 		return isInTag(tag, unwrap(state));
 	}
 
+	@Override
+	public String getId(EntityType type) {
+		return type.getId();
+	}
+
 	public abstract boolean isInTag(String tag, E state);
 	public abstract List<String> listTags(E state);
-	public abstract List<EntityType> getAllTypes();
 	public abstract boolean equals(E a, E b);
 	public abstract String getEntityId(E state);
+	public abstract List<String> listAllActiveEffectTypes();
 }

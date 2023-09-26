@@ -5,6 +5,8 @@ import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 
 public class ScrollPanel extends Panel {
 	private Panel display;
@@ -21,16 +23,21 @@ public class ScrollPanel extends Panel {
 	public void mouseWheel(MouseEvent event) {
 		display.mouseWheel(event.offset(bounds).offset(-xScroll, -yScroll));
 		if(!event.isConsumed() && event.isInBounds(bounds)) {
+			float s = MathHelper.clamp(getScrollSpeed(), 0.1F, 10F);
 			if(gui.isShiftDown()) {
-				int newScroll = xScroll - event.btn * 5;
+				int newScroll = (int) (xScroll - event.btn * 20 * s);
 				setScrollX(newScroll);
 				if(bounds.w / (float) display.getBounds().w < 1)event.consume();
 			} else {
-				int newScroll = yScroll - event.btn * 5;
+				int newScroll = (int) (yScroll - event.btn * 20 * s);
 				setScrollY(newScroll);
 				if(bounds.h / (float) display.getBounds().h < 1)event.consume();
 			}
 		}
+	}
+
+	protected float getScrollSpeed() {
+		return ModConfig.getCommonConfig().getInt(ConfigKeys.MOUSE_WHEEL_SENSITIVITY, 100) / 100f;
 	}
 
 	public void setDisplay(Panel display) {
@@ -171,6 +178,11 @@ public class ScrollPanel extends Panel {
 			ye = 3;
 		}
 		yScroll = MathHelper.clamp(newScroll, 0, Math.max(display.getBounds().h - bounds.h + ye, 0));
+	}
+
+	public void onDisplayResize() {
+		setScrollX(xScroll);
+		setScrollY(yScroll);
 	}
 
 	public int getScrollX() {

@@ -16,6 +16,7 @@ import com.tom.cpl.gui.UIColors;
 import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
+import com.tom.cpl.item.Stack;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.text.IText;
 import com.tom.cpm.shared.gui.panel.Panel3d;
@@ -709,5 +710,13 @@ public class GuiImpl implements IGui, EventHandler {
 	@Override
 	public void openURL0(String url) {
 		WebMC.getInstance().openURL(url);
+	}
+
+	@Override
+	public void drawStack(int x, int y, Stack stack) {
+	}
+
+	@Override
+	public void drawStackTooltip(int mx, int my, Stack stack) {
 	}
 }

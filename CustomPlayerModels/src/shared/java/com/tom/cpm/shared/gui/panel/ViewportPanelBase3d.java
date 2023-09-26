@@ -138,36 +138,23 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 			}
 		}
 
-		stack.push();
-		ItemTransform tr = def.getTransform(ItemSlot.RIGHT_HAND);
-		if(tr != null)
-			stack.mul(tr.getMatrix());
-		else
-			p.rightArm.translateRotatePart(stack);
-		renderItem(stack, rp, ItemSlot.RIGHT_HAND, getHeldItem(ItemSlot.RIGHT_HAND));
-		stack.pop();
-
-		stack.push();
-		tr = def.getTransform(ItemSlot.LEFT_HAND);
-		if(tr != null)
-			stack.mul(tr.getMatrix());
-		else
-			p.leftArm.translateRotatePart(stack);
-		renderItem(stack, rp, ItemSlot.LEFT_HAND, getHeldItem(ItemSlot.LEFT_HAND));
-		stack.pop();
-
-		stack.push();
-		tr = def.getTransform(ItemSlot.HEAD);
-		if(tr != null)
-			stack.mul(tr.getMatrix());
-		else
-			p.head.translateRotatePart(stack);
-		renderItem(stack, rp, ItemSlot.HEAD, getHeldItem(ItemSlot.HEAD));
-		stack.pop();
+		for (ItemSlot slot : ItemSlot.SLOTS) {
+			stack.push();
+			DisplayItem item = getHeldItem(slot);
+			ItemSlot trSlot = slot;
+			if(item.positionOverride != null)trSlot = item.positionOverride;
+			ItemTransform tr = def.getTransform(trSlot);
+			if(tr != null)
+				stack.mul(tr.getMatrix());
+			else
+				p.transformSlot(trSlot, stack);
+			renderItem(stack, rp, slot, item);
+			stack.pop();
+		}
 
 		if((drawParrots() & 1) != 0) {
 			stack.push();
-			tr = def.getTransform(ItemSlot.LEFT_SHOULDER);
+			ItemTransform tr = def.getTransform(ItemSlot.LEFT_SHOULDER);
 			if(tr != null)
 				stack.mul(tr.getMatrix());
 			stack.translate(0.4F, p.crouching ? (double)-1.3F : -1.5D, 0.0D);
@@ -177,7 +164,7 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 
 		if((drawParrots() & 2) != 0) {
 			stack.push();
-			tr = def.getTransform(ItemSlot.RIGHT_SHOULDER);
+			ItemTransform tr = def.getTransform(ItemSlot.RIGHT_SHOULDER);
 			if(tr != null)
 				stack.mul(tr.getMatrix());
 			stack.translate(-0.4F, p.crouching ? (double)-1.3F : -1.5D, 0.0D);

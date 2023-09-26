@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.render.VertexBuffer;
+import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
@@ -201,5 +202,15 @@ public class VanillaPlayerModel {
 		rightArmPose = ArmPose.EMPTY;
 		useAmount = 0;
 		parts.forEach(VanillaPartRenderer::reset);
+	}
+
+	public void transformSlot(ItemSlot trSlot, MatrixStack stack) {
+		switch(trSlot) {
+		case HEAD: head.translateRotatePart(stack); break;
+		case LEFT_HAND: leftArm.translateRotatePart(stack); break;
+		case RIGHT_HAND: rightArm.translateRotatePart(stack); break;
+		default:
+			break;
+		}
 	}
 }

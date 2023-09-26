@@ -35,7 +35,7 @@ public class DropDownBox<T> extends GuiElement {
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
 		gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 - 4, v, color);
-		gui.drawTexture(bounds.x + bounds.w - 10, bounds.y + bounds.h / 2 - 4, 8, 8, 24, 8, "editor");
+		gui.drawTexture(bounds.x + bounds.w - 10, bounds.y + bounds.h / 2 - 4, 8, 8, 0, 8, "editor");
 	}
 
 	@Override

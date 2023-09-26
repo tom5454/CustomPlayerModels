@@ -16,9 +16,7 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.render.RenderTypes;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpl.util.Image;
-import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
-import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 import com.tom.cpm.shared.gui.panel.Panel3d.Panel3dNative;
@@ -97,10 +95,6 @@ public class Panel3dImpl extends Panel3dNative {
 		Image rImg = new Image(size.x, size.y);
 		rImg.draw(img, 0, 0, size.x, size.y);
 		return rImg;
-	}
-
-	@Override
-	public void renderItem(MatrixStack stack, ItemSlot hand, DisplayItem item) {
 	}
 
 	@Override

@@ -236,7 +236,7 @@ public class ETextures implements TreeElement {
 			e.ui.displayConfirm(e.ui.i18nFormat("label.cpm.confirm"), e.ui.i18nFormat("label.cpm.resetTextureSheet"), () ->  {
 				e.action("delTexture").
 				updateValueOp(this, this.getImage(), this.copyDefaultImg(), ETextures::setImage).
-				updateValueOp(this, this.isEdited(), false, ETextures::setEdited).
+				updateValueOp(this, this.isEdited(), false, ETextures::setEdited, e.setSkinEdited).
 				execute();
 			}, null, e.ui.i18nFormat("button.cpm.resetTexture"));
 		} else {

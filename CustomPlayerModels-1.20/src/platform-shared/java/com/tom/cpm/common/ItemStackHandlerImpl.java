@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import net.minecraft.client.multiplayer.ClientRegistryLayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.ByteArrayTag;
@@ -16,6 +17,8 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -61,11 +64,14 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 
 	@Override
 	public List<String> listNativeTags() {
-		return BuiltInRegistries.ITEM.getTagNames().map(k -> k.location().toString()).toList();
+		return BuiltInRegistries.ITEM.getTagNames().map(k -> "#" + k.location()).toList();
 	}
 
 	@Override
-	public List<Stack> getAllItems() {
+	public List<Stack> getAllElements() {
+		if (CreativeModeTabs.searchTab().getSearchTabDisplayItems().isEmpty()) {
+			CreativeModeTabs.tryRebuildTabContents(FeatureFlagSet.of(FeatureFlags.VANILLA), false, ClientRegistryLayer.createRegistryAccess().compositeAccess());
+		}
 		return CreativeModeTabs.searchTab().getSearchTabDisplayItems().stream().map(this::wrap).collect(Collectors.toList());
 	}
 
@@ -232,5 +238,10 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 	@Override
 	public Stack emptyObject() {
 		return wrap(ItemStack.EMPTY);
+	}
+
+	@Override
+	public String getItemDisplayName(ItemStack stack) {
+		return stack.getDisplayName().getString();
 	}
 }

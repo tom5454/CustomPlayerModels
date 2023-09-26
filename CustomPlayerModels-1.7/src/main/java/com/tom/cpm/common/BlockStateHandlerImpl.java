@@ -85,7 +85,7 @@ public class BlockStateHandlerImpl extends BlockStateHandler<BlockMeta> {
 	}
 
 	@Override
-	public List<BlockState> getAllBlocks() {
+	public List<BlockState> getAllElements() {
 		Iterator<Block> itr = GameData.getBlockRegistry().iterator();
 		List<BlockState> list = new ArrayList<>();
 		while (itr.hasNext()) {

@@ -47,8 +47,10 @@ import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.IVersionCheck;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.MojangAPI;
-import com.tom.cpm.web.client.item.BlockStateHandlerImpl;
-import com.tom.cpm.web.client.item.ItemStackHandlerImpl;
+import com.tom.cpm.web.client.emul.BiomeHandlerImpl;
+import com.tom.cpm.web.client.emul.BlockStateHandlerImpl;
+import com.tom.cpm.web.client.emul.EntityTypeHandlerImpl;
+import com.tom.cpm.web.client.emul.ItemStackHandlerImpl;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.FileManagerPopup;
 import com.tom.cpm.web.client.render.GuiImpl;
@@ -437,11 +439,11 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 
 	@Override
 	public BiomeHandler<?> getBiomeHandler() {
-		return null;
+		return BiomeHandlerImpl.impl;
 	}
 
 	@Override
 	public EntityTypeHandler<?> getEntityTypeHandler() {
-		return null;
+		return EntityTypeHandlerImpl.impl;
 	}
 }

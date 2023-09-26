@@ -224,7 +224,7 @@ public class AnimTestPanel extends Panel {
 		layersPanel.setBounds(new Box(5, 0, 160, 20));
 		layersPanel.addElement(new Label(gui, gui.i18nFormat("label.cpm.customLayers")).setBounds(new Box(0, 6, 0, 0)));
 
-		Button layersDropDown = new ButtonIcon(gui, "editor", 24, 8, null) {
+		Button layersDropDown = new ButtonIcon(gui, "editor", 0, 8, null) {
 
 			@Override
 			public void mouseClick(MouseEvent evt) {

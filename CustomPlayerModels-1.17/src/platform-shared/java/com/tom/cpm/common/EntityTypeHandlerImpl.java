@@ -68,7 +68,7 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<EntityType<?>> {
 	}
 
 	@Override
-	public List<com.tom.cpl.block.entity.EntityType> getAllTypes() {
+	public List<com.tom.cpl.block.entity.EntityType> getAllElements() {
 		return Registry.ENTITY_TYPE.stream().map(this::wrap).collect(Collectors.toList());
 	}
 
@@ -80,5 +80,10 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<EntityType<?>> {
 	@Override
 	public String getEntityId(EntityType<?> state) {
 		return Registry.ENTITY_TYPE.getKey(state).toString();
+	}
+
+	@Override
+	public List<String> listAllActiveEffectTypes() {
+		return Registry.POTION.keySet().stream().map(ResourceLocation::toString).collect(Collectors.toList());
 	}
 }

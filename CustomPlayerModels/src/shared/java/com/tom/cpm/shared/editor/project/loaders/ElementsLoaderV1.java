@@ -75,6 +75,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 			if(elem != null) {
 				elem.hidden = !map.getBoolean("show");
 				elem.showInEditor = map.getBoolean("showInEditor", true);
+				elem.locked = map.getBoolean("locked", false);
 				if(map.containsKey("children")) {
 					loadChildren(map.getList("children"), elem, editor);
 				}
@@ -98,6 +99,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 			if(elem.typeData instanceof RootModelType)map.put("customPart", true);
 			map.put("show", !elem.hidden);
 			map.put("showInEditor", elem.showInEditor);
+			map.put("locked", elem.locked);
 			if(!elem.children.isEmpty()) {
 				saveChildren(elem, map.putList("children"), editor);
 			}

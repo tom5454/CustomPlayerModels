@@ -26,7 +26,13 @@ public class KeybindsPopup extends PopupPanel {
 
 		setBounds(new Box(0, 0, 350, 300));
 
-		ScrollPanel scp = new ScrollPanel(gui);
+		ScrollPanel scp = new ScrollPanel(gui) {
+
+			@Override
+			protected float getScrollSpeed() {
+				return ce.getInt(ConfigKeys.MOUSE_WHEEL_SENSITIVITY, 100) / 100f;
+			}
+		};
 		scp.setBounds(new Box(0, 5, 350, 290));
 		addElement(scp);
 
@@ -53,7 +59,7 @@ public class KeybindsPopup extends PopupPanel {
 	public static KeybindsPopup create(Frame frm) {
 		ConfigEntryTemp ce = ModConfig.getCommonConfig().createTemp();
 		KeybindsPopup p = new KeybindsPopup(frm, ce);
-		p.setBounds(new Box(0, 0, 350, 330));
+		p.setBounds(new Box(0, 0, 350, 325));
 
 		Button save = new Button(frm.getGui(), frm.getGui().i18nFormat("button.cpm.saveCfg"), () -> {
 			ce.saveConfig();

@@ -12,7 +12,7 @@
 Usage `/cpm setskin [-f|-t|-r] <target> <base64 model>`  
 Flags:
 * -f: Force set model, player can't change their own model.
-* -t: Temporary model, set model will ble cleared when the player logs out.
+* -t: Temporary model, set model will be cleared when the player logs out.
 * -r: Reset model, remove server set model
 
 Target: the player to set the model to  

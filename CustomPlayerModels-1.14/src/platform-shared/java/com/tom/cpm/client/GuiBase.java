@@ -14,10 +14,12 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.ChatVisibility;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SharedConstants;
 import net.minecraft.util.Util;
@@ -37,10 +39,12 @@ import com.tom.cpl.gui.UIColors;
 import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.TextField.ITextField;
+import com.tom.cpl.item.Stack;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.text.IText;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 
@@ -713,5 +717,23 @@ public class GuiBase extends Screen implements IGui {
 
 	public void onOpened() {
 		vanillaScale = -1;
+	}
+
+	@Override
+	public void drawStack(int x, int y, Stack stack) {
+		x += getOffset().x;
+		y += getOffset().y;
+		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
+		GlStateManager.enableDepthTest();
+		RenderHelper.turnOnGui();
+		this.itemRenderer.renderAndDecorateItem(this.minecraft.player, s, x, y);
+		this.itemRenderer.renderGuiItemDecorations(font, s, x, y, null);
+		GlStateManager.disableDepthTest();
+	}
+
+	@Override
+	public void drawStackTooltip(int mx, int my, Stack stack) {
+		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
+		renderTooltip(s, mx, my);
 	}
 }

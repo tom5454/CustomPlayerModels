@@ -18,6 +18,7 @@ import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.tag.AllTagManagers;
+import com.tom.cpl.tag.IAllTags;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
@@ -76,16 +77,18 @@ public class ModelDefinition {
 	public boolean hideHeadIfSkull = true, removeArmorOffset, removeBedOffset, enableInvisGlow;
 	public ModelPartCloneable cloneable;
 	private Throwable error;
-	public AllTagManagers modelTagManager = new AllTagManagers(MinecraftClientAccess.get().getBuiltinTags());
+	public IAllTags modelTagManager;
 
 	public ModelDefinition(ModelDefinitionLoader<?> loader, Player<?> player) {
 		this.loader = loader;
 		this.playerObj = player;
+		this.modelTagManager = new AllTagManagers(MinecraftClientAccess.get().getBuiltinTags());
 	}
 
 	public ModelDefinition(Throwable e, Player<?> player) {
 		this.loader = null;
 		this.playerObj = player;
+		this.modelTagManager = new AllTagManagers(MinecraftClientAccess.get().getBuiltinTags());
 		setError(e);
 	}
 

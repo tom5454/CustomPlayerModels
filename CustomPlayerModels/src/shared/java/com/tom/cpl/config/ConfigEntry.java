@@ -161,11 +161,14 @@ public class ConfigEntry {
 		}
 
 		public boolean add(Object e) {
-			return data.add(e);
+			boolean s = data.add(e);
+			if(s)changeListener.run();
+			return s;
 		}
 
 		public void clear() {
 			data.clear();
+			changeListener.run();
 		}
 
 		public Object get(int index) {

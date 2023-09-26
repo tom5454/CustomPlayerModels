@@ -464,4 +464,8 @@ public class EditorAnim implements IAnimation {
 		});
 		ab.onRun(editor::updateGui);
 	}
+
+	public int getSelectedFrameIndex() {
+		return frames.indexOf(currentFrame);
+	}
 }

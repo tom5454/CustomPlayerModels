@@ -4,9 +4,9 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
-import com.tom.cpm.ServerNetHandler;
 import com.tom.cpm.common.ByteArrayPayload;
 import com.tom.cpm.common.ServerHandler;
+import com.tom.cpm.common.ServerNetHandler;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.io.FastByteArrayInputStream;
 import com.tom.cpm.shared.network.NetH.ServerNetH;

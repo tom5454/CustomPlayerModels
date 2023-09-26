@@ -1,4 +1,5 @@
 {
+	"builtin": true,
 	"entries": [
 		"minecraft:diamond_sword",
     	"minecraft:stone_sword",

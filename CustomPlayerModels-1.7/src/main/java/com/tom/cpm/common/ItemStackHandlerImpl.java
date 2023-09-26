@@ -66,11 +66,11 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 
 	@Override
 	public List<String> listNativeTags() {
-		return Arrays.stream(OreDictionary.getOreNames()).map(t -> "oredict:" + t).collect(Collectors.toList());
+		return Arrays.stream(OreDictionary.getOreNames()).map(t -> "#oredict:" + t).collect(Collectors.toList());
 	}
 
 	@Override
-	public List<Stack> getAllItems() {
+	public List<Stack> getAllElements() {
 		List<ItemStack> stacks = new ArrayList<>();
 		Iterator<Item> itr = GameData.getItemRegistry().iterator();
 		while (itr.hasNext()) {
@@ -253,5 +253,10 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 	@Override
 	public Stack emptyObject() {
 		return wrap(null);
+	}
+
+	@Override
+	public String getItemDisplayName(ItemStack stack) {
+		return stack.getDisplayName();
 	}
 }

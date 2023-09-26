@@ -20,7 +20,7 @@ public class TextField extends GuiElement implements Supplier<IGui>, Focusable {
 
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
-		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_fill);
+		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, enabled ? bgColor : gui.getColors().button_disabled);
 		field.draw(event.x, event.y, partialTicks, bounds);
 	}

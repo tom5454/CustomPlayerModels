@@ -61,11 +61,11 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 
 	@Override
 	public List<String> listNativeTags() {
-		return Registry.ITEM.getTagNames().map(k -> k.location().toString()).toList();
+		return Registry.ITEM.getTagNames().map(k -> "#" + k.location()).toList();
 	}
 
 	@Override
-	public List<Stack> getAllItems() {
+	public List<Stack> getAllElements() {
 		NonNullList<ItemStack> list = NonNullList.create();
 		CreativeModeTab.TAB_SEARCH.fillItemList(list);
 		return list.stream().map(this::wrap).collect(Collectors.toList());
@@ -234,5 +234,10 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 	@Override
 	public Stack emptyObject() {
 		return wrap(ItemStack.EMPTY);
+	}
+
+	@Override
+	public String getItemDisplayName(ItemStack stack) {
+		return stack.getDisplayName().getString();
 	}
 }

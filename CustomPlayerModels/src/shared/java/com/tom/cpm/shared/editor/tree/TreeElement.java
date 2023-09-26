@@ -87,7 +87,7 @@ public abstract interface TreeElement {
 			elem.populatePopup(popup);
 			if(popup.getY() > 0) {
 				Vec2i p = evt.getPos();
-				popup.display(p.x, p.y);
+				popup.display(p.x + 1, p.y + 1);
 			}
 		}
 
@@ -115,6 +115,16 @@ public abstract interface TreeElement {
 		@Override
 		protected boolean canSelect(TreeElement elem) {
 			return elem.canSelect();
+		}
+
+		@Override
+		protected void drawName(TreeElement elem, IGui gui, int x, int y, int color) {
+			if(elem != null)elem.drawName(gui, x, y, color);
+		}
+
+		@Override
+		protected int getExtraWidth(TreeElement value, IGui gui) {
+			return value != null ? value.getExtraWidth(gui) : 0;
 		}
 	}
 
@@ -170,6 +180,8 @@ public abstract interface TreeElement {
 	public default Vec3f getVec(VecType type) {return Vec3f.ZERO;}
 	public default boolean canEditVec(VecType type) {return false;}
 	public default boolean canSelect() {return true;}
+	public default int getExtraWidth(IGui gui) { return 0; }
+	public default void drawName(IGui gui, int x, int y, int color) {}
 
 	public static interface TreeSettingElement extends TreeElement {
 		TreeElement getParent();

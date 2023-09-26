@@ -7,7 +7,7 @@ import com.tom.cpl.item.Stack;
 import com.tom.cpl.util.TriConsumer;
 import com.tom.cpm.shared.MinecraftClientAccess;
 
-public class AllTagManagers {
+public class AllTagManagers implements IAllTags {
 	private final TagManager<BlockState> blockTags = new TagManager<>(BlockState.handler);
 	private final TagManager<Stack> itemTags = new TagManager<>(Stack.handler);
 	private final TagManager<EntityType> entityTags = new TagManager<>(EntityType.handler);
@@ -32,18 +32,22 @@ public class AllTagManagers {
 		biomeTags = new TagManager<>(MinecraftClientAccess.get().getBiomeHandler());
 	}
 
+	@Override
 	public TagManager<BlockState> getBlockTags() {
 		return blockTags;
 	}
 
+	@Override
 	public TagManager<Stack> getItemTags() {
 		return itemTags;
 	}
 
+	@Override
 	public TagManager<EntityType> getEntityTags() {
 		return entityTags;
 	}
 
+	@Override
 	public TagManager<Biome> getBiomeTags() {
 		return biomeTags;
 	}

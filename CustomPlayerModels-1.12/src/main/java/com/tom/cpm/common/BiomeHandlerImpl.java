@@ -43,7 +43,7 @@ public class BiomeHandlerImpl extends BiomeHandler<Biome> {
 	}
 
 	@Override
-	public List<com.tom.cpl.block.Biome> getAllBiomes() {
+	public List<com.tom.cpl.block.Biome> getAllElements() {
 		return ForgeRegistries.BIOMES.getValuesCollection().stream().map(this::wrap).collect(Collectors.toList());
 	}
 
@@ -70,5 +70,10 @@ public class BiomeHandlerImpl extends BiomeHandler<Biome> {
 	@Override
 	public RainType getRainType(Biome state) {
 		return state.isSnowyBiome() ? RainType.SNOW : state.canRain() ? RainType.RAIN : RainType.NONE;
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return true;
 	}
 }
