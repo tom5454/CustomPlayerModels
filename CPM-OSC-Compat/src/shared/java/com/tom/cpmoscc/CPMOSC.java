@@ -130,12 +130,12 @@ public class CPMOSC {
 							}
 							if (st.playerInventory != null) {
 								Inventory i = st.playerInventory;
-								sendItem(def, "held_item", i.getStack(i.getNamedSlotId(NamedSlot.MAIN_HAND)));
-								sendItem(def, "armor/helmet", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_HELMET)));
-								sendItem(def, "armor/chestplate", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_CHESTPLATE)));
-								sendItem(def, "armor/leggings", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_LEGGINGS)));
-								sendItem(def, "armor/boots", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_BOOTS)));
-								sendItem(def, "off_hand", i.getStack(i.getNamedSlotId(NamedSlot.OFF_HAND)));
+								sendItem(def, "held_item", getStackTemp(i, i.getNamedSlotId(NamedSlot.MAIN_HAND)));
+								sendItem(def, "armor/helmet", getStackTemp(i, i.getNamedSlotId(NamedSlot.ARMOR_HELMET)));
+								sendItem(def, "armor/chestplate", getStackTemp(i, i.getNamedSlotId(NamedSlot.ARMOR_CHESTPLATE)));
+								sendItem(def, "armor/leggings", getStackTemp(i, i.getNamedSlotId(NamedSlot.ARMOR_LEGGINGS)));
+								sendItem(def, "armor/boots", getStackTemp(i, i.getNamedSlotId(NamedSlot.ARMOR_BOOTS)));
+								sendItem(def, "off_hand", getStackTemp(i, i.getNamedSlotId(NamedSlot.OFF_HAND)));
 								transmit.send("/cpm/heldSlot", i.getNamedSlotId(NamedSlot.MAIN_HAND));
 							}
 							World w = st.world;
@@ -169,6 +169,11 @@ public class CPMOSC {
 				}
 			}
 		}
+	}
+
+	private static Stack getStackTemp(Inventory t, int i) {
+		if(i >= 0 && i < t.size())return t.getInSlot(i);
+		else return Stack.EMPTY;
 	}
 
 	private static <T> List<String> listTags(TagManager<T> mngr, T e) {

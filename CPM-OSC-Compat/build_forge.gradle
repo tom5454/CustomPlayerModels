@@ -113,11 +113,6 @@ repositories {
 	}
 }
 
-configurations {
-    shade
-    implementation.extendsFrom shade
-}
-
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
@@ -170,7 +165,6 @@ sourceSets {
 	}
 	main {
         java {
-            srcDir 'src/main/java'
             exclude '**/CPMOSCClientFabric.java'
        }
    }

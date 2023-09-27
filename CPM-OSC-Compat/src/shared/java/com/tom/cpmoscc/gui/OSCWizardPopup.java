@@ -75,7 +75,7 @@ public class OSCWizardPopup extends PopupPanel {
 		addElement(new Label(gui, gui.i18nFormat("osc-label.cpmosc.oscArgId")).setBounds(new Box(5, 0, 200, 10)));
 
 		argId = new Spinner(gui);
-		argId.setBounds(new Box(5, 10, 160, 18));
+		argId.setBounds(new Box(5, 10, 160, 20));
 		argId.setDp(0);
 		argId.addChangeListener(() -> {
 			if(argId.getValue() < 0)argId.setValue(0);
@@ -84,15 +84,15 @@ public class OSCWizardPopup extends PopupPanel {
 		tabHandler.add(argId);
 
 		chbxValRange = new Checkbox(gui, gui.i18nFormat("osc-label.cpmosc.valueRange"));
-		chbxValRange.setBounds(new Box(5, 0, 160, 18));
+		chbxValRange.setBounds(new Box(5, 0, 160, 20));
 		addElement(chbxValRange);
 
 		Panel p = new Panel(gui);
-		p.setBounds(new Box(0, 0, 160, 18));
+		p.setBounds(new Box(0, 0, 160, 20));
 		addElement(p);
 
 		min = new Spinner(gui);
-		min.setBounds(new Box(5, 0, 70, 18));
+		min.setBounds(new Box(5, 0, 70, 20));
 		min.setDp(2);
 		p.addElement(min);
 		tabHandler.add(min);
@@ -101,7 +101,7 @@ public class OSCWizardPopup extends PopupPanel {
 		p.addElement(new Label(gui, "~").setBounds(new Box(77, 5, 10, 10)));
 
 		max = new Spinner(gui);
-		max.setBounds(new Box(85, 0, 70, 18));
+		max.setBounds(new Box(85, 0, 70, 20));
 		max.setDp(2);
 		p.addElement(max);
 		tabHandler.add(max);

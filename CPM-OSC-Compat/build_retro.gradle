@@ -65,6 +65,10 @@ repositories {
         }
     }
     maven {
+		name = "tom5454 maven"
+		url = "https://raw.githubusercontent.com/tom5454/maven/main"
+	}
+    maven {
     	url = "http://localhost:8000"
 		allowInsecureProtocol true
 		content {
