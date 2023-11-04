@@ -50,7 +50,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.7.0') {
+	modImplementation ('com.github.Virtuoel:Pehkui:3.7.8') {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
@@ -61,7 +61,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     modImplementation (files('firstperson-fabric-2.1.2-mc1.19.1.jar'))*/
     
-    modCompileOnly('curse.maven:vivecraft-667903:4684112')
+    modCompileOnly('curse.maven:vivecraft-667903:4794418')
     implementation('com.electronwill.night-config:toml:3.6.6')
     implementation('com.electronwill.night-config:core:3.6.6')
     implementation("org.lwjgl:lwjgl-openvr:3.3.1")

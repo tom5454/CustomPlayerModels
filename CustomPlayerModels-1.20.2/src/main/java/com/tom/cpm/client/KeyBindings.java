@@ -7,10 +7,9 @@ import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.settings.IKeyConflictContext;
-import net.minecraftforge.client.settings.KeyConflictContext;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.settings.IKeyConflictContext;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
 
 import com.mojang.blaze3d.platform.InputConstants;
 

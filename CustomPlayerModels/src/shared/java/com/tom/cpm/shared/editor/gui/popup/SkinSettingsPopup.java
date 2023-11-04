@@ -12,6 +12,7 @@ import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
@@ -42,8 +43,8 @@ public class SkinSettingsPopup extends PopupPanel {
 
 		Button openSkinBtn = new Button(gui, gui.i18nFormat("button.cpm.openSkin"), () -> {
 			FileChooserPopup fc = new FileChooserPopup(e);
-			fc.setTitle(gui.i18nFormat("label.cpm.loadSkin"));
-			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
+			fc.setTitle(EmbeddedLocalizations.loadSkin);
+			fc.setFileDescText(EmbeddedLocalizations.filePng);
 			fc.setFilter(new FileFilter("png"));
 			fc.setAccept(e::loadSkin);
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
@@ -56,8 +57,8 @@ public class SkinSettingsPopup extends PopupPanel {
 		Button saveSkin = new Button(gui, gui.i18nFormat("button.cpm.saveSkin"), () -> {
 			if(gui.isShiftDown() || tex.file == null) {
 				FileChooserPopup fc = new FileChooserPopup(e);
-				fc.setTitle(gui.i18nFormat("label.cpm.saveSkin"));
-				fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
+				fc.setTitle(EmbeddedLocalizations.saveSkin);
+				fc.setFileDescText(EmbeddedLocalizations.filePng);
 				fc.setFilter(new FileFilter("png"));
 				fc.setSaveDialog(true);
 				fc.setExtAdder(f -> f + ".png");

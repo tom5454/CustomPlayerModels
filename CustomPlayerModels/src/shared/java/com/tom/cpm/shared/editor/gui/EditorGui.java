@@ -33,6 +33,7 @@ import com.tom.cpl.gui.util.TabFocusHandler;
 import com.tom.cpl.gui.util.TabbedPanelManager;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.text.KeybindText;
+import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
@@ -423,8 +424,8 @@ public class EditorGui extends Frame {
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.load"), () -> checkUnsaved(() -> {
 			FileChooserPopup fc = new FileChooserPopup(this);
-			fc.setTitle(gui.i18nFormat("label.cpm.loadFile"));
-			fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
+			fc.setTitle(EmbeddedLocalizations.loadProject);
+			fc.setFileDescText(EmbeddedLocalizations.fileProject);
 			fc.setFilter(new FileFilter("cpmproject"));
 			fc.setAccept(this::load);
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
@@ -439,8 +440,8 @@ public class EditorGui extends Frame {
 
 		importMenu.addButton(gui.i18nFormat("button.cpm.file.import.project"), () -> {
 			FileChooserPopup fc = new FileChooserPopup(this);
-			fc.setTitle(gui.i18nFormat("button.cpm.file.import"));
-			fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
+			fc.setTitle(EmbeddedLocalizations.importFile);
+			fc.setFileDescText(EmbeddedLocalizations.fileProject);
 			fc.setFilter(new FileFilter("cpmproject"));
 			fc.setAccept(f -> {});
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));
@@ -481,8 +482,8 @@ public class EditorGui extends Frame {
 
 	private void saveAs() {
 		FileChooserPopup fc = new FileChooserPopup(this);
-		fc.setTitle(gui.i18nFormat("label.cpm.saveFile"));
-		fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
+		fc.setTitle(EmbeddedLocalizations.saveProject);
+		fc.setFileDescText(EmbeddedLocalizations.fileProject);
 		fc.setFilter(new FileFilter("cpmproject"));
 		fc.setSaveDialog(true);
 		fc.setExtAdder(n -> n + ".cpmproject");

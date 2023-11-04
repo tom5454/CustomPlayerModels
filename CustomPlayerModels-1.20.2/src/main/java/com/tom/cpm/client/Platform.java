@@ -3,8 +3,7 @@ package com.tom.cpm.client;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.Connection;
 import net.minecraft.world.entity.player.Player;
-
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 import io.netty.channel.Channel;
 

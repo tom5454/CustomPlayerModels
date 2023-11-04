@@ -27,6 +27,7 @@ import com.tom.cpl.block.entity.ActiveEffect;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
+import com.tom.cpm.client.vr.VRPlayerRenderer;
 import com.tom.cpm.common.EntityTypeHandlerImpl;
 import com.tom.cpm.common.PlayerInventory;
 import com.tom.cpm.common.WorldImpl;
@@ -183,8 +184,8 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 			animState.swimAmount = m.swimAmount;
 			animState.leftArm = ArmPose.of(m.leftArmPose);
 			animState.rightArm = ArmPose.of(m.rightArmPose);
-			/*if(CustomPlayerModelsClient.vrLoaded)
-				animState.vrState = VRPlayerRenderer.getVRState(animState.animationMode, model);*/
+			if(CustomPlayerModelsClient.vrLoaded)
+				animState.vrState = VRPlayerRenderer.getVRState(animState.animationMode, model);
 		}
 	}
 

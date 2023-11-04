@@ -12,6 +12,7 @@ import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.EmbeddedLocalization;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.util.Log;
 
@@ -27,7 +28,7 @@ public class FileChooserPopup extends PopupPanel {
 	private BiPredicate<File, String> filter;
 	private Function<String, String> extAdder;
 	private Label fileDescLabel;
-	private String title;
+	private EmbeddedLocalization title, desc;
 	private Frame frm;
 
 	public FileChooserPopup(Frame frame) {
@@ -114,7 +115,7 @@ public class FileChooserPopup extends PopupPanel {
 		}
 	}
 
-	public void setTitle(String text) {
+	public void setTitle(EmbeddedLocalization text) {
 		title = text;
 	}
 
@@ -164,8 +165,9 @@ public class FileChooserPopup extends PopupPanel {
 		files.refresh();
 	}
 
-	public void setFileDescText(String text) {
-		this.fileDescLabel.setText(text);
+	public void setFileDescText(EmbeddedLocalization text) {
+		this.fileDescLabel.setText(text.getTextNormal(gui));
+		this.desc = text;
 	}
 
 	public void setExtAdder(Function<String, String> extAdder) {
@@ -254,11 +256,19 @@ public class FileChooserPopup extends PopupPanel {
 
 	@Override
 	public String getTitle() {
-		return title;
+		return title.getTextNormal(gui);
 	}
 
-	public String getDesc() {
-		return fileDescLabel.getText();
+	public String getSafeTitle() {
+		return title.getTextSafe(gui);
+	}
+
+	public String getDescription() {
+		return desc.getTextNormal(gui);
+	}
+
+	public String getSafeDescription() {
+		return desc.getTextSafe(gui);
 	}
 
 	public BiPredicate<File, String> getFilter() {

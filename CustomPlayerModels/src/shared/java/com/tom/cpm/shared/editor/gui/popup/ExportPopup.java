@@ -21,6 +21,7 @@ import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.ButtonGroup;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpl.util.Util;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
@@ -160,8 +161,8 @@ public abstract class ExportPopup extends PopupPanel {
 
 			Button setOut = new Button(gui, "...", () -> {
 				FileChooserPopup fc = new FileChooserPopup(e);
-				fc.setTitle(gui.i18nFormat("label.cpm.exportSkin"));
-				fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
+				fc.setTitle(EmbeddedLocalizations.exportSkin);
+				fc.setFileDescText(EmbeddedLocalizations.filePng);
 				fc.setFilter(new FileFilter("png"));
 				fc.setSaveDialog(true);
 				fc.setExtAdder(n -> n + ".png");

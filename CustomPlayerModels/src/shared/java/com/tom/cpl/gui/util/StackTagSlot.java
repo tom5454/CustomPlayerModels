@@ -12,35 +12,36 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 
 public class StackTagSlot extends GuiElement {
 	private TagManager<Stack> mngr;
-	private String elem;
-	private int size, index;
+	private int index;
 	private long lastInc;
+	private List<Stack> stacks;
+
 	public StackTagSlot(IGui gui, TagManager<Stack> mngr, String elem) {
 		super(gui);
 		this.mngr = mngr;
-		this.elem = elem;
+		stacks = mngr.listStacks(Arrays.asList(elem));
 	}
 
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
-		List<Stack> stacks = mngr.listStacks(Arrays.asList(elem));
-		if (size != stacks.size()) {
-			index = 0;
-			size = stacks.size();
-		}
 		if (stacks.isEmpty()) {
-			gui.drawBox(bounds.x, bounds.y, 16, 16, 0xFFFF0000);
+			gui.drawTexture(bounds.x, bounds.y, 16, 16, 64, 0, "editor");
 			return;
 		}
 		long ticks = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
-		if (lastInc + 1000 < ticks && size > 1) {
+		if (lastInc + 1000 < ticks && stacks.size() > 1) {
 			lastInc = ticks;
-			index = (index + 1) % size;
+			index = (index + 1) % stacks.size();
 		}
 		Stack st = stacks.get(index);
 		gui.drawStack(bounds.x, bounds.y, st);
 		if (event.isHovered(bounds)) {
 			new StackTooltip(gui.getFrame(), st).set();
 		}
+	}
+
+	public void setStacks(String elem) {
+		stacks = mngr.listStacks(Arrays.asList(elem));
+		index = 0;
 	}
 }

@@ -189,6 +189,7 @@ public class ModelDefinitionLoader<GP> {
 			}
 			def.setParts(parts);
 			def.validate();
+			MinecraftClientAccess.get().getNetHandler().requestPlayerState(player.getUUID());
 			Log.debug(def);
 		} catch (Throwable e) {
 			def.setError(e);

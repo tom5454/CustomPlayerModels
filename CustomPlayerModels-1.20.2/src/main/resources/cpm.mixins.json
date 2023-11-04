@@ -4,7 +4,6 @@
   "package": "com.tom.cpm.mixin",
   "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "cpm.mixins.refmap.json",
   "mixins": [
 	"ServerGamePacketListenerImplMixin",
 	"ServerCommonPacketListenerImplMixin"

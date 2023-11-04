@@ -54,6 +54,7 @@ public class Generators {
 		register("button.cpm.tools.convert_model_custom", "tooltip.cpm.tools.convert_model_custom", eg -> convertModel(eg.getEditor()));
 		register("button.cpm.tools.add_skin_layer2", null, eg -> addSkinLayer(eg.getEditor()));
 		register("button.cpm.tools.convert2template", null, Generators::convertTemplate);
+		register("button.cpm.tools.convert2model", null, Generators::convertModel);
 		register("button.cpm.tools.fillUV", null, Generators::fillUV);
 		register("button.cpm.tools.safetyLevel", null, Generators::checkSafetyLevel);
 		register("button.cpm.tools.mirror", null, Generators::mirrorElement);
@@ -165,6 +166,23 @@ public class Generators {
 					eg.openPopup(new ConfirmPopup(eg, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warnTemplate"),
 							new ConfirmPopup(eg, gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.warn_c2t"), () -> setupTemplate(editor), null),
 							null));
+			}
+		}
+	}
+
+	private static void convertModel(EditorGui eg) {
+		Editor editor = eg.getEditor();
+		IGui gui = eg.getGui();
+		if (editor.templateSettings != null) {
+			if (editor.dirty) {
+				eg.openPopup(new MessagePopup(eg, gui.i18nFormat("label.cpm.info"), gui.i18nFormat("label.cpm.must_save")));
+			} else {
+				editor.templateSettings = null;
+				for (ModelElement el : editor.elements) {
+					el.children.removeIf(e -> e.templateElement);
+				}
+				editor.markDirty();
+				editor.updateGui();
 			}
 		}
 	}
@@ -378,5 +396,4 @@ public class Generators {
 			ab.execute();
 		}
 	}
-
 }

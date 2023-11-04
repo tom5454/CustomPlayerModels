@@ -309,7 +309,7 @@ public class GestureGui extends Frame {
 
 		FlowLayout fl = new FlowLayout(btnPanel2, 0, 1);
 
-		Button btnModelProperties = new Button(gui, gui.i18nFormat("button.cpm.modelProperties"), () -> openPopup(new PropertiesPopup(gui, height * 2 / 3, def)));
+		Button btnModelProperties = new Button(gui, gui.i18nFormat("button.cpm.modelProperties"), () -> MinecraftClientAccess.get().openGui(ModelPropertiesGui::new));
 		btnModelProperties.setBounds(new Box(0, 0, 160, 20));
 		if(status != ServerStatus.INSTALLED || !MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
 			btnModelProperties.setEnabled(false);

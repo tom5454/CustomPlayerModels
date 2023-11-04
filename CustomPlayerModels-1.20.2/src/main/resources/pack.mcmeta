@@ -1,6 +1,8 @@
 {
-   "pack": {
-      "pack_format": 10,
-      "description": "Custom Player Models resources"
-   }
+  "pack": {
+    "description": {
+      "text": "Customizable Player Models resources"
+    },
+    "pack_format": 18
+  }
 }

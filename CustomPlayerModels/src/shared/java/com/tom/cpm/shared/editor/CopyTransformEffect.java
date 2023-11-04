@@ -69,7 +69,7 @@ public class CopyTransformEffect {
 					copySX ? from.rc.getRenderScale().x : to.rc.getRenderScale().x,
 							copySY ? from.rc.getRenderScale().y : to.rc.getRenderScale().y,
 									copySZ ? from.rc.getRenderScale().z : to.rc.getRenderScale().z);
-			if(copyVis)to.rc.setVisible(from.rc.isVisible());
+			if(copyVis)to.rc.setVisible(to.rc.doDisplay() && from.rc.isVisible());
 		}
 	}
 

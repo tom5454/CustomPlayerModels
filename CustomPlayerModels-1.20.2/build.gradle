@@ -1,192 +1,81 @@
-buildscript {
-    repositories {
-        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
-        classpath 'org.spongepowered:mixingradle:0.7.+'
-    }
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.0.5'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin'
 
-version = project.mod_version
-group = "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'CustomPlayerModels-1.20.2'
+version = mod_version
+group = mod_group_id
+
+repositories {
+    mavenLocal()
+}
+
+base {
+    archivesName = 'CustomPlayerModels-1.20.2'
+}
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
-minecraft {
-    // The mappings can be changed at any time and must be in the following format.
-    // Channel:   Version:
-    // snapshot   YYYYMMDD          Snapshot are built nightly.
-    // stable     #                 Stables are built at the discretion of the MCP team.
-    // official   MCVersion         Official field/method names from Mojang mapping files
-    // parchment  YYYY.MM.DD-MCVer  Javadocs and parameters layered on top of Mojmaps from the ParchmentMC team.
-    //
-    // You must be aware of the Mojang license when using the 'official' / 'parchment' mappings.
-    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    //
-    // Use non-default mappings at your own risk. They may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
-    //mappings channel: 'parchment', version: '2022.05.02-1.18.2'
-    mappings channel: 'official', version: '1.20.2'
+minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
+//minecraft.accessTransformers.entry public net.minecraft.client.Minecraft textureManager # textureManager
 
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+// Default run configurations.
+// These can be tweaked, removed, or duplicated as needed.
+runs {
+    // applies to all the run configs below
+    configureEach {
+        // Recommended logging data for a userdev environment
+        // The markers can be added/remove as needed separated by commas.
+        // "SCAN": For mods scan.
+        // "REGISTRIES": For firing of registry events.
+        // "REGISTRYDUMP": For getting the contents of all registries.
+        systemProperty 'forge.logging.markers', 'REGISTRIES'
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
-    runs {
-        client {
-            workingDirectory project.file('run')
+        // Recommended logging level for the console
+        // You can set various levels here.
+        // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+        systemProperty 'forge.logging.console.level', 'debug'
+        
+        programArgument '--mixin.config'
+        programArgument 'cpm.mixins.json'
+		programArgument '--mixin.config'
+		programArgument 'cpm.mixins.compat.json'
 
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-
-            mods {
-                "cpm" {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-
-            mods {
-                "cpm" {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'cpm', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                "cpm" {
-                    source sourceSets.main
-                }
-            }
-        }
+        modSource project.sourceSets.main
     }
-    
-    runs.each { run -> run.taskName = project.name + (run.taskName.startsWith("run") ? run.taskName.substring(3) : run.taskName) }
+
+    client {
+        // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    server {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
+    }
+
+    // This run config launches GameTestServer and runs all registered gametests, then exits.
+    // By default, the server will crash when no gametests are provided.
+    // The gametest system is also enabled by default for other run configs under the /test command.
+    gameTestServer {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    data {
+        // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
+        // workingDirectory project.file('run-data')
+
+        // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
 }
 
 // Include resources generated by data generators.
 sourceSets.main.resources { srcDir 'src/generated/resources' }
-
-repositories {
-    // Put repositories for dependencies here
-    // ForgeGradle automatically adds the Forge maven and Maven Central for you
-
-    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
-    // flatDir {
-    //     dir 'libs'
-    // }
-    maven { url 'https://jitpack.io' }
-    maven {
-        url 'https://www.cursemaven.com'
-        content {
-            includeGroup "curse.maven"
-        }
-    }
-}
-
-mixin {
-    add sourceSets.main, "cpm.mixins.refmap.json"
-    config 'cpm.mixins.json'
-    config 'cpm.mixins.compat.json'
-    
-    debug.verbose = true
-    debug.export = true
-    
-    //extraMappings file("vivecraft-667903-4684121.tsrg")
-}
-
-dependencies {
-    // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.20.2-48.0.0'
-
-    // Mixin annotation processor - generates the refmap
-    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
-
-    // Real mod deobf dependency examples - these get remapped to your current mappings
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
-    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
-    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
-
-    // Examples using mod jars from ./libs
-    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    compileOnly files("of.jar")
-    
-    //compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.7-1.20.1-forge")
-    //compileOnly fg.deobf('curse.maven:vivecraft-667903:4684121')
-}
-
 sourceSets {
 	main {
 		java {
@@ -202,45 +91,77 @@ sourceSets {
 	}
 }
 
-jar {
-    manifest {
-        attributes([
-				"Specification-Title"     : project.name,
-                "Specification-Vendor"    : "tom5454",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "tom5454",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs": "cpm.mixins.json,cpm.mixins.compat.json"
-        ])
+dependencies {
+    // Specify the version of Minecraft to use.
+    // Depending on the plugin applied there are several options. We will assume you applied the userdev plugin as shown above.
+    // The group for userdev is net.neoforged, the module name is neoforge, and the version is the same as the neoforge version.
+    // You can however also use the vanilla plugin (net.neoforged.gradle.vanilla) to use a version of Minecraft without the neoforge loader.
+    // And its provides the option to then use net.minecraft as the group, and one of; client, server or joined as the module name, plus the game version as version.
+    // For all intends and purposes: You can treat this dependency as if it is a normal library you would use.
+    implementation "net.neoforged:neoforge:${neo_version}"
+
+    // Example mod dependency with JEI
+    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
+    // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+    // compileOnly "mezz.jei:jei-${mc_version}-forge-api:${jei_version}"
+    // runtimeOnly "mezz.jei:jei-${mc_version}-forge:${jei_version}"
+
+    // Example mod dependency using a mod jar from ./libs with a flat dir repository
+    // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
+    // The group id is ignored when searching -- in this case, it is "blank"
+    // implementation "blank:coolmod-${mc_version}:${coolmod_version}"
+
+    // Example mod dependency using a file as dependency
+    // implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
+
+    // Example project dependency using a sister or child project:
+    // implementation project(":myproject")
+
+    // For more info:
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    compileOnly files("of.jar")
+    compileOnly files("vc.jar")
+}
+
+// This block of code expands all declared replace properties in the specified resource targets.
+// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
+// When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
+// See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
+            neo_version         : neo_version, neo_version_range: neo_version_range,
+            loader_version_range: loader_version_range,
+            mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors         : mod_authors, mod_description: mod_description, pack_format_number: pack_format_number,
+            file: [jarVersion: mod_version]
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
     }
 }
 
+java {
+    withSourcesJar()
+}
+
 // Example configuration to allow publishing using the maven-publish plugin
-// This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar')
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-// publish.dependsOn('reobfJar')
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives sourcesJar
-}
-
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            artifact jar
+        register('mavenJava', MavenPublication) {
+            from components.java
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            url "file://${project.projectDir}/repo"
         }
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }

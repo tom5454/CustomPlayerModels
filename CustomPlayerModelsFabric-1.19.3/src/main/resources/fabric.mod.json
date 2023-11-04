@@ -26,7 +26,7 @@
       "com.tom.cpm.client.CustomPlayerModelsClient"
     ],
 	"preLaunch": [
-      "com.tom.cpm.LaunchMixinWithOptifineRunnable"
+      "com.tom.cpm.LoadCompatMixins"
     ],
 	"modmenu": [
       "com.tom.cpm.ModMenu"

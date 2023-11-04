@@ -78,6 +78,7 @@ public class EditorTagManager<T> extends TagManager<T> {
 	}
 
 	public static String formatTag(String name) {
+		if (name.isEmpty())return null;
 		String[] strings = new String[]{"model", name};
 		int i = name.indexOf(":");
 		if (i >= 0) {
@@ -123,5 +124,10 @@ public class EditorTagManager<T> extends TagManager<T> {
 		Map<String, List<String>> map = new HashMap<>();
 		tags.forEach((id, tag) -> map.put(id, new ArrayList<>(tag.getEntries())));
 		return map;
+	}
+
+	@Override
+	protected boolean checkTag(CPMTag<T> tag) {
+		return true;
 	}
 }

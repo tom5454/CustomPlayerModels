@@ -2,6 +2,7 @@ package com.tom.cpl.tag;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class CPMTag<T> implements Tag<T> {
 	private final TagManager<T> manager;
@@ -29,7 +30,7 @@ public class CPMTag<T> implements Tag<T> {
 		return getAllStacksInt(null);
 	}
 
-	protected List<T> getAllStacksInt(List<CPMTag<T>> dejavu) {
+	protected List<T> getAllStacksInt(Set<CPMTag<T>> dejavu) {
 		if(stacks == null)stacks = manager.listStacksInt(entries, dejavu);
 		return stacks;
 	}

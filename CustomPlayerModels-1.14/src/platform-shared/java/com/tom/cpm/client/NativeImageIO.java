@@ -36,32 +36,34 @@ public class NativeImageIO implements IImageIO {
 
 	@Override
 	public Image read(InputStream f) throws IOException {
-		NativeImage ni = NativeImage.read(f);
-		Image i = new Image(ni.getWidth(), ni.getHeight());
-		for(int y = 0;y<ni.getHeight();y++) {
-			for(int x = 0;x<ni.getWidth();x++) {
-				int rgb = ni.getPixelRGBA(x, y);
-				int a = (rgb >> 24 & 255);
-				int b = (rgb >> 16 & 255);
-				int g = (rgb >> 8 & 255);
-				int r = (rgb & 255);
-				i.setRGB(x, y, (a << 24) | (r << 16) | (g << 8) | b);
+		try (NativeImage ni = NativeImage.read(f)) {
+			Image i = new Image(ni.getWidth(), ni.getHeight());
+			for(int y = 0;y<ni.getHeight();y++) {
+				for(int x = 0;x<ni.getWidth();x++) {
+					int rgb = ni.getPixelRGBA(x, y);
+					int a = (rgb >> 24 & 255);
+					int b = (rgb >> 16 & 255);
+					int g = (rgb >> 8 & 255);
+					int r = (rgb & 255);
+					i.setRGB(x, y, (a << 24) | (r << 16) | (g << 8) | b);
+				}
 			}
+			return i;
 		}
-		return i;
 	}
 
 	@Override
 	public void write(Image img, File f) throws IOException {
-		createFromBufferedImage(img).writeToFile(f);
+		try (NativeImage i = createFromBufferedImage(img)) {
+			i.writeToFile(f);
+		}
 	}
 
 	@Override
 	public void write(Image img, OutputStream f) throws IOException {
 		WriteCallback wc = new WriteCallback(Channels.newChannel(f));
-		NativeImage ni = createFromBufferedImage(img);
 
-		try {
+		try (NativeImage ni = createFromBufferedImage(img)) {
 			if (!STBImageWrite.stbi_write_png_to_func(wc, 0L, ni.getWidth(), ni.getHeight(), ni.format().components(), MemoryUtil.memByteBuffer(ni.pixels, ni.size), 0)) {
 				throw new IOException("Could not write image: " + STBImage.stbi_failure_reason());
 			}

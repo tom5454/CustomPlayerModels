@@ -183,8 +183,8 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     compileOnly files("of.jar")
     
-    compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.1-1.19.4-forge")
-    compileOnly fg.deobf('curse.maven:vivecraft-667903:4684117')
+    compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.8-1.19.4-forge")
+    compileOnly fg.deobf('curse.maven:vivecraft-667903:4794425')
 }
 
 sourceSets {

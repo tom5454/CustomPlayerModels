@@ -3,6 +3,7 @@ package com.tom.cpm.client;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import net.coderbot.batchedentityrendering.impl.Groupable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -12,7 +13,6 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -188,17 +188,18 @@ public abstract class ClientBase {
 	}
 
 	public void playerRenderPost(MultiBufferSource buffer, PlayerModel model) {
-		if(buffer instanceof BufferSource i)i.endBatch();
 		manager.unbindClear(model);
 	}
 
+	private boolean startedIrisHandGroup;
 	public void renderHand(MultiBufferSource buffer, PlayerModel model) {
-		manager.bindHand(Minecraft.getInstance().player, buffer, model);
+		manager.bindHand(minecraft.player, buffer, model);
+		if (irisLoaded && buffer instanceof Groupable gr)startedIrisHandGroup = gr.maybeStartGroup();
 	}
 
 	public void renderHandPost(MultiBufferSource buffer, HumanoidModel model) {
-		if(buffer instanceof BufferSource i)i.endBatch();
 		manager.unbindClear(model);
+		if (irisLoaded && buffer instanceof Groupable gr && startedIrisHandGroup)gr.endGroup();
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, MultiBufferSource buffer) {
@@ -206,7 +207,6 @@ public abstract class ClientBase {
 	}
 
 	public void renderSkullPost(MultiBufferSource buffer, Model model) {
-		if(buffer instanceof BufferSource i)i.endBatch();
 		manager.unbindFlush(model);
 	}
 

@@ -41,7 +41,7 @@ dependencies {
 	
 	compileOnly files("../CustomPlayerModels-1.18/of.jar")
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.7.0') {
+	modImplementation ('com.github.Virtuoel:Pehkui:3.7.8') {
         exclude(group: "net.fabricmc.fabric-api")
     }
     
@@ -49,7 +49,7 @@ dependencies {
     //modImplementation ('curse.maven:irisshaders-455508:3899702')
     //implementation("org.joml:joml:1.10.2")
     //implementation("org.anarres:jcpp:1.4.14")
-    modCompileOnly('curse.maven:vivecraft-667903:4684109')
+    modCompileOnly('curse.maven:vivecraft-667903:4794415')
 }
 
 loom {

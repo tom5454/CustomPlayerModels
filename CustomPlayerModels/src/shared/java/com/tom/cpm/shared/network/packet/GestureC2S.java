@@ -32,7 +32,7 @@ public class GestureC2S implements IC2SPacket {
 
 	@Override
 	public <P> void handle(NetHandler<?, P, ?> handler, ServerNetH net, P player) {
-		if(gestureData.length > 128)return;
+		if(gestureData.length > 256)return;
 		PlayerData pd = net.cpm$getEncodedModelData();
 		pd.gestureData = gestureData;
 		NBTTagCompound evt = new NBTTagCompound();

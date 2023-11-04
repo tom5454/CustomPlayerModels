@@ -12,7 +12,6 @@
     "ModelPartMixin_OF",
     "BlockEntityWithoutLevelRendererMixinFabric_OF",
 	"VRArmRendererMixin_$vivecraft",
-	"VRPlayerModelWithArmsMixin_$vivecraft",
 	"BlockEntityRenderDispatcherMixin_Iris",
 	"LevelRendererMixin_Iris_FPM"
   ],

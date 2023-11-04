@@ -25,7 +25,7 @@ public class Spinner extends GuiElement implements Focusable {
 		super(gui);
 		txtf = new TextField(gui);
 		txtf.setEventListener(this::updateTxtf);
-		txtf.setText(lastValue = roundValue(dp, value));
+		txtf.setText(lastValue = roundValue());
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class Spinner extends GuiElement implements Focusable {
 		gui.drawTexture(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2 + 1, 8, 8, 0, 8, "editor", enabled ? downH ? gui.getColors().button_text_hover : gui.getColors().button_text_color : gui.getColors().button_text_disabled);
 		if(txtfNeedsUpdate && !txtf.isFocused()) {
 			txtfNeedsUpdate = false;
-			txtf.setText(lastValue = roundValue(dp, value));
+			txtf.setText(lastValue = roundValue());
 		}
 		if(event.isHovered(bounds) && txtf.isFocused() && error != null) {
 			new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.exp_error", error)).set();
@@ -64,12 +64,12 @@ public class Spinner extends GuiElement implements Focusable {
 				if(bUp.isInBounds(e.x, e.y)) {
 					value += v;
 					changeListeners.forEach(Runnable::run);
-					txtf.setText(lastValue = roundValue(dp, value));
+					txtf.setText(lastValue = roundValue());
 					e.consume();
 				} else if(bDown.isInBounds(e.x, e.y)) {
 					value -= v;
 					changeListeners.forEach(Runnable::run);
-					txtf.setText(lastValue = roundValue(dp, value));
+					txtf.setText(lastValue = roundValue());
 					e.consume();
 				}
 			}
@@ -99,14 +99,14 @@ public class Spinner extends GuiElement implements Focusable {
 	public void setValue(float value) {
 		this.value = value;
 		if(!txtf.isFocused())
-			txtf.setText(lastValue = roundValue(dp, value));
+			txtf.setText(lastValue = roundValue());
 		else txtfNeedsUpdate = true;
 		error = null;
 	}
 
 	public void setDp(int dp) {
 		this.dp = dp;
-		txtf.setText(lastValue = roundValue(dp, value));
+		txtf.setText(lastValue = roundValue());
 	}
 
 	@Override
@@ -151,7 +151,12 @@ public class Spinner extends GuiElement implements Focusable {
 		return visible && enabled;
 	}
 
-	private String roundValue(int dp, float newValue) {
-		return new BigDecimal(value).setScale(dp, RoundingMode.HALF_UP).toPlainString();
+	private String roundValue() {
+		try {
+			return new BigDecimal(value).setScale(dp, RoundingMode.HALF_UP).toPlainString();
+		} catch (NumberFormatException e) {
+			// Fallback
+			return String.format("%." + dp + "f", value);
+		}
 	}
 }

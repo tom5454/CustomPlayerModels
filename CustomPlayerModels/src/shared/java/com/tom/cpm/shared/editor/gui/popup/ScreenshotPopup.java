@@ -10,6 +10,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.render.VBuffers;
+import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.ETextures;
@@ -43,8 +44,8 @@ public class ScreenshotPopup extends PopupPanel {
 
 		Button openFile = new Button(gui, gui.i18nFormat("button.cpm.importIconImage"), () -> {
 			FileChooserPopup fc = new FileChooserPopup(eg);
-			fc.setTitle(gui.i18nFormat("button.cpm.importIconImage"));
-			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
+			fc.setTitle(EmbeddedLocalizations.importFile);
+			fc.setFileDescText(EmbeddedLocalizations.filePng);
 			fc.setFilter(new FileFilter("png"));
 			fc.setExtAdder(n -> n + ".png");
 			fc.setAccept(f -> {

@@ -76,7 +76,7 @@ public class NewSkinPopup extends PopupPanel {
 		});
 
 		Checkbox keepOld = new Checkbox(gui, gui.i18nFormat("label.cpm.keepOldSkin"));
-		keepOld.setBounds(new Box(5, 110, 100, 18));
+		keepOld.setBounds(new Box(5, 110, 100, 20));
 		keepOld.setAction(() -> keepOld.setSelected(!keepOld.isSelected()));
 		addElement(keepOld);
 

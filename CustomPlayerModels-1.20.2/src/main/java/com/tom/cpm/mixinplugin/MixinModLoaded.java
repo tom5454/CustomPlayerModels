@@ -1,6 +1,6 @@
 package com.tom.cpm.mixinplugin;
 
-import net.minecraftforge.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.LoadingModList;
 
 public class MixinModLoaded {
 

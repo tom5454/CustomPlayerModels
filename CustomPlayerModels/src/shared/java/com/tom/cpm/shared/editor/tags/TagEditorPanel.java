@@ -129,6 +129,7 @@ public class TagEditorPanel<T> extends Panel {
 	}
 
 	protected class PopupList extends PopupPanel {
+		private Button btnR;
 
 		protected PopupList(List<String> values) {
 			super(TagEditorPanel.this.gui);
@@ -153,18 +154,35 @@ public class TagEditorPanel<T> extends Panel {
 			btnC.setBounds(new Box(70, h - 25, 60, 20));
 			addElement(btnC);
 
+			btnR = new Button(gui, gui.i18nFormat("button.cpm.tags.raw"), null);
+			initRawPopup(gui.i18nFormat("button.cpm.tags.list"), () -> frame.openPopup(this));
+			btnR.setBounds(new Box(135, h - 25, 60, 20));
+			addElement(btnR);
+
 			setBounds(new Box(0, 0, w, h));
 		}
 
 		protected PopupList(List<String> values, String exBtn, Runnable exAction) {
 			this(values);
+			initRawPopup(exBtn, exAction);
+		}
 
-			Button btnC = new Button(gui, exBtn, () -> {
+		private void initRawPopup(String exBtn, Runnable exAction) {
+			Frame frame = gui.getFrame();
+
+			btnR.setAction(() -> {
 				close();
-				exAction.run();
+				InputPopup in = new InputPopup(frame, gui.i18nFormat("label.cpm.tags.raw.title"), gui.i18nFormat("label.cpm.tags.raw.desc"), e -> addTagElement(e), null);
+
+				Button btnT = new Button(gui, exBtn, () -> {
+					in.close();
+					exAction.run();
+				});
+				btnT.setBounds(new Box(95, in.getBounds().h - 25, 60, 20));
+				in.addElement(btnT);
+
+				frame.openPopup(in);
 			});
-			btnC.setBounds(new Box(135, bounds.h - 25, 60, 20));
-			addElement(btnC);
 		}
 
 		@Override
@@ -218,8 +236,8 @@ public class TagEditorPanel<T> extends Panel {
 			private String searchLast = "";
 			private TextField searchField;
 			private List<Stack> itemsList;
-			private float currentScroll;
-			private int cols, lines;
+			private float currentScroll, oldScroll;
+			private int cols, lines, dragY;
 			private boolean refreshItemList = true;
 			private Stack selected;
 			private boolean enableDrag;
@@ -232,7 +250,7 @@ public class TagEditorPanel<T> extends Panel {
 				int h = Math.min(frame.getBounds().h / 4 * 3, 335);
 
 				searchField = new TextField(gui);
-				searchField.setBounds(new Box(5, 5, w - 10, 20));
+				searchField.setBounds(new Box(10, 10, w - 20, 20));
 				addElement(searchField);
 				searchField.setEventListener(this::updateSearch);
 
@@ -259,7 +277,7 @@ public class TagEditorPanel<T> extends Panel {
 								}
 							}
 						};
-						slot.setBounds(new Box(5 + x * 18, 30 + y * 18, 18, 18));
+						slot.setBounds(new Box(10 + x * 18, 35 + y * 18, 18, 18));
 						addElement(slot);
 						slots.add(slot);
 					}
@@ -385,15 +403,15 @@ public class TagEditorPanel<T> extends Panel {
 
 					int scx = bounds.w - 5;
 					int i = (itemsList.size() + cols - 1) / cols;
-					float sch = bounds.h - 35;
+					float sch = bounds.h - 65;
 					float ph = i * 18;
 					float overflowY = sch / ph;
 					float h = Math.max(overflowY * sch, 8);
 					float scroll = (currentScroll * (i - lines) * 18) / (ph - sch);
 					int y = (int) (scroll * (sch - h));
-					Box bar = new Box(bounds.x + scx, 30 + bounds.y + y, 3, (int) h);
-					gui.drawBox(scx, 30, 3, sch, gui.getColors().panel_background);
-					gui.drawBox(scx, 30 + y, 3, h, event.isHovered(bar) || enableDrag ? gui.getColors().button_hover : gui.getColors().button_disabled);
+					Box bar = new Box(bounds.x + scx, 35 + bounds.y + y, 3, (int) h);
+					gui.drawBox(scx, 35, 3, sch, gui.getColors().panel_background);
+					gui.drawBox(scx, 35 + y, 3, h, event.isHovered(bar) || enableDrag ? gui.getColors().button_hover : gui.getColors().button_disabled);
 
 					gui.popMatrix();
 					gui.setupCut();
@@ -403,8 +421,10 @@ public class TagEditorPanel<T> extends Panel {
 			@Override
 			public void mouseClick(MouseEvent event) {
 				super.mouseClick(event);
-				if(event.offset(bounds).isHovered(new Box(bounds.w - 5, 0, 3, bounds.h))) {
+				if(event.offset(bounds).isHovered(new Box(bounds.w - 5, 35, 3, bounds.h - 65))) {
 					enableDrag = true;
+					oldScroll = currentScroll;
+					dragY = event.y;
 					event.consume();
 				}
 			}
@@ -412,10 +432,13 @@ public class TagEditorPanel<T> extends Panel {
 			@Override
 			public void mouseDrag(MouseEvent event) {
 				if (enableDrag) {
-					int l = 30;
-					int j1 = bounds.h - 5;
-					this.currentScroll = (event.y - l - 7.5F) / (j1 - l - 15.0F);
-					this.currentScroll = MathHelper.clamp(this.currentScroll, 0.0F, 1.0F);
+					float sch = bounds.h - 65;
+					float ph = (itemsList.size() + cols - 1) / cols * 18;
+					float overflowY = sch / ph;
+					float h = Math.max(overflowY * sch, 8);
+
+					float newScroll = (event.y - dragY) / (bounds.h - 65 - h);
+					this.currentScroll = MathHelper.clamp(oldScroll + newScroll, 0.0F, 1.0F);
 					scrollTo(currentScroll);
 					event.consume();
 				}

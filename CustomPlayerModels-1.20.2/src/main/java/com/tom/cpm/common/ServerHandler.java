@@ -5,17 +5,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
-
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.ServerTickEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.TickEvent.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import com.mojang.brigadier.CommandDispatcher;
 
@@ -65,7 +64,7 @@ public class ServerHandler extends ServerHandlerBase {
 
 	@SubscribeEvent
 	public void onTick(ServerTickEvent evt) {
-		if(evt.phase == Phase.END) {
+		if(evt.phase == TickEvent.Phase.END) {
 			netHandler.tick();
 		}
 	}

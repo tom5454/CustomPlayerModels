@@ -5,9 +5,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -70,6 +72,8 @@ public class VersionCheck implements Runnable, IVersionCheck {
 			}
 			List<Pair<ComparableVersion, String>> ordered = new ArrayList<>();
 			ComparableVersion oldFilter = null;
+			Set<String> dejavu = new HashSet<>();
+			dejavu.add(version);
 			while(tmp != null) {
 				for (String key : tmp.keySet()) {
 					if(key.equals(PREV_TAG))continue;
@@ -87,7 +91,9 @@ public class VersionCheck implements Runnable, IVersionCheck {
 				} else {
 					oldFilter = ordered.stream().map(Pair::getKey).sorted().findFirst().orElse(oldFilter);
 				}
-				tmp = (Map<String, String>) json.get(prev);
+				if(dejavu.add(prev))
+					tmp = (Map<String, String>) json.get(prev);
+				else tmp = null;
 			}
 			ordered.sort(Comparator.comparing(Pair::getKey));
 

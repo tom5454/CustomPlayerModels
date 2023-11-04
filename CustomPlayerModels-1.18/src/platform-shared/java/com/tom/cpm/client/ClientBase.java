@@ -190,14 +190,15 @@ public class ClientBase {
 		manager.unbindClear(model);
 	}
 
+	private boolean startedIrisHandGroup;
 	public void renderHand(MultiBufferSource buffer, PlayerModel model) {
 		manager.bindHand(minecraft.player, buffer, model);
-		if (irisLoaded && buffer instanceof Groupable gr)gr.startGroup();
+		if (irisLoaded && buffer instanceof Groupable gr)startedIrisHandGroup = gr.maybeStartGroup();
 	}
 
 	public void renderHandPost(MultiBufferSource buffer, HumanoidModel model) {
 		manager.unbindClear(model);
-		if (irisLoaded && buffer instanceof Groupable gr)gr.endGroup();
+		if (irisLoaded && buffer instanceof Groupable gr && startedIrisHandGroup)gr.endGroup();
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, MultiBufferSource buffer) {

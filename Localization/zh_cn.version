@@ -1170,5 +1170,11 @@
   "label.cpm.keybind.findElement": "Find Element",
   "label.cpm.findElement": "Find Element",
   "label.cpm.findElement.info": "Use %s and %s to select",
-  "label.cpm.mouseWheelSensitivity": "Scroll Sensitivity: %s%%"
+  "label.cpm.mouseWheelSensitivity": "Scroll Sensitivity: %s%%",
+  "button.cpm.tags.raw": "Raw",
+  "button.cpm.tags.list": "List",
+  "label.cpm.tags.raw.title": "Add Raw Entry",
+  "label.cpm.tags.raw.desc": "Enter the object\u0027s ID to add:",
+  "label.cpm.import": "Import",
+  "button.cpm.tools.convert2model": "Convert To Model"
 }

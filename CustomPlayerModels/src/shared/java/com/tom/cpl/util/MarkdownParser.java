@@ -117,16 +117,20 @@ public class MarkdownParser {
 					else lines.add(new EmptyLine(4));
 				} else if(lnt.startsWith("- ") || lnt.startsWith("* ")) {//List
 					parseLine(sb, 1, prefix);
-					boolean sub = ln.startsWith(" ");
-					prefix.add(new ListComponent(sub, "* "));
+					int indC = 0;
+					for (;indC<ln.length() && ln.charAt(indC) == ' ';indC++);
+					indC = indC / 2;
+					prefix.add(new ListComponent(indC, null));
 					sb.append(lnt.substring(1).trim());
 				} else if(LIST.matcher(lnt).matches()) {//Numbered list
 					parseLine(sb, 1, prefix);
-					boolean sub = ln.startsWith(" ");
+					int indC = 0;
+					for (;indC<ln.length() && ln.charAt(indC) == ' ';indC++);
+					indC = indC / 2;
 					Matcher m = LIST.matcher(lnt);
 					m.find();
 					String num = m.group(1);
-					prefix.add(new ListComponent(sub, m.group(1) + ". "));
+					prefix.add(new ListComponent(indC, m.group(1) + ". "));
 					sb.append(lnt.substring(num.length() + 1).trim());
 				} else if(ln.endsWith("  ")) {//Line break
 					sb.append(lnt);
@@ -613,24 +617,38 @@ public class MarkdownParser {
 	}
 
 	private static class ListComponent implements Component {
-		private boolean sub;
+		private int sub;
 		private String h;
 
-		public ListComponent(boolean sub, String h) {
+		public ListComponent(int sub, String h) {
 			this.sub = sub;
 			this.h = h;
 		}
 
 		@Override
 		public List<GuiElement> toElements(MarkdownRenderer mdr, Cursor cursor) {
-			int w = mdr.getGui().textWidth(h);
-			cursor.x = sub ? 20 : 5;
+			int w = h == null ? 10 : mdr.getGui().textWidth(h);
+			cursor.x = 5 + sub * 15;
 			cursor.xStart = cursor.x + w;
-			List<GuiElement> l = Arrays.asList(new Label(mdr.getGui(), h).setBounds(cursor.bounds(0, 0)));
+			GuiElement he = h != null ? new Label(mdr.getGui(), h) : new BulletPoint(mdr.getGui(), Math.min(sub, 3));
+			List<GuiElement> l = Arrays.asList(he.setBounds(cursor.bounds(0, 0)));
 			cursor.x += w;
 			return l;
 		}
 
+		private static class BulletPoint extends GuiElement {
+			private int i;
+
+			public BulletPoint(IGui gui, int i) {
+				super(gui);
+				this.i = i;
+			}
+
+			@Override
+			public void draw(MouseEvent event, float partialTicks) {
+				gui.drawTexture(bounds.x, bounds.y, 8, 8, 48 + (i % 2) * 8, (i / 2) * 8, "editor");
+			}
+		}
 	}
 
 	private static class ImageComponent implements Component {

@@ -5,8 +5,7 @@ import java.util.function.Function;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-
-import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.neoforged.neoforge.client.gui.overlay.ExtendedGui;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
@@ -24,7 +23,7 @@ public class GuiImpl extends GuiBase {
 			matrixStack.pose().pushPose();
 			matrixStack.pose().translate(0, 0, 800);
 			try {
-				Method m = ForgeGui.class.getDeclaredMethod("renderChat", int.class, int.class, GuiGraphics.class);
+				Method m = ExtendedGui.class.getDeclaredMethod("renderChat", int.class, int.class, GuiGraphics.class);
 				m.setAccessible(true);
 				m.invoke(minecraft.gui, minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight(), matrixStack);
 			} catch (Throwable e) {

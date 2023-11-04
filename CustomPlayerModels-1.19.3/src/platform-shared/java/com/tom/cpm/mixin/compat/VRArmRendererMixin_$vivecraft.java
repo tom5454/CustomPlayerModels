@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.render.VRArmRenderer;
+import org.vivecraft.client_vr.render.VRArmRenderer;
 
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -51,7 +51,7 @@ public class VRArmRendererMixin_$vivecraft extends PlayerRenderer {
 							+ "getSkinTextureLocation()Lnet/minecraft/resources/ResourceLocation;"
 					),
 			method = "renderItem("
-					+ "Lorg/vivecraft/provider/ControllerType;"
+					+ "Lorg/vivecraft/client_vr/provider/ControllerType;"
 					+ "Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;"
 					+ "ILnet/minecraft/client/player/AbstractClientPlayer;"
 					+ "Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;)V"

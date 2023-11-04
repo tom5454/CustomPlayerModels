@@ -10,6 +10,7 @@ import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
 import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.ProcessPopup;
+import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.model.SkinType;
@@ -69,8 +70,8 @@ public class SkinUploadPopup extends ProcessPopup<Void> {
 
 	private void save() {
 		FileChooserPopup fc = new FileChooserPopup(frame);
-		fc.setTitle(gui.i18nFormat("label.cpm.exportSkin"));
-		fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
+		fc.setTitle(EmbeddedLocalizations.exportSkin);
+		fc.setFileDescText(EmbeddedLocalizations.filePng);
 		fc.setFilter(new FileFilter("png"));
 		fc.setSaveDialog(true);
 		fc.setExtAdder(n -> n + ".png");

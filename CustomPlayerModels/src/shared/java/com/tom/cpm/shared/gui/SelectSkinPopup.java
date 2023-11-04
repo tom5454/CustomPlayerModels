@@ -23,6 +23,7 @@ import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.util.ButtonGroup;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpl.util.Image;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -100,8 +101,8 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 
 		openSkin = new Button(gui, gui.i18nFormat("button.cpm.openSkin"), () -> {
 			FileChooserPopup fc = new FileChooserPopup(frm);
-			fc.setTitle(gui.i18nFormat("button.cpm.openSkin"));
-			fc.setFileDescText(gui.i18nFormat("label.cpm.file_png"));
+			fc.setTitle(EmbeddedLocalizations.openSkin);
+			fc.setFileDescText(EmbeddedLocalizations.filePng);
 			fc.setFilter(new FileFilter("png"));
 			fc.setExtAdder(n -> n + ".png");
 			fc.setAccept(f -> {

@@ -105,6 +105,7 @@ public class SocialPanel extends Panel {
 			selUUID = p.getUUID();
 			if(scrollPlayer.getDisplay() != null)((SocialPlayerPanel)scrollPlayer.getDisplay()).cleanup();
 			scrollPlayer.setDisplay(new SocialPlayerPanel(frm, p.getPlayer(), cam, scrollWidth, bounds.h - 20, () -> setPlayerPanel(p)));
+			MinecraftClientAccess.get().getNetHandler().requestPlayerData(selUUID);
 		} else {
 			selUUID = null;
 			playerList.setWidth(bounds.w);

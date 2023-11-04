@@ -52,6 +52,7 @@ import com.tom.cpm.shared.network.packet.PluginMessageC2S;
 import com.tom.cpm.shared.network.packet.PluginMessageS2C;
 import com.tom.cpm.shared.network.packet.ReceiveEventS2C;
 import com.tom.cpm.shared.network.packet.RecommendSafetyS2C;
+import com.tom.cpm.shared.network.packet.RequestPlayerC2S;
 import com.tom.cpm.shared.network.packet.ScaleInfoS2C;
 import com.tom.cpm.shared.network.packet.ServerAnimationS2C;
 import com.tom.cpm.shared.network.packet.SetScaleC2S;
@@ -72,6 +73,7 @@ public class NetHandler<RL, P, NET> {
 	public static final String GESTURE = "gesture";
 	public static final String SERVER_ANIMATION = "srv_anim";
 	public static final String PLUGIN = "plugin";
+	public static final String REQUEST_PLAYER = "req_pl";
 
 	protected Function<P, UUID> getPlayerUUID;
 	private TriConsumer<NET, RL, byte[]> sendPacket;
@@ -125,6 +127,8 @@ public class NetHandler<RL, P, NET> {
 
 		register(packetC2S, PLUGIN, PluginMessageC2S.class, PluginMessageC2S::new);
 		register(packetS2C, PLUGIN, PluginMessageS2C.class, PluginMessageS2C::new);
+
+		register(packetC2S, REQUEST_PLAYER, RequestPlayerC2S.class, RequestPlayerC2S::new);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -384,6 +388,16 @@ public class NetHandler<RL, P, NET> {
 		}
 	}
 
+	public void requestPlayerState(UUID other) {
+		if (!hasModClient())return;
+		sendPacketToServer(new RequestPlayerC2S(other, false));
+	}
+
+	public void requestPlayerData(UUID other) {
+		if (!hasModClient())return;
+		sendPacketToServer(new RequestPlayerC2S(other, true));
+	}
+
 	public String getID(P pl) {
 		return getPlayerUUID.apply(pl).toString();
 	}
@@ -611,6 +625,10 @@ public class NetHandler<RL, P, NET> {
 
 	public P getPlayerById(int entityId) {
 		return getPlayerById.apply(entityId);
+	}
+
+	public P getPlayerByUUID(UUID uuid) {
+		return getOnlinePlayers.get().stream().filter(p -> uuid.equals(getPlayerUUID.apply(p))).findFirst().orElse(null);
 	}
 
 	public Object getLoaderId(P player) {

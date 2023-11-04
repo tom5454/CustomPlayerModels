@@ -24,6 +24,7 @@ import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.editor.project.ProjectFile;
@@ -51,8 +52,8 @@ public class ErrorLogPanel extends Panel {
 
 		saveLogs = new Button(gui, gui.i18nFormat("button.cpm.saveLogs"), () -> {
 			FileChooserPopup fc = new FileChooserPopup(frm);
-			fc.setTitle(gui.i18nFormat("button.cpm.saveLogs"));
-			fc.setFileDescText(gui.i18nFormat("label.cpm.file_logs"));
+			fc.setTitle(EmbeddedLocalizations.saveLogs);
+			fc.setFileDescText(EmbeddedLocalizations.fileLog);
 			fc.setFilter(new FileFilter("zip"));
 			fc.setExtAdder(n -> n + ".zip");
 			fc.setAccept(this::saveLogs);

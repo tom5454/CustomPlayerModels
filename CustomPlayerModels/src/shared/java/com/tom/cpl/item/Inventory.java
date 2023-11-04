@@ -6,7 +6,7 @@ public interface Inventory {
 	void reset();
 
 	default Stack getStack(int i) {
-		if(i > 0 && i < size())return getInSlot(i);
+		if(i >= 0 && i < size())return getInSlot(i);
 		else return Stack.EMPTY;
 	}
 

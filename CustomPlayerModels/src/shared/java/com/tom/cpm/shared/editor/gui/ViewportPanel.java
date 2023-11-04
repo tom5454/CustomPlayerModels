@@ -270,7 +270,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				break;
 
 			case HEAD_ROTATION_YAW:
-				if (editor.selectedAnim != null) {
+				if (editor.selectedAnim != null && editor.playVanillaAnims.get()) {
 					int f = editor.selectedAnim.getSelectedFrameIndex();
 					int frms = editor.selectedAnim.getFrames().size() - 1;
 					if(f < 0 || frms < 1)break;
@@ -279,7 +279,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				break;
 
 			case HEAD_ROTATION_PITCH:
-				if (editor.selectedAnim != null) {
+				if (editor.selectedAnim != null && editor.playVanillaAnims.get()) {
 					int f = editor.selectedAnim.getSelectedFrameIndex();
 					int frms = editor.selectedAnim.getFrames().size() - 1;
 					if(f < 0 || frms < 1)break;

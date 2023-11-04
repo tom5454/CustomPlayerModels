@@ -23,7 +23,7 @@ public class TinyFDChooser implements NativeChooser {
 		if(fc.getFilter() instanceof FileFilter) {
 			FileFilter ff = (FileFilter) fc.getFilter();
 			if(ff.isFolder()) {
-				String sel = TinyFileDialogs.tinyfd_selectFolderDialog(fc.getTitle(), path);
+				String sel = TinyFileDialogs.tinyfd_selectFolderDialog(fc.getSafeTitle(), path);
 				if(sel == null)return null;
 				return new File(sel);
 			} else if(ff.getExt() != null) {
@@ -35,16 +35,16 @@ public class TinyFDChooser implements NativeChooser {
 					aFilterPatterns.flip();
 
 					String sel = fc.isSaveDialog() ?
-							TinyFileDialogs.tinyfd_saveFileDialog(fc.getTitle(), path, aFilterPatterns, fc.getDesc()) :
-								TinyFileDialogs.tinyfd_openFileDialog(fc.getTitle(), path, aFilterPatterns, fc.getDesc(), false);
+							TinyFileDialogs.tinyfd_saveFileDialog(fc.getSafeTitle(), path, aFilterPatterns, fc.getSafeDescription()) :
+								TinyFileDialogs.tinyfd_openFileDialog(fc.getSafeTitle(), path, aFilterPatterns, fc.getSafeDescription(), false);
 					if(sel == null)return null;
 					return new File(sel);
 				}
 			}
 		}
 		String sel = fc.isSaveDialog() ?
-				TinyFileDialogs.tinyfd_saveFileDialog(fc.getTitle(), path, null, fc.getDesc()) :
-					TinyFileDialogs.tinyfd_openFileDialog(fc.getTitle(), path, null, fc.getDesc(), false);
+				TinyFileDialogs.tinyfd_saveFileDialog(fc.getSafeTitle(), path, null, fc.getSafeDescription()) :
+					TinyFileDialogs.tinyfd_openFileDialog(fc.getSafeTitle(), path, null, fc.getSafeDescription(), false);
 		if(sel == null)return null;
 		return new File(sel);
 	}

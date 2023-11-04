@@ -133,7 +133,8 @@ public class PropertiesPopup extends PopupPanel {
 				s.getSpinner().setDp(0);
 				s.setAction(() -> {
 					MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setLayerValue(def.getAnimations(), g, s.getValue());
-					current.setFloat(g.name, s.getValue());
+					if(current != null)
+						current.setFloat(g.name, s.getValue());
 				});
 				updateState.add(() -> s.setValue(Byte.toUnsignedInt(MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), g)) / 255f));
 				panel.addElement(s);
@@ -179,13 +180,18 @@ public class PropertiesPopup extends PopupPanel {
 
 	private void setToggleGesture(Gesture g, boolean v) {
 		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setLayerValue(def.getAnimations(), g, v ? 1 : 0);
-		current.setFloat(g.name, v ? 1 : 0);
+		if(current != null)current.setFloat(g.name, v ? 1 : 0);
 	}
 
 	@Override
 	public void onClosed() {
 		ModConfig.getCommonConfig().save();
 		super.onClosed();
+	}
+
+	@Override
+	public String getTitle() {
+		return gui.i18nFormat("button.cpm.modelProperties");
 	}
 
 	private class Group {

@@ -5,22 +5,21 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.function.Supplier;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.VersionChecker;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.versions.forge.ForgeVersion;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.VersionChecker;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
 
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpm.api.ICPMPlugin;
@@ -42,8 +41,8 @@ public class CustomPlayerModels extends CommonBase {
 
 		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.preInit();
 
-		MinecraftForge.EVENT_BUS.register(this);
-		MinecraftForge.EVENT_BUS.register(new ServerHandler());
+		NeoForge.EVENT_BUS.register(this);
+		NeoForge.EVENT_BUS.register(new ServerHandler());
 	}
 
 	private void doClientStuff(final FMLClientSetupEvent event) {
@@ -69,7 +68,7 @@ public class CustomPlayerModels extends CommonBase {
 			}
 		});
 		apiInit();
-		DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> CustomPlayerModelsClient::apiInit);
+		if(FMLEnvironment.dist == Dist.CLIENT)CustomPlayerModelsClient.apiInit();
 	}
 
 	@SubscribeEvent
@@ -95,7 +94,7 @@ public class CustomPlayerModels extends CommonBase {
 
 	@Override
 	public String getMCBrand() {
-		return "(forge/" + ForgeVersion.getVersion() + ")";
+		return "(neoforge/" + NeoForgeVersion.getVersion() + ")";
 	}
 
 	@Override

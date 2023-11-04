@@ -23,3 +23,7 @@ Make sure to save the file in `UTF-8` format.
 ## Publishing
 Create a Pull Request with your changes.  
 Don't touch the `.version` files as these will be generated/updated automatically once the PR is merged.  
+
+## Embed Locale
+Some translations have to be embedded in code due to security issues (TinyFD on Linux)  
+Use the `meta.cpm.embedLocale` tag and enter your language locale.  

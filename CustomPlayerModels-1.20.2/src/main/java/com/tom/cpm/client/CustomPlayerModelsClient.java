@@ -12,20 +12,19 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-
-import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent.ClientTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.RenderTickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.client.ConfigScreenHandler;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.TickEvent.ClientTickEvent;
+import net.neoforged.neoforge.event.TickEvent.RenderTickEvent;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
 
@@ -46,7 +45,7 @@ public class CustomPlayerModelsClient extends ClientBase {
 
 	public void init() {
 		init0();
-		MinecraftForge.EVENT_BUS.register(this);
+		NeoForge.EVENT_BUS.register(this);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders0);
 		init1();
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
@@ -82,17 +81,17 @@ public class CustomPlayerModelsClient extends ClientBase {
 
 	@SubscribeEvent
 	public void renderTick(RenderTickEvent evt) {
-		if(evt.phase == Phase.START) {
+		if(evt.phase == TickEvent.Phase.START) {
 			mc.getPlayerRenderManager().getAnimationEngine().update(evt.renderTickTime);
 		}
 	}
 
 	@SubscribeEvent
 	public void clientTick(ClientTickEvent evt) {
-		if(evt.phase == Phase.START && !minecraft.isPaused()) {
+		if(evt.phase == TickEvent.Phase.START && !minecraft.isPaused()) {
 			mc.getPlayerRenderManager().getAnimationEngine().tick();
 		}
-		if (minecraft.player == null || evt.phase == Phase.START)
+		if (minecraft.player == null || evt.phase == TickEvent.Phase.START)
 			return;
 
 		if(KeyBindings.gestureMenuBinding.consumeClick()) {

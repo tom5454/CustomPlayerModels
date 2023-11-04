@@ -47,6 +47,10 @@ public class NetworkUtil {
 		PlayerData dt = handler.getSNetH(target).cpm$getEncodedModelData();
 		if(dt == null)return;
 		handler.sendPacketTo(netTo, writeSkinData(handler, dt, target));
+		sendPlayerState(handler, target, dt, netTo);
+	}
+
+	private static <P> void sendPlayerState(NetHandler<?, P, ?> handler, P target, PlayerData dt, ServerNetH netTo) {
 		if(dt.gestureData.length > 0) {
 			NBTTagCompound evt = new NBTTagCompound();
 			evt.setByteArray(NetworkUtil.GESTURE, dt.gestureData);
@@ -56,6 +60,13 @@ public class NetworkUtil {
 			int id = handler.getPlayerId(target);
 			dt.pluginStates.forEach((k, v) -> handler.sendPacketTo(netTo, new PluginMessageS2C(k, id, v)));
 		}
+	}
+
+	public static <P> void sendPlayerState(NetHandler<?, P, ?> handler, P target, P to) {
+		ServerNetH netTo = handler.getSNetH(to);
+		PlayerData dt = handler.getSNetH(target).cpm$getEncodedModelData();
+		if(dt == null)return;
+		sendPlayerState(handler, target, dt, netTo);
 	}
 
 	public static <P> IPacket writeSkinData(NetHandler<?, P, ?> handler, PlayerData dt, P target) {

@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 
@@ -28,8 +29,16 @@ public class ClientPacketListenerMixin implements NetH {
 		this.cpm$hasMod = v;
 	}
 
-	@Inject(at = @At("HEAD"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;)V", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;)V", cancellable = true, require = 0)
 	public void onHandleCustomPayload(CustomPacketPayload packet, CallbackInfo cbi) {
+		if(packet instanceof ByteArrayPayload p) {
+			CustomPlayerModelsClient.INSTANCE.netHandler.receiveClient(packet.id(), new FastByteArrayInputStream(p.data()), this);
+			cbi.cancel();
+		}
+	}
+
+	@Inject(at = @At("HEAD"), method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/ClientboundCustomPayloadPacket;Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;)V", cancellable = true, require = 0, remap = false)
+	public void handleCustomPayload(ClientboundCustomPayloadPacket p_295727_, CustomPacketPayload packet, CallbackInfo cbi) {
 		if(packet instanceof ByteArrayPayload p) {
 			CustomPlayerModelsClient.INSTANCE.netHandler.receiveClient(packet.id(), new FastByteArrayInputStream(p.data()), this);
 			cbi.cancel();

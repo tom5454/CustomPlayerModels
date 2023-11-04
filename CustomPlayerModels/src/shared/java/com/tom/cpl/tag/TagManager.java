@@ -3,6 +3,7 @@ package com.tom.cpl.tag;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +38,12 @@ public class TagManager<T> {
 		return listStacksInt(entries, null);
 	}
 
-	protected List<T> listStacksInt(List<String> entries, List<CPMTag<T>> dejavu) {
+	protected List<T> listStacksInt(List<String> entries, Set<CPMTag<T>> dejavu) {
 		return listStacksInt(entries, true, dejavu);
 	}
 
-	private List<T> listStacksInt(List<String> entries, boolean scanNative, List<CPMTag<T>> dejavu) {
-		if (dejavu == null)dejavu = new ArrayList<>();
+	private List<T> listStacksInt(List<String> entries, boolean scanNative, Set<CPMTag<T>> dejavu) {
+		if (dejavu == null)dejavu = new HashSet<>();
 		Set<T> list = new LinkedHashSet<>();
 		if(parent != null)
 			list.addAll(parent.listStacksInt(entries, false, dejavu));
@@ -50,7 +51,7 @@ public class TagManager<T> {
 			if (!e.isEmpty()) {
 				if (e.charAt(0) == '$') {
 					CPMTag<T> tag = tags.get(e.substring(1));
-					if (dejavu.add(tag)) {
+					if (dejavu.add(tag) && checkTag(tag)) {
 						if (tag != null) {
 							list.addAll(tag.getAllStacksInt(dejavu));
 						}
@@ -60,6 +61,10 @@ public class TagManager<T> {
 			}
 		}
 		return new ArrayList<>(list);
+	}
+
+	protected boolean checkTag(CPMTag<T> tag) {
+		return parent == null ? tag.isBuiltin() : true;
 	}
 
 	public boolean isInTag(List<String> entries, T stack) {
@@ -72,7 +77,7 @@ public class TagManager<T> {
 			if (!e.isEmpty()) {
 				if (e.charAt(0) == '$') {
 					CPMTag<T> tag = tags.get(e.substring(1));
-					if (tag != null && tag.is(stack))
+					if (tag != null && checkTag(tag) && tag.is(stack))
 						return true;
 				} else if(scanNative) {
 					if(nativeManager.isInNativeTag(e, stack))
@@ -92,7 +97,7 @@ public class TagManager<T> {
 		if(parent != null)
 			list.addAll(parent.listStackTags(stack, false));
 		for (CPMTag<T> e : tags.values()) {
-			if (e.is(stack))list.add(e);
+			if (checkTag(e) && e.is(stack))list.add(e);
 		}
 		if(scanNative)
 			list.addAll(nativeManager.listNativeTags(stack).stream().map(t -> new NativeTag<>(nativeManager, t)).collect(Collectors.toList()));
@@ -105,13 +110,20 @@ public class TagManager<T> {
 		tagMap.forEach((t, j) -> {
 			try {
 				List<String> entries = new ArrayList<>();
-				boolean builtin = true;
+				Boolean builtin = null;
 				for (Map<String, Object> map : j) {
+					boolean b = (boolean) map.getOrDefault("builtin", false);
 					if ((boolean) map.getOrDefault("replace", false)) {
 						entries.clear();
-						builtin = true;
+						if (builtin != null && builtin && !b)
+							throw new IllegalStateException("Can't replace built-in tag with non-builtin");
+						builtin = b;
 					}
-					builtin &= (boolean) map.getOrDefault("builtin", false);
+					if (builtin == null)
+						builtin = b;
+					else if (builtin != b)
+						throw new IllegalStateException("Can't append to a built-in tag to a non-builtin");
+
 					((List<Object>) map.get("entries")).forEach(e -> entries.add((String) e));
 				}
 				tags.put(t, new CPMTag<>(this, t, entries, builtin));
@@ -119,7 +131,8 @@ public class TagManager<T> {
 				ErrorLog.addLog(LogLevel.WARNING, "Failed to load cpm builtin tag: " + t, e);
 			}
 		});
-		Log.info("Loaded " + tags.size() + " builtin " + prefix + " tags");
+		long bi = tags.values().stream().filter(CPMTag::isBuiltin).count();
+		Log.info("Loaded " + bi + " built-in, " + (tags.size() - bi) + " custom " + prefix + " tags");
 	}
 
 	protected void setParent(TagManager<T> parent) {
@@ -134,7 +147,7 @@ public class TagManager<T> {
 		List<Tag<T>> list = new ArrayList<>();
 		if(parent != null)
 			list.addAll(parent.listAllTags(false));
-		list.addAll(tags.values());
+		tags.values().stream().filter(this::checkTag).forEach(list::add);
 		if (listNative)nativeManager.listNativeTags().stream().map(t -> new NativeTag<>(nativeManager, t)).forEach(list::add);
 		return list;
 	}

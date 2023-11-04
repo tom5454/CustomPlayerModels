@@ -29,7 +29,7 @@ public class AWTChooser implements NativeChooser {
 
 			@Override
 			public String getDescription() {
-				return fc.getDesc();
+				return fc.getDescription();
 			}
 
 			@Override

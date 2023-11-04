@@ -1,0 +1,6 @@
+tsrg2 left right
+org/vivecraft/client_vr/render/VRArmRenderer org/vivecraft/client_vr/render/VRArmRenderer
+	<init> (Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;Z)V <init>
+	renderRightHand (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V m_117770_
+	renderLeftHand (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V m_117813_
+	renderItem (Lorg/vivecraft/client_vr/provider/ControllerType;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;)V renderItem
