@@ -4,6 +4,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.neoforged.gradle.userdev' version '7.0.5'
+    id 'net.neoforged.gradle.mixin' version '7.0.5'
 }
 
 version = mod_version
@@ -39,11 +40,6 @@ runs {
         // You can set various levels here.
         // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
         systemProperty 'forge.logging.console.level', 'debug'
-        
-        programArgument '--mixin.config'
-        programArgument 'cpm.mixins.json'
-		programArgument '--mixin.config'
-		programArgument 'cpm.mixins.compat.json'
 
         modSource project.sourceSets.main
     }
@@ -89,6 +85,11 @@ sourceSets {
 			exclude "**/*.lang"
 		}
 	}
+}
+
+mixin {
+    config 'cpm.mixins.json'
+    config 'cpm.mixins.compat.json'
 }
 
 dependencies {
