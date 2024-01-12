@@ -92,11 +92,6 @@ public class PlayerProfile extends Player<PlayerEntity> {
 		Pose p = player.getPose();
 		animState.resetPlayer();
 		switch (p) {
-		case SNEAKING:
-			animState.sneaking = true;
-			break;
-		case DYING:
-			break;
 		case FALL_FLYING:
 			animState.elytraFlying = true;
 			break;
@@ -106,14 +101,12 @@ public class PlayerProfile extends Player<PlayerEntity> {
 		case SPIN_ATTACK:
 			animState.tridentSpin = true;
 			break;
-		case STANDING:
-			break;
-		case SWIMMING:
-			animState.swimming = true;
-			break;
 		default:
 			break;
 		}
+		animState.sneaking = player.isVisuallySneaking();
+		animState.crawling = player.isVisuallyCrawling();
+		animState.swimming = player.isVisuallySwimming();
 		if(!player.isAlive())animState.dying = true;
 		if(Platform.isSitting(player))animState.riding = true;
 		if(player.isSprinting())animState.sprinting = true;

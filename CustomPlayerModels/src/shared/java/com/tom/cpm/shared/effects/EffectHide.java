@@ -6,6 +6,7 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.RenderedCube;
 
+@Deprecated
 public class EffectHide implements IRenderEffect {
 	private int id;
 
@@ -30,7 +31,7 @@ public class EffectHide implements IRenderEffect {
 	public void apply(ModelDefinition def) {
 		RenderedCube cube = def.getElementById(id);
 		if(cube != null) {
-			cube.hidden = true;
+			cube.setHidden(true);
 		}
 	}
 

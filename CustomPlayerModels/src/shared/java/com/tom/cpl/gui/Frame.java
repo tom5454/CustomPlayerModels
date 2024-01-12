@@ -12,6 +12,8 @@ import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpm.shared.editor.gui.popup.WikiBrowserPopup;
+import com.tom.cpm.shared.gui.Keybinds;
 
 public abstract class Frame extends Panel {
 	protected PopupPanels popup;
@@ -26,12 +28,18 @@ public abstract class Frame extends Panel {
 
 	@Override
 	public void keyPressed(KeyboardEvent event) {
+		if (tooltipBox != null && tooltipBox.getWikiPage() != null) {
+			String w = tooltipBox.getWikiPage();
+			keybindHandler.registerKeybindInPopups(Keybinds.OPEN_WIKI, () -> {
+				openPopup(new WikiBrowserPopup(gui, "https://github.com/tom5454/CustomPlayerModels/wiki/" + w + ".md"));
+			});
+		}
 		super.keyPressed(event);
 		if(event.matches(gui.getKeyCodes().KEY_ESCAPE)) {
 			onClosing();
 			event.consume();
 		}
-		keybindHandler.keyEvent(event);
+		keybindHandler.keyEvent(event, false);
 	}
 
 	protected void onClosing() {
@@ -263,8 +271,10 @@ public abstract class Frame extends Panel {
 				if(popup.onEscape()) {
 					event.consume();
 				}
-			} else
+			} else {
+				keybindHandler.keyEvent(event, true);
 				event.consume();
+			}
 		}
 
 		public void close() {

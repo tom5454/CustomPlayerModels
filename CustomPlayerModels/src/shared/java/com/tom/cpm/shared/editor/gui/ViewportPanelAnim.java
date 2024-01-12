@@ -19,7 +19,7 @@ import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData;
 import com.tom.cpm.shared.editor.anim.AnimationDisplayData.Type;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.editor.util.FilterBuffers;
 import com.tom.cpm.shared.gui.Keybinds;
 import com.tom.cpm.shared.model.builtin.VanillaPlayerModel;

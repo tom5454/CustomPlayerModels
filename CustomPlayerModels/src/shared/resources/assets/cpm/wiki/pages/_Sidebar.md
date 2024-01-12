@@ -8,6 +8,7 @@ Customizable Player Models Wiki
 * [Creating Animations](https://github.com/tom5454/CustomPlayerModels/wiki/Animations)
 * [Animated Textures](https://github.com/tom5454/CustomPlayerModels/wiki/Animated-Textures)
 * [Mod Integrations](https://github.com/tom5454/CustomPlayerModels/wiki/Mod-Integrations)
+* [Scaling](https://github.com/tom5454/CustomPlayerModels/wiki/Scaling)
 * Controls
   * [Editor](https://github.com/tom5454/CustomPlayerModels/wiki/Controls#editor-controls)
   * [In-Game](https://github.com/tom5454/CustomPlayerModels/wiki/Controls#in-game-controls-keybindings)

@@ -30,12 +30,12 @@ public class AnimatedTexture {
 		this.interpolate = interpolate;
 	}
 
-	public void update(long time) {
+	public void update(long time, boolean inGui) {
 		if(frameCount == 0 || frameTime == 0)return;
 		int frm = (int) (time / frameTime % frameCount);
 		if(interpolate) {
 			if(time - lastUpdate > 50) {
-				TextureProvider tex = def.getTexture(sheet, false);
+				TextureProvider tex = def.getTexture(sheet, inGui);
 				Image img = tex.getImage();
 
 				float t = frm + (time % frameTime) / (float) frameTime;
@@ -51,7 +51,7 @@ public class AnimatedTexture {
 					tex.texture.markDirty();
 			}
 		} else if(frm != lastFrame) {
-			TextureProvider tex = def.getTexture(sheet, false);
+			TextureProvider tex = def.getTexture(sheet, inGui);
 			Image img = tex.getImage();
 			lastFrame = frm;
 			int uvx = uvStart.x;

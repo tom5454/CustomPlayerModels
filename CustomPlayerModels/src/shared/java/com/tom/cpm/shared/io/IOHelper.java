@@ -348,12 +348,34 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		writeFloat2(v.z);
 	}
 
+	public Vec3f readVarVec3() throws IOException {
+		Vec3f v = new Vec3f();
+		v.x = readVarFloat();
+		v.y = readVarFloat();
+		v.z = readVarFloat();
+		return v;
+	}
+
+	public void writeVarVec3(Vec3f v) throws IOException {
+		writeVarFloat(v.x);
+		writeVarFloat(v.y);
+		writeVarFloat(v.z);
+	}
+
 	public float readFloat2() throws IOException {
 		return din.readShort() / (float) DIV;
 	}
 
 	public void writeFloat2(float f) throws IOException {
 		dout.writeShort(MathHelper.clamp((int) (f * DIV), Short.MIN_VALUE, Short.MAX_VALUE));
+	}
+
+	public float readVarFloat() throws IOException {
+		return readSignedVarInt() / (float) DIV;
+	}
+
+	public void writeVarFloat(float f) throws IOException {
+		writeSignedVarInt((int) (f * DIV));
 	}
 
 	public IOHelper readNextBlock() throws IOException {
@@ -440,6 +462,11 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		try (IOHelper h = writeNextBlock()) {
 			writer.write(val, h);
 		}
+	}
+
+	public <T extends Enum<T>> IOHelper writeNextObjectBlock(T type) throws IOException {
+		writeEnum(type);
+		return writeNextBlock();
 	}
 
 	public void reset() throws IOException {
@@ -581,5 +608,26 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 		if(tag instanceof NBTTagCompound)
 			return (NBTTagCompound) tag;
 		else throw new IOException("Root tag must be a named compound tag");
+	}
+
+	public void writeBoolArray(int size, boolean[] data) throws IOException {
+		for(int f = 0;f<size;f+=8) {
+			int flgs = 0;
+			for(int j = 0;f+j < size && j < 8;j++) {
+				if(data[f+j])flgs |= (1 << j);
+			}
+			write(flgs);
+		}
+	}
+
+	public boolean[] readBoolArray(int size) throws IOException {
+		boolean[] f = new boolean[size];
+		for(int j = 0;j<size;j += 8) {
+			int dt = read();
+			for(int k = 0;j+k < size && k < 8;k++) {
+				f[j+k] = (dt & (1 << k)) != 0;
+			}
+		}
+		return f;
 	}
 }

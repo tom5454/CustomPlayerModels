@@ -10,7 +10,7 @@ import com.tom.cpm.shared.network.NetHandler.ScalerInterface;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.ScalingOptions;
 
-public class ChiseledMeScaler implements ScalerInterface<EntityPlayerMP, ScalingOptions> {
+public class ChiseledMeScaler implements ScalerInterface<EntityPlayerMP, ChiseledMeScaler> {
 	private static final BiConsumer<EntityPlayerMP, Float> APPLY;
 
 	static {
@@ -47,12 +47,20 @@ public class ChiseledMeScaler implements ScalerInterface<EntityPlayerMP, Scaling
 	}
 
 	@Override
-	public void setScale(ScalingOptions key, EntityPlayerMP player, float value) {
-		if(key == ScalingOptions.ENTITY) {
-			APPLY.accept(player, value);
-		}
+	public void setScale(ChiseledMeScaler key, EntityPlayerMP player, float value) {
+		APPLY.accept(player, value);
 	}
 
 	@Override
-	public ScalingOptions toKey(ScalingOptions opt) { return opt; }
+	public ChiseledMeScaler toKey(ScalingOptions opt) {
+		if(opt == ScalingOptions.ENTITY) {
+			return this;
+		}
+		return null;
+	}
+
+	@Override
+	public String getMethodName() {
+		return "chiseledme";
+	}
 }

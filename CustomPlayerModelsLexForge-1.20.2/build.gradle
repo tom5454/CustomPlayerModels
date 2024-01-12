@@ -165,7 +165,7 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.20.2-48.0.0'
+    minecraft 'net.minecraftforge:forge:1.20.2-48.1.0'
 
     // Mixin annotation processor - generates the refmap
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
@@ -183,7 +183,6 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     compileOnly files("../CustomPlayerModels-1.20.2/of.jar")
     
-    //compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.11-1.20.2-forge")
     compileOnly fg.deobf('curse.maven:vivecraft-667903:4794435')
 }
 

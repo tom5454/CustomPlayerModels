@@ -1,20 +1,9 @@
 Integration animations:
-- [Scaling](#scaling)
+- [Scaling](https://github.com/tom5454/CustomPlayerModels/wiki/Scaling)
 - [Voice Animations](#voice-animations)
 - [First Person View](#first-person-view)
 - [VR Animations](#vr-animations)
 - [OSC](#osc-protocol)
-
-## Scaling
-On 1.14+:  
-Player size, health, movement, and various attributes can be scaled using Pehkui:
-[CurseForge](https://www.curseforge.com/minecraft/mc-mods/pehkui), [Modrinth](https://modrinth.com/mod/pehkui)  
-Some attributes' scaling is disabled by default and have to be enabled using the [/cpm command](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command#scaling) on the server.  
-
-On older versions:  
-1.12.2: [Chiseled Me](https://www.curseforge.com/minecraft/mc-mods/chiseled-me) or [ArtemisLib](https://www.curseforge.com/minecraft/mc-mods/artemislib) can change the player size  
-1.10.2: [Chiseled Me](https://www.curseforge.com/minecraft/mc-mods/chiseled-me) can change the player size
-
 
 ## Voice Animations
 - [Simple Voice Chat](https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat)  

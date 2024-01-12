@@ -12,6 +12,7 @@ import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.DropDownBox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.ListPicker;
+import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
@@ -86,10 +87,14 @@ public class AnimationSettingsPopup extends PopupPanel {
 
 		this.addElement(new Label(gui, gui.i18nFormat("label.cpm.name")).setBounds(new Box(5, 0, 190, 10)));
 
+		Panel nameFieldPanel = new Panel(gui);
+		nameFieldPanel.setBounds(new Box(5, 0, 190, 20));
+		this.addElement(nameFieldPanel);
+
 		TextField nameField = new TextField(gui);
 		if(edit && editor.selectedAnim != null)nameField.setText(editor.selectedAnim.getDisplayName());
-		nameField.setBounds(new Box(5, 0, 190, 20));
-		this.addElement(nameField);
+		nameField.setBounds(new Box(0, 0, 190, 20));
+		nameFieldPanel.addElement(nameField);
 
 		List<AnimSel> selAnims = new ArrayList<>();
 		editor.animations.stream().map(a -> a.pose).
@@ -101,9 +106,9 @@ public class AnimationSettingsPopup extends PopupPanel {
 		map(a -> new AnimSel(a.getId(), a.getDisplayGroup())).distinct().forEach(selAnims::add);
 
 		ListPicker<AnimSel> dropDownAnimSel = new ListPicker<>(gui.getFrame(), selAnims);
-		dropDownAnimSel.setBounds(new Box(5, 0, 190, 20));
+		dropDownAnimSel.setBounds(new Box(0, 0, 190, 20));
 		dropDownAnimSel.setVisible(false);
-		addElement(dropDownAnimSel);
+		nameFieldPanel.addElement(dropDownAnimSel);
 
 		if(edit && editor.selectedAnim != null && editor.selectedAnim.type.isStaged()) {
 			nameField.setVisible(false);

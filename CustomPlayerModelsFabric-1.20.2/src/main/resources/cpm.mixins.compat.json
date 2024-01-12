@@ -9,7 +9,6 @@
   ],
   "client": [
     "AbstractTextureMixin_OF",
-    "ModelPartMixin_OF",
     "BlockEntityWithoutLevelRendererMixinFabric_OF",
 	"BlockEntityRenderDispatcherMixin_Iris",
 	"LevelRendererMixin_Iris_FPM",

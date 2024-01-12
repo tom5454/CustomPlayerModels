@@ -41,6 +41,7 @@ public class ServerHandlerBase {
 		netHandler.setGetPlayerId(ServerPlayer::getId);
 		netHandler.setKickPlayer((p, m) -> p.connection.disconnect(m.remap()));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
+		netHandler.addScaler(new AttributeScaler());
 		return netHandler;
 	}
 }

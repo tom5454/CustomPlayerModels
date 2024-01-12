@@ -3,6 +3,7 @@ package com.tom.cpm.shared.editor.project.loaders;
 import java.io.IOException;
 import java.util.Locale;
 
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.project.IProject;
@@ -68,7 +69,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 			Vec3f pos = new Vec3f(map.getMap("position"), new Vec3f());
 			Vec3f rotation = new Vec3f(map.getMap("rotation"), new Vec3f());
 			Vec3f scale = new Vec3f(map.getMap("scale"), new Vec3f());
-			p.setRenderScale(pos, rotation, scale);
+			p.setRenderScale(pos, new Rotation(rotation, true), scale);
 		}
 		return p;
 	}
@@ -76,7 +77,7 @@ public class PropertiesLoaderV1 implements ProjectPartLoader {
 	protected static void putPartPos(PartPosition pos, JsonMap fpHand, String name) {
 		JsonMap map = fpHand.putMap(name);
 		map.put("position", pos.getRPos().toMap());
-		map.put("rotation", pos.getRRotation().toMap());
+		map.put("rotation", pos.getRRotation().toMap3());
 		map.put("scale", pos.getRScale().toMap());
 	}
 

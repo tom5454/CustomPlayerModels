@@ -2,13 +2,11 @@ package com.tom.cpm.shared.parts;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
 
 import com.tom.cpm.shared.config.ResourceLoader.ResourceEncoding;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.template.Template;
 import com.tom.cpm.shared.util.TextureStitcher;
 
@@ -44,8 +42,8 @@ public class ModelPartTemplate implements IModelPart {
 		}
 
 		@Override
-		public List<RenderedCube> getModel() {
-			return template.getCubes();
+		public void preApply(ModelDefinition def) {
+			def.addCubes(template.getCubes());
 		}
 
 		@Override

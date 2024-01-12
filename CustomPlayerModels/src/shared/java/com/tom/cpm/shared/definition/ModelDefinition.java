@@ -2,6 +2,7 @@ package com.tom.cpm.shared.definition;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -47,9 +48,10 @@ import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.parts.IModelPart;
 import com.tom.cpm.shared.parts.IResolvedModelPart;
 import com.tom.cpm.shared.parts.ModelPartCloneable;
+import com.tom.cpm.shared.parts.ModelPartCollection;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
 import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
-import com.tom.cpm.shared.parts.ModelPartPlayer;
+import com.tom.cpm.shared.parts.ModelPartLink;
 import com.tom.cpm.shared.parts.ModelPartSkin;
 import com.tom.cpm.shared.parts.ModelPartSkinLink;
 import com.tom.cpm.shared.skin.TextureProvider;
@@ -62,7 +64,6 @@ public class ModelDefinition {
 	private final Player<?> playerObj;
 	private List<IModelPart> parts;
 	private List<IResolvedModelPart> resolved;
-	private ModelPartPlayer player;
 	protected List<RenderedCube> cubes;
 	private Map<Integer, RenderedCube> cubeMap;
 	private Map<TextureSheetType, TextureProvider> textures;
@@ -117,29 +118,13 @@ public class ModelDefinition {
 	public void validate() {
 		if(loader == null)return;
 		boolean hasSkin = false;
-		boolean hasPlayer = false;
 		boolean hasDef = false;
 		for (IModelPart iModelPart : parts) {
 			if(iModelPart instanceof ModelPartSkin || iModelPart instanceof ModelPartSkinLink) {
 				if(hasSkin)throw new IllegalStateException("Multiple skin tags");
 				hasSkin = true;
 			}
-			if(iModelPart instanceof ModelPartPlayer) {
-				if(hasPlayer)throw new IllegalStateException("Multiple player tags");
-				hasPlayer = true;
-				player = (ModelPartPlayer) iModelPart;
-			}
-			if(iModelPart instanceof ModelPartDefinition) {
-				if(hasDef)throw new IllegalStateException("Multiple definition tags");
-				ModelPartDefinition def = (ModelPartDefinition) iModelPart;
-				if(def.getPlayer() != null) {
-					if(hasPlayer)throw new IllegalStateException("Multiple player tags");
-					hasPlayer = true;
-					player = def.getPlayer();
-				}
-				hasDef = true;
-			}
-			if(iModelPart instanceof ModelPartDefinitionLink) {
+			if(iModelPart instanceof ModelPartDefinition || iModelPart instanceof ModelPartDefinitionLink) {
 				if(hasDef)throw new IllegalStateException("Multiple definition tags");
 				hasDef = true;
 			}
@@ -153,44 +138,25 @@ public class ModelDefinition {
 			resolved.add(part.resolve());
 		}
 		textures = new HashMap<>();
-		for (IResolvedModelPart parts : resolved) {
-			TextureProvider img = parts.getSkin();
-			if(img != null) {
-				if(textures.containsKey(TextureSheetType.SKIN))throw new IOException("Multiple skin tags");
-				else {
-					textures.put(TextureSheetType.SKIN, img);
-				}
-			}
-			if(parts instanceof ModelPartDefinition) {
-				ModelPartDefinition def = (ModelPartDefinition) parts;
-				if(def.getPlayer() != null) {
-					if(player != null && player != def.getPlayer())throw new IllegalStateException("Multiple player tags");
-					player = def.getPlayer();
-				}
-			}
-		}
-		if(player == null)player = new ModelPartPlayer();
 		cubes = new ArrayList<>();
+		rootRenderingCubes = new HashMap<>();
 		Map<Integer, RootModelElement> playerModelParts = new HashMap<>();
 		for(int i = 0;i<PlayerModelParts.VALUES.length;i++) {
 			RootModelElement elem = new RootModelElement(PlayerModelParts.VALUES[i], this);
-			elem.hidden = !player.doRenderPart(PlayerModelParts.VALUES[i]);
+			rootRenderingCubes.put(PlayerModelParts.VALUES[i], new PartRoot(elem));
 			playerModelParts.put(i, elem);
 		}
-		for (IResolvedModelPart part : resolved) {
-			List<RenderedCube> cs = part.getModel();
-			for (RenderedCube rc : cs) {
-				int id = rc.getCube().parentId;
-				RenderedCube p = playerModelParts.get(id);
-				if(p != null) {
-					p.addChild(rc);
-					rc.setParent(p);
-				}
-				if(rc.getParent() == null) {
-					throw new IOException("Cube without parent");
-				}
+		resolved.forEach(r -> r.preApply(this));
+		for (RenderedCube rc : cubes) {
+			int id = rc.getCube().parentId;
+			RenderedCube p = playerModelParts.get(id);
+			if(p != null) {
+				p.addChild(rc);
+				rc.setParent(p);
 			}
-			cubes.addAll(cs);
+			if(rc.getParent() == null) {
+				throw new IOException("Cube without parent");
+			}
 		}
 		ConfigKeys.MAX_CUBE_COUNT.checkFor(playerObj, cubes.size(), BlockReason.TOO_MANY_CUBES);
 		TextureStitcher stitcher = new TextureStitcher(playerObj.isClientPlayer() ? 8192 : ConfigKeys.MAX_TEX_SHEET_SIZE.getValueFor(playerObj));
@@ -208,28 +174,6 @@ public class ModelDefinition {
 			stitcher.setBase(skin);
 			skinTexture = new TextureProvider(skin, new Vec2i(64, 64));
 		}
-		/*Vec2i whiteBox = new Vec2i(0, 0);
-		List<RenderedCube> coloredCubes = new ArrayList<>();
-		cubes.forEach(t -> {
-			if(t.getCube().texSize == 0) {
-				coloredCubes.add(t);
-				int dx = MathHelper.ceil(t.getCube().size.x);
-				int dy = MathHelper.ceil(t.getCube().size.y);
-				int dz = MathHelper.ceil(t.getCube().size.z);
-				whiteBox.x = Math.max(whiteBox.x, 2 * (dx + dz));
-				whiteBox.y = Math.max(whiteBox.y, dy + dz);
-			}
-		});
-		if(whiteBox.x > 0 && whiteBox.y > 0) {
-			stitcher.allocSingleColor(whiteBox, 0xffffffff, uv -> {
-				coloredCubes.forEach(cube -> {
-					cube.recolor = true;
-					cube.getCube().texSize = 1;
-					cube.getCube().u = uv.x;
-					cube.getCube().v = uv.y;
-				});
-			});
-		}*/
 		resolved.forEach(r -> r.stitch(stitcher));
 		TextureProvider tx = stitcher.finish();
 		if(tx != null) {
@@ -243,8 +187,6 @@ public class ModelDefinition {
 				convertPart(playerModelParts.get(part.ordinal()));
 			}
 		}
-		rootRenderingCubes = new HashMap<>();
-		playerModelParts.forEach((i, e) -> rootRenderingCubes.put(PlayerModelParts.VALUES[i], new PartRoot(e)));
 		cubeMap = new HashMap<>();
 		cubes.addAll(playerModelParts.values());
 		cubes.forEach(c -> cubeMap.put(c.getId(), c));
@@ -256,8 +198,8 @@ public class ModelDefinition {
 
 	protected void convertPart(RootModelElement p) {
 		PlayerModelParts part = (PlayerModelParts) p.getPart();
-		if(!p.hidden) {
-			p.hidden = true;
+		if(!p.isHidden()) {
+			p.setHidden(true);
 			Cube cube = new Cube();
 			PlayerPartValues val = PlayerPartValues.getFor(part, playerObj.getSkinType());
 			cube.offset = val.getOffset();
@@ -338,8 +280,6 @@ public class ModelDefinition {
 		case LOADED:
 			bb.append("\n\tCubes: ");
 			bb.append(cubes.size());
-			bb.append("\n\tPlayer:\n\t\t");
-			bb.append(player.toString().replace("\n", "\n\t\t"));
 			bb.append("\n\tOther:");
 			for (IResolvedModelPart iModelPart : resolved) {
 				bb.append("\n\t\t");
@@ -384,8 +324,8 @@ public class ModelDefinition {
 
 	public Link findDefLink() {
 		for (IModelPart iModelPart : parts) {
-			if(iModelPart instanceof ModelPartDefinitionLink) {
-				return ((ModelPartDefinitionLink)iModelPart).getLink();
+			if(iModelPart instanceof ModelPartDefinitionLink || iModelPart instanceof ModelPartCollection.PackageLink) {
+				return ((ModelPartLink) iModelPart).getLink();
 			}
 		}
 		return null;
@@ -438,7 +378,6 @@ public class ModelDefinition {
 	private void clear() {
 		parts = Collections.emptyList();
 		resolved = null;
-		player = null;
 		cubes = null;
 		cubeMap = null;
 		textures = null;
@@ -507,5 +446,9 @@ public class ModelDefinition {
 		default:
 			return null;
 		}
+	}
+
+	public void addCubes(Collection<RenderedCube> cubes) {
+		this.cubes.addAll(cubes);
 	}
 }

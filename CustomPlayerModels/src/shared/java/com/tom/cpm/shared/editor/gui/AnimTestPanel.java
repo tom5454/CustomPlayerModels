@@ -30,6 +30,7 @@ import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.IAnimation;
 import com.tom.cpm.shared.animation.IPose;
@@ -415,7 +416,7 @@ public class AnimTestPanel extends Panel {
 				playStartTime = playTime;
 				playing = true;
 				if(handler != null) {
-					handler.getAll().forEach(IAnimation::prepare);
+					handler.getAll().forEach(a -> a.prepare(AnimationMode.PLAYER));
 				}
 			} else if(!enable) {
 				playing = false;
@@ -426,7 +427,7 @@ public class AnimTestPanel extends Panel {
 					gestureFinished();
 			}
 			return (handler != null ?
-					handler.getAll().stream().filter(v -> enable || !v.checkAndUpdateRemove()) :
+					handler.getAll().stream().filter(v -> enable || !v.checkAndUpdateRemove(AnimationMode.PLAYER)) :
 						(enable ? anims.stream() : Stream.<IAnimation>empty())
 					).map(TestAnim::new);
 		}
@@ -441,11 +442,11 @@ public class AnimTestPanel extends Panel {
 			@Override
 			public void run() {
 				long playTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
-				anim.animate(playTime - playStartTime, editor.definition);
+				anim.animate(playTime - playStartTime, editor.definition, AnimationMode.PLAYER);
 			}
 
 			public int getPriority() {
-				return anim.getPriority();
+				return anim.getPriority(AnimationMode.PLAYER);
 			}
 		}
 	}

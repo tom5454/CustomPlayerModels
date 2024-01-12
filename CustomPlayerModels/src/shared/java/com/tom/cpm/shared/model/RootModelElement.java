@@ -1,25 +1,28 @@
 package com.tom.cpm.shared.model;
 
 import com.tom.cpl.math.BoundingBox;
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
 public class RootModelElement extends RenderedCube {
 	private VanillaModelPart part;
-	public Vec3f posN, rotN, defPos, defRot;
+	public Vec3f posN, defPos;
+	public Rotation rotN, defRot;
 	private ModelDefinition def;
 	private boolean rotAdd, posAdd;
 	public boolean disableVanilla;
+	private boolean hidden;
 
 	public RootModelElement(VanillaModelPart part, ModelDefinition def) {
 		this.part = part;
 		this.posN = new Vec3f();
-		this.rotN = new Vec3f();
+		this.rotN = new Rotation();
 		this.pos = new Vec3f();
-		this.rotation = new Vec3f();
+		this.rotation = new Rotation();
 		this.defPos = new Vec3f();
-		this.defRot = new Vec3f();
+		this.defRot = new Rotation();
 		this.def = def;
 	}
 
@@ -30,7 +33,7 @@ public class RootModelElement extends RenderedCube {
 	@Override
 	public void reset() {
 		this.pos = new Vec3f();
-		this.rotation = new Vec3f();
+		this.rotation = new Rotation();
 		this.renderScale = new Vec3f(1, 1, 1);
 		display = !hidden;
 		posAdd = true;
@@ -121,7 +124,7 @@ public class RootModelElement extends RenderedCube {
 		}
 	}
 
-	public Vec3f getRot() {
+	public Rotation getRot() {
 		if(rotAdd) {
 			return rotation.add(defRot);
 		} else {
@@ -144,7 +147,17 @@ public class RootModelElement extends RenderedCube {
 	}
 
 	@Override
-	public Vec3f getTransformRotation() {
+	public Rotation getTransformRotation() {
 		return getRot();
+	}
+
+	@Override
+	public void setHidden(boolean v) {
+		hidden = v;
+	}
+
+	@Override
+	public boolean isHidden() {
+		return hidden;
 	}
 }

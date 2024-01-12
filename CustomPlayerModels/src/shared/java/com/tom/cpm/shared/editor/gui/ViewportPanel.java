@@ -45,7 +45,7 @@ import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.gui.Keybinds;
 import com.tom.cpm.shared.gui.ViewportCamera;
 import com.tom.cpm.shared.gui.panel.ViewportPanelBase3d;
@@ -78,7 +78,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 			VecType v = vs[i];
 			ButtonIconToggle icon = new ButtonIconToggle(gui, "editor", v.ordinal() * 16, 48, true, () -> setVec(v));
 			icon.setBounds(new Box(i * 20, 0, 20, 20));
-			icon.setTooltip(new Tooltip(frm, gui.i18nFormat("label.cpm." + v.name().toLowerCase(Locale.ROOT))));
+			icon.setTooltip(new Tooltip(frm, gui.i18nFormat("label.cpm." + v.name().toLowerCase(Locale.ROOT)), Keybinds.EDITOR_TOOL_KBS.get(v)));
 			addElement(icon);
 			dragGroup.addElement(v, icon);
 		}
@@ -254,6 +254,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 				break;
 
 			case SWIMMING:
+			case CRAWLING:
 				PlayerModelSetup.setRotationAngles(p, ls, lsa, hand, true);
 				matrixstack.translate(0.0D, 1.0D, -0.5d);
 				matrixstack.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(90));
@@ -283,7 +284,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 					int f = editor.selectedAnim.getSelectedFrameIndex();
 					int frms = editor.selectedAnim.getFrames().size() - 1;
 					if(f < 0 || frms < 1)break;
-					p.head.xRot = (float) Math.toRadians((1f - f / (float) frms) * 180 - 90);
+					p.head.xRot = (float) -Math.toRadians((1f - f / (float) frms) * 180 - 90);
 				}
 				break;
 

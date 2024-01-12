@@ -74,6 +74,7 @@ public enum AnimationDisplayData {
 	HEAD_ROTATION_PITCH(VanillaPose.HEAD_ROTATION_PITCH, null, null, Type.PROGRESS),
 	BRUSH_LEFT(VanillaPose.BRUSH_LEFT, ItemSlot.LEFT_HAND, DisplayItem.BRUSH, Type.HAND),
 	BRUSH_RIGHT(VanillaPose.BRUSH_RIGHT, ItemSlot.RIGHT_HAND, DisplayItem.BRUSH, Type.HAND),
+	CRAWLING(VanillaPose.CRAWLING, null, null, Type.POSE),
 	;
 	public final VanillaPose pose;
 	public final ItemSlot slot;

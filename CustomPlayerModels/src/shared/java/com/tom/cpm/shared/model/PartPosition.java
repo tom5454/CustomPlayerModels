@@ -1,11 +1,13 @@
 package com.tom.cpm.shared.model;
 
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 
 public class PartPosition {
-	protected Vec3f rPos = new Vec3f(), rRotation = new Vec3f(), rScale = new Vec3f();
+	protected Vec3f rPos = new Vec3f(), rScale = new Vec3f();
+	protected Rotation rRotation = new Rotation();
 
-	public void setRenderScale(Vec3f pos, Vec3f rotation, Vec3f scale) {
+	public void setRenderScale(Vec3f pos, Rotation rotation, Vec3f scale) {
 		rPos = pos;
 		rRotation = rotation;
 		rScale = scale;
@@ -15,7 +17,7 @@ public class PartPosition {
 		return rPos;
 	}
 
-	public Vec3f getRRotation() {
+	public Rotation getRRotation() {
 		return rRotation;
 	}
 
@@ -27,12 +29,16 @@ public class PartPosition {
 		this.rPos = rPos;
 	}
 
-	public void setRRotation(Vec3f rRotation) {
+	public void setRRotation(Rotation rRotation) {
 		this.rRotation = rRotation;
 	}
 
 	public void setRotationDeg(Vec3f r) {
-		this.rRotation = new Vec3f((float) Math.toRadians(r.x), (float) Math.toRadians(r.y), (float) Math.toRadians(r.z));
+		this.rRotation = new Rotation(r, true);
+	}
+
+	public Vec3f getRotationDeg() {
+		return this.rRotation.asVec3f(true);
 	}
 
 	public void setRScale(Vec3f rScale) {

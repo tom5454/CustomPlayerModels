@@ -7,6 +7,7 @@ import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.RenderedCube;
 
+@Deprecated
 public class EffectScale implements IRenderEffect {
 	private int id;
 	private Vec3f scale;

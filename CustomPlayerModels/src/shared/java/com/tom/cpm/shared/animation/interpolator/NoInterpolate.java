@@ -1,6 +1,6 @@
 package com.tom.cpm.shared.animation.interpolator;
 
-import com.tom.cpm.shared.animation.InterpolatorChannel;
+import java.util.function.DoubleUnaryOperator;
 
 public class NoInterpolate implements Interpolator {
 	private float[] values;
@@ -11,7 +11,7 @@ public class NoInterpolate implements Interpolator {
 	}
 
 	@Override
-	public void init(float[] values, InterpolatorChannel channel) {
+	public void init(float[] values, DoubleUnaryOperator setup) {
 		this.values = values;
 	}
 

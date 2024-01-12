@@ -74,4 +74,9 @@ public class PehkuiInterface implements ScalerInterface<ServerPlayerEntity, Scal
 			return null;
 		}
 	}
+
+	@Override
+	public String getMethodName() {
+		return PEHKUI;
+	}
 }

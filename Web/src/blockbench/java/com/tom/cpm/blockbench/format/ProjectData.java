@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.blockbench.proxy.Project;
 import com.tom.cpm.blockbench.util.JsonUtil;
@@ -134,7 +135,7 @@ public class ProjectData {
 		Map<String, Object> map = new HashMap<>();
 		fpHand.put(name, map);
 		map.put("position", pos.getRPos().toMap());
-		map.put("rotation", pos.getRRotation().toMap());
+		map.put("rotation", pos.getRRotation().toMap3());
 		map.put("scale", pos.getRScale().toMap());
 	}
 
@@ -145,7 +146,7 @@ public class ProjectData {
 			Vec3f pos = new Vec3f(map.getMap("position"), new Vec3f());
 			Vec3f rotation = new Vec3f(map.getMap("rotation"), new Vec3f());
 			Vec3f scale = new Vec3f(map.getMap("scale"), new Vec3f());
-			p.setRenderScale(pos, rotation, scale);
+			p.setRenderScale(pos, new Rotation(rotation, true), scale);
 		}
 		return p;
 	}

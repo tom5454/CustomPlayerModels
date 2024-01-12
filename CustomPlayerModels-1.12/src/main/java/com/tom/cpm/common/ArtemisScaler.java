@@ -30,5 +30,14 @@ public class ArtemisScaler implements ScalerInterface<EntityPlayerMP, ScalingOpt
 	}
 
 	@Override
-	public ScalingOptions toKey(ScalingOptions opt) { return opt; }
+	public ScalingOptions toKey(ScalingOptions opt) {
+		if (opt == ScalingOptions.WIDTH || opt == ScalingOptions.HEIGHT || opt == ScalingOptions.ENTITY)
+			return opt;
+		return null;
+	}
+
+	@Override
+	public String getMethodName() {
+		return "artemislib";
+	}
 }

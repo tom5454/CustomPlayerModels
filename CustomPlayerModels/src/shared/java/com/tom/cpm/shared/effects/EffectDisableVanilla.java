@@ -7,6 +7,7 @@ import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 
+@Deprecated
 public class EffectDisableVanilla implements IRenderEffect {
 	private int id;
 

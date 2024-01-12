@@ -3,6 +3,7 @@ package com.tom.cpm.shared.animation;
 import java.util.List;
 
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.config.Player;
 
 public class Gesture implements IManualGesture {
 	public final AnimationType type;
@@ -33,8 +34,8 @@ public class Gesture implements IManualGesture {
 	}
 
 	@Override
-	public void play(AnimationRegistry reg) {
-		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().playGesture(reg, this);
+	public void play(AnimationRegistry reg, Player<?> player) {
+		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().playGesture(reg, this, player);
 	}
 
 	@Override

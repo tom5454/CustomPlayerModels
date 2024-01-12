@@ -175,7 +175,7 @@ public class FBXRenderer extends DirectModelRenderManager<FBXCreator> {
 				SkinType s = c instanceof ModelElement ? ((ModelElement)c).editor.skinType : SkinType.DEFAULT;
 				PartValues pv = DirectParts.getPartOverrides(part, s);
 				Vec3f pos = pv.getPos().add(rc.pos);
-				Vec3f rot = rc.rotation;
+				Vec3f rot = rc.rotation.asVec3f(true);
 				if(pv instanceof DirectPartValues) {
 					rot = rot.add(((DirectPartValues)pv).getRotation());
 				}
@@ -183,7 +183,7 @@ public class FBXRenderer extends DirectModelRenderManager<FBXCreator> {
 				b.getBone().rotation.set(rot);
 			} else {
 				b.getBone().position.set(rc.pos);
-				b.getBone().rotation.set(rc.rotation);
+				b.getBone().rotation.set(rc.rotation.asVec3f(true));
 				if(c instanceof ModelElement)
 					b.getBone().hidden = ((ModelElement)c).hidden;
 			}

@@ -64,8 +64,19 @@ public class PehkuiInterface implements ScalerInterface<ServerPlayer, ScaleType>
 			return ScaleTypes.WIDTH;
 		case HEIGHT:
 			return ScaleTypes.HEIGHT;
+		case JUMP_HEIGHT:
+			return ScaleTypes.JUMP_HEIGHT;
+		case PROJECTILE_DMG:
+			return ScaleTypes.PROJECTILES;
+		case EXPLOSION_DMG:
+			return ScaleTypes.EXPLOSIONS;
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public String getMethodName() {
+		return PEHKUI;
 	}
 }

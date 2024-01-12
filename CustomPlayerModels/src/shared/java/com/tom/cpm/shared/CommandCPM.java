@@ -1,8 +1,15 @@
 package com.tom.cpm.shared;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import com.tom.cpl.command.ArgType;
 import com.tom.cpl.command.CommandCtx;
@@ -11,6 +18,7 @@ import com.tom.cpl.command.LiteralCommandBuilder;
 import com.tom.cpl.command.RequiredCommandBuilder;
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.text.FormatText;
+import com.tom.cpl.text.IText;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.config.BuiltInSafetyProfiles;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -21,6 +29,7 @@ import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.ScalingOptions;
 
 public class CommandCPM {
+	private static final String SCALING_DEFAULT = "default";
 
 	public static void register(CommandHandler<?> dispatcher) {
 		LiteralCommandBuilder cpm = new LiteralCommandBuilder("cpm").
@@ -184,6 +193,25 @@ public class CommandCPM {
 		List<LiteralCommandBuilder> l = new ArrayList<>();
 		for(ScalingOptions o : ScalingOptions.VALUES) {
 			String name = o.name().toLowerCase(Locale.ROOT);
+			LiteralCommandBuilder m = new LiteralCommandBuilder("method");
+			{
+				RequiredCommandBuilder t = new RequiredCommandBuilder("target", ArgType.PLAYER);
+				Supplier<List<String>> vals = () -> {
+					List<String> scls = new ArrayList<>(MinecraftServerAccess.get().getNetHandler().getScaleSetters().getOrDefault(o, Collections.emptyMap()).keySet());
+					scls.add(ConfigKeys.SCALING_METHOD_OFF);
+					scls.add(SCALING_DEFAULT);
+					return scls;
+				};
+				m.then(new RequiredCommandBuilder("method", ArgType.STRING, false).
+						setPossibleValues(vals).
+						run(c -> setScalingMethod(c, null, o, c.getArgument("method")))
+						);
+				t.then(new RequiredCommandBuilder("method", ArgType.STRING, false).
+						setPossibleValues(vals).
+						run(c -> setScalingMethod(c, c.getArgument("target"), o, c.getArgument("method")))
+						);
+				m.then(t);
+			}
 			LiteralCommandBuilder s = new LiteralCommandBuilder(name);
 			s.then(new LiteralCommandBuilder("limit").
 					then(new RequiredCommandBuilder("max", ArgType.FLOAT, Pair.of(o.getMin(), o.getMax())).
@@ -214,7 +242,8 @@ public class CommandCPM {
 									run(c -> setScalingEn(c, c.getArgument("target"), o, c.getArgument("enable")))
 									)
 							)
-					);
+					).
+			then(m);
 			l.add(s);
 		}
 		LiteralCommandBuilder all = new LiteralCommandBuilder("all");
@@ -229,53 +258,103 @@ public class CommandCPM {
 						)
 				);
 		l.add(all);
+		LiteralCommandBuilder reset = new LiteralCommandBuilder("reset");
+		reset.then(new RequiredCommandBuilder("target", ArgType.PLAYER).
+				run(c -> resetScaling(c))
+				);
+		l.add(reset);
 		return l;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void setScalingEnAll(CommandCtx<?> context, Object player, boolean en) {
+	private static void resetScaling(CommandCtx<?> c) {
+		Object player = c.getArgument("target");
+		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
+		PlayerData dt = h.getSNetH(player).cpm$getEncodedModelData();
+		dt.rescaleToTarget(h, player, null);
+		c.sendSuccess(new FormatText("commands.cpm.scalingReset", c.handler.toStringPlayer(player)));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void editScaling(CommandCtx<?> context, Object player, BiConsumer<ConfigEntry, BiFunction<Object, Object, IText>> cc) {
 		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
 		ConfigEntry e = ModConfig.getWorldConfig();
-		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
-		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
-		for(ScalingOptions o : ScalingOptions.VALUES) {
-			ConfigEntry ce = e.getEntry(o.name().toLowerCase(Locale.ROOT));
-			ce.setBoolean(ConfigKeys.ENABLED, en);
-			context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + o.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.enableX", en)));
+		Map<ScalingOptions, Float> sclMap1 = null;
+		Map<Object, Map<ScalingOptions, Float>> sclMap2 = null;
+		BiFunction<Object, Object, IText> op;
+		if(player != null) {
+			e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
+			PlayerData dt = h.getSNetH(player).cpm$getEncodedModelData();
+			sclMap1 = new EnumMap<>(dt.targetScale);
+			dt.resetScale(h, player);
+			op = (a, b) -> new FormatText("commands.cpm.setValueFor", a, b, context.handler.toStringPlayer(player));
+		} else {
+			e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
+			sclMap2 = new HashMap<>();
+			for (Object o : h.getOnlinePlayers()) {
+				PlayerData dt = h.getSNetH(o).cpm$getEncodedModelData();
+				sclMap2.put(o, new EnumMap<>(dt.targetScale));
+				dt.resetScale(h, o);
+			}
+			op = (a, b) -> new FormatText("commands.cpm.setValue", a, b);
 		}
-		context.sendSuccess(new FormatText("commands.cpm.requiresRelog"));
+		cc.accept(e, op);
+		if(player != null) {
+			PlayerData dt = h.getSNetH(player).cpm$getEncodedModelData();
+			dt.rescale(h, player, sclMap1, null);
+		} else {
+			sclMap2.forEach((o, sm) -> {
+				PlayerData dt = h.getSNetH(o).cpm$getEncodedModelData();
+				dt.rescale(h, o, sm, null);
+			});
+		}
 		ModConfig.getWorldConfig().save();
 	}
 
-	@SuppressWarnings("unchecked")
+	private static void setScalingMethod(CommandCtx<?> c, Object player, ScalingOptions sc, String method) {
+		editScaling(c, player, (e, v) -> {
+			e = e.getEntry(sc.name().toLowerCase(Locale.ROOT));
+			FormatText scl;
+			if (method.equals(SCALING_DEFAULT)) {
+				e.clearValue(ConfigKeys.SCALING_METHOD);
+				scl = new FormatText("commands.cpm.setScalingMethod.default");
+			} else {
+				e.setString(ConfigKeys.SCALING_METHOD, method);
+				scl = new FormatText("commands.cpm.setScalingMethod.method", method);
+			}
+			c.sendSuccess(v.apply(sc.asText(), scl));
+		});
+	}
+
+	private static void setScalingEnAll(CommandCtx<?> context, Object player, boolean en) {
+		editScaling(context, player, (e, v) -> {
+			for(ScalingOptions o : ScalingOptions.VALUES) {
+				ConfigEntry ce = e.getEntry(o.name().toLowerCase(Locale.ROOT));
+				ce.setBoolean(ConfigKeys.ENABLED, en);
+				context.sendSuccess(v.apply(o.asText(), new FormatText("label.cpm.enableX", en)));
+			}
+		});
+	}
+
 	private static void setScalingEn(CommandCtx<?> context, Object player, ScalingOptions sc, boolean en) {
-		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
-		ConfigEntry e = ModConfig.getWorldConfig();
-		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
-		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
-		e = e.getEntry(sc.name().toLowerCase(Locale.ROOT));
-		e.setBoolean(ConfigKeys.ENABLED, en);
-		ModConfig.getWorldConfig().save();
-		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.enableX", en)));
-		context.sendSuccess(new FormatText("commands.cpm.requiresRelog"));
+		editScaling(context, player, (e, v) -> {
+			e = e.getEntry(sc.name().toLowerCase(Locale.ROOT));
+			e.setBoolean(ConfigKeys.ENABLED, en);
+			context.sendSuccess(v.apply(sc.asText(), new FormatText("label.cpm.enableX", en)));
+		});
 	}
 
-	@SuppressWarnings("unchecked")
 	private static void setScalingLimit(CommandCtx<?> context, Object player, ScalingOptions sc, float min, float max) {
 		if(min > 1 || min > max || max < 1) {
 			context.fail(new FormatText("commands.cpm.numberOutOfBounds"));
 			return;
 		}
-		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
-		ConfigEntry e = ModConfig.getWorldConfig();
-		if(player != null)e = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS).getEntry(h.getID(player));
-		else e = e.getEntry(ConfigKeys.SCALING_SETTINGS);
-		e = e.getEntry(sc.name().toLowerCase(Locale.ROOT));
-		e.setFloat(ConfigKeys.MIN, min);
-		e.setFloat(ConfigKeys.MAX, max);
-		ModConfig.getWorldConfig().save();
-		context.sendSuccess(new FormatText("commands.cpm.setValue", new FormatText("label.cpm.tree.scaling." + sc.name().toLowerCase(Locale.ROOT)), new FormatText("label.cpm.rangeOf", min, max)));
-		context.sendSuccess(new FormatText("commands.cpm.requiresRelog"));
+		editScaling(context, player, (e, v) -> {
+			e = e.getEntry(sc.name().toLowerCase(Locale.ROOT));
+			e.setFloat(ConfigKeys.MIN, min);
+			e.setFloat(ConfigKeys.MAX, max);
+			context.sendSuccess(v.apply(sc.asText(), new FormatText("label.cpm.rangeOf", min, max)));
+		});
 	}
 
 	@SuppressWarnings("unchecked")

@@ -3,7 +3,6 @@ package com.tom.cpm.shared.animation.interpolator;
 import java.util.function.DoubleUnaryOperator;
 
 import com.tom.cpl.math.MathHelper;
-import com.tom.cpm.shared.animation.InterpolatorChannel;
 
 public class LinearLoopInterpolator implements Interpolator {
 	private float[] values;
@@ -15,8 +14,7 @@ public class LinearLoopInterpolator implements Interpolator {
 	}
 
 	@Override
-	public void init(float[] values, InterpolatorChannel channel) {
-		DoubleUnaryOperator setup = channel.createInterpolatorSetup();
+	public void init(float[] values, DoubleUnaryOperator setup) {
 		setup.applyAsDouble(values[(values.length - 2) % values.length]);
 		setup.applyAsDouble(values[(values.length - 1) % values.length]);
 		this.values = new float[values.length];

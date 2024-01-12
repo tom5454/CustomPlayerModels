@@ -218,25 +218,32 @@ public class ColorButton extends Button {
 					;
 		}
 
+		private float getV(Spinner s, float max) {
+			float v = s.getValue();
+			if (v < 0)s.setValue(0);
+			if (v > max)s.setValue(max);
+			return s.getValue();
+		}
+
 		private void updateColorRGB_spinner() {
-			sliderR.setValue(spinnerR.getValue() / 255f);
-			sliderG.setValue(spinnerG.getValue() / 255f);
-			sliderB.setValue(spinnerB.getValue() / 255f);
+			sliderR.setValue(getV(spinnerR, 255) / 255f);
+			sliderG.setValue(getV(spinnerG, 255) / 255f);
+			sliderB.setValue(getV(spinnerB, 255) / 255f);
 			hexField.setText(String.format("%1$06X", getColor()));
 			updateRGB();
 			updateDisplayText();
 		}
 
 		private void updateColorHSV_spinner() {
-			sliderH.setValue(spinnerH.getValue() / 360f);
-			sliderS.setValue(spinnerS.getValue() / 100f);
-			sliderV.setValue(spinnerV.getValue() / 100f);
+			sliderH.setValue(getV(spinnerH, 360) / 360f);
+			sliderS.setValue(getV(spinnerS, 100) / 100f);
+			sliderV.setValue(getV(spinnerV, 100) / 100f);
 			updateHSV();
 			updateDisplayText();
 		}
 
 		private void updateRGB() {
-			float[] hsv = RGBtoHSB((int) spinnerR.getValue(), (int) spinnerG.getValue(), (int) spinnerB.getValue(), null);
+			float[] hsv = RGBtoHSB((int) spinnerR.getValue(), (int) spinnerG.getValue(), (int) spinnerB.getValue());
 			sliderH.setValue(hsv[0]);
 			sliderS.setValue(hsv[1]);
 			sliderV.setValue(hsv[2]);
@@ -371,7 +378,7 @@ public class ColorButton extends Button {
 		int r = ((color & 0xff0000) >> 16);
 		int g = ((color & 0x00ff00) >> 8);
 		int b =  color & 0x0000ff;
-		float[] hsv = RGBtoHSB(r, g, b, null);
+		float[] hsv = RGBtoHSB(r, g, b);
 		return
 				((((int) (hsv[0] * 255)) & 0xff) << 16) |
 				((((int) (hsv[1] * 255)) & 0xff) <<  8) |
@@ -433,11 +440,9 @@ public class ColorButton extends Button {
 		return 0xff000000 | (r << 16) | (g << 8) | (b << 0);
 	}
 
-	public static float[] RGBtoHSB(int r, int g, int b, float[] hsbvals) {
+	public static float[] RGBtoHSB(int r, int g, int b) {
 		float hue, saturation, brightness;
-		if (hsbvals == null) {
-			hsbvals = new float[3];
-		}
+		float[] hsbvals = new float[3];
 		int cmax = (r > g) ? r : g;
 		if (b > cmax) cmax = b;
 		int cmin = (r < g) ? r : g;

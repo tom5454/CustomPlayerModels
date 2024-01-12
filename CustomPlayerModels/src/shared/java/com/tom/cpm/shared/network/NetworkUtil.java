@@ -10,7 +10,6 @@ import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.function.TriFunction;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.text.FormatText;
-import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.BuiltInSafetyProfiles;
@@ -102,15 +101,28 @@ public class NetworkUtil {
 		key.setValue(ce, (T) value);
 	}
 
-	public static Pair<Float, Float> getScalingLimits(ScalingOptions o, String id) {
+	public static ScalingSettings getScalingLimits(ScalingOptions o, String id) {
 		ConfigEntry e = ModConfig.getWorldConfig();
 		ConfigEntry pl = e.getEntry(ConfigKeys.PLAYER_SCALING_SETTINGS);
 		ConfigEntry g = e.getEntry(ConfigKeys.SCALING_SETTINGS);
-		if(!getValue(pl, g, id, o.name().toLowerCase(Locale.ROOT), ConfigKeys.ENABLED, ConfigEntry::getBoolean, o.getDefualtEnabled()))
-			return null;
-		float min = getValue(pl, g, id, o.name().toLowerCase(Locale.ROOT), ConfigKeys.MIN, ConfigEntry::getFloat, o.getMin());
-		float max = getValue(pl, g, id, o.name().toLowerCase(Locale.ROOT), ConfigKeys.MAX, ConfigEntry::getFloat, o.getMax());
-		return Pair.of(min, max);
+		String sId = o.name().toLowerCase(Locale.ROOT);
+		String scaler = getValue(pl, g, id, sId, ConfigKeys.SCALING_METHOD, ConfigEntry::getString, null);
+		if(!getValue(pl, g, id, sId, ConfigKeys.ENABLED, ConfigEntry::getBoolean, o.getDefualtEnabled()))
+			return new ScalingSettings(1, 1, scaler);
+		float min = getValue(pl, g, id, sId, ConfigKeys.MIN, ConfigEntry::getFloat, o.getMin());
+		float max = getValue(pl, g, id, sId, ConfigKeys.MAX, ConfigEntry::getFloat, o.getMax());
+		return new ScalingSettings(min, max, scaler);
+	}
+
+	public static class ScalingSettings {
+		public final float min, max;
+		public final String scaler;
+
+		public ScalingSettings(float min, float max, String scaler) {
+			this.min = min;
+			this.max = max;
+			this.scaler = scaler;
+		}
 	}
 
 	private static <T> T getValue(ConfigEntry pl, ConfigEntry g, String id, String opt, String key, TriFunction<ConfigEntry, String, T, T> getter, T def) {

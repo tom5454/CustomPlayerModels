@@ -25,6 +25,7 @@ import com.tom.cpl.util.Pair;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -75,7 +76,7 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 		super(gui);
 		UGWTContext.setContext(DomGlobal.window);
 		name = Java.getQueryVariable("name");
-		animHandler = new AnimationHandler(this::getSelectedDefinition);
+		animHandler = new AnimationHandler(this::getSelectedDefinition, AnimationMode.GUI);
 		if(name.startsWith("https:")) {
 			String url = name;
 			name = "Web";

@@ -8,7 +8,7 @@ import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorRenderer;
 import com.tom.cpm.shared.editor.EditorTool;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 
 public class ViewportPaintPanel extends ViewportPanel {
 	private int dragging;

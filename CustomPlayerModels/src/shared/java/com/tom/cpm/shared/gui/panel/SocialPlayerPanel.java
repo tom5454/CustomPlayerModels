@@ -20,6 +20,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -51,7 +52,7 @@ public class SocialPlayerPanel extends Panel implements IModelDisplayPanel {
 		setBounds(parentBox);
 		this.player = player;
 		this.cam = cam;
-		animHandler = new AnimationHandler(this::getSelectedDefinition);
+		animHandler = new AnimationHandler(this::getSelectedDefinition, AnimationMode.GUI);
 
 		String uuid = player.getUUID().toString();
 		int s = Math.min(w, h) - 30;

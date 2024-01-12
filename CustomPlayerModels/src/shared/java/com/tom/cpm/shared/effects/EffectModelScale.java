@@ -2,6 +2,7 @@ package com.tom.cpm.shared.effects;
 
 import java.io.IOException;
 
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
@@ -37,7 +38,7 @@ public class EffectModelScale implements IRenderEffect {
 	public void apply(ModelDefinition def) {
 		if(def.getScale() != null) {
 			ScaleData d = def.getScale();
-			d.setRenderScale(pos, rotation, scale);
+			d.setRenderScale(pos, new Rotation(rotation, false), scale);
 		}
 	}
 

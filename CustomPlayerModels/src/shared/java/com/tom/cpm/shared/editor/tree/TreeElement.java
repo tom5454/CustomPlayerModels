@@ -145,19 +145,6 @@ public abstract interface TreeElement {
 	public default void getTreeElements(Consumer<TreeElement> c) {}
 	public default void populatePopup(PopupMenu popup) {}
 	public default Tooltip getTooltip(IGui gui) { return null; }
-
-	public static enum VecType {
-		SIZE,
-		OFFSET,
-		ROTATION,
-		POSITION,
-		SCALE,
-		TEXTURE,
-		;
-		public static final VecType[] MOUSE_EDITOR_TYPES = {SIZE, OFFSET, ROTATION, POSITION};
-		public static final VecType[] MOUSE_EDITOR_ANIM_TYPES = {ROTATION, POSITION};
-	}
-
 	public default void setVec(Vec3f v, VecType object) {}
 	public default void setElemName(String name) {}
 	public default String getElemName() { return ""; }

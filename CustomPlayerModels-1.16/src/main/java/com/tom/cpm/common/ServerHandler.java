@@ -30,7 +30,7 @@ public class ServerHandler extends ServerHandlerBase {
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
 		netHandler.setGetOnlinePlayers(() -> ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers());
 		if(ModList.get().isLoaded("pehkui")) {
-			netHandler.setScaler(new PehkuiInterface());
+			netHandler.addScaler(new PehkuiInterface());
 		}
 	}
 

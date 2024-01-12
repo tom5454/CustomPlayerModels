@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -90,7 +91,7 @@ public class NetHandler<RL, P, NET> {
 	protected ToIntFunction<P> getPlayerId;
 	protected Consumer<IText> displayText;
 	protected Supplier<Collection<? extends P>> getOnlinePlayers;
-	protected Map<ScalingOptions, BiConsumer<P, Float>> scaleSetters = new EnumMap<>(ScalingOptions.class);
+	protected Map<ScalingOptions, Map<String, Scaler<P>>> scaleSetters = new EnumMap<>(ScalingOptions.class);
 	protected BiConsumer<? super P, ServerAnimationState> animStateUpdate;
 
 	private List<ConfigChangeRequest<?, ?>> recommendedSettingChanges = new ArrayList<>();
@@ -235,7 +236,7 @@ public class NetHandler<RL, P, NET> {
 	}
 
 	public void setScale(ScaleData scl) {
-		if(hasModClient() && serverCaps.contains(ServerCaps.SCALING)) {
+		if (hasModClient()) {
 			if(scl == null)scl = ScaleData.NULL;
 			NBTTagCompound nbt = new NBTTagCompound();
 			for(Entry<ScalingOptions, Float> e : scl.getScaling().entrySet()) {
@@ -243,18 +244,14 @@ public class NetHandler<RL, P, NET> {
 					nbt.setFloat(e.getKey().getNetKey(), e.getValue());
 				}
 			}
-			sendPacketToServer(new SetScaleC2S(nbt));
+			if (nbt.tagCount() > 0)
+				sendPacketToServer(new SetScaleC2S(nbt));
 		}
 	}
 
 	public void onRespawn(P pl) {
 		PlayerData pd = getSNetH(pl).cpm$getEncodedModelData();
-		for(Entry<ScalingOptions, BiConsumer<P, Float>> e : scaleSetters.entrySet()) {
-			float sc = pd.scale.getOrDefault(e.getKey(), 1F);
-			if(sc != 1 || sc != 0) {
-				e.getValue().accept(pl, sc);
-			}
-		}
+		pd.rescale(this, pl);
 	}
 
 	public void tick() {
@@ -530,8 +527,8 @@ public class NetHandler<RL, P, NET> {
 		}
 	}
 
-	public <K> void setScaler(ScalerInterface<P, K> intf) {
-		for(ScalingOptions opt : ScalingOptions.VALUES) {
+	public <K> void addScaler(ScalerInterface<P, K> intf) {
+		for (ScalingOptions opt : ScalingOptions.VALUES) {
 			K key;
 			try {
 				key = intf.toKey(opt);
@@ -540,17 +537,22 @@ public class NetHandler<RL, P, NET> {
 				continue;
 			}
 			if(key != null)
-				scaleSetters.put(opt, (p, v) -> intf.setScale(key, p, v));
+				scaleSetters.computeIfAbsent(opt, __ -> new LinkedHashMap<>()).put(intf.getMethodName(), (p, v) -> intf.setScale(key, p, v));
 		}
 	}
 
-	public BiConsumer<P, Float> setScaler(ScalingOptions key, BiConsumer<P, Float> value) {
-		return scaleSetters.put(key, value);
-	}
-
 	public static interface ScalerInterface<P, K> {
+		public static final String ATTRIBUTE = "attribute";
+		public static final String PEHKUI = "pehkui";
+
 		void setScale(K key, P player, float value);
 		K toKey(ScalingOptions opt);
+		String getMethodName();
+	}
+
+	@FunctionalInterface
+	public static interface Scaler<P> {
+		void applyScaling(P player, float value);
 	}
 
 	public boolean isSupported(ScalingOptions o) {
@@ -615,7 +617,7 @@ public class NetHandler<RL, P, NET> {
 		sendChat.accept(player, chatMsg);
 	}
 
-	public Map<ScalingOptions, BiConsumer<P, Float>> getScaleSetters() {
+	public Map<ScalingOptions, Map<String, Scaler<P>>> getScaleSetters() {
 		return scaleSetters;
 	}
 
@@ -629,6 +631,10 @@ public class NetHandler<RL, P, NET> {
 
 	public P getPlayerByUUID(UUID uuid) {
 		return getOnlinePlayers.get().stream().filter(p -> uuid.equals(getPlayerUUID.apply(p))).findFirst().orElse(null);
+	}
+
+	public List<P> getOnlinePlayers() {
+		return new ArrayList<>(getOnlinePlayers.get());
 	}
 
 	public Object getLoaderId(P player) {

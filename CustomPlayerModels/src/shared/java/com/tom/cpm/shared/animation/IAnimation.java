@@ -1,16 +1,22 @@
 package com.tom.cpm.shared.animation;
 
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
+import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 
 public interface IAnimation {
-	int getDuration();
-	int getPriority();
-	void animate(long millis, ModelDefinition def);
+	int getDuration(AnimationMode mode);
+	int getPriority(AnimationMode mode);
+	void animate(long millis, ModelDefinition def, AnimationMode mode);
 
-	default void prepare() {
+	default void prepare(AnimationMode mode) {
 	}
 
-	default boolean checkAndUpdateRemove() {
+	default boolean checkAndUpdateRemove(AnimationMode mode) {
+		return true;
+	}
+
+	default boolean canPlay(Player<?> player, AnimationMode mode) {
 		return true;
 	}
 }

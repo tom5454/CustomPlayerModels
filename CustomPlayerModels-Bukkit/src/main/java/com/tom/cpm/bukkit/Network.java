@@ -53,6 +53,7 @@ public class Network implements PluginMessageListener, Listener {
 				u.hunger = t.getFoodLevel() / 20f;
 				u.inMenu = t.getOpenInventory() != null;
 			});
+			netHandler.addScaler(new AttributeScaler());
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}

@@ -8,7 +8,7 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType.ModePanel;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 
 public class UVPanel extends ModePanel {
 	private Spinner spinnerU, spinnerV, spinnerT;

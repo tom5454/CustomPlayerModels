@@ -100,4 +100,9 @@ public class ClientApi implements IClientAPI {
 	public MessageSender registerPluginStateMessage(String messageId, BiConsumer<UUID, NBTTagCompound> handler) {
 		return null;
 	}
+
+	@Override
+	public int getAnimationPlaying(String name) {
+		return -1;
+	}
 }

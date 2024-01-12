@@ -43,6 +43,7 @@ public class ServerHandler {
 		netHandler.setGetOnlinePlayers(() -> MinecraftServer.getServer().getConfigurationManager().playerEntityList);
 		netHandler.setKickPlayer((p, m) -> p.playerNetServerHandler.kickPlayerFromServer(m.toString()));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
+		netHandler.addScaler(new AttributeScaler());
 	}
 
 	@SubscribeEvent

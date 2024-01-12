@@ -1,15 +1,26 @@
 package com.tom.cpm.shared.config;
 
 import java.util.Base64;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import com.google.common.collect.Iterables;
 
 import com.tom.cpl.config.ConfigEntry;
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpm.shared.animation.ServerAnimationState;
 import com.tom.cpm.shared.network.ModelEventType;
+import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.network.NetHandler.Scaler;
+import com.tom.cpm.shared.network.NetworkUtil;
+import com.tom.cpm.shared.network.NetworkUtil.ScalingSettings;
+import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.ScalingOptions;
 
 public class PlayerData {
@@ -17,6 +28,7 @@ public class PlayerData {
 	public byte[] data;
 	public boolean forced, save;
 	public final Map<ScalingOptions, Float> scale = new EnumMap<>(ScalingOptions.class);
+	public final Map<ScalingOptions, Float> targetScale = new EnumMap<>(ScalingOptions.class);
 	public final EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
 	public byte[] gestureData = new byte[0];
 	public Map<String, AnimationInfo> animNames = new HashMap<>();
@@ -88,6 +100,49 @@ public class PlayerData {
 
 		public boolean isCommandControlled() {
 			return (type & 16) != 0;
+		}
+	}
+
+	public <P> void rescale(NetHandler<?, P, ?> handler, P player) {
+		Map<ScalingOptions, Float> map = new EnumMap<>(scale);
+		scale.clear();
+		rescale(handler, player, map, null, false);
+	}
+
+	public <P> void rescaleToTarget(NetHandler<?, P, ?> handler, P player, List<ScalingOptions> blocked) {
+		rescale(handler, player, targetScale, blocked, true);
+	}
+
+	public <P> void resetScale(NetHandler<?, P, ?> handler, P player) {
+		rescale(handler, player, Collections.emptyMap(), null, true);
+	}
+
+	public <P> void rescale(NetHandler<?, P, ?> handler, P player, Map<ScalingOptions, Float> values, List<ScalingOptions> blocked) {
+		rescale(handler, player, values, blocked, false);
+	}
+
+	private <P> void rescale(NetHandler<?, P, ?> handler, P player, Map<ScalingOptions, Float> values, List<ScalingOptions> blocked, boolean force) {
+		String id = handler.getID(player);
+		for (Entry<ScalingOptions, Map<String, Scaler<P>>> e : handler.getScaleSetters().entrySet()) {
+			float oldV = scale.getOrDefault(e.getKey(), 1F);
+			float selNewV = values.getOrDefault(e.getKey(), 1F);
+			float newV = selNewV;
+			ScalingSettings l = NetworkUtil.getScalingLimits(e.getKey(), id);
+			String scaler = l.scaler;
+			if (scaler == null)scaler = Iterables.getLast(e.getValue().keySet());
+			if (ConfigKeys.SCALING_METHOD_OFF.equals(scaler))continue;
+			newV = newV == 0 ? 1F : MathHelper.clamp(newV, l.min, l.max);
+			if(newV != oldV || force) {
+				Map<String, Scaler<P>> scl = e.getValue();
+				Scaler<P> s = scl.get(scaler);
+				if (s != null) {
+					Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
+					s.applyScaling(player, newV);
+				}
+			}
+			if(blocked != null && newV != selNewV && selNewV != 0) {
+				blocked.add(e.getKey());
+			}
 		}
 	}
 }

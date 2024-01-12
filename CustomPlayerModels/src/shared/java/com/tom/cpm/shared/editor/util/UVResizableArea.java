@@ -17,6 +17,7 @@ import com.tom.cpm.shared.editor.elements.MultiSelector;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
+import com.tom.cpm.shared.editor.tree.VecType;
 
 public abstract class UVResizableArea {
 	protected final Editor editor;

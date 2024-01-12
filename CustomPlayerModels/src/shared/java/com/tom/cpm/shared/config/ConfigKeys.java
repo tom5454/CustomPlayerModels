@@ -34,10 +34,13 @@ public class ConfigKeys {
 	public static final String PLAYER_SCALING = "player_scaling";
 	public static final String SCALING_SETTINGS = "scaling_settings";
 	public static final String PLAYER_SCALING_SETTINGS = "player_scaling_settings";
+	public static final String SCALING_METHOD = "method";
+	public static final String SCALING_METHOD_OFF = "disable";
 	public static final String ENABLED = "enabled";
 	public static final String MIN = "min";
 	public static final String MAX = "max";
 	public static final String SHOW_LOADING_INFO = "showLoadingInfo";
+	public static final String SHOW_INGAME_WARNINGS = "showIngameWarnings";
 	public static final String ADV_SCALING_SETTINGS = "advScalingSettings";
 	public static final String EDITOR_DRAG_MOUSE_BUTTON = "editorDragMouseButton";
 	public static final String EDITOR_MENU_MOUSE_BUTTON = "editorMenuMouseButton";
@@ -60,6 +63,7 @@ public class ConfigKeys {
 	public static final String EDITOR_ESC_EXIT = "editorEscExit";
 	public static final String ENABLE_INVIS_GLOW = "enableInvisibleGlow";
 	public static final String MOUSE_WHEEL_SENSITIVITY = "mouseWheelSensitivity";
+	public static final String EDITOR_EXPERIMENTAL_EXPORT = "experimentalExport0614";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

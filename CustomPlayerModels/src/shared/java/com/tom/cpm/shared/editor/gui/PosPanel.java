@@ -20,7 +20,7 @@ import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.gui.popup.SkinSettingsPopup;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 
 public class PosPanel extends Panel {
 	private TabFocusHandler tabHandler;

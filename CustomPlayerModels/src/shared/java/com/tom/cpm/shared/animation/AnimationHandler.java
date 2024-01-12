@@ -5,23 +5,27 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
+import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 
 public class AnimationHandler {
 	private final Supplier<ModelDefinition> player;
+	private final AnimationMode mode;
 
 	private List<PlayingAnim> currentAnimations = new ArrayList<>();
 	private List<NextAnim> nextAnims = new ArrayList<>();
 
 	private Gesture currentGesture;
 
-	public AnimationHandler(Supplier<ModelDefinition> player) {
+	public AnimationHandler(Supplier<ModelDefinition> player, AnimationMode mode) {
 		this.player = player;
+		this.mode = mode;
 	}
 
 	public void animate(AnimationState state, long currentTime) {
 		boolean needsSort = false;
-		currentAnimations.removeIf(a -> nextAnims.stream().noneMatch(n -> n.animation == a.currentAnimation) && a.currentAnimation.checkAndUpdateRemove());
+		currentAnimations.removeIf(a -> nextAnims.stream().noneMatch(n -> n.animation == a.currentAnimation) && a.currentAnimation.checkAndUpdateRemove(mode));
 		for (NextAnim animation : nextAnims) {
 			boolean found = false;
 			for (int i = 0; i < currentAnimations.size(); i++) {
@@ -32,21 +36,21 @@ public class AnimationHandler {
 			}
 			if(!found) {
 				currentAnimations.add(new PlayingAnim(animation, currentTime,
-						currentGesture != null ? (currentGesture.animation.contains(animation.animation) ? currentGesture.isLoop : true) : true));
+						currentGesture != null ? (currentGesture.animation.contains(animation.animation) ? currentGesture.isLoop : true) : true, mode));
 				needsSort = true;
 			}
 		}
 		if(needsSort)
-			currentAnimations.sort(Comparator.comparingInt(e -> e.currentAnimation.getPriority()));
+			currentAnimations.sort(Comparator.comparingInt(e -> e.currentAnimation.getPriority(mode)));
 
 		player.get().resetAnimationPos();
 
 		for (PlayingAnim a : currentAnimations) {
 			if(!a.finished) {
 				long currentStep = (currentTime - a.currentStart);
-				a.currentAnimation.animate(a.getTime(state, currentStep), player.get());
+				a.currentAnimation.animate(a.getTime(state, currentStep), player.get(), mode);
 
-				if(!a.loop && currentStep > a.currentAnimation.getDuration()) {
+				if(!a.loop && currentStep > a.currentAnimation.getDuration(mode)) {
 					a.finished = true;
 				}
 			}
@@ -56,7 +60,8 @@ public class AnimationHandler {
 	}
 
 	public void addAnimations(List<? extends IAnimation> next, IPose pose) {
-		next.stream().map(a -> new NextAnim(a, pose)).forEach(nextAnims::add);
+		Player<?> pl = player.get().getPlayerObj();
+		next.stream().filter(a -> a.canPlay(pl, mode)).map(a -> new NextAnim(a, pose)).forEach(nextAnims::add);
 	}
 
 	public void setGesture(Gesture next) {
@@ -88,9 +93,9 @@ public class AnimationHandler {
 		private long currentStart;
 		private boolean loop, finished;
 
-		public PlayingAnim(NextAnim anim, long currentStart, boolean loop) {
+		public PlayingAnim(NextAnim anim, long currentStart, boolean loop, AnimationMode mode) {
 			this.currentAnimation = anim.animation;
-			currentAnimation.prepare();
+			currentAnimation.prepare(mode);
 			this.pose = anim.pose;
 			this.currentStart = currentStart;
 			this.loop = loop;

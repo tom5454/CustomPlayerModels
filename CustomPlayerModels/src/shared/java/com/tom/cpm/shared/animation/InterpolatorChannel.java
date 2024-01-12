@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 import com.tom.cpm.shared.util.RotationInterpolator;
 
-public enum InterpolatorChannel {
+public enum InterpolatorChannel implements InterpolationInfo {
 	POS_X(0),
 	POS_Y(1),
 	POS_Z(2),
@@ -42,6 +42,7 @@ public enum InterpolatorChannel {
 		this.defaultValue = defVal;
 	}
 
+	@Override
 	public DoubleUnaryOperator createInterpolatorSetup() {
 		return interpolatorSetupFactory.get();
 	}

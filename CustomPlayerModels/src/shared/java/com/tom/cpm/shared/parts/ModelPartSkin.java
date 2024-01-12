@@ -8,6 +8,7 @@ import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.skin.TextureProvider;
 
+@Deprecated
 public class ModelPartSkin implements IModelPart, IResolvedModelPart {
 	private TextureProvider image;
 
@@ -25,8 +26,8 @@ public class ModelPartSkin implements IModelPart, IResolvedModelPart {
 	}
 
 	@Override
-	public TextureProvider getSkin() {
-		return image;
+	public void preApply(ModelDefinition def) {
+		def.setTexture(TextureSheetType.SKIN, image);
 	}
 
 	@Override

@@ -72,10 +72,11 @@ public enum VanillaPose implements IPose {
 	IN_MENU,
 	INVISIBLE,
 	LIGHT(s -> Math.max(s.skyLight, s.blockLight) / 15f),
-	HEAD_ROTATION_YAW(s -> MathHelper.clamp(((s.yaw - s.bodyYaw) % 90 + 90) / 180f, 0, 1)),
+	HEAD_ROTATION_YAW(VanillaPose::calcHeadYaw),
 	HEAD_ROTATION_PITCH(s -> MathHelper.clamp((s.pitch + 90) / 180f, 0, 1)),
 	BRUSH_LEFT,
 	BRUSH_RIGHT,
+	CRAWLING,
 	;
 	private final String i18nKey;
 	private ToFloatFunction<AnimationState> stateGetter;
@@ -92,6 +93,21 @@ public enum VanillaPose implements IPose {
 			if(s.serverState.updated)return state.apply(s.serverState);
 			else return state.apply(s.localState);
 		};
+	}
+
+	private static float calcHeadYaw(AnimationState s) {
+		float yaw = s.yaw % 360;
+		if (yaw < 0)yaw += 360;
+		float bodyYaw = s.bodyYaw % 360;
+		if (bodyYaw < 0)bodyYaw += 360;
+		float d = Math.abs(yaw - bodyYaw);
+		if (d > 180.0f) {
+			d = 360.0f - d;
+		}
+		double cd = (bodyYaw - yaw + 360.0) % 360.0;
+		double ccd = (yaw - bodyYaw + 360.0) % 360.0;
+		if(cd < ccd)d = -d;
+		return MathHelper.clamp((d + 90) / 180f, 0, 1);
 	}
 
 	private VanillaPose(ToFloatFunction<AnimationState> stateGetter) {

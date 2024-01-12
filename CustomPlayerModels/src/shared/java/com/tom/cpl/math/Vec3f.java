@@ -65,6 +65,10 @@ public class Vec3f {
 		return new Vec3f(x - v.x, y - v.y, z - v.z);
 	}
 
+	public Vec3f sub(float v) {
+		return new Vec3f(x - v, y - v, z - v);
+	}
+
 	public float getYaw() {
 		float norm;
 
@@ -148,5 +152,9 @@ public class Vec3f {
 		x *= invLength;
 		y *= invLength;
 		z *= invLength;
+	}
+
+	public boolean epsilon(float e) {
+		return Math.abs(x) < e && Math.abs(y) < e && Math.abs(z) < e;
 	}
 }

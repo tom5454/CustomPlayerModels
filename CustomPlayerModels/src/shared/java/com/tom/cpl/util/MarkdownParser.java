@@ -90,6 +90,14 @@ public class MarkdownParser {
 						t.add(ln.trim());
 					}
 					lines.add(new TableLine(t));
+				} else if(ln.startsWith(">")) {//Quote
+					parseLine(sb, 1, prefix);
+					List<String> t = new ArrayList<>();
+					t.add(lnt);
+					while((ln = rd.readLine()) != null && ln.startsWith(">")) {
+						t.add(ln.trim());
+					}
+					lines.add(new QuoteLine(t));
 				} else if(lnt.isEmpty()) {//Paragraph break
 					parseLine(sb, 1, prefix);
 					lines.add(new EmptyLine(12));
@@ -122,6 +130,9 @@ public class MarkdownParser {
 					indC = indC / 2;
 					prefix.add(new ListComponent(indC, null));
 					sb.append(lnt.substring(1).trim());
+					if(ln.endsWith("  ")) {
+						parseLine(sb, 1, prefix);
+					}
 				} else if(LIST.matcher(lnt).matches()) {//Numbered list
 					parseLine(sb, 1, prefix);
 					int indC = 0;
@@ -132,6 +143,9 @@ public class MarkdownParser {
 					String num = m.group(1);
 					prefix.add(new ListComponent(indC, m.group(1) + ". "));
 					sb.append(lnt.substring(num.length() + 1).trim());
+					if(ln.endsWith("  ")) {
+						parseLine(sb, 1, prefix);
+					}
 				} else if(ln.endsWith("  ")) {//Line break
 					sb.append(lnt);
 					parseLine(sb, 1, prefix);
@@ -390,6 +404,114 @@ public class MarkdownParser {
 				});
 				cpy.setBounds(new Box(bounds.w - 52, 3, 50, 12));
 				addElement(cpy);
+			}
+		}
+	}
+
+	private static class QuoteLine implements Line {
+		private Line[] lines;
+		private QuoteNote header;
+
+		public QuoteLine(List<String> t) {
+			try {
+				String header = t.get(0);
+				if (header.startsWith("> [!")) {
+					int i = header.indexOf('!');
+					header = header.substring(i + 1);
+					i = header.indexOf(']');
+					header = header.substring(0, i);
+					t.remove(0);
+					for (QuoteNote q : QuoteNote.values()) {
+						if (q.name().equalsIgnoreCase(header)) {
+							this.header = q;
+							break;
+						}
+					}
+				}
+				lines = new ComponentLine[t.size()];
+
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < t.size(); i++) {
+					String txt = t.get(i);
+					sb.append(txt, 2, txt.length());
+					this.lines[i] = parseLine(sb, 1, null, null);
+				}
+			} catch (Exception e) {
+				Log.warn("Error parsing markdown quote", e);
+				this.lines = null;
+			}
+		}
+
+		@Override
+		public List<GuiElement> toElements(MarkdownRenderer mdr, Cursor cursor) {
+			if (lines == null) {
+				Label l = new Label(mdr.getGui(), "Error parsing quote in Markdown");
+				l.setBounds(cursor.bounds(0, 0));
+				l.setColor(0xffff0000);
+				cursor.y += 10;
+				return Arrays.asList(l);
+			} else {
+				return Arrays.asList(new QuoteBlock(mdr, cursor));
+			}
+		}
+
+		private class QuoteBlock extends Panel {
+
+			public QuoteBlock(MarkdownRenderer mdr, Cursor cursor) {
+				super(mdr.getGui());
+
+				int mw = cursor.maxWidth - 1;
+				Panel p = new Panel(gui);
+				Cursor c = new Cursor();
+				c.maxWidth = mw - 10;
+				for (int j = 0; j < lines.length; j++) {
+					Line line = lines[j];
+					p.getElements().addAll(line.toElements(mdr, c));
+				}
+				int h = header != null ? 21 : 0;
+				p.setBounds(new Box(6, h, mw - 10, c.y));
+				addElement(p);
+				setBounds(cursor.bounds(mw + 1, c.y + h + 2));
+				cursor.y += c.y + h + 10;
+			}
+
+			@Override
+			public void draw(MouseEvent event, float partialTicks) {
+				gui.pushMatrix();
+				gui.setPosOffset(getBounds());
+				gui.setupCut();
+				Box bounds = getBounds();
+				int rgb = gui.getColors().popup_background;
+				if (header != null) {
+					rgb = header.color.apply(gui);
+					gui.drawBox(1, 1, 2, bounds.h - 1, gui.getColors().popup_background);
+					String note = gui.i18nFormat("label.cpm.md.quote." + header.name().toLowerCase(Locale.ROOT));
+					gui.drawTexture(4, 2, 16, 16, header.ordinal() * 16, 96, "editor", rgb);
+					gui.drawText(25, 7, note, gui.getColors().popup_background);
+					gui.drawText(24, 6, note, rgb);
+				}
+				gui.drawBox(0, 0, 2, bounds.h - 2, rgb);
+
+				for (GuiElement guiElement : elements) {
+					if(guiElement.isVisible())
+						guiElement.draw(event.offset(bounds), partialTicks);
+				}
+				gui.popMatrix();
+				gui.setupCut();
+			}
+		}
+
+		public static enum QuoteNote {
+			NOTE(g -> 0xFF2f81f7),
+			TIP(g -> 0xFF3fb950),
+			IMPORTANT(g -> 0xFFa371f7),
+			WARNING(g -> 0xFFd29922),
+			CAUTION(g -> 0xFFf85149),
+			;
+			private Function<IGui, Integer> color;
+
+			private QuoteNote(Function<IGui, Integer> color) {
+				this.color = color;
 			}
 		}
 	}

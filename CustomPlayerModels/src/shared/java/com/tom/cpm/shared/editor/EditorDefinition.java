@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.tom.cpl.math.MatrixStack;
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.TriangleBoundingBox;
 import com.tom.cpl.math.TriangleBoundingBox.BoxBuilder;
 import com.tom.cpl.math.Vec3f;
@@ -57,8 +58,8 @@ public class EditorDefinition extends ModelDefinition implements IExtraRenderDef
 			}
 
 			@Override
-			public Vec3f getRRotation() {
-				return editor.scalingElem.rotation;
+			public Rotation getRRotation() {
+				return new Rotation(editor.scalingElem.rotation, true);
 			}
 
 			@Override

@@ -347,6 +347,20 @@ public class ClientApi extends SharedApi implements IClientAPI {
 		return playAnimation(name, -1);
 	}
 
+	@Override
+	public int getAnimationPlaying(String name) {
+		Player<?> pl = MinecraftClientAccess.get().getCurrentClientPlayer();
+		ModelDefinition def = pl.getModelDefinition();
+		if (def == null)return -1;
+		CustomPose pose = def.getAnimations().getCustomPoses().get(name);
+		if (pose == null) {
+			Gesture g = def.getAnimations().getGestures().get(name);
+			if (g == null)return -1;
+			return MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), g);
+		}
+		return pl.currentPose == pose ? 1 : 0;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <P> MessageSender registerPluginMessage(Class<P> clazz, String messageId, BiConsumer<P, NBTTagCompound> handler, boolean broadcastToTracking) {

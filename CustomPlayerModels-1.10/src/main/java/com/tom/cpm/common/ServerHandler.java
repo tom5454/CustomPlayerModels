@@ -47,8 +47,9 @@ public class ServerHandler {
 		netHandler.setGetOnlinePlayers(() -> FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerList());
 		netHandler.setKickPlayer((p, m) -> p.connection.kickPlayerFromServer(m.toString()));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
+		netHandler.addScaler(new AttributeScaler());
 		if(Loader.isModLoaded("chiseled_me")) {
-			netHandler.setScaler(new ChiseledMeScaler());
+			netHandler.addScaler(new ChiseledMeScaler());
 		}
 	}
 

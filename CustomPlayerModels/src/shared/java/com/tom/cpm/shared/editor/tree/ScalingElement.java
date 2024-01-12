@@ -95,7 +95,7 @@ public class ScalingElement implements TreeElement {
 			String tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling." + name);
 			if(opt != ScalingOptions.ENTITY)tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling.serverRequired", tooltip);
 			if(!opt.getDefualtEnabled())tooltip = gui.i18nFormat("tooltip.cpm.tree.scaling.disabledByDefault", tooltip, name);
-			return new Tooltip(gui.getFrame(), tooltip);
+			return new Tooltip(gui.getFrame(), tooltip, "Scaling");
 		}
 	}
 

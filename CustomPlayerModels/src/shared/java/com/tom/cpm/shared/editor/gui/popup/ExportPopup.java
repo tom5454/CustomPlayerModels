@@ -31,6 +31,7 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Exporter;
 import com.tom.cpm.shared.editor.gui.EditorGui;
+import com.tom.cpm.shared.editor.template.TemplateExporter;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.ModelDescription.CopyProtection;
 import com.tom.cpm.shared.gui.SelectSkinPopup;
@@ -409,7 +410,7 @@ public abstract class ExportPopup extends PopupPanel {
 			editor.description.desc = descField.getText();
 			editor.markDirty();
 
-			Exporter.exportTemplate(editor, gui, editor.description,
+			TemplateExporter.exportTemplate(editor, gui, editor.description,
 					t -> editorGui.openPopup(new CreateGistPopup(editorGui, gui, "template_export", t,
 							l -> editorGui.openPopup(new ExportStringResultPopup(editorGui, "template", l.toString()))
 							)));

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.math.MatrixStack;
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec4f;
@@ -361,9 +362,9 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		public void transform(MatrixStack stack, PartPosition pos) {
 			if(pos != null) {
 				Vec3f p = pos.getRPos();
-				Vec3f r = pos.getRRotation();
+				Rotation r = pos.getRRotation();
 				Vec3f s = pos.getRScale();
-				RedirectRenderer.translateRotate(p.x, p.y, p.z, r.x, r.y, r.z, stack);
+				RedirectRenderer.translateRotate(p.x, p.y, p.z, r, stack);
 				float sx = s.x;
 				float sy = s.y;
 				float sz = s.z;
@@ -484,7 +485,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 							}
 							if(!skipTransform) {
 								mngr.posSet.set(tp, elem.getPos());
-								mngr.rotSet.set(tp, elem.getRot());
+								mngr.rotSet.set(tp, elem.getRot().asVec3f(false));
 							}
 							if(elem.doDisplay() && doRender && holder.enableParentRendering(part)) {
 								holder.copyModel(tp, parent);
@@ -499,7 +500,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						if(!skipTransform) {
 							RootModelElement elem = elems.getMainRoot();
 							mngr.posSet.set(tp, elem.getPos());
-							mngr.rotSet.set(tp, elem.getRot());
+							mngr.rotSet.set(tp, elem.getRot().asVec3f(false));
 						}
 					} else {
 						holder.copyModel(tp, parent);
@@ -513,33 +514,23 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		}
 
 		public default void translateRotate(RenderedCube rc, MatrixStack matrixStackIn) {
-			translateRotate(rc.pos.x, rc.pos.y, rc.pos.z, rc.rotation.x, rc.rotation.y, rc.rotation.z, matrixStackIn);
+			translateRotate(rc.pos.x, rc.pos.y, rc.pos.z, rc.rotation, matrixStackIn);
 			if(rc.renderScale.x != 1 || rc.renderScale.y != 1 || rc.renderScale.z != 1 ||
 					rc.renderScale.x > 0 || rc.renderScale.y > 0 || rc.renderScale.z > 0) {
 				matrixStackIn.scale(Math.max(rc.renderScale.x, 0.01f), Math.max(rc.renderScale.y, 0.01f), Math.max(rc.renderScale.z, 0.01f));
 			}
 		}
 
-		public static void translateRotate(float px, float py, float pz, float rx, float ry, float rz, MatrixStack matrixStackIn) {
+		public static void translateRotate(float px, float py, float pz, Rotation rot, MatrixStack matrixStackIn) {
 			matrixStackIn.translate(px / 16.0F, py / 16.0F, pz / 16.0F);
-			if (rz != 0.0F) {
-				matrixStackIn.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rz));
-			}
-
-			if (ry != 0.0F) {
-				matrixStackIn.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(ry));
-			}
-
-			if (rx != 0.0F) {
-				matrixStackIn.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rx));
-			}
+			matrixStackIn.rotate(rot.asQ());
 		}
 
 		public default void translateRotate(MatrixStack matrixStackIn) {
 			RedirectHolder<?, ?, ?, P> holder = getHolder();
 			ModelRenderManager<?, ?, P, ?> m = holder.mngr;
 			P tp = (P) this;
-			translateRotate(m.px.apply(tp), m.py.apply(tp), m.pz.apply(tp), m.rx.apply(tp), m.ry.apply(tp), m.rz.apply(tp), matrixStackIn);
+			translateRotate(m.px.apply(tp), m.py.apply(tp), m.pz.apply(tp), new Rotation(m.rx.apply(tp), m.ry.apply(tp), m.rz.apply(tp), false), matrixStackIn);
 		}
 
 		public default void render(RenderedCube elem, MatrixStack matrixStackIn, VBuffers buf, float red, float green, float blue, float alpha, boolean doRenderRoot, boolean doRenderElems) {

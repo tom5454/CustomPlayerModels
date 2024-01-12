@@ -22,6 +22,7 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.project.JsonMap;
 import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.editor.util.UVResizableArea;
 import com.tom.cpm.shared.model.TextureSheetType;
 

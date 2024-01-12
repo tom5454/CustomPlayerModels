@@ -91,7 +91,7 @@ public abstract class Player<P> {
 	}
 
 	public AnimationHandler getAnimationHandler(AnimationMode mode) {
-		return animHandler.computeIfAbsent(mode, k -> new AnimationHandler(this::getModelDefinition));
+		return animHandler.computeIfAbsent(mode, k -> new AnimationHandler(this::getModelDefinition, k));
 	}
 
 	public static boolean isEnableRendering() {

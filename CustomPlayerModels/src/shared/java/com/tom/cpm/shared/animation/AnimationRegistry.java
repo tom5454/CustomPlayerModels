@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -21,7 +20,6 @@ public class AnimationRegistry {
 	private Map<String, Gesture> gestures = new HashMap<>();
 	private Map<String, CustomPose> customPoses = new HashMap<>();
 	private List<CopyTransform> copyTransforms = new ArrayList<>();
-	private List<Gesture> stageGestures = new ArrayList<>();
 	private int blankGesture;
 	private int poseResetId;
 	private String profileId;
@@ -52,10 +50,6 @@ public class AnimationRegistry {
 	}
 
 	public void register(Gesture gesture) {
-		if(gesture.getType().isStaged()) {
-			stageGestures.add(gesture);
-			return;
-		}
 		gestures.put(gesture.name, gesture);
 		if(gesture.getType().isLayer())
 			layerToId.put(gesture, layerToId.size() + 2);
@@ -106,9 +100,9 @@ public class AnimationRegistry {
 		animatedTextures.add(tex);
 	}
 
-	public void tickAnimated(long time) {
+	public void tickAnimated(long time, boolean inGui) {
 		for (int i = 0; i < animatedTextures.size(); i++) {
-			animatedTextures.get(i).update(time);
+			animatedTextures.get(i).update(time, inGui);
 		}
 	}
 
@@ -142,46 +136,5 @@ public class AnimationRegistry {
 
 	public String getProfileId() {
 		return profileId;
-	}
-
-	public void finishLoading() {
-		Map<String, StagedAnimation> anims = new HashMap<>();
-		for(Gesture g : stageGestures) {
-			String[] nm = g.name.split(":", 2);
-			if(nm.length == 2) {
-				IPose pose = null;
-				StagedAnimation san = anims.computeIfAbsent(g.name, k -> new StagedAnimation());
-				if(g.type == AnimationType.SETUP)g.animation.forEach(san::addPre);
-				else if(g.type == AnimationType.FINISH)g.animation.forEach(san::addPost);
-				switch (nm[0]) {
-				case "p":
-					for(VanillaPose p : VanillaPose.VALUES) {
-						if(nm[1].equals(p.name().toLowerCase(Locale.ROOT))) {
-							pose = p;
-							break;
-						}
-					}
-					//Fall through
-				case "c":
-					if(pose == null)pose = customPoses.get(nm[1]);
-					animations.computeIfPresent(pose, (p, an) -> {
-						an.forEach(san::addPlay);
-						return san.getAll();
-					});
-					break;
-
-				case "g":
-					gestures.computeIfPresent(nm[1], (k, gs) -> {
-						gs.animation.forEach(san::addPlay);
-						gs.animation = san.getAll();
-						return gs;
-					});
-					break;
-
-				default:
-					break;
-				}
-			}
-		}
 	}
 }

@@ -8,6 +8,7 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 
+@Deprecated
 public class ModelPartDupRoot implements IModelPart, IResolvedModelPart {
 	private int id;
 	private PlayerModelParts type;
@@ -47,7 +48,7 @@ public class ModelPartDupRoot implements IModelPart, IResolvedModelPart {
 				RootModelElement e = def.addRoot(id, type);
 				e.posN = rc.pos;
 				e.rotN = rc.rotation;
-				e.hidden = rc.hidden;
+				e.setHidden(rc.isHidden());
 				if(rc.children != null) {
 					e.children.addAll(rc.children);
 					rc.children.forEach(p -> p.setParent(e));

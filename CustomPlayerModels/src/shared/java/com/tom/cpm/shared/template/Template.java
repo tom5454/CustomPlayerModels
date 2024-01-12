@@ -101,7 +101,7 @@ public class Template {
 		rc = Cube.resolveCubes(cubes);
 		for (RenderedCube renderedCube : rc) {
 			Map<String, Object> cd = cubeDataList.get(renderedCube.getId());
-			renderedCube.hidden = (boolean) cd.get("hidden");
+			renderedCube.setHidden((boolean) cd.get("hidden"));
 			renderedCube.recolor = (boolean) cd.get("recolor");
 			renderedCube.glow = (boolean) cd.get("glow");
 			templateArgs.values().forEach(a -> a.apply(renderedCube));

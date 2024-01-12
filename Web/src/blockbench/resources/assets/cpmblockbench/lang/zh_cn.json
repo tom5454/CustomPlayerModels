@@ -32,7 +32,7 @@
   "bb-label.autoFix.regroup": "重组",
   "bb-label.convertedFromOld": "该项目是使用早期版本的插件制作的。\\插件数据已转换为新格式。",
   "bb-label.error.oldConvertFail": "无法转换旧项目数据",
-  "bb-label.warn.nonConvertedPartNotSupported": "Root部件 %s 未隐藏，将转换块。",
+  "bb-label.warn.nonConvertedPartNotSupported": "Root 模型 %s 未隐藏，将转换块。",
   "bb-label.warn.coloredCubeNotSupported": "不支持彩色块：%s",
   "bb-label.warn.copyTransformNotVis": "具有复制变换的元素无法正确显示",
   "bb-label.warn.multiple": "%s（%s 警告）",

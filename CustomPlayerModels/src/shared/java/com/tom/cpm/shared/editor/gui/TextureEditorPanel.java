@@ -21,7 +21,7 @@ import com.tom.cpm.shared.editor.anim.AnimatedTex;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.editor.util.UVResizableArea;
 
 public class TextureEditorPanel extends GuiElement {
@@ -78,15 +78,13 @@ public class TextureEditorPanel extends GuiElement {
 			switch (editor.drawMode.get()) {
 			case MOVE_UV:
 			{
-				if(p1 != null) {
-					TreeElement e = getElementUnderMouse(event);
-					if(dragging && moveStart != null)e = editor.getSelectedElement();
-					if(e != null) {
-						Box b = e.getTextureBox();
-						if(b != null) {
-							Vec4f s = UVResizableArea.expandBox(b, zoom);
-							gui.drawRectangle(s.x * zoom + offX, s.y * zoom + offY, s.z * zoom, s.w * zoom, 0xff000000);
-						}
+				TreeElement e = getElementUnderMouse(event);
+				if(dragging && moveStart != null)e = editor.getSelectedElement();
+				if(e != null) {
+					Box b = e.getTextureBox();
+					if(b != null) {
+						Vec4f s = UVResizableArea.expandBox(b, zoom);
+						gui.drawRectangle(s.x * zoom + offX, s.y * zoom + offY, s.z * zoom, s.w * zoom, 0xff000000);
 					}
 				}
 			}
@@ -162,13 +160,14 @@ public class TextureEditorPanel extends GuiElement {
 			} else if(event.btn == 0) {
 				int px = (int) ((event.x - offX - bounds.x) / zoom);
 				int py = (int) ((event.y - offY - bounds.y) / zoom);
-				if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
-					switch (editor.drawMode.get()) {
-					case PEN:
-					case RUBBER:
-					case FILL:
-					case COLOR_PICKER:
-					{
+
+				switch (editor.drawMode.get()) {
+				case PEN:
+				case RUBBER:
+				case FILL:
+				case COLOR_PICKER:
+				{
+					if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
 						if(gui.isCtrlDown() || editor.drawMode.get() == EditorTool.COLOR_PICKER) {
 							editor.penColor = provider.getImage().getRGB(px, py);
 							editor.setPenColor.accept(editor.penColor);
@@ -176,27 +175,27 @@ public class TextureEditorPanel extends GuiElement {
 						} else
 							editor.drawPixel(px, py, false);
 					}
-					break;
+				}
+				break;
 
-					case MOVE_UV:
-					{
-						dragX = px;
-						dragY = py;
-						TreeElement me = getElementUnderMouse(event);
-						if(me != null) {
-							me.onClick(gui, editor, event);
-							moveStart = new Vec2i();
-							Vec3f uv = me.getVec(VecType.TEXTURE);
-							moveStart.x = (int) uv.x;
-							moveStart.y = (int) uv.y;
-						} else editor.selectedElement = null;
-						editor.updateGui();
-					}
-					break;
+				case MOVE_UV:
+				{
+					dragX = px;
+					dragY = py;
+					TreeElement me = getElementUnderMouse(event);
+					if(me != null) {
+						me.onClick(gui, editor, event);
+						moveStart = new Vec2i();
+						Vec3f uv = me.getVec(VecType.TEXTURE);
+						moveStart.x = (int) uv.x;
+						moveStart.y = (int) uv.y;
+					} else editor.selectedElement = null;
+					editor.updateGui();
+				}
+				break;
 
-					default:
-						break;
-					}
+				default:
+					break;
 				}
 			}
 			event.consume();
@@ -220,33 +219,33 @@ public class TextureEditorPanel extends GuiElement {
 				} else if(btn == 0) {
 					int px = (int) ((x - offX - bounds.x) / zoom);
 					int py = (int) ((y - offY - bounds.y) / zoom);
-					if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight()) {
-						switch (editor.drawMode.get()) {
-						case PEN:
-						case RUBBER:
-						case FILL:
-							editor.drawPixel(px, py, false);
-							break;
 
-						case MOVE_UV:
-						{
-							TreeElement me = editor.selectedElement;
-							if(me != null && moveStart != null) {
-								int xoff = px - dragX;
-								int yoff = py - dragY;
-								Vec3f uv = me.getVec(VecType.TEXTURE);
-								if(Math.abs(xoff) >= uv.z)dragX = px;
-								if(Math.abs(yoff) >= uv.z)dragY = py;
-								uv.x = MathHelper.clamp(uv.x + xoff / (int) uv.z, 0, provider.provider.size.x);
-								uv.y = MathHelper.clamp(uv.y + yoff / (int) uv.z, 0, provider.provider.size.y);
-								me.setVecTemp(VecType.TEXTURE, uv);
-							}
-						}
+					switch (editor.drawMode.get()) {
+					case PEN:
+					case RUBBER:
+					case FILL:
+						if(px >= 0 && py >= 0 && px < provider.getImage().getWidth() && py < provider.getImage().getHeight())
+							editor.drawPixel(px, py, false);
 						break;
 
-						default:
-							break;
+					case MOVE_UV:
+					{
+						TreeElement me = editor.selectedElement;
+						if(me != null && moveStart != null) {
+							int xoff = px - dragX;
+							int yoff = py - dragY;
+							Vec3f uv = me.getVec(VecType.TEXTURE);
+							if(Math.abs(xoff) >= uv.z)dragX = px;
+							if(Math.abs(yoff) >= uv.z)dragY = py;
+							uv.x = MathHelper.clamp(uv.x + xoff / (int) uv.z, 0, provider.provider.size.x);
+							uv.y = MathHelper.clamp(uv.y + yoff / (int) uv.z, 0, provider.provider.size.y);
+							me.setVecTemp(VecType.TEXTURE, uv);
 						}
+					}
+					break;
+
+					default:
+						break;
 					}
 				}
 

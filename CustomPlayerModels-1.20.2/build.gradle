@@ -3,8 +3,8 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.5'
-    id 'net.neoforged.gradle.mixin' version '7.0.5'
+    id 'net.neoforged.gradle.userdev' version '7.0.74'
+    id 'net.neoforged.gradle.mixin' version '7.0.74'
 }
 
 version = mod_version
@@ -12,6 +12,13 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 base {
@@ -77,7 +84,6 @@ sourceSets {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
 			srcDir "src/platform-shared/java"
-			exclude "com/tom/cpm/common/PehkuiInterface.java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
@@ -122,7 +128,8 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     compileOnly files("of.jar")
-    compileOnly files("vc.jar")
+    compileOnly 'curse.maven:vivecraft-667903:4941632'
+    compileOnly 'com.github.Virtuoel:Pehkui:3.7.12-1.20.2-neoforge'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

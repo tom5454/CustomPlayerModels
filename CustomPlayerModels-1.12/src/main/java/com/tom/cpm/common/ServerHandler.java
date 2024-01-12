@@ -46,10 +46,12 @@ public class ServerHandler {
 		netHandler.setGetOnlinePlayers(() -> FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers());
 		netHandler.setKickPlayer((p, m) -> p.connection.disconnect(m.remap()));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
+		netHandler.addScaler(new AttributeScaler());
 		if(Loader.isModLoaded("chiseled_me")) {
-			netHandler.setScaler(new ChiseledMeScaler());
-		} else if(Loader.isModLoaded("artemislib")) {
-			netHandler.setScaler(new ArtemisScaler());
+			netHandler.addScaler(new ChiseledMeScaler());
+		}
+		if(Loader.isModLoaded("artemislib")) {
+			netHandler.addScaler(new ArtemisScaler());
 		}
 	}
 

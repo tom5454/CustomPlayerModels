@@ -218,7 +218,7 @@ public class BlockBenchFS implements IFS {
 					return Promise.resolve(d.canceled ? null : new File(d.filePaths[0]));
 				});
 			} else if(ff.getExt() != null) {
-				dp.filters = new FileFilterJS[] {FileFilterJS.make(fc.getDesc(), ff.getExt())};
+				dp.filters = new FileFilterJS[] {FileFilterJS.make(fc.getDescription(), ff.getExt())};
 			}
 		}
 		if(fc.isSaveDialog()) {

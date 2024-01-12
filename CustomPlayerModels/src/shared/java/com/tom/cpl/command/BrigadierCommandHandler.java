@@ -25,6 +25,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Pair;
+import com.tom.cpm.shared.util.Log;
 
 public abstract class BrigadierCommandHandler<S> implements CommandHandler<S> {
 	private static final DynamicCommandExceptionType ERROR_FAILED = new DynamicCommandExceptionType(a -> new FormatText("commands.cpm.genericFail", a).remap());
@@ -69,7 +70,12 @@ public abstract class BrigadierCommandHandler<S> implements CommandHandler<S> {
 			Consumer<CommandCtx<?>> cmd = b.getFunc();
 			a.executes(c -> {
 				CommandCtx<S> ctx = new WrappedCtx(c, args);
-				cmd.accept(ctx);
+				try {
+					cmd.accept(ctx);
+				} catch (Exception e) {
+					Log.error("Command error, input: /" + c.getInput(), e);
+					throw ERROR_FAILED.create("Unknown error");
+				}
 				if(ctx.getFail() != null)throw ERROR_FAILED.create(ctx.getFail());
 				return ctx.getResult();
 			});

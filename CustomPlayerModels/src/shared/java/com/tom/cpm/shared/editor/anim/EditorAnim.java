@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IAnimation;
@@ -25,7 +26,7 @@ import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
@@ -100,7 +101,7 @@ public class EditorAnim implements IAnimation {
 		for (int component = 0; component < components.size(); component++) {
 			for (InterpolatorChannel channel : InterpolatorChannel.VALUES) {
 				Interpolator i = intType.create();
-				i.init(AnimFrame.toArray(this, components.get(component), channel), channel);
+				i.init(AnimFrame.toArray(this, components.get(component), channel), channel.createInterpolatorSetup());
 				psfs[component][channel.channelID()] = i;
 			}
 		}
@@ -117,7 +118,7 @@ public class EditorAnim implements IAnimation {
 	}
 
 	@Override
-	public void animate(long millis, ModelDefinition def) {
+	public void animate(long millis, ModelDefinition def, AnimationMode mode) {
 		if(components == null || psfs == null)calculateSplines();
 		float step;
 		boolean remap = false;
@@ -441,12 +442,12 @@ public class EditorAnim implements IAnimation {
 	}
 
 	@Override
-	public int getPriority() {
+	public int getPriority(AnimationMode mode) {
 		return priority;
 	}
 
 	@Override
-	public int getDuration() {
+	public int getDuration(AnimationMode mode) {
 		return duration;
 	}
 

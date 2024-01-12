@@ -6,6 +6,7 @@ import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 
+@Deprecated
 public class ModelPartSkinLink extends ModelPartLink {
 
 	public ModelPartSkinLink(IOHelper in, ModelDefinition def) throws IOException {

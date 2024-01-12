@@ -1,8 +1,6 @@
 package com.tom.cpl.util;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,15 +32,11 @@ public class EmbeddedLocalization {
 	}
 
 	public void setFallback(String fallback) {
-		this.fallback = decode(fallback);
+		this.fallback = fallback;
 	}
 
 	public void addLocale(String loc, String text) {
-		translations.put(loc, decode(text));
-	}
-
-	private String decode(String text) {
-		return new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);
+		translations.put(loc, text);
 	}
 
 	public static void validateEmbeds() {

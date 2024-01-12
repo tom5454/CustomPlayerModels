@@ -10,6 +10,7 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
+@Deprecated
 public class ModelPartPlayer implements IModelPart, IResolvedModelPart {
 	private boolean[] keep = new boolean[8];
 	public ModelPartPlayer(IOHelper in, ModelDefinition def) throws IOException {
@@ -34,12 +35,12 @@ public class ModelPartPlayer implements IModelPart, IResolvedModelPart {
 		});
 	}
 
-	public boolean doRenderPart(PlayerModelParts part) {
-		return keep[part.ordinal()];
-	}
-
-	public void setDoRenderPart(PlayerModelParts part, boolean value) {
-		keep[part.ordinal()] = value;
+	@Override
+	public void preApply(ModelDefinition def) {
+		for (int i = 0;i<PlayerModelParts.VALUES.length;i++) {
+			RootModelElement elem = def.getModelElementFor(PlayerModelParts.VALUES[i]).getMainRoot();
+			elem.setHidden(!keep[i]);
+		}
 	}
 
 	@Override

@@ -1,5 +1,8 @@
 package com.tom.cpm.shared.util;
 
+import java.util.Locale;
+
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.network.ServerCaps;
 
 public enum ScalingOptions {
@@ -26,6 +29,7 @@ public enum ScalingOptions {
 	JUMP_HEIGHT("jump_height", ServerCaps.ATTRIBUTE_SCALE, false),
 	PROJECTILE_DMG("proj_dmg", ServerCaps.ATTRIBUTE_SCALE, false),
 	EXPLOSION_DMG("exp_dmg", ServerCaps.ATTRIBUTE_SCALE, false),
+	KNOCKBACK_RESIST("kbr", ServerCaps.ATTRIBUTE_SCALE, false),
 	;
 	public static final ScalingOptions[] VALUES = values();
 
@@ -68,5 +72,9 @@ public enum ScalingOptions {
 
 	public float getMax() {
 		return max;
+	}
+
+	public FormatText asText() {
+		return new FormatText("label.cpm.tree.scaling." + name().toLowerCase(Locale.ROOT));
 	}
 }

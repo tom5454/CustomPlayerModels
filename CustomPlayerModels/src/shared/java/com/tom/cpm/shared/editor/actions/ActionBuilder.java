@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.definition.ListAction;
 import com.tom.cpm.shared.definition.MapAction;
@@ -85,15 +86,15 @@ public class ActionBuilder extends Action {
 	}
 
 	private static float calcVal(float val, int min, int max, boolean wrap) {
-		if(val < min) {
-			if(wrap)while(val < min)val += max;
-			else val = min;
+		if (wrap) {
+			val = (val - min) % (max - min) + min;
+			if (val < min) {
+				val += (max - min);
+			}
+			return val;
+		} else {
+			return MathHelper.clamp(val, min, max);
 		}
-		if(val > max) {
-			if(wrap)while(val >= max)val -= max;
-			else val = max;
-		}
-		return val;
 	}
 
 	public <T> ActionBuilder addToList(List<T> list, T value) {

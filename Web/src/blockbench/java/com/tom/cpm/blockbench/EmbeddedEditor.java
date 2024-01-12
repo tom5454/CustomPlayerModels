@@ -164,6 +164,7 @@ public class EmbeddedEditor {
 			gui.onGuiException("Error creating gui", e, true);
 		}
 		WebMC.getInstance().setGui(gui);
+		g.getEditor().reinit();
 		if(openListener != null && g != null)openListener.accept(g.getEditor());
 		openListener = null;
 		return gui;

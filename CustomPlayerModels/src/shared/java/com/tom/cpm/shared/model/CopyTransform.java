@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.model;
 
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 
 public class CopyTransform {
@@ -34,8 +35,8 @@ public class CopyTransform {
 	public void apply() {
 		Vec3f pf = from.getTransformPosition();
 		Vec3f pt = to.getTransformPosition();
-		Vec3f rf = from.getTransformRotation();
-		Vec3f rt = to.getTransformRotation();
+		Rotation rf = from.getTransformRotation();
+		Rotation rt = to.getTransformRotation();
 		Vec3f sf = from.getRenderScale();
 		Vec3f st = to.getRenderScale();
 		to.setPosition(false, copyPX ? pf.x : pt.x, copyPY ? pf.y : pt.y, copyPZ ? pf.z : pt.z);

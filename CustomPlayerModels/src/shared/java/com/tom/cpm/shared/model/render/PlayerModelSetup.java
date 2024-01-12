@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.model.render;
 
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Hand;
 import com.tom.cpm.shared.model.RootModelElement;
@@ -318,13 +319,13 @@ public class PlayerModelSetup {
 	public static void initDefaultPose(RootModelElement rme, VanillaModelPart part) {
 		if(part == RootModelType.CAPE) {
 			rme.defPos = new Vec3f(0, -0.85F + 1, -1.1F + 0.125F * 32f);
-			rme.defRot = new Vec3f(0, (float) Math.toRadians(180.0F), (float) -Math.toRadians(6.0F));
+			rme.defRot = new Rotation(0, (float) Math.toRadians(180.0F), (float) -Math.toRadians(6.0F), false);
 		} else if(part == RootModelType.ELYTRA_LEFT) {
 			rme.defPos = new Vec3f(5, 0, 0);
-			rme.defRot = new Vec3f(0.2617994F, 0, -0.2617994F);
+			rme.defRot = new Rotation(0.2617994F, 0, -0.2617994F, false);
 		} else if(part == RootModelType.ELYTRA_RIGHT) {
 			rme.defPos = new Vec3f(-5, 0, 0);
-			rme.defRot = new Vec3f(0.2617994F, 0, 0.2617994F);
+			rme.defRot = new Rotation(0.2617994F, 0, 0.2617994F, false);
 		}
 	}
 }

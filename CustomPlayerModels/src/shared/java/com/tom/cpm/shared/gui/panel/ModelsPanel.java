@@ -28,6 +28,7 @@ import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationHandler;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -67,7 +68,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		this.frm = frm;
 		this.camera = camera;
 		sizeSetters = new ArrayList<>();
-		animHandler = new AnimationHandler(this::getSelectedDefinition);
+		animHandler = new AnimationHandler(this::getSelectedDefinition, AnimationMode.GUI);
 
 		list = new ScrollPanel(gui);
 		list.setBounds(new Box(0, 0, 0, 0));

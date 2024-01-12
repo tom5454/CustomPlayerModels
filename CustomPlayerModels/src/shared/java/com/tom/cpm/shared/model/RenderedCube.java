@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.tom.cpl.math.BoundingBox;
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.model.render.ItemRenderer;
@@ -16,7 +17,8 @@ public class RenderedCube implements IModelComponent {
 	private RenderedCube parent;
 	public List<RenderedCube> children;
 	public Vec3f offset;
-	public Vec3f rotation;
+	public Rotation rotation;
+	public Vec3f rotationZYX;
 	public Vec3f pos;
 	public Vec3f renderScale;
 	public Mesh renderObject;
@@ -26,8 +28,6 @@ public class RenderedCube implements IModelComponent {
 
 	//Render Effect Glow
 	public boolean glow = false;
-	//Render Effect Hide
-	public boolean hidden = false;
 	//Render Effect Recolor
 	public boolean recolor = false;
 	//Render Effect Single Texture
@@ -50,11 +50,11 @@ public class RenderedCube implements IModelComponent {
 	@Override
 	public void reset() {
 		if(cube.offset != null)this.offset = new Vec3f(cube.offset);
-		if(cube.rotation != null)this.rotation = new Vec3f(cube.rotation);
+		if(cube.rotation != null)this.rotation = new Rotation(cube.rotation, false);
 		if(cube.pos != null)this.pos = new Vec3f(cube.pos);
 		this.renderScale = new Vec3f(1, 1, 1);
 		this.color = recolor || cube.texSize == 0 ? cube.rgb : 0xffffff;
-		this.display = !hidden;
+		this.display = !cube.hidden;
 	}
 
 	public void setParent(RenderedCube parent) {
@@ -136,7 +136,7 @@ public class RenderedCube implements IModelComponent {
 	}
 
 	@Override
-	public Vec3f getRotation() {
+	public Rotation getRotation() {
 		return rotation;
 	}
 
@@ -198,7 +198,15 @@ public class RenderedCube implements IModelComponent {
 		return getPosition();
 	}
 
-	public Vec3f getTransformRotation() {
+	public Rotation getTransformRotation() {
 		return getRotation();
+	}
+
+	public void setHidden(boolean v) {
+		cube.hidden = v;
+	}
+
+	public boolean isHidden() {
+		return cube.hidden;
 	}
 }

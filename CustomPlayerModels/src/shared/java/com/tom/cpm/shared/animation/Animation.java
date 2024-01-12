@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.animation;
 
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.interpolator.Interpolator;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -45,14 +46,14 @@ public class Animation implements IAnimation {
 		for (int component = 0; component < components; component++) {
 			for (InterpolatorChannel channel : InterpolatorChannel.VALUES) {
 				Interpolator i = itType.create();
-				i.init(data[component][channel.channelID()], channel);
+				i.init(data[component][channel.channelID()], channel.createInterpolatorSetup());
 				psfs[component][channel.channelID()] = i;
 			}
 		}
 	}
 
 	@Override
-	public void animate(long millis, ModelDefinition def) {
+	public void animate(long millis, ModelDefinition def, AnimationMode mode) {
 		if(frames == 0)return;
 		float step = (float) millis % duration / duration * frames;
 		for (int componentId = 0; componentId < componentIDs.length; componentId++) {
@@ -82,12 +83,12 @@ public class Animation implements IAnimation {
 	}
 
 	@Override
-	public int getDuration() {
+	public int getDuration(AnimationMode mode) {
 		return duration;
 	}
 
 	@Override
-	public int getPriority() {
+	public int getPriority(AnimationMode mode) {
 		return priority;
 	}
 }

@@ -38,6 +38,7 @@ public class CustomPlayerModels extends CommonBase {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
+		MinecraftObjectHolder.setCommonObject(this);
 
 		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.preInit();
 
@@ -51,7 +52,7 @@ public class CustomPlayerModels extends CommonBase {
 
 	public void setup(FMLCommonSetupEvent evt) {
 		cfg = new ModConfigFile(new File(FMLPaths.CONFIGDIR.get().toFile(), "cpm.json"));
-		MinecraftObjectHolder.setCommonObject(this);
+		NeoForge.EVENT_BUS.register(new ServerHandler());
 		LOG.info("Customizable Player Models Initialized");
 	}
 

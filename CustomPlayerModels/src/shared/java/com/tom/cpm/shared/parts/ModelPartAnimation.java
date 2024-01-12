@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -16,12 +17,14 @@ import java.util.function.Function;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.Animation;
 import com.tom.cpm.shared.animation.AnimationRegistry;
+import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IAnimation;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
+import com.tom.cpm.shared.animation.StagedAnimation;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -35,6 +38,7 @@ import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.util.Log;
 
+@Deprecated
 public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 	private Map<Integer, ResolvedData> parsedData = new HashMap<>();
 	private int blankId, resetId;
@@ -565,6 +569,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 
 	@Override
 	public void apply(ModelDefinition def) {
+		List<Gesture> stageGestures = new ArrayList<>();
 		parsedData.values().forEach(rd -> {
 			IModelComponent[] comp = new IModelComponent[rd.components.length];
 			for (int i = 0; i < comp.length; i++) {
@@ -638,9 +643,13 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					g.group = rd.group;
 					g.command = rd.command;
 					g.layerCtrl = rd.layerCtrl;
-					reg.register(g);
-					if(rd.gid != -1)
-						reg.register(rd.gid, g);
+					if (g.type.isStaged()) {
+						stageGestures.add(g);
+					} else {
+						reg.register(g);
+						if(rd.gid != -1)
+							reg.register(rd.gid, g);
+					}
 					return l;
 				}).add(rd.anim);
 			} else {
@@ -656,7 +665,48 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		reg.setBlankGesture(blankId);
 		reg.setPoseResetId(resetId);
 		reg.setProfileId(modelProfilesId);
-		reg.finishLoading();
+		finishLoading(reg, stageGestures);
+	}
+
+	private void finishLoading(AnimationRegistry reg, List<Gesture> stageGestures) {
+		Map<String, StagedAnimation> anims = new HashMap<>();
+		for (Gesture g : stageGestures) {
+			String[] nm = g.name.split(":", 2);
+			if(nm.length == 2) {
+				IPose pose = null;
+				StagedAnimation san = anims.computeIfAbsent(g.name, k -> new StagedAnimation());
+				if(g.type == AnimationType.SETUP)g.animation.forEach(san::addPre);
+				else if(g.type == AnimationType.FINISH)g.animation.forEach(san::addPost);
+				switch (nm[0]) {
+				case "p":
+					for(VanillaPose p : VanillaPose.VALUES) {
+						if(nm[1].equals(p.name().toLowerCase(Locale.ROOT))) {
+							pose = p;
+							break;
+						}
+					}
+					//Fall through
+				case "c":
+					if(pose == null)pose = reg.getCustomPoses().get(nm[1]);
+					reg.getAnimations().computeIfPresent(pose, (p, an) -> {
+						an.forEach(san::addPlay);
+						return san.getAll();
+					});
+					break;
+
+				case "g":
+					reg.getGestures().computeIfPresent(nm[1], (k, gs) -> {
+						gs.animation.forEach(san::addPlay);
+						gs.animation = san.getAll();
+						return gs;
+					});
+					break;
+
+				default:
+					break;
+				}
+			}
+		}
 	}
 
 	@Override

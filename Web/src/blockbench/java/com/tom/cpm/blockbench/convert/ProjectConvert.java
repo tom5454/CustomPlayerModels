@@ -35,6 +35,7 @@ public class ProjectConvert {
 		DomGlobal.console.log("Export");
 		Editor editor = new Editor();
 		editor.setUI(new BBUI());
+		editor.reinit();
 		return exportWithWarnings(editor).then(__ -> {
 			try {
 				StoreIDGen storeIDgen = new StoreIDGen();
@@ -79,7 +80,7 @@ public class ProjectConvert {
 			return RenderSystem.withContext(() -> {
 				Editor editor = new Editor();
 				editor.setUI(new BBUI());
-				editor.loadDefaultPlayerModel();
+				editor.reinit();
 				return new JSZip().loadAsync(ab).then(editor.project::load).then(__ -> {
 					return RenderSystem.withContext(() -> {
 						try {

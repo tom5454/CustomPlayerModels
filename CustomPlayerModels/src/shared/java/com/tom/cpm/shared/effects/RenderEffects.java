@@ -4,12 +4,12 @@ import java.util.function.Supplier;
 
 public enum RenderEffects {
 	GLOW(EffectGlow::new),
-	SCALE(EffectScale::new),
-	HIDE(EffectHide::new),
+	@Deprecated SCALE(EffectScale::new),
+	@Deprecated HIDE(EffectHide::new),
 	COLOR(EffectColor::new),
 	SINGLE_TEX(EffectSingleTexture::new),
 	PER_FACE_UV(EffectPerFaceUV::new),
-	UV_OVERFLOW(EffectUV::new),
+	@Deprecated UV_OVERFLOW(EffectUV::new),
 	ITEM(EffectRenderItem::new),
 	HIDE_SKULL(EffectHideSkull::new),
 	REMOVE_ARMOR_OFFSET(EffectRemoveArmorOffset::new),
@@ -19,7 +19,7 @@ public enum RenderEffects {
 	SCALING(EffectScaling::new),
 	COPY_TRANSFORM(EffectCopyTransform::new),
 	FIRST_PERSON_HAND(EffectFirstPersonHandPos::new),
-	DISABLE_VANILLA(EffectDisableVanilla::new),
+	@Deprecated DISABLE_VANILLA(EffectDisableVanilla::new),
 	REMOVE_BED_OFFSET(EffectRemoveBedOffset::new),
 	INVIS_GLOW(EffectInvisGlow::new),
 	;

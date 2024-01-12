@@ -2,6 +2,7 @@ package com.tom.cpm.shared.effects;
 
 import java.io.IOException;
 
+import com.tom.cpl.math.Rotation;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.PartPosition;
@@ -20,20 +21,20 @@ public class EffectFirstPersonHandPos implements IRenderEffect {
 	@Override
 	public void load(IOHelper in) throws IOException {
 		leftHand = new PartPosition();
-		leftHand.setRenderScale(in.readVec6b(), in.readAngle(), in.readVec6b());
+		leftHand.setRenderScale(in.readVec6b(), new Rotation(in.readAngle(), false), in.readVec6b());
 
 		rightHand = new PartPosition();
-		rightHand.setRenderScale(in.readVec6b(), in.readAngle(), in.readVec6b());
+		rightHand.setRenderScale(in.readVec6b(), new Rotation(in.readAngle(), false), in.readVec6b());
 	}
 
 	@Override
 	public void write(IOHelper out) throws IOException {
 		out.writeVec6b(leftHand.getRPos());
-		out.writeAngle(leftHand.getRRotation());
+		out.writeAngle(leftHand.getRRotation().asVec3f(true));
 		out.writeVec6b(leftHand.getRScale());
 
 		out.writeVec6b(rightHand.getRPos());
-		out.writeAngle(rightHand.getRRotation());
+		out.writeAngle(rightHand.getRRotation().asVec3f(true));
 		out.writeVec6b(rightHand.getRScale());
 	}
 

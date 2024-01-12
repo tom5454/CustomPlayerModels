@@ -15,6 +15,7 @@ import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
 import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.tree.VecType;
 
 public interface MultiSelector extends TreeElement {
 	boolean add(TreeElement modelElement);

@@ -8,12 +8,13 @@ import com.tom.cpl.math.BoundingBox;
 import com.tom.cpl.math.Mat3f;
 import com.tom.cpl.math.Mat4f;
 import com.tom.cpl.math.MatrixStack;
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.TriangleBoundingBox;
 import com.tom.cpl.math.TriangleBoundingBox.BoxBuilder;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.render.VertexBuffer;
 import com.tom.cpm.shared.editor.tree.TreeElement;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
@@ -227,7 +228,7 @@ public class EditorRenderer {
 			f.pop();
 			f.push();
 			Vec3f pos = rc.getTransformPosition();
-			ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, (float) Math.toRadians(old.x), (float) Math.toRadians(old.y), (float) Math.toRadians(old.z), f);
+			ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, new Rotation(old, true), f);
 			return drawRotationDragPane(f, bufferIn, type, Vec3f.ZERO, new Vec3f(), size, true);
 		}
 
@@ -419,8 +420,8 @@ public class EditorRenderer {
 			f.push();
 			Vec3f pos = rc.getTransformPosition();
 			Vec3f rot = rc.getCube().rotation;
-			if(old == null)ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, (float) Math.toRadians(rot.x), (float) Math.toRadians(rot.y), (float) Math.toRadians(rot.z), f);
-			else ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, (float) Math.toRadians(old.x), (float) Math.toRadians(old.y), (float) Math.toRadians(old.z), f);
+			if(old == null)ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, new Rotation(rot, true), f);
+			else ModelRenderManager.RedirectRenderer.translateRotate(pos.x, pos.y, pos.z, new Rotation(old, true), f);
 			drawRotation(f, buffer, boxConsumer, rc, Vec3f.POSITIVE_X, EditorRenderer.BoundType.DRAG_X, sizeW, alpha);
 			f.push();
 			f.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(90));

@@ -36,7 +36,7 @@ public class VanillaDefinition extends ModelDefinition {
 			if(part == PlayerModelParts.CUSTOM_PART)continue;
 			RootModelElement elem = playerModelParts.get(part.ordinal());
 			cubes.add(elem);
-			elem.hidden = true;
+			elem.setHidden(true);
 			Cube cube = new Cube();
 			PlayerPartValues val = PlayerPartValues.getFor(part, type);
 			cube.offset = val.getOffset();

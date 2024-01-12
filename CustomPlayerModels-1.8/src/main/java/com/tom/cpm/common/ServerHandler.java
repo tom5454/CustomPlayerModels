@@ -45,6 +45,7 @@ public class ServerHandler {
 		netHandler.setGetOnlinePlayers(() -> FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().getPlayerList());
 		netHandler.setKickPlayer((p, m) -> p.playerNetServerHandler.kickPlayerFromServer(m.toString()));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
+		netHandler.addScaler(new AttributeScaler());
 	}
 
 	@SubscribeEvent

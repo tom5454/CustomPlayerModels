@@ -2,19 +2,14 @@ package com.tom.cpm.shared.network.packet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 
-import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.nbt.NBTTagList;
 import com.tom.cpl.nbt.NBTTagString;
-import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.network.NetworkUtil;
-import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.ScalingOptions;
 
 public class SetScaleC2S extends NBTC2S {
@@ -30,21 +25,11 @@ public class SetScaleC2S extends NBTC2S {
 	public <P> void handle(NetHandler<?, P, ?> handler, ServerNetH net, P pl) {
 		PlayerData pd = net.cpm$getEncodedModelData();
 		List<ScalingOptions> blocked = new ArrayList<>();
-		for(Entry<ScalingOptions, BiConsumer<P, Float>> e : handler.getScaleSetters().entrySet()) {
-			float oldV = pd.scale.getOrDefault(e.getKey(), 1F);
-			float selNewV = tag.getFloat(e.getKey().getNetKey());
-			float newV = selNewV;
-			Pair<Float, Float> l = NetworkUtil.getScalingLimits(e.getKey(), handler.getID(pl));
-			newV = newV == 0 || l == null ? 1F : MathHelper.clamp(newV, l.getKey(), l.getValue());
-			if(newV != oldV) {
-				Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
-				e.getValue().accept(pl, newV);
-				pd.scale.put(e.getKey(), newV);
-			}
-			if(newV != selNewV && selNewV != 0) {
-				blocked.add(e.getKey());
-			}
+		pd.targetScale.clear();
+		for (ScalingOptions so : ScalingOptions.VALUES) {
+			pd.targetScale.put(so, tag.getFloat(so.getNetKey()));
 		}
+		pd.rescaleToTarget(handler, pl, blocked);
 		pd.save(handler.getID(pl));
 		NBTTagCompound ret = new NBTTagCompound();
 		if(!blocked.isEmpty()) {

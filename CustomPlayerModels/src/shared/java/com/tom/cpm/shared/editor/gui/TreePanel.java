@@ -42,9 +42,11 @@ public class TreePanel extends Panel {
 			tree.setBounds(new Box(0, 0, w, h));
 			treePanel.onDisplayResize();
 
-			int y = tree.getElementY(editor.selectedElement);
-			if (y != -1 && (y < treePanel.getScrollY() || y > treePanel.getScrollY() + treePanel.getBounds().h)) {
-				treePanel.setScrollY(y);
+			if (editor.selectedElement != null) {
+				int y = tree.getElementY(editor.selectedElement);
+				if (y != -1 && (y < treePanel.getScrollY() || y > treePanel.getScrollY() + treePanel.getBounds().h)) {
+					treePanel.setScrollY(y);
+				}
 			}
 		});
 

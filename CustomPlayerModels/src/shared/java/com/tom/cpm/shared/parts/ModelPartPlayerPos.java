@@ -2,12 +2,14 @@ package com.tom.cpm.shared.parts;
 
 import java.io.IOException;
 
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.RenderedCube;
 import com.tom.cpm.shared.model.RootModelElement;
 
+@Deprecated
 public class ModelPartPlayerPos implements IModelPart, IResolvedModelPart {
 	public int id;
 	public Vec3f pos, rot;
@@ -42,7 +44,7 @@ public class ModelPartPlayerPos implements IModelPart, IResolvedModelPart {
 		if(e instanceof RootModelElement) {
 			RootModelElement elem = (RootModelElement) e;
 			elem.posN = pos;
-			elem.rotN = rot;
+			elem.rotN = new Rotation(rot, false);
 		}
 	}
 

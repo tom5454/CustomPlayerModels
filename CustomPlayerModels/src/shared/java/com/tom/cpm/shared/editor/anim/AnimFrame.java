@@ -7,10 +7,11 @@ import java.util.stream.Stream;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
+import com.tom.cpm.shared.editor.FormatLimits;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 
@@ -140,22 +141,6 @@ public class AnimFrame {
 			}
 		}
 
-		/* This is the intended code, but breaks older models. TODO switch to this in format cleanup
-		public boolean hasPosChanges() {
-			if(anim.add) {
-				return Math.abs(pos.x) > 0.01f || Math.abs(pos.y) > 0.01f || Math.abs(pos.z) > 0.01f;
-			} else {
-				Vec3f d;
-				if(comp.type == ElementType.ROOT_PART) {
-					PartValues val = ((VanillaModelPart) comp.typeData).getDefaultSize(anim.editor.skinType);
-					d = val.getPos().add(comp.pos);
-				} else {
-					d = comp.pos;
-				}
-				return Math.abs(pos.x - d.x) > 0.01f || Math.abs(pos.y - d.y) > 0.01f || Math.abs(pos.z - d.z) > 0.01f;
-			}
-		}*/
-
 		public boolean hasRotChanges() {
 			if(anim.add) {
 				return Math.abs(rot.x) > 0.01f || Math.abs(rot.y) > 0.01f || Math.abs(rot.z) > 0.01f;
@@ -206,7 +191,7 @@ public class AnimFrame {
 			Vec3f r = new Vec3f(this.getRotation());
 			r.y = 360 - r.y;
 			r.z = 360 - r.z;
-			ab.updateValueOp(this, this.getPosition(), p, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, FrameData::setPos, anim.editor.setAnimPos);
+			ab.updateValueOp(this, this.getPosition(), p, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, FrameData::setPos, anim.editor.setAnimPos);
 			ab.updateValueOp(this, this.getRotation(), r, 0, 360, true, FrameData::setRot, anim.editor.setAnimRot);
 		}
 	}
@@ -218,7 +203,7 @@ public class AnimFrame {
 			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
-		ab.updateValueOp(dt, dt.pos, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.pos = b, anim.editor.setAnimPos);
+		ab.updateValueOp(dt, dt.pos, v, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, (a, b) -> a.pos = b, anim.editor.setAnimPos);
 		ab.execute();
 	}
 
@@ -240,7 +225,7 @@ public class AnimFrame {
 			dt = new FrameData(elem);
 			ab.addToMap(components, elem, dt);
 		}
-		ab.updateValueOp(dt, dt.scale, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.scale = b, anim.editor.setAnimScale);
+		ab.updateValueOp(dt, dt.scale, v, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, (a, b) -> a.scale = b, anim.editor.setAnimScale);
 		ab.execute();
 	}
 

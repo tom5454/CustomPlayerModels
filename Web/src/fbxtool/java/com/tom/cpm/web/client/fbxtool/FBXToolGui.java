@@ -22,6 +22,7 @@ import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.MatrixStack;
+import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO;
@@ -92,8 +93,8 @@ public class FBXToolGui extends Frame implements IModelDisplayPanel {
 
 		Button load = new Button(gui, gui.i18nFormat("button.cpm.file.load"), () -> {
 			FileChooserPopup fc = new FileChooserPopup(this);
-			fc.setTitle(gui.i18nFormat("label.cpm.loadFile"));
-			fc.setFileDescText(gui.i18nFormat("label.cpm.file_project"));
+			fc.setTitle(EmbeddedLocalizations.loadProject);
+			fc.setFileDescText(EmbeddedLocalizations.fileProject);
 			fc.setFilter(new FileFilter("cpmproject"));
 			fc.setAccept(this::load);
 			fc.setButtonText(gui.i18nFormat("button.cpm.ok"));

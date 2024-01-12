@@ -24,6 +24,7 @@ import com.tom.cpm.shared.editor.ETextures;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Effect;
+import com.tom.cpm.shared.editor.FormatLimits;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
@@ -33,6 +34,7 @@ import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
 import com.tom.cpm.shared.editor.gui.popup.CopyTransformSettingsPopup;
 import com.tom.cpm.shared.editor.tree.TreeElement;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.editor.util.QuickTask;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PartValues;
@@ -61,7 +63,6 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public boolean singleTex;
 	public boolean extrude;
 	public long storeID;
-	public boolean hidden;
 	public boolean templateElement, generated;
 	public boolean duplicated;
 	public boolean disableVanillaAnim;
@@ -225,14 +226,14 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		case SIZE:
 			v.round(10);
 			editor.action("set", "label.cpm.size").
-			updateValueOp(this, this.size, v, 0, 25, false, (a, b) -> a.size = b, editor.setSize).
+			updateValueOp(this, this.size, v, 0, FormatLimits.getSizeLimit(), false, (a, b) -> a.size = b, editor.setSize).
 			onAction(this::markDirty).
 			execute();
 			break;
 
 		case OFFSET:
 			editor.action("set", "label.cpm.offset").
-			updateValueOp(this, this.offset, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.offset = b, editor.setOffset).
+			updateValueOp(this, this.offset, v, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, (a, b) -> a.offset = b, editor.setOffset).
 			onAction(this::markDirty).
 			execute();
 			break;
@@ -245,13 +246,13 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 		case POSITION:
 			editor.action("set", "label.cpm.position").
-			updateValueOp(this, this.pos, v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false, (a, b) -> a.pos = b, editor.setPosition).
+			updateValueOp(this, this.pos, v, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, (a, b) -> a.pos = b, editor.setPosition).
 			execute();
 			break;
 
 		case SCALE:
 			editor.action("set", "label.cpm.scale").
-			updateValueOp(this, this.scale, v, 0, 25, false, (a, b) -> a.scale = b, editor.setScale).
+			updateValueOp(this, this.scale, v, 0, FormatLimits.getSizeLimit(), false, (a, b) -> a.scale = b, editor.setScale).
 			onAction(this::markDirty).
 			execute();
 			break;
@@ -296,14 +297,14 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public void setVecTemp(VecType vt, Vec3f v) {
 		switch (vt) {
 		case OFFSET:
-			ActionBuilder.limitVec(v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false);
+			ActionBuilder.limitVec(v, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false);
 			offset = v;
 			editor.setOffset.accept(offset);
 			markDirty();
 			break;
 
 		case POSITION:
-			ActionBuilder.limitVec(v, -Vec3f.MAX_POS, Vec3f.MAX_POS, false);
+			ActionBuilder.limitVec(v, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false);
 			pos = v;
 			editor.setPosition.accept(pos);
 			break;
@@ -315,14 +316,14 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			break;
 
 		case SCALE:
-			ActionBuilder.limitVec(v, 0, 25, false);
+			ActionBuilder.limitVec(v, 0, FormatLimits.getSizeLimit(), false);
 			scale = v;
 			editor.setScale.accept(scale);
 			markDirty();
 			break;
 
 		case SIZE:
-			ActionBuilder.limitVec(v, 0, 25, false);
+			ActionBuilder.limitVec(v, 0, FormatLimits.getSizeLimit(), false);
 			v.round(10);
 			size = v;
 			editor.setSize.accept(size);

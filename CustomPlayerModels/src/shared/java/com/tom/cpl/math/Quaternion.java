@@ -42,9 +42,15 @@ public class Quaternion {
 	}
 
 	public Quaternion(float x, float y, float z, RotationOrder order) {
-		x *= ((float)Math.PI / 180F);
-		y *= ((float)Math.PI / 180F);
-		z *= ((float)Math.PI / 180F);
+		this(x, y, z, order, true);
+	}
+
+	public Quaternion(float x, float y, float z, RotationOrder order, boolean degrees) {
+		if (degrees) {
+			x *= ((float)Math.PI / 180F);
+			y *= ((float)Math.PI / 180F);
+			z *= ((float)Math.PI / 180F);
+		}
 
 		float l = cos(0.5F * x);
 		float c = cos(0.5F * y);
@@ -93,6 +99,10 @@ public class Quaternion {
 		this.y = (float) ((m.m02 - m.m20) / (4 * w));
 		this.z = (float) ((m.m10 - m.m01) / (4 * w));
 		this.w = (float) w;
+	}
+
+	public Quaternion(Vec3f zyx, boolean degrees) {
+		this(zyx.x, zyx.y, zyx.z, RotationOrder.ZYX, degrees);
 	}
 
 	@Override

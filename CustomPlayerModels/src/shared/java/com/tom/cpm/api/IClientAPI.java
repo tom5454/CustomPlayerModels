@@ -177,6 +177,14 @@ public interface IClientAPI extends ISharedAPI {
 	<P> boolean playAnimation(String name);
 
 	/**
+	 * Get the value for the given animation (value or toggle)
+	 *
+	 * @param name animation name
+	 * @return The animation value (value layer: 0-255, other animations: 0-1), -1 if animation doesn't exist
+	 * */
+	int getAnimationPlaying(String name);
+
+	/**
 	 * Player renderer for 1.16 and newer versions
 	 *
 	 * See {@link RetroPlayerRenderer} for 1.12 and older versions

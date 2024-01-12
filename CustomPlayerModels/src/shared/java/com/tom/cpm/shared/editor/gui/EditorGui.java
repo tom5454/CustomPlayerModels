@@ -77,6 +77,7 @@ import com.tom.cpm.shared.util.PlayerModelLayer;
 
 public class EditorGui extends Frame {
 	public static boolean rescaleGui = true;
+	public static boolean showExportWarn = true;
 	private static List<File> recent = new ArrayList<>();
 	private static Editor toReopen;
 	private TabbedPanelManager tabs;
@@ -144,10 +145,13 @@ public class EditorGui extends Frame {
 		}
 		TestIngameManager.checkConfig();
 		gui.setCloseListener(c -> {
-			checkUnsaved(() -> {
-				editor.free();
-				c.run();
-			});
+			if (toReopen != null && editor.dirty) {
+				openPopup(new ConfirmPopup(this, gui.i18nFormat("label.cpm.unsavedInGame"), c, null));
+			} else
+				checkUnsaved(() -> {
+					editor.free();
+					c.run();
+				});
 		});
 	}
 
@@ -450,7 +454,13 @@ public class EditorGui extends Frame {
 
 		//pp.addMenuButton(gui.i18nFormat("button.cpm.file.import"), importMenu);
 
-		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> openPopup(ExportPopup.createPopup(this)));
+		pp.addButton(gui.i18nFormat("button.cpm.file.export"), () -> {
+			openPopup(ExportPopup.createPopup(this));
+			if (showExportWarn) {
+				gui.displayMessagePopup(gui.i18nFormat("label.cpm.warning"), gui.i18nFormat("label.cpm.exportWarn"));
+				showExportWarn = false;
+			}
+		}).setTooltip(new Tooltip(this, gui.i18nFormat("tooltip.cpm.export"), "Exporting"));
 
 		pp.addButton(gui.i18nFormat("button.cpm.file.test"), () -> {
 			if(TestIngameManager.openTestIngame(this, false))toReopen = editor;

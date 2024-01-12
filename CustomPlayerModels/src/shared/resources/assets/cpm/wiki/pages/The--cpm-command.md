@@ -52,18 +52,33 @@ Set the kick message
 
 ## scaling
 Usage: `/cpm scaling <scaling option>`  
-Only has an effect after re-logging.  
 Subcommands:
 * [limit](#scaling-limit)
 * [enabled](#scaling-enabled)
+* [method](#scaling-method)
+* [reset](#scaling-reset)
 
 ### scaling limit
 Usage: `/cpm scaling <scaling option> limit [player] <max>` or `/cpm scaling <scaling option> limit [player] <min> <max>`  
-Set the Pehkui scaling limit for `scaling option`. Optionally can be set per player using the player argument, leave empty for global setting.
+Set the scaling limit for `scaling option`. Optionally can be set per player using the player argument, leave empty for global setting.
 
 ### scaling enabled
 Usage: `/cpm scaling <scaling option> enabled [player] <enable>`  
-Enable Pehkui scaling for `scaling option`. Optionally can be set per player using the player argument, leave empty for global setting.
+Enable scaling for `scaling option`. Optionally can be set per player using the player argument, leave empty for global setting.
+
+### scaling method
+Usage: `/cpm scaling <scaling option> method [player] <method>`  
+Set the scaling method for `scaling option`.  
+Supported options:
+* `disable` method acts like if the scaling mod isn't installed.  
+* `default` pick the server default scaler.  
+* `attribute` use vanilla attributes
+* `pehkui` use the [Pehkui](https://github.com/tom5454/CustomPlayerModels/wiki/Scaling#pehkui) to scale (when installed)
+* See the [scaling page](https://github.com/tom5454/CustomPlayerModels/wiki/Scaling) for other supported mods.
+
+### scaling reset
+Usage: `/cpm scaling reset <player>`  
+Reset the scaling for the selected player.
 
 ## animate
 Usage: `/cpm animate <target> <animation name> [value (0-255)]`  

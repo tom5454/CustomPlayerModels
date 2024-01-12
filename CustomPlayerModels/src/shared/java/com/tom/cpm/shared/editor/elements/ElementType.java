@@ -1,5 +1,6 @@
 package com.tom.cpm.shared.editor.elements;
 
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.CombinedListView;
 import com.tom.cpl.util.FlatListView;
@@ -51,7 +52,7 @@ public enum ElementType {
 			elem.texSize = elem.texture ? (elem.mirror ? -elem.textureSize : elem.textureSize) : 0;
 			elem.rc.reset();
 			elem.rc.display = elem.showInEditor && (!elem.editor.applyAnim || !elem.hidden) && !elem.editor.definition.outlineOnly;
-			elem.rc.rotation = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
+			elem.rc.rotation = new Rotation(elem.rotation, true);
 			elem.rc.glow = elem.glow;
 			elem.rc.singleTex = elem.singleTex;
 			elem.rc.faceUVs = elem.faceUV;
@@ -92,7 +93,7 @@ public enum ElementType {
 			};
 			elem.rc.setCube(elem);
 			elem.rc.pos = new Vec3f();
-			elem.rc.rotation = new Vec3f();
+			elem.rc.rotation = new Rotation();
 			elem.rc.children = new CombinedListView<>(new ListView<>(elem.children, m -> m.rc), new FlatListView<>(editor.templates, t -> t.getForPart(type).stream()));
 			elem.storeID = type.getId(elem.rc);
 			PlayerModelSetup.initDefaultPose((RootModelElement) elem.rc, type);
@@ -102,7 +103,7 @@ public enum ElementType {
 		public void preRenderUpdate(ModelElement elem) {
 			RootModelElement e = (RootModelElement) elem.rc;
 			e.posN = new Vec3f(elem.pos);
-			e.rotN = new Vec3f((float) Math.toRadians(elem.rotation.x), (float) Math.toRadians(elem.rotation.y), (float) Math.toRadians(elem.rotation.z));
+			e.rotN = new Rotation(elem.rotation, true);
 			e.reset();
 			e.disableVanilla = elem.disableVanillaAnim;
 		}

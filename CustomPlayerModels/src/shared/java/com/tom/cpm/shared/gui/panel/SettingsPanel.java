@@ -90,6 +90,10 @@ public class SettingsPanel extends Panel {
 
 			makeCheckbox(general, ConfigKeys.GESTURE_AUTO_RESET, true);
 
+			makeCheckbox(general, ConfigKeys.SHOW_INGAME_WARNINGS, true);
+
+			makeCheckbox(general, ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false);
+
 			MinecraftClientAccess.get().populatePlatformSettings("general", general);
 
 			layout.reflow();

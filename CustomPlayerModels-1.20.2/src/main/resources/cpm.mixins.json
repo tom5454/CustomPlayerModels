@@ -19,7 +19,9 @@
 	"BlockEntityWithoutLevelRendererMixin",
 	"ParrotOnShoulderLayerMixin",
 	"LocalPlayerMixin",
-	"LivingRendererMixin"
+	"LivingRendererMixin",
+	"ClientPacketListenerNeoForgeMixin",
+	"SkullModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

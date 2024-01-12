@@ -85,7 +85,8 @@ public class RecommendSafetyS2C extends NBTS2C {
 				handler.getRecommendedSettingChanges().add(new ConfigChangeRequest<>(ConfigKeys.SAFETY_PROFILE, old, netProfile.name().toLowerCase(Locale.ROOT)));
 			}
 
-			handler.displayText(new FormatText("chat.cpm.serverSafetySettings", new KeybindText("key.cpm.gestureMenu", "gestureMenu")));
+			if (ModConfig.getCommonConfig().getBoolean(ConfigKeys.SHOW_INGAME_WARNINGS, true))
+				handler.displayText(new FormatText("chat.cpm.serverSafetySettings", new KeybindText("key.cpm.gestureMenu", "gestureMenu")));
 		}
 	}
 }

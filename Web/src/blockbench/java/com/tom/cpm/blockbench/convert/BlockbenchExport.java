@@ -9,12 +9,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Rotation;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.util.Direction;
@@ -233,9 +235,10 @@ public class BlockbenchExport {
 					rootWarning(group);
 					return;
 				}
-				ModelElement e = new ModelElement(editor, ElementType.ROOT_PART, part);
-				editor.elements.add(e);
-				me = e;
+				me = new ModelElement(editor, ElementType.ROOT_PART, part);
+				me.duplicated = true;
+				me.storeID = Math.abs(new Random().nextLong());
+				editor.elements.add(me);
 			} else {
 				part = part(groupName);
 				if(part == null) {
@@ -817,7 +820,7 @@ public class BlockbenchExport {
 			Vec3f pos = new Vec3f(map.getMap("position"), new Vec3f());
 			Vec3f rotation = new Vec3f(map.getMap("rotation"), new Vec3f());
 			Vec3f scale = new Vec3f(map.getMap("scale"), new Vec3f());
-			p.setRenderScale(pos, rotation, scale);
+			p.setRenderScale(pos, new Rotation(rotation, true), scale);
 		}
 		return p;
 	}

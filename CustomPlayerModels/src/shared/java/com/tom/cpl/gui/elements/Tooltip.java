@@ -1,12 +1,17 @@
 package com.tom.cpl.gui.elements;
 
+import java.util.Locale;
+
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.config.Keybind;
+import com.tom.cpm.shared.gui.Keybinds;
 
 public class Tooltip extends Panel {
 	private final Frame frm;
+	private String openWikiPage;
+
 	protected Tooltip(Frame frm) {
 		super(frm.getGui());
 		this.frm = frm;
@@ -33,6 +38,11 @@ public class Tooltip extends Panel {
 		this(frm, kb.formatTooltip(frm.getGui(), text));
 	}
 
+	public Tooltip(Frame frm, String text, String openWiki) {
+		this(frm, frm.gui.i18nFormat("tooltip.cpm.openWikiTooltip", text, Keybinds.OPEN_WIKI.getSetKey(frm.gui), frm.gui.i18nFormat("label.cpm.wiki.page." + openWiki.toLowerCase(Locale.ROOT))));
+		this.openWikiPage = openWiki;
+	}
+
 	public void set() {
 		frm.setTooltip(this);
 	}
@@ -48,5 +58,9 @@ public class Tooltip extends Panel {
 				guiElement.draw(event.offset(bounds), partialTicks);
 		}
 		gui.popMatrix();
+	}
+
+	public String getWikiPage() {
+		return openWikiPage;
 	}
 }

@@ -2,6 +2,7 @@ package com.tom.cpm.shared.animation;
 
 import com.tom.cpl.text.I18n;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.config.Player;
 
 public class CustomPose implements IPose, IManualGesture {
 	private String name;
@@ -42,7 +43,7 @@ public class CustomPose implements IPose, IManualGesture {
 	}
 
 	@Override
-	public void play(AnimationRegistry reg) {
+	public void play(AnimationRegistry reg, Player<?> player) {
 		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setCustomPose(reg, this);
 	}
 

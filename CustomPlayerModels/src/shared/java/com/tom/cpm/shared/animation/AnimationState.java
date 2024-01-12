@@ -26,7 +26,7 @@ public class AnimationState {
 	public long jumping;
 	public boolean hasSkullOnHead;
 	public boolean wearingHelm, wearingBody, wearingLegs, wearingBoots, wearingElytra;
-	public boolean sleeping, dying, riding, elytraFlying, swimming, retroSwimming, sprinting, sneaking, takingDmg, tridentSpin;
+	public boolean sleeping, dying, riding, elytraFlying, swimming, retroSwimming, sprinting, sneaking, takingDmg, tridentSpin, crawling;
 	public float moveAmountX, moveAmountY, moveAmountZ, attackTime, swimAmount, bowPullback, crossbowPullback, yaw, bodyYaw, pitch, speakLevel;
 	public int hurtTime, skyLight, blockLight;
 	public Hand mainHand = Hand.RIGHT, activeHand = Hand.RIGHT, swingingHand = Hand.RIGHT;
@@ -48,6 +48,7 @@ public class AnimationState {
 		retroSwimming = false;
 		sprinting = false;
 		sneaking = false;
+		crawling = false;
 		tridentSpin = false;
 		usingAnimation = HandAnimation.NONE;
 		encodedState = 0;
@@ -84,6 +85,7 @@ public class AnimationState {
 		else if(localState.falling > 4 || serverState.falling > 4)return VanillaPose.FALLING;
 		else if(riding)return VanillaPose.RIDING;
 		else if(localState.creativeFlying || serverState.creativeFlying)return VanillaPose.CREATIVE_FLYING;
+		else if(crawling && registry.hasPoseAnimations(VanillaPose.CRAWLING))return VanillaPose.CRAWLING;
 		else if(swimming)return VanillaPose.SWIMMING;
 		else if(retroSwimming && registry.hasPoseAnimations(VanillaPose.RETRO_SWIMMING))return VanillaPose.RETRO_SWIMMING;
 		else if(isClimbing && Math.abs(moveAmountY) > 0.05F && registry.hasPoseAnimations(VanillaPose.CLIMBING_ON_LADDER))return VanillaPose.CLIMBING_ON_LADDER;

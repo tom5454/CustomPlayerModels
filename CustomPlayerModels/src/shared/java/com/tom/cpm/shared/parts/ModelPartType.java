@@ -1,26 +1,32 @@
 package com.tom.cpm.shared.parts;
 
+import com.tom.cpm.shared.parts.anim.ModelPartAnimationNew;
+
 public enum ModelPartType {
 	END(ModelPartEnd::new),
-	PLAYER(ModelPartPlayer::new),
+	@Deprecated PLAYER(ModelPartPlayer::new),
 	TEMPLATE(ModelPartTemplate::new),
-	DEFINITION(ModelPartDefinition::new),
-	DEFINITION_LINK(ModelPartDefinitionLink::new),
-	SKIN(ModelPartSkin::new),
-	SKIN_LINK(ModelPartSkinLink::new),
-	PLAYER_PARTPOS(ModelPartPlayerPos::new),
+	@Deprecated DEFINITION(ModelPartDefinition::new),
+	@Deprecated DEFINITION_LINK(ModelPartDefinitionLink::new),
+	@Deprecated SKIN(ModelPartSkin::new),
+	@Deprecated SKIN_LINK(ModelPartSkinLink::new),
+	@Deprecated PLAYER_PARTPOS(ModelPartPlayerPos::new),
 	RENDER_EFFECT(ModelPartRenderEffect::new),
 	UUID_LOCK(ModelPartUUIDLockout::new),
-	ANIMATION_DATA(ModelPartAnimation::new),
+	@Deprecated ANIMATION_DATA(ModelPartAnimation::new),
 	SKIN_TYPE(ModelPartSkinType::new),
-	MODEL_ROOT(ModelPartRoot::new),
+	@Deprecated MODEL_ROOT(ModelPartRoot::new),
 	@Deprecated LIST_ICON(ModelPartListIcon::new),
-	DUP_ROOT(ModelPartDupRoot::new),
+	@Deprecated DUP_ROOT(ModelPartDupRoot::new),
 	CLONEABLE(ModelPartCloneable::new),
 	@Deprecated SCALE(ModelPartScale::new),
 	TEXTURE(ModelPartTexture::new),
 	ANIMATED_TEX(ModelPartAnimatedTexture::new),
 	TAGS(ModelPartTags::new),
+	PACKAGE_LINK(ModelPartCollection.PackageLink::new),
+	CUBES(ModelPartCubes::new),
+	ROOT_INFO(ModelPartRootInfo::new),
+	ANIMATION_NEW(ModelPartAnimationNew::new),
 	;
 	public static final ModelPartType[] VALUES = values();
 	private final IModelPart.Factory factory;

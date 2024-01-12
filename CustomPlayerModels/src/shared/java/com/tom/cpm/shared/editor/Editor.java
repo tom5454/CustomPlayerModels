@@ -36,6 +36,7 @@ import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -65,7 +66,7 @@ import com.tom.cpm.shared.editor.tree.TexturesElement;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.TreeElement.ModelTree;
 import com.tom.cpm.shared.editor.tree.TreeElement.TreeSettingElement;
-import com.tom.cpm.shared.editor.tree.TreeElement.VecType;
+import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.editor.util.QuickTask;
 import com.tom.cpm.shared.editor.util.StoreIDGen;
@@ -483,7 +484,7 @@ public class Editor {
 			if(this.playFullAnim) {
 				long playTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
 				long currentStep = (playTime - this.playStartTime);
-				this.selectedAnim.animate(currentStep, definition);
+				this.selectedAnim.animate(currentStep, definition, AnimationMode.PLAYER);
 				if(currentStep > this.selectedAnim.duration && !this.selectedAnim.loop && this.selectedAnim.pose == null){
 					this.playFullAnim = false;
 					setAnimPlay.accept(false);
@@ -733,21 +734,21 @@ public class Editor {
 	public void setAnimDuration(int value) {
 		if(selectedAnim == null)return;
 		action("setAnim", "label.cpm.duration").
-		updateValueOp(selectedAnim, selectedAnim.duration, value, 1, (int) Short.MAX_VALUE, (a, b) -> a.duration = b, setAnimDuration).
+		updateValueOp(selectedAnim, selectedAnim.duration, value, 1, FormatLimits.getAnimLenLimit(), (a, b) -> a.duration = b, setAnimDuration).
 		execute();
 	}
 
 	public void setAnimPriority(int value) {
 		if(selectedAnim == null)return;
 		action("setAnim", "label.cpm.anim_priority").
-		updateValueOp(selectedAnim, selectedAnim.priority, value, (int) Byte.MIN_VALUE, (int) Byte.MAX_VALUE, (a, b) -> a.priority = b, setAnimPriority).
+		updateValueOp(selectedAnim, selectedAnim.priority, value, FormatLimits.getAnimSortLimitsMin(), FormatLimits.getAnimSortLimitsMax(), (a, b) -> a.priority = b, setAnimPriority).
 		execute();
 	}
 
 	public void setAnimOrder(int value) {
 		if(selectedAnim == null)return;
 		action("setAnim", "label.cpm.anim_order").
-		updateValueOp(selectedAnim, selectedAnim.order, value, (int) Byte.MIN_VALUE, (int) Byte.MAX_VALUE, (a, b) -> a.order = b, setAnimOrder).
+		updateValueOp(selectedAnim, selectedAnim.order, value, FormatLimits.getAnimSortLimitsMin(), FormatLimits.getAnimSortLimitsMax(), (a, b) -> a.order = b, setAnimOrder).
 		execute();
 	}
 

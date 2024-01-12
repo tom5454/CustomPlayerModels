@@ -8,9 +8,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.io.IOHelper;
 
 public class Cube {
+	public static final int HAS_MESH    = 1 << 0;
+	public static final int HAS_TEXTURE = 1 << 1;
+	public static final int HIDDEN      = 1 << 2;
+	public static final int SCALED      = 1 << 3;
+	public static final int UV_SCALED   = 1 << 4;
+	public static final int MC_SCALED   = 1 << 5;
+
 	public Vec3f offset;
 	public Vec3f rotation;
 	public Vec3f pos;
@@ -21,10 +29,17 @@ public class Cube {
 	public int rgb;
 	public int u, v, texSize;
 	public float mcScale;
+	public boolean hidden;
 
+	@Deprecated
 	public static Cube loadDefinitionCube(IOHelper din) throws IOException {
 		Cube c = new Cube();
-		loadCubePos(c, din);
+		c.size = din.readVec3ub();
+		c.pos = din.readVec6b();
+		c.offset = din.readVec6b();
+		c.rotation = din.readAngle();
+		c.scale = new Vec3f(1, 1, 1);
+		c.parentId = din.readVarInt();
 		int tex = din.readByte();
 		if(tex == 0) {
 			int ch2 = din.read();
@@ -37,6 +52,46 @@ public class Cube {
 			c.texSize = tex;
 			c.u = din.read();
 			c.v = din.read();
+		}
+		return c;
+	}
+
+	public static Cube loadDefinitionCubeV2(IOHelper din) throws IOException {
+		Cube c = new Cube();
+		byte flags = din.readByte();
+		c.parentId = din.readVarInt();
+		c.pos = din.readVarVec3();
+		c.rotation = din.readAngle();
+		c.hidden = (flags & HIDDEN) != 0;
+		if ((flags & HAS_MESH) != 0) {
+			c.size = din.readVarVec3();
+			c.offset = din.readVarVec3();
+
+			if ((flags & HAS_TEXTURE) != 0) {
+				c.texSize = (flags & UV_SCALED) != 0 ? din.readByte() : 1;
+				c.u = din.readVarInt();
+				c.v = din.readVarInt();
+			} else {
+				int ch2 = din.read();
+				int ch3 = din.read();
+				int ch4 = din.read();
+				if ((ch2 | ch3 | ch4) < 0)
+					throw new EOFException();
+				c.rgb = ((0xff << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
+			}
+
+			if ((flags & MC_SCALED) != 0) {
+				c.mcScale = din.readFloat2();
+			}
+		} else {
+			c.size = new Vec3f();
+			c.offset = new Vec3f();
+		}
+
+		if ((flags & SCALED) != 0) {
+			c.scale = din.readVarVec3();
+		} else {
+			c.scale = new Vec3f(1, 1, 1);
 		}
 		return c;
 	}
@@ -58,6 +113,7 @@ public class Cube {
 		return c;
 	}
 
+	@Deprecated
 	public static void saveDefinitionCube(IOHelper dout, Cube cube) throws IOException {
 		dout.writeVec3ub(cube.size);
 		dout.writeVec6b(cube.pos);
@@ -84,7 +140,49 @@ public class Cube {
 		}
 	}
 
-	public static void saveDefinitionCube(Map<String, Object> map, Cube cube) throws IOException {
+	public static void saveDefinitionCubeV2(IOHelper dout, Cube cube) throws IOException {
+		boolean hasMesh = !cube.size.epsilon(0.001f);
+		boolean texture = hasMesh && cube.texSize != 0;
+		boolean hidden = cube.hidden;
+		boolean scaled = cube.scale != null && !cube.scale.sub(1).epsilon(0.001f);
+		boolean uv_scaled = texture && cube.texSize != 1;
+		boolean mc_scaled = hasMesh && Math.abs(cube.mcScale) > 0.0001f;
+		int flags = 0;
+		boolean[] flagsArray = new boolean[] {hasMesh, texture, hidden, scaled, uv_scaled, mc_scaled};
+		for (int i = flagsArray.length - 1;i >= 0;i--)
+			flags = (flags << 1) | (flagsArray[i] ? 1 : 0);
+
+		dout.writeByte(flags);
+		dout.writeVarInt(cube.parentId);
+		dout.writeVarVec3(cube.pos);
+		Vec3f rot = new Vec3f(cube.rotation);
+		ActionBuilder.limitVec(rot, 0, 360, true);
+		dout.writeAngle(rot);
+		if (hasMesh) {
+			dout.writeVarVec3(cube.size);
+			dout.writeVarVec3(cube.offset);
+
+			if (texture) {
+				if (uv_scaled)dout.writeByte(cube.texSize);
+				dout.writeVarInt(cube.u);
+				dout.writeVarInt(cube.v);
+			} else {
+				dout.write((cube.rgb >>> 16) & 0xFF);
+				dout.write((cube.rgb >>>  8) & 0xFF);
+				dout.write((cube.rgb >>>  0) & 0xFF);
+			}
+
+			if (mc_scaled) {
+				dout.writeFloat2(cube.mcScale);
+			}
+		}
+
+		if (scaled) {
+			dout.writeVarVec3(cube.scale);
+		}
+	}
+
+	public static void saveTemplateCube(Map<String, Object> map, Cube cube) throws IOException {
 		map.put("offset", cube.offset.toMap());
 		map.put("pos", cube.pos.toMap());
 		map.put("rotation", cube.rotation.toMap());
@@ -98,26 +196,29 @@ public class Cube {
 		map.put("parent", cube.parentId);
 	}
 
-	public static Cube loadTemplateCube(IOHelper din, int[] colors) throws IOException {
-		Cube c = new Cube();
-		loadCubePos(c, din);
-		c.rgb = colors[din.read()];
-		return c;
-	}
-
-	private static void loadCubePos(Cube c, IOHelper din) throws IOException {
-		c.size = din.readVec3ub();
-		c.pos = din.readVec6b();
-		c.offset = din.readVec6b();
-		c.rotation = din.readAngle();
-		c.scale = new Vec3f(1, 1, 1);
-		c.parentId = din.readVarInt();
+	public static List<RenderedCube> resolveCubesV2(List<Cube> cubes) {
+		Map<Integer, RenderedCube> r = new HashMap<>();
+		for (Cube cube : cubes) {
+			r.put(cube.id, new RenderedCube(cube));
+		}
+		for (Cube c : cubes) {
+			if(c.parentId < 10)continue;
+			RenderedCube cube = r.get(c.id);
+			RenderedCube parent = r.get(c.parentId);
+			cube.setParent(parent);
+			parent.addChild(cube);
+		}
+		return new ArrayList<>(r.values());
 	}
 
 	public static List<RenderedCube> resolveCubes(List<Cube> cubes) {
 		Map<Integer, RenderedCube> r = new HashMap<>();
 		for (Cube cube : cubes) {
-			r.put(cube.id, new RenderedCube(cube));
+			boolean h = cube.hidden;
+			cube.hidden = false;
+			RenderedCube rc = new RenderedCube(cube);
+			rc.getCube().hidden = h;
+			r.put(cube.id, rc);
 		}
 		for (Cube c : cubes) {
 			if(c.parentId < 10)continue;

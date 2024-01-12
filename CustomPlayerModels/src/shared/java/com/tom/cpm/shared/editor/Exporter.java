@@ -11,16 +11,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import com.tom.cpl.gui.UI;
 import com.tom.cpl.gui.elements.MessagePopup;
@@ -30,6 +24,8 @@ import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
@@ -39,7 +35,7 @@ import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
 import com.tom.cpm.shared.editor.gui.popup.ExportStringResultPopup;
 import com.tom.cpm.shared.editor.gui.popup.OverflowPopup;
 import com.tom.cpm.shared.editor.template.EditorTemplate;
-import com.tom.cpm.shared.editor.template.TemplateArgHandler;
+import com.tom.cpm.shared.editor.util.ExportHelper;
 import com.tom.cpm.shared.editor.util.ModelDescription;
 import com.tom.cpm.shared.effects.EffectColor;
 import com.tom.cpm.shared.effects.EffectCopyTransform;
@@ -65,7 +61,6 @@ import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.io.SkinDataOutputStream;
 import com.tom.cpm.shared.model.Cube;
 import com.tom.cpm.shared.model.PlayerModelParts;
-import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
@@ -74,7 +69,6 @@ import com.tom.cpm.shared.parts.ModelPartAnimatedTexture;
 import com.tom.cpm.shared.parts.ModelPartAnimation;
 import com.tom.cpm.shared.parts.ModelPartCloneable;
 import com.tom.cpm.shared.parts.ModelPartDefinition;
-import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
 import com.tom.cpm.shared.parts.ModelPartDupRoot;
 import com.tom.cpm.shared.parts.ModelPartEnd;
 import com.tom.cpm.shared.parts.ModelPartPlayer;
@@ -87,12 +81,11 @@ import com.tom.cpm.shared.parts.ModelPartTags;
 import com.tom.cpm.shared.parts.ModelPartTemplate;
 import com.tom.cpm.shared.parts.ModelPartTexture;
 import com.tom.cpm.shared.parts.ModelPartUUIDLockout;
+import com.tom.cpm.shared.parts.PartCollection;
 import com.tom.cpm.shared.paste.PastePopup;
-import com.tom.cpm.shared.template.Template;
 import com.tom.cpm.shared.util.Log;
 
 public class Exporter {
-	public static final Gson sgson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
 	public static void exportSkin(Editor e, UI gui, File f, boolean forceOut) {
 		exportSkin(e, gui, img -> {
@@ -128,12 +121,12 @@ public class Exporter {
 
 	public static void exportUpdate(Editor e, UI gui, Link linkToUpdate) {
 		try {
-			ModelPartDefinition def = prepareDefinition(e);
+			PartCollection def = prepareExport(e);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			{
 				baos.write(ModelDefinitionLoader.HEADER);
 				ChecksumOutputStream cos = new ChecksumOutputStream(baos);
-				def.write(new IOHelper(cos));
+				def.writePackage(new IOHelper(cos));
 				cos.close();
 			}
 			String b64 = Base64.getEncoder().encodeToString(baos.toByteArray());
@@ -182,25 +175,37 @@ public class Exporter {
 				}), false);
 	}
 
+	private static PartCollection prepareExport(Editor e) throws IOException {
+		if (ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false)) {
+			return ExporterImpl.prepareExport(e);
+		} else {
+			return prepareDefinition(e);
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	@Deprecated
 	private static ModelPartDefinition prepareDefinition(Editor e) throws IOException {
 		List<Cube> flatList = new ArrayList<>();
-		walkElements(e.elements, new int[] {10}, flatList);
-		ModelPartDefinition def = new ModelPartDefinition(e.textures.get(TextureSheetType.SKIN).isEdited() ? new ModelPartSkin(e) : null, flatList);
+		ExportHelper.flattenElements(e.elements, new int[] {10}, flatList);
+		ModelPartDefinition def = new ModelPartDefinition(flatList);
 		ModelPartPlayer player = new ModelPartPlayer(e);
-		def.setPlayer(player);
 		List<IModelPart> otherParts = new ArrayList<>();
+		otherParts.add(player);
+		if (e.textures.get(TextureSheetType.SKIN).isEdited()) {
+			otherParts.add(new ModelPartSkin(e));
+		}
 		for(PlayerModelParts p : PlayerModelParts.VALUES) {
 			for (ModelElement el : e.elements) {
 				if(el.type == ElementType.ROOT_PART && el.typeData == p && !el.duplicated) {
-					if(Math.abs(el.pos.x) >= 0.1f || Math.abs(el.pos.y) >= 0.1f || Math.abs(el.pos.z) >= 0.1f ||
-							Math.abs(el.rotation.x) >= 0.1f || Math.abs(el.rotation.y) >= 0.1f || Math.abs(el.rotation.z) >= 0.1f) {
+					if(!el.pos.epsilon(0.1f) || !el.rotation.epsilon(0.1f)) {
 						otherParts.add(new ModelPartPlayerPos(p.getId(el.rc), el.pos, el.rotation));
 					}
 				}
 			}
 		}
 		List<IModelPart> otherParts2 = new ArrayList<>();
-		walkElements(e.elements, el -> {
+		ExportHelper.walkElements(e.elements, el -> {
 			if(el.type == ElementType.NORMAL) {
 				if(el.glow) {
 					otherParts.add(new ModelPartRenderEffect(new EffectGlow(el.id)));
@@ -300,7 +305,7 @@ public class Exporter {
 
 	private static boolean exportSkin0(Editor e, UI gui, Result result, boolean forceOut) {
 		try {
-			ModelPartDefinition def = prepareDefinition(e);
+			PartCollection def = prepareExport(e);
 			if(forceOut) {
 				writeOut(e, gui, def, result);
 				return true;
@@ -310,7 +315,7 @@ public class Exporter {
 				ChecksumOutputStream cos = new ChecksumOutputStream(out);
 				try(IOHelper dout = new IOHelper(cos)) {
 					dout.writeObjectBlock(new ModelPartSkinType(e.skinType));
-					dout.writeObjectBlock(def);
+					def.writeBlocks(dout);
 					dout.writeObjectBlock(ModelPartEnd.END);
 				}
 			} catch (EOFException unusedException) {
@@ -332,17 +337,17 @@ public class Exporter {
 		}
 	}
 
-	private static void writeOut(Editor e, UI gui, ModelPartDefinition def, Result result) throws Exception {
+	private static void writeOut(Editor e, UI gui, PartCollection def, Result result) throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		{
 			baos.write(ModelDefinitionLoader.HEADER);
 			ChecksumOutputStream cos = new ChecksumOutputStream(baos);
-			def.write(new IOHelper(cos));
+			def.writePackage(new IOHelper(cos));
 			cos.close();
 		}
 		result.overflowWriter.accept(baos.toByteArray(), link -> {
 			try {
-				ModelPartDefinitionLink defLink = new ModelPartDefinitionLink(link);
+				IModelPart defLink = def.toLink(link);
 				try(OutputStream out = result.get()) {
 					out.write(ModelDefinitionLoader.HEADER);
 					ChecksumOutputStream cos = new ChecksumOutputStream(out);
@@ -359,101 +364,6 @@ public class Exporter {
 				gui.onGuiException("Error while exporting", ex, false);
 			}
 		});
-	}
-
-	public static void exportTemplate(Editor e, UI gui, ModelDescription desc, Consumer<String> templateOut) {
-		try {
-			List<Cube> flatList = new ArrayList<>();
-			walkElements(e.elements, new int[] {Template.TEMPLATE_ID_OFFSET}, flatList);
-			Map<String, Object> data = new HashMap<>();
-			List<Map<String, Object>> cubesList = new ArrayList<>();
-			data.put("cubes", cubesList);
-			Map<Integer, Map<String, Object>> cubeDataList = new HashMap<>();
-			flatList.sort((a, b) -> Integer.compare(a.id, b.id));
-			for (Cube cube : flatList) {
-				Map<String, Object> m = new HashMap<>();
-				Cube.saveDefinitionCube(m, cube);
-				cubesList.add(m);
-				Map<String, Object> dtMap = new HashMap<>();
-				m.put("data", dtMap);
-				m.put("id", cube.id);
-				cubeDataList.put(cube.id, dtMap);
-			}
-			walkElements(e.elements, el -> {
-				if(el.type == ElementType.NORMAL && !el.templateElement) {
-					Map<String, Object> dt = cubeDataList.get(el.id);
-					dt.put("hidden", el.hidden);
-					dt.put("recolor", el.recolor);
-					dt.put("glow", el.glow);
-				}
-			});
-			List<Map<String, Object>> argsList = new ArrayList<>();
-			data.put("args", argsList);
-			for(TemplateArgHandler a : e.templateSettings.templateArgs) {
-				Map<String, Object> map = new HashMap<>();
-				argsList.add(map);
-				map.put("name", a.name);
-				map.put("desc", a.desc);
-				map.put("type", a.type.baseType.name().toLowerCase(Locale.ROOT));
-				map.put("elem_type", a.type.name().toLowerCase(Locale.ROOT));
-				Map<String, Object> d = new HashMap<>();
-				a.handler.export().export(d);
-				map.put("data", d);
-				a.handler.applyArgs(data, a.effectedElems);
-			}
-			if(e.textures.get(TextureSheetType.SKIN).isEdited()) {
-				IOHelper h = new IOHelper();
-				e.textures.get(TextureSheetType.SKIN).write(h);
-				data.put("texture", h.toB64());
-			}
-			data.put("name", desc.name);
-			data.put("desc", desc.desc);
-			if(desc.icon != null) {
-				try(IOHelper icon = new IOHelper()) {
-					icon.writeImage(desc.icon);
-					data.put("icon", icon.toB64());
-				}
-			}
-			String result = sgson.toJson(data);
-			templateOut.accept(result);
-		} catch (ExportException ex) {
-			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", gui.i18nFormat(ex.getMessage())));
-		} catch (Exception ex) {
-			gui.onGuiException("Error while exporting", ex, false);
-		}
-	}
-
-	private static void walkElements(List<ModelElement> elems, int[] id, List<Cube> flatList) {
-		for (ModelElement me : elems) {
-			if(me.templateElement)continue;
-			switch (me.type) {
-			case NORMAL:
-				me.id = id[0]++;
-				flatList.add(me);
-				break;
-			case ROOT_PART:
-				if(me.duplicated || me.typeData instanceof RootModelType) {
-					Cube fake = Cube.newFakeCube();
-					me.id = id[0]++;
-					fake.id = me.id;
-					fake.pos = me.pos;
-					fake.rotation = me.rotation;
-					flatList.add(fake);
-				} else me.id = ((RootModelElement)me.rc).getPart().getId(me.rc);
-				break;
-			default:
-				break;
-			}
-			if(me.parent != null)me.parentId = me.parent.id;
-			walkElements(me.children, id, flatList);
-		}
-	}
-
-	private static void walkElements(List<ModelElement> elems, Consumer<ModelElement> c) {
-		for (ModelElement me : elems) {
-			c.accept(me);
-			walkElements(me.children, c);
-		}
 	}
 
 	public static boolean check(Editor editor, UI gui, Runnable next) {

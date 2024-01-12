@@ -439,7 +439,7 @@ public class GestureGui extends Frame {
 	}
 
 	private void clearGesture() {
-		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().playGesture(def.getAnimations(), null);
+		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().playGesture(def.getAnimations(), null, def.getPlayerObj());
 	}
 
 	private void clearPose() {
@@ -447,7 +447,7 @@ public class GestureGui extends Frame {
 	}
 
 	private void setManualGesture(IManualGesture g) {
-		if(def != null)g.play(def.getAnimations());
+		if(def != null)g.play(def.getAnimations(), def.getPlayerObj());
 	}
 
 	private class GestureButton extends Panel {
@@ -486,7 +486,7 @@ public class GestureGui extends Frame {
 						slider.setValue(Byte.toUnsignedInt(MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), (Gesture) g)) / 255f);
 					slider.setTooltip(new Tooltip(GestureGui.this, gui.i18nFormat("tooltip.cpm.gesture.valueDefaultValue", (int) (g.getDefaultValue() * 100), Keybinds.RESET_VALUE_LAYER.getSetKey(gui))));
 					addElement(slider);
-				} else if(layer) {
+				} else {
 					Button btn = new Button(gui, "", () -> setManualGesture(g));
 					btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
 					addElement(btn);

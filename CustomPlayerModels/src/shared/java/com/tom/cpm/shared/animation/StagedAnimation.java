@@ -1,12 +1,15 @@
 package com.tom.cpm.shared.animation;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
+import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.definition.ModelDefinition;
 
 public class StagedAnimation {
-	private Stage currentStage;
+	private Map<AnimationMode, Stage> currentStage = new EnumMap<>(AnimationMode.class);
 	private List<Anim> pre = new ArrayList<>();
 	private List<Anim> play = new ArrayList<>();
 	private List<Anim> post = new ArrayList<>();
@@ -37,11 +40,15 @@ public class StagedAnimation {
 		return a;
 	}
 
+	private static class AnimData {
+		private long offset, lastFrame;
+		private boolean finished;
+	}
+
 	private class Anim implements IAnimation {
 		private final IAnimation parent;
 		private final Stage stage;
-		private long offset, lastFrame;
-		private boolean finished;
+		private Map<AnimationMode, AnimData> data = new EnumMap<>(AnimationMode.class);
 
 		public Anim(IAnimation parent, Stage stage) {
 			this.parent = parent;
@@ -49,56 +56,61 @@ public class StagedAnimation {
 		}
 
 		@Override
-		public int getDuration() {
+		public int getDuration(AnimationMode mode) {
 			if(stage == Stage.FINISH)return Integer.MAX_VALUE;
-			return parent.getDuration();
+			return parent.getDuration(mode);
 		}
 
 		@Override
-		public int getPriority() {
-			return parent.getPriority();
+		public int getPriority(AnimationMode mode) {
+			return parent.getPriority(mode);
 		}
 
 		@Override
-		public void animate(long millis, ModelDefinition def) {
-			lastFrame = millis;
-			if(currentStage == stage) {
-				if(stage == Stage.FINISH && lastFrame >= offset + parent.getDuration())return;
-				if(stage == Stage.SETUP && (millis - offset) >= parent.getDuration()) {
-					finished = true;
-					if(pre.stream().allMatch(a -> a.finished)) {
-						currentStage = Stage.PLAY;
+		public void animate(long millis, ModelDefinition def, AnimationMode mode) {
+			AnimData d = data.get(mode);
+			d.lastFrame = millis;
+			if(currentStage.get(mode) == stage) {
+				if(stage == Stage.FINISH && d.lastFrame >= d.offset + parent.getDuration(mode))return;
+				if(stage == Stage.SETUP && (millis - d.offset) >= parent.getDuration(mode)) {
+					d.finished = true;
+					if(pre.stream().allMatch(a -> a.data.get(mode).finished)) {
+						currentStage.put(mode, Stage.PLAY);
 					}
 				} else
-					parent.animate(millis - offset, def);
+					parent.animate(millis - d.offset, def, mode);
 			} else
-				offset = millis;
+				d.offset = millis;
 		}
 
 		@Override
-		public boolean checkAndUpdateRemove() {
+		public boolean checkAndUpdateRemove(AnimationMode mode) {
+			AnimData d = data.get(mode);
+			if (d == null)return true;
 			if(stage == Stage.FINISH) {
-				currentStage = Stage.FINISH;
-				if(lastFrame >= offset + parent.getDuration()) {
-					offset = 0;
+				currentStage.put(mode, Stage.FINISH);
+				if(d.lastFrame >= d.offset + parent.getDuration(mode)) {
+					d.offset = 0;
 					return true;
 				}
 				return false;
 			}
-			finished = false;
-			offset = 0;
+			d.finished = false;
+			d.offset = 0;
 			return true;
 		}
 
 		@Override
-		public void prepare() {
-			currentStage = pre.isEmpty() ? Stage.PLAY : Stage.SETUP;
-			all.forEach(a -> ((Anim) a).reset());
+		public void prepare(AnimationMode mode) {
+			currentStage.put(mode, pre.isEmpty() ? Stage.PLAY : Stage.SETUP);
+			all.forEach(a -> ((Anim) a).reset(mode));
 		}
 
-		private void reset() {
-			offset = 0;
-			finished = false;
+		private void reset(AnimationMode mode) {
+			AnimData d = data.get(mode);
+			if (d == null)data.put(mode, d = new AnimData());
+			d.offset = 0;
+			d.finished = false;
 		}
 	}
 

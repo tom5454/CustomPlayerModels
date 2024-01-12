@@ -1,6 +1,10 @@
 package com.tom.cpm.shared.gui;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import com.tom.cpm.shared.config.Keybind;
+import com.tom.cpm.shared.editor.tree.VecType;
 
 public class Keybinds {
 	public static final Keybind ZOOM_IN_CAMERA = new Keybind("zoomInCamera", "+");
@@ -36,9 +40,13 @@ public class Keybinds {
 
 	public static final Keybind RESET_VALUE_LAYER = new Keybind("resetValueLayer", "r");
 
+	public static final Keybind OPEN_WIKI = new Keybind("openWiki", c -> c.KEY_F1);
+
 	public static final Object MOUSE_MARKER = new Object();
 
 	public static final Object[] KEYBINDS = new Object[] {
+			"general",
+			OPEN_WIKI,
 			"gestureGui",
 			RESET_VALUE_LAYER,
 			"3dView",
@@ -52,4 +60,11 @@ public class Keybinds {
 			COPY_ANIM_FRAME, PASTE_ANIM_FRAME, COPY_ANIM_PART, PASTE_ANIM_PART
 	};
 
+	public static final Map<VecType, Keybind> EDITOR_TOOL_KBS = new EnumMap<>(VecType.class);
+	static {
+		EDITOR_TOOL_KBS.put(VecType.OFFSET, OFFSET);
+		EDITOR_TOOL_KBS.put(VecType.POSITION, POSITION);
+		EDITOR_TOOL_KBS.put(VecType.ROTATION, ROTATION);
+		EDITOR_TOOL_KBS.put(VecType.SIZE, SIZE);
+	}
 }
