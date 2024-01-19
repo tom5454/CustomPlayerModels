@@ -70,6 +70,11 @@ public class PluginStart implements EntryPoint {
 					public String getAppID() {
 						return "Blockbench CPM Plugin";
 					}
+
+					@Override
+					protected String getLangChangeDesc() {
+						return "bb-label.language.reloadRequired.desc";
+					}
 				};
 				DomGlobal.console.log("CPM Plugin loading " + WebMC.platform);
 			} catch (Throwable e) {

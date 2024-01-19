@@ -1,6 +1,6 @@
 plugins {
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'net.minecraftforge.gradle' version '6.0.20'
 }
 
 project.buildDir = '/build_forge'
@@ -166,6 +166,8 @@ sourceSets {
 	main {
         java {
             exclude '**/CPMOSCClientFabric.java'
+            exclude '**/CPMOSCModNeoForge.java'
+            exclude '**/CPMOSCClientNeoForge.java'
        }
    }
 }
@@ -191,11 +193,6 @@ jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
 processResources {
     inputs.property "version", version
 
@@ -206,10 +203,6 @@ processResources {
     filesMatching("**/*.toml") {
         expand 'mod_version': mod_version
     }
-}
-
-artifacts {
-    archives sourcesJar
 }
 
 publishing {

@@ -117,6 +117,7 @@ public class RenderSystem implements RetroGLAccess<String> {
 			preloadedAssets = new HashMap<>();
 			JsArray<Promise<Object>> promises = new JsArray<>();
 			promises.push(I18n.loaded);
+			promises.push(FontLoader.loaded);
 			for(String res : Resources.listResources()) {
 				if(res.endsWith(".png")) {
 					promises.push(ImageIO.loadImage(Resources.getResource(res), true, false).then(img -> {
@@ -138,7 +139,7 @@ public class RenderSystem implements RetroGLAccess<String> {
 
 	private static void init0(Window windowIn, Supplier<EventHandler> preload) {
 		HTMLStyleElement style = Js.uncheckedCast(document.createElement("style"));
-		style.innerHTML = Stylesheet.MAIN_SOURCE;
+		style.innerHTML = Stylesheet.MAIN_SOURCE + FontLoader.FONTS;
 		document.head.appendChild(style);
 		document.body.style.margin = MarginUnionType.of(0);
 		document.body.style.overflow = "hidden";

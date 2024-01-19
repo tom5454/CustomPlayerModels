@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.Proxy;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -16,11 +17,13 @@ import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.gui.elements.ListPicker;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.ScrollPanel;
 import com.tom.cpl.item.ItemStackHandler;
+import com.tom.cpl.math.Box;
 import com.tom.cpl.render.RenderTypeBuilder;
 import com.tom.cpl.tag.AllTagManagers;
 import com.tom.cpl.text.TextRemapper;
@@ -28,6 +31,8 @@ import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.ILogger;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
+import com.tom.cpl.util.NamedElement;
+import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.shared.IPlayerRenderManager;
@@ -51,19 +56,26 @@ import com.tom.cpm.web.client.emul.BiomeHandlerImpl;
 import com.tom.cpm.web.client.emul.BlockStateHandlerImpl;
 import com.tom.cpm.web.client.emul.EntityTypeHandlerImpl;
 import com.tom.cpm.web.client.emul.ItemStackHandlerImpl;
+import com.tom.cpm.web.client.java.Base64;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.FileManagerPopup;
+import com.tom.cpm.web.client.render.FullScreenButton;
 import com.tom.cpm.web.client.render.GuiImpl;
 import com.tom.cpm.web.client.render.RenderSystem;
+import com.tom.cpm.web.client.resources.Resources;
 import com.tom.cpm.web.client.util.AsyncResourceException;
 import com.tom.cpm.web.client.util.CPMApi;
 import com.tom.cpm.web.client.util.GameProfile;
+import com.tom.cpm.web.client.util.I18n;
 import com.tom.cpm.web.client.util.ImageIO;
 import com.tom.ugwt.client.ExceptionUtil;
 
+import elemental2.core.Global;
 import elemental2.dom.DomGlobal;
 import elemental2.promise.Promise;
+import elemental2.webstorage.WebStorageWindow;
 import jsinterop.base.Js;
+import jsinterop.base.JsPropertyMap;
 
 public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILogger {
 	private ModConfigFile config;
@@ -324,8 +336,33 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		break;
 
 		case "general":
-			//TODO language selector
-			break;
+		{
+			IGui gui = panel.getGui();
+			JsPropertyMap<String> mapIn = Js.<JsPropertyMap<String>>uncheckedCast(Global.JSON.parse(new String(Base64.getDecoder().decode(
+					Resources.getResource("assets/cpmweb/lang-list.json")
+					))));
+			Map<String, String> map = new HashMap<>();
+			mapIn.forEach(k -> {
+				if (k.startsWith("comment"))return;
+				String v = mapIn.get(k);
+				map.put(k, v);
+			});
+			NameMapper<String> mapper = new NameMapper<>(map.keySet(), map::get);
+			ListPicker<NamedElement<String>> langBtn = new ListPicker<>(gui.getFrame(), mapper.asList());
+			mapper.setSetter(langBtn::setSelected);
+			mapper.setValue(I18n.locale);
+			langBtn.setAction(() -> {
+				I18n.locale = langBtn.getSelected().getElem();
+				try {
+					WebStorageWindow.of(RenderSystem.getWindow()).localStorage.setItem("editorLanguage", I18n.locale);
+				} catch (Exception e) {
+				}
+				gui.displayMessagePopup(gui.i18nFormat("web-label.language.reloadRequired.title"), gui.i18nFormat(getLangChangeDesc()));
+			});
+			langBtn.setBounds(new Box(5, 0, 150, 20));
+			panel.addElement(langBtn);
+		}
+		break;
 
 		case "editor":
 			if(firstOpen) {
@@ -356,9 +393,27 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 			}
 			break;
 
+		case "displayPopup":
+		{
+			PopupMenu pp = (PopupMenu) panel;
+			Panel pn = ((ScrollPanel)pp.getElements().get(0)).getDisplay();
+			pn.getElements().forEach(e -> {
+				Box b = e.getBounds();
+				e.setBounds(new Box(b.x, b.y + 20, b.w, b.h));
+			});
+			FullScreenButton fsb = new FullScreenButton(pp.getGui(), pp::close);
+			fsb.setBounds(new Box(0, 0, 80, 20));
+			pn.addElement(fsb);
+		}
+		break;
+
 		default:
 			break;
 		}
+	}
+
+	protected String getLangChangeDesc() {
+		return "web-label.language.reloadRequired.desc";
 	}
 
 	public static void close() {

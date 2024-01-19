@@ -65,7 +65,9 @@ sourceSets {
         java {
             srcDir 'src/main/java'
             exclude '**/CPMOSCClientForge.java'
-            exclude '**/CPMOSCMod.java'
+            exclude '**/CPMOSCModForge.java'
+            exclude '**/CPMOSCModNeoForge.java'
+            exclude '**/CPMOSCClientNeoForge.java'
        }
    }
 }

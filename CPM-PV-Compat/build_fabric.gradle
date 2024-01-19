@@ -1,0 +1,85 @@
+plugins {
+    id 'fabric-loom' version '0.11-SNAPSHOT'
+}
+
+sourceCompatibility = JavaLanguageVersion.of(java_version as int)
+targetCompatibility = JavaLanguageVersion.of(java_version as int)
+
+project.buildDir = '/build_fabric'
+
+archivesBaseName = archives_base_name
+version = mod_version
+group = maven_group
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "henkelmax.public"
+        url = 'https://maven.maxhenkel.de/repository/public'
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+		name = "tom5454 maven"
+		url = "https://raw.githubusercontent.com/tom5454/maven/main"
+	}
+    mavenLocal()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    
+    compileOnly "com.google.inject:guice:7.0.0"
+    
+    compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+    //compileOnly files("CustomPlayerModels-API-0.6.1-pre.jar")
+	modRuntimeOnly "com.tom5454.cpm:CustomPlayerModels-${project.cpm_mc_version}:${project.cpm_runtime_version}"
+
+    modImplementation "maven.modrinth:plasmo-voice:fabric-1.19.2-2.0.8"
+}
+
+processResources {
+    inputs.property "version", version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": mod_version
+    }
+    
+    filesMatching("**/*.toml") {
+        expand 'mod_id': mod_id,
+                'mod_version': mod_version
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            exclude '**/CPMPVModForge.java'
+            exclude '**/CPMPVModNeoForge.java'
+       }
+   }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = java_version as int
+}
+
+java {
+    withSourcesJar()
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}

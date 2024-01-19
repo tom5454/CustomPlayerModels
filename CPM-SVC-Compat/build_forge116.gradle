@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.20', changing: true
     }
 }
 
@@ -47,6 +47,14 @@ minecraft {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourceSets {
+	main {
+        java {
+            srcDir 'src/main/java'
+            exclude '**/CPMSVCModNeoForge.java'
+       }
+   }
+}
 
 repositories {
     mavenCentral()
@@ -76,6 +84,7 @@ dependencies {
     implementation "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
     
     compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+    //compileOnly files("CustomPlayerModels-API-0.6.1-pre.jar")
 	runtimeOnly fg.deobf("com.tom5454.cpm:CustomPlayerModels-1.16:${project.cpm_runtime_version}")
 
     implementation fg.deobf("maven.modrinth:simple-voice-chat:forge-1.16.5-${voicechat_api_version}")

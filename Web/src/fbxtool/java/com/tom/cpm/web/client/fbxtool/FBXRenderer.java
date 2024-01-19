@@ -85,8 +85,8 @@ public class FBXRenderer extends DirectModelRenderManager<FBXCreator> {
 
 		@Override
 		public void translateRotate(RenderedCube rc, MatrixStack st) {
-			((FBXStack)st).initBone(rc);
 			super.translateRotate(rc, st);
+			((FBXStack)st).initBone(rc);
 		}
 	}
 
@@ -175,15 +175,25 @@ public class FBXRenderer extends DirectModelRenderManager<FBXCreator> {
 				SkinType s = c instanceof ModelElement ? ((ModelElement)c).editor.skinType : SkinType.DEFAULT;
 				PartValues pv = DirectParts.getPartOverrides(part, s);
 				Vec3f pos = pv.getPos().add(rc.pos);
-				Vec3f rot = rc.rotation.asVec3f(true);
+				Vec3f rot = rc.rotation.asVec3f(false);
 				if(pv instanceof DirectPartValues) {
 					rot = rot.add(((DirectPartValues)pv).getRotation());
 				}
 				b.setBoneAbsolutePos(pos.x, pos.y, pos.z);
 				b.getBone().rotation.set(rot);
 			} else {
-				b.getBone().position.set(rc.pos);
-				b.getBone().rotation.set(rc.rotation.asVec3f(true));
+				/*Quaternion q = new Quaternion(getLast().getMatrix());
+				Vec4f p = new Vec4f(rc.pos, 1);
+				p.transform(new Mat4f(q));
+				b.getBone().position.set(p);
+				q.mul(rc.rotation.asQ());
+				b.getBone().rotation.set(q);*/
+				//b.getBone().position.set(rc.pos);
+				//b.getBone().rotation.set(rc.rotation.asVec3f(false));
+				Vec4f p = new Vec4f(0, 0, 0, 1);
+				p.transform(getLast().getMatrix());
+				p.mul(16);
+				b.setBoneAbsolutePos(p.x, p.y, p.z);
 				if(c instanceof ModelElement)
 					b.getBone().hidden = ((ModelElement)c).hidden;
 			}

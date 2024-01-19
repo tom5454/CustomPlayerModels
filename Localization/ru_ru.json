@@ -1111,6 +1111,8 @@
   "web-button.viewer.search": "Поиск",
   "web-button.viewer.download": "Скачать",
   "web-button.viewer.uploadToMc": "Загрузить на Minecraft.net",
+  "web-button.fullscreen": "UNLOCALIZED: Toggle Fullscreen",
+  "web-button.language": "UNLOCALIZED: Language",
   "web-label.editorBeta": "Веб-версия редактора находится в бета-тесте.\\Возможны незначительные визуальные дефекты с редактором.\\\\Ваши модели будут сохранены внутри вашего браузера.\\Используйте меню Файл/Файловый менеджер, чтобы их скачать, или кнопку ... в окне выбора файла.",
   "web-label.loadFromURL": "Загрузка проекта по URL",
   "web-label.fileName": "Имя файла",
@@ -1131,6 +1133,8 @@
   "web-label.viewer.mode.skin": "Скин Кодированный",
   "web-label.viewer.mode.model": "Модель (.cpmmodel)",
   "web-label.pasteClient": "Клиент вставки",
+  "web-label.language.reloadRequired.title": "UNLOCALIZED: Reload Required",
+  "web-label.language.reloadRequired.desc": "UNLOCALIZED: Page reload is required to switch the language.",
   "bb-button.openCPMProject": "Открыть проект настраиваемых игроков",
   "bb-button.exportCPMProject": "Экспорт проекта настраиваемых игроков",
   "bb-button.openEmbeddedEditor": "Открыть встроенный редактор CPM",
@@ -1177,6 +1181,7 @@
   "bb-label.fixStagedAnim.selectBase": "Выбрать базовую анимацию:",
   "bb-label.autoFix.stagedAnim": "Базовая ступенчатая анимация",
   "bb-label.warn.unknownAnimation": "Неизвестный тип анимации (%s)",
+  "bb-label.language.reloadRequired.desc": "UNLOCALIZED: Please restart Blockbench to apply language change.",
   "bb-tooltip.export.renameGroup": "Переименовать группу в выбранный тип\\Если группа с таким же именем уже существует, действие завершится ошибкой.",
   "osc-button.cpmosc.oscSettings": "Настройки OSC",
   "osc-button.cpmosc.oscWizard": "Мастер OSC-анимации",
@@ -1198,5 +1203,9 @@
   "osc-label.cpmosc.oscTransmitAddr": "Адрес:",
   "osc-tooltip.cpmosc.oscSettings": "Открыть настройки OSC и отладочное всплывающее окно",
   "osc-tooltip.cpmosc.oscWizard": "Создать новую OSC-анимацию с помощью мастера",
-  "osc-tooltip.cpmosc.oscFirstArg": "Фильтр для первого строкового аргумента, оставьте пустым для отсутствия фильтра\\Полезно для срабатывания VMC"
+  "osc-tooltip.cpmosc.oscFirstArg": "Фильтр для первого строкового аргумента, оставьте пустым для отсутствия фильтра\\Полезно для срабатывания VMC",
+  "fbxtool-button.exportGLTF": "UNLOCALIZED: Export GLTF",
+  "fbxtool-button.setupRig": "UNLOCALIZED: Setup Rig",
+  "fbxtool-label.humanoidRig": "UNLOCALIZED: Humanoid Rig",
+  "fbxtool-label.threeLoading": "UNLOCALIZED: Three.js Loading..."
 }

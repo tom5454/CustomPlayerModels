@@ -10,7 +10,6 @@ import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.web.client.FS;
 import com.tom.cpm.web.client.LocalStorageFS;
-import com.tom.cpm.web.client.Stylesheet;
 import com.tom.cpm.web.client.java.io.FileNotFoundException;
 import com.tom.cpm.web.client.util.JSZip;
 import com.tom.cpm.web.client.util.JSZip.ZipFileProperties;
@@ -65,7 +64,7 @@ public class FileManagerPopup extends PopupPanel {
 					+ "margin: 0px;"
 					+ "min-height: 100%;"
 					+ "font-family: Minecraftia;"
-					+ "}" + Stylesheet.FONT
+					+ "}" + FontLoader.FONTS
 					+ " button {"
 					+ "padding: 4 10;"
 					+ "font-family: Minecraftia;"

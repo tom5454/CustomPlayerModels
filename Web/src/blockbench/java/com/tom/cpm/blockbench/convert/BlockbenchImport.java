@@ -273,6 +273,7 @@ public class BlockbenchImport {
 		Animation a = new Animation().add(false);
 		Animation.selected = a;
 		a.name = ea.toString();
+		if (ea.type.isStaged())a.name = ea.displayName;
 		a.loop = ea.loop ? "loop" : "once";
 		a.type = Animation.makeType(ea.type, ea.pose);
 		a.additive = ea.add;

@@ -11,3 +11,10 @@ Currently you have to use `-DuseLib=true` argument or it will fail to compile.
 
 Fixing weird issues with GWT:
 - Delete the contents of `gwt-temp`, and `gwt-unitCache` and retry (restart `devMode`).
+
+## Using devMode
+The server is available at `http://127.0.0.1:8888/CPMWeb.html?app=<app name>`.  
+Replace `<app name>`:
+- viewer
+- fbxtool
+Remove the `?app...` to open the CPM Editor.

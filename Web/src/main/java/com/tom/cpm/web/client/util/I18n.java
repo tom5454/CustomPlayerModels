@@ -6,21 +6,36 @@ import com.tom.cpm.web.client.java.Base64;
 import com.tom.cpm.web.client.resources.Resources;
 
 import elemental2.core.Global;
+import elemental2.core.JsObject;
 import elemental2.dom.DomGlobal;
 import elemental2.promise.Promise;
+import elemental2.webstorage.WebStorageWindow;
 import jsinterop.base.Js;
 import jsinterop.base.JsPropertyMap;
 
 public class I18n {
 	private static JsPropertyMap<String> entries;
 	public static final Promise<Object> loaded;
+	public static String locale;
 
 	static {
+		String loc = DomGlobal.navigator.language.toLowerCase().replace('-', '_');
+		try {
+			locale = WebStorageWindow.of(DomGlobal.window).localStorage.getItem("editorLanguage");
+		} catch (Exception e) {
+			locale = loc;
+		}
+		DomGlobal.console.log("Selected Language: " + locale);
 		loaded = Resources.loaded.then(__ -> {
-			String loc = DomGlobal.navigator.language.toLowerCase().replace('-', '_');
 			entries = getLang("en_us");
-			JsPropertyMap<String> ent = getLang(loc);
-			ent.forEach(k -> entries.set(k, ent.get(k)));
+			JsPropertyMap<String> ent = getLang(locale);
+			if (JsObject.keys(ent).length == 0 && !loc.equals(locale)) {
+				locale = loc;
+				ent = getLang(locale);
+			}
+			final JsPropertyMap<String> e = ent;
+			if (JsObject.keys(e).length > 0)
+				e.forEach(k -> entries.set(k, e.get(k)));
 			return null;
 		});
 	}

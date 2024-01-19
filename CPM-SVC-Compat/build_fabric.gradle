@@ -42,7 +42,8 @@ dependencies {
 
     implementation "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
     
-    compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+    //compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+    compileOnly files("CustomPlayerModels-API-0.6.1-pre.jar")
 	modRuntimeOnly "com.tom5454.cpm:CustomPlayerModels-${project.cpm_mc_version}:${project.cpm_runtime_version}"
 
     modImplementation "maven.modrinth:simple-voice-chat:fabric-1.18.2-${voicechat_api_version}"
@@ -67,7 +68,8 @@ sourceSets {
     main {
         java {
             srcDir 'src'
-            exclude '**/CPMSVCMod.java'
+            exclude '**/CPMSVCModForge.java'
+            exclude '**/CPMSVCModNeoForge.java'
        }
    }
 }

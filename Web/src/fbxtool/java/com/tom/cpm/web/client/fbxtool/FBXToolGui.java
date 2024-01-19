@@ -107,7 +107,7 @@ public class FBXToolGui extends Frame implements IModelDisplayPanel {
 		title.setBounds(new Box(5, 5, 0, 0));
 		right.addElement(title);
 
-		Button export = new Button(gui, "Export GLTF", this::export);
+		Button export = new Button(gui, gui.i18nFormat("fbxtool-button.exportGLTF"), this::export);
 		export.setBounds(new Box(5, height - 25, 100, 20));
 		right.addElement(export);
 
@@ -120,15 +120,27 @@ public class FBXToolGui extends Frame implements IModelDisplayPanel {
 
 		FlowLayout layout = new FlowLayout(p, 4, 1);
 
+		Panel hP = new Panel(gui);
+		hP.setBounds(new Box(5, 0, 220, 20));
+		p.addElement(hP);
+
 		boolean hr = humanoidRig != null ? humanoidRig.isSelected() : true;
-		humanoidRig = new Checkbox(gui, "Humanoid Rig");
+		humanoidRig = new Checkbox(gui, gui.i18nFormat("fbxtool-label.humanoidRig"));
 		humanoidRig.setSelected(hr);
-		humanoidRig.setBounds(new Box(5, 0, 120, 20));
+		humanoidRig.setBounds(new Box(0, 0, 120, 20));
+		hP.addElement(humanoidRig);
+
+		Button setupRig = new Button(gui, gui.i18nFormat("fbxtool-button.setupRig"), () -> {
+
+		});
+		setupRig.setBounds(new Box(120, 0, 100, 20));
+		hP.addElement(setupRig);
+
 		humanoidRig.setAction(() -> {
 			humanoidRig.setSelected(!humanoidRig.isSelected());
 			three.markDirty();
+			setupRig.setEnabled(humanoidRig.isSelected());
 		});
-		p.addElement(humanoidRig);
 
 		layout.reflow();
 	}

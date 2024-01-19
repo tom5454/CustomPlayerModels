@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[28,)"
+loaderVersion="[1,)"
 license="MIT"
 issueTrackerURL="https://github.com/tom5454/CustomPlayerModels/issues"
 [[mods]]
@@ -16,19 +16,29 @@ A Customizable Player Models, OSC/VMC protocol compat mod.
 '''
 [[dependencies.cpmoscc]]
     modId="forge"
-    mandatory=true
+    mandatory=false
+    type="optional"
     versionRange="[28,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cpmoscc]]
+    modId="neoforge"
+    mandatory=false
+    type="required"
+    versionRange="[20.2,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cpmoscc]]
     modId="minecraft"
     mandatory=true
+    type="required"
     versionRange="[1.14.4,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cpmoscc]]
     modId="cpm"
     mandatory=true
+    type="required"
     versionRange="*"
     ordering="NONE"
     side="BOTH"

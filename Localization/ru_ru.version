@@ -1198,5 +1198,14 @@
   "label.cpm.exportWarn": "You can\u0027t edit exported models.\\Make sure to keep your project file safe.",
   "label.cpm.pose.crawling": "Crawling",
   "tooltip.cpm.export": "Export your model to use it in-game.",
-  "label.cpm.wiki.page.exporting": "Exporting"
+  "label.cpm.wiki.page.exporting": "Exporting",
+  "fbxtool-button.exportGLTF": "Export GLTF",
+  "fbxtool-button.setupRig": "Setup Rig",
+  "fbxtool-label.humanoidRig": "Humanoid Rig",
+  "fbxtool-label.threeLoading": "Three.js Loading...",
+  "web-button.fullscreen": "Toggle Fullscreen",
+  "web-button.language": "Language",
+  "web-label.language.reloadRequired.title": "Reload Required",
+  "web-label.language.reloadRequired.desc": "Page reload is required to switch the language.",
+  "bb-label.language.reloadRequired.desc": "Please restart Blockbench to apply language change."
 }

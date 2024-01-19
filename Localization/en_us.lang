@@ -1131,6 +1131,8 @@ web-button.viewer.add=Add local skin
 web-button.viewer.search=Search
 web-button.viewer.download=Download
 web-button.viewer.uploadToMc=Upload to Minecraft.net
+web-button.fullscreen=Toggle Fullscreen
+web-button.language=Language
 
 web-label.editorBeta=The web version of the editor is in Beta\You may experience minor visual glitches with the editor.\\Your models will be saved inside your browser\use the File/File Manager to download them, or use the ... button in the file chooser.
 web-label.loadFromURL=Loading project from URL
@@ -1152,6 +1154,8 @@ web-label.viewer.clone=Clone Model
 web-label.viewer.mode.skin=Skin Encoded
 web-label.viewer.mode.model=Model (.cpmmodel)
 web-label.pasteClient=Paste Client
+web-label.language.reloadRequired.title=Reload Required
+web-label.language.reloadRequired.desc=Page reload is required to switch the language.
 
 bb-button.openCPMProject=Open Customizable Player Models Project
 bb-button.exportCPMProject=Export Customizable Player Models Project
@@ -1200,6 +1204,7 @@ bb-label.fixStagedAnim.title=Auto-Fix Staged Animation
 bb-label.fixStagedAnim.selectBase=Select Base Animation:
 bb-label.autoFix.stagedAnim=Staged Animation Base
 bb-label.warn.unknownAnimation=Unknown Animation Type (%s)
+bb-label.language.reloadRequired.desc=Please restart Blockbench to apply language change.
 
 bb-tooltip.export.renameGroup=Rename the group to the selected type\If a group with the same name already exists the action will fail.
 
@@ -1226,3 +1231,9 @@ osc-label.cpmosc.oscTransmitAddr=Address:
 osc-tooltip.cpmosc.oscSettings=Open the OSC Settings and Debug Popup
 osc-tooltip.cpmosc.oscWizard=Generate a new OSC Animation using a wizard
 osc-tooltip.cpmosc.oscFirstArg=Filter for the first string argument, leave empty for no filter\Useful for VMC triggers
+
+fbxtool-button.exportGLTF=Export GLTF
+fbxtool-button.setupRig=Setup Rig
+
+fbxtool-label.humanoidRig=Humanoid Rig
+fbxtool-label.threeLoading=Three.js Loading...

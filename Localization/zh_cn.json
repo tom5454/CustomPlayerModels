@@ -1112,6 +1112,8 @@
   "web-button.viewer.search": "搜索",
   "web-button.viewer.download": "下载",
   "web-button.viewer.uploadToMc": "上传到 Minecraft.net",
+  "web-button.fullscreen": "UNLOCALIZED: Toggle Fullscreen",
+  "web-button.language": "UNLOCALIZED: Language",
   "web-label.editorBeta": "编辑器的 Web 版本处于测试阶段\\您可能会遇到编辑器的轻微视觉故障。\\\\您的模型将保存在浏览器中\\使用文件/文件管理器下载它们，或使用 .. . 文件选择器中的按钮。",
   "web-label.loadFromURL": "从 URL 加载项目",
   "web-label.fileName": "文件名称",
@@ -1132,6 +1134,8 @@
   "web-label.viewer.mode.skin": "皮肤编码",
   "web-label.viewer.mode.model": "模型（.cpmmodel）",
   "web-label.pasteClient": "粘贴客户端",
+  "web-label.language.reloadRequired.title": "UNLOCALIZED: Reload Required",
+  "web-label.language.reloadRequired.desc": "UNLOCALIZED: Page reload is required to switch the language.",
   "bb-button.openCPMProject": "打开Customizable Player Models项目",
   "bb-button.exportCPMProject": "导出Customizable Player Models项目",
   "bb-button.openEmbeddedEditor": "打开CPM Web 编辑器",
@@ -1178,6 +1182,7 @@
   "bb-label.fixStagedAnim.selectBase": "选择基本动画：",
   "bb-label.autoFix.stagedAnim": "基本分阶段动画",
   "bb-label.warn.unknownAnimation": "未知的动画类型（%s）",
+  "bb-label.language.reloadRequired.desc": "UNLOCALIZED: Please restart Blockbench to apply language change.",
   "bb-tooltip.export.renameGroup": "将组重命名为所选类型\\如果已存在同名组，则操作将失败。",
   "osc-button.cpmosc.oscSettings": "OSC 设置",
   "osc-button.cpmosc.oscWizard": "OSC 动画向导",
@@ -1199,5 +1204,9 @@
   "osc-label.cpmosc.oscTransmitAddr": "地址：",
   "osc-tooltip.cpmosc.oscSettings": "打开 OSC 设置和调试弹出窗口",
   "osc-tooltip.cpmosc.oscWizard": "使用向导生成新的 OSC 动画",
-  "osc-tooltip.cpmosc.oscFirstArg": "过滤第一个字符串参数，留空不过滤\\对VMC触发器有用"
+  "osc-tooltip.cpmosc.oscFirstArg": "过滤第一个字符串参数，留空不过滤\\对VMC触发器有用",
+  "fbxtool-button.exportGLTF": "UNLOCALIZED: Export GLTF",
+  "fbxtool-button.setupRig": "UNLOCALIZED: Setup Rig",
+  "fbxtool-label.humanoidRig": "UNLOCALIZED: Humanoid Rig",
+  "fbxtool-label.threeLoading": "UNLOCALIZED: Three.js Loading..."
 }

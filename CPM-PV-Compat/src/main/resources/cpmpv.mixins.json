@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.tom.cpmpvc.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "client": [
+	  "BaseClientAudioSourceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -48,5 +48,6 @@
   "bb-label.fixStagedAnim.selectBase": "Select Base Animation:",
   "bb-label.autoFix.stagedAnim": "Staged Animation Base",
   "bb-label.warn.unknownAnimation": "Unknown Animation Type (%s)",
+  "bb-label.language.reloadRequired.desc": "Please restart Blockbench to apply language change.",
   "bb-tooltip.export.renameGroup": "Rename the group to the selected type\\If a group with the same name already exists the action will fail."
 }

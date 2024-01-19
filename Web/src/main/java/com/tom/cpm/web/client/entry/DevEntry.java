@@ -7,6 +7,7 @@ import com.tom.cpm.web.client.CPMWebInterface;
 import com.tom.cpm.web.client.CPMWebInterface.WebEntry;
 import com.tom.cpm.web.client.FS;
 import com.tom.cpm.web.client.LocalStorageFS;
+import com.tom.cpm.web.client.fbxtool.FBXEditorGui;
 import com.tom.cpm.web.client.fbxtool.FBXToolGui;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.GuiImpl;
@@ -28,6 +29,9 @@ public class DevEntry implements EntryPoint, WebEntry {
 		if(app != null && app.endsWith("viewer.html") || "viewer".equals(Java.getQueryVariable("app"))) {
 			DomGlobal.document.title = "CPM Web Viewer";
 			gui.setGui(new ViewerGui(gui));
+		} else if(app != null && app.endsWith("fbxeditor.html") || "fbxeditor".equals(Java.getQueryVariable("app"))) {
+			DomGlobal.document.title = "CPM FBX Editor";
+			gui.setGui(new FBXEditorGui(gui));
 		} else if(app != null && app.endsWith("fbxtool.html") || "fbxtool".equals(Java.getQueryVariable("app"))) {
 			DomGlobal.document.title = "CPM FBX Tool";
 			gui.setGui(new FBXToolGui(gui));

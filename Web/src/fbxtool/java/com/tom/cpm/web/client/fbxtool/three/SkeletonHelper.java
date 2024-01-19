@@ -6,6 +6,7 @@ import jsinterop.annotations.JsType;
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "THREE.SkeletonHelper")
 public class SkeletonHelper extends Object3D {
 	public MeshBasicMaterial material;
+	public Bone[] bones;
 
 	public SkeletonHelper(Mesh mesh) {
 	}

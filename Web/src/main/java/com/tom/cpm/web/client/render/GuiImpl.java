@@ -342,10 +342,7 @@ public class GuiImpl implements IGui, EventHandler {
 				return null;
 			};
 			element.style.fontSize = FontSizeUnionType.of(RenderSystem.fontSize + "px");
-			int r = (this0.colors.label_text_color & 0x00FF0000) >>> 16;
-			int g = (this0.colors.label_text_color & 0x0000FF00) >>> 8;
-			int b = this0.colors.label_text_color & 0x000000FF;
-			element.style.color = "rgb(" + r + ", " + g + ", " + b + ")";
+			element.style.color = toCSSColor(this0.colors.label_text_color);
 			this.enabled = true;
 		}
 
@@ -653,6 +650,13 @@ public class GuiImpl implements IGui, EventHandler {
 		}
 
 		protected void makeVisible() {}
+
+		public static String toCSSColor(int rgb) {
+			int r = (rgb & 0x00FF0000) >>> 16;
+			int g = (rgb & 0x0000FF00) >>> 8;
+			int b = rgb & 0x000000FF;
+			return "rgb(" + r + ", " + g + ", " + b + ")";
+		}
 	}
 
 	private boolean forceClose;

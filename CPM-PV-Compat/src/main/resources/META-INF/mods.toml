@@ -1,0 +1,49 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+[[mods]]
+modId="cpmpvc"
+version="${mod_version}"
+displayName="CPM PV Compat"
+logoFile="icon.png"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/cpmpvc" #optional
+credits="tom5454"
+authors="tom5454"
+description='''
+A Customizable Player Models, Plasmo Voice compat mod.
+'''
+[[dependencies.cpmpvc]]
+    modId="forge"
+    mandatory=false
+    type="optional"
+    versionRange="[36,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cpmpvc]]
+    modId="neoforge"
+    mandatory=false
+    type="required"
+    versionRange="[20.2,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cpmpvc]]
+    modId="minecraft"
+    mandatory=true
+    type="required"
+    versionRange="[1.19.2,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cpmpvc]]
+    modId="plasmovoice"
+    mandatory=true
+    type="required"
+    versionRange="[2.0.0,)"
+    ordering="AFTER"
+    side="BOTH"
+[[dependencies.cpmpvc]]
+    modId="cpm"
+    mandatory=true
+    type="required"
+    versionRange="*"
+    ordering="NONE"
+    side="BOTH"

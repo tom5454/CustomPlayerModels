@@ -10,6 +10,8 @@
   "web-button.viewer.search": "ɥɔɹɐǝS",
   "web-button.viewer.download": "pɐoןuʍoᗡ",
   "web-button.viewer.uploadToMc": "ʇǝu˙ʇɟɐɹɔǝuıW oʇ pɐoןd∩",
+  "web-button.fullscreen": "uǝǝɹɔsןןnℲ ǝןbbo⟘",
+  "web-button.language": "ǝbɐnbuɐꞀ",
   "web-label.editorBeta": "˙ɹǝsooɥɔ ǝןıɟ ǝɥʇ uı uoʇʇnq ˙˙˙ ǝɥʇ ǝsn ɹo \u0027ɯǝɥʇ pɐoןuʍop oʇ ɹǝbɐuɐW ǝןıℲ/ǝןıℲ ǝɥʇ ǝsn\\ɹǝsʍoɹq ɹnoʎ ǝpısuı pǝʌɐs ǝq ןןıʍ sןǝpoɯ ɹnoʎ\\\\˙ɹoʇıpǝ ǝɥʇ ɥʇıʍ sǝɥɔʇıןb ןɐnsıʌ ɹouıɯ ǝɔuǝıɹǝdxǝ ʎɐɯ noʎ\\ɐʇǝᗺ uı sı ɹoʇıpǝ ǝɥʇ ɟo uoısɹǝʌ qǝʍ ǝɥ⟘",
   "web-label.loadFromURL": "Ꞁᴚ∩ ɯoɹɟ ʇɔǝظoɹd buıpɐoꞀ",
   "web-label.fileName": "ǝɯɐN ǝןıℲ",
@@ -29,5 +31,7 @@
   "web-label.viewer.clone": "ןǝpoW ǝuoןƆ",
   "web-label.viewer.mode.skin": "pǝpoɔuƎ uıʞS",
   "web-label.viewer.mode.model": "(ןǝpoɯɯdɔ˙) ןǝpoW",
-  "web-label.pasteClient": "ʇuǝıןƆ ǝʇsɐԀ"
+  "web-label.pasteClient": "ʇuǝıןƆ ǝʇsɐԀ",
+  "web-label.language.reloadRequired.title": "pǝɹınbǝᴚ pɐoןǝᴚ",
+  "web-label.language.reloadRequired.desc": "˙ǝbɐnbuɐן ǝɥʇ ɥɔʇıʍs oʇ pǝɹınbǝɹ sı pɐoןǝɹ ǝbɐԀ"
 }

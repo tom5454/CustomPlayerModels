@@ -93,7 +93,6 @@ public class MainWrapper {
 			isLoaded = true;
 
 			System.out.println("Running resource generator");
-			boolean min = mode.equals("Viewer");
 
 			Supplier<String> resGen = new Supplier<String>() {
 				private String r;
@@ -102,7 +101,7 @@ public class MainWrapper {
 				@Override
 				public String get() {
 					if(r == null || System.currentTimeMillis() - lastGen > 5000) {
-						r = ResourceGen.run(wd, min);
+						r = ResourceGen.run(wd, mode);
 						lastGen = System.currentTimeMillis();
 					}
 					return r;

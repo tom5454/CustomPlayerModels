@@ -18,9 +18,9 @@ public class CubeData {
 			JsonMap s = JsonUtil.fromJson(cube.pluginData);
 			if(s.containsKey("extrude")) {
 				this.extrude = new Extrude();
-				this.extrude.u = s.getInt("u");
-				this.extrude.v = s.getInt("v");
-				this.extrude.ts = s.getInt("ts");
+				this.extrude.u = s.getInt("u", 0);
+				this.extrude.v = s.getInt("v", 0);
+				this.extrude.ts = s.getInt("ts", 0);
 			}
 		}
 	}

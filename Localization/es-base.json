@@ -1112,6 +1112,8 @@
   "web-button.viewer.search": "Buscar",
   "web-button.viewer.download": "Descargar",
   "web-button.viewer.uploadToMc": "Subir a Minecraft.net",
+  "web-button.fullscreen": "UNLOCALIZED: Toggle Fullscreen",
+  "web-button.language": "UNLOCALIZED: Language",
   "web-label.editorBeta": "La versión web del editor está en fase Beta\\Puede que experimentes errores visuales menores.\\\\Tus Modelos serán guardados dentro del explorador\\Usa Archivp/Administrador de Archivos para descargarlos, o usa el botón ... en el explorador de archivos.",
   "web-label.loadFromURL": "Cargando proyecto desde URL",
   "web-label.fileName": "Nombre del Archivo",
@@ -1132,6 +1134,8 @@
   "web-label.viewer.mode.skin": "Skin Codificada",
   "web-label.viewer.mode.model": "Modelo (.cpmmodel)",
   "web-label.pasteClient": "Pegar Cliente",
+  "web-label.language.reloadRequired.title": "UNLOCALIZED: Reload Required",
+  "web-label.language.reloadRequired.desc": "UNLOCALIZED: Page reload is required to switch the language.",
   "bb-button.openCPMProject": "Abrir Proyecto de Customizable Player Models",
   "bb-button.exportCPMProject": "Exportar Proyecto de Customizable Player Models",
   "bb-button.openEmbeddedEditor": "Abrir Editor de CPM Integrado",
@@ -1178,6 +1182,7 @@
   "bb-label.fixStagedAnim.selectBase": "Seleccionar Animación Base:",
   "bb-label.autoFix.stagedAnim": "Base de Animación Escenificada",
   "bb-label.warn.unknownAnimation": "Tipo de Animación Desconocida (%s)",
+  "bb-label.language.reloadRequired.desc": "UNLOCALIZED: Please restart Blockbench to apply language change.",
   "bb-tooltip.export.renameGroup": "Renombrar el grupo al tipo seleccionado\\Si un grupo ya tiene el mismo nombre la acción va a fallar.",
   "osc-button.cpmosc.oscSettings": "Opciones de OSC",
   "osc-button.cpmosc.oscWizard": "OSC Animation Wizard",
@@ -1199,5 +1204,9 @@
   "osc-label.cpmosc.oscTransmitAddr": "Dirección:",
   "osc-tooltip.cpmosc.oscSettings": "Abre las opciones de OSC y Debug Popup",
   "osc-tooltip.cpmosc.oscWizard": "Genera una nueva animación de OSC usando un wizard",
-  "osc-tooltip.cpmosc.oscFirstArg": "Filtra por el primer hilo de argumento, Deja vacío para ningún filtro\\útil para VMC triggers"
+  "osc-tooltip.cpmosc.oscFirstArg": "Filtra por el primer hilo de argumento, Deja vacío para ningún filtro\\útil para VMC triggers",
+  "fbxtool-button.exportGLTF": "UNLOCALIZED: Export GLTF",
+  "fbxtool-button.setupRig": "UNLOCALIZED: Setup Rig",
+  "fbxtool-label.humanoidRig": "UNLOCALIZED: Humanoid Rig",
+  "fbxtool-label.threeLoading": "UNLOCALIZED: Three.js Loading..."
 }

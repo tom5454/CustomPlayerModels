@@ -8,9 +8,9 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(CPMSVCC.MOD_ID)
-public class CPMSVCMod {
+public class CPMSVCModForge {
 
-	public CPMSVCMod() {
+	public CPMSVCModForge() {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::sendIMC);
 	}
 

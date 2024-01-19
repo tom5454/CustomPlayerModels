@@ -8,11 +8,11 @@
     "tom5454"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/cpmsvcc",
     "sources": "https://github.com/tom5454/CustomPlayerModels"
   },
   "license": "MIT",
-  "icon": "assets/cpmsvcc/icon.png",
+  "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
     "cpmapi": [

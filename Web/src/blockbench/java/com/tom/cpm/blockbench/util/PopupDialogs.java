@@ -158,16 +158,18 @@ public class PopupDialogs {
 
 	private static void fillWarnDialog(List<WarnEntry> ent, GlobalFunc quickFix) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<div style='display: flex;flex-direction: column;'><style>.cpm_autofix_button {float: right;} .cpm_warn_msg {text-align: left;}</style>");
+		sb.append("<div style='display: flex;flex-direction: column;'>");
 		ent.stream().filter(w -> !w.isFixed()).sorted().forEach(w -> {
 			String msg = w.getMessage();
-			sb.append("<div class='tool widget cpm_warn_msg'>");
+			sb.append("<div class='tool widget cpm_warn_msg' style='text-align: left; display: flex; flex: 1;'>");
 			if(w.getTooltip() != null) {
 				sb.append("<div class='tooltip' style='margin-left: 0px;'>" + w.getTooltip() + "</div>");
 			}
+			sb.append("<div>");
 			sb.append(msg);
+			sb.append("</div>");
 			if(w.canQuickFix()) {
-				sb.append("<button onclick='" + quickFix + "(" + ent.indexOf(w) + ")' class='cpm_autofix_button'>" + I18n.get("bb-button.autoFix") + "</button>");
+				sb.append("<div><button onclick='" + quickFix + "(" + ent.indexOf(w) + ")'>" + I18n.get("bb-button.autoFix") + "</button></div>");
 			}
 			sb.append("</div>");
 		});

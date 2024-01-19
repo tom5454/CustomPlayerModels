@@ -10,6 +10,8 @@
   "web-button.viewer.search": "Search",
   "web-button.viewer.download": "Download",
   "web-button.viewer.uploadToMc": "Upload to Minecraft.net",
+  "web-button.fullscreen": "Toggle Fullscreen",
+  "web-button.language": "Language",
   "web-label.editorBeta": "The web version of the editor is in Beta\\You may experience minor visual glitches with the editor.\\\\Your models will be saved inside your browser\\use the File/File Manager to download them, or use the ... button in the file chooser.",
   "web-label.loadFromURL": "Loading project from URL",
   "web-label.fileName": "File Name",
@@ -29,5 +31,7 @@
   "web-label.viewer.clone": "Clone Model",
   "web-label.viewer.mode.skin": "Skin Encoded",
   "web-label.viewer.mode.model": "Model (.cpmmodel)",
-  "web-label.pasteClient": "Paste Client"
+  "web-label.pasteClient": "Paste Client",
+  "web-label.language.reloadRequired.title": "Reload Required",
+  "web-label.language.reloadRequired.desc": "Page reload is required to switch the language."
 }

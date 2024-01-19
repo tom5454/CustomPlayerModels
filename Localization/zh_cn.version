@@ -1197,5 +1197,14 @@
   "commands.cpm.setValueFor": "Set \u0027%s\u0027 to \u0027%s\u0027 for player %s",
   "commands.cpm.setScalingMethod.method": "Scaling Method: %s",
   "commands.cpm.setScalingMethod.default": "Default Scaler",
-  "commands.cpm.scalingReset": "Reset scaling for %s"
+  "commands.cpm.scalingReset": "Reset scaling for %s",
+  "fbxtool-button.exportGLTF": "Export GLTF",
+  "fbxtool-button.setupRig": "Setup Rig",
+  "fbxtool-label.humanoidRig": "Humanoid Rig",
+  "fbxtool-label.threeLoading": "Three.js Loading...",
+  "web-button.fullscreen": "Toggle Fullscreen",
+  "web-button.language": "Language",
+  "web-label.language.reloadRequired.title": "Reload Required",
+  "web-label.language.reloadRequired.desc": "Page reload is required to switch the language.",
+  "bb-label.language.reloadRequired.desc": "Please restart Blockbench to apply language change."
 }

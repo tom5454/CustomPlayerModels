@@ -12,4 +12,6 @@ public class Bone extends Object3D {
 
 	@JsProperty(name = "_cpm_hidden_post")
 	public boolean hidden;
+
+	public native void getWorldPosition(ThreeVec3 v3);
 }

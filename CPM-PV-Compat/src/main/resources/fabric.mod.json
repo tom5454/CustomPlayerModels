@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "cpmpvc",
+  "version": "${version}",
+  "name": "CPM PV Compat",
+  "description": "A Customizable Player Models, Plasmo Voice compat mod.",
+  "authors": [
+    "tom5454"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/cpmpvc",
+    "sources": "https://github.com/tom5454/CustomPlayerModels"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "cpmapi": [
+      "com.tom.cpmpvc.CPMPVPlugin"
+    ],
+    "client": [
+      "com.tom.cpmpvc.CPMPVModFabric"
+    ]
+  },
+  "mixins": [
+	  "cpmpv.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+	"plasmovoice": ">=2.0.0",
+	"cpm": "*"
+  }
+}

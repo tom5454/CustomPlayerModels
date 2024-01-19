@@ -43,7 +43,6 @@ public class CustomPlayerModels extends CommonBase {
 		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.preInit();
 
 		NeoForge.EVENT_BUS.register(this);
-		NeoForge.EVENT_BUS.register(new ServerHandler());
 	}
 
 	private void doClientStuff(final FMLClientSetupEvent event) {

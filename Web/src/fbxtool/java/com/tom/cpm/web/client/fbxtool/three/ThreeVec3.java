@@ -7,7 +7,7 @@ import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
-@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "THREE.Vector3")
 public class ThreeVec3 {
 	public double x, y, z;
 
@@ -38,4 +38,6 @@ public class ThreeVec3 {
 		this.y = v;
 		this.z = v;
 	}
+
+	public native double distanceTo(ThreeVec3 v);
 }

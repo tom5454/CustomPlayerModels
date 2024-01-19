@@ -3,6 +3,8 @@ package com.tom.cpm.web.client.resources;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import com.tom.cpm.web.client.util.JSZip;
 import com.tom.cpm.web.client.util.JSZip.ZipEntry;
@@ -46,5 +48,13 @@ public class Resources {
 
 	public static Set<String> listResources() {
 		return RESOURCE_MAP.keySet();
+	}
+
+	public static Stream<String> listResources(String prefix, Predicate<String> path) {
+		return RESOURCE_MAP.keySet().stream().filter(s -> {
+			String[] sp = s.split("/", 3);
+			if (sp.length < 3)return false;
+			return prefix.equalsIgnoreCase(sp[0]) && path.test(sp[2]);
+		});
 	}
 }
