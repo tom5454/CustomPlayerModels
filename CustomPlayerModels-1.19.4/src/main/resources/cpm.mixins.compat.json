@@ -12,8 +12,7 @@
 	"ModelPartMixin_OF",
 	"BlockEntityWithoutLevelRendererMixin_OF",
 	"VRArmRendererMixin_$vivecraft",
-	"BlockEntityRenderDispatcherMixin_Iris",
-	"LevelRendererMixin_Iris_FPM"
+	"BlockEntityRenderDispatcherMixin_Iris"
   ],
   "injectors": {
     "defaultRequire": 1

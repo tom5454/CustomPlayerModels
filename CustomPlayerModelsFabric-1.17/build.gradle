@@ -34,7 +34,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	compileOnly files("of.jar")
+	compileOnly files("../CustomPlayerModels-1.17/of.jar")
 }
 
 loom {

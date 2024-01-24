@@ -13,9 +13,9 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.client.ConfigScreenHandler;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
@@ -39,14 +39,14 @@ import com.tom.cpm.shared.util.Log;
 public class CustomPlayerModelsClient extends ClientBase {
 	public static final CustomPlayerModelsClient INSTANCE = new CustomPlayerModelsClient();
 
-	public static void preInit() {
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(KeyBindings::init);
+	public static void preInit(IEventBus bus) {
+		bus.addListener(KeyBindings::init);
+		bus.addListener(INSTANCE::registerShaders0);
 	}
 
 	public void init() {
 		init0();
 		NeoForge.EVENT_BUS.register(this);
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders0);
 		init1();
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}

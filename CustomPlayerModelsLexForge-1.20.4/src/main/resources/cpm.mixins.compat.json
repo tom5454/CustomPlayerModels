@@ -11,7 +11,6 @@
 	"AbstractTextureMixin_OF",
 	"BlockEntityWithoutLevelRendererMixin_OF",
 	"BlockEntityRenderDispatcherMixin_Iris",
-	"LevelRendererMixin_Iris_FPM",
 	"VRArmRendererMixin_$vivecraft"
   ],
   "injectors": {

@@ -52,10 +52,5 @@ accessible field net/minecraft/server/network/ServerCommonPacketListenerImpl ser
 accessible field net/minecraft/client/renderer/texture/HttpTexture file Ljava/io/File;
 accessible field net/minecraft/client/renderer/texture/HttpTexture urlString Ljava/lang/String;
 
-accessible field net/minecraft/network/protocol/common/ClientboundCustomPayloadPacket KNOWN_TYPES Ljava/util/Map;
-mutable field net/minecraft/network/protocol/common/ClientboundCustomPayloadPacket KNOWN_TYPES Ljava/util/Map;
-accessible field net/minecraft/network/protocol/common/ServerboundCustomPayloadPacket KNOWN_TYPES Ljava/util/Map;
-mutable field net/minecraft/network/protocol/common/ServerboundCustomPayloadPacket KNOWN_TYPES Ljava/util/Map;
-
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings 
 accessible field net/minecraft/world/level/biome/Biome climateSettings Lnet/minecraft/world/level/biome/Biome$ClimateSettings;

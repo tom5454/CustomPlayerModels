@@ -57,9 +57,9 @@ public class MinecraftObject implements MinecraftClientAccess {
 		prm = new PlayerRenderManager();
 		renderBuilder = new RenderTypeBuilder<>();
 		renderBuilder.register(RenderMode.DEFAULT, RenderType::entityTranslucent, 0);
-		renderBuilder.register(RenderMode.GLOW, RenderType::eyes, 1);
+		renderBuilder.register(RenderMode.GLOW, CustomRenderTypes::glowingEyes, 1);
 		renderBuilder.register(RenderMode.COLOR, CustomRenderTypes::entityColorTranslucent, 0);
-		renderBuilder.register(RenderMode.COLOR_GLOW, CustomRenderTypes::entityColorEyes, 1);
+		renderBuilder.register(RenderMode.COLOR_GLOW, CustomRenderTypes::glowingEyesColor, 1);
 		renderBuilder.register(RenderMode.OUTLINE, CustomRenderTypes::linesNoDepth, 2);
 		tags = new AllTagManagers(mc, CPMTagLoader::new);
 	}

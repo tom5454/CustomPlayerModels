@@ -1,8 +1,5 @@
 package com.tom.cpm.client;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.NetworkManager;
@@ -20,21 +17,8 @@ public class Platform {
 	public static final ResourceLocation WHITE = new ResourceLocation("forge:textures/white.png");
 
 	public static void initPlayerProfile() {
-		if(ModList.get().isLoaded("firstpersonmod")) {
-			try {
-				MethodHandle h = MethodHandles.lookup().unreflectGetter(Class.forName("dev.tr7zw.firstperson.FirstPersonModelCore").getDeclaredField("isRenderingPlayer"));
-				PlayerProfile.inFirstPerson = () -> {
-					try {
-						return (boolean) h.invoke();
-					} catch (Throwable e) {
-						PlayerProfile.inFirstPerson = () -> false;
-						return false;
-					}
-				};
-				PlayerProfile.inFirstPerson.getAsBoolean();
-			} catch (Throwable e) {
-			}
-		}
+		if (ModList.get().isLoaded("firstperson"))
+			FirstPersonDetector.init();
 	}
 
 	public static Matrix4f createMatrix(float[] array) {

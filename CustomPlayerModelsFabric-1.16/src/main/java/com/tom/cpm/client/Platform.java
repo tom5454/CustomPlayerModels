@@ -1,8 +1,5 @@
 package com.tom.cpm.client;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,21 +16,8 @@ public class Platform {
 	public static final ResourceLocation WHITE = new ResourceLocation("cpm:textures/white.png");
 
 	public static void initPlayerProfile() {
-		if(FabricLoader.getInstance().isModLoaded("firstperson")) {
-			try {
-				MethodHandle h = MethodHandles.lookup().unreflectGetter(Class.forName("dev.tr7zw.firstperson.FirstPersonModelCore").getDeclaredField("isRenderingPlayer"));
-				PlayerProfile.inFirstPerson = () -> {
-					try {
-						return (boolean) h.invoke();
-					} catch (Throwable e) {
-						PlayerProfile.inFirstPerson = () -> false;
-						return false;
-					}
-				};
-				PlayerProfile.inFirstPerson.getAsBoolean();
-			} catch (Throwable e) {
-			}
-		}
+		if (FabricLoader.getInstance().isModLoaded("firstperson"))
+			FirstPersonDetector.init();
 	}
 
 	public static Matrix4f createMatrix(float[] array) {

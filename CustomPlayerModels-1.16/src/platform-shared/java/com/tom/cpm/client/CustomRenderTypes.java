@@ -9,8 +9,6 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 
 public class CustomRenderTypes extends RenderType {
 	public static final RenderType LINES_NO_NEPTH = create("cpm:lines_no_depth", DefaultVertexFormats.POSITION_COLOR, 1, 256, RenderType.State.builder().setLineState(new RenderState.LineState(OptionalDouble.empty())).setLayeringState(VIEW_OFFSET_Z_LAYERING).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setOutputState(ITEM_ENTITY_TARGET).setDepthTestState(NO_DEPTH_TEST).setWriteMaskState(COLOR_DEPTH_WRITE).createCompositeState(false));
-	public static final RenderType ENTITY_COLOR = entityTranslucent(Platform.WHITE);
-	public static final RenderType ENTITY_COLOR_EYES = eyes(Platform.WHITE);
 
 	public CustomRenderTypes(String nameIn, VertexFormat formatIn, int drawModeIn, int bufferSizeIn,
 			boolean useDelegateIn, boolean needsSortingIn, Runnable setupTaskIn, Runnable clearTaskIn) {
@@ -22,10 +20,10 @@ public class CustomRenderTypes extends RenderType {
 	}
 
 	public static RenderType entityColorTranslucent() {
-		return ENTITY_COLOR;
+		return entityTranslucent(Platform.WHITE);
 	}
 
 	public static RenderType entityColorEyes() {
-		return ENTITY_COLOR_EYES;
+		return eyes(Platform.WHITE);
 	}
 }
