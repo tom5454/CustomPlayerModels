@@ -11,7 +11,8 @@
     "TextureMixin_OF",
 	"VRArmRendererMixin_VR",
 	"VRPlayerRendererMixin_VR",
-	"VRCapeLayerMixin_VR"
+	"VRCapeLayerMixin_VR",
+	"CompositeRenderTypeMixin_Iris"
   ],
   "injectors": {
     "defaultRequire": 1

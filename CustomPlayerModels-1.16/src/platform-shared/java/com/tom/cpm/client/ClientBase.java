@@ -30,6 +30,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.common.PlayerAnimUpdater;
+import com.tom.cpm.mixinplugin.IrisDetector;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.mixinplugin.VRDetector;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -52,8 +53,10 @@ public class ClientBase {
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();
 		vrLoaded = VRDetector.doApply();
+		irisLoaded = IrisDetector.doApply();
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
 		if(vrLoaded)Log.info("ViveCraft detected, enabling ViveCraft compatibility");
+		if(irisLoaded)Log.info("Iris detected, enabling iris compatibility");
 	}
 
 	public void init1() {

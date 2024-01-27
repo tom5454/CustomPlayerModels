@@ -9,7 +9,8 @@
   ],
   "client": [
     "ModelRendererMixin_OF",
-    "TextureMixin_OF"
+    "TextureMixin_OF",
+    "CompositeRenderTypeMixin_Iris"
   ],
   "injectors": {
     "defaultRequire": 1

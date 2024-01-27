@@ -69,7 +69,6 @@ public class CustomPlayerModels extends CommonBase {
 				LOG.error("Mod {} provides a broken implementation of CPM api", m.getSenderModId(), e);
 			}
 		});
-		LOG.info("Customizable Player Models IMC processed: " + api.getPluginStatus());
 		apiInit();
 		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.apiInit();
 	}
