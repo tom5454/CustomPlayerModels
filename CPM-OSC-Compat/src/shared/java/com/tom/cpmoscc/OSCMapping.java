@@ -47,7 +47,10 @@ public class OSCMapping {
 				String v = m.group(2);
 				argumentId = v == null || v.isEmpty() ? 0 : Integer.parseInt(v);
 				argMatcher = m.group(3);
-				if(argMatcher != null && argumentId == 0)argumentId++;
+				if (argMatcher != null) {
+					if (argMatcher.isEmpty())argMatcher = null;
+					else if(argumentId == 0)argumentId++;
+				}
 				v = m.group(4);
 				min = v == null || v.isEmpty() ? 0 : Float.parseFloat(v.replace(',', '.'));
 				v = m.group(5);

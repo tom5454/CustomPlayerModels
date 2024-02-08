@@ -20,6 +20,7 @@
 	"ParrotOnShoulderLayerMixin",
 	"LocalPlayerMixin",
 	"LivingRendererMixin",
+	"SkullModelMixin",
 	
 	"GameRendererMixinFabric",
 	"MinecraftMixinFabric",

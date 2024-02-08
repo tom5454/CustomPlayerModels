@@ -7,15 +7,9 @@ import net.neoforged.fml.InterModComms;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(CPMOSC.MOD_ID)
 public class CPMOSCModNeoForge {
-
-	@Deprecated
-	public CPMOSCModNeoForge() {
-		this(FMLJavaModLoadingContext.get().getModEventBus());
-	}
 
 	public CPMOSCModNeoForge(IEventBus bus) {
 		bus.addListener(this::sendIMC);

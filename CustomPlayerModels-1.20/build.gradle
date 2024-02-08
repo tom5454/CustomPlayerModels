@@ -192,8 +192,8 @@ dependencies {
     compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.8-1.20.1-forge")
     compileOnly fg.deobf('curse.maven:vivecraft-667903:4859783')
     
-    compileOnly fg.deobf('curse.maven:oculus-581495:4952626')
-    compileOnly fg.deobf('curse.maven:embeddium-908741:5034486')
+    compileOnly fg.deobf('curse.maven:oculus-581495:5080444')
+    compileOnly fg.deobf('curse.maven:embeddium-908741:5077202')
     compileOnly fg.deobf('maven.modrinth:entityculling:374z4jcq')
     compileOnly fg.deobf('maven.modrinth:first-person-model:Ao3IYF3s')
 }

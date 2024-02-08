@@ -1,0 +1,25 @@
+# =====================================================
+# Auto-generated file DO NOT EDIT! See template jsons in the Localization folder of the GitHub Repo.
+# =====================================================
+
+osc-button.cpmosc.oscSettings=Настройки OSC
+osc-button.cpmosc.oscWizard=Мастер OSC-анимации
+osc-button.cpmosc.copyName=Копировать имя
+osc-button.cpmosc.selectFromInputs=Выбрать из существующих входов
+osc-button.cpmosc.importFromSelected=Импортировать из выбранной анимации
+osc-button.cpmosc.createNew=Создать новый
+osc-button.cpmosc.editSelected=Редактировать выбранное
+osc-label.cpmosc.oscPath=OSC-путь:
+osc-label.cpmosc.oscFirstArg=Первый аргумент:
+osc-label.cpmosc.oscArgId=Идентификатор аргумента:
+osc-label.cpmosc.valueRange=Диапазон значений:
+osc-label.cpmosc.noOscData=Данные OSC не были получены\Проверьте настройки вашей программы отправителя\Вам может потребоваться перезапустить вашу программу отправителя,\если вы запустили ее перед открытием этого интерфейса
+osc-label.cpmosc.oscEnable=OSC включен
+osc-label.cpmosc.oscDisabled=OSC выключен, включите его с помощью флажка и нажмите сохранить
+osc-label.cpmosc.oscPort=Порт:
+osc-label.cpmosc.oscDebugger=Отладчик OSC
+osc-label.cpmosc.oscEnableTransmit=Включить передачу
+osc-label.cpmosc.oscTransmitAddr=Адрес:
+osc-tooltip.cpmosc.oscSettings=Открыть настройки OSC и отладочное всплывающее окно
+osc-tooltip.cpmosc.oscWizard=Создать новую OSC-анимацию с помощью мастера
+osc-tooltip.cpmosc.oscFirstArg=Фильтр для первого строкового аргумента, оставьте пустым для отсутствия фильтра\Полезно для срабатывания VMC

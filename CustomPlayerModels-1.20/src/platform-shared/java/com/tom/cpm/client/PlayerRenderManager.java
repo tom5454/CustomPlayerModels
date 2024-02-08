@@ -28,7 +28,6 @@ import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
 import com.tom.cpm.client.optifine.OptifineTexture;
 import com.tom.cpm.client.optifine.RedirectModelRendererOF;
-import com.tom.cpm.client.optifine.proxy.ModelPartOF;
 import com.tom.cpm.client.vr.VRPlayerRenderer;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
@@ -177,12 +176,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 		public RedirectHolderSkull(PlayerRenderManager mngr, SkullModel model) {
 			super(mngr, model);
 
-			register(new Field<>(() -> model.head, v -> {
-				model.root.children.put("head", v);
-				model.head = v;
-				if(model.root instanceof ModelPartOF)
-					((ModelPartOF)model.root).cpm$updateChildModelsList();
-			}, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
 		}
 
 	}
