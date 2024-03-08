@@ -1,6 +1,7 @@
 package com.tom.cpm.client;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
@@ -55,6 +56,7 @@ public class CustomPlayerModelsClient extends ClientBase implements ClientModIni
 			}
 		});
 		init1();
+		ClientCommandRegistrationCallback.EVENT.register((d, r) -> new ClientCommand(d));
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
 		apiInit();
 	}

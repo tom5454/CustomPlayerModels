@@ -48,5 +48,6 @@
   "bb-label.fixStagedAnim.selectBase": "选择基本动画：",
   "bb-label.autoFix.stagedAnim": "基本分阶段动画",
   "bb-label.warn.unknownAnimation": "未知的动画类型（%s）",
+  "bb-label.language.reloadRequired.desc": "请重新启动 Blockbench 以应用语言更改。",
   "bb-tooltip.export.renameGroup": "将组重命名为所选类型\\如果已存在同名组，则操作将失败。"
 }

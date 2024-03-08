@@ -189,11 +189,16 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	}
 
 	@Override
-	public void executeLater(Runnable r) {
+	public void executeOnGameThread(Runnable r) {
 		new Promise<>((res, rej) -> {
 			RenderSystem.withContext(r);
 			res.onInvoke(Js.undefined());
 		});
+	}
+
+	@Override
+	public void executeNextFrame(Runnable r) {
+		executeOnGameThread(r);
 	}
 
 	@Override

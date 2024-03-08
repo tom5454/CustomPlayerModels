@@ -85,7 +85,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess {
 	@EventHandler
 	public void serverStart(FMLServerStartingEvent evt) {
 		MinecraftObjectHolder.setServerObject(new MinecraftServerObject(evt.getServer()));
-		new Command(evt::registerServerCommand);
+		new Command(evt::registerServerCommand, false);
 	}
 
 	@EventHandler

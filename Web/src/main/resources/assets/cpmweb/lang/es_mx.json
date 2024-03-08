@@ -10,6 +10,8 @@
   "web-button.viewer.search": "Buscar",
   "web-button.viewer.download": "Descargar",
   "web-button.viewer.uploadToMc": "Subir a Minecraft.net",
+  "web-button.fullscreen": "Pantalla Completa",
+  "web-button.language": "Lenguaje",
   "web-label.editorBeta": "La versión web del editor está en fase Beta\\Puede que experimentes errores visuales menores.\\\\Tus Modelos serán guardados dentro del explorador\\Usa Archivp/Administrador de Archivos para descargarlos, o usa el botón ... en el explorador de archivos.",
   "web-label.loadFromURL": "Cargando proyecto desde URL",
   "web-label.fileName": "Nombre del Archivo",
@@ -29,5 +31,7 @@
   "web-label.viewer.clone": "Clonar Modelo",
   "web-label.viewer.mode.skin": "Skin Codificada",
   "web-label.viewer.mode.model": "Modelo (.cpmmodel)",
-  "web-label.pasteClient": "Pegar Cliente"
+  "web-label.pasteClient": "Pegar Cliente",
+  "web-label.language.reloadRequired.title": "Reinicio Requerido",
+  "web-label.language.reloadRequired.desc": "Reinicio de la página es requerido para camabiar el lenguaje."
 }

@@ -67,7 +67,7 @@ public interface IGui extends UI {
 
 	@Override
 	default void executeLater(Runnable r) {
-		MinecraftClientAccess.get().executeLater(() -> {
+		MinecraftClientAccess.get().executeOnGameThread(() -> {
 			try {
 				r.run();
 			} catch (Throwable e) {

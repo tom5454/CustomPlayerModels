@@ -36,7 +36,7 @@ public class CustomPlayerModels extends CommonBase implements ModInitializer {
 		});
 		ServerTickEvents.END_SERVER_TICK.register(s -> ServerHandler.netHandler.tick());
 		CommandRegistrationCallback.EVENT.register((d, isD) -> {
-			new Command(d);
+			new Command(d, false);
 		});
 		FabricLoader.getInstance().getEntrypointContainers("cpmapi", ICPMPlugin.class).forEach(entrypoint -> {
 			ModMetadata metadata = entrypoint.getProvider().getMetadata();

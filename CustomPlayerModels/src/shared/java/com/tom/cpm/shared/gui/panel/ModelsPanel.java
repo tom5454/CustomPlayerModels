@@ -140,6 +140,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 				if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 					MinecraftClientAccess.get().sendSkinUpdate();
 				}
+				loadModelList();
 			});
 			sizeSetters.add(s -> reset.setBounds(new Box(0, 0, s.x, 20)));
 			panel.addElement(reset);
@@ -147,7 +148,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		sizeSetters.add(s -> panel.setBounds(new Box(0, 0, s.x, 40)));
 		panels = new ArrayList<>();
 		if(fs == null || fs.length == 0) {
-			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.no_skins"));
+			Label lbl = new Label(gui, gui.i18nFormat("label.cpm.no_models"));
 			lbl.setBounds(new Box(5, 25, 0, 0));
 			panel.addElement(lbl);
 		} else {
@@ -171,7 +172,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 					}
 				}
 				final int fy = y;
-				MinecraftClientAccess.get().executeLater(() -> {
+				MinecraftClientAccess.get().executeOnGameThread(() -> {
 					panels.forEach(panel::addElement);
 					if(panel.getBounds() != null) {
 						int w = panel.getBounds().w;
@@ -385,6 +386,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
 			MinecraftClientAccess.get().sendSkinUpdate();
 		}
+		loadModelList();
 	}
 
 	private void uploadSelected() {
@@ -435,6 +437,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 
 	public void filesDropped(List<File> files) {
 		File modelsDir = new File(MinecraftClientAccess.get().getGameDir(), "player_models/" + selectedFolder);
+		modelsDir.mkdirs();
 		for (int i = 0; i < files.size(); i++) {
 			File model = files.get(i);
 			if(model.getName().endsWith(".cpmmodel")) {

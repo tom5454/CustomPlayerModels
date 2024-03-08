@@ -16,7 +16,7 @@
   "bb-label.warn.unknownTexture": "Textura Desconocida: %s",
   "bb-label.warn.unknownRoot": "Grupo de Raices Desconocida: %s",
   "bb-label.warn.cubeSkipped": "Cubos omitidos. Revisa Raices Omitidas",
-  "bb-label.pleaseReport": "Por favor rReporta este error en GitHub",
+  "bb-label.pleaseReport": "Por favor Reporta este error en GitHub",
   "bb-label.error.export": "Error durante exportación:",
   "bb-label.error.import": "Error durante importación:",
   "bb-label.error.title": "Error en el plugin de CPM",
@@ -48,5 +48,6 @@
   "bb-label.fixStagedAnim.selectBase": "Seleccionar Animación Base:",
   "bb-label.autoFix.stagedAnim": "Base de Animación Escenificada",
   "bb-label.warn.unknownAnimation": "Tipo de Animación Desconocida (%s)",
+  "bb-label.language.reloadRequired.desc": "Por favor, reinicia BlockBench para aplicar el nuevo lenguaje.",
   "bb-tooltip.export.renameGroup": "Renombrar el grupo al tipo seleccionado\\Si un grupo ya tiene el mismo nombre la acción va a fallar."
 }

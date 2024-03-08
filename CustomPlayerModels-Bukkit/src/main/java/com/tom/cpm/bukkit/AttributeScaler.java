@@ -36,6 +36,7 @@ public class AttributeScaler implements ScalerInterface<Player, List<Attribute>>
 			case HEALTH: return Collections.singletonList(Attribute.GENERIC_MAX_HEALTH);
 			case ATTACK_DMG: return Collections.singletonList(Attribute.GENERIC_ATTACK_DAMAGE);
 			case ATTACK_KNOCKBACK: return Collections.singletonList(Attribute.GENERIC_ATTACK_KNOCKBACK);
+			case ATTACK_SPEED: return Collections.singletonList(Attribute.GENERIC_ATTACK_SPEED);
 			case DEFENSE: return Collections.singletonList(Attribute.GENERIC_ARMOR);
 			case FLIGHT_SPEED: return Collections.singletonList(Attribute.GENERIC_FLYING_SPEED);
 			case MOB_VISIBILITY: return Collections.singletonList(Attribute.GENERIC_FOLLOW_RANGE);

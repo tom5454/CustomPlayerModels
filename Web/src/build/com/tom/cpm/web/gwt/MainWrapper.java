@@ -147,6 +147,7 @@ public class MainWrapper {
 			ClassSrcTransformer.addImportTransform("com.google.common.hash.Hashing", "com.tom.cpm.web.client.java.Hashing");
 			ClassSrcTransformer.addImportTransform("java.net.URI", "com.tom.cpm.web.client.java.URI");
 			ClassSrcTransformer.addImportTransform("java.net.URISyntaxException", "com.tom.cpm.web.client.java.URISyntaxException");
+			ClassSrcTransformer.addImportTransform("java.io.PrintWriter", "com.tom.cpm.web.client.java.io.PrintWriter");
 			ClassSrcTransformer.buggyFiles.add("com/tom/cpm/web/client/resources/Resources.java");
 
 			System.out.println("Init finished");

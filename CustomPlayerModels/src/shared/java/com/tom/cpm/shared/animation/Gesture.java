@@ -65,6 +65,6 @@ public class Gesture implements IManualGesture {
 
 	@Override
 	public float getDefaultValue() {
-		return defVal / 255f;
+		return Byte.toUnsignedInt(defVal) / 255f;
 	}
 }

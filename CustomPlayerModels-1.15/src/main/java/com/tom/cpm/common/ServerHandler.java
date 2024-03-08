@@ -46,7 +46,7 @@ public class ServerHandler extends ServerHandlerBase {
 	}
 
 	public static void registerCommands(CommandDispatcher<CommandSource> d) {
-		new Command(d);
+		new Command(d, false);
 	}
 
 	@SubscribeEvent

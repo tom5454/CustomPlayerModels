@@ -48,7 +48,7 @@ spigot {
         command {
         	named 'cpm'
             description 'Customizable Player Models command'
-            usage '/<command> setskin'
+            usage '/<command> <subcommands>'
             permission 'cpm.command'
         }
         permission {

@@ -25,6 +25,7 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
+import com.tom.cpm.shared.editor.elements.MultiSelector.ElementImpl;
 import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
 import com.tom.cpm.shared.editor.tree.VecType;
 import com.tom.cpm.shared.model.PartValues;
@@ -160,16 +161,36 @@ public class EditorAnim implements IAnimation {
 	}
 
 	public void setPosition(Vec3f v) {
-		if(currentFrame != null && editor.getSelectedElement() != null) {
-			currentFrame.setPos(editor.getSelectedElement(), v);
+		if(currentFrame != null) {
+			if (editor.selectedElement instanceof ElementImpl)
+				((ElementImpl) editor.selectedElement).setVecAnim(v, me -> {
+					IElem dt = currentFrame.getData(me);
+					if (dt != null)return dt.getPosition();
+					else if(this.add)return new Vec3f();
+					else if(me.type == ElementType.ROOT_PART) {
+						PartValues val = ((VanillaModelPart)me.typeData).getDefaultSize(editor.skinType);
+						return val.getPos().add(me.pos);
+					}
+					return me.pos;
+				}, currentFrame::setPos);
+			else if (editor.getSelectedElement() != null)
+				currentFrame.setPos(editor.getSelectedElement(), v);
 		}
 		components = null;
 		psfs = null;
 	}
 
 	public void setRotation(Vec3f v) {
-		if(currentFrame != null && editor.getSelectedElement() != null) {
-			currentFrame.setRot(editor.getSelectedElement(), v);
+		if(currentFrame != null) {
+			if (editor.selectedElement instanceof ElementImpl)
+				((ElementImpl) editor.selectedElement).setVecAnim(v, me -> {
+					IElem dt = currentFrame.getData(me);
+					if (dt != null)return dt.getRotation();
+					else if(this.add)return new Vec3f();
+					return me.rotation;
+				}, currentFrame::setRot);
+			else if (editor.getSelectedElement() != null)
+				currentFrame.setRot(editor.getSelectedElement(), v);
 		}
 		components = null;
 		psfs = null;
@@ -403,6 +424,26 @@ public class EditorAnim implements IAnimation {
 						editor.setAnimShow.accept(dt.isVisible());
 					}
 				}
+			} else if (editor.selectedElement instanceof ElementImpl) {
+				ElementImpl e = (ElementImpl) editor.selectedElement;
+				Vec3f p = e.getVecAnim(me -> {
+					IElem dt = selFrm.getData(me);
+					if (dt != null)return dt.getPosition();
+					else if(this.add)return new Vec3f();
+					else if(me.type == ElementType.ROOT_PART) {
+						PartValues val = ((VanillaModelPart)me.typeData).getDefaultSize(editor.skinType);
+						return val.getPos().add(me.pos);
+					}
+					return me.pos;
+				});
+				Vec3f r = e.getVecAnim(me -> {
+					IElem dt = selFrm.getData(me);
+					if (dt != null)return dt.getRotation();
+					else if(this.add)return new Vec3f();
+					return me.rotation;
+				});
+				editor.setAnimPos.accept(p);
+				editor.setAnimRot.accept(r);
 			}
 			editor.setFrameDelEn.accept(true);
 		}

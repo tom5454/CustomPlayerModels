@@ -31,17 +31,18 @@ public abstract class BrigadierCommandHandler<S> implements CommandHandler<S> {
 	private static final DynamicCommandExceptionType ERROR_FAILED = new DynamicCommandExceptionType(a -> new FormatText("commands.cpm.genericFail", a).remap());
 	private final CommandDispatcher<S> dispatcher;
 
-	public BrigadierCommandHandler(CommandDispatcher<S> dispatcher) {
+	public BrigadierCommandHandler(CommandDispatcher<S> dispatcher, boolean client) {
 		this.dispatcher = dispatcher;
-		register();
+		if (client)registerClient();
+		else registerCommon();
 	}
 
 	protected abstract boolean hasOPPermission(S source);
 
 	@Override
-	public void register(LiteralCommandBuilder builder) {
-		LiteralArgumentBuilder<S> cmd = literal(builder.getName()).
-				requires(this::hasOPPermission);
+	public void register(LiteralCommandBuilder builder, boolean isOp) {
+		LiteralArgumentBuilder<S> cmd = literal(builder.getName());
+		if(isOp)cmd.requires(this::hasOPPermission);
 		build(cmd, builder, Collections.emptyList(), cmd.getLiteral().toLowerCase(Locale.ROOT));
 		dispatcher.register(cmd);
 	}

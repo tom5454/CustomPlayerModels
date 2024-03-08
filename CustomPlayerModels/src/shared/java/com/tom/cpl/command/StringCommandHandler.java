@@ -16,14 +16,15 @@ import com.tom.cpl.util.Pair;
 public abstract class StringCommandHandler<S, CS, CE extends Exception> implements CommandHandler<CS> {
 	private final Consumer<CommandImpl> register;
 
-	public StringCommandHandler(Consumer<CommandImpl> register) {
+	public StringCommandHandler(Consumer<CommandImpl> register, boolean client) {
 		this.register = register;
-		register();
+		if (client)registerClient();
+		else registerCommon();
 	}
 
 	@Override
-	public void register(LiteralCommandBuilder builder) {
-		register.accept(new CommandImpl(builder));
+	public void register(LiteralCommandBuilder builder, boolean isOp) {
+		register.accept(new CommandImpl(builder, isOp));
 	}
 
 	public abstract CE generic(String text, Object... format);
@@ -34,9 +35,11 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 
 	public class CommandImpl {
 		private final LiteralCommandBuilder root;
+		private final boolean isOp;
 
-		public CommandImpl(LiteralCommandBuilder root) {
+		public CommandImpl(LiteralCommandBuilder root, boolean isOp) {
 			this.root = root;
+			this.isOp = isOp;
 		}
 
 		public String getName() {
@@ -204,6 +207,10 @@ public abstract class StringCommandHandler<S, CS, CE extends Exception> implemen
 				}
 			}
 			return getListOfStringsMatchingLastWord(args, compl);
+		}
+
+		public boolean isOp() {
+			return isOp;
 		}
 	}
 

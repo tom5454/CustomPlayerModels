@@ -66,7 +66,7 @@ public enum ElementType {
 		@Override
 		public void buildElement(Editor editor, ModelElement elem, Object typeData) {
 			VanillaModelPart type = (VanillaModelPart) typeData;
-			elem.name = editor.ui.i18nFormat("label.cpm.elem." + type.getName());
+			elem.name = "";
 			elem.pos = new Vec3f();
 			elem.rotation = new Vec3f();
 			elem.rc = new RootModelElement(type, editor.definition) {

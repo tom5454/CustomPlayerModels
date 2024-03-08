@@ -82,6 +82,8 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 				elem.pos = new Vec3f(map.getMap("pos"), new Vec3f(0, 0, 0));
 				elem.rotation = new Vec3f(map.getMap("rotation"), new Vec3f(0, 0, 0));
 				elem.disableVanillaAnim = map.getBoolean("disableVanillaAnim", false);
+				elem.name = map.getString("name", "");
+				elem.partNameColor = map.getInt("nameColor", 0);
 			}
 		});
 		Editor.walkElements(editor.elements, e -> {
@@ -107,6 +109,8 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 			map.put("rotation", elem.rotation.toMap());
 			map.put("dup", elem.duplicated);
 			map.put("disableVanillaAnim", elem.disableVanillaAnim);
+			map.put("name", elem.name);
+			map.put("nameColor", elem.partNameColor);
 			if(elem.duplicated || elem.typeData instanceof RootModelType) {
 				map.put("storeID", elem.storeID);
 			}
@@ -162,6 +166,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		map.put("singleTex", elem.singleTex);
 		map.put("extrude", elem.extrude);
 		map.put("locked", elem.locked);
+		map.put("nameColor", elem.partNameColor);
 		if(elem.faceUV != null)map.put("faceUV", elem.faceUV.toMap());
 		if(elem.itemRenderer != null)map.put("itemRenderer", elem.itemRenderer.slot.name().toLowerCase(Locale.ROOT));
 		if(elem.copyTransform != null)map.put("copyTransform", elem.copyTransform.toMap());
@@ -188,6 +193,7 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		elem.singleTex = map.getBoolean("singleTex", false);
 		elem.extrude = map.getBoolean("extrude", false);
 		elem.locked = map.getBoolean("locked", false);
+		elem.partNameColor = map.getInt("nameColor", 0);
 		if(map.containsKey("faceUV"))elem.faceUV = new PerFaceUV(map.getMap("faceUV"));
 		if(map.containsKey("itemRenderer")) {
 			String name = map.getString("itemRenderer");

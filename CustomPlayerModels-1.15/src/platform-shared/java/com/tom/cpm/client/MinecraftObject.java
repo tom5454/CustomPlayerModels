@@ -118,8 +118,13 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public void executeLater(Runnable r) {
+	public void executeOnGameThread(Runnable r) {
 		mc.execute(r);
+	}
+
+	@Override
+	public void executeNextFrame(Runnable r) {
+		mc.tell(r);
 	}
 
 	@Override

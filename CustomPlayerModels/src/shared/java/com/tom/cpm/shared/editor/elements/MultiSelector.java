@@ -2,7 +2,9 @@ package com.tom.cpm.shared.editor.elements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
@@ -60,6 +62,11 @@ public interface MultiSelector extends TreeElement {
 					editor.setPartColor.accept(0);
 				}
 				editor.setDelEn.accept(true);
+				if (!elements.isEmpty()) {
+					ModelElement me = elements.get(0);
+					editor.setHiddenEffect.accept(me.hidden);
+					editor.setGlow.accept(me.glow);
+				}
 			}
 			editor.setPosition.accept(getVec(VecType.POSITION));
 			editor.setRot.accept(getVec(VecType.ROTATION));
@@ -82,6 +89,16 @@ public interface MultiSelector extends TreeElement {
 				Vec3f off = v.sub(s);
 				elements.forEach(e -> e.setVec(getVec(e, object).add(off), object));
 			}
+		}
+
+		public Vec3f getVecAnim(Function<ModelElement, Vec3f> getter) {
+			return elements.stream().map(getter).reduce(new Vec3f(), Vec3f::add).mul(1f / elements.size());
+		}
+
+		public void setVecAnim(Vec3f v, Function<ModelElement, Vec3f> getter, BiConsumer<ModelElement, Vec3f> setter) {
+			Vec3f s = elements.stream().map(getter).reduce(new Vec3f(), Vec3f::add).mul(1f / elements.size());
+			Vec3f off = v.sub(s);
+			elements.forEach(e -> setter.accept(e, getter.apply(e).add(off)));
 		}
 
 		@Override

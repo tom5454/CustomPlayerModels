@@ -35,7 +35,7 @@ public class Commands {
 			super(i -> {
 				commands.put(i.getName(), i);
 				pl.getCommand(i.getName()).setExecutor(pl);
-			});
+			}, false);
 			this.commands = commands;
 		}
 

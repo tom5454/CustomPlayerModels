@@ -6,6 +6,7 @@ import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.util.EmbeddedLocalization;
 import com.tom.cpl.util.MarkdownRenderer;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -59,7 +60,7 @@ public class FirstStartPopup extends PopupPanel {
 			c.y += 25;
 			return Arrays.asList(guiScale);
 		});
-		mdr.browse("https://github.com/tom5454/CustomPlayerModels/wiki/FirstStartGuide.md");
+		mdr.browse(EmbeddedLocalization.getLocalizedWikiPage(gui, "https://github.com/tom5454/CustomPlayerModels/wiki/FirstStartGuide"));
 		loaded = true;
 
 		onInit();

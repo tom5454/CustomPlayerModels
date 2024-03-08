@@ -31,6 +31,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
@@ -49,6 +50,7 @@ import com.mojang.authlib.properties.Property;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CommonProxy;
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.common.Command;
 import com.tom.cpm.common.PlayerAnimUpdater;
 import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -99,6 +101,7 @@ public class ClientProxy extends CommonProxy {
 		netHandler.setGetNet(c -> ((EntityPlayerSP)c).connection);
 		netHandler.setDisplayText(f -> minecraft.ingameGUI.getChatGUI().printChatMessage(f.remap()));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
+		new Command(ClientCommandHandler.instance::registerCommand, true);
 	}
 
 	@Override

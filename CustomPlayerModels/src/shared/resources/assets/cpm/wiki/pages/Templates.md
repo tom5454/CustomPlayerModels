@@ -1,4 +1,6 @@
-**Templates are buggy and outdated, don't use them.**
+> [!CAUTION]
+> Templates are buggy and outdated, don't use them for now.  
+> The template system will be updated after the animation updates are finished.
 
 ## Using Templates
 Templates are pre-made models, which can be added to your player model.  

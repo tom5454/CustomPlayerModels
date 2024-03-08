@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.AnimationType;
@@ -76,6 +78,8 @@ public class AnimLoaderState {
 		Map<SerializedTrigger, Integer> triggers = new HashMap<>();
 		Map<EditorAnim, SerializedTrigger> stagingIds = new HashMap<>();
 		Map<EditorAnim, Integer> animTriggers = new HashMap<>();
+		Set<ModelElement> allElems = new HashSet<>();
+		Editor.walkElements(e.elements, allElems::add);
 		e.animations.forEach(a -> {
 			SerializedTrigger tr = new SerializedTrigger();
 			if (a.pose instanceof VanillaPose)tr.pose = (VanillaPose) a.pose;
@@ -104,6 +108,7 @@ public class AnimLoaderState {
 			List<ModelElement> elems = a.getComponentsFiltered();
 			List<AnimFrame> frames = a.getFrames();
 			elems.forEach(me -> {
+				if(!allElems.contains(me))return;
 				Map<InterpolatorChannel, Integer> c = AnimatorChannel.addCubeToChannels(anim, me.id, a.add);
 				//TODO replace with include system later
 				if (frames.stream().anyMatch(f -> f.hasPosChanges(me))) {

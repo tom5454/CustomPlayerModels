@@ -693,11 +693,17 @@ public class MarkdownParser {
 	}
 
 	private static class LinkComponent implements Component {
-		private String text, url;
+		protected String text, url, tooltip;
 
 		public LinkComponent(String text, String url) {
 			this.text = text;
 			this.url = url;
+			if (url.endsWith("\"")) {
+				String[] sp = url.split(" \"", 2);
+				this.url = sp[0];
+				this.tooltip = sp[1];
+				this.tooltip = this.tooltip.substring(0, this.tooltip.length() - 1);
+			}
 		}
 
 		@Override
@@ -706,7 +712,8 @@ public class MarkdownParser {
 			String url = this.url;
 			Runnable click = () -> mdr.browse(url);
 			List<Predicate<MouseEvent>> hovers = new ArrayList<>();
-			return linewrapSimple(text, cursor, t -> new Lbl(mdr.getGui(), t, click, s, hovers), mdr.getGui()::textWidth);
+			Tooltip tt = this.tooltip != null ? new Tooltip(mdr.getGui().getFrame(), this.tooltip) : null;
+			return linewrapSimple(text, cursor, t -> new Lbl(mdr.getGui(), t, click, s, hovers, tt), mdr.getGui()::textWidth);
 		}
 
 		private static class Lbl extends GuiElement {
@@ -714,18 +721,21 @@ public class MarkdownParser {
 			private float scale;
 			private Runnable click;
 			private List<Predicate<MouseEvent>> hovers;
+			private Tooltip tt;
 
-			public Lbl(IGui gui, String text, Runnable click, float scale, List<Predicate<MouseEvent>> hovers) {
+			public Lbl(IGui gui, String text, Runnable click, float scale, List<Predicate<MouseEvent>> hovers, Tooltip tt) {
 				super(gui);
 				this.txt = new LiteralText(text);
 				this.scale = scale;
 				this.click = click;
 				this.hovers = hovers;
+				this.tt = tt;
 				hovers.add(e -> e.isHovered(bounds));
 			}
 
 			@Override
 			public void draw(MouseEvent event, float partialTicks) {
+				if (tt != null && event.isHovered(bounds))tt.set();
 				gui.drawFormattedText(bounds.x, bounds.y, txt, hovers.stream().anyMatch(p -> p.test(event)) ? gui.getColors().link_hover : gui.getColors().link_normal, scale);
 			}
 
@@ -780,6 +790,13 @@ public class MarkdownParser {
 		public ImageComponent(String altText, String url) {
 			this.altText = altText;
 			this.url = url;
+			if (url.endsWith("\"")) {
+				String[] sp = url.split(" \"", 2);
+				this.url = sp[0];
+				String t = sp[1];
+				t = t.substring(0, t.length() - 1);
+				this.altText = altText + "\\" + t;
+			}
 		}
 
 		@Override

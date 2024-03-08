@@ -2,6 +2,7 @@ package com.tom.cpm.client;
 
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
+import org.quiltmc.qsl.command.api.client.ClientCommandRegistrationCallback;
 import org.quiltmc.qsl.lifecycle.api.client.event.ClientTickEvents;
 import org.quiltmc.qsl.screen.api.client.QuiltScreen;
 import org.quiltmc.qsl.screen.api.client.ScreenEvents;
@@ -57,6 +58,7 @@ public class CustomPlayerModelsClient extends ClientBase implements ClientModIni
 		ScreenEvents.BEFORE_RENDER.register((_1, _2, _3, _4, _5) -> PlayerProfile.inGui = true);
 		ScreenEvents.AFTER_RENDER.register((_1, _2, _3, _4, _5) -> PlayerProfile.inGui = false);
 		init1();
+		ClientCommandRegistrationCallback.EVENT.register((d, b, e) -> new ClientCommand(d));
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
 		apiInit();
 	}

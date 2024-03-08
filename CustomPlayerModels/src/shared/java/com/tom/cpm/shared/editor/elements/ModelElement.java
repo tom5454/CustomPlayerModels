@@ -32,6 +32,7 @@ import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.gui.ModeDisplayType;
 import com.tom.cpm.shared.editor.gui.TextureDisplay;
+import com.tom.cpm.shared.editor.gui.popup.ColorButton;
 import com.tom.cpm.shared.editor.gui.popup.CopyTransformSettingsPopup;
 import com.tom.cpm.shared.editor.tree.TreeElement;
 import com.tom.cpm.shared.editor.tree.VecType;
@@ -71,6 +72,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public ItemRenderer itemRenderer;
 	public CopyTransformEffect copyTransform;
 	public Mat4f matrixPosition;
+	public int partNameColor;
 
 	public ModelElement(ModelElement element, ModelElement parent) {
 		this(element.editor);
@@ -173,10 +175,15 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public String getName() {
 		String name = this.name;
-		if(hidden)name = editor.ui.i18nFormat("label.cpm.tree.hidden", name);
-		if(copyTransform != null)name = editor.ui.i18nFormat("label.cpm.copyTransformFlag", name);
-		if(duplicated)name = editor.ui.i18nFormat("label.cpm.tree.duplicated", name);
-		if(disableVanillaAnim)name = editor.ui.i18nFormat("label.cpm.tree.disableVanillaAnim", name);
+		if (type == ElementType.ROOT_PART) {
+			String n = editor.ui.i18nFormat("label.cpm.elem." + ((VanillaModelPart) typeData).getName());
+			if (duplicated)n = editor.ui.i18nFormat("label.cpm.tree.duplicated", n);
+			if (name.isEmpty())name = n;
+			else name = editor.ui.i18nFormat("label.cpm.tree.renamedRoot", name, n);
+		}
+		if (hidden)name = editor.ui.i18nFormat("label.cpm.tree.hidden", name);
+		if (copyTransform != null)name = editor.ui.i18nFormat("label.cpm.copyTransformFlag", name);
+		if (disableVanillaAnim)name = editor.ui.i18nFormat("label.cpm.tree.disableVanillaAnim", name);
 		return name;
 	}
 
@@ -193,6 +200,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		if(itemRenderer != null && editor.definition.rendererObjectMap.get(itemRenderer) == itemRenderer) {
 			return gui.getColors().link_normal;
 		}
+		int p = partNameColor & 0xFFFFFF;
+		if (p != 0)return p | 0xFF000000;
 		return !showInEditor || locked ? gui.getColors().button_text_disabled : 0;
 	}
 
@@ -430,6 +439,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setHiddenEffect.accept(this.hidden);
 			editor.setDelEn.accept(this.duplicated || this.typeData instanceof RootModelType);
 			editor.setDisableVanillaEffect.accept(disableVanillaAnim);
+			editor.updateName.accept(this.name);
 			break;
 
 		default:
@@ -454,7 +464,10 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			List<ModelElement> lst = type == ElementType.NORMAL ? parent.children : editor.elements;
 			ActionBuilder ab = editor.action("remove", "action.cpm.cube").removeFromList(lst, this).
 					onRun(() -> editor.selectedElement = null);
-			editor.animations.stream().flatMap(a -> a.getFrames().stream()).forEach(f -> f.clearSelectedData(ab, this));
+			List<ModelElement> allRemoved = new ArrayList<>();
+			allRemoved.add(this);
+			Editor.walkElements(children, allRemoved::add);
+			editor.animations.stream().flatMap(a -> a.getFrames().stream()).forEach(f -> allRemoved.forEach(e -> f.clearSelectedData(ab, e)));
 			ab.onAction(() -> editor.animations.forEach(EditorAnim::clearCache));
 			ab.execute();
 			editor.updateGui();
@@ -607,6 +620,12 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			locked = true;
 			editor.updateGui();
 		});
+
+		int p = partNameColor & 0xFFFFFF;
+		ColorButton textColor = new ColorButton(popup.getGui(), editor.ui.i18nFormat("button.cpm.setNameColor"),
+				popup.getGui().getFrame(), t -> partNameColor = t);
+		textColor.setColor(p == 0 ? popup.getGui().getColors().label_text_color : p);
+		popup.add(textColor);
 	}
 
 	private void duplicate() {
@@ -667,7 +686,22 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public int bgColor(IGui gui) {
-		return editor.selectedElement != this && editor.selectedAnim != null && editor.applyAnim && editor.selectedAnim.getComponentsFiltered().contains(this) ? gui.getColors().anim_part_background : 0;
+		if (editor.selectedElement != this) {
+			ModelElement me = editor.getSelectedElement();
+			if (me != null && me.copyTransform != null && me.copyTransform.from == this) {
+				return gui.getColors().ct_src_background;
+			}
+
+			if (editor.selectedAnim != null && editor.applyAnim) {
+				if (editor.selectedAnim.getSelectedFrame() != null) {
+					if (editor.selectedAnim.getSelectedFrame().getAllElementsFiltered().anyMatch(e -> e == this))
+						return gui.getColors().anim_part_background;
+				}
+				if(editor.selectedAnim.getComponentsFiltered().contains(this))
+					return gui.getColors().anim_part_background2;
+			}
+		}
+		return 0;
 	}
 
 	public ModelElement getRoot() {

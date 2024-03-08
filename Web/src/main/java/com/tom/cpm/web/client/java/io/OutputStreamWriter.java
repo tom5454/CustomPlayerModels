@@ -3,6 +3,7 @@ package com.tom.cpm.web.client.java.io;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class OutputStreamWriter extends Writer {
@@ -11,6 +12,12 @@ public class OutputStreamWriter extends Writer {
 
 	public OutputStreamWriter(OutputStream os) {
 		this.os = os;
+	}
+
+	public OutputStreamWriter(OutputStream os, Charset ch) {
+		this.os = os;
+		if (ch != StandardCharsets.UTF_8)
+			throw new UnsupportedOperationException();
 	}
 
 	@Override

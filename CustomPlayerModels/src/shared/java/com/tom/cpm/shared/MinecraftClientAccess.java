@@ -25,7 +25,11 @@ public interface MinecraftClientAccess {
 	IPlayerRenderManager getPlayerRenderManager();
 	ModelDefinitionLoader getDefinitionLoader();
 	ITexture createTexture();
-	void executeLater(Runnable r);
+	void executeOnGameThread(Runnable r);
+
+	default void executeNextFrame(Runnable r) {
+		getDefinitionLoader().execute(() -> executeOnGameThread(r));//Create one frame delay
+	}
 
 	public static MinecraftClientAccess get() {
 		return MinecraftObjectHolder.clientObject;
@@ -92,4 +96,9 @@ public interface MinecraftClientAccess {
 
 	AllTagManagers getBuiltinTags();
 	BiomeHandler<?> getBiomeHandler();
+
+	@Deprecated
+	default void executeLater(Runnable r) {
+		executeOnGameThread(r);
+	}
 }

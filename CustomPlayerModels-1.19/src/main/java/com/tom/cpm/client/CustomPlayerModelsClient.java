@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -26,6 +27,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import com.tom.cpm.common.Command;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -140,5 +142,10 @@ public class CustomPlayerModelsClient extends ClientBase {
 	@SubscribeEvent
 	public void onLogout(ClientPlayerNetworkEvent.LoggingOut evt) {
 		mc.onLogOut();
+	}
+
+	@SubscribeEvent
+	public void registerClientCommands(RegisterClientCommandsEvent event) {
+		new Command(event.getDispatcher(), true);
 	}
 }

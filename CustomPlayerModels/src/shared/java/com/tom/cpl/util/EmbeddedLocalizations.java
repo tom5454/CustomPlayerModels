@@ -12,6 +12,8 @@ public class EmbeddedLocalizations {
 	public static final EmbeddedLocalization fileProject = new EmbeddedLocalization("label.cpm.file_project");
 	public static final EmbeddedLocalization filePng = new EmbeddedLocalization("label.cpm.file_png");
 	public static final EmbeddedLocalization fileLog = new EmbeddedLocalization("label.cpm.file_logs");
+	public static final EmbeddedLocalization exportUV = new EmbeddedLocalization("label.cpm.exportUVs");
+	public static final EmbeddedLocalization fileOra = new EmbeddedLocalization("label.cpm.file_openraster");
 
 	public static void load() {}
 
@@ -30,9 +32,12 @@ public class EmbeddedLocalizations {
 		fileProject.setFallback("Project file (.cpmproject)");
 		filePng.setFallback("Image (.png)");
 		fileLog.setFallback("Exported logs (.zip)");
+		exportUV.setFallback("Export UV Map");
+		fileOra.setFallback("Open Raster file (.ora)");
 		l = "es";
 		loadProject.addLocale(l, "Cargar Proyecto");
 		saveProject.addLocale(l, "Guardar Proyecto");
+		importFile.addLocale(l, "Importar");
 		exportSkin.addLocale(l, "Exportar Skin");
 		saveSkin.addLocale(l, "Guardar Skin");
 		loadSkin.addLocale(l, "Cargar Skin Personalizada");
@@ -44,6 +49,7 @@ public class EmbeddedLocalizations {
 		l = "zn_cn";
 		loadProject.addLocale(l, "\u52A0\u8F7D\u9879\u76EE");
 		saveProject.addLocale(l, "\u4FDD\u5B58\u9879\u76EE");
+		importFile.addLocale(l, "\u5BFC\u5165");
 		exportSkin.addLocale(l, "\u5BFC\u51FA\u76AE\u80A4");
 		saveSkin.addLocale(l, "\u4FDD\u5B58\u76AE\u80A4");
 		loadSkin.addLocale(l, "\u52A0\u8F7D\u81EA\u5B9A\u4E49\u76AE\u80A4");

@@ -33,6 +33,7 @@ public class AttributeScaler implements ScalerInterface<EntityPlayerMP, List<IAt
 		switch (opt) {
 		case HEALTH: return Collections.singletonList(SharedMonsterAttributes.MAX_HEALTH);
 		case ATTACK_DMG: return Collections.singletonList(SharedMonsterAttributes.ATTACK_DAMAGE);
+		case ATTACK_SPEED: return Collections.singletonList(SharedMonsterAttributes.ATTACK_SPEED);
 		case DEFENSE: return Collections.singletonList(SharedMonsterAttributes.ARMOR);
 		case MOB_VISIBILITY: return Collections.singletonList(SharedMonsterAttributes.FOLLOW_RANGE);
 		case MOTION: return Collections.singletonList(SharedMonsterAttributes.MOVEMENT_SPEED);

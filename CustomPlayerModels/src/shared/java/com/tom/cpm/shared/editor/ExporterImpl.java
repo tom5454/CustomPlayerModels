@@ -104,7 +104,6 @@ public class ExporterImpl {
 			if(e.scalingElem.hasTransform())
 				parts.add(new ModelPartRenderEffect(new EffectModelScale(e.scalingElem.pos, e.scalingElem.rotation, e.scalingElem.scale)));
 		}
-		//TODO global flags effect
 		if(!e.hideHeadIfSkull)parts.add(new ModelPartRenderEffect(new EffectHideSkull(e.hideHeadIfSkull)));
 		if(e.removeArmorOffset)parts.add(new ModelPartRenderEffect(new EffectRemoveArmorOffset(e.removeArmorOffset)));
 		if(e.removeBedOffset)parts.add(new ModelPartRenderEffect(new EffectRemoveBedOffset()));

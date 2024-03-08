@@ -14,8 +14,8 @@ import com.tom.cpl.text.IText;
 
 public class Command extends BrigadierCommandHandler<CommandSourceStack> {
 
-	public Command(CommandDispatcher<CommandSourceStack> dispatcher) {
-		super(dispatcher);
+	public Command(CommandDispatcher<CommandSourceStack> dispatcher, boolean client) {
+		super(dispatcher, client);
 	}
 
 	@Override

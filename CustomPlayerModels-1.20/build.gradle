@@ -190,7 +190,7 @@ dependencies {
     compileOnly files("of.jar")
     
     compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.8-1.20.1-forge")
-    compileOnly fg.deobf('curse.maven:vivecraft-667903:4859783')
+    compileOnly fg.deobf('curse.maven:vivecraft-667903:5144672')
     
     compileOnly fg.deobf('curse.maven:oculus-581495:5080444')
     compileOnly fg.deobf('curse.maven:embeddium-908741:5077202')

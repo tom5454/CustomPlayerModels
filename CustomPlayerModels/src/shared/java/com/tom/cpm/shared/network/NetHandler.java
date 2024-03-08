@@ -244,8 +244,7 @@ public class NetHandler<RL, P, NET> {
 					nbt.setFloat(e.getKey().getNetKey(), e.getValue());
 				}
 			}
-			if (nbt.tagCount() > 0)
-				sendPacketToServer(new SetScaleC2S(nbt));
+			sendPacketToServer(new SetScaleC2S(nbt));
 		}
 	}
 

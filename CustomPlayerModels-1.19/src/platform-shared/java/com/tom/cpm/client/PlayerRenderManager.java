@@ -249,6 +249,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			if(parent != null)return this;
 			parent = parentProvider.get();
 			holder.copyModel(parent, this);
+			setInitialPose(parent.getInitialPose());
 			return this;
 		}
 

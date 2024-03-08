@@ -11,14 +11,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SkullBlock;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -37,10 +37,8 @@ public class BlockEntityWithoutLevelRendererMixinFabric_OF {
 		if (item instanceof BlockItem) {
 			Block block = ((BlockItem)item).getBlock();
 			if (block instanceof AbstractSkullBlock) {
-				CompoundTag compoundTag = itemStack.getTag();
-				GameProfile gameProfile = compoundTag != null
-						? SkullBlockEntity.getOrResolveGameProfile(compoundTag)
-								: null;
+				ResolvableProfile resolvableProfile = itemStack.get(DataComponents.PROFILE);
+				GameProfile gameProfile = resolvableProfile != null ? resolvableProfile.gameProfile() : null;
 				SkullBlock.Type skullType = ((AbstractSkullBlock)block).getType();
 				SkullModelBase skullmodelbase = this.skullModels.get(skullType);
 				RefHolder.CPM_MODELS = skullModels;

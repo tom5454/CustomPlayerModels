@@ -79,6 +79,7 @@ public class UpdaterRegistry {
 			@Override
 			public void add(Consumer<T> c) {
 				c.accept(value.get());
+				super.add(c);
 			}
 		};
 	}

@@ -300,7 +300,7 @@ public class Tree<T> extends GuiElement {
 	public int getElementY(T elem) {
 		int[] c = new int[] {1, 0};
 		walk_getElementY(handler.root, elem, c);
-		return c[0] * 10;
+		return c[1] != 0 ? c[0] * 10 : -1;
 	}
 
 	private void walk_getElementY(TreeElement<T> e, T elem, int[] c) {

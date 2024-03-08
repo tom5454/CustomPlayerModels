@@ -116,7 +116,7 @@ public abstract class Player<P> {
 
 	public void cleanup() {
 		ModelDefinition def = getModelDefinition0();
-		if(def != null)MinecraftClientAccess.get().executeLater(def::cleanup);
+		if(def != null)MinecraftClientAccess.get().executeOnGameThread(def::cleanup);
 	}
 
 	public boolean isClientPlayer() {

@@ -83,7 +83,7 @@ public class SelectSkinPopup extends PopupPanel implements IModelDisplayPanel {
 					}
 				}
 				final int fy = y;
-				MinecraftClientAccess.get().executeLater(() -> {
+				MinecraftClientAccess.get().executeOnGameThread(() -> {
 					panels.forEach(panel::addElement);
 					if(panel.getBounds() != null) {
 						int w = panel.getBounds().w;

@@ -107,7 +107,8 @@ public class PopupMenu extends PopupPanel {
 		int h = panel.elements.size() * 20;
 		int ph = Math.min(h, frame.getBounds().h - y);
 		panel.setBounds(new Box(0, 0, w, h));
-		setBounds(new Box(x, y, w, ph));
+		Box fb = frame.getBounds();
+		setBounds(new Box(Math.min(x, fb.w - w), Math.min(y, fb.h - ph), w, ph));
 		scroll.setBounds(new Box(0, 0, w, ph));
 		frame.openPopup(this);
 	}

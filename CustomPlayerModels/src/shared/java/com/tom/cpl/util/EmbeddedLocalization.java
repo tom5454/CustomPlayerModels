@@ -3,6 +3,7 @@ package com.tom.cpl.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -10,6 +11,7 @@ import com.tom.cpl.text.I18n;
 
 public class EmbeddedLocalization {
 	public static final String LOCALE = "meta.cpm.embedLocale";
+	public static final String LOCALE_ID = "meta.cpm.localeID";
 	public static boolean validateEmbeds = true;
 	private static List<EmbeddedLocalization> allEntries = new ArrayList<>();
 	private final String key;
@@ -53,5 +55,15 @@ public class EmbeddedLocalization {
 
 	public static void forEachEntry(Consumer<? super EmbeddedLocalization> action) {
 		allEntries.forEach(action);
+	}
+
+	public static String getLocalizedWikiPage(I18n gui, String path) {
+		String loc = gui.i18nFormat(LOCALE_ID);
+		if (loc.equals("en_us") || loc.equals(LOCALE_ID))
+			return path;
+		else {
+			String[] sp = loc.split("_");
+			return path + "-" + sp[0] + "-" + sp[1].toUpperCase(Locale.ROOT);
+		}
 	}
 }

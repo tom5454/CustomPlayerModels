@@ -41,4 +41,10 @@ public class Box {
 		int f4 = Math.max(this.y + h, other.y + other.h);
 		return new Box(f0, f1, f3 - f0, f4 - f1);
 	}
+
+	public static Box fromArea(int sx, int sy, int ex, int ey) {
+		int x = Math.min(sx, ex);
+		int y = Math.min(sy, ey);
+		return new Box(x, y, Math.abs(sx - ex), Math.abs(sy - ey));
+	}
 }

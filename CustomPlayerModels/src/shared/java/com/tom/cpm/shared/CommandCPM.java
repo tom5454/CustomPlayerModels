@@ -117,7 +117,7 @@ public class CommandCPM {
 								)
 						)
 				;
-		dispatcher.register(cpm);
+		dispatcher.register(cpm, true);
 	}
 
 	private static void setInvisGlow(CommandCtx<?> context, boolean en) {

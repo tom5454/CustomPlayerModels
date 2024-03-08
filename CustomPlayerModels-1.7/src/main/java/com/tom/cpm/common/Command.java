@@ -16,8 +16,8 @@ import com.tom.cpl.text.IText;
 
 public class Command extends StringCommandHandler<MinecraftServer, ICommandSender, CommandException> {
 
-	public Command(Consumer<CommandBase> register) {
-		super(i -> register.accept(new Cmd(i)));
+	public Command(Consumer<CommandBase> register, boolean client) {
+		super(i -> register.accept(new Cmd(i)), client);
 	}
 
 	private static class Cmd extends CommandBase {
@@ -49,7 +49,7 @@ public class Command extends StringCommandHandler<MinecraftServer, ICommandSende
 
 		@Override
 		public int getRequiredPermissionLevel() {
-			return 2;
+			return impl.isOp() ? 2 : 0;
 		}
 	}
 

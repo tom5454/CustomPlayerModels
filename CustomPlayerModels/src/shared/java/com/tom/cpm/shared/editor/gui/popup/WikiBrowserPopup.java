@@ -1,6 +1,7 @@
 package com.tom.cpm.shared.editor.gui.popup;
 
 import java.util.Stack;
+import java.util.regex.Matcher;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.MouseEvent;
@@ -8,6 +9,7 @@ import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
+import com.tom.cpl.util.EmbeddedLocalization;
 import com.tom.cpl.util.MarkdownRenderer;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -18,11 +20,13 @@ public class WikiBrowserPopup extends PopupPanel {
 	private Stack<String> fwdQueue = new Stack<>();
 	private boolean stepping = false;
 	private Button back, fwd, openSidebar;
-	private MarkdownRenderer content, sidebar;
+	private MarkdownRenderer content;
+	private SidebarContent sidebar;
 	private static final int SIDEBAR_W = 100;
+	private String sidebarLocale;
 
 	public WikiBrowserPopup(IGui gui) {
-		this(gui, "https://github.com/tom5454/CustomPlayerModels/wiki/Home.md");
+		this(gui, EmbeddedLocalization.getLocalizedWikiPage(gui, "https://github.com/tom5454/CustomPlayerModels/wiki/Home"));
 	}
 
 	public WikiBrowserPopup(IGui gui, String mainPage) {
@@ -64,7 +68,7 @@ public class WikiBrowserPopup extends PopupPanel {
 
 		content = new MarkdownRenderer(gui, new MdResourceLoader(gui::openURL, u -> {
 			if(!stepping) {
-				if(u.equals("https://github.com/tom5454/CustomPlayerModels/wiki/FirstStartGuide")) {
+				if(u.startsWith("https://github.com/tom5454/CustomPlayerModels/wiki/FirstStartGuide")) {
 					close();
 					gui.getFrame().openPopup(new FirstStartPopup(gui));
 					return;
@@ -74,26 +78,26 @@ public class WikiBrowserPopup extends PopupPanel {
 				fwd.setEnabled(false);
 				back.setEnabled(backQueue.size() > 1);
 			}
+			Matcher m = MdResourceLoader.LOCALE_EXT.matcher(u);
+			if (m.matches()) {
+				String s = m.group(2);
+				if (!s.equals(sidebarLocale)) {
+					sidebarLocale = s;
+					sidebar.setContent("https://github.com/tom5454/CustomPlayerModels/wiki/_Sidebar-" + sidebarLocale);
+				}
+			} else if(sidebarLocale != null) {
+				sidebarLocale = null;
+				sidebar.setContent("https://github.com/tom5454/CustomPlayerModels/wiki/_Sidebar");
+			}
 		}, offline), "Loading");
 		content.setBounds(new Box(0, 0, 100, 100));
 		addElement(content);
+
+		sidebar = new SidebarContent(gui, new MdResourceLoader(gui::openURL, null, offline), "Loading");
+		sidebar.setBounds(new Box(0, 0, 100, 100));
+		sidebar.setContent("https://github.com/tom5454/CustomPlayerModels/wiki/_Sidebar");
+
 		content.browse(mainPage);
-
-		sidebar = new MarkdownRenderer(gui, new MdResourceLoader(gui::openURL, null, offline), "Loading") {
-			private boolean loaded;
-
-			{
-				setBounds(new Box(0, 0, 100, 100));
-				browse("https://github.com/tom5454/CustomPlayerModels/wiki/_Sidebar.md");
-				loaded = true;
-			}
-
-			@Override
-			public void browse(String url) {
-				if(!loaded)super.browse(url);
-				else content.browse(url);
-			}
-		};
 
 		openSidebar = new Button(gui, gui.i18nFormat("button.cpm.openWikiSidebar"), null) {
 
@@ -184,5 +188,21 @@ public class WikiBrowserPopup extends PopupPanel {
 	public void onClosed() {
 		content.cleanup();
 		sidebar.cleanup();
+	}
+
+	private class SidebarContent extends MarkdownRenderer {
+
+		public SidebarContent(IGui gui, MarkdownResourceLoader loader, String in) {
+			super(gui, loader, in);
+		}
+
+		@Override
+		public void browse(String url) {
+			content.browse(url);
+		}
+
+		public void setContent(String url) {
+			super.browse(url);
+		}
 	}
 }

@@ -52,7 +52,7 @@ public class ServerHandler extends ServerHandlerBase {
 	@SubscribeEvent
 	public void registerCommands(RegisterCommandsEvent evt) {
 		CommandDispatcher<CommandSourceStack> d = evt.getDispatcher();
-		new Command(d);
+		new Command(d, false);
 	}
 
 	@SubscribeEvent

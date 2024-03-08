@@ -6,6 +6,7 @@ import java.util.function.Function;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.UpdaterRegistry;
+import com.tom.cpl.gui.UpdaterRegistry.Updater;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.util.FlowLayout;
@@ -62,7 +63,7 @@ public class FirstPersonHandPosGui extends Frame {
 		TabFocusHandler tabHandler = new TabFocusHandler(gui);
 		FlowLayout layout = new FlowLayout(p, 4, 1);
 
-		addPart("rotation", p, tabHandler, 1, pp, pp2, PartPosition::getRotationDeg, PartPosition::setRotationDeg);
+		addPartR("rotation", p, tabHandler, 1, pp, pp2, PartPosition::getRotationDeg, PartPosition::setRotationDeg);
 		addPart("position", p, tabHandler, 2, pp, pp2, PartPosition::getRPos, PartPosition::setRPos);
 		addPart("scale", p, tabHandler, 2, pp, pp2, PartPosition::getRScale, PartPosition::setRScale);
 
@@ -78,5 +79,15 @@ public class FirstPersonHandPosGui extends Frame {
 				setter.accept(pp2, p);
 			}).execute();
 		}, panel, UpdaterRegistry.makeStatic(() -> getter.apply(pp)), dp, tabHandler);
+	}
+
+	private void addPartR(String name, Panel panel, TabFocusHandler tabHandler, int dp, PartPosition pp, PartPosition pp2, Function<PartPosition, Vec3f> getter, BiConsumer<PartPosition, Vec3f> setter) {
+		Updater<Vec3f> up = UpdaterRegistry.makeStatic(() -> getter.apply(pp));
+		PosPanel.addVec3(name, v -> {
+			e.action("set", "label.cpm." + name).updateValueOp(pp, getter.apply(pp), v, 0, 360, true, (a, p) -> {
+				setter.accept(pp, p);
+				setter.accept(pp2, p);
+			}, up).execute();
+		}, panel, up, dp, tabHandler);
 	}
 }

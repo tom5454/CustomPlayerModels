@@ -136,7 +136,7 @@ public class Image {
 		color = argb2rgba(color);
 		for(int x = 0;x + xs < iw && x < w;x++) {
 			for(int y = 0;y + ys < ih && y < h;y++) {
-				int index = ((y + ys) * iw + x + xs) * 4;
+				int index = (y + ys) * iw + x + xs;
 				dataSet(data, index, color);
 			}
 		}

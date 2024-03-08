@@ -37,7 +37,7 @@ public class CustomPlayerModels extends CommonBase implements ModInitializer {
 		});
 		ServerTickEvents.END_SERVER_TICK.register(s -> ServerHandler.netHandler.tick());
 		CommandRegistrationCallback.EVENT.register((d, a, e) -> {
-			new Command(d);
+			new Command(d, false);
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((o, n, end) -> {
 			if(!end)ServerHandler.netHandler.onRespawn(n);

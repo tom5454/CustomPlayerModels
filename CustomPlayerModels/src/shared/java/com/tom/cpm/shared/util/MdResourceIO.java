@@ -16,7 +16,7 @@ import com.tom.cpm.shared.io.HTTPIO;
 public class MdResourceIO {
 
 	public static CompletableFuture<Image> loadImage0(String url, boolean offline) {
-		return MdResourceLoader.fetch(url, offline).thenCompose(i -> {
+		return MdResourceLoader.fetch(url, offline, true).thenCompose(i -> {
 			try {
 				return CompletableFuture.completedFuture(ImageIO.read(new ByteArrayInputStream(i)));
 			} catch (IOException e) {

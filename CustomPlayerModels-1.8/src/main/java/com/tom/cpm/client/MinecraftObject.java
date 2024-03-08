@@ -112,7 +112,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	@Override
-	public void executeLater(Runnable r) {
+	public void executeOnGameThread(Runnable r) {
 		mc.addScheduledTask(r);
 	}
 

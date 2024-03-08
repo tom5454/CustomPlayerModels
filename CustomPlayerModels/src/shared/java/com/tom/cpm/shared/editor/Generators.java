@@ -35,6 +35,7 @@ import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.elements.RootGroups;
 import com.tom.cpm.shared.editor.gui.EditorGui;
+import com.tom.cpm.shared.editor.gui.popup.ExportUVMapPopup;
 import com.tom.cpm.shared.editor.template.TemplateSettings;
 import com.tom.cpm.shared.editor.util.QuickTask;
 import com.tom.cpm.shared.editor.util.SafetyLevel;
@@ -44,6 +45,7 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.ItemRenderer;
+import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureType;
 
@@ -58,6 +60,7 @@ public class Generators {
 		register("button.cpm.tools.fillUV", null, Generators::fillUV);
 		register("button.cpm.tools.safetyLevel", null, Generators::checkSafetyLevel);
 		register("button.cpm.tools.mirror", null, Generators::mirrorElement);
+		register("button.cpm.tools.exportUVMap", "tooltip.cpm.tools.exportUVMap", Generators::exportUVMap);
 	}
 
 	public String name;
@@ -117,7 +120,7 @@ public class Generators {
 					Vec2i uv = val.getUV();
 					elem.u = uv.x;
 					elem.v = uv.y;
-					elem.name = el.name;
+					elem.name = e.ui.i18nFormat("label.cpm.elem." + ((VanillaModelPart) el.typeData).getName());
 					elem.generated = true;
 					ab.updateValueOp(el, false, true, (a, b) -> a.hidden = b);
 				}
@@ -202,22 +205,33 @@ public class Generators {
 			if(el instanceof ModelElement) {
 				ModelElement me = (ModelElement) el;
 				if(me.type == ElementType.NORMAL && me.texture) {
-					Box box = me.getTextureBox();
-					int ts = Math.abs(me.texSize);
-					int bx = me.u * ts;
-					int by = me.v * ts;
-					int dx = MathHelper.ceil(me.size.x * ts);
-					int dy = MathHelper.ceil(me.size.y * ts);
-					int dz = MathHelper.ceil(me.size.z * ts);
-					ab.action(new ImageAction(me.getTexture().getImage(), box, img -> {
-						img.fill(bx + dx + dz, by + dz, dz, dy, 0xffff0000);
-						img.fill(bx, by + dz, dz, dy, 0xffdd0000);
-						img.fill(bx + dz, by, dx, dz, 0xff00ff00);
-						img.fill(bx + dz + dx, by, dx, dz, 0xff00dd00);
-						img.fill(bx + dz, by + dz, dx, dy, 0xff0000ff);
-						img.fill(bx + dz * 2 + dx, by + dz, dx, dy, 0xff0000dd);
-					}));
-					texs.add(me.getTexture());
+					if (me.faceUV != null) {
+						Face f = me.faceUV.get(editor.perfaceFaceDir.get());
+						if (f != null) {
+							Box box = Box.fromArea(f.sx, f.sy, f.ex, f.ey);
+							ab.action(new ImageAction(me.getTexture().getImage(), box, img -> {
+								img.fill(box.x, box.y, box.w, box.h, 0xff888888);
+							}));
+							texs.add(me.getTexture());
+						}
+					} else {
+						Box box = me.getTextureBox();
+						int ts = Math.abs(me.texSize);
+						int bx = me.u * ts;
+						int by = me.v * ts;
+						int dx = MathHelper.ceil(me.size.x * ts);
+						int dy = MathHelper.ceil(me.size.y * ts);
+						int dz = MathHelper.ceil(me.size.z * ts);
+						ab.action(new ImageAction(me.getTexture().getImage(), box, img -> {
+							img.fill(bx + dx + dz, by + dz, dz, dy, 0xffff0000);
+							img.fill(bx, by + dz, dz, dy, 0xffdd0000);
+							img.fill(bx + dz, by, dx, dz, 0xff00ff00);
+							img.fill(bx + dz + dx, by, dx, dz, 0xff00dd00);
+							img.fill(bx + dz, by + dz, dx, dy, 0xff0000ff);
+							img.fill(bx + dz * 2 + dx, by + dz, dx, dy, 0xff0000dd);
+						}));
+						texs.add(me.getTexture());
+					}
 				}
 			}
 		});
@@ -395,5 +409,9 @@ public class Generators {
 			ab.onAction(editor::updateGui);
 			ab.execute();
 		}
+	}
+
+	private static void exportUVMap(EditorGui eg) {
+		eg.openPopup(new ExportUVMapPopup(eg));
 	}
 }

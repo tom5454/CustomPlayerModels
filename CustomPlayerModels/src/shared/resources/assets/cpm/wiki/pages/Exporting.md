@@ -33,8 +33,13 @@ Skin Layer settings are used [for creating custom animations](https://github.com
 ### Data overflow
 If the model is too big to fit in the unused space on the skin file, then you have to upload it to one of the following:
 - My Paste Site: Select `Upload Paste`. You can change the name of the Paste (You can view your uploaded pastes in Edit/Pastes, the site has a limit of 15 pastes and 100kB per file).
-- [GitHub Gist](https://gist.github.com/), or [Pastebin](https://pastebin.com/): Select `Upload Gist` option. Click `Copy`, then create a new Gist/Pastebin and paste in your model data you just copied. Then grab the URL from the created Gist, then put it into the bottom text field.
+- [GitHub Gist](https://gist.github.com/): Select `Upload Gist` option. Click `Copy`, then create a new Gist/Pastebin and paste in your model data you just copied. Then grab the URL from the created Gist, then put it into the bottom text field.
 - GitHub repo, you can put the model data into a text file in your public repo and link it.
+
+> [!NOTE]
+> Only use GitHub Gists if you have an active GitHub account!  
+> Join the [CPM discord server](https://discord.gg/mKyXdEsMZD) and run `/paste-register` in the #commands channel to expand your paste storage limits
+> You need a valid Minecraft account to use my paste site!
 
 ![Image: Export Overflow Gui](https://github.com/tom5454/CustomPlayerModels/wiki/images/export_overflow_popup.png)
 
@@ -47,6 +52,9 @@ If the launcher says unable to load skin then try restarting it.
 The model will load for everybody who has the mod installed on multiplayer servers.
 
 ## Exporting as local model
+> [!NOTE]
+> CPM is required on the server for this feature.
+
 You can export models as a local model. You can change these models in the Gestures Menu/Models when on servers with Customizable Player Models installed or in singleplayer, even while in-game.  
 ![Image: Export Model Gui](https://github.com/tom5454/CustomPlayerModels/wiki/images/export_model.png)  
 You can export a local model in File/Export and press the 'Export: ???' button to 'Export: Model'.  
@@ -56,3 +64,5 @@ Apply your model in `Edit/Models`, or in-game `Gestures Menu/Models`.
 Select your model and click apply below the preview.  
 Local models only work in singleplayer and in multiplayer servers with the mod (or plugin) installed.  
 [If the model is too big (above 30kB) you have to upload](#data-overflow)  
+Skin compatible models can be converted to regular [Stored in Skin](#stored-in-skin) models using the Edit/Models menu in the editor (you must open the editor from the title screen).  
+See: [Models Popup](https://github.com/tom5454/CustomPlayerModels/wiki/Models-Menu#models-popup)  

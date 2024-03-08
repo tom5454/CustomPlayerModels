@@ -30,6 +30,7 @@ public enum ScalingOptions {
 	PROJECTILE_DMG("proj_dmg", ServerCaps.ATTRIBUTE_SCALE, false),
 	EXPLOSION_DMG("exp_dmg", ServerCaps.ATTRIBUTE_SCALE, false),
 	KNOCKBACK_RESIST("kbr", ServerCaps.ATTRIBUTE_SCALE, false),
+	SAFE_FALL_DISTANCE("safe_fall", ServerCaps.ATTRIBUTE_SCALE, false),
 	;
 	public static final ScalingOptions[] VALUES = values();
 

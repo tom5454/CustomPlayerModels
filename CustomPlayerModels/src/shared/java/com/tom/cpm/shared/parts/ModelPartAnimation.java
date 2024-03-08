@@ -270,6 +270,8 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		List<ResolvedData> notLayerControlled = new ArrayList<>();
 		Set<CustomPose> addedPoses = new HashSet<>();
 		Set<String> addedGestures = new HashSet<>();
+		Set<ModelElement> allElems = new HashSet<>();
+		Editor.walkElements(e.elements, allElems::add);
 		e.animations.forEach(ea -> {
 			int id = idc[0]++;
 			if (id > 250) {
@@ -334,6 +336,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.it = ea.intType;
 			for (int i = 0; i < cs; i++) {
 				ModelElement elem = elems.get(i);
+				if(!allElems.contains(elem))continue;
 				rd.components[i] = elem.id;
 				if(frames.stream().anyMatch(f -> f.hasPosChanges(elem))) {
 					rd.pos[i] = new Vec3f[fc];

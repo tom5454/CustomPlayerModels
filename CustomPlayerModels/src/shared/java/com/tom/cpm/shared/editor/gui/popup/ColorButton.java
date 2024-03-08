@@ -24,6 +24,12 @@ public class ColorButton extends Button {
 		this.actionColor = action;
 	}
 
+	public ColorButton(IGui gui, String text, Frame frame, IntConsumer action) {
+		super(gui, text, null);
+		this.action = () -> frame.openPopup(new ColorPopup(frame));
+		this.actionColor = action;
+	}
+
 	private ColorButton(IGui gui, Runnable action) {
 		super(gui, "", null);
 		this.action = action;
@@ -32,16 +38,28 @@ public class ColorButton extends Button {
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
 		int bgColor = gui.getColors().button_fill;
+		int color = gui.getColors().button_text_color;
 		if(!enabled) {
+			color = gui.getColors().button_text_disabled;
 			bgColor = gui.getColors().button_disabled;
 		} else if(event.isHovered(bounds)) {
+			color = gui.getColors().button_text_hover;
 			bgColor = gui.getColors().button_hover;
 		}
 		if(event.isHovered(bounds) && tooltip != null)
 			tooltip.set();
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
-		gui.drawBox(bounds.x+3, bounds.y+3, bounds.w-6, bounds.h-6, 0xff000000 | color);
+
+		if (name == null || name.isEmpty()) {
+			gui.drawBox(bounds.x+3, bounds.y+3, bounds.w-6, bounds.h-6, 0xff000000 | this.color);
+		} else {
+			int w = gui.textWidth(name);
+			gui.drawText(bounds.x + bounds.h-8 + (bounds.w - bounds.h-8) / 2 - w / 2, bounds.y + bounds.h / 2 - 4, name, color);
+
+			gui.drawBox(bounds.x+3, bounds.y+3, bounds.h-6, bounds.h-6, gui.getColors().button_border);
+			gui.drawBox(bounds.x+4, bounds.y+4, bounds.h-8, bounds.h-8, 0xff000000 | this.color);
+		}
 	}
 
 	public void setColor(int color) {
