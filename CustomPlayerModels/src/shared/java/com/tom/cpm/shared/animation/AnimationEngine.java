@@ -234,13 +234,13 @@ public class AnimationEngine {
 		}
 
 		@Override
-		public long getTime(AnimationState state, long time) {
+		public long getTime(AnimationState state, long animTime) {
 			if (state.gestureData.length > id) {
 				float val = Byte.toUnsignedInt(state.gestureData[id]) / 256f;
-				if (state.prevGestureData != null && state.prevGestureData.length == state.gestureData.length) {
+				long time = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
+				if (state.prevGestureData != null && state.prevGestureData.length == state.gestureData.length && state.lastGestureReceiveTime + 50 >= time) {
 					float prev = Byte.toUnsignedInt(state.prevGestureData[id]) / 256f;
-					float partial = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().partial;
-					val = MathHelper.lerp(partial, prev, val);
+					val = MathHelper.lerp((time - state.lastGestureReceiveTime) / 50f, prev, val);
 				}
 				return (long) (val * VanillaPose.DYNAMIC_DURATION_MUL);
 			} else

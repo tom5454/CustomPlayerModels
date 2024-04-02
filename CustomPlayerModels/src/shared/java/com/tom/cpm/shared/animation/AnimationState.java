@@ -11,6 +11,7 @@ import com.tom.cpl.item.Inventory;
 import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.network.ModelEventType;
@@ -35,6 +36,7 @@ public class AnimationState {
 	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing, inGui, firstPersonMod, voiceMuted, invisible;
 	public byte[] gestureData;
 	public byte[] prevGestureData;
+	public long lastGestureReceiveTime;
 	public VRState vrState;
 	public AnimationMode animationMode;
 	public long dayTime;
@@ -184,6 +186,7 @@ public class AnimationState {
 		if(tag.hasKey(NetworkUtil.GESTURE)) {
 			prevGestureData = gestureData;
 			gestureData = tag.getByteArray(NetworkUtil.GESTURE);
+			lastGestureReceiveTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
 		}
 	}
 
