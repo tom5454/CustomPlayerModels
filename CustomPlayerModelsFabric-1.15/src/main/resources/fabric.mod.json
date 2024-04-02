@@ -25,15 +25,13 @@
   	"client": [
       "com.tom.cpm.client.CustomPlayerModelsClient"
     ],
-	"mm:early_risers": [
-      "com.tom.cpm.LaunchMixinWithOptifineRunnable"
-    ],
 	"modmenu": [
       "com.tom.cpm.ModMenu"
     ]
   },
   "mixins": [
-  	"cpm.mixins.json"
+  	"cpm.mixins.json",
+  	"cpm.mixins.of.json"
   ],
   "accessWidener" : "cpm.accesswidener",
   "depends": {

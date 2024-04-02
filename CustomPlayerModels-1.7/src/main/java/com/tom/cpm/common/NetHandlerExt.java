@@ -1,15 +1,9 @@
 package com.tom.cpm.common;
 
 import java.io.IOException;
+import java.util.function.BiFunction;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ResourceLocation;
-
-import com.mojang.authlib.GameProfile;
-
-import com.tom.cpm.PlayerDataExt;
-import com.tom.cpm.client.ClientProxy;
-import com.tom.cpm.client.PlayerProfile;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.IOHelper;
@@ -19,14 +13,24 @@ import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.network.NetHandler;
 
-public class NetHandlerExt<P, N> extends NetHandler<ResourceLocation, P, N> {
+public class NetHandlerExt<RL, P, N> extends NetHandler<RL, P, N> {
 	public static final String SKIN_LAYERS = "layer";
 
-	public NetHandlerExt() {
-		super(ResourceLocation::new);
+	public NetHandlerExt(BiFunction<String, String, RL> keyFactory) {
+		super(keyFactory);
 
 		register(packetC2S, SKIN_LAYERS, LayerC2S.class, LayerC2S::new);
 		register(packetS2C, SKIN_LAYERS, LayerS2C.class, LayerS2C::new);
+	}
+
+	@Override
+	public void sendPlayerData(P target, P to) {
+		super.sendPlayerData(target, to);
+
+		ServerNetH netTo = getSNetH(to);
+		PlayerDataExt dt = (PlayerDataExt) getSNetH(target).cpm$getEncodedModelData();
+		if(dt == null)return;
+		sendPacketTo(netTo, new LayerS2C(getPlayerId(target), dt.getSkinLayer()));
 	}
 
 	@Override
@@ -56,9 +60,9 @@ public class NetHandlerExt<P, N> extends NetHandler<ResourceLocation, P, N> {
 
 		@Override
 		public <P> void handle(NetHandler<?, P, ?> handler, ServerNetH from, P pl) {
-			EntityPlayerMP player = (EntityPlayerMP) pl;
-			PlayerDataExt.setSkinLayer(player, layer);
-			handler.sendPacketToTracking(pl, new LayerS2C(player.getEntityId(), layer));
+			PlayerDataExt dt = (PlayerDataExt) handler.getSNetH(pl).cpm$getEncodedModelData();
+			dt.setSkinLayer(layer);
+			handler.sendPacketToTracking(pl, new LayerS2C(handler.getPlayerId(pl), layer));
 		}
 	}
 
@@ -92,8 +96,8 @@ public class NetHandlerExt<P, N> extends NetHandler<ResourceLocation, P, N> {
 
 		private <P> void handle0(NetHandler<?, P, ?> handler, NetH from) {
 			P ent = handler.getPlayerById(entId);
-			PlayerProfile profile = (PlayerProfile) ClientProxy.mc.getDefinitionLoader().loadPlayer((GameProfile) handler.getLoaderId(ent), ModelDefinitionLoader.PLAYER_UNIQUE);
-			profile.encGesture = layer;
+			IPlayerProfile profile = (IPlayerProfile) MinecraftClientAccess.get().getDefinitionLoader().loadPlayer(handler.getLoaderId(ent), ModelDefinitionLoader.PLAYER_UNIQUE);
+			profile.setEncGesture(layer);
 		}
 	}
 
@@ -101,5 +105,24 @@ public class NetHandlerExt<P, N> extends NetHandler<ResourceLocation, P, N> {
 		if(hasModClient()) {
 			sendPacketToServer(new LayerC2S(value));
 		}
+	}
+
+	public static class PlayerDataExt extends PlayerData {
+		private int skinLayer;
+
+		public PlayerDataExt() {
+		}
+
+		public void setSkinLayer(int skinLayer) {
+			this.skinLayer = skinLayer;
+		}
+
+		public int getSkinLayer() {
+			return skinLayer;
+		}
+	}
+
+	public static interface IPlayerProfile {
+		void setEncGesture(int g);
 	}
 }

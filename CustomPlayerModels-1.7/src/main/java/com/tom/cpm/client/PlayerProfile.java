@@ -25,6 +25,7 @@ import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.HandAnimation;
 import com.tom.cpl.util.TriConsumer;
 import com.tom.cpm.common.EntityTypeHandlerImpl;
+import com.tom.cpm.common.NetHandlerExt.IPlayerProfile;
 import com.tom.cpm.common.PlayerInventory;
 import com.tom.cpm.common.WorldImpl;
 import com.tom.cpm.shared.config.Player;
@@ -32,7 +33,7 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
-public class PlayerProfile extends Player<EntityPlayer> {
+public class PlayerProfile extends Player<EntityPlayer> implements IPlayerProfile {
 	public static boolean inGui;
 	private final GameProfile profile;
 	public int encGesture;
@@ -187,5 +188,10 @@ public class PlayerProfile extends Player<EntityPlayer> {
 	@Override
 	public Object getGameProfile() {
 		return profile;
+	}
+
+	@Override
+	public void setEncGesture(int g) {
+		encGesture = g;
 	}
 }

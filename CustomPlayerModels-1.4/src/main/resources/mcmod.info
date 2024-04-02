@@ -1,0 +1,11 @@
+[
+{
+  "modid" : "customplayermodels",
+  "name" : "Customizable Player Models",
+  "description": "Customize your minecraft avatar!",
+  "version": "${version}",
+  "url" : "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
+  "authorList": ["tom5454"],
+  "logoFile" : "logo.png"
+}
+]

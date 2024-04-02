@@ -52,6 +52,11 @@ API version: ![API version badge](https://img.shields.io/maven-metadata/v?color=
 | 1.10.2 | ![1.10 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.10.2%2Fmaven-metadata.xml) | - | - | - |
 | 1.8 | ![1.8 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.8%2Fmaven-metadata.xml) | - | - | - |
 | 1.7.10 | ![1.7 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.7.10%2Fmaven-metadata.xml) | - | - | - |
+| 1.6.4 | ![1.6 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.6.4%2Fmaven-metadata.xml) | - | - | - |
+| 1.5.2 | ![1.5 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.5.2%2Fmaven-metadata.xml) | - | - | - |
+| 1.4.7 | ![1.4 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.4.7%2Fmaven-metadata.xml) | - | - | - |
+| 1.2.5 | ![1.2 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.7.10%2Fmaven-metadata.xml) | - | - | - |
+| b1.7.3 | - | - | ![b1.7 babric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-b1.7.3%2Fmaven-metadata.xml) | - |
 
 #### gradle.properties
 ```ini
@@ -91,6 +96,45 @@ dependencies {
 }
 ```
 
+#### Dependencies using Voldeloom
+
+```gradle
+dependencies {
+  /* minecraft dependency is here */
+  
+  compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+  //1.4.7, 1.5.2
+  coremodImplementation ("com.tom5454.cpm:CustomPlayerModels-${project.cpm_mc_version}:${project.cpm_runtime_version}") {
+    copyToFolder("coremods")
+  }
+  //1.6.4
+  modRuntimeOnly "com.tom5454.cpm:CustomPlayerModels-${project.cpm_mc_version}:${project.cpm_runtime_version}"
+}
+```
+
+On 1.2.5:  
+
+```gradle
+volde {
+	runs {
+		client {
+			programArg "Dev"
+			vmArg "-Dcpmcore.deobf=true"
+			vmArg "-Dcpmcore.env.client=true"
+			vmArg "-javaagent:\"" + file("CustomPlayerModels-${project.cpm_runtime_version}.jar").absolutePath + "\""
+		}
+	}
+}
+
+dependencies {
+  /* minecraft dependency is here */
+  
+  compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
+}
+```
+
+You have to place the current mod version from Modrinth to the project root folder, or the Java Agent won't load.
+
 ## Create your Plugin
 
 Create a class implementing `ICPMPlugin`.
@@ -110,6 +154,9 @@ public class CPMCompat implements ICPMPlugin {
 	}
 }
 ```
+
+### Forge 1.2.5
+The plugin loader isn't implemented yet.
 
 ### Forge 1.12 and lower
 Send an IMC message with your plugin class location.  

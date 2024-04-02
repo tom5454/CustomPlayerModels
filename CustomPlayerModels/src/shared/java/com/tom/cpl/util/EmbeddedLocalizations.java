@@ -1,5 +1,11 @@
 package com.tom.cpl.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 public class EmbeddedLocalizations {
 	public static final EmbeddedLocalization loadProject = new EmbeddedLocalization("label.cpm.loadFile");
 	public static final EmbeddedLocalization saveProject = new EmbeddedLocalization("label.cpm.saveFile");
@@ -18,47 +24,26 @@ public class EmbeddedLocalizations {
 	public static void load() {}
 
 	static {
-		//Do not edit below this line
-		String l;
-		//==Auto generator marker==
-		loadProject.setFallback("Load Project");
-		saveProject.setFallback("Save Project");
-		importFile.setFallback("Import");
-		exportSkin.setFallback("Export Skin");
-		saveSkin.setFallback("Save Skin");
-		loadSkin.setFallback("Load Custom Skin");
-		openSkin.setFallback("Open Skin");
-		saveLogs.setFallback("Export Logs");
-		fileProject.setFallback("Project file (.cpmproject)");
-		filePng.setFallback("Image (.png)");
-		fileLog.setFallback("Exported logs (.zip)");
-		exportUV.setFallback("Export UV Map");
-		fileOra.setFallback("Open Raster file (.ora)");
-		l = "es";
-		loadProject.addLocale(l, "Cargar Proyecto");
-		saveProject.addLocale(l, "Guardar Proyecto");
-		importFile.addLocale(l, "Importar");
-		exportSkin.addLocale(l, "Exportar Skin");
-		saveSkin.addLocale(l, "Guardar Skin");
-		loadSkin.addLocale(l, "Cargar Skin Personalizada");
-		openSkin.addLocale(l, "Abrir Skin");
-		saveLogs.addLocale(l, "Exportar Registro");
-		fileProject.addLocale(l, "Archivo de Proyecto (.cpmproject)");
-		filePng.addLocale(l, "Imagen (.png)");
-		fileLog.addLocale(l, "Registros exportados (.zip)");
-		l = "zn_cn";
-		loadProject.addLocale(l, "\u52A0\u8F7D\u9879\u76EE");
-		saveProject.addLocale(l, "\u4FDD\u5B58\u9879\u76EE");
-		importFile.addLocale(l, "\u5BFC\u5165");
-		exportSkin.addLocale(l, "\u5BFC\u51FA\u76AE\u80A4");
-		saveSkin.addLocale(l, "\u4FDD\u5B58\u76AE\u80A4");
-		loadSkin.addLocale(l, "\u52A0\u8F7D\u81EA\u5B9A\u4E49\u76AE\u80A4");
-		openSkin.addLocale(l, "\u6253\u5F00\u76AE\u80A4");
-		saveLogs.addLocale(l, "\u5BFC\u51FA\u65E5\u5FD7");
-		fileProject.addLocale(l, "\u9879\u76EE\u6587\u4EF6\uFF08.cpmproject\uFF09");
-		filePng.addLocale(l, "\u56FE\u7247\uFF08.png\uFF09");
-		fileLog.addLocale(l, "\u5BFC\u51FA\u7684\u65E5\u5FD7\uFF08.zip\uFF09");
-		//==Auto generator end==
-		EmbeddedLocalization.validateEmbeds();
+		if (EmbeddedLocalization.validateEmbeds) {
+			Map<String, EmbeddedLocalization> lookup = new HashMap<>();
+			EmbeddedLocalization.forEachEntry(e -> lookup.put(e.getKey(), e));
+			try (InputStream is = EmbeddedLocalizations.class.getResourceAsStream("/com/tom/cpl/util/embedded_lang.properties")){
+				Properties pr = new Properties();
+				pr.load(is);
+				for (String key : pr.stringPropertyNames()) {
+					String val = pr.getProperty(key);
+					String[] sp = key.split("/");
+					EmbeddedLocalization el = lookup.get(sp[0]);
+					if (sp.length == 1) {
+						el.setFallback(val);
+					} else {
+						el.addLocale(sp[1], val);
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException("Corrupted mod JAR", e);
+			}
+			EmbeddedLocalization.validateEmbeds();
+		}
 	}
 }

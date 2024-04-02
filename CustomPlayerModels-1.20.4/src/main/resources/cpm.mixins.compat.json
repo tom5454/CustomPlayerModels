@@ -10,7 +10,9 @@
 	"AbstractTextureMixin_OF",
 	"BlockEntityWithoutLevelRendererMixin_OF",
 	"BlockEntityRenderDispatcherMixin_Iris",
-	"VRArmRendererMixin_$vivecraft"
+	"VRArmRendererMixin_$vivecraft",
+	"BlockEntityRenderDispatcherMixin_Iris7",
+	"CustomRenderTypesMixin_Iris7"
   ],
   "injectors": {
     "defaultRequire": 1

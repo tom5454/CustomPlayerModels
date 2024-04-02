@@ -1,6 +1,6 @@
 plugins {
 	id 'maven-publish'
-	alias libs.plugins.quilt.loom
+	id 'org.quiltmc.loom' version '1.+'
 }
 
 archivesBaseName = project.archives_base_name
@@ -26,19 +26,17 @@ repositories {
 // All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
 // See https://docs.gradle.org/current/userguide/platforms.html for information on how version catalogs work.
 dependencies {
-	minecraft libs.minecraft
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	
 	mappings loom.layered {
-		mappings "org.quiltmc:quilt-mappings:${libs.versions.quilt.mappings.get()}:intermediary-v2"
+		mappings "org.quiltmc:quilt-mappings:${minecraft_version}+build.${quilt_mappings}:intermediary-v2"
 		officialMojangMappings()
 	}
 	
-	modImplementation libs.quilt.loader
-
-	// QSL is not a complete API; You will need Quilted Fabric API to fill in the gaps.
-	// Quilted Fabric API will automatically pull in the correct QSL version.
-	modImplementation libs.quilted.fabric.api
-	// modImplementation libs.bundles.quilted.fabric.api // If you wish to use Fabric API's deprecated modules, you can replace the above line with this one
+	modImplementation "org.quiltmc:quilt-loader:${project.loader_version}"
+	modImplementation "org.quiltmc:qsl:${qsl_version}+${minecraft_version}"
+	if (project.quilted_fabric_api_version != null)
+		modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${quilted_fabric_api_version}-${minecraft_version}"
 
 	modImplementation("com.terraformersmc:modmenu:7.1.0") {
         exclude(group: "net.fabricmc.fabric-api")
@@ -63,6 +61,18 @@ dependencies {
 
 loom {
 	accessWidenerPath = file("src/main/resources/cpm.accesswidener")
+	
+	// Loom and Loader both use this block in order to gather more information about your mod.
+	mods {
+		// This should match your mod id.
+		"cpm" {
+			// Tell Loom about each source set used by your mod here. This ensures that your mod's classes are properly transformed by Loader.
+			sourceSet("main")
+			// If you shade (directly include classes, not JiJ) a dependency into your mod, include it here using one of these methods:
+			// dependency("com.example.shadowedmod:1.2.3")
+			// configuration("exampleShadedConfigurationName")
+		}
+	}
 }
 
 sourceSets {

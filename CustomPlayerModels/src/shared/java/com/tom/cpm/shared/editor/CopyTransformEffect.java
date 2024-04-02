@@ -104,9 +104,9 @@ public class CopyTransformEffect {
 			sb.append("\\ ");
 			sb.append(gui.i18nFormat("label.cpm.copyTransform.from", from.getElemName()));
 		}
-		boolean p = createXYZ(sb, gui.i18nFormat("label.cpm.position"), copyPX, copyPX, copyPZ);
-		boolean r = createXYZ(sb, gui.i18nFormat("label.cpm.rotation"), copyRX, copyRX, copyRZ);
-		boolean s = createXYZ(sb, gui.i18nFormat("label.cpm.scale"), copySX, copySX, copySZ);
+		boolean p = createXYZ(sb, gui.i18nFormat("label.cpm.position"), copyPX, copyPY, copyPZ);
+		boolean r = createXYZ(sb, gui.i18nFormat("label.cpm.rotation"), copyRX, copyRY, copyRZ);
+		boolean s = createXYZ(sb, gui.i18nFormat("label.cpm.scale"), copySX, copySY, copySZ);
 		if(copyVis) {
 			sb.append("\\  ");
 			sb.append(gui.i18nFormat("label.cpm.visible"));

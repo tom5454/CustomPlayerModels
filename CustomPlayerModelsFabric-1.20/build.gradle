@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.2-SNAPSHOT'
+	id 'fabric-loom' version '1.5-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -29,6 +29,8 @@ repositories {
     }
 }
 
+def useLib = System.getProperty("useLib")
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -48,17 +50,22 @@ dependencies {
 	
 	compileOnly files("../CustomPlayerModels-1.20/of.jar")
 	
-    modImplementation ('curse.maven:vivecraft-667903:4859782')
-    implementation('com.electronwill.night-config:toml:3.6.6')
-    implementation('com.electronwill.night-config:core:3.6.6')
-    implementation("org.lwjgl:lwjgl-openvr:3.3.1")
-    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
-    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
-    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+	if (useLib) {
+    	modImplementation ('curse.maven:vivecraft-667903:4859782')
+    	implementation('com.electronwill.night-config:toml:3.6.6')
+    	implementation('com.electronwill.night-config:core:3.6.6')
+    	implementation("org.lwjgl:lwjgl-openvr:3.3.1")
+    	implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
+    	implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
+    	implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+    } else 
+    	compileOnly files("vc.jar")
     
     modImplementation("com.jamieswhiteshirt:reach-entity-attributes:2.4.0")
     
     modImplementation (files('firstperson-fabric-2.2.4-mc1.20.1.jar'))
+    
+    modImplementation fileTree(dir: 'iris_beta', include: ['*.jar'])
 }
 
 loom {

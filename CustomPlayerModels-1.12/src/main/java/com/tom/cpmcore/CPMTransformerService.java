@@ -259,6 +259,8 @@ public class CPMTransformerService implements IClassTransformer {
 			public ClassNode apply(ClassNode input) {
 				boolean isDeobf = false;
 				input.interfaces.add("com/tom/cpmcore/IPlayerRenderer");
+				MethodNode renderModel = null;
+
 				for(MethodNode method : input.methods) {
 					if(method.name.equals("<init>")) {
 						LOG.info("CPM RenderPlayer Hook: Found constructor");
@@ -327,41 +329,58 @@ public class CPMTransformerService implements IClassTransformer {
 							}
 						}
 					}
+					if(method.name.equals("renderModel") || (method.name.equals("a") && method.desc.equals("(Lvp;FFFFFF)V"))) {
+						renderModel = method;
+						LOG.info("CPM Render Invis Hook: Found renderModel method");
+					}
 				}
-				//func_77036_a(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V
-				//renderModel(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V
-				String name = isDeobf ? "renderModel" : "func_77036_a";
-				LOG.info("CPM Render Invis Hook: Injecting method " + (isDeobf ? "deobf" : ""));
-				MethodNode mn = new MethodNode(Opcodes.ACC_PUBLIC, name, "(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V", null, null);
-				mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 2));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 3));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 4));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 5));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 6));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 7));
-				mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onRenderPlayerModel", "(Lnet/minecraft/client/renderer/entity/RenderPlayer;Lnet/minecraft/entity/EntityLivingBase;FFFFFF)Z", false));
-				LabelNode lbln = new LabelNode();
-				mn.instructions.add(new JumpInsnNode(Opcodes.IFEQ, lbln));
-				mn.instructions.add(new InsnNode(Opcodes.RETURN));
-				mn.instructions.add(lbln);
 
-				mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 2));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 3));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 4));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 5));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 6));
-				mn.instructions.add(new VarInsnNode(Opcodes.FLOAD, 7));
-				mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/renderer/entity/RenderLivingBase", name, "(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V", false));
-				mn.instructions.add(new InsnNode(Opcodes.RETURN));
-				input.methods.add(mn);
+				InsnList list;
+				boolean fullMethod = false;
+				String name = isDeobf ? "renderModel" : "func_77036_a";
+				if (renderModel == null) {
+					//func_77036_a(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V
+					//renderModel(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V
+					LOG.info("CPM Render Invis Hook: Injecting method " + (isDeobf ? "deobf" : ""));
+					renderModel = new MethodNode(Opcodes.ACC_PUBLIC, name, "(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V", null, null);
+					input.methods.add(renderModel);
+					list = renderModel.instructions;
+					fullMethod = true;
+				} else {
+					list = new InsnList();
+				}
+				list.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				list.add(new VarInsnNode(Opcodes.ALOAD, 1));
+				list.add(new VarInsnNode(Opcodes.FLOAD, 2));
+				list.add(new VarInsnNode(Opcodes.FLOAD, 3));
+				list.add(new VarInsnNode(Opcodes.FLOAD, 4));
+				list.add(new VarInsnNode(Opcodes.FLOAD, 5));
+				list.add(new VarInsnNode(Opcodes.FLOAD, 6));
+				list.add(new VarInsnNode(Opcodes.FLOAD, 7));
+				list.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "onRenderPlayerModel", "(Lnet/minecraft/client/renderer/entity/RenderPlayer;Lnet/minecraft/entity/EntityLivingBase;FFFFFF)Z", false));
+				LabelNode lbln = new LabelNode();
+				list.add(new JumpInsnNode(Opcodes.IFEQ, lbln));
+				list.add(new InsnNode(Opcodes.RETURN));
+				list.add(lbln);
+
+				if (fullMethod) {
+					list.add(new VarInsnNode(Opcodes.ALOAD, 0));
+					list.add(new VarInsnNode(Opcodes.ALOAD, 1));
+					list.add(new VarInsnNode(Opcodes.FLOAD, 2));
+					list.add(new VarInsnNode(Opcodes.FLOAD, 3));
+					list.add(new VarInsnNode(Opcodes.FLOAD, 4));
+					list.add(new VarInsnNode(Opcodes.FLOAD, 5));
+					list.add(new VarInsnNode(Opcodes.FLOAD, 6));
+					list.add(new VarInsnNode(Opcodes.FLOAD, 7));
+					list.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, "net/minecraft/client/renderer/entity/RenderLivingBase", name, "(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V", false));
+					list.add(new InsnNode(Opcodes.RETURN));
+				} else {
+					renderModel.instructions.insertBefore(renderModel.instructions.getFirst(), list);
+				}
 				LOG.info("CPM Render Invis Hook: injected");
 
 				name = isDeobf ? "isVisible" : "func_193115_c";
-				mn = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$isVisible", "(Lnet/minecraft/client/entity/AbstractClientPlayer;)Z", null, null);
+				MethodNode mn = new MethodNode(Opcodes.ACC_PUBLIC, "cpm$isVisible", "(Lnet/minecraft/client/entity/AbstractClientPlayer;)Z", null, null);
 				mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 				mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
 				mn.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, input.name, name, "(Lnet/minecraft/entity/EntityLivingBase;)Z", false));

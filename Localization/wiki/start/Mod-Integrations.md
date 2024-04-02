@@ -8,6 +8,8 @@ Integration animations:
 ## Voice Animations
 - [Simple Voice Chat](https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat)  
 Requires compat mod: Customizable Player Models Simple Voice Chat compat [CurseForge](https://www.curseforge.com/minecraft/mc-mods/cpmsvcc), [Modrinth](https://modrinth.com/mod/cpmsvcc)  
+- [Plasmo Voice](https://www.curseforge.com/minecraft/mc-mods/plasmo-voice)  
+Requires compat mod: Customizable Player Models Plasmo Voice compat [CurseForge](https://www.curseforge.com/minecraft/mc-mods/cpmpvc), [Modrinth](https://modrinth.com/mod/cpmpvc)  
 
 ## First Person View
 - [First-person Model (Forge/Fabric)](https://www.curseforge.com/minecraft/mc-mods/first-person-model)

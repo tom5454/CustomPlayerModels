@@ -28,6 +28,7 @@
 package com.tom.cpm.externals.com.udojava.evalex;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -214,11 +215,13 @@ public class Expression {
 	 * All defined operators with name and implementation.
 	 */
 	protected Map<String, Operator> operators = new HashMap<>();
+	protected static final Map<String, Operator> builtinOperators;
 
 	/**
 	 * All defined functions with name and implementation.
 	 */
 	protected Map<String, Function> functions = new HashMap<>();
+	protected static final Map<String, Function> builtinFunctions;
 
 	/**
 	 * All defined variables with name and value.
@@ -251,7 +254,7 @@ public class Expression {
 	 * defined by a name, the number of parameters and the actual processing
 	 * implementation.
 	 */
-	public abstract class Function {
+	public static abstract class Function {
 		/**
 		 * Name of this function.
 		 */
@@ -292,13 +295,22 @@ public class Expression {
 		 *         computing result.
 		 */
 		public abstract float eval(List<Float> parameters);
+
+		/**
+		 * If the function returns a constant result for constant inputs
+		 *
+		 * @author tom5454
+		 * */
+		public boolean isConstFunction() {
+			return true;
+		}
 	}
 
 	/**
 	 * Abstract definition of a supported operator. An operator is defined by
 	 * its name (pattern), precedence and if it is left- or right associative.
 	 */
-	public abstract class Operator {
+	public static abstract class Operator {
 		/**
 		 * This operators name (pattern).
 		 */
@@ -467,219 +479,247 @@ public class Expression {
 	 */
 	public Expression(String expression) {
 		this.expression = expression;
-		addOperator(new Operator("+", 20, true) {
+		operators.putAll(builtinOperators);
+		functions.putAll(builtinFunctions);
+
+		variables.put("PI", (float) Math.PI);
+		variables.put("TRUE", 1f);
+		variables.put("FALSE", 0f);
+	}
+
+	/**
+	 * tom5454 use shared builtin operator and function objects
+	 * */
+	static {
+		Map<String, Operator> operators = new HashMap<>();
+		Map<String, Function> functions = new HashMap<>();
+
+		addOperator0(operators, new Operator("+", 20, true) {
 			@Override
 			public float eval(float v1, float v2) {
 				return v1 + v2;
 			}
 		});
-		addOperator(new Operator("-", 20, true) {
+		addOperator0(operators, new Operator("-", 20, true) {
 			@Override
 			public float eval(float v1, float v2) {
 				return v1 - v2;
 			}
 		});
-		addOperator(new Operator("*", 30, true) {
+		addOperator0(operators, new Operator("*", 30, true) {
 			@Override
 			public float eval(float v1, float v2) {
 				return v1 * v2;
 			}
 		});
-		addOperator(new Operator("/", 30, true) {
+		addOperator0(operators, new Operator("/", 30, true) {
 			@Override
 			public float eval(float v1, float v2) {
 				return v1 / v2;
 			}
 		});
-		addOperator(new Operator("%", 30, true) {
+		addOperator0(operators, new Operator("%", 30, true) {
 			@Override
 			public float eval(float v1, float v2) {
 				return v1 % v2;
 			}
 		});
-		addOperator(new Operator("^", 40, false) {
+		addOperator0(operators, new Operator("^", 40, false) {
 			@Override
 			public float eval(float v1, float v2) {
 				return (float) Math.pow(v1, v2);
 			}
 		});
-		addOperator(new Operator("&&", 4, false) {
+		addOperator0(operators, new Operator("&&", 4, false) {
 			@Override
 			public float eval(float v1, float v2) {
-				boolean b1 = v1 >= 0.5f;
-				boolean b2 = v2 >= 0.5f;
+				boolean b1 = isTrue(v1);
+				boolean b2 = isTrue(v2);
 				return b1 && b2 ? 1f : 0f;
 			}
 		});
 
-		addOperator(new Operator("||", 2, false) {
+		addOperator0(operators, new Operator("||", 2, false) {
 			@Override
 			public float eval(float v1, float v2) {
-				boolean b1 = v1 >= 0.5f;
-				boolean b2 = v2 >= 0.5f;
+				boolean b1 = isTrue(v1);
+				boolean b2 = isTrue(v2);
 				return b1 || b2 ? 1f : 0f;
 			}
 		});
 
-		addOperator(new Operator(">", 10, false) {
+		addOperator0(operators, new Operator(">", 10, false) {
 			@Override
 			public float eval(float v1, float v2) {
-				return Float.compare(v1, v2) == 1 ? 1f : 0f;
+				return v1 > v2 ? 1f : 0f;
 			}
 		});
 
-		addOperator(new Operator(">=", 10, false) {
+		addOperator0(operators, new Operator(">=", 10, false) {
 			@Override
 			public float eval(float v1, float v2) {
-				return Float.compare(v1, v2) >= 0 ? 1f : 0f;
+				return v1 >= v2 ? 1f : 0f;
 			}
 		});
 
-		addOperator(new Operator("<", 10, false) {
+		addOperator0(operators, new Operator("<", 10, false) {
 			@Override
 			public float eval(float v1, float v2) {
-				return Float.compare(v1, v2) == -1 ? 1f : 0f;
+				return v1 < v2 ? 1f : 0f;
 			}
 		});
 
-		addOperator(new Operator("<=", 10, false) {
+		addOperator0(operators, new Operator("<=", 10, false) {
 			@Override
 			public float eval(float v1, float v2) {
-				return Float.compare(v1, v2) <= 0 ? 1f : 0f;
+				return v1 <= v2 ? 1f : 0f;
 			}
 		});
 
-		addOperator(new Operator("=", 7, false) {
+		addOperator0(operators, new Operator("=", 7, false) {
 			@Override
 			public float eval(float v1, float v2) {
-				return Float.compare(v1, v2) == 0 ? 1f : 0f;
+				return epsEqual(v1, v2) ? 1f : 0f;
 			}
 		});
-		addOperator(new Operator("==", 7, false) {
+		addOperator0(operators, new Operator("==", 7, false) {
 			@Override
 			public float eval(float v1, float v2) {
-				return operators.get("=").eval(v1, v2);
-			}
-		});
-
-		addOperator(new Operator("!=", 7, false) {
-			@Override
-			public float eval(float v1, float v2) {
-				return Float.compare(v1, v2) != 0 ? 1f : 0f;
-			}
-		});
-		addOperator(new Operator("<>", 7, false) {
-			@Override
-			public float eval(float v1, float v2) {
-				return operators.get("!=").eval(v1, v2);
+				return epsEqual(v1, v2) ? 1f : 0f;
 			}
 		});
 
-		addFunction(new Function("NOT", 1) {
+		addOperator0(operators, new Operator("!=", 7, false) {
+			@Override
+			public float eval(float v1, float v2) {
+				return !epsEqual(v1, v2) ? 1f : 0f;
+			}
+		});
+		addOperator0(operators, new Operator("<>", 7, false) {
+			@Override
+			public float eval(float v1, float v2) {
+				return !epsEqual(v1, v2) ? 1f : 0f;
+			}
+		});
+
+		addFunction0(functions, new Function("NOT", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
-				boolean zero = parameters.get(0).compareTo(0f) == 0;
+				boolean zero = !isTrue(parameters.get(0));
 				return zero ? 1f : 0f;
 			}
 		});
 
-		addFunction(new Function("IF", 3) {
+		addFunction0(functions, new Function("BOOL", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
-				boolean isTrue = !parameters.get(0).equals(0f);
+				boolean zero = !isTrue(parameters.get(0));
+				return zero ? 0f : 1f;
+			}
+		});
+
+		addFunction0(functions, new Function("IF", 3) {
+			@Override
+			public float eval(List<Float> parameters) {
+				boolean isTrue = isTrue(parameters.get(0));
 				return isTrue ? parameters.get(1) : parameters.get(2);
 			}
 		});
 
-		addFunction(new Function("RANDOM", 0) {
+		addFunction0(functions, new Function("RANDOM", 0) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.random();
 			}
+
+			@Override
+			public boolean isConstFunction() {
+				return false;
+			}
 		});
-		addFunction(new Function("SIN", 1) {
+		addFunction0(functions, new Function("SIN", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.sin(Math.toRadians(parameters.get(0)));
 			}
 		});
-		addFunction(new Function("COS", 1) {
+		addFunction0(functions, new Function("COS", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.cos(Math.toRadians(parameters.get(0)));
 			}
 		});
-		addFunction(new Function("TAN", 1) {
+		addFunction0(functions, new Function("TAN", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.tan(Math.toRadians(parameters.get(0)));
 			}
 		});
-		addFunction(new Function("SINH", 1) {
+		addFunction0(functions, new Function("SINH", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.sinh(parameters.get(0));
 			}
 		});
-		addFunction(new Function("COSH", 1) {
+		addFunction0(functions, new Function("COSH", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.cosh(parameters.get(0));
 			}
 		});
-		addFunction(new Function("TANH", 1) {
+		addFunction0(functions, new Function("TANH", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.tanh(parameters.get(0));
 			}
 		});
-		addFunction(new Function("RAD", 1) {
+		addFunction0(functions, new Function("RAD", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.toRadians(parameters.get(0));
 			}
 		});
-		addFunction(new Function("DEG", 1) {
+		addFunction0(functions, new Function("DEG", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.toDegrees(parameters.get(0));
 			}
 		});
-		addFunction(new Function("MAX", 2) {
+		addFunction0(functions, new Function("MAX", 2) {
 			@Override
 			public float eval(List<Float> parameters) {
 				float v1 = parameters.get(0);
 				float v2 = parameters.get(1);
-				return Float.compare(v1, v2) > 0 ? v1 : v2;
+				return v1 > v2 ? v1 : v2;
 			}
 		});
-		addFunction(new Function("MIN", 2) {
+		addFunction0(functions, new Function("MIN", 2) {
 			@Override
 			public float eval(List<Float> parameters) {
 				float v1 = parameters.get(0);
 				float v2 = parameters.get(1);
-				return Float.compare(v1, v2) < 0 ? v1 : v2;
+				return v1 < v2 ? v1 : v2;
 			}
 		});
-		addFunction(new Function("ABS", 1) {
+		addFunction0(functions, new Function("ABS", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return Math.abs(parameters.get(0));
 			}
 		});
-		addFunction(new Function("LOG", 1) {
+		addFunction0(functions, new Function("LOG", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.log(parameters.get(0));
 			}
 		});
-		addFunction(new Function("LOG10", 1) {
+		addFunction0(functions, new Function("LOG10", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.log10(parameters.get(0));
 			}
 		});
-		addFunction(new Function("ROUND", 2) {
+		addFunction0(functions, new Function("ROUND", 2) {
 			@Override
 			public float eval(List<Float> parameters) {
 				float toRound = parameters.get(0);
@@ -688,29 +728,35 @@ public class Expression {
 				return (float) (((int) (toRound * d)) / d);
 			}
 		});
-		addFunction(new Function("FLOOR", 1) {
+		addFunction0(functions, new Function("FLOOR", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.floor(parameters.get(0));
 			}
 		});
-		addFunction(new Function("CEILING", 1) {
+		addFunction0(functions, new Function("CEILING", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.ceil(parameters.get(0));
 			}
 		});
-		addFunction(new Function("SQRT", 1) {
+		addFunction0(functions, new Function("SQRT", 1) {
 			@Override
 			public float eval(List<Float> parameters) {
 				return (float) Math.sqrt(parameters.get(0));
 			}
 		});
 
-		variables.put("PI", (float) Math.PI);
-		variables.put("TRUE", 1f);
-		variables.put("FALSE", 0f);
+		builtinOperators = Collections.unmodifiableMap(operators);
+		builtinFunctions = Collections.unmodifiableMap(functions);
+	}
 
+	public static boolean isTrue(float v) {
+		return v >= 0.5f;
+	}
+
+	public static boolean epsEqual(float v1, float v2) {
+		return Math.abs(v1 - v2) < 0.01f;
 	}
 
 	/**
@@ -842,6 +888,10 @@ public class Expression {
 		return operators.put(operator.getOper(), operator);
 	}
 
+	private static void addOperator0(Map<String, Operator> operators, Operator operator) {
+		operators.put(operator.getOper(), operator);
+	}
+
 	/**
 	 * Adds a function to the list of supported functions
 	 *
@@ -852,6 +902,10 @@ public class Expression {
 	 */
 	public Function addFunction(Function function) {
 		return functions.put(function.getName(), function);
+	}
+
+	private static void addFunction0(Map<String, Function> functions, Function function) {
+		functions.put(function.getName(), function);
 	}
 
 	/**

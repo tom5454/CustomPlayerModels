@@ -9,6 +9,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldServer;
 
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
@@ -22,10 +23,10 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 
 public class ServerHandler {
-	public static NetHandlerExt<EntityPlayerMP, NetHandlerPlayServer> netHandler;
+	public static NetHandlerExt<ResourceLocation, EntityPlayerMP, NetHandlerPlayServer> netHandler;
 
 	static {
-		netHandler = new NetHandlerExt<>();
+		netHandler = new NetHandlerExt<>(ResourceLocation::new);
 		netHandler.setGetPlayerUUID(EntityPlayerMP::getUniqueID);
 		netHandler.setSendPacketServer(a -> a, (c, rl, pb) -> c.sendPacket(new S3FPacketCustomPayload(rl.toString(), pb)), ent -> ((WorldServer)ent.worldObj).getEntityTracker().getTrackingPlayers(ent), e -> (EntityPlayerMP) e);
 		netHandler.setFindTracking((p, f) -> {

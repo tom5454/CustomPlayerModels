@@ -12,8 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SkullBlock;
 
@@ -38,9 +40,9 @@ public class BlockEntityWithoutLevelRendererMixin_OF {
 			locals = LocalCapture.CAPTURE_FAILHARD,
 			require = 0,
 			remap = false)//Optifine
-	public void onRenderOF(ItemStack stack, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int arg5, CallbackInfo ci, Item item, Block block, GameProfile gameProfile, SkullBlock.Type skullType, SkullModelBase model) {
+	public void onRenderOF(ItemStack stack, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int arg5, CallbackInfo ci, Item item, Block block, AbstractSkullBlock skullBlock, CompoundTag tag, GameProfile gameProfile, SkullModelBase model) {
 		RefHolder.CPM_MODELS = skullModels;
-		if(skullType == SkullBlock.Types.PLAYER && gameProfile != null) {
+		if (model == skullModels.get(SkullBlock.Types.PLAYER) && gameProfile != null) {
 			CustomPlayerModelsClient.INSTANCE.renderSkull(model, gameProfile, vertexConsumers);
 		}
 	}

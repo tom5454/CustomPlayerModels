@@ -32,6 +32,8 @@ import com.tom.cpm.shared.network.NetH;
 
 public class CPMASMClientHooks {
 	public static void renderSkull(ModelBase skullModel, GameProfile profile) {
+		RetroGL.color4f(1, 1, 1, 1);
+		RetroGL.renderCallLoc = 0;
 		if(profile != null) {
 			ClientProxy.INSTANCE.renderSkull(skullModel, profile);
 		}
@@ -91,6 +93,8 @@ public class CPMASMClientHooks {
 	}
 
 	public static void onHandPre(RenderPlayer this0, EntityPlayer player) {
+		RetroGL.color4f(1, 1, 1, 1);
+		RetroGL.renderCallLoc = 0;
 		ClientProxy.INSTANCE.manager.bindHand(player, null, this0.modelBipedMain);
 		ClientProxy.INSTANCE.manager.bindSkin(this0.modelBipedMain, TextureSheetType.SKIN);
 	}

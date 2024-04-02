@@ -5,7 +5,7 @@
 
 ### Attribute Scaling
 CPM can apply some scaling settings using [attributes](https://minecraft.wiki/w/Attribute). See the list below for the supported attributes per Minecraft version:  
-| Scaling Option | 1.7 - 1.8 | 1.10 | 1.12 | 1.14 - 1.17 | 1.18 - 1.20.4 | 1.20.5 |
+| Scaling Option | 1.6 - 1.8 | 1.10 | 1.12 | 1.14 - 1.17 | 1.18 - 1.20.4 | 1.20.5 |
 | --- | --- | --- | --- | --- | --- | --- |
 | Entity Scaling |  No | No | No | No | No | Yes |
 | Motion Scale |  Yes | Yes | Yes | Yes | Yes | Yes |
@@ -23,7 +23,7 @@ CPM can apply some scaling settings using [attributes](https://minecraft.wiki/w/
 | Jump Height |  No | No | No | No | No | Yes |
 | Knockback Resist Scale |  Yes | Yes | Yes | Yes | Yes | Yes |
 | Safe Fall Distance Scale |  No | No | No | No | No | Yes |
-| Scaling Option | 1.7 - 1.8 | 1.10 | 1.12 | 1.14 - 1.17 | 1.18 - 1.20.4 | 1.20.5 |
+| Scaling Option | 1.6 - 1.8 | 1.10 | 1.12 | 1.14 - 1.17 | 1.18 - 1.20.4 | 1.20.5 |
 
 Method name: `attribute`  
 

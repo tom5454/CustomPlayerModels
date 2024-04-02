@@ -6,8 +6,7 @@
   	"common.PlayerListMixin",
 	"common.PlayerMixin",
 	"common.ServerEntityMixin",
-	"ServerGamePacketListenerImplMixin",
-	"ServerCommonPacketListenerImplMixin"
+	"ServerGamePacketListenerImplMixin"
   ],
   "client": [
     "PlayerRendererMixin",

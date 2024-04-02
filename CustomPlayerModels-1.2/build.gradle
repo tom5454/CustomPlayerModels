@@ -1,0 +1,548 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		gradlePluginPortal()
+		maven { url "https://maven.fabricmc.net" }
+		maven { url "https://repo.sleeping.town" }
+		maven { url 'https://maven.minecraftforge.net/' }
+	}
+	dependencies {
+		classpath "agency.highlysuspect:voldeloom:2.5-SNAPSHOT"
+		classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+		classpath 'me.tatarka:gradle-retrolambda:3.7.1'
+	}
+}
+
+apply plugin: 'java'
+apply plugin: "agency.highlysuspect.voldeloom"
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+def useLib = System.getProperty("useLib")
+
+sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+retrolambda {
+  javaVersion JavaVersion.VERSION_1_6
+  defaultMethods true
+  incremental false
+}
+
+version = project.mod_version
+group = "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "CustomPlayerModels-1.2.5"
+
+String minecraftVersion = "1.2.5"
+String forgeVersion = "1.2.5-3.4.9.171"
+
+volde {
+	runs {
+		client {
+			programArg "tom5454"
+			vmArg "-Xdebug"
+			vmArg "-Xrunjdwp:server=y,transport=dt_socket,address=4100,suspend=y"
+			vmArg "-Dcpm.debug=true"
+			vmArg "-Dcpmcore.deobf=true"
+			vmArg "-Dcpmcore.spc=true"
+			vmArg "-Dcpmcore.env.client=true"
+			vmArg "-Dcpmcore.asm_dump=true"
+			vmArg "-Dcpmcore.dump=\"" + file("${buildDir}/obf_dump.cfg").absolutePath + "\""
+			vmArg "-Dcpmcore.dumpsrc=\"" + file("run/$archivesBaseName-${version}.jar").absolutePath + "\""
+			vmArg "-javaagent:\"" + file("run/$archivesBaseName-${version}.jar").absolutePath + "\""
+		}
+		obfDump {
+			environment = "client"
+			mainClass = "net.minecraft.client.Minecraft"
+			runDir = "run"
+			vmArg "-Dcpmcore.deobf=true"
+			vmArg "-Dcpmcore.env.client=true"
+			vmArg "-Dcpmcore.dump=\"" + file("${buildDir}/obf_dump.cfg").absolutePath + "\""
+			vmArg "-Dcpmcore.dumpsrc=\"" + file("run/$archivesBaseName-${version}.jar").absolutePath + "\""
+			vmArg "-javaagent:\"" + file("run/$archivesBaseName-${version}.jar").absolutePath + "\""
+			vmArg "-Dcpmcore.dump.exit=true"
+		}
+	}
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "../CustomPlayerModels/src/shared/java"
+			exclude "com/tom/cpl/util/NettyByteBufInputStream.java"
+			srcDir "../CustomPlayerModels-1.6/src/retro/java"
+		}
+		resources {
+			srcDir "../CustomPlayerModels/src/shared/resources"
+			exclude "assets/*/lang/*.json"
+			srcDir "../CustomPlayerModels-1.6/src/retro/resources"
+		}
+	}
+}
+
+configurations {
+    priority
+    sourceSets.main.compileClasspath = configurations.priority + sourceSets.main.compileClasspath
+    shade
+    implementation.extendsFrom shade
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${minecraftVersion}"
+	forgeClient "net.minecraftforge:forge:${forgeVersion}:client@zip"
+	forgeServer "net.minecraftforge:forge:${forgeVersion}:server@zip"
+	mappings "net.minecraftforge:forge:${forgeVersion}:src@zip"
+	accessTransformers files("${buildDir}/at/META-INF/cpm_at.cfg")
+	compileOnly "com.mojang:brigadier:1.0.18"
+	
+	shade "com.google.guava:guava:17.0"
+	shade "com.google.code.gson:gson:2.8.5"
+	shade "org.ow2.asm:asm-all:4.1"
+}
+
+jar {
+    manifest {
+        attributes(
+                'Premain-Class': 'com.tom.cpmcore.CPMLoadingPlugin')
+    }
+    
+	classifier = 'slim'
+}
+
+shadowJar {
+	configurations = [project.configurations.shade]
+	
+	relocate 'com.google', 'com.tom.cpm.externals.com.google'
+	relocate 'org.objectweb', 'com.tom.cpm.externals.org.objectweb'
+	
+	exclude 'module-info.class'
+	exclude 'META-INF/maven/**'
+	
+	classifier = ''
+}
+
+build.dependsOn(shadowJar)
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+processResources
+{
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'cpm.version'
+                
+        // replace version and mcversion
+        expand 'version':project.version
+    }
+    
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'cpm.version'
+    }
+    
+    from(files("${buildDir}/at"))
+    
+    duplicatesStrategy = "include"
+}
+//https://archive.org/details/minecraftcoderpack
+//https://ia801701.us.archive.org/view_archive.php?archive=/29/items/minecraftcoderpack/minecraftcoderpack.zip
+/*task downloadSRG(type: Copy) {
+    def zipUrl = 'https://archive.org/download/minecraftcoderpack/minecraftcoderpack.zip/minecraftcoderpack%2F1.6.4%2Fmcp811.zip'
+    def destinationDir = file("${buildDir}/extractedFiles")
+    destinationDir.mkdirs()
+
+    from(zipTree(zipUrl))
+    into(destinationDir)
+    include '** /*.srg'
+    include '** /*.csv'
+
+    println "Downloaded and extracted .srg files to: ${destinationDir}"
+}*/
+
+task remapAT {
+	println "Loading remap data"
+	def srgFilesDir = "${buildDir}/extractedFiles"
+    def mappingFD = [:]
+    def mappingCL = [:]
+    def mappingMD = [:]
+    def mappingFDs = [:]
+    def mappingCLs = [:]
+    def mappingMDs = [:]
+    def fieldMap = [:]
+    def methodMap = [:]
+    def fieldMapS = [:]
+    def methodMapS = [:]
+    file(srgFilesDir + "/client.srg").eachLine { line ->
+	    def parts = line.split(':')
+	    if (parts.size() == 2) {
+	        def type = parts[0].trim()
+	        def kv = parts[1].trim().split(" ")
+	        if (type == "FD") {
+	        	mappingFD[kv[1]] = kv[0]
+	        } else if (type == "CL") {
+	        	mappingCL[kv[1]] = kv[0]
+	        } else if (type == "MD") {
+	            mappingMD[kv[2] + kv[3]] = kv[0] + kv[1]
+	        }
+	    }
+    }
+    file(srgFilesDir + "/server.srg").eachLine { line ->
+	    def parts = line.split(':')
+	    if (parts.size() == 2) {
+	        def type = parts[0].trim()
+	        def kv = parts[1].trim().split(" ")
+	        if (type == "FD") {
+	        	mappingFDs[kv[1]] = kv[0]
+	        } else if (type == "CL") {
+	        	mappingCLs[kv[1]] = kv[0]
+	        } else if (type == "MD") {
+	            mappingMDs[kv[2] + kv[3]] = kv[0] + kv[1]
+	        }
+	    }
+    }
+    file(srgFilesDir + "/fields.csv").eachLine { line ->
+    	def parts = line.split(',')
+    	if (parts[2] == '0')
+    		fieldMap[parts[0]] = parts[1]
+    	else
+    		fieldMapS[parts[0]] = parts[1]
+    }
+    file(srgFilesDir + "/methods.csv").eachLine { line ->
+    	def parts = line.split(',')
+    	if (parts[2] == '0')
+    		methodMap[parts[0]] = parts[1]
+    	else
+    		methodMapS[parts[0]] = parts[1]
+    }
+    
+    println "Remapping ATs"
+    def newText = ''
+    def remapFails = ''
+    file("./src/main/resources/META-INF/cpm_at_dev.cfg").eachLine { line ->
+    	def parts = line.split(' ', 4)
+    	if (parts.size() > 2) {
+    		def mode = parts[0]
+        	def clazz = parts[1]
+        	def obj = parts[2]
+        	def lookup = "?"
+        	def own = clazz.substring(clazz.lastIndexOf(".") + 1)
+        	def remapInfo = "Field: $own $obj\n"
+        	fieldMap.each { intermediate, named ->
+            	if (named == obj) {
+               		def k = "net/minecraft/src/" + own + "/" + intermediate
+               		remapInfo += "  Considering: $k\n"
+               		if (mappingFD[k] != null) {
+               			lookup = mappingFD[k]
+               			//println "    Mapped: $lookup"
+               			return false // Break out of the loop once found
+               		}
+               		k = "net/minecraft/client/" + own + "/" + intermediate
+               		remapInfo += "  Considering: $k\n"
+               		if (mappingFD[k] != null) {
+               			lookup = mappingFD[k]
+               			//println "    Mapped: $lookup"
+               			return false // Break out of the loop once found
+               		}
+           		}
+        	}
+        	def fieldLookup = "net/minecraft/src/" + clazz.substring(clazz.lastIndexOf(".") + 1) + "/" + obj
+        	def fieldInfo = mappingFD[fieldLookup]
+        	if (fieldInfo != null)lookup = fieldInfo
+        	if (lookup != null)lookup = lookup.replace("/", ".")
+        	def clientF = false
+        	if (lookup == "?") {
+        		clientF = true
+        	}
+    		else newText += "$mode $lookup\n"
+    		lookup = "?"
+    		fieldMapS.each { intermediate, named ->
+            	if (named == obj) {
+               		def k = "net/minecraft/src/" + own + "/" + intermediate
+               		remapInfo += "  Considering: $k\n"
+               		if (mappingFDs[k] != null) {
+               			lookup = mappingFDs[k]
+               			//println "    Mapped: $lookup"
+               			return false // Break out of the loop once found
+               		}
+           		}
+        	}
+        	if (lookup != "?")
+    			newText += "$mode ${lookup.replace('/', '.')}\n"
+    		else if (clientF)
+    			remapFails += "$remapInfo\n"
+    	} else {
+        	newText += line + '\n'
+        }
+    }
+    def f = file("${buildDir}/at/META-INF/cpm_at.cfg")
+    f.parentFile.mkdirs()
+    f.text = newText
+    
+    def supers = [:]
+    def srgfails = [:]
+    def skips = [:]
+    def serverSRGd = [:]
+    file("./src/main/resources/META-INF/cpm_core_super.cfg").eachLine { line ->
+    	def parts = line.split(' ', 4)
+    	if (parts.size() > 2) {
+    		if (parts[0] == "super")
+    			supers[parts[1]] = parts[2]
+    		else if (parts[0] == "srgfail")
+    			srgfails[parts[1]] = parts[2]
+    		else if (parts[0] == "serversrg")
+    			serverSRGd[parts[1]] = parts[2]
+    	}
+    	if(parts.size() > 1) {
+    		if (parts[0] == "skip")
+    			skips[parts[1]] = true
+    	}
+    }
+    
+    println "Remapping Core names"
+    newText = ''
+    def parser = { line ->
+    	def parts = line.split(' ', 4)
+    	if (parts.size() > 1 && parts[0] != "override") {
+    		def mode = parts[0]
+    		def nameO = parts[1]
+    		def lookupC = "?"
+    		def lookupS = "?"
+    		def name = nameO
+    		if (srgfails[name] != null)
+    			name = srgfails[name]
+    		def remapInfo = ""
+    		if (mode.equals("method")) {
+    			def ind = name.indexOf(';')
+    			def own = name.substring(0, ind)
+    			def nm = name.substring(ind + 1)
+    			ind = nm.indexOf('(')
+    			def mth = nm.substring(0, ind)
+    			def par = nm.substring(ind).replaceAll("Lnet\\.minecraft\\.(?:[\\w]+\\.)+([\\w]+)\\;", "Lnet/minecraft/src/\$1;")
+    			def par2 = nm.substring(ind).replaceAll("Lnet\\.minecraft\\.(?:[\\w]+\\.)+([\\w]+)\\;", "Lnet/minecraft/client/\$1;")
+    			
+    			if (skips[name]) {
+    				def desc = nm.substring(ind)
+    				lookupC = "$own/!$mth$desc"
+    				lookupS = "$own/!$mth$desc"
+    			}
+    			
+    			while (lookupC == "?" && lookupS == "?" && own != null) {
+    			remapInfo += "Method: $own $mth $par\n"
+    			methodMap.each { intermediate, named ->
+            		if (named == mth) {
+                		def k = "net/minecraft/src/" + own + "/" + intermediate + par
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingMD[k] != null) {
+                			lookupC = mappingMD[k]
+                			//println "    Mapped: $lookupC"
+                			return false // Break out of the loop once found
+                		}
+                		k = "net/minecraft/client/" + own + "/" + intermediate + par
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingMD[k] != null) {
+                			lookupC = mappingMD[k]
+                			//println "    Mapped: $lookupC"
+                			return false // Break out of the loop once found
+                		}
+                		k = "net/minecraft/src/" + own + "/" + intermediate + par2
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingMD[k] != null) {
+                			lookupC = mappingMD[k]
+                			//println "    Mapped: $lookupC"
+                			return false // Break out of the loop once found
+                		}
+                		k = "net/minecraft/client/" + own + "/" + intermediate + par2
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingMD[k] != null) {
+                			lookupC = mappingMD[k]
+                			//println "    Mapped: $lookupC"
+                			return false // Break out of the loop once found
+                		}
+            		}
+        		}
+        		def mthS = mth
+        		if (serverSRGd[mthS] != null)
+        			mthS = serverSRGd[mth]
+        		methodMapS.each { intermediate, named ->
+            		if (named == mthS) {
+                		def k = "net/minecraft/src/" + own + "/" + intermediate + par
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingMDs[k] != null) {
+                			lookupS = mappingMDs[k]
+                			//println "    Mapped: $lookupS"
+                			return false // Break out of the loop once found
+                		}
+                		k = "net/minecraft/server/" + own + "/" + intermediate + par
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingMDs[k] != null) {
+                			lookupS = mappingMDs[k]
+                			//println "    Mapped: $lookupS"
+                			return false // Break out of the loop once found
+                		}
+            		}
+        		}
+        		if (lookupC == "?") {
+        			def k = "net/minecraft/src/" + own + "/" + mth + par
+        			remapInfo += "  Considering: $k\n"
+                	if (mappingMD[k] != null) {
+                		lookupC = mappingMD[k]
+                		//println "    Mapped: $lookupC"
+                	}
+        		}
+        		if (lookupS == "?") {
+        			def k = "net/minecraft/src/" + own + "/" + mthS + par
+        			remapInfo += "  Considering: $k\n"
+                	if (mappingMDs[k] != null) {
+                		lookupS = mappingMDs[k]
+                		//println "    Mapped: $lookupS"
+                	}
+        		}
+        		own = supers[own]
+        		}
+    		} else if (mode.equals("field")) {
+    			def ind = name.indexOf(';')
+    			def own = name.substring(0, ind)
+    			def nm = name.substring(ind + 1)
+    			
+    			if (skips[name]) {
+    				lookupC = "$own/$nm"
+    				lookupS = "$own/$nm"
+    			}
+    			
+    			while (lookupC == "?" && lookupS == "?" && own != null) {
+    			remapInfo += "Field: $own $nm\n"
+    			fieldMap.each { intermediate, named ->
+            		if (named == nm) {
+                		def k = "net/minecraft/src/" + own + "/" + intermediate
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingFD[k] != null) {
+                			lookupC = mappingFD[k]
+                			//println "    Mapped: $lookupC"
+                			return false // Break out of the loop once found
+                		}
+                		k = "net/minecraft/client/" + own + "/" + intermediate
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingFD[k] != null) {
+                			lookupC = mappingFD[k]
+                			//println "    Mapped: $lookupC"
+                			return false // Break out of the loop once found
+                		}
+            		}
+        		}
+        		fieldMapS.each { intermediate, named ->
+            		if (named == nm) {
+                		def k = "net/minecraft/src/" + own + "/" + intermediate
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingFDs[k] != null) {
+                			lookupS = mappingFDs[k]
+                			//println "    Mapped: $lookupS"
+                			return false // Break out of the loop once found
+                		}
+                		k = "net/minecraft/server/" + own + "/" + intermediate
+                		remapInfo += "  Considering: $k\n"
+                		if (mappingFDs[k] != null) {
+                			lookupS = mappingFDs[k]
+                			//println "    Mapped: $lookupS"
+                			return false // Break out of the loop once found
+                		}
+            		}
+        		}
+        		if (lookupC == "?") {
+        			def k = "net/minecraft/src/" + own + "/" + nm
+        			remapInfo += "  Considering: $k\n"
+                	if (mappingFD[k] != null) {
+                		lookupC = mappingFD[k]
+                		//println "    Mapped: $lookupC"
+                	}
+        		}
+        		if (lookupS == "?") {
+        			def k = "net/minecraft/src/" + own + "/" + nm
+        			remapInfo += "  Considering: $k\n"
+                	if (mappingFDs[k] != null) {
+                		lookupS = mappingFDs[k]
+                		//println "    Mapped: $lookupS"
+                	}
+                	k = "net/minecraft/server/" + own + "/" + nm
+        			remapInfo += "  Considering: $k\n"
+                	if (mappingFDs[k] != null) {
+                		lookupS = mappingFDs[k]
+                		//println "    Mapped: $lookupS"
+                	}
+        		}
+        		own = supers[own]
+        		}
+    		} else if (mode.equals("class")) {
+        		remapInfo += "Class: $name\n"
+        		def par = name.replaceAll("net\\.minecraft\\.(?:[\\w]+\\.)+([\\w]+)", "net/minecraft/src/\$1")
+    			def par2 = name.replaceAll("net\\.minecraft\\.(?:[\\w]+\\.)+([\\w]+)", "net/minecraft/client/\$1")
+    			def par3 = name.replaceAll("net\\.minecraft\\.(?:[\\w]+\\.)+([\\w]+)", "net/minecraft/server/\$1")
+    			remapInfo += "  Considering: $par\n"
+    			if (mappingCL[par] != null) {
+    				lookupC = mappingCL[par];
+    				//println "    Mapped: $lookupC"
+    			}
+    			if (mappingCLs[par] != null) {
+    				lookupS = mappingCLs[par];
+    				//println "    Mapped: $lookupS"
+    			}
+    			remapInfo += "  Considering: $par2\n"
+    			if (mappingCL[par2] != null) {
+    				lookupC = mappingCL[par2];
+    				//println "    Mapped: $lookupC"
+    			}
+    			remapInfo += "  Considering: $par3\n"
+    			if (mappingCLs[par3] != null) {
+    				lookupS = mappingCLs[par3];
+    				//println "    Mapped: $lookupS"
+    			}
+    		}
+    		if (lookupC == "?" && lookupS == "?") {
+    			remapFails += "$mode $name\n"
+    			remapFails += "$remapInfo\n"
+    		}
+    		newText += "$mode $nameO $lookupC $lookupS\n"
+    	} else {
+        	newText += line + '\n'
+    	}
+    }
+    file("./src/main/resources/META-INF/cpm_core_dev.cfg").eachLine(parser)
+    file("${buildDir}/obf_dump.cfg").eachLine(parser)
+    
+    file("${buildDir}/at/META-INF/cpm_core.cfg").text = newText
+    file("${buildDir}/remap_fails.log").text = remapFails
+}
+
+//remapAT.dependsOn(downloadSRG)
+
+task copyArtifact(type: Copy, dependsOn: 'build') {
+    def artifactDir = file("${buildDir}/libs/$archivesBaseName-${version}.jar")
+    println "Artifact: ${artifactDir}"
+    def destinationDir = file("./run/") // Update this with your desired destination folder
+
+    // Copy the artifact to the destination directory
+    from artifactDir
+    into destinationDir
+
+    doLast {
+        println "Copied artifact to: ${destinationDir}"
+        delete artifactDir // Gradle dumb
+    }
+}
+
+//Disable remap and give a dummy jar to stop renaming things
+tasks.named('remapJarForRelease').configure {
+    enabled = false
+    input = file("${buildDir}/of.jar")
+}

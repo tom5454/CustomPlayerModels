@@ -34,6 +34,7 @@ public class AnimationState {
 	public HandAnimation usingAnimation = HandAnimation.NONE;
 	public boolean parrotLeft, parrotRight, isFreezing, isBurning, isOnLadder, isClimbing, inGui, firstPersonMod, voiceMuted, invisible;
 	public byte[] gestureData;
+	public byte[] prevGestureData;
 	public VRState vrState;
 	public AnimationMode animationMode;
 	public long dayTime;
@@ -180,7 +181,10 @@ public class AnimationState {
 				}
 			}
 		}
-		if(tag.hasKey(NetworkUtil.GESTURE))gestureData = tag.getByteArray(NetworkUtil.GESTURE);
+		if(tag.hasKey(NetworkUtil.GESTURE)) {
+			prevGestureData = gestureData;
+			gestureData = tag.getByteArray(NetworkUtil.GESTURE);
+		}
 	}
 
 	public void jump() {

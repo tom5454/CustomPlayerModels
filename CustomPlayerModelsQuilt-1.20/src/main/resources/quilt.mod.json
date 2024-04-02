@@ -26,9 +26,6 @@
 			"client_init": [
 				"com.tom.cpm.client.CustomPlayerModelsClient"
 			],
-			"pre_launch": [
-				"com.tom.cpm.LoadCompatMixins"
-			],
 			"modmenu": [
 				"com.tom.cpm.ModMenu"
 			]
@@ -49,5 +46,5 @@
 		]
 	},
 	"access_widener": "cpm.accesswidener",
-	"mixin": "cpm.mixins.json"
+	"mixin": ["cpm.mixins.json", "cpm.mixins.compat.json"]
 }

@@ -57,8 +57,6 @@
   "button.cpm.config.rotateButton": "Rotate Button: %s",
   "button.cpm.select": "Select",
   "button.cpm.models": "Models",
-  "button.cpm.reset_skin": "Reset Skin",
-  "button.cpm.reset_skin.sel": "Reset Skin (Selected)",
   "button.cpm.file.test": "Test Ingame",
   "button.cpm.applySkin": "Apply",
   "button.cpm.takeScreenshot": "Take Screenshot",
@@ -469,7 +467,6 @@
   "label.cpm.display.allUVs": "Display All UVs",
   "label.cpm.warnMoveGenPart": "You attempted to move a converted part!\\You probably want to move the original part instead of the generated part.\\This message won\u0027t appear again.",
   "label.cpm.tree.duplicated": "%s (Duplicated)",
-  "label.cpm.no_skins": "No models found",
   "label.cpm.display.onlyDrawOnSelected": "Only draw on selected",
   "label.cpm.test_unsupported": "Test option is unsupported in this version",
   "label.cpm.must_save.test": "You have unsaved changes.\\Save your project before testing.",
@@ -909,7 +906,6 @@
   "key.cpm.qa_6": "Quick Access 6",
   "commands.cpm.setskin.success": "Set %s\u0027s skin",
   "commands.cpm.setskin.success.force": "Force set %s\u0027s skin",
-  "commands.cpm.usage": "Usage: set: cpm setskin [-f|-t] \u003cplayer\u003e \u003cbase64_string\u003e or reset: cpm setskin -r \u003cplayer\u003e",
   "commands.cpm.setValue": "Set \u0027%s\u0027 to \u0027%s\u0027",
   "commands.cpm.safety.recommend": "Recommend safety settings",
   "commands.cpm.safety.profile.custom": "Custom",
@@ -1224,5 +1220,9 @@
   "tooltip.cpm.tree.scaling.hitbox_width": "Change hitbox width",
   "tooltip.cpm.tree.scaling.hitbox_height": "Change hitbox height",
   "tooltip.cpm.tree.scaling.serverRequired": "%s\\Customizable Player Models is required on both the client and server.\\See the Scaling page on the wiki for required mods for your version.",
-  "tooltip.cpm.tools.exportUVMap": "Export the selected texture UV Map."
+  "tooltip.cpm.tools.exportUVMap": "Export the selected texture UV Map.",
+  "label.cpm.no_skins": "No skins found",
+  "commands.cpm.usage": "Valid sub commands: setskin, safety, kick, scaling, animate, effects, detect",
+  "button.cpm.reset_skin": "Load from Skin",
+  "button.cpm.reset_skin.sel": "Load from Skin (Selected)"
 }

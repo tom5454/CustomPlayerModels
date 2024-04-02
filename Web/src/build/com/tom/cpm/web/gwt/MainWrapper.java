@@ -148,6 +148,7 @@ public class MainWrapper {
 			ClassSrcTransformer.addImportTransform("java.net.URI", "com.tom.cpm.web.client.java.URI");
 			ClassSrcTransformer.addImportTransform("java.net.URISyntaxException", "com.tom.cpm.web.client.java.URISyntaxException");
 			ClassSrcTransformer.addImportTransform("java.io.PrintWriter", "com.tom.cpm.web.client.java.io.PrintWriter");
+			ClassSrcTransformer.addImportTransform("java.util.Properties", "com.tom.cpm.web.client.java.Properties");
 			ClassSrcTransformer.buggyFiles.add("com/tom/cpm/web/client/resources/Resources.java");
 
 			System.out.println("Init finished");

@@ -1,0 +1,30 @@
+accessWidener	v1	named
+accessible field net/minecraft/client/render/entity/PlayerEntityRenderer bipedModel Lnet/minecraft/client/render/entity/model/BipedEntityModel;
+accessible field net/minecraft/client/render/entity/PlayerEntityRenderer field_295 Lnet/minecraft/client/render/entity/model/BipedEntityModel;
+accessible field net/minecraft/client/render/entity/PlayerEntityRenderer field_296 Lnet/minecraft/client/render/entity/model/BipedEntityModel;
+
+accessible field net/minecraft/class_153 field_898 [Lnet/minecraft/class_153;
+accessible field net/minecraft/class_153 field_896 Z
+accessible field net/minecraft/class_153 field_897 Z
+
+accessible field net/minecraft/client/gui/widget/TextFieldWidget x I
+accessible field net/minecraft/client/gui/widget/TextFieldWidget y I
+accessible field net/minecraft/client/gui/widget/TextFieldWidget width I
+accessible field net/minecraft/client/gui/widget/TextFieldWidget height I
+mutable field net/minecraft/client/gui/widget/TextFieldWidget x I
+mutable field net/minecraft/client/gui/widget/TextFieldWidget y I
+mutable field net/minecraft/client/gui/widget/TextFieldWidget width I
+mutable field net/minecraft/client/gui/widget/TextFieldWidget height I
+accessible field net/minecraft/client/gui/widget/TextFieldWidget textRenderer Lnet/minecraft/client/font/TextRenderer;
+accessible field net/minecraft/client/gui/widget/TextFieldWidget focusedTicks I
+
+accessible field net/minecraft/entity/Entity field_1636 F
+
+accessible field net/minecraft/client/Minecraft INSTANCE Lnet/minecraft/client/Minecraft;
+
+accessible field net/minecraft/nbt/NbtCompound entries Ljava/util/Map;
+
+accessible field net/minecraft/class_206 field_757 Ljava/util/Map;
+accessible field net/minecraft/class_206 field_758 Ljava/util/Map;
+
+accessible field net/minecraft/client/resource/language/TranslationStorage translations Ljava/util/Properties;

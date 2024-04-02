@@ -34,6 +34,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.common.PlayerAnimUpdater;
+import com.tom.cpm.mixinplugin.Iris7Detector;
 import com.tom.cpm.mixinplugin.IrisDetector;
 import com.tom.cpm.mixinplugin.OFDetector;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -57,6 +58,10 @@ public abstract class ClientBase {
 		optifineLoaded = OFDetector.doApply();
 		vrLoaded = Platform.isModLoaded("vivecraft");
 		irisLoaded = IrisDetector.doApply();
+		if (Iris7Detector.doApply()) {
+			irisLoaded = true;
+			Log.warn("Iris Beta detected, experimental support enabled");
+		}
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
 		if(vrLoaded)Log.info("ViveCraft detected, enabling ViveCraft compatibility");
 		if(irisLoaded)Log.info("Iris detected, enabling iris compatibility");

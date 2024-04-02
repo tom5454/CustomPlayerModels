@@ -11,7 +11,9 @@
 	"AbstractTextureMixin_OF",
 	"BlockEntityWithoutLevelRendererMixin_OF",
 	"VRArmRendererMixin_$vivecraft",
-	"BlockEntityRenderDispatcherMixin_Iris"
+	"BlockEntityRenderDispatcherMixin_Iris",
+	"BlockEntityRenderDispatcherMixin_Iris7",
+	"CustomRenderTypesMixin_Iris7"
   ],
   "injectors": {
     "defaultRequire": 1

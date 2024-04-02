@@ -26,6 +26,7 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -67,7 +68,7 @@ public class ClientProxy extends CommonProxy {
 	private Minecraft minecraft;
 	public static ClientProxy INSTANCE;
 	public RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
-	public NetHandlerExt<EntityPlayer, NetHandlerPlayClient> netHandler;
+	public NetHandlerExt<ResourceLocation, EntityPlayer, NetHandlerPlayClient> netHandler;
 
 	@Override
 	public void init() {
@@ -81,7 +82,7 @@ public class ClientProxy extends CommonProxy {
 		KeyBindings.init();
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), EntityPlayer::getGameProfile);
 		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
-		netHandler = new NetHandlerExt<>();
+		netHandler = new NetHandlerExt<>(ResourceLocation::new);
 		Executor ex = minecraft::func_152344_a;
 		netHandler.setExecutor(() -> ex);
 		netHandler.setSendPacketClient((c, rl, pb) -> c.addToSendQueue(new C17PacketCustomPayload(rl.toString(), pb)));

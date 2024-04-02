@@ -74,11 +74,11 @@ public class CPMTransformerService implements IClassTransformer {
 						if(nd.getOpcode() == Opcodes.ALOAD && nd.var == modelBase) {
 							m.instructions.insertBefore(nd, lst);
 							LOG.info("CPM Skull Hook: injected (Pre)");
-						} else if(insnNode instanceof InsnNode){
-							if(insnNode.getOpcode() == Opcodes.RETURN) {
-								m.instructions.insertBefore(insnNode, lst2);
-								LOG.info("CPM Skull Hook: injected (Post)");
-							}
+						}
+					} else if(insnNode instanceof InsnNode){
+						if(insnNode.getOpcode() == Opcodes.RETURN) {
+							m.instructions.insertBefore(insnNode, lst2);
+							LOG.info("CPM Skull Hook: injected (Post)");
 						}
 					}
 				}

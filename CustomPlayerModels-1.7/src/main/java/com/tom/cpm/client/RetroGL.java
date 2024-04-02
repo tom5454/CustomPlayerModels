@@ -37,6 +37,8 @@ public class RetroGL implements RetroGLAccess<ResourceLocation> {
 	public RenderStage texture(ResourceLocation tex) {
 		return new RenderStage(true, true, true, () -> {
 			bindTex(tex);
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glBlendFunc(770, 771);
 		}, () -> {
 		}, GL11.GL_QUADS);
 	}

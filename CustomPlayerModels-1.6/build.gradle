@@ -1,0 +1,278 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		gradlePluginPortal()
+		maven { url "https://maven.fabricmc.net" }
+		maven { url "https://repo.sleeping.town" }
+		maven { url 'https://maven.minecraftforge.net/' }
+	}
+	dependencies {
+		classpath "agency.highlysuspect:voldeloom:2.5-SNAPSHOT"
+		classpath 'gradle.plugin.com.github.johnrengelman:shadow:7.1.2'
+		classpath 'me.tatarka:gradle-retrolambda:3.7.1'
+	}
+}
+
+apply plugin: 'java'
+apply plugin: "agency.highlysuspect.voldeloom"
+apply plugin: 'me.tatarka.retrolambda'
+
+def useLib = System.getProperty("useLib")
+
+sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+retrolambda {
+  javaVersion JavaVersion.VERSION_1_6
+  defaultMethods true
+  incremental false
+}
+
+version = project.mod_version
+group = "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "CustomPlayerModels-1.6.4"
+
+String minecraftVersion = "1.6.4"
+String forgeVersion = "1.6.4-9.11.1.1345"
+
+volde {
+	runs {
+		client {
+			programArg "--username=tom5454"
+			vmArg "-Xdebug"
+			vmArg "-Xrunjdwp:server=y,transport=dt_socket,address=4100,suspend=y"
+			vmArg "-Dcpm.debug=true"
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${minecraftVersion}"
+	forge "net.minecraftforge:forge:${forgeVersion}:universal" //no @zip classifier this time
+	mappings "net.minecraftforge:forge:${forgeVersion}:src@zip"
+	accessTransformers files("${buildDir}/at/META-INF/cpm_at.cfg")
+	compileOnly "com.mojang:brigadier:1.0.18"
+	
+	compileOnly "com.google.guava:guava:17.0"
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "../CustomPlayerModels/src/shared/java"
+			exclude "com/tom/cpl/util/NettyByteBufInputStream.java"
+			srcDir "src/retro/java"
+			exclude "com/google/common/**"
+		}
+		resources {
+			srcDir "../CustomPlayerModels/src/shared/resources"
+			exclude "assets/*/lang/*.json"
+			srcDir "src/retro/resources"
+		}
+	}
+}
+
+jar {
+    manifest {
+        attributes(
+                'FMLCorePlugin': 'com.tom.cpmcore.CPMLoadingPlugin',
+                'FMLCorePluginContainsFMLMod': 'true')
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+processResources
+{
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        // replace version and mcversion
+        expand 'version':project.version
+    }
+    
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+    
+    from(files("${buildDir}/at"))
+    
+    duplicatesStrategy = "include"
+}
+//https://archive.org/details/minecraftcoderpack
+//https://ia801701.us.archive.org/view_archive.php?archive=/29/items/minecraftcoderpack/minecraftcoderpack.zip
+/*task downloadSRG(type: Copy) {
+    def zipUrl = 'https://archive.org/download/minecraftcoderpack/minecraftcoderpack.zip/minecraftcoderpack%2F1.6.4%2Fmcp811.zip'
+    def destinationDir = file("${buildDir}/extractedFiles")
+    destinationDir.mkdirs()
+
+    from(zipTree(zipUrl))
+    into(destinationDir)
+    include '** /*.srg'
+    include '** /*.csv'
+
+    println "Downloaded and extracted .srg files to: ${destinationDir}"
+}*/
+
+task remapAT {
+	println "Loading remap data"
+	def srgFilesDir = "${buildDir}/extractedFiles"
+    def mappingFD = [:]
+    def mappingCL = [:]
+    def mappingMD = [:]
+    def fieldMap = [:]
+    def methodMap = [:]
+    fileTree(dir: srgFilesDir, include: '**/*.srg').each { file ->
+    	file.eachLine { line ->
+            def parts = line.split(':')
+            if (parts.size() == 2) {
+                def type = parts[0].trim()
+                def kv = parts[1].trim().split(" ")
+                if (type == "FD") {
+                	mappingFD[kv[1]] = kv[0]
+                } else if (type == "CL") {
+                	mappingCL[kv[1]] = kv[0]
+                } else if (type == "MD") {
+                    mappingMD[kv[2] + kv[3]] = kv[0] + kv[1]
+                }
+            }
+        }
+    }
+    file(srgFilesDir + "/fields.csv").eachLine { line ->
+    	def parts = line.split(',')
+    	if (fieldMap[parts[0]] == null)
+    		fieldMap[parts[0]] = parts[1]
+    }
+    def doPrint = false
+    file(srgFilesDir + "/methods.csv").eachLine { line ->
+    	def parts = line.split(',')
+    	if (methodMap[parts[0]] == null)
+    		methodMap[parts[0]] = parts[1]
+    }
+    
+    println "Remapping ATs"
+    def newText = ''
+    file("./src/main/resources/META-INF/cpm_at_dev.cfg").eachLine { line ->
+    	def parts = line.split(' ', 4)
+    	if (parts.size() > 2) {
+    		def mode = parts[0]
+        	def clazz = parts[1]
+        	def obj = parts[2]
+        	def lookup = "?"
+        	def own = clazz.substring(clazz.lastIndexOf(".") + 1)
+        	println "Field: $own $obj"
+        	fieldMap.each { intermediate, named ->
+            	if (named == obj) {
+               		def k = "net/minecraft/src/" + own + "/" + intermediate
+               		println "  Considering: $k"
+               		if (mappingFD[k] != null) {
+               			lookup = mappingFD[k]
+               			println "    Mapped: $lookup"
+               			return false // Break out of the loop once found
+               		}
+           		}
+        	}
+        	def fieldLookup = "net/minecraft/src/" + clazz.substring(clazz.lastIndexOf(".") + 1) + "/" + obj
+        	def fieldInfo = mappingFD[fieldLookup]
+        	if (fieldInfo != null)lookup = fieldInfo
+        	if (lookup != null)lookup = lookup.replace("/", ".")
+        	if (lookup == "?")logger.warn("Lookup failed")
+    		newText += "$mode $lookup\n"
+    	} else {
+        	newText += line + '\n'
+        }
+    }
+    def f = file("${buildDir}/at/META-INF/cpm_at.cfg")
+    f.parentFile.mkdirs()
+    f.text = newText
+    
+    println "Remapping Core names"
+    newText = ''
+    file("./src/main/resources/META-INF/cpm_core_dev.cfg").eachLine { line ->
+    	def parts = line.split(' ', 4)
+    	if (parts.size() > 1) {
+    		def mode = parts[0]
+    		def name = parts[1]
+    		def lookup = "?"
+    		if (mode.equals("method")) {
+    			def ind = name.indexOf(';')
+    			def own = name.substring(0, ind)
+    			def nm = name.substring(ind + 1)
+    			ind = nm.indexOf('(')
+    			def mth = nm.substring(0, ind)
+    			def par = nm.substring(ind).replaceAll("Lnet\\.minecraft\\.(?:[\\w]+\\.)+([\\w]+)\\;", "Lnet/minecraft/src/\$1;")
+    			println "Method: $own $mth $par"
+    			methodMap.each { intermediate, named ->
+            		if (named == mth) {
+                		def k = "net/minecraft/src/" + own + "/" + intermediate + par
+                		println "  Considering: $k"
+                		if (mappingMD[k] != null) {
+                			lookup = mappingMD[k]
+                			println "    Mapped: $lookup"
+                			return false // Break out of the loop once found
+                		}
+            		}
+        		}
+    		} else if (mode.equals("field")) {
+    			def ind = name.indexOf(';')
+    			def own = name.substring(0, ind)
+    			def nm = name.substring(ind + 1)
+    			println "Field: $own $nm"
+    			fieldMap.each { intermediate, named ->
+            		if (named == nm) {
+                		def k = "net/minecraft/src/" + own + "/" + intermediate
+                		println "  Considering: $k"
+                		if (mappingFD[k] != null) {
+                			lookup = mappingFD[k]
+                			println "    Mapped: $lookup"
+                			return false // Break out of the loop once found
+                		}
+            		}
+        		}
+    		}
+    		if (lookup == "?")logger.warn("Lookup failed")
+    		newText += "$mode $name $lookup\n"
+    	} else {
+        	newText += line + '\n'
+    	}
+    }
+    file("${buildDir}/at/META-INF/cpm_core.cfg").text = newText
+}
+
+//remapAT.dependsOn(downloadSRG)
+
+task copyArtifact(type: Copy, dependsOn: 'build') {
+    def artifactDir = file("${buildDir}/libs/$archivesBaseName-$version-dev.jar")
+    println "Artifact: ${artifactDir}"
+    def destinationDir = file("./run/mods") // Update this with your desired destination folder
+
+    // Clean the destination folder before copying
+    doFirst {
+        delete destinationDir
+    }
+
+    // Ensure the destination directory exists
+    destinationDir.mkdirs()
+
+    // Copy the artifact to the destination directory
+    from artifactDir
+    into destinationDir
+
+    doLast {
+        println "Copied artifact to: ${destinationDir}"
+    }
+}

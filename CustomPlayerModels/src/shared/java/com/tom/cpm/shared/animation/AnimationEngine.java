@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.IKeybind;
+import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpl.text.I18n;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -234,9 +235,15 @@ public class AnimationEngine {
 
 		@Override
 		public long getTime(AnimationState state, long time) {
-			if(state.gestureData.length > id)
-				return (long) ((Byte.toUnsignedInt(state.gestureData[id]) / 256f) * VanillaPose.DYNAMIC_DURATION_MUL);
-			else
+			if (state.gestureData.length > id) {
+				float val = Byte.toUnsignedInt(state.gestureData[id]) / 256f;
+				if (state.prevGestureData != null && state.prevGestureData.length == state.gestureData.length) {
+					float prev = Byte.toUnsignedInt(state.prevGestureData[id]) / 256f;
+					float partial = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().partial;
+					val = MathHelper.lerp(partial, prev, val);
+				}
+				return (long) (val * VanillaPose.DYNAMIC_DURATION_MUL);
+			} else
 				return 0L;
 		}
 	}
