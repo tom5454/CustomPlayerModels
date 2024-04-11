@@ -33,7 +33,6 @@ public class PlayerEntityRendererMixin extends LivingEntityRenderer {
 
 	@Inject(at = @At(value = "HEAD"), method = "renderHand()V")
 	public void onHandPre(CallbackInfo cbi) {
-		RetroGL.color4f(1, 1, 1, 1);
 		RetroGL.renderCallLoc = 0;
 		CustomPlayerModelsClient.INSTANCE.manager.bindHand(Minecraft.INSTANCE.player, null, bipedModel);
 		CustomPlayerModelsClient.INSTANCE.manager.bindSkin(bipedModel, TextureSheetType.SKIN);

@@ -20,7 +20,7 @@ public class RetroGL implements RetroGLAccess<Integer> {
 	public static int renderCallLoc;
 	public static final int HURT_OVERLAY_LOC = 3;
 
-	private static final RenderStage lines = new RenderStage(true, false, false, () -> {
+	private static final RenderStage lines = new RenderStage(true, false, false, false, () -> {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}, () -> {
@@ -28,7 +28,7 @@ public class RetroGL implements RetroGLAccess<Integer> {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}, GL11.GL_LINES);
 
-	private static final RenderStage color = new RenderStage(true, false, false, () -> {
+	private static final RenderStage color = new RenderStage(true, false, false, true, () -> {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}, () -> {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -36,7 +36,7 @@ public class RetroGL implements RetroGLAccess<Integer> {
 
 	@Override
 	public RenderStage texture(Integer tex) {
-		return new RenderStage(true, true, true, () -> {
+		return new RenderStage(true, true, true, true, () -> {
 			bindTex(tex);
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glBlendFunc(770, 771);
@@ -49,21 +49,21 @@ public class RetroGL implements RetroGLAccess<Integer> {
 
 	@Override
 	public RenderStage eyes(Integer tex) {
-		return new RenderStage(true, true, true, () -> {
+		return new RenderStage(true, true, true, false, () -> {
 			if(renderCallLoc == RetroGL.HURT_OVERLAY_LOC)return;
 			//lx = clx;
 			//ly = cly;
 			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glDisable(GL11.GL_ALPHA_TEST);
+			//GL11.glDisable(GL11.GL_ALPHA_TEST);
 			GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
-			GL11.glDepthMask(true);
+			//GL11.glDepthMask(true);
 			/*int i = 0xF0;
 			int j = i % 65536;
 			int k = i / 65536;*/
 
-			GL11.glEnable(3042);
-			GL11.glDisable(3008);
-			GL11.glBlendFunc(770, 771);
+			//GL11.glEnable(3042);
+			//GL11.glDisable(3008);
+			//GL11.glBlendFunc(770, 771);
 
 			//OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, j, k);
 			bindTex(tex);
@@ -97,14 +97,15 @@ public class RetroGL implements RetroGLAccess<Integer> {
 	}
 
 	private static class RenderStage implements RetroLayer {
-		private boolean color, texture, normal;
+		private boolean color, texture, normal, lit;
 		private Runnable begin, end;
 		private int glMode;
 
-		public RenderStage(boolean color, boolean texture, boolean normal, Runnable begin, Runnable end, int glMode) {
+		public RenderStage(boolean color, boolean texture, boolean normal, boolean lit, Runnable begin, Runnable end, int glMode) {
 			this.color = color;
 			this.texture = texture;
 			this.normal = normal;
+			this.lit = lit;
 			this.begin = begin;
 			this.end = end;
 			this.glMode = glMode;
@@ -134,7 +135,7 @@ public class RetroGL implements RetroGLAccess<Integer> {
 				float u, float v, float nx, float ny, float nz) {
 			buffer.pos(x, y, z);
 			if(stage.texture)buffer.tex(u, v);
-			if(stage.color)buffer.color(red, green, blue, alpha);
+			if(stage.color)buffer.color(red, green, blue, alpha, stage.lit);
 			if(stage.normal)buffer.normal(nx, ny, nz);
 			buffer.endVertex();
 		}
@@ -174,8 +175,11 @@ public class RetroGL implements RetroGLAccess<Integer> {
 			return this;
 		}
 
-		public RetroTessellator color(float p_78369_1_, float p_78369_2_, float p_78369_3_, float p_78369_4_) {
-			t.color(p_78369_1_, p_78369_2_, p_78369_3_, p_78369_4_);
+		public RetroTessellator color(float p_78369_1_, float p_78369_2_, float p_78369_3_, float p_78369_4_, boolean lit) {
+			if (lit)
+				t.color(p_78369_1_ * lred, p_78369_2_ * lgreen, p_78369_3_ * lblue, p_78369_4_);
+			else
+				t.color(p_78369_1_, p_78369_2_, p_78369_3_, p_78369_4_);
 			return this;
 		}
 
@@ -194,6 +198,7 @@ public class RetroGL implements RetroGLAccess<Integer> {
 	}
 
 	private static float red, green, blue, alpha;
+	private static float lred, lgreen, lblue;
 
 	public static void color4f(float r, float g, float b, float a) {
 		red = r;
@@ -201,6 +206,36 @@ public class RetroGL implements RetroGLAccess<Integer> {
 		blue = b;
 		alpha = a;
 		GL11.glColor4f(r, g, b, a);
+	}
+
+	public static void lightColor4f(float r, float g, float b, float a) {
+		lred = r;
+		lgreen = g;
+		lblue = b;
+		GL11.glColor4f(r, g, b, a);
+		resetColor();
+	}
+
+	public static void lightColor3f(float r, float g, float b) {
+		lred = r;
+		lgreen = g;
+		lblue = b;
+		GL11.glColor3f(r, g, b);
+		resetColor();
+	}
+
+	public static void resetColor() {
+		red = 1F;
+		green = 1F;
+		blue = 1F;
+		alpha = 1F;
+	}
+
+	public static void resetLightColor() {
+		lred = 1F;
+		lgreen = 1F;
+		lblue = 1F;
+		resetColor();
 	}
 
 	@Override

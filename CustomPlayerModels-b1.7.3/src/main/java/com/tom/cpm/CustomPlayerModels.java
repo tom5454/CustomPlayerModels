@@ -26,6 +26,8 @@ import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
+import com.tom.cpm.shared.util.IVersionCheck;
+import com.tom.cpm.shared.util.VersionCheck;
 
 public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("CPM");
@@ -112,5 +114,10 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 	@Override
 	public EntityTypeHandler<?> getEntityTypeHandler() {
 		return EntityTypeHandlerImpl.impl;
+	}
+
+	@Override
+	public IVersionCheck getVersionCheck() {
+		return VersionCheck.get(getMCVersion() + "-fabric", getModVersion());
 	}
 }

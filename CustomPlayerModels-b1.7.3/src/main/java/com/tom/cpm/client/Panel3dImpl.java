@@ -37,6 +37,7 @@ public class Panel3dImpl extends Panel3dNative {
 
 		GL11.glPushMatrix();
 		try {
+			RetroGL.resetLightColor();
 			Box bounds = getBounds();
 			Vec2i off = panel.getGui().getOffset();
 			GL11.glTranslatef(off.x + bounds.w / 2, off.y + bounds.h / 2, 50);

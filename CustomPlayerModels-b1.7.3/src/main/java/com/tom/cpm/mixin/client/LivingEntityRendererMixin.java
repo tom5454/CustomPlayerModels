@@ -44,7 +44,6 @@ public class LivingEntityRendererMixin {
 
 	@Inject(at = @At(value = "HEAD"), method = RENDER_METHOD)
 	public void onRender(LivingEntity arg, double d, double e, double f, float g, float h, CallbackInfo cbi) {
-		RetroGL.color4f(1, 1, 1, 1);
 		RetroGL.renderCallLoc = 0;
 	}
 

@@ -1,0 +1,154 @@
+plugins {
+	id 'babric-loom' version '1.4.+'
+	id 'java'
+}
+
+archivesBaseName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
+
+loom {
+	gluedMinecraftJar()
+	noIntermediateMappings()
+	customMinecraftManifest.set("https://github.com/Turnip-Labs/bta-manifest-repo/releases/download/v${project.minecraft_version}/${project.minecraft_version}.json")
+}
+
+repositories {
+	mavenCentral()
+	maven { url = "https://jitpack.io" }
+	maven {
+		name = 'Babric'
+		url = 'https://maven.glass-launcher.net/babric'
+	}
+	maven {
+		name = 'Fabric'
+		url = 'https://maven.fabricmc.net/'
+	}
+	ivy {
+		url = "https://github.com/Better-than-Adventure"
+		patternLayout {
+			artifact "[organisation]/releases/download/v[revision]/[module].jar"
+			m2compatible = true
+		}
+		metadataSources { artifact() }
+	}
+	ivy {
+		url = "https://github.com/Turnip-Labs"
+		patternLayout {
+			artifact "[organisation]/releases/download/v[revision]/[module]-[revision].jar"
+			m2compatible = true
+		}
+		metadataSources { artifact() }
+	}
+	ivy {
+		url = "https://github.com/Turnip-Labs"
+		patternLayout {
+			artifact "[organisation]/releases/download/[revision]/[module]-[revision].jar"
+			m2compatible = true
+		}
+		metadataSources { artifact() }
+	}
+	ivy {
+		url = "https://github.com/Turnip-Labs"
+		patternLayout {
+			artifact "[organisation]/releases/download/[revision]/[module]-bta-[revision].jar"
+			m2compatible = true
+		}
+		metadataSources { artifact() }
+	}
+	ivy {
+		url = "https://piston-data.mojang.com"
+		patternLayout {
+			artifact "v1/[organisation]/[revision]/[module].jar"
+			m2compatible = true
+		}
+		metadataSources { artifact() }
+	}
+	ivy {
+		url = "https://github.com/MartinSVK12"
+		patternLayout {
+			artifact "[organisation]/releases/download/[revision]/[module]-[revision].jar"
+			m2compatible = true
+		}
+		metadataSources { artifact() }
+	}
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/cpm.accesswidener")
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "../CustomPlayerModels/src/shared/java"
+			exclude "com/tom/cpl/util/NettyByteBufInputStream.java"
+			srcDir "../CustomPlayerModels-1.6/src/retro/java"
+		}
+		resources {
+			srcDir "../CustomPlayerModels/src/shared/resources"
+			exclude "assets/*/lang/*.json"
+			srcDir "../CustomPlayerModels-1.6/src/retro/resources"
+		}
+	}
+}
+
+dependencies {
+	minecraft "bta-download-repo:bta:${project.minecraft_version}"
+	mappings loom.layered() {}
+
+	modRuntimeOnly "objects:client:43db9b498cb67058d2e12d394e6507722e71bb45" // https://piston-data.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar
+	modImplementation "fabric-loader:fabric-loader:${project.loader_version}"
+
+	// Helper library
+	// If you do not need Halplibe you can comment this line out or delete this line
+	modImplementation "com.github.Turnip-Labs:bta-halplibe:${project.halplibe_version}"
+
+	modImplementation "ModMenu:ModMenu:2.0.4"
+
+	implementation "org.slf4j:slf4j-api:1.8.0-beta4"
+	implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"
+
+	implementation 'com.google.guava:guava:33.0.0-jre'
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+	var log4jVersion = "2.20.0"
+	implementation("org.apache.logging.log4j:log4j-core:${log4jVersion}")
+	implementation("org.apache.logging.log4j:log4j-api:${log4jVersion}")
+	implementation("org.apache.logging.log4j:log4j-1.2-api:${log4jVersion}")
+
+	implementation("org.apache.commons:commons-lang3:3.12.0")
+	include(implementation("com.google.guava:failureaccess:1.0.2"))//Required depenency for Guava, that's missing in the Prism install for some reason...
+	
+	compileOnly "com.mojang:brigadier:1.0.18"
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+	withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.release.set 8
+}
+
+jar {
+	from("LICENSE") {
+		rename { "${it}_${archivesBaseName}" }
+	}
+}
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+}
+
+processResources {
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}

@@ -96,7 +96,7 @@ public class GuiImpl extends Screen implements IGui {
 			onGuiException("Error drawing gui", e, true);
 		} finally {
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
-			String s = "Minecraft b1.7.3 (fml,forge) " + MinecraftCommonAccess.get().getModVersion();
+			String s = "Minecraft b1.7.3 (babric) " + MinecraftCommonAccess.get().getModVersion();
 			textRenderer.draw(s, width - textRenderer.getWidth(s) - 4, 2, 0xff000000);
 			s = minecraft.debugText;
 			textRenderer.draw(s, width - textRenderer.getWidth(s) - 4, 11, 0xff000000);
@@ -542,10 +542,10 @@ public class GuiImpl extends Screen implements IGui {
 		GL11.glShadeModel(GL11.GL_SMOOTH);
 		RetroTessellator t = RetroGL.tessellator;
 		t.begin(7);
-		t.pos(right, top, this.zOffset).color(rtr, gtr, btr, atr).endVertex();
-		t.pos(left, top, this.zOffset).color(rtl, gtl, btl, atl).endVertex();
-		t.pos(left, bottom, this.zOffset).color(rbl, gbl, bbl, abl).endVertex();
-		t.pos(right, bottom, this.zOffset).color(rbr, gbr, bbr, abr).endVertex();
+		t.pos(right, top, this.zOffset).color(rtr, gtr, btr, atr, false).endVertex();
+		t.pos(left, top, this.zOffset).color(rtl, gtl, btl, atl, false).endVertex();
+		t.pos(left, bottom, this.zOffset).color(rbl, gbl, bbl, abl, false).endVertex();
+		t.pos(right, bottom, this.zOffset).color(rbr, gbr, bbr, abr, false).endVertex();
 		t.draw();
 		GL11.glShadeModel(GL11.GL_FLAT);
 		GL11.glDisable(GL11.GL_BLEND);

@@ -15,6 +15,7 @@ import net.minecraft.entity.LivingEntity;
 
 import com.tom.cpm.client.IGameOptions;
 import com.tom.cpm.client.PlayerProfile;
+import com.tom.cpm.client.RetroGL;
 
 @Mixin(class_555.class)
 public class GameRendererMixin {
@@ -23,6 +24,7 @@ public class GameRendererMixin {
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;render(IIF)V"), method = "method_1844(F)V")
 	public void onDrawScreenPre(float f, CallbackInfo cbi) {
 		PlayerProfile.inGui = true;
+		RetroGL.resetLightColor();
 	}
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;render(IIF)V", shift = Shift.AFTER), method = "method_1844(F)V")

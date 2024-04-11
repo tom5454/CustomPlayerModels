@@ -112,6 +112,8 @@ dependencies {
 	modImplementation("net.glasslauncher:HowManyItems-Fabric-Unofficial:${project.howmanyitems_version}") {
 		transitive false
 	}
+	
+	include(implementation("com.google.guava:failureaccess:1.0.1"))//Required depenency for Guava, that's missing in the Prism install for some reason...
 }
 
 loom {

@@ -14,7 +14,9 @@
 	  "client.ScreenMixin",
 	  "client.GameOptionsMixin",
 	  "client.ChatScreenMixin",
-	  "client.ClientNetworkHandlerMixin"
+	  "client.ClientNetworkHandlerMixin",
+	  "client.EntityRenderDispatcherMixin",
+	  "client.ArsenicOverlayRendererMixin"
   ],
   "server": [
 	  "server.ServerNetworkHandlerMixin",

@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "package": "com.tom.cpm.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+	  "client.BipedEntityModelMixin",
+	  "client.LivingEntityRendererMixin",
+	  "client.MinecraftMixin",
+	  "client.PlayerEntityRendererMixin",
+	  "client.ScreenMixin",
+	  "client.ClientNetworkHandlerMixin",
+	  "client.EntityRenderDispatcherMixin",
+	  "client.I18nMixin",
+	  "client.ItemRendererMixin"
+  ],
+  "server": [
+	  "server.ServerNetworkHandlerMixin",
+	  "server.MinecraftServerMixin",
+	  "server.EntityTrackerEntryMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

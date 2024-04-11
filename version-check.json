@@ -44,15 +44,16 @@
     "1.20-quilt-latest": "0.6.16b",
     "1.20.1-quilt-latest": "0.6.16b",
     "1.20.2-latest": "0.6.16b",
-    "1.20.4-latest": "0.6.16b",
+    "1.20.4-latest": "0.6.16c",
     "1.20.3-fabric-latest": "0.6.14c",
     "1.20.4-fabric-latest": "0.6.16b",
-    "1.20.5-fabric-latest": "0.6.16b",
-    "b1.7.3-fabric-latest": "0.6.16b",
+    "1.20.5-fabric-latest": "0.6.16c",
+    "b1.7.3-fabric-latest": "0.6.16c",
     "1.2.5-latest": "0.6.16b",
     "1.4.7-latest": "0.6.16b",
     "1.5.2-latest": "0.6.16b",
-    "1.6.4-latest": "0.6.16b"
+    "1.6.4-latest": "0.6.16b",
+    "b1.7.3-bta-babric-latest": "0.6.16a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -1296,7 +1297,8 @@
     "0.6.14c": "24w03b port\nFixed crash with First Person Model (Closes #550)\nFixed crash with Iris/Oculus and Entity Culling (Closes #531)\nFixed glowing eyes not working on placed player heads with Iris/Oculus\nFixed Optifine GL error with color cubes\nFixed glowing cubes rendering behind with first person model and Iris/Oculus (Closes #494)",
     "0.6.15a": "Added /cpmclient command\nSubcommands:\n- profile \u003cname\u003e: open the social settings menu for player\n- safety: opens the safety settings\n- animate \u003canimation\u003e [value]: play animation\n- set_model \u003cmodel file\u003e: change your model\n- reset_model: remove your selected model\nAdded Safe Fall Distance Scaling (1.20.5+)\nAdded attack speed attribute scaling\nEditor QoL:\n- Added Export UV Map under Edit/Tools\n- Editable display names for roots\n- Improved part highlights\n- Set Part Name Color\n- Multi-select parts with animation editor\nUpdated Spanish and Chinese translations (#563, #559)\nTranslatable wiki pages\n24w10a port\n\nFixed dragging and dropping .cpmmodels while inside the Models menu on the Minecraft window not working in some cases.\nFixed value layer default value showing negative (Closes #553)\nFixed model elements getting stuck inside the animation system after delete (Closes #536)\nFixed scaling staying stuck on model disable/switch (Closes #546)\nFixed first person hand rotations not wrapping around correctly (Closes #574)\nFixed initial part pose not copying over (Closes #575)\nFixed fill UV not working with per-face uv\nFixed parts tree scrolling to the bottom in some cases",
     "0.6.16a": "Backports:\n- b1.7.3 port (StationAPI required)\n- 1.2.5 port\n- 1.4.7 port\n- 1.5.2 port\n- 1.6.4 port\nPorted to 24w13a and 24w14potato\nAdded Iris 1.7 beta compatibility to 1.20.1 and 1.20.4 (Fixes the crash)\nAdded linear interpolation to value layer updates\nUpdated Simplified Chinese translation (#586)\n\nFixed first person hand flashing red on 1.7.10 (Closes #583)\nFixed crash with RenderPlayer API on 1.12.2 (Closes #566)\nFixed translucent textures showing solid on 1.7.10 and 1.8.9 (#401)\nFixed crash with Optifine 1.20.4 (Closes #585)\nFixed Copy Transform tooltip reports incorrect toggles (Closes #587)",
-    "0.6.16b": "Fixed value layers bugging out in some cases"
+    "0.6.16b": "Fixed value layers bugging out in some cases",
+    "0.6.16c": "1.20.5-pre1 port\nBTA-Babric port\nAdded Pehkui support on 1.20.4 NeoForge\n\nFixed fullbright entities on b1.7.3 (Closes #589)"
   },
   "1.20.3-fabric": {
     "0.6.14a": "Experimental export option:\nNew export format in Beta:\n- Removed cube size limits (Closes #269, Closes #231)\n- Removed animation length limit (Closes #108)\n- Fixed visible and color animations not working correctly (Closes #323, Closes #339, Closes #280)\nPorted to 1.20.4\nPehkui support on NeoForge 1.20.2 and 1.20.4 and fabric 1.20.4\nVanilla scaling support on 1.20.5 (23w51b)\nScaling changes: (Closes #452)\n- Added the ability to set scaling method:\n- Use /cpm scaling \u003ctype\u003e method [player] \u003cattribute/pehkui/disable/default/...\u003e\n- Disabling the scaling methods acts like if the scaling mod isn\u0027t installed\n- Added /cpm scaling reset \u003cplayer\u003e\n- Relogging isn\u0027t required anymore, changes apply immediately\n- Added attribute based scaling (doesn\u0027t require pehkui, works on 1.12 and older and bukkit)\n- See the new Scaling wiki page\nAdded the option to hide in-game warning messages in chat (Closes #534)\nAdded Crawling animation (Closes #437)\nUpdated Spanish and Chinese translations (#526, #532)\nAdded Russian translation (Closes #535)\n\nFixed head yaw animations breaking in boats (Closes #527)\nFixed head pitch not displaying correctly in the editor\nFixed model selector not working when not in-game\nFixed setup/finish animation selector dropdown not showing in the right place\nFixed color picker spinners going out of bounds\nFixed non layer controlled gestures not working in the gestures gui\nFixed sodium crash with skulls on 1.20.2 (Closes #538)\nFixed jump height not working on 1.20+\nFixed animated textures not showing in models menu and web viewer\nFixed setup and finish animations breaking when the model is shown multiple times (Closes #539)\nFixed part tree scrolling to the bottom when clicking on nothing/Root (Closes #530)\nFixed sneaking animation playing a tick ahead (Closes #151)\nFixed UVs can\u0027t be selected or moved when out of image bounds",
@@ -1318,11 +1320,13 @@
     "0.6.14d": "24w06a port\nFixed crash with sodium/embeddium on 1.20.1 (Closes #560)",
     "0.6.15a": "Added /cpmclient command\nSubcommands:\n- profile \u003cname\u003e: open the social settings menu for player\n- safety: opens the safety settings\n- animate \u003canimation\u003e [value]: play animation\n- set_model \u003cmodel file\u003e: change your model\n- reset_model: remove your selected model\nAdded Safe Fall Distance Scaling (1.20.5+)\nAdded attack speed attribute scaling\nEditor QoL:\n- Added Export UV Map under Edit/Tools\n- Editable display names for roots\n- Improved part highlights\n- Set Part Name Color\n- Multi-select parts with animation editor\nUpdated Spanish and Chinese translations (#563, #559)\nTranslatable wiki pages\n24w10a port\n\nFixed dragging and dropping .cpmmodels while inside the Models menu on the Minecraft window not working in some cases.\nFixed value layer default value showing negative (Closes #553)\nFixed model elements getting stuck inside the animation system after delete (Closes #536)\nFixed scaling staying stuck on model disable/switch (Closes #546)\nFixed first person hand rotations not wrapping around correctly (Closes #574)\nFixed initial part pose not copying over (Closes #575)\nFixed fill UV not working with per-face uv\nFixed parts tree scrolling to the bottom in some cases",
     "0.6.16a": "Backports:\n- b1.7.3 port (StationAPI required)\n- 1.2.5 port\n- 1.4.7 port\n- 1.5.2 port\n- 1.6.4 port\nPorted to 24w13a and 24w14potato\nAdded Iris 1.7 beta compatibility to 1.20.1 and 1.20.4 (Fixes the crash)\nAdded linear interpolation to value layer updates\nUpdated Simplified Chinese translation (#586)\n\nFixed first person hand flashing red on 1.7.10 (Closes #583)\nFixed crash with RenderPlayer API on 1.12.2 (Closes #566)\nFixed translucent textures showing solid on 1.7.10 and 1.8.9 (#401)\nFixed crash with Optifine 1.20.4 (Closes #585)\nFixed Copy Transform tooltip reports incorrect toggles (Closes #587)",
-    "0.6.16b": "Fixed value layers bugging out in some cases"
+    "0.6.16b": "Fixed value layers bugging out in some cases",
+    "0.6.16c": "1.20.5-pre1 port\nBTA-Babric port\nAdded Pehkui support on 1.20.4 NeoForge\n\nFixed fullbright entities on b1.7.3 (Closes #589)"
   },
   "b1.7.3-fabric": {
     "0.6.16a": "Backports:\n- b1.7.3 port (StationAPI required)\n- 1.2.5 port\n- 1.4.7 port\n- 1.5.2 port\n- 1.6.4 port\nPorted to 24w13a and 24w14potato\nAdded Iris 1.7 beta compatibility to 1.20.1 and 1.20.4 (Fixes the crash)\nAdded linear interpolation to value layer updates\nUpdated Simplified Chinese translation (#586)\n\nFixed first person hand flashing red on 1.7.10 (Closes #583)\nFixed crash with RenderPlayer API on 1.12.2 (Closes #566)\nFixed translucent textures showing solid on 1.7.10 and 1.8.9 (#401)\nFixed crash with Optifine 1.20.4 (Closes #585)\nFixed Copy Transform tooltip reports incorrect toggles (Closes #587)",
-    "0.6.16b": "Fixed value layers bugging out in some cases"
+    "0.6.16b": "Fixed value layers bugging out in some cases",
+    "0.6.16c": "1.20.5-pre1 port\nBTA-Babric port\nAdded Pehkui support on 1.20.4 NeoForge\n\nFixed fullbright entities on b1.7.3 (Closes #589)"
   },
   "1.2.5": {
     "0.6.16a": "Backports:\n- b1.7.3 port (StationAPI required)\n- 1.2.5 port\n- 1.4.7 port\n- 1.5.2 port\n- 1.6.4 port\nPorted to 24w13a and 24w14potato\nAdded Iris 1.7 beta compatibility to 1.20.1 and 1.20.4 (Fixes the crash)\nAdded linear interpolation to value layer updates\nUpdated Simplified Chinese translation (#586)\n\nFixed first person hand flashing red on 1.7.10 (Closes #583)\nFixed crash with RenderPlayer API on 1.12.2 (Closes #566)\nFixed translucent textures showing solid on 1.7.10 and 1.8.9 (#401)\nFixed crash with Optifine 1.20.4 (Closes #585)\nFixed Copy Transform tooltip reports incorrect toggles (Closes #587)",
@@ -1339,5 +1343,8 @@
   "1.6.4": {
     "0.6.16a": "Backports:\n- b1.7.3 port (StationAPI required)\n- 1.2.5 port\n- 1.4.7 port\n- 1.5.2 port\n- 1.6.4 port\nPorted to 24w13a and 24w14potato\nAdded Iris 1.7 beta compatibility to 1.20.1 and 1.20.4 (Fixes the crash)\nAdded linear interpolation to value layer updates\nUpdated Simplified Chinese translation (#586)\n\nFixed first person hand flashing red on 1.7.10 (Closes #583)\nFixed crash with RenderPlayer API on 1.12.2 (Closes #566)\nFixed translucent textures showing solid on 1.7.10 and 1.8.9 (#401)\nFixed crash with Optifine 1.20.4 (Closes #585)\nFixed Copy Transform tooltip reports incorrect toggles (Closes #587)",
     "0.6.16b": "Fixed value layers bugging out in some cases"
+  },
+  "b1.7.3-bta-babric": {
+    "0.6.16a": "1.20.5-pre1 port\nBTA-Babric port\nAdded Pehkui support on 1.20.4 NeoForge\n\nFixed fullbright entities on b1.7.3 (Closes #589)"
   }
 }
