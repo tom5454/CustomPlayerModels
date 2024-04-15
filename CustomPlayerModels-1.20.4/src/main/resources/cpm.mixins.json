@@ -6,7 +6,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
 	"ServerGamePacketListenerImplMixin",
-	"ServerCommonPacketListenerImplMixin"
+	"ServerCommonPacketListenerImplMixin",
+	"ServerGamePacketListenerImplNeoForgeMixin"
   ],
   "client": [
     "PlayerRendererMixin",
@@ -21,7 +22,6 @@
 	"LocalPlayerMixin",
 	"LivingRendererMixin",
 	"ClientPacketListenerNeoForgeMixin",
-	"ServerGamePacketListenerImplNeoForgeMixin",
 	"SkullModelMixin"
   ],
   "injectors": {

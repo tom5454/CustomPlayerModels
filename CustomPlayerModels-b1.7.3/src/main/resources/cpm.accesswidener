@@ -28,3 +28,6 @@ accessible field net/minecraft/class_206 field_757 Ljava/util/Map;
 accessible field net/minecraft/class_206 field_758 Ljava/util/Map;
 
 accessible field net/minecraft/client/resource/language/TranslationStorage translations Ljava/util/Properties;
+
+accessible field net/minecraft/class_488 field_2004 Ljava/util/Set;
+accessible field net/minecraft/class_488 field_2005 Lnet/minecraft/class_80;

@@ -1,8 +1,10 @@
 package com.tom.cpm.mixin.client;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.net.handler.NetClientHandler;
 import net.minecraft.client.world.WorldClient;
 import net.minecraft.core.entity.Entity;
@@ -15,6 +17,7 @@ import com.tom.cpm.shared.io.FastByteArrayInputStream;
 
 @Mixin(value = NetClientHandler.class, remap = false)
 public abstract class ClientNetworkHandlerMixin implements ClientNetworkImpl {
+	private @Shadow @Final Minecraft mc;
 	private @Shadow WorldClient worldClient;
 	private boolean cpm$hasMod;
 
@@ -37,6 +40,7 @@ public abstract class ClientNetworkHandlerMixin implements ClientNetworkImpl {
 
 	@Override
 	public Entity cpm$getEntityByID(int id) {
+		if (mc.thePlayer.id == id)return mc.thePlayer;
 		return worldClient.getEntityById(id);
 	}
 

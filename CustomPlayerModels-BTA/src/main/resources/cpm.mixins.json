@@ -18,7 +18,8 @@
   "server": [
 	  "server.ServerNetworkHandlerMixin",
 	  "server.MinecraftServerMixin",
-	  "server.EntityTrackerEntryMixin"
+	  "server.EntityTrackerEntryMixin",
+	  "server.PlayerManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

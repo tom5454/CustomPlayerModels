@@ -36,6 +36,7 @@ public abstract class MinecraftMixin {
 	@Shadow public GuiScreen currentScreen;
 	@Shadow public EntityPlayerSP thePlayer;
 	@Shadow public abstract void displayGuiScreen(GuiScreen screen);
+	@Shadow public abstract boolean isMultiplayerWorld();
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/util/phys/AABB;initializePool()V"), method = "run()V")
 	public void onRenderTick(CallbackInfo cbi) {
@@ -73,7 +74,7 @@ public abstract class MinecraftMixin {
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;thePlayer:Lnet/minecraft/client/entity/player/EntityPlayerSP;", shift = Shift.AFTER), method = "changeWorld(Lnet/minecraft/core/world/World;Ljava/lang/String;Lnet/minecraft/core/entity/player/EntityPlayer;)V")
 	public void onSetPlayer(World world, String string, EntityPlayer arg2, CallbackInfo cbi) {
-		if (thePlayer != null)
+		if (thePlayer != null && !isMultiplayerWorld())
 			ServerHandler.netHandler.onJoin(thePlayer);
 	}
 

@@ -22,7 +22,8 @@
 	  "server.ServerNetworkHandlerMixin",
 	  "server.ServerCommandManagerMixin",
 	  "server.MinecraftServerMixin",
-	  "server.EntityTrackerEntryMixin"
+	  "server.EntityTrackerEntryMixin",
+	  "server.PlayerManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

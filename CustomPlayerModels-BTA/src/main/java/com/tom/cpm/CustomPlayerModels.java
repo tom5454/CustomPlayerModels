@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.entity.player.EntityPlayer;
 
 import com.tom.cpl.block.BlockStateHandler;
@@ -87,13 +86,19 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 
 	@Override
 	public String getMCVersion() {
-		return Minecraft.VERSION;
+		return "b1.7.3";
 	}
 
 	@Override
 	public String getMCBrand() {
 		String lVer = FabricLoader.getInstance().getModContainer("fabricloader").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("?UNKNOWN?");
-		return "(bta-babric/" + lVer + ")";
+		String btaVer;
+		try {
+			btaVer = (String) FabricLoader.getInstance().getGameInstance().getClass().getDeclaredField("VERSION").get(null);
+		} catch (Exception e) {
+			btaVer = "Unknown";
+		}
+		return "(" + btaVer + "/bta-babric/" + lVer + ")";
 	}
 
 	@Override

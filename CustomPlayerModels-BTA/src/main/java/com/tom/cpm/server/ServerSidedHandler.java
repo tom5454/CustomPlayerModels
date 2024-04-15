@@ -7,9 +7,12 @@ import java.util.function.Consumer;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.entity.Entity;
+import net.minecraft.core.entity.EntityTrackerEntry;
 import net.minecraft.core.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.entity.EntityTracker;
 import net.minecraft.server.entity.player.EntityPlayerMP;
+import net.minecraft.server.world.WorldServer;
 
 import com.tom.cpm.SidedHandler;
 import com.tom.cpm.common.ServerNetworkImpl;
@@ -18,23 +21,27 @@ public class ServerSidedHandler implements SidedHandler {
 
 	@Override
 	public void getTracking(EntityPlayer player, Consumer<EntityPlayer> f) {
-		/*for (EntityTrackerEntry tr : (Set<EntityTrackerEntry>) ((class_73) player.world).field_273.field_934) {
-			if (tr.trackedEntity instanceof PlayerEntity && tr.trackedPlayers.contains(player)) {
-				f.accept((PlayerEntityMP) tr.trackedEntity);
+		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+		WorldServer ws = (WorldServer) player.world;
+		EntityTracker et = server.getEntityTracker(ws.dimension.id);
+		for (EntityTrackerEntry tr : (Set<EntityTrackerEntry>) et.trackedEntitySet) {
+			if (tr.trackedEntity instanceof EntityPlayer && tr.trackedPlayers.contains(player)) {
+				f.accept((EntityPlayer) tr.trackedEntity);
 			}
-		}*/
+		}
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set<EntityPlayer> getTrackingPlayers(Entity entity) {
-		/*class_79 et = ((class_73) entity.world).field_273;
-		EntityTrackerEntry entry = (EntityTrackerEntry) et.trackedEntityHashTable.lookup(entity.entityId);
+		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+		WorldServer ws = (WorldServer) entity.world;
+		EntityTracker et = server.getEntityTracker(ws.dimension.id);
+		EntityTrackerEntry entry = (EntityTrackerEntry) et.trackedEntityHashTable.get(entity.id);
 		if (entry == null)
 			return Collections.emptySet();
 		else
-			return entry.trackedPlayers;*/
-		return Collections.emptySet();
+			return entry.trackedPlayers;
 	}
 
 	@SuppressWarnings({ "unchecked", "deprecation" })

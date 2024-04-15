@@ -11,3 +11,6 @@ mutable field net/minecraft/client/gui/GuiTextField height I
 accessible field net/minecraft/core/lang/Language entries Ljava/util/Properties;
 
 accessible field net/minecraft/client/Minecraft INSTANCE Lnet/minecraft/client/Minecraft;
+
+accessible field net/minecraft/server/entity/EntityTracker trackedEntityHashTable Lnet/minecraft/core/world/pathfinder/IdHashMap;
+accessible field net/minecraft/server/entity/EntityTracker trackedEntitySet Ljava/util/Set;

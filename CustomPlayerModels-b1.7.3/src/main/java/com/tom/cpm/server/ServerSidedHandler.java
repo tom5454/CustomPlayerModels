@@ -6,8 +6,11 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.class_174;
 import net.minecraft.class_39;
+import net.minecraft.class_488;
 import net.minecraft.class_69;
+import net.minecraft.class_73;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -22,23 +25,27 @@ public class ServerSidedHandler implements SidedHandler {
 
 	@Override
 	public void getTracking(PlayerEntity player, Consumer<PlayerEntity> f) {
-		/*for (EntityTrackerEntry tr : (Set<EntityTrackerEntry>) ((class_73) player.world).field_273.field_934) {
-			if (tr.trackedEntity instanceof PlayerEntity && tr.trackedPlayers.contains(player)) {
-				f.accept((PlayerEntityMP) tr.trackedEntity);
+		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+		class_73 ws = (class_73) player.world;
+		class_488 et = server.method_2165(ws.dimension.id);
+		for (class_174 tr : (Set<class_174>) et.field_2004) {
+			if (tr.field_597 instanceof PlayerEntity && tr.field_610.contains(player)) {
+				f.accept((PlayerEntity) tr.field_597);
 			}
-		}*/
+		}
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set<PlayerEntity> getTrackingPlayers(Entity entity) {
-		/*class_79 et = ((class_73) entity.world).field_273;
-		EntityTrackerEntry entry = (EntityTrackerEntry) et.trackedEntityHashTable.lookup(entity.entityId);
+		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+		class_73 ws = (class_73) entity.world;
+		class_488 et = server.method_2165(ws.dimension.id);
+		class_174 entry = (class_174) et.field_2005.method_772(entity.id);
 		if (entry == null)
 			return Collections.emptySet();
 		else
-			return entry.trackedPlayers;*/
-		return Collections.emptySet();
+			return entry.field_610;
 	}
 
 	@SuppressWarnings({ "unchecked", "deprecation" })

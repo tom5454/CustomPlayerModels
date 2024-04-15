@@ -33,9 +33,6 @@
 	],
     "stationapi:event_bus_server": [
 		"com.tom.cpm.server.CPMServer"
-	],
-	"server": [
-		"com.tom.cpm.server.CustomPlayerModelsServer"
 	]
   },
   "mixins": [

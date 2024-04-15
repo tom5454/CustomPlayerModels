@@ -94,7 +94,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			onGuiException("Error drawing gui", e, true);
 		} finally {
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
-			String s = "Minecraft BTA " + MinecraftCommonAccess.get().getModVersion();
+			String s = "Minecraft " + Minecraft.VERSION  + " " + MinecraftCommonAccess.get().getModVersion();
 			fontRenderer.drawString(s, width - fontRenderer.getStringWidth(s) - 4, 2, 0xff000000);
 			s = mc.debugFPS;
 			fontRenderer.drawString(s, width - fontRenderer.getStringWidth(s) - 4, 11, 0xff000000);

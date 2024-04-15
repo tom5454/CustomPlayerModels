@@ -81,7 +81,7 @@ public abstract class MinecraftMixin {
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;player:Lnet/minecraft/entity/player/ClientPlayerEntity;", shift = Shift.AFTER), method = "method_2115(Lnet/minecraft/world/World;Ljava/lang/String;Lnet/minecraft/entity/player/PlayerEntity;)V")
 	public void onSetPlayer(World world, String string, PlayerEntity arg2, CallbackInfo cbi) {
-		if (player != null)
+		if (player != null && !isWorldRemote())
 			ServerHandler.netHandler.onJoin(player);
 	}
 

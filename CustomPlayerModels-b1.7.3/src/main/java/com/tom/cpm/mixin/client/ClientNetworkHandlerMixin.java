@@ -1,9 +1,11 @@
 package com.tom.cpm.mixin.client;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import net.minecraft.class_454;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.ClientNetworkHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.Connection;
@@ -15,6 +17,7 @@ import com.tom.cpm.client.ClientNetworkImpl;
 
 @Mixin(ClientNetworkHandler.class)
 public abstract class ClientNetworkHandlerMixin implements ClientNetworkImpl {
+	private @Shadow @Final Minecraft minecraft;
 	private @Shadow Connection connection;
 	private @Shadow class_454 field_1973;
 	private boolean cpm$hasMod;
@@ -40,6 +43,7 @@ public abstract class ClientNetworkHandlerMixin implements ClientNetworkImpl {
 
 	@Override
 	public Entity cpm$getEntityByID(int id) {
+		if (minecraft.player.id == id)return minecraft.player;
 		return field_1973.method_1496(id);
 	}
 
