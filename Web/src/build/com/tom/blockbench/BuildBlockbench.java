@@ -45,7 +45,7 @@ public class BuildBlockbench {
 
 	private static void buildGwt(String version, File f, String mode, boolean debug) {
 		//"-Xdebug", "-Xrunjdwp:server=n,transport=dt_socket,address=4013,suspend=y"
-		String[] args = new String[] {"java", "-cp", ClasspathFix.getFixedClasspath(), "-Dugwt.useContext=true", "-Dugwt.sourcemap=http://localhost:8000/src/cpmblockbench.map", "com.tom.cpm.web.gwt.MainWrapper", debug ? "--buildDebug" : "--build", version, mode};
+		String[] args = new String[] {"java", "-cp", ClasspathFix.getFixedClasspath(), "-Dugwt.sourcemap=http://localhost:8000/src/cpmblockbench.map", "com.tom.cpm.web.gwt.MainWrapper", debug ? "--buildDebug" : "--build", version, mode};
 		ProcessBuilder pb = new ProcessBuilder(args);
 		pb.directory(f);
 		pb.inheritIO();

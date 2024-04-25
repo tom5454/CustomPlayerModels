@@ -1,9 +1,6 @@
 package com.tom.cpm.lefix;
 
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
@@ -25,19 +22,13 @@ import com.tom.cpm.CustomPlayerModels;
 public class FixSSL {
 	public static void fixup() {
 		try {
-			KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-			Path ksPath = Paths.get(System.getProperty("java.home"), new String[] { "lib", "security", "cacerts" });
-			keyStore.load(Files.newInputStream(ksPath, new java.nio.file.OpenOption[0]), "changeit".toCharArray());
-			Map<String, Certificate> jdkTrustStore = Collections.list(keyStore.aliases()).stream().collect(Collectors.toMap(a -> a, rethrowFunction(keyStore::getCertificate)));
-
 			KeyStore leKS = KeyStore.getInstance(KeyStore.getDefaultType());
-			InputStream leKSFile = FixSSL.class.getResourceAsStream("/com/tom/cpm/lefix/lekeystore.jks");
-			leKS.load(leKSFile, "supersecretpassword".toCharArray());
+			InputStream leKSFile = FixSSL.class.getResourceAsStream("/com/tom/cpm/lefix/cacerts");
+			leKS.load(leKSFile, "changeit".toCharArray());
 			Map<String, Certificate> leTrustStore = Collections.list(leKS.aliases()).stream().collect(Collectors.toMap(a -> a, rethrowFunction(leKS::getCertificate)));
 
 			KeyStore mergedTrustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			mergedTrustStore.load(null, new char[0]);
-			jdkTrustStore.forEach(rethrowBiConsumer(mergedTrustStore::setCertificateEntry));
 			leTrustStore.forEach(rethrowBiConsumer(mergedTrustStore::setCertificateEntry));
 
 			TrustManagerFactory instance = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());

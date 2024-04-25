@@ -3,7 +3,6 @@ package com.tom.cpm.client;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import net.coderbot.batchedentityrendering.impl.Groupable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -36,7 +35,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.common.ByteArrayPayload;
-import com.tom.cpm.common.NetworkInit;
 import com.tom.cpm.common.PlayerAnimUpdater;
 import com.tom.cpm.mixinplugin.IrisDetector;
 import com.tom.cpm.mixinplugin.OFDetector;
@@ -82,7 +80,6 @@ public abstract class ClientBase {
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
 		netHandler.setDisplayText(t -> minecraft.player.displayClientMessage(t.remap(), false));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
-		NetworkInit.initNetworking(netHandler, minecraft);
 	}
 
 	public static void apiInit() {
@@ -192,15 +189,12 @@ public abstract class ClientBase {
 		manager.unbindClear(model);
 	}
 
-	private boolean startedIrisHandGroup;
 	public void renderHand(MultiBufferSource buffer, PlayerModel model) {
 		manager.bindHand(minecraft.player, buffer, model);
-		if (irisLoaded && buffer instanceof Groupable gr)startedIrisHandGroup = gr.maybeStartGroup();
 	}
 
 	public void renderHandPost(MultiBufferSource buffer, HumanoidModel model) {
 		manager.unbindClear(model);
-		if (irisLoaded && buffer instanceof Groupable gr && startedIrisHandGroup)gr.endGroup();
 	}
 
 	public void renderSkull(Model skullModel, GameProfile profile, MultiBufferSource buffer) {

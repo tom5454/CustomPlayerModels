@@ -1,0 +1,163 @@
+plugins {
+	id 'maven-publish'
+	id 'org.quiltmc.loom' version '1.+'
+}
+
+archivesBaseName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+	// Add repositories to retrieve artifacts from in here.
+	// You should only use this when depending on other mods because
+	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
+	// for more information about repositories.
+	maven { url 'https://jitpack.io' }
+	maven { url "https://maven.terraformersmc.com/releases/"}
+	maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+def useLib = System.getProperty("useLib")
+
+// All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
+// See https://docs.gradle.org/current/userguide/platforms.html for information on how version catalogs work.
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	
+	mappings loom.layered {
+		mappings "org.quiltmc:quilt-mappings:${minecraft_version}+build.${quilt_mappings}:intermediary-v2"
+		officialMojangMappings()
+	}
+	
+	modImplementation "org.quiltmc:quilt-loader:${project.loader_version}"
+	modImplementation "org.quiltmc:qsl:${qsl_version}+${minecraft_version}"
+	modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${quilted_fabric_api_version}-${minecraft_version}"
+
+	modImplementation("com.terraformersmc:modmenu:9.0.0-pre.1") {
+        exclude(group: "net.fabricmc.fabric-api")
+        exclude(group: "net.fabricmc")
+    }
+	
+	modImplementation ('com.github.Virtuoel:Pehkui:3.7.12') {
+        exclude(group: "net.fabricmc.fabric-api")
+        exclude(group: "net.fabricmc")
+    }
+
+	compileOnly files("../CustomPlayerModels-1.20.4/of.jar")
+	
+	if (useLib) {
+    	modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.6-fabric')
+    	implementation "com.electronwill.night-config:core:3.6.3"
+    	implementation "com.electronwill.night-config:toml:3.6.3"
+    } else 
+    	compileOnly files("../CustomPlayerModels-1.20.4/vc.jar")
+	
+	/*modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.8-fabric')
+    implementation "com.electronwill.night-config:core:3.6.3"
+    implementation "com.electronwill.night-config:toml:3.6.3"
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")*/
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/cpm.accesswidener")
+	
+	// Loom and Loader both use this block in order to gather more information about your mod.
+	mods {
+		// This should match your mod id.
+		"cpm" {
+			// Tell Loom about each source set used by your mod here. This ensures that your mod's classes are properly transformed by Loader.
+			sourceSet("main")
+			// If you shade (directly include classes, not JiJ) a dependency into your mod, include it here using one of these methods:
+			// dependency("com.example.shadowedmod:1.2.3")
+			// configuration("exampleShadedConfigurationName")
+		}
+	}
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "../CustomPlayerModels/src/shared/java"
+			srcDir "../CustomPlayerModels-1.20.4/src/platform-shared/java"
+			srcDir "../CustomPlayerModelsFabric-1.20.4/src/rawmc-shared/java"
+		}
+		resources {
+			srcDir "../CustomPlayerModels/src/shared/resources"
+			srcDir "../CustomPlayerModels-1.20.4/src/platform-shared/resources"
+			srcDir "../CustomPlayerModelsFabric-1.20.4/src/rawmc-shared/resources"
+			exclude "**/*.lang"
+		}
+	}
+}
+
+processResources {
+	inputs.property 'version', version
+
+	filesMatching('quilt.mod.json') {
+		expand 'version': version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = 'UTF-8'
+	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
+	it.options.release = 17
+}
+
+java {
+	// Still required by IDEs such as Eclipse and Visual Studio Code
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+
+	// If this mod is going to be a library, then it should also generate Javadocs in order to aid with development.
+	// Uncomment this line to generate them.
+	// withJavadocJar()
+}
+
+// If you plan to use a different file for the license, don't forget to change the file name here!
+jar {
+	from('LICENSE') {
+		rename { "${it}_${base.archivesName.get()}" }
+	}
+}
+
+// Configure the maven publication
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+		// Notice: This block does NOT have the same function as the block in the top level.
+		// The repositories here will be used for publishing your artifact, not for
+		// retrieving dependencies.
+	}
+}

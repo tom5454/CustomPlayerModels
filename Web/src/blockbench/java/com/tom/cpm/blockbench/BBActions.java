@@ -13,13 +13,13 @@ import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.blockbench.convert.BlockbenchImport;
 import com.tom.cpm.blockbench.convert.BlockbenchImport.UVMul;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
+import com.tom.cpm.blockbench.ee.EmbeddedEditorHandler;
 import com.tom.cpm.blockbench.format.AnimationWizard;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Toggle;
 import com.tom.cpm.blockbench.proxy.Animation;
 import com.tom.cpm.blockbench.proxy.Animation.GeneralAnimator;
-import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.BoneAnimator;
 import com.tom.cpm.blockbench.proxy.Canvas;
 import com.tom.cpm.blockbench.proxy.Cube;
@@ -107,7 +107,13 @@ public class BBActions {
 			a.description = "";
 			a.icon = "icon-player";
 			a.category = "file";
-			a.click = e -> EmbeddedEditor.open();
+			a.click = e -> {
+				EmbeddedEditorHandler.open().catch_(ex -> {
+					PopupDialogs.displayError("Failed to open Embedded Editor:", ex);
+					return null;
+				});
+			};
+
 			Action openCPM = new Action("open_cpm", a);
 			MenuBar.addAction(openCPM, "file");
 			PluginStart.cleanup.add(openCPM::delete);
@@ -122,18 +128,6 @@ public class BBActions {
 			MenuBar.addAction(reload, "file");
 			PluginStart.cleanup.add(reload::delete);
 		}
-
-		/*{
-			Action.ActionProperties a = new Action.ActionProperties();
-			a.name = "Open Embedded CPM Editor (Tab)";
-			a.description = "";
-			a.icon = "icon-player";
-			a.category = "file";
-			a.click = e -> EmbeddedEditor.openTab();
-			Action openCPM = new Action("open_cpm_d", a);
-			MenuBar.addAction(openCPM, "file");
-			cleanup.add(openCPM::delete);
-		}*/
 
 		{
 			MenuBar.SubMenu m = new MenuBar.SubMenu();
@@ -228,21 +222,12 @@ public class BBActions {
 			a.name = I18n.get("bb-button.viewInEmbeddedEditor");
 			a.icon = "launch";
 			a.click = e -> {
-				EmbeddedEditor.setOpenListener(ed -> {
-					//MessagePopup msg = new MessagePopup(ed.frame, I18n.get("label.cpm.loading"), I18n.get("label.cpm.loading"));
-					//ed.frame.openPopup(msg);
-					PopupDialogs.runTaskWithWarning(w -> ProjectConvert.prepExport(ed, w), Blockbench::focus).then(__ -> {
-						ed.refreshCaches();
-						EmbeddedEditor.focus();
-						//msg.close();
-						return null;
-					}).catch_(ex -> {
-						EmbeddedEditor.close();
-						PopupDialogs.displayError(I18n.get("bb-label.error.export"), ex);
-						return null;
-					});
+				ProjectConvert.convertToCPM().then(b -> b.arrayBuffer()).then(dt -> {
+					return EmbeddedEditorHandler.open().then(ee -> ee.openProject(dt));
+				}).catch_(ex -> {
+					PopupDialogs.displayError(I18n.get("bb-label.error.export"), ex);
+					return null;
 				});
-				EmbeddedEditor.open();
 			};
 			Action act = new Action("cpm_view_in_embedded", a);
 			PluginStart.cleanup.add(act::delete);

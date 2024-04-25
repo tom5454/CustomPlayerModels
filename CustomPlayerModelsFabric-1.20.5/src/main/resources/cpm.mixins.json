@@ -10,7 +10,6 @@
   ],
   "client": [
     "PlayerRendererMixin",
-    "ClientPacketListenerMixin",
 	"CapeLayerMixin",
 	"ElytraLayerMixin",
 	"HumanoidArmorLayerMixin",
@@ -23,7 +22,8 @@
 	"GameRendererMixinFabric",
 	"MinecraftMixinFabric",
 	"PlayerRendererMixinFabric",
-	"SkullModelMixin"
+	"SkullModelMixin",
+	"ClientPacketListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

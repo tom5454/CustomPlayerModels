@@ -2,10 +2,10 @@ package com.tom.cpm.blockbench.format;
 
 import com.tom.cpm.blockbench.BBActions;
 import com.tom.cpm.blockbench.BlockBenchFS;
-import com.tom.cpm.blockbench.EmbeddedEditor;
 import com.tom.cpm.blockbench.PluginStart;
 import com.tom.cpm.blockbench.convert.OldPluginConvert;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
+import com.tom.cpm.blockbench.ee.EmbeddedEditorHandler;
 import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Condition;
 import com.tom.cpm.blockbench.proxy.Action.ConditionMethod;
@@ -89,7 +89,7 @@ public class CPMCodec {
 		ctr.format_page.component = new VueComponent();
 		ctr.format_page.component.methods = Js.uncheckedCast(new JsObject());
 		ctr.format_page.component.methods.set("create", ProjectGenerator::newProject);
-		ctr.format_page.component.methods.set("openembed", EmbeddedEditor::open);
+		ctr.format_page.component.methods.set("openembed", EmbeddedEditorHandler::open);
 		ctr.format_page.component.methods.set("open", ProjectConvert::open);
 		ctr.format_page.component.template = "<div style=\"display:flex;flex-direction:column;height:100%\">"
 				+ "<p class=\"format_description\">" + I18n.get("bb-label.cpmCodecDesc") + "</p>"

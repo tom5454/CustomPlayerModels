@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import com.tom.cpl.gui.Frame;
 import com.tom.cpm.blockbench.BBUI;
+import com.tom.cpm.blockbench.ee.EmbeddedEditorHandler;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Blockbench.ExportProperties;
@@ -33,24 +34,30 @@ public class ProjectConvert {
 
 	public static Promise<Blob> compile(JsObject options) {
 		DomGlobal.console.log("Export");
+		return convertToCPM().then(model -> {
+			JsPropertyMap<?> map = JsPropertyMap.of("model", model, "options", options);
+			CPMCodec.codec.dispatchEvent("compile", Js.cast(map));
+			Blob m = Js.cast(map.get("model"));
+			return Promise.resolve(m);
+		});
+	}
+
+	public static Promise<Blob> convertToCPM() {
 		Editor editor = new Editor();
 		editor.setUI(new BBUI());
 		editor.reinit();
-		return exportWithWarnings(editor).then(__ -> {
-			try {
-				StoreIDGen storeIDgen = new StoreIDGen();
-				Editor.walkElements(editor.elements, storeIDgen::setID);
-				ProjectIO.saveProject(editor, editor.project);
-				return editor.project.save().then(model -> {
-					JsPropertyMap<?> map = JsPropertyMap.of("model", model, "options", options);
-					CPMCodec.codec.dispatchEvent("compile", Js.cast(map));
-					Blob m = Js.cast(map.get("model"));
-					return Promise.resolve(m);
-				});
-			} catch (Throwable e) {
-				return Promise.reject(e);
-			}
-		});
+		return exportWithWarnings(editor).then(__ -> saveToBlob(editor));
+	}
+
+	private static Promise<Blob> saveToBlob(Editor editor) {
+		try {
+			StoreIDGen storeIDgen = new StoreIDGen();
+			Editor.walkElements(editor.elements, storeIDgen::setID);
+			ProjectIO.saveProject(editor, editor.project);
+			return editor.project.save();
+		} catch (Throwable e) {
+			return Promise.reject(e);
+		}
 	}
 
 	public static Promise<Void> exportWithWarnings(Editor editor) {
@@ -154,10 +161,11 @@ public class ProjectConvert {
 		Frame frm = WebMC.getInstance().getGui().getFrame();
 		if(frm instanceof EditorGui) {
 			EditorGui eg = (EditorGui) frm;
-			Blockbench.focus();
-			PopupDialogs.runTaskWithWarning(w -> RenderSystem.withContext(() -> {
-				return new BlockbenchImport(eg.getEditor(), w).doImport();
-			}));
+			Editor editor = eg.getEditor();
+			saveToBlob(editor).then(b -> b.arrayBuffer()).then(a -> {
+				EmbeddedEditorHandler.openInHost(a);
+				return null;
+			});
 		}
 	}
 }

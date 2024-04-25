@@ -7,12 +7,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.coderbot.batchedentityrendering.impl.Groupable;
-import net.coderbot.iris.block_rendering.BlockRenderingSettings;
-import net.coderbot.iris.layer.EntityRenderStateShard;
-import net.coderbot.iris.layer.OuterWrappedRenderType;
-import net.coderbot.iris.shaderpack.materialmap.NamespacedId;
-import net.coderbot.iris.uniforms.CapturedRenderingState;
+import net.irisshaders.batchedentityrendering.impl.Groupable;
+import net.irisshaders.iris.layer.EntityRenderStateShard;
+import net.irisshaders.iris.layer.OuterWrappedRenderType;
+import net.irisshaders.iris.shaderpack.materialmap.NamespacedId;
+import net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings;
+import net.irisshaders.iris.uniforms.CapturedRenderingState;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,7 +33,7 @@ public class BlockEntityRenderDispatcherMixin_Iris {
 		if (!(bufferSource instanceof Groupable) || !(blockEntity instanceof SkullBlockEntity)) {
 			return bufferSource;
 		} else {
-			Object2IntFunction<NamespacedId> entityIds = BlockRenderingSettings.INSTANCE.getEntityIds();
+			Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
 			if (entityIds == null)
 				return bufferSource;
 

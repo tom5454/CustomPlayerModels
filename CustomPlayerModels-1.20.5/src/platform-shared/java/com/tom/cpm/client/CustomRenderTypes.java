@@ -2,6 +2,8 @@ package com.tom.cpm.client;
 
 import java.util.OptionalDouble;
 
+import net.irisshaders.batchedentityrendering.impl.BlendingStateHolder;
+import net.irisshaders.batchedentityrendering.impl.TransparencyType;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -30,5 +32,12 @@ public class CustomRenderTypes extends RenderType {
 
 	public static RenderType linesNoDepth() {
 		return LINES_NO_DEPTH;
+	}
+
+	public static RenderType glowingEyes(ResourceLocation rl) {
+		RenderType rt = RenderType.eyes(rl);
+		if (ClientBase.irisLoaded)
+			((BlendingStateHolder) rt).setTransparencyType(TransparencyType.DECAL);
+		return rt;
 	}
 }

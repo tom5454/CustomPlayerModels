@@ -32,7 +32,7 @@ public class BBUI implements UI {
 
 	@Override
 	public void executeLater(Runnable r) {
-		MinecraftClientAccess.get().executeLater(() -> {
+		MinecraftClientAccess.get().executeOnGameThread(() -> {
 			try {
 				r.run();
 			} catch (Throwable e) {

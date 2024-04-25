@@ -1,5 +1,6 @@
 package com.tom.cpm.blockbench.proxy.electron;
 
+import elemental2.core.JsObject;
 import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
@@ -10,6 +11,7 @@ public class FileSystem {
 	public native boolean existsSync(String path);
 	public native String[] readdirSync(String path);
 	public native Buffer readFileSync(String path);
+	public native JsObject readFileSync(String path, String mode);
 	public native void readFile(String path, ReadCallback cb);
 	public native void writeFile(String path, Buffer content, WriteCallback cb);
 	public native void mkdirSync(String path, MkDirOpt opt);

@@ -8,7 +8,6 @@
   "mixins": [
   ],
   "client": [
-    "ModelRendererMixin_OF",
     "TextureMixin_OF",
     "CompositeRenderTypeMixin_Iris"
   ],

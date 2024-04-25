@@ -177,16 +177,23 @@ public class BlockBenchFS implements IFS {
 	@JsProperty(namespace = JsPackage.GLOBAL, name = "process.platform")
 	private static native String getPlatform();
 
+	@JsProperty(namespace = JsPackage.GLOBAL, name = "__dirname")
+	private static native String getAppPackagePath();
+
+	@JsProperty(namespace = JsPackage.GLOBAL, name = "_editorWorkDir")
+	private static native String getEmbeddedWorkingDirectory();
+
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
 	public static class PathAPI {
 		public native String dirname(String path);
 		public native String resolve(String... path);
 		public native String basename(String path);
 		public native boolean isAbsolute(String path);
+		public native String join(String... path);
 	}
 
-	private static final PathAPI PATH = Js.uncheckedCast(require("path"));
-	private static final String WD = PATH.resolve(Electron.app.getPath("userData"), "CPM Plugin Data");
+	public static final PathAPI PATH = Js.uncheckedCast(require("path"));
+	private static final String WD = Js.typeof(getEmbeddedWorkingDirectory()) != "undefined" ? getEmbeddedWorkingDirectory() : PATH.resolve(Electron.app.getPath("userData"), "CPM Plugin Data");
 	private static final boolean WIN = getPlatform().startsWith("win");
 
 	static {
@@ -231,5 +238,10 @@ public class BlockBenchFS implements IFS {
 				return Promise.resolve(d.canceled ? null : new File(d.filePaths[0]));
 			});
 		}
+	}
+
+	public static String getLibrary(String name) {
+		String path = PATH.join(getAppPackagePath(), "lib", name);
+		return Js.cast(fs.readFileSync(path, "utf8"));
 	}
 }

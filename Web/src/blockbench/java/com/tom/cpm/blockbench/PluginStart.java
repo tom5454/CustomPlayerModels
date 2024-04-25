@@ -5,10 +5,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
 
-import com.tom.cpl.config.ModConfigFile;
-import com.tom.cpl.gui.elements.Panel;
-import com.tom.cpl.gui.elements.PopupMenu;
-import com.tom.cpm.blockbench.convert.ProjectConvert;
+import com.tom.cpm.blockbench.ee.EmbeddedEditorHandler;
 import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.format.ProjectGenerator;
 import com.tom.cpm.blockbench.proxy.Blockbench;
@@ -32,48 +29,20 @@ public class PluginStart implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
+		if (EmbeddedEditorHandler.isRunningInEmbeddedEditor()) {
+			EmbeddedEditorHandler.run();
+			return;
+		}
 		System.setOut(new LoggingPrintStream("STDOUT", DomGlobal.console::info));
 		System.setErr(new LoggingPrintStream("STDERR", DomGlobal.console::error));
 		RenderSystem.preloaded(() -> {
 			try {
 				FS.setImpl(Global.isApp() ? new BlockBenchFS() : new LocalStorageFS(DomGlobal.window));
-				new WebMC(new ModConfigFile(DomGlobal.window, true), true, true) {
+				new BBInstance() {
 
 					@Override
 					protected String buildPlatformString() {
 						return Java.getPlatform() + " BB " + Blockbench.version + (!Global.isApp() ? " (Web)" : "") + " CPM " + System.getProperty("cpm.version");
-					}
-
-					@Override
-					public String getMCVersion() {
-						return "blockbench";
-					}
-
-					@Override
-					public void populatePlatformSettings(String group, Panel panel) {
-						super.populatePlatformSettings(group, panel);
-						switch (group) {
-						case "filePopup": {
-							PopupMenu pp = (PopupMenu) panel;
-							pp.addButton(panel.getGui().i18nFormat("bb-button.viewInBB"), ProjectConvert::viewInBB);
-						}
-						break;
-						}
-					}
-
-					@Override
-					public void openURL(String url) {
-						Global.openExternal(url);
-					}
-
-					@Override
-					public String getAppID() {
-						return "Blockbench CPM Plugin";
-					}
-
-					@Override
-					protected String getLangChangeDesc() {
-						return "bb-label.language.reloadRequired.desc";
 					}
 				};
 				DomGlobal.console.log("CPM Plugin loading " + WebMC.platform);

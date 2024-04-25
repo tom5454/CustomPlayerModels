@@ -1,0 +1,50 @@
+{
+	"schema_version": 1,
+	"quilt_loader": {
+		"group": "com.tom5454",
+		"id": "cpm",
+		"version": "${version}",
+		"metadata": {
+			"name": "Customizable Player Models",
+			"description": "Customize your minecraft avatar!",
+			"contributors": {
+				"tom5454": "Owner"
+			},
+			"contact": {
+				"homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
+				"sources": "https://github.com/tom5454/CustomPlayerModels",
+				"issues": "https://github.com/tom5454/CustomPlayerModels/issues"
+			},
+			"license": "MIT",
+			"icon": "icon.png"
+		},
+		"intermediate_mappings": "net.fabricmc:intermediary",
+		"entrypoints": {
+			"init": [
+				"com.tom.cpm.CustomPlayerModels"
+			],
+			"client_init": [
+				"com.tom.cpm.client.CustomPlayerModelsClient"
+			],
+			"modmenu": [
+				"com.tom.cpm.ModMenu"
+			]
+		},
+		"depends": [
+			{
+				"id": "quilt_loader",
+				"versions": ">=0.19.1"
+			},
+			{
+				"id": "quilted_fabric_api",
+				"versions": ">=7.0.2"
+			},
+			{
+				"id": "minecraft",
+				"versions": ">=1.20.4"
+			}
+		]
+	},
+	"access_widener": "cpm.accesswidener",
+	"mixin": ["cpm.mixins.json", "cpm.mixins.compat.json"]
+}

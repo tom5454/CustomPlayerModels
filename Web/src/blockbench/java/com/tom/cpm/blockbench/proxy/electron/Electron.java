@@ -10,6 +10,7 @@ import jsinterop.base.Js;
 public class Electron {
 	public static ElectronApp app;
 	public static ElectronDialog dialog;
+	public IPCRenderer ipcRenderer;
 
 	@JsOverlay
 	public static Electron getElectron() {

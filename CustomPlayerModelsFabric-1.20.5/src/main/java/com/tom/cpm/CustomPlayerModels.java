@@ -2,27 +2,37 @@ package com.tom.cpm;
 
 import java.io.File;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.PlayPayloadHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type;
 
 import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpm.api.ICPMPlugin;
+import com.tom.cpm.common.ByteArrayPayload;
 import com.tom.cpm.common.Command;
+import com.tom.cpm.common.NetworkInit;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.config.ModConfig;
+import com.tom.cpm.shared.io.FastByteArrayInputStream;
+import com.tom.cpm.shared.network.NetH.ServerNetH;
 import com.tom.cpm.shared.util.IVersionCheck;
 import com.tom.cpm.shared.util.VersionCheck;
 
 public class CustomPlayerModels extends CommonBase implements ModInitializer {
-
+	public static Set<Type<ByteArrayPayload>> clientPackets = new HashSet<>();
 	@Override
 	public void onInitialize() {
 		cfg = new ModConfigFile(new File(FabricLoader.getInstance().getConfigDir().toFile(), "cpm.json"));
@@ -41,6 +51,16 @@ public class CustomPlayerModels extends CommonBase implements ModInitializer {
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((o, n, end) -> {
 			if(!end)ServerHandler.netHandler.onRespawn(n);
+		});
+		PlayPayloadHandler<ByteArrayPayload> h = (p, c) -> {
+			ServerHandler.netHandler.receiveServer(p.id(), new FastByteArrayInputStream(p.data()), (ServerNetH) c.player().connection);
+		};
+		NetworkInit.register((a, b) -> {
+			PayloadTypeRegistry.playS2C().register(a, b);
+			clientPackets.add(a);
+		}, (a, b) -> {
+			PayloadTypeRegistry.playC2S().register(a, b);
+			ServerPlayNetworking.registerGlobalReceiver(a, h);
 		});
 		FabricLoader.getInstance().getEntrypointContainers("cpmapi", ICPMPlugin.class).forEach(entrypoint -> {
 			ModMetadata metadata = entrypoint.getProvider().getMetadata();

@@ -29,7 +29,6 @@ import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.SidedHandler;
 import com.tom.cpm.common.PlayerAnimUpdater;
 import com.tom.cpm.common.ServerNetworkImpl;
-import com.tom.cpm.lefix.FixSSL;
 import com.tom.cpm.retro.GameProfile;
 import com.tom.cpm.retro.GameProfileManager;
 import com.tom.cpm.retro.MCExecutor;
@@ -50,7 +49,6 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 
 	@Override
 	public void onInitializeClient() {
-		FixSSL.fixup();
 		INSTANCE = this;
 		minecraft = Minecraft.INSTANCE;
 		CustomPlayerModels.proxy = this;

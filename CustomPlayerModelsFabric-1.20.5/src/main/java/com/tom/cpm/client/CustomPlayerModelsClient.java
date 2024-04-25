@@ -3,6 +3,8 @@ package com.tom.cpm.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.PlayPayloadHandler;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
@@ -12,11 +14,14 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 
 import com.tom.cpm.CustomPlayerModels;
+import com.tom.cpm.common.ByteArrayPayload;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.gui.GestureGui;
+import com.tom.cpm.shared.io.FastByteArrayInputStream;
+import com.tom.cpm.shared.network.NetH;
 
 public class CustomPlayerModelsClient extends ClientBase implements ClientModInitializer {
 	public static CustomPlayerModelsClient INSTANCE;
@@ -57,6 +62,10 @@ public class CustomPlayerModelsClient extends ClientBase implements ClientModIni
 		});
 		init1();
 		ClientCommandRegistrationCallback.EVENT.register((d, r) -> new ClientCommand(d));
+		PlayPayloadHandler<ByteArrayPayload> h = (p, c) -> {
+			netHandler.receiveClient(p.id(), new FastByteArrayInputStream(p.data()), (NetH) c.player().connection);
+		};
+		CustomPlayerModels.clientPackets.forEach(p -> ClientPlayNetworking.registerGlobalReceiver(p, h));
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
 		apiInit();
 	}

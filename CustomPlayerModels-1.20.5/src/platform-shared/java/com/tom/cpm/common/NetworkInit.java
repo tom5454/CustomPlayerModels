@@ -1,28 +1,54 @@
 package com.tom.cpm.common;
 
-import java.util.concurrent.Executor;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-
-import com.tom.cpm.shared.network.NetHandler;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type;
 
 public class NetworkInit {
-	private static boolean initialized = false;
 
-	public static void initNetworking(NetHandler<CustomPacketPayload.Type<ByteArrayPayload>, ?, ?> netH, Executor exec) {
-		if(initialized)return;
-		initialized = true;
-		exec.execute(() -> {
-			netH.registerIn(id -> makeCodec(id, PlatformCommon::registerC2SPacket));
-			netH.registerOut(id -> makeCodec(id, PlatformCommon::registerS2CPacket));
-		});
+	public static void register(PacketRegistry toClient, PacketRegistry toServer) {
+		ServerHandler.netHandler.registerIn(id -> makeCodec(id, toServer));
+		ServerHandler.netHandler.registerOut(id -> makeCodec(id, toClient));
 	}
 
-	private static void makeCodec(CustomPacketPayload.Type<ByteArrayPayload> type, BiConsumer<CustomPacketPayload.Type<ByteArrayPayload>, StreamCodec<FriendlyByteBuf, ByteArrayPayload>> c) {
+	public static void register(PacketRegistry toClient, PacketRegistry toServer, PacketRegistry bidirectional) {
+		Map<CustomPacketPayload.Type<ByteArrayPayload>, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload>> cl = new HashMap<>();
+		Map<CustomPacketPayload.Type<ByteArrayPayload>, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload>> se = new HashMap<>();
+		Map<CustomPacketPayload.Type<ByteArrayPayload>, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload>> bi = new HashMap<>();
+
+		register((a, b) -> {
+			if (se.containsKey(a)) {
+				se.remove(a);
+				bi.put(a, b);
+			} else {
+				cl.put(a, b);
+			}
+		}, (a, b) -> {
+			if (cl.containsKey(a)) {
+				cl.remove(a);
+				bi.put(a, b);
+			} else {
+				se.put(a, b);
+			}
+		});
+		cl.forEach(toClient);
+		se.forEach(toServer);
+		bi.forEach(bidirectional);
+	}
+
+	private static void makeCodec(CustomPacketPayload.Type<ByteArrayPayload> type, PacketRegistry c) {
 		StreamCodec<FriendlyByteBuf, ByteArrayPayload> codec = CustomPacketPayload.codec(ByteArrayPayload::write, d -> new ByteArrayPayload(type, d));
 		c.accept(type, codec);
+	}
+
+	@FunctionalInterface
+	public static interface PacketRegistry extends BiConsumer<CustomPacketPayload.Type<ByteArrayPayload>, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload>> {
+		@Override
+		void accept(Type<ByteArrayPayload> t, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload> u);
 	}
 }

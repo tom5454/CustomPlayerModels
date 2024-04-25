@@ -3,6 +3,7 @@ package com.tom.cpm.web.client;
 import com.google.gwt.core.client.GWT;
 
 import com.tom.cpl.config.ModConfigFile;
+import com.tom.cpl.gui.Frame;
 import com.tom.cpm.web.client.render.GuiImpl;
 import com.tom.cpm.web.client.render.RenderSystem;
 import com.tom.cpm.web.client.util.LoggingPrintStream;
@@ -25,7 +26,7 @@ public class CPMWebInterface {
 			GWT.log("Uncaught exception", e);
 		});
 		RenderSystem.preloaded(() -> {
-			new WebMC(new ModConfigFile(DomGlobal.window, FS.hasImpl()), false, false);
+			entry.createInstance();
 			RenderSystem.init(DomGlobal.window, CPMWebInterface::init);
 		});
 	}
@@ -37,6 +38,9 @@ public class CPMWebInterface {
 		try {
 			entry.doLaunch(gui);
 		} catch (Throwable e) {
+			gui.setGui(new Frame(gui) {
+				@Override public void initFrame(int width, int height) {}
+			});
 			gui.onGuiException("Error creating gui", e, true);
 		}
 		WebMC.getInstance().setGui(gui);
@@ -45,6 +49,10 @@ public class CPMWebInterface {
 
 	public static interface WebEntry {
 		void doLaunch(GuiImpl gui);
+
+		default WebMC createInstance() {
+			return new WebMC(new ModConfigFile(DomGlobal.window, FS.hasImpl()), false, false);
+		}
 	}
 
 	public static void init(WebEntry e) {

@@ -10,8 +10,8 @@
   "client": [
     "AbstractTextureMixin_OF",
     "BlockEntityWithoutLevelRendererMixinFabric_OF",
-	"BlockEntityRenderDispatcherMixin_Iris",
-	"VRArmRendererMixin_$vivecraft"
+	"VRArmRendererMixin_$vivecraft",
+	"BlockEntityRenderDispatcherMixin_Iris"
   ],
   "injectors": {
     "defaultRequire": 1

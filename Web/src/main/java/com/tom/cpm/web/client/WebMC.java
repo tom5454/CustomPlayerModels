@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import com.tom.cpl.block.BiomeHandler;
@@ -51,6 +52,7 @@ import com.tom.cpm.shared.util.ErrorLog;
 import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 import com.tom.cpm.shared.util.IVersionCheck;
 import com.tom.cpm.shared.util.Log;
+import com.tom.cpm.shared.util.MdResourceIO;
 import com.tom.cpm.shared.util.MojangAPI;
 import com.tom.cpm.web.client.emul.BiomeHandlerImpl;
 import com.tom.cpm.web.client.emul.BlockStateHandlerImpl;
@@ -91,10 +93,10 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	private AllTagManagers tags;
 
 	public WebMC(ModConfigFile config, boolean canExit, boolean versionCheck) {
+		instance = this;
 		this.versionCheck = versionCheck;
 		MinecraftObjectHolder.setCommonObject(this);
 		MinecraftObjectHolder.setClientObject(this);
-		instance = this;
 		this.canExit = canExit;
 
 		platform = buildPlatformString();
@@ -505,5 +507,9 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	@Override
 	public EntityTypeHandler<?> getEntityTypeHandler() {
 		return EntityTypeHandlerImpl.impl;
+	}
+
+	public Function<String, CompletableFuture<byte[]>> getNetworkFetch() {
+		return MdResourceIO::jsFetch;
 	}
 }

@@ -13,13 +13,6 @@ public class ElectronApp {
 
 	@JsFunction
 	public static interface ElectronEventHandler {
-		void onEvent(Object ev, ElectronWindow w);
-	}
-
-	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
-	public static class ElectronWindow {
-		public native void removeMenu();
-		public native void openDevTools();
-		public native void focus();
+		void onEvent(Object ev, BrowserWindow w);
 	}
 }

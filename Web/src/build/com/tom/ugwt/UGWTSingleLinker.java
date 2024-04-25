@@ -140,7 +140,7 @@ public class UGWTSingleLinker extends SelectionScriptLinker {
 
 		boolean useStrong = System.getProperty("ugwt.useStrongName", "false").equals("true");
 
-		gsb.append("(function() {\n");
+		gsb.append("(function _ugwtapp() {\n");
 		gsb.append("var $wnd = window, $moduleName, $moduleBase;\n");
 
 		UGWTPostProcessor.addPre(2);

@@ -21,6 +21,17 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 // All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
@@ -35,8 +46,7 @@ dependencies {
 	
 	modImplementation "org.quiltmc:quilt-loader:${project.loader_version}"
 	modImplementation "org.quiltmc:qsl:${qsl_version}+${minecraft_version}"
-	if (project.quilted_fabric_api_version != null)
-		modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${quilted_fabric_api_version}-${minecraft_version}"
+	modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${quilted_fabric_api_version}-${minecraft_version}"
 
 	modImplementation("com.terraformersmc:modmenu:7.1.0") {
         exclude(group: "net.fabricmc.fabric-api")
@@ -57,6 +67,14 @@ dependencies {
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+    
+    modImplementation('maven.modrinth:sodium:mc1.20.1-0.5.8')
+    modImplementation "net.fabricmc.fabric-api:fabric-rendering-data-attachment-v1:0.3.36+92a0d36777"
+    modImplementation('maven.modrinth:iris:KHQ2Hnpt')
+    
+    modImplementation("org.antlr:antlr4-runtime:4.11.1")
+    modImplementation("io.github.douira:glsl-transformer:2.0.0-pre13")
+    modImplementation("org.anarres:jcpp:1.4.14")
 }
 
 loom {

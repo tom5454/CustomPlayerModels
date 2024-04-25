@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.tom.cpm.mixin.compat",
+  "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "CustomPlayerModels-Quilt-1.20.4-refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "AbstractTextureMixin_OF",
+    "BlockEntityWithoutLevelRendererMixinFabric_OF",
+	"VRArmRendererMixin_$vivecraft",
+	"BlockEntityRenderDispatcherMixin_Iris",
+	"BlockEntityRenderDispatcherMixin_Iris7",
+	"CustomRenderTypesMixin_Iris7"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

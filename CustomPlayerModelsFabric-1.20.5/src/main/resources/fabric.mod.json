@@ -25,7 +25,7 @@
   	"client": [
       "com.tom.cpm.client.CustomPlayerModelsClient"
     ],
-	"_modmenu": [
+	"modmenu": [
       "com.tom.cpm.ModMenu"
     ]
   },

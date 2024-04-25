@@ -19,18 +19,24 @@ import elemental2.webstorage.WebStorageWindow;
 
 public class ModConfigFile extends ConfigEntry {
 	private boolean changed = false;
+	private String configName;
 	private Storage local;
 
-	@SuppressWarnings("unchecked")
 	public ModConfigFile(Window window, boolean doLoad) {
+		this(window, doLoad, "config");
+	}
+
+	@SuppressWarnings("unchecked")
+	public ModConfigFile(Window window, boolean doLoad, String configName) {
+		this.configName = configName;
 		changeListener = () -> changed = true;
 		data = new TreeMap<>();
 
 		if(doLoad) {
 			try {
 				local = WebStorageWindow.of(window).localStorage;
-				if(local.getItem("config") != null) {
-					data = (Map<String, Object>) MinecraftObjectHolder.gson.fromJson(local.getItem("config"), Object.class);
+				if(local.getItem(configName) != null) {
+					data = (Map<String, Object>) MinecraftObjectHolder.gson.fromJson(local.getItem(configName), Object.class);
 				}
 			} catch (Throwable e) {
 				DomGlobal.console.log(e);
@@ -41,7 +47,7 @@ public class ModConfigFile extends ConfigEntry {
 
 	public void save() {
 		if(changed && local != null) {
-			local.setItem("config", MinecraftObjectHolder.gson.toJson(data));
+			local.setItem(configName, MinecraftObjectHolder.gson.toJson(data));
 			changed = false;
 		}
 	}

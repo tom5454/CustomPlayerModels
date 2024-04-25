@@ -77,6 +77,8 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 		UGWTContext.setContext(DomGlobal.window);
 		name = Java.getQueryVariable("name");
 		animHandler = new AnimationHandler(this::getSelectedDefinition, AnimationMode.GUI);
+		if (name == null)
+			throw new IllegalArgumentException("Missing query parameter: name");
 		if(name.startsWith("https:")) {
 			String url = name;
 			name = "Web";
