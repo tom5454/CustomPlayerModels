@@ -1,0 +1,34 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+issueTrackerURL="https://github.com/tom5454/CustomPlayerModels/issues"
+[[mods]]
+modId="cpmoscc"
+version="${mod_version}"
+displayName="CPM OSC Compat"
+updateJSONURL="https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/CPM-OSC-Compat/version-check.json" #optional
+logoFile="icon.png"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/cpmoscc" #optional
+credits="tom5454"
+authors="tom5454"
+description='''
+A Customizable Player Models, OSC/VMC protocol compat mod.
+'''
+[[dependencies.cpmoscc]]
+    modId="neoforge"
+    type="required"
+    versionRange="[20.5,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cpmoscc]]
+    modId="minecraft"
+    type="required"
+    versionRange="[1.20.5,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cpmoscc]]
+    modId="cpm"
+    type="required"
+    versionRange="*"
+    ordering="NONE"
+    side="BOTH"
