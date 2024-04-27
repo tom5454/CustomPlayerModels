@@ -60,14 +60,18 @@ dependencies {
         exclude(group: "net.fabricmc")
     }
 
-	compileOnly files("../CustomPlayerModels-1.20.4/of.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/of.jar")
 	
 	if (useLib) {
     	modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.6-fabric')
     	implementation "com.electronwill.night-config:core:3.6.3"
     	implementation "com.electronwill.night-config:toml:3.6.3"
     } else 
-    	compileOnly files("../CustomPlayerModels-1.20.4/vc.jar")
+    	compileOnly files("../CustomPlayerModels-1.20.4/stubs/vc.jar")
+    	
+    compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris_old.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/fpm.jar")
 	
 	/*modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.8-fabric')
     implementation "com.electronwill.night-config:core:3.6.3"

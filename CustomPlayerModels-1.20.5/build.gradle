@@ -19,6 +19,17 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 base {
@@ -128,8 +139,10 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    compileOnly files("of.jar")
-    compileOnly files("vc.jar")
+    compileOnly files("stubs/of.jar")
+    compileOnly files("stubs/vc.jar")
+    compileOnly files("stubs/iris.jar")
+    compileOnly files("stubs/fpm.jar")
     //compileOnly 'curse.maven:vivecraft-667903:4887905'
 }
 

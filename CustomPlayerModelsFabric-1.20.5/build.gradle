@@ -34,6 +34,8 @@ repositories {
     }
 }
 
+def useLib = System.getProperty("useLib")
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -51,8 +53,18 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }*/
 	
-	compileOnly files("../CustomPlayerModels-1.20.5/of.jar")
-	compileOnly files("../CustomPlayerModels-1.20.5/vc.jar")
+	compileOnly files("../CustomPlayerModels-1.20.5/stubs/of.jar")
+	
+	if (useLib) {
+		modCompileOnly('maven.modrinth:sodium:mc1.20.5-0.5.8')
+    	modCompileOnly('maven.modrinth:iris:1.7.0+1.20.5')
+    	modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.9-fabric')//1.20.4 fallback
+    	modCompileOnly('maven.modrinth:first-person-model:51Nzrb3j')//1.20.4 fallback
+	} else {
+		compileOnly files("../CustomPlayerModels-1.20.5/stubs/iris.jar")
+		compileOnly files("../CustomPlayerModels-1.20.5/stubs/vc.jar")
+		compileOnly files("../CustomPlayerModels-1.20.5/stubs/fpm.jar")
+	}
 	
     /*modCompileOnly('maven.modrinth:vivecraft:1.20.3-pre2-1.1.5-b1-fabric')
     implementation "com.electronwill.night-config:core:3.6.3"

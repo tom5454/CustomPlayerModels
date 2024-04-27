@@ -187,10 +187,11 @@ dependencies {
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    compileOnly files("of.jar")
+    compileOnly files("stubs/of.jar")
+    compileOnly files("stubs/iris.jar")
     
     compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.8-1.20.1-forge")
-    compileOnly fg.deobf('curse.maven:vivecraft-667903:5144672')
+    compileOnly fg.deobf('maven.modrinth:vivecraft:1.20.1-1.1.9-forge')
     
     compileOnly fg.deobf('curse.maven:oculus-581495:5080444')
     compileOnly fg.deobf('curse.maven:embeddium-908741:5077202')

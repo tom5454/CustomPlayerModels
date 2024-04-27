@@ -53,16 +53,20 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	compileOnly files("../CustomPlayerModels-1.20.4/of.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/of.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris_old.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/fpm.jar")
 	
 	if (useLib) {
-    	modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.6-fabric')
+    	modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.9-fabric')
     	implementation "com.electronwill.night-config:core:3.6.3"
     	implementation "com.electronwill.night-config:toml:3.6.3"
+    	modImplementation('maven.modrinth:sodium:mc1.20.4-0.5.8')
+    	modImplementation('maven.modrinth:iris:1.7.0+1.20.4')
     } else 
-    	compileOnly files("vc.jar")
+    	compileOnly files("../CustomPlayerModels-1.20.4/stubs/vc.jar")
     
-    modImplementation fileTree(dir: 'iris_beta', include: ['*.jar'])
 }
 
 loom {

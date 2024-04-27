@@ -127,7 +127,10 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    compileOnly files("of.jar")
+    compileOnly files("stubs/of.jar")
+    compileOnly files("stubs/iris_old.jar")
+	compileOnly files("stubs/iris.jar")
+	compileOnly files("stubs/fpm.jar")
     //compileOnly files("vc.jar")
     compileOnly 'curse.maven:vivecraft-667903:5144688'
     compileOnly 'com.github.Virtuoel:Pehkui:3.8.0-1.20.4-neoforge'

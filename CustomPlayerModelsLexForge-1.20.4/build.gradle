@@ -181,7 +181,10 @@ dependencies {
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    compileOnly files("../CustomPlayerModels-1.20.4/of.jar")
+    compileOnly files("../CustomPlayerModels-1.20.4/stubs/of.jar")
+    compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris_old.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris.jar")
+	compileOnly files("../CustomPlayerModels-1.20.4/stubs/fpm.jar")
     
     compileOnly fg.deobf('curse.maven:vivecraft-667903:4941635')
 }
