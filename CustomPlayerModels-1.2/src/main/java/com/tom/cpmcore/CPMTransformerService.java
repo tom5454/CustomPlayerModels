@@ -1015,6 +1015,7 @@ public class CPMTransformerService {
 
 		@Override
 		public String mapFieldName(String owner, String name, String desc) {
+			if (name.startsWith("cpm$"))return name;
 			if (owner.startsWith("net/minecraft")) {
 				return lookupField(owner.substring(owner.lastIndexOf('/') + 1) + ";" + name);
 			} else if (!fs.contains(name) && owner.equals(classNode.name) && sm) {
@@ -1025,6 +1026,7 @@ public class CPMTransformerService {
 
 		@Override
 		public String mapMethodName(String owner, String name, String desc) {
+			if (name.startsWith("cpm$"))return name;
 			if (name.equals("<init>") || name.equals("<clinit>"))return name;
 			if (owner.startsWith("net/minecraft")) {
 				return lookupMethod(owner.substring(owner.lastIndexOf('/') + 1) + ";" + name + desc).getKey();

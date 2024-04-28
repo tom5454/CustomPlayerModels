@@ -49,12 +49,12 @@
     "1.20.4-fabric-latest": "0.6.16c",
     "1.20.5-fabric-latest": "0.6.16e",
     "b1.7.3-fabric-latest": "0.6.16e",
-    "1.2.5-latest": "0.6.16c",
+    "1.2.5-latest": "0.6.16d",
     "1.4.7-latest": "0.6.16c",
     "1.5.2-latest": "0.6.16c",
     "1.6.4-latest": "0.6.16c",
     "b1.7.3-bta-babric-latest": "0.6.16c",
-    "1.20.5-latest": "0.6.16b",
+    "1.20.5-latest": "0.6.16c",
     "1.20.4-quilt-latest": "0.6.16b"
   },
   "1.12.2": {
@@ -1374,7 +1374,8 @@
     "0.0.0": "1.4.7",
     "0.6.16a": "Backports:\n- b1.7.3 port (StationAPI required)\n- 1.2.5 port\n- 1.4.7 port\n- 1.5.2 port\n- 1.6.4 port\nPorted to 24w13a and 24w14potato\nAdded Iris 1.7 beta compatibility to 1.20.1 and 1.20.4 (Fixes the crash)\nAdded linear interpolation to value layer updates\nUpdated Simplified Chinese translation (#586)\n\nFixed first person hand flashing red on 1.7.10 (Closes #583)\nFixed crash with RenderPlayer API on 1.12.2 (Closes #566)\nFixed translucent textures showing solid on 1.7.10 and 1.8.9 (#401)\nFixed crash with Optifine 1.20.4 (Closes #585)\nFixed Copy Transform tooltip reports incorrect toggles (Closes #587)",
     "0.6.16b": "Fixed value layers bugging out in some cases",
-    "0.6.16c": "NeoForge, Fabric 1.20.5 port \nQuilt 1.20.4 port\n\nFixed SSL exception on old Minecraft versions with old Java installations\nFixed mixin crash on 1.16.5 fabric\nFixed Iris 1.7 crashing on Quilt (Closes #599)"
+    "0.6.16c": "NeoForge, Fabric 1.20.5 port \nQuilt 1.20.4 port\n\nFixed SSL exception on old Minecraft versions with old Java installations\nFixed mixin crash on 1.16.5 fabric\nFixed Iris 1.7 crashing on Quilt (Closes #599)",
+    "0.6.16d": "NeoForge 20.5.14-beta port\nFixed crash with 1.2.5"
   },
   "1.4.7": {
     "0.0.0": "1.5.2",
@@ -1403,7 +1404,8 @@
   "1.20.5": {
     "0.0.0": "1.20.4",
     "0.6.16a": "NeoForge, Fabric 1.20.5 port \nQuilt 1.20.4 port\n\nFixed SSL exception on old Minecraft versions with old Java installations\nFixed mixin crash on 1.16.5 fabric\nFixed Iris 1.7 crashing on Quilt (Closes #599)",
-    "0.6.16b": "Fixed crash with Iris 1.7 (Closes #601)"
+    "0.6.16b": "Fixed crash with Iris 1.7 (Closes #601)",
+    "0.6.16c": "NeoForge 20.5.14-beta port\nFixed crash with 1.2.5"
   },
   "1.20.4-quilt": {
     "0.0.0": "1.20.1-quilt",

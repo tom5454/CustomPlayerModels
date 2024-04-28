@@ -8,12 +8,11 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.TickEvent;
-import net.neoforged.neoforge.event.TickEvent.ServerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -63,10 +62,8 @@ public class ServerHandler extends ServerHandlerBase {
 	}
 
 	@SubscribeEvent
-	public void onTick(ServerTickEvent evt) {
-		if(evt.phase == TickEvent.Phase.END) {
-			netHandler.tick();
-		}
+	public void onTick(ServerTickEvent.Post evt) {
+		netHandler.tick();
 	}
 
 	@SubscribeEvent

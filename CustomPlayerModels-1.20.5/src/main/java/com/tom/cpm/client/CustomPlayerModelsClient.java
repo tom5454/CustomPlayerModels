@@ -17,15 +17,14 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.TickEvent;
-import net.neoforged.neoforge.event.TickEvent.ClientTickEvent;
-import net.neoforged.neoforge.event.TickEvent.RenderTickEvent;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
 
@@ -82,18 +81,20 @@ public class CustomPlayerModelsClient extends ClientBase {
 	}
 
 	@SubscribeEvent
-	public void renderTick(RenderTickEvent evt) {
-		if(evt.phase == TickEvent.Phase.START) {
-			mc.getPlayerRenderManager().getAnimationEngine().update(evt.renderTickTime);
+	public void renderTick(RenderFrameEvent.Pre evt) {
+		mc.getPlayerRenderManager().getAnimationEngine().update(evt.getPartialTick());
+	}
+
+	@SubscribeEvent
+	public void clientTickPre(ClientTickEvent.Pre evt) {
+		if(!minecraft.isPaused()) {
+			mc.getPlayerRenderManager().getAnimationEngine().tick();
 		}
 	}
 
 	@SubscribeEvent
-	public void clientTick(ClientTickEvent evt) {
-		if(evt.phase == TickEvent.Phase.START && !minecraft.isPaused()) {
-			mc.getPlayerRenderManager().getAnimationEngine().tick();
-		}
-		if (minecraft.player == null || evt.phase == TickEvent.Phase.START)
+	public void clientTickPost(ClientTickEvent.Post evt) {
+		if (minecraft.player == null)
 			return;
 
 		if(KeyBindings.gestureMenuBinding.consumeClick()) {
