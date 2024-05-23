@@ -390,6 +390,19 @@ public class CPMTransformerService implements IClassTransformer {
 							}
 						}
 					}
+					for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
+						AbstractInsnNode insnNode = it.next();
+						if(insnNode instanceof MethodInsnNode) {
+							MethodInsnNode mn = (MethodInsnNode) insnNode;
+							if (mn.name.equals("glColor4f")) {
+								mn.owner = HOOKS_CLASS;
+								LOG.info("CPM Player Renderer/Color hook: injected");
+							} else if (mn.name.equals("glColor3f")) {
+								mn.owner = HOOKS_CLASS;
+								LOG.info("CPM Player Renderer/Color hook: injected");
+							}
+						}
+					}
 				}
 				//func_77036_a(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V
 				//renderModel(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V

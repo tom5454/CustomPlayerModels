@@ -22,6 +22,7 @@ import com.mojang.authlib.GameProfile;
 import com.tom.cpl.util.NettyByteBufInputStream;
 import com.tom.cpm.client.ClientProxy;
 import com.tom.cpm.client.PlayerRenderManager;
+import com.tom.cpm.client.RetroGL;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -55,7 +56,9 @@ public class CPMASMClientHooks {
 			m.copyModelForArmor(player.bipedRightLeg, armor.bipedRightLeg);
 			CPMClientAccess.setNoSetup(armor, true);
 		}
+		RetroGL.colorHold();
 		in.render(entityIn, p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, scale);
+		RetroGL.colorHoldEnd();
 	}
 
 	public static void postRenderSkull(ModelRenderer r, float scale, RenderPlayer rpe) {
