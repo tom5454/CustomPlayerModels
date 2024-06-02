@@ -17,7 +17,6 @@ import elemental2.promise.Promise.PromiseExecutorCallbackFn.RejectCallbackFn;
 import elemental2.promise.Promise.PromiseExecutorCallbackFn.ResolveCallbackFn;
 
 public class MdResourceIO {
-	//private static final String IMAGES_ROOT = "https://github.com/tom5454/CustomPlayerModels/wiki/images/";
 	private static final Function<String, CompletableFuture<byte[]>> loader = WebMC.getInstance().getNetworkFetch();
 
 	public static CompletableFuture<Image> loadImage0(String url, boolean offline) {
@@ -29,10 +28,12 @@ public class MdResourceIO {
 	}
 
 	public static CompletableFuture<byte[]> jsFetch(String url) {
-		if(url.startsWith(MdResourceLoader.RAW_WIKI_ROOT)) {
+		if(url.startsWith(MdResourceLoader.RAW_IMG_ROOT)) {
+			String f = url.substring(MdResourceLoader.RAW_IMG_ROOT.length());
+			return fetch("i:" + f);
+		} else if(url.startsWith(MdResourceLoader.RAW_WIKI_ROOT)) {
 			String f = url.substring(MdResourceLoader.RAW_WIKI_ROOT.length());
-			if (f.endsWith(".png"))return fetch("i:" + f);
-			else return fetch("p:" + f);
+			return fetch("p:" + f);
 		} else if(url.startsWith("changelog")) {
 			return fetch("c:c.md");
 		}

@@ -49,9 +49,9 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	/*modImplementation ('com.github.Virtuoel:Pehkui:3.7.5') {
+	modImplementation ('com.github.Virtuoel:Pehkui:3.8.1') {
         exclude(group: "net.fabricmc.fabric-api")
-    }*/
+    }
 	
 	compileOnly files("../CustomPlayerModels-1.20.6/stubs/of.jar")
 	
@@ -85,7 +85,6 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/java"
 			srcDir "../CustomPlayerModels-1.20.6/src/platform-shared/java"
 			srcDir "src/rawmc-shared/java"
-			exclude "com/tom/cpm/common/PehkuiInterface.java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"

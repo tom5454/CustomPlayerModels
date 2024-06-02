@@ -18,6 +18,8 @@ import com.tom.cpl.util.Pair;
 import com.tom.cpm.externals.org.apache.maven.artifact.versioning.ComparableVersion;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.io.HTTPIO;
 
@@ -40,6 +42,10 @@ public class VersionCheck implements Runnable, IVersionCheck {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
+		if (!ModConfig.getCommonConfig().getBoolean(ConfigKeys.UPDATE_CHECKER, true)) {
+			finished.complete(null);
+			return;
+		}
 		try {
 			Log.info("[VersionChecker] Starting CPM version checker...");
 			URL url = new URL(MinecraftObjectHolder.VERSION_CHECK_URL);

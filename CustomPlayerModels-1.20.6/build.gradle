@@ -94,7 +94,7 @@ sourceSets {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
 			srcDir "src/platform-shared/java"
-			exclude "com/tom/cpm/common/PehkuiInterface.java"
+			//exclude "com/tom/cpm/common/PehkuiInterface.java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
@@ -138,6 +138,7 @@ dependencies {
     compileOnly files("stubs/iris.jar")
     compileOnly files("stubs/fpm.jar")
     compileOnly 'maven.modrinth:vivecraft:1.20.6-1.1.9-b1-neoforge'
+    compileOnly 'com.github.Virtuoel:Pehkui:3.8.0-1.20.4-neoforge'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

@@ -37,8 +37,10 @@ public class RetroGL implements RetroGLAccess<ResourceLocation> {
 	public RenderStage texture(ResourceLocation tex) {
 		return new RenderStage(true, true, true, () -> {
 			bindTex(tex);
-			GlStateManager.enableBlend();
-			GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+			if (!drawingGlint) {
+				GlStateManager.enableBlend();
+				GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+			}
 		}, () -> {
 		}, GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
 	}
@@ -161,5 +163,16 @@ public class RetroGL implements RetroGLAccess<ResourceLocation> {
 	@Override
 	public ResourceLocation getDynTexture() {
 		return DynTexture.getBoundLoc();
+	}
+
+	private static boolean drawingGlint;
+	public static void enableGlint() {
+		colorHold();
+		drawingGlint = true;
+	}
+
+	public static void disableGlint() {
+		colorHoldEnd();
+		drawingGlint = false;
 	}
 }

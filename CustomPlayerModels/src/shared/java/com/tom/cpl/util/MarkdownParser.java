@@ -46,10 +46,19 @@ public class MarkdownParser {
 		}
 	};
 	private static final Pattern LIST = Pattern.compile("^(\\d+)\\..*$");
-	private static final String ESC_CHARS = "!#()*+-.[\\]_{}~";
+	private static final String ESC_CHARS = "!#()*+-.[\\]_{}~`";
+	private static final Map<String, Character> htmlEscapeEntities = new HashMap<>();
+	static {
+		htmlEscapeEntities.put("amp", '&');
+		htmlEscapeEntities.put("lt", '<');
+		htmlEscapeEntities.put("gt", '>');
+		htmlEscapeEntities.put("quot", '"');
+		htmlEscapeEntities.put("apos", '\'');
+	}
 
 	private final List<Line> lines = new ArrayList<>();
 	private final Map<Line, String> headerLines = new HashMap<>();
+	private final Map<String, LinkReference> linkReferences = new HashMap<>();
 
 	public static MarkdownParser makeErrorPage(IGui gui, Throwable e) {
 		StringBuilder sb = new StringBuilder("# ");
@@ -67,10 +76,14 @@ public class MarkdownParser {
 			String ln, lnt;
 			StringBuilder sb = new StringBuilder();
 			String codeBlock = null;
+			String nextHeaderName = null;
 			List<Component> prefix = new ArrayList<>();
+			boolean lastBreak = false;
+			IndentComponent lastIndent = null;
 			while((ln = rd.readLine()) != null) {
 				lnt = ln.trim();
 				if(lnt.startsWith("```")) {
+					lastBreak = false;
 					if(codeBlock == null) {
 						parseLine(sb, 1, prefix);
 						codeBlock = lnt.substring(3);
@@ -79,17 +92,30 @@ public class MarkdownParser {
 						sb.setLength(0);
 						codeBlock = null;
 					}
+					continue;
 				} else if(codeBlock != null) {
 					sb.append(ln);
 					sb.append('\n');
-				} else if(ln.startsWith("|")) {//Table
+					continue;
+				}
+				if(lnt.isEmpty()) {//Paragraph break
+					if (lastBreak)continue;
+					parseLine(sb, 1, prefix);
+					lines.add(new EmptyLine(12));
+					lastBreak = true;
+					continue;
+				}
+				boolean wasLastBreak = lastBreak;
+				lastBreak = false;
+				if(!ln.startsWith("  "))lastIndent = null;
+				if(ln.startsWith("|")) {//Table
 					parseLine(sb, 1, prefix);
 					List<String> t = new ArrayList<>();
 					t.add(lnt);
 					while((ln = rd.readLine()) != null && ln.startsWith("|")) {
 						t.add(ln.trim());
 					}
-					lines.add(new TableLine(t));
+					lines.add(new TableLine(t, this));
 				} else if(ln.startsWith(">")) {//Quote
 					parseLine(sb, 1, prefix);
 					List<String> t = new ArrayList<>();
@@ -97,10 +123,18 @@ public class MarkdownParser {
 					while((ln = rd.readLine()) != null && ln.startsWith(">")) {
 						t.add(ln.trim());
 					}
-					lines.add(new QuoteLine(t));
-				} else if(lnt.isEmpty()) {//Paragraph break
-					parseLine(sb, 1, prefix);
-					lines.add(new EmptyLine(12));
+					lines.add(new QuoteLine(t, this));
+				} else if(lnt.startsWith("<a name=")) {//Header link
+					String e = lnt.substring(9);
+					int i = e.indexOf('"');
+					if (i != -1) {
+						nextHeaderName = e.substring(0, i);
+						if (wasLastBreak)lastBreak = true;
+						continue;
+					} else {
+						if(sb.length() > 0)sb.append(' ');
+						sb.append(lnt);
+					}
 				} else if(lnt.startsWith("#")) {//Header
 					parseLine(sb, 1, prefix);
 
@@ -119,20 +153,59 @@ public class MarkdownParser {
 					String h = lnt.replaceAll("^#+", "").trim();
 					sb.append(h);
 					Line line = parseLine(sb, scl, prefix);
-					headerLines.put(line, h.replaceAll("[^a-zA-Z0-9_\\-\\s]", "").replaceAll("[\\s\\-]", "-").toLowerCase(Locale.ROOT));
+					if (nextHeaderName != null)
+						headerLines.put(line, nextHeaderName);
+					else
+						headerLines.put(line, h.replaceAll("[^a-zA-Z0-9_\\-\\s]", "").replaceAll("[\\s\\-]", "-").toLowerCase(Locale.ROOT));
+					nextHeaderName = null;
 
 					if(scl > 1.3f)lines.add(new HorizontalLine());
 					else lines.add(new EmptyLine(4));
-				} else if(lnt.startsWith("- ") || lnt.startsWith("* ")) {//List
+				} else if(ln.startsWith("---") || ln.startsWith("***") || ln.startsWith("__")) {//HLine
+					parseLine(sb, 1, prefix);
+					lines.add(new HorizontalLine());
+				} else if(lnt.startsWith("[")) {//Links
+					int j = 0;
+					for (;j<lnt.length() && lnt.charAt(j) != ']';j++);
+					if (at(lnt, j + 1) == ':') {
+						parseLine(sb, 1, prefix);
+
+						String lnk = lnt.substring(1, j).toLowerCase(Locale.ROOT);
+						LinkReference ref = linkReferences.get(lnk);
+						if (ref != null) {
+							if (lnk.startsWith("^")) {
+								sb.append(lnt.substring(j + 2).trim());
+								prefix.add(new TextComponent(new StringBuilder(lnk + ": "), new TextStyle()));
+								Line line = parseLine(sb, 0.9f, prefix);
+								headerLines.put(line, "footnote_" + lnk);
+								ref.setLink("#footnote_" + lnk);
+								lastIndent = new IndentComponent();
+								lastIndent.setX(10);
+								continue;
+							} else {
+								String val = lnt.substring(j + 2).trim();
+								ref.setLink(val);
+							}
+						}
+					} else if(ln.endsWith("  ")) {//Line break
+						sb.append(lnt);
+						parseLine(sb, 1, prefix);
+					} else {
+						if(sb.length() > 0)sb.append(' ');
+						sb.append(lnt);
+					}
+				} else if(lnt.startsWith("- ") || lnt.startsWith("* ") || lnt.startsWith("+ ")) {//List
 					parseLine(sb, 1, prefix);
 					int indC = 0;
 					for (;indC<ln.length() && ln.charAt(indC) == ' ';indC++);
 					indC = indC / 2;
-					prefix.add(new ListComponent(indC, null));
+					lastIndent = new IndentComponent();
+					prefix.add(new ListComponent(indC, null, lastIndent));
 					sb.append(lnt.substring(1).trim());
 					if(ln.endsWith("  ")) {
 						parseLine(sb, 1, prefix);
 					}
+					continue;
 				} else if(LIST.matcher(lnt).matches()) {//Numbered list
 					parseLine(sb, 1, prefix);
 					int indC = 0;
@@ -141,18 +214,24 @@ public class MarkdownParser {
 					Matcher m = LIST.matcher(lnt);
 					m.find();
 					String num = m.group(1);
-					prefix.add(new ListComponent(indC, m.group(1) + ". "));
+					lastIndent = new IndentComponent();
+					prefix.add(new ListComponent(indC, m.group(1) + ". ", lastIndent));
 					sb.append(lnt.substring(num.length() + 1).trim());
 					if(ln.endsWith("  ")) {
 						parseLine(sb, 1, prefix);
 					}
+					continue;
 				} else if(ln.endsWith("  ")) {//Line break
+					if(ln.startsWith("  ") && lastIndent != null && !prefix.contains(lastIndent))
+						prefix.add(lastIndent);
 					sb.append(lnt);
 					parseLine(sb, 1, prefix);
 				} else {
 					if(sb.length() > 0)sb.append(' ');
 					sb.append(lnt);
 				}
+				if(ln.startsWith("  ") && lastIndent != null && !prefix.contains(lastIndent))
+					prefix.add(lastIndent);
 			}
 			parseLine(sb, 1, prefix);
 		} catch (IOException e) {
@@ -173,10 +252,12 @@ public class MarkdownParser {
 	}
 
 	private Line parseLine(StringBuilder sb, float scl, List<Component> prefix) {
-		return parseLine(sb, scl, prefix, lines);
+		Line ln = parseLine(sb, scl, prefix, this);
+		lines.add(ln);
+		return ln;
 	}
 
-	private static Line parseLine(StringBuilder sb, float scl, List<Component> prefix, List<Line> lines) {
+	private static Line parseLine(StringBuilder sb, float scl, List<Component> prefix, MarkdownParser parser) {
 		if(sb.length() == 0 && (prefix == null || prefix.isEmpty()))return NULL_LINE;
 		String text = sb.toString();
 		sb.setLength(0);
@@ -186,7 +267,14 @@ public class MarkdownParser {
 			prefix.clear();
 		}
 		TextStyle current = new TextStyle();
+		Map<Integer, TextStyle> styleEnd = new HashMap<>();
 		for(int i = 0;i<text.length();i++) {
+			if (styleEnd.containsKey(i)) {
+				if(sb.length() > 0)
+					comp.add(new TextComponent(sb, current));
+				current = styleEnd.get(i);
+				continue;
+			}
 			char c = text.charAt(i);
 			if (c == '\\') {
 				char n = at(text, i + 1);
@@ -196,18 +284,76 @@ public class MarkdownParser {
 				} else sb.append(c);
 			} else if(c == '*' || c == '_') {
 				if(c == at(text, i + 1)) {
-					comp.add(new TextComponent(sb, current));
-					current.bold = !current.bold;
-					i++;
+					boolean foundEnd = false;
+					int m = -1;
+					for (int j = i+1; j<text.length(); j++) {
+						if (styleEnd.containsKey(j))continue;
+						if (text.charAt(j) == c) {
+							m = j;
+							if (at(text, j + 1) == c) {
+								foundEnd = true;
+								break;
+							}
+						}
+					}
+
+					if (foundEnd) {
+						styleEnd.put(m, current);//skip processing
+						styleEnd.put(m + 1, new TextStyle(current));
+						comp.add(new TextComponent(sb, current));
+						current.bold = !current.bold;
+						i++;
+						sb.setLength(0);
+					} else if(m != -1) {
+						sb.append(c);
+						styleEnd.put(m, new TextStyle(current));
+						comp.add(new TextComponent(sb, current));
+						current.italic = !current.italic;
+						sb.setLength(0);
+					} else {
+						sb.append(c);
+					}
 				} else {
-					comp.add(new TextComponent(sb, current));
-					current.italic = !current.italic;
-					sb.setLength(0);
+					boolean foundEnd = false;
+					int m = -1;
+					for (int j = i+1; j<text.length(); j++) {
+						if (styleEnd.containsKey(j))continue;
+						if (text.charAt(j) == c) {
+							foundEnd = true;
+							m = j;
+							break;
+						}
+					}
+					if (foundEnd) {
+						styleEnd.put(m, new TextStyle(current));
+						comp.add(new TextComponent(sb, current));
+						current.italic = !current.italic;
+						sb.setLength(0);
+					} else {
+						sb.append(c);
+					}
 				}
 			} else if(c == '~' && at(text, i + 1) == '~') {
-				comp.add(new TextComponent(sb, current));
-				current.strikethrough = !current.strikethrough;
-				sb.setLength(0);
+				boolean foundEnd = false;
+				int m = -1;
+				for (int j = i+1; j<text.length(); j++) {
+					if (styleEnd.containsKey(j))continue;
+					if (text.charAt(j) == c && at(text, j + 1) == c) {
+						m = j;
+						foundEnd = true;
+						break;
+					}
+				}
+				if (foundEnd) {
+					styleEnd.put(m, current);//skip processing
+					styleEnd.put(m + 1, new TextStyle(current));
+					comp.add(new TextComponent(sb, current));
+					current.strikethrough = !current.strikethrough;
+					sb.setLength(0);
+				} else {
+					sb.append(c);
+					sb.append(c);
+				}
 				i++;
 			} else if(c == '!' && at(text, i + 1) == '[') {
 				comp.add(new TextComponent(sb, current));
@@ -226,9 +372,18 @@ public class MarkdownParser {
 					}
 					String lnk = sb.toString();
 					sb.setLength(0);
-					comp.add(new ImageComponent(alt, lnk));
+					comp.add(new ImageComponent(alt, new LinkReference(lnk)));
+				} else if(at(text, i + 1) == '[') {
+					i++;
+					for(i++;i<text.length() && text.charAt(i) != ']';i++) {
+						sb.append(text.charAt(i));
+					}
+					String lnk = sb.toString();
+					sb.setLength(0);
+					LinkReference ref = LinkReference.getRef(parser, lnk);
+					comp.add(new ImageComponent(alt, ref));
 				} else {
-					i = j + 2;
+					i = j + 1;
 					sb.append("![");
 				}
 			} else if(c == '$' && at(text, i + 1) == '[') {
@@ -250,7 +405,7 @@ public class MarkdownParser {
 					sb.setLength(0);
 					comp.add(new CustomComponent(id, args));
 				} else {
-					i = j + 2;
+					i = j + 1;
 					sb.append("$[");
 				}
 			} else if(c == '[') {
@@ -269,18 +424,37 @@ public class MarkdownParser {
 					}
 					String lnk = sb.toString();
 					sb.setLength(0);
-					comp.add(new LinkComponent(lnkText, lnk));
+					comp.add(new LinkComponent(lnkText, new LinkReference(lnk)));
+				} else if(at(text, i + 1) == '[') {
+					i++;
+					for(i++;i<text.length() && text.charAt(i) != ']';i++) {
+						sb.append(text.charAt(i));
+					}
+					String lnk = sb.toString();
+					sb.setLength(0);
+					LinkReference ref = LinkReference.getRef(parser, lnk);
+					comp.add(new LinkComponent(lnkText, ref));
+				} else if(lnkText.startsWith("^")) {
+					LinkReference ref = LinkReference.getRef(parser, lnkText);
+					comp.add(new ScaledComponent(0.5f, 0, new LinkComponent("[" + lnkText.substring(1) + "]", ref)));
 				} else {
-					i = j + 1;
+					i = j;
 					sb.append("[");
 				}
 			} else if(c == '`') {
 				comp.add(new TextComponent(sb, current));
 				sb.setLength(0);
 				for(i++;i<text.length() && text.charAt(i) != '`';i++) {
-					sb.append(text.charAt(i));
+					char ch = text.charAt(i);
+					if (ch == '&') {
+						i = parseEscape(i, text, sb);
+					} else {
+						sb.append(ch);
+					}
 				}
 				comp.add(new CodeComponent(sb));
+			} else if(c == '&') {
+				i = parseEscape(i, text, sb);
 			} else {
 				sb.append(c);
 			}
@@ -288,13 +462,71 @@ public class MarkdownParser {
 		comp.add(new TextComponent(sb, current));
 		sb.setLength(0);
 		Line line = new ComponentLine(comp, scl);
-		if(lines != null)lines.add(line);
 		return line;
+	}
+
+	private static int parseEscape(int i, String text, StringBuilder sb) {
+		int j = i;
+		for(i++;i<text.length() && text.charAt(i) != ';';i++);
+		if (at(text, i) == ';') {
+			if (at(text, j + 1) == '#') {
+				try {
+					char ch;
+					if (at(text, j + 2) == 'X' || at(text, j + 2) == 'x') {
+						ch = (char) Integer.parseInt(text.substring(j + 3, i), 16);
+					} else {
+						ch = (char) Integer.parseInt(text.substring(j + 2, i), 10);
+					}
+					sb.append(ch);
+				} catch (NumberFormatException e) {
+					i = j;
+					sb.append('&');
+				}
+			} else {
+				Character ec = htmlEscapeEntities.get(text.substring(j + 1, i));
+				if (ec != null) {
+					sb.append(ec);
+				} else {
+					i = j;
+					sb.append('&');
+				}
+			}
+		} else {
+			i = j;
+			sb.append('&');
+		}
+		return i;
 	}
 
 	private static char at(String s, int i) {
 		if(s.length() > i)return s.charAt(i);
 		else return 0;
+	}
+
+	private static class LinkReference {
+		private String url;
+		private String tooltip;
+
+		private LinkReference() {
+		}
+
+		public LinkReference(String url) {
+			setLink(url);
+		}
+
+		public static LinkReference getRef(MarkdownParser parser, String id) {
+			return parser.linkReferences.computeIfAbsent(id.toLowerCase(Locale.ROOT), __ -> new LinkReference());
+		}
+
+		public void setLink(String url) {
+			this.url = url;
+			if (url.endsWith("\"")) {
+				String[] sp = url.split(" \"", 2);
+				this.url = sp[0];
+				this.tooltip = sp[1];
+				this.tooltip = this.tooltip.substring(0, this.tooltip.length() - 1);
+			}
+		}
 	}
 
 	private static interface Line {
@@ -380,7 +612,7 @@ public class MarkdownParser {
 				scp.setDisplay(p);
 				scp.setBounds(new Box(0, 0, b.w, b.h));
 
-				int w = Arrays.stream(code).mapToInt(gui::textWidth).max().orElse(0) + 1;
+				int w = Arrays.stream(code).mapToInt(gui::textWidth).max().orElse(0) + 5;
 				if(w > bounds.w - 52)w += 55;
 
 				p.setBounds(new Box(0, 0, w, b.h - 4));
@@ -412,7 +644,7 @@ public class MarkdownParser {
 		private Line[] lines;
 		private QuoteNote header;
 
-		public QuoteLine(List<String> t) {
+		public QuoteLine(List<String> t, MarkdownParser parser) {
 			try {
 				String header = t.get(0);
 				if (header.startsWith("> [!")) {
@@ -434,7 +666,7 @@ public class MarkdownParser {
 				for (int i = 0; i < t.size(); i++) {
 					String txt = t.get(i);
 					sb.append(txt, 2, txt.length());
-					this.lines[i] = parseLine(sb, 1, null, null);
+					this.lines[i] = parseLine(sb, 1, null, parser);
 				}
 			} catch (Exception e) {
 				Log.warn("Error parsing markdown quote", e);
@@ -518,25 +750,35 @@ public class MarkdownParser {
 
 	private static class TableLine implements Line {
 		private Line[][] table;
+		private Align[] colAlign;
 		private int cols;
 
-		public TableLine(List<String> lines) {
+		public TableLine(List<String> lines, MarkdownParser parser) {
 			try {
 				String[][] table = lines.stream().map(l -> Arrays.stream(l.substring(1, l.length() - 1).split("\\|")).map(String::trim).toArray(String[]::new)).toArray(String[][]::new);
 				cols = table[0].length;
 				this.table = new ComponentLine[table.length - 1][cols];
+				this.colAlign = new Align[cols];
+				Arrays.fill(colAlign, Align.LEFT);
 
 				StringBuilder sb = new StringBuilder();
 				for (int i = 0; i < table.length; i++) {
+					String[] c = table[i];
 					if(i == 1) {
-						//TODO parse align
+						for (int j = 0; j < cols; j++) {
+							String align = c[j];
+							boolean left = align.startsWith(":");
+							boolean right = align.endsWith(":");
+							if (left && right)colAlign[j] = Align.CENTER;
+							else if(right)colAlign[j] = Align.RIGHT;
+						}
+						//TODO alignment
 						continue;
 					}
-					String[] c = table[i];
 					for (int j = 0; j < cols; j++) {
 						String txt = c[j];
 						sb.append(txt);
-						this.table[i == 0 ? 0 : i - 1][j] = parseLine(sb, 1, null, null);
+						this.table[i == 0 ? 0 : i - 1][j] = parseLine(sb, 1, null, parser);
 					}
 				}
 
@@ -559,6 +801,12 @@ public class MarkdownParser {
 			}
 		}
 
+		private static enum Align {
+			LEFT,
+			CENTER,
+			RIGHT;
+		}
+
 		private class Table extends Panel {
 
 			public Table(MarkdownRenderer mdr, Cursor cursor) {
@@ -579,6 +827,7 @@ public class MarkdownParser {
 
 						Cursor c = new Cursor();
 						c.maxWidth = mw - 1;
+						c.y = 1;
 						p.getElements().addAll(line.toElements(mdr, c));
 						mh = Math.max(mh, c.y);
 
@@ -693,26 +942,21 @@ public class MarkdownParser {
 	}
 
 	private static class LinkComponent implements Component {
-		protected String text, url, tooltip;
+		protected LinkReference ref;
+		protected String text;
 
-		public LinkComponent(String text, String url) {
+		public LinkComponent(String text, LinkReference ref) {
 			this.text = text;
-			this.url = url;
-			if (url.endsWith("\"")) {
-				String[] sp = url.split(" \"", 2);
-				this.url = sp[0];
-				this.tooltip = sp[1];
-				this.tooltip = this.tooltip.substring(0, this.tooltip.length() - 1);
-			}
+			this.ref = ref;
 		}
 
 		@Override
 		public List<GuiElement> toElements(MarkdownRenderer mdr, Cursor cursor) {
 			float s = cursor.scale;
-			String url = this.url;
+			String url = ref.url;
 			Runnable click = () -> mdr.browse(url);
 			List<Predicate<MouseEvent>> hovers = new ArrayList<>();
-			Tooltip tt = this.tooltip != null ? new Tooltip(mdr.getGui().getFrame(), this.tooltip) : null;
+			Tooltip tt = ref.tooltip != null ? new Tooltip(mdr.getGui().getFrame(), ref.tooltip) : null;
 			return linewrapSimple(text, cursor, t -> new Lbl(mdr.getGui(), t, click, s, hovers, tt), mdr.getGui()::textWidth);
 		}
 
@@ -748,18 +992,36 @@ public class MarkdownParser {
 		}
 	}
 
+	private static class IndentComponent implements Component {
+		private int x;
+
+		public void setX(int x) {
+			this.x = x;
+		}
+
+		@Override
+		public List<GuiElement> toElements(MarkdownRenderer mdr, Cursor cursor) {
+			cursor.x += x;
+			cursor.xStart = x;
+			return Collections.emptyList();
+		}
+	}
+
 	private static class ListComponent implements Component {
 		private int sub;
 		private String h;
+		private IndentComponent indent;
 
-		public ListComponent(int sub, String h) {
+		public ListComponent(int sub, String h, IndentComponent indent) {
 			this.sub = sub;
 			this.h = h;
+			this.indent = indent;
 		}
 
 		@Override
 		public List<GuiElement> toElements(MarkdownRenderer mdr, Cursor cursor) {
 			int w = h == null ? 10 : mdr.getGui().textWidth(h);
+			indent.setX(5 + sub * 15 + w);
 			cursor.x = 5 + sub * 15;
 			cursor.xStart = cursor.x + w;
 			GuiElement he = h != null ? new Label(mdr.getGui(), h) : new BulletPoint(mdr.getGui(), Math.min(sub, 3));
@@ -784,46 +1046,52 @@ public class MarkdownParser {
 	}
 
 	private static class ImageComponent implements Component {
-		private String altText, url;
+		private LinkReference ref;
+		private String altText;
 		private Vec2i size = new Vec2i();
+		private Tooltip error;
 
-		public ImageComponent(String altText, String url) {
+		public ImageComponent(String altText, LinkReference ref) {
 			this.altText = altText;
-			this.url = url;
-			if (url.endsWith("\"")) {
-				String[] sp = url.split(" \"", 2);
-				this.url = sp[0];
-				String t = sp[1];
-				t = t.substring(0, t.length() - 1);
-				this.altText = altText + "\\" + t;
-			}
+			this.ref = ref;
 		}
 
 		@Override
 		public List<GuiElement> toElements(MarkdownRenderer mdr, Cursor cursor) {
 			IGui gui = mdr.getGui();
 			Img i = new Img(gui);
-			i.tooltip = new Tooltip(gui.getFrame(), altText);
-			boolean[] refresh = new boolean[] {false};
-			mdr.getLoader().loadImage(url).thenAcceptAsync(img -> {
-				if(size.x == 0) {
-					size.x = img.getWidth();
-					size.y = img.getHeight();
-					if(refresh[0]) {
-						mdr.refresh();
-						return;
+			if (ref.tooltip != null)
+				i.tooltip = new Tooltip(gui.getFrame(), ref.tooltip);
+			if (ref.url != null) {
+				boolean[] refresh = new boolean[] {false};
+				mdr.getLoader().loadImage(ref.url).thenAcceptAsync(img -> {
+					if(size.x == 0) {
+						size.x = img.getWidth();
+						size.y = img.getHeight();
+						if(refresh[0]) {
+							mdr.refresh();
+							return;
+						}
 					}
-				}
-				TextureProvider p = new TextureProvider(img, new Vec2i());
-				mdr.registerCleanup(p::free);
-				i.pr = p;
-			}, gui::executeLater).exceptionally(e -> {
-				size.x = 16;
-				size.y = 16;
-				i.tooltip = new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.failedToLoadImage", e.getMessage()));
-				return null;
-			});
-			refresh[0] = true;
+					TextureProvider p = new TextureProvider(img, new Vec2i());
+					mdr.registerCleanup(p::free);
+					i.pr = p;
+					error = null;
+				}, gui::executeLater).exceptionally(e -> {
+					size.x = 16;
+					size.y = 16;
+					error = new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.failedToLoadImage", e.getMessage()));
+					return null;
+				});
+				refresh[0] = true;
+			} else {
+				error = new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.failedToLoadImage", "Invalid image URL"));
+			}
+			if (error != null) {
+				float s = cursor.scale;
+				Tooltip tt = error;
+				return linewrapSimple(altText, cursor, t -> new Alt(mdr.getGui(), t, s, tt), mdr.getGui()::textWidth);
+			}
 			if(size.x > cursor.maxWidth) {
 				float sc = size.x / (float) cursor.maxWidth;
 				size.x = cursor.maxWidth;
@@ -846,7 +1114,7 @@ public class MarkdownParser {
 
 			@Override
 			public void draw(MouseEvent event, float partialTicks) {
-				if(event.isHovered(bounds))tooltip.set();
+				if(event.isHovered(bounds) && tooltip != null)tooltip.set();
 				if(error) {
 					gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, 0xffff0000);
 				} else if(pr != null) {
@@ -855,6 +1123,25 @@ public class MarkdownParser {
 				} else {
 					gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_fill);
 				}
+			}
+		}
+
+		private static class Alt extends GuiElement {
+			private LiteralText txt;
+			private float scale;
+			private Tooltip tt;
+
+			public Alt(IGui gui, String text, float scale, Tooltip tt) {
+				super(gui);
+				this.txt = new LiteralText(text);
+				this.scale = scale;
+				this.tt = tt;
+			}
+
+			@Override
+			public void draw(MouseEvent event, float partialTicks) {
+				if (tt != null && event.isHovered(bounds))tt.set();
+				gui.drawFormattedText(bounds.x, bounds.y, txt, gui.getColors().label_text_color, scale);
 			}
 		}
 	}
@@ -879,6 +1166,32 @@ public class MarkdownParser {
 				return Arrays.asList(lbl);
 			}
 			return f.create(mdr, cursor, args);
+		}
+	}
+
+	private static class ScaledComponent implements Component {
+		private float scale;
+		private int yOff;
+		private Component component;
+
+		public ScaledComponent(float scale, int yOff, Component component) {
+			this.scale = scale;
+			this.yOff = yOff;
+			this.component = component;
+		}
+
+		@Override
+		public List<GuiElement> toElements(MarkdownRenderer mdr, Cursor cursor) {
+			Cursor c = new Cursor();
+			c.x = cursor.x;
+			c.scale = cursor.scale * scale;
+			c.y = cursor.y + yOff;
+			c.xStart = cursor.xStart;
+			c.maxWidth = (int) (cursor.maxWidth / scale);
+			List<GuiElement> el = component.toElements(mdr, c);
+			cursor.x = c.x;
+			cursor.y = c.y;
+			return el;
 		}
 	}
 

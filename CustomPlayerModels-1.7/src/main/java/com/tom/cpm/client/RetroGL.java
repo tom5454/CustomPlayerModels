@@ -17,6 +17,7 @@ import com.tom.cpm.shared.retro.RetroGLAccess;
 public class RetroGL implements RetroGLAccess<ResourceLocation> {
 	public static final RetroTessellator tessellator = new RetroTessellator(Tessellator.instance);
 	public static int renderCallLoc;
+	public static final int GLINT_OVERLAY_LOC = 2;
 	public static final int HURT_OVERLAY_LOC = 3;
 
 	private static final RenderStage lines = new RenderStage(true, false, false, () -> {
@@ -37,8 +38,10 @@ public class RetroGL implements RetroGLAccess<ResourceLocation> {
 	public RenderStage texture(ResourceLocation tex) {
 		return new RenderStage(true, true, true, () -> {
 			bindTex(tex);
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glBlendFunc(770, 771);
+			if (renderCallLoc != RetroGL.GLINT_OVERLAY_LOC) {
+				GL11.glEnable(GL11.GL_BLEND);
+				GL11.glBlendFunc(770, 771);
+			}
 		}, () -> {
 		}, GL11.GL_QUADS);
 	}

@@ -57,11 +57,7 @@ public abstract class ClientBase {
 		mc = new MinecraftObject(minecraft);
 		optifineLoaded = OFDetector.doApply();
 		vrLoaded = Platform.isModLoaded("vivecraft");
-		irisLoaded = IrisDetector.doApply();
-		if (Iris7Detector.doApply()) {
-			irisLoaded = true;
-			Log.warn("Iris Beta detected, experimental support enabled");
-		}
+		irisLoaded = Iris7Detector.doApply() || IrisDetector.doApply();
 		if(optifineLoaded)Log.info("Optifine detected, enabling optifine compatibility");
 		if(vrLoaded)Log.info("ViveCraft detected, enabling ViveCraft compatibility");
 		if(irisLoaded)Log.info("Iris detected, enabling iris compatibility");

@@ -442,6 +442,8 @@ public class AnimPanel extends Panel {
 		h.registerKeybind(Keybinds.PASTE_ANIM_FRAME, this::pasteFrame);
 		h.registerKeybind(Keybinds.COPY_ANIM_PART, this::copyData);
 		h.registerKeybind(Keybinds.PASTE_ANIM_PART, this::pasteData);
+		h.registerKeybind(Keybinds.ANIM_PREV_FRAME, editor::animPrevFrm);
+		h.registerKeybind(Keybinds.ANIM_NEXT_FRAME, editor::animNextFrm);
 		super.keyPressed(event);
 	}
 }

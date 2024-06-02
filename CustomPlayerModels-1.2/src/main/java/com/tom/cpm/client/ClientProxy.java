@@ -95,7 +95,6 @@ public class ClientProxy extends CommonProxy {
 			public void tickEnd(EnumSet<TickType> var1, Object... var2) {
 				if (var1.contains(TickType.GAME)) {
 					clientTickEnd();
-					MCExecutor.executeAll();
 				}
 			}
 

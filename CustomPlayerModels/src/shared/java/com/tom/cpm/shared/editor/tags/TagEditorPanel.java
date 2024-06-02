@@ -50,6 +50,7 @@ public class TagEditorPanel<T> extends Panel {
 		tagList = new ListPicker<>(gui.getFrame(), tagMapper.asList());
 		tagMapper.setSetter(tagList::setSelected);
 		tagList.setBounds(new Box(5, 5, w - 60, 20));
+		tagList.setAction(this::updateElems);
 		addElement(tagList);
 
 		scpElements = new ScrollPanel(gui);

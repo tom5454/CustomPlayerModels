@@ -25,6 +25,7 @@ import com.tom.cpm.shared.io.IOHelper;
 
 public class MdResourceLoader implements MarkdownResourceLoader {
 	public static final String RAW_WIKI_ROOT = "https://raw.githubusercontent.com/wiki/tom5454/CustomPlayerModels/";
+	public static final String RAW_IMG_ROOT = RAW_WIKI_ROOT + "images/";
 	private static final String WIKI_ROOT = "https://github.com/tom5454/CustomPlayerModels/wiki";
 	private static final String IMAGES_ROOT = WIKI_ROOT + "/images/";
 	private static final String LOCALE_ROOT = WIKI_ROOT + "/locale/";
@@ -114,7 +115,7 @@ public class MdResourceLoader implements MarkdownResourceLoader {
 			if(offline) {
 				return asset0("/assets/cpm/wiki/images/" + p);
 			} else {
-				return fetchOnline(RAW_WIKI_ROOT + p, "/assets/cpm/wiki/images/" + p, logWarn);
+				return fetchOnline(RAW_IMG_ROOT + p, "/assets/cpm/wiki/images/" + p, logWarn);
 			}
 		} else if(url.startsWith(WIKI_ROOT)) {
 			Matcher m = LOCALE_EXT.matcher(url);

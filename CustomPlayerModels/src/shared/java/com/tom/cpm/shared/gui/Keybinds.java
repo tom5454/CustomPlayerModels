@@ -32,11 +32,14 @@ public class Keybinds {
 	public static final Keybind TOGGLE_HIDDEN_ACTION = new Keybind("toggleHidden", "h");
 	public static final Keybind TOGGLE_LOCK_ACTION = new Keybind("toggleLock", "l");
 	public static final Keybind FIND_ELEMENT = new Keybind("findElement", "f", Keybind.CTRL);
+	public static final Keybind RELOAD_TEXTURE = new Keybind("reloadTexture");
 
 	public static final Keybind COPY_ANIM_FRAME = new Keybind("copyAnimFrame", "c", Keybind.ALT);
 	public static final Keybind PASTE_ANIM_FRAME = new Keybind("pasteAnimFrame", "v", Keybind.ALT);
 	public static final Keybind COPY_ANIM_PART = new Keybind("copyAnimPart", "c", Keybind.CTRL);
 	public static final Keybind PASTE_ANIM_PART = new Keybind("pasteAnimPart", "v", Keybind.CTRL);
+	public static final Keybind ANIM_PREV_FRAME = new Keybind("animPrevFrame");
+	public static final Keybind ANIM_NEXT_FRAME = new Keybind("animNextFrame");
 
 	public static final Keybind RESET_VALUE_LAYER = new Keybind("resetValueLayer", "r");
 
@@ -53,11 +56,11 @@ public class Keybinds {
 			ZOOM_IN_CAMERA, ZOOM_OUT_CAMERA, RESET_CAMERA, FOCUS_CAMERA,
 			"editor",
 			MOUSE_MARKER, OFFSET, ROTATION, POSITION, SIZE, SAVE, UNDO, REDO, NEW_PART, DELETE, TOGGLE_GIZMO, RUN_QUICK_ACTION,
-			TOGGLE_VIS_ACTION, TOGGLE_HIDDEN_ACTION, TOGGLE_LOCK_ACTION, FIND_ELEMENT,
+			TOGGLE_VIS_ACTION, TOGGLE_HIDDEN_ACTION, TOGGLE_LOCK_ACTION, FIND_ELEMENT, RELOAD_TEXTURE,
 			"treeNav",
 			TREE_PREV, TREE_NEXT, TREE_UP, TREE_DOWN,
 			"animAct",
-			COPY_ANIM_FRAME, PASTE_ANIM_FRAME, COPY_ANIM_PART, PASTE_ANIM_PART
+			COPY_ANIM_FRAME, PASTE_ANIM_FRAME, COPY_ANIM_PART, PASTE_ANIM_PART, ANIM_PREV_FRAME, ANIM_NEXT_FRAME,
 	};
 
 	public static final Map<VecType, Keybind> EDITOR_TOOL_KBS = new EnumMap<>(VecType.class);

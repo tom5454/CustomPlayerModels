@@ -32,6 +32,7 @@ import com.tom.cpm.client.RetroGL;
 import com.tom.cpm.client.SinglePlayerCommands;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.retro.GameProfileManager;
+import com.tom.cpm.retro.MCExecutor;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.MinecraftServerAccess;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -296,5 +297,9 @@ public class CPMASMClientHooks {
 
 	public static Entity inj_getEntityByID(NetClientHandler handler, int id) {
 		return handler.worldClient.getEntityByID(id);
+	}
+
+	public static void clientTickEnd() {
+		MCExecutor.executeAll();
 	}
 }

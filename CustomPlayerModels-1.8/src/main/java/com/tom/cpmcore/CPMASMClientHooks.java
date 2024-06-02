@@ -61,6 +61,12 @@ public class CPMASMClientHooks {
 		RetroGL.colorHoldEnd();
 	}
 
+	public static void renderArmorGlint(ModelBase in, Entity entityIn, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float scale) {
+		RetroGL.enableGlint();
+		in.render(entityIn, p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, scale);
+		RetroGL.disableGlint();
+	}
+
 	public static void postRenderSkull(ModelRenderer r, float scale, RenderPlayer rpe) {
 		if(rpe != null) {
 			rpe.getMainModel().bipedHead.postRender(scale);

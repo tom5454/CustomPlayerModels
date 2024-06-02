@@ -267,7 +267,7 @@ public class NetHandler<RL, P, NET> {
 				}
 				NBTTagCompound evt = new NBTTagCompound();
 				updatePlayer(p, dt.state);
-				for (ModelEventType type : ModelEventType.SNYC_TYPES) {
+				for (ModelEventType type : ModelEventType.SYNC_TYPES) {
 					if(dt.eventSubs.contains(type)) {
 						type.write(dt.state, evt);
 					}

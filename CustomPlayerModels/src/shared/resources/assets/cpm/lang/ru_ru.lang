@@ -369,7 +369,6 @@ tooltip.cpm.gesture.valueDefaultValue=Значение по умолчанию: 
 tooltip.cpm.gesture.valueReset=Удерживайте CTRL+%s, чтобы сбросить все слои значений к значению по умолчанию
 tooltip.cpm.anim.pasteDataAll=Устанавливает позу выделенной части из буфера обмена (внутренняя) во всех кадрах
 tooltip.cpm.display.showOutlines=Показать границы блоков
-tooltip.cpm.tools.exportUVMap=UNLOCALIZED: Export the selected texture UV Map as a layered OpenRaster (.ora) file.
 tab.cpm.model=Модель
 tab.cpm.texture=Текстура
 tab.cpm.animation=Анимации

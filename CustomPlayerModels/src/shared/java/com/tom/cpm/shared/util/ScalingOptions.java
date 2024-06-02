@@ -6,10 +6,10 @@ import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.network.ServerCaps;
 
 public enum ScalingOptions {
-	ENTITY("scale", ServerCaps.SCALING),
-	EYE_HEIGHT("eyeHeight", ServerCaps.EYE_HEIGHT),
-	HITBOX_WIDTH("hitboxW", ServerCaps.HITBOX_SCALING),
-	HITBOX_HEIGHT("hitboxH", ServerCaps.HITBOX_SCALING),
+	ENTITY("scale", ServerCaps.SCALING, false),
+	EYE_HEIGHT("eyeHeight", ServerCaps.EYE_HEIGHT, false),
+	HITBOX_WIDTH("hitboxW", ServerCaps.HITBOX_SCALING, false),
+	HITBOX_HEIGHT("hitboxH", ServerCaps.HITBOX_SCALING, false),
 	THIRD_PERSON("thirdPerson", ServerCaps.THIRD_PERSON),
 	VIEW_BOBBING("viewBonning", ServerCaps.THIRD_PERSON),
 	MOTION("motion", ServerCaps.ATTRIBUTE_SCALE, false),

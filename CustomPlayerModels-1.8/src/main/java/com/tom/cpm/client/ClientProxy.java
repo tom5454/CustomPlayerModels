@@ -262,8 +262,8 @@ public class ClientProxy extends CommonProxy {
 						} else {
 							renderLivingLabel(evt.entity, str, evt.x, y - (evt.entity.isChild() ? (double)(evt.entity.height / 2.0F) : 0.0D), evt.z, 64);
 						}
+						GlStateManager.popMatrix();
 					}
-					GlStateManager.popMatrix();
 				}
 			}
 		}

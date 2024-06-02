@@ -87,7 +87,8 @@ public class AnimLoaderState {
 				tr.name = a.getId();
 				tr.anim = a.type;
 				tr.group = a.group;
-				tr.layerCtrl = a.layerControlled;
+				if (!a.type.isLayer())
+					tr.layerCtrl = a.layerControlled;
 				tr.command = a.command;
 				tr.isProperty = a.isProperty;
 				tr.order = a.order;
