@@ -82,11 +82,12 @@ public class Image {
 	}
 
 	public void draw(Image i, int xs, int ys, int w, int h) {
-		for(int y = ys;y<h;y++) {
-			for(int x = xs;x<w;x++) {
-				float fx = x / (float) w;
-				float fy = y / (float) h;
-				data[y * w + x] = i.getRGB(Math.min((int) (fx * i.getWidth()), i.getWidth()-1), Math.min((int) (fy * i.getHeight()), i.getHeight()-1));
+		for (int y = 0;y<h;y++) {
+			int yp = (y + ys) * w;
+			for (int x = 0;x<w;x++) {
+				int ix = x * i.getWidth() / w;
+				int iy = y * i.getHeight() / h;
+				data[yp + x + xs] = i.getRGB(Math.min(ix, i.getWidth()-1), Math.min(iy, i.getHeight()-1));
 			}
 		}
 	}

@@ -3,6 +3,7 @@ package com.tom.cpm.shared.parts.anim;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +59,11 @@ public class ModelPartAnimationNew implements IModelPart, IResolvedModelPart {
 		AnimationRegistry reg = def.getAnimations();
 		Map<SerializedTrigger, List<IAnimation>> anims = new HashMap<>();
 		Map<Integer, IAnimation> convAnims = new HashMap<>();
+		Map<SerializedTrigger, Integer> trigIds = new HashMap<>();
 		state.getAnims().forEach((id, an) -> {
 			SerializedTrigger tr = state.getTriggers().get(an.triggerID);
 			if (tr != null) {
+				trigIds.put(tr, an.triggerID);
 				AnimationNew a = new AnimationNew(an.priority, an.duration);
 				an.animatorChannels.values().forEach(ac -> ac.addToAnim(a, def));
 				anims.computeIfAbsent(tr, __ -> new ArrayList<>()).add(a);
@@ -95,7 +98,10 @@ public class ModelPartAnimationNew implements IModelPart, IResolvedModelPart {
 				}
 			}
 		});
-		anims.forEach((a, b) -> {
+		//TODO sorting won't be necessary after full trigger rewrite
+		anims.entrySet().stream().sorted(Comparator.comparingInt(e -> trigIds.get(e.getKey()))).forEach((e) -> {
+			SerializedTrigger a = e.getKey();
+			List<IAnimation> b = e.getValue();
 			StagedAnimation sa2 = st2.get(a);
 			a.registerOld(reg, (sa2 != null ? sa2.getAll() : b).stream().flatMap(an -> {
 				StagedAnimation sa = st.get(an);

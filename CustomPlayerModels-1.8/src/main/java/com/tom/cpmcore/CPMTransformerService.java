@@ -195,6 +195,26 @@ public class CPMTransformerService implements IClassTransformer {
 							}
 						}
 						LOG.info("CPM Armor Hook/Bind: injected");
+					} else if((method.name.equals("a") && method.desc.equals("(Lpr;Lbbo;FFFFFFF)V")) || method.name.equals("func_177183_a")) {
+						LOG.info("CPM Armor Hook/LayerGlint: Found renderEnchantedGlint method");
+						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
+							AbstractInsnNode insnNode = it.next();
+							if(insnNode instanceof MethodInsnNode) {
+								MethodInsnNode mn = (MethodInsnNode) insnNode;
+								if((mn.name.equals("a") && mn.desc.equals("(Lpr;FFFFFF)V")) || mn.name.equals("render")) {
+									LOG.info("CPM Armor Hook/LayerGlint: Found render call");
+									Type[] argsD = Type.getArgumentTypes(mn.desc);
+									Type[] args = new Type[argsD.length + 1];
+									args[0] = Type.getObjectType(mn.owner);
+									System.arraycopy(argsD, 0, args, 1, argsD.length);
+									mn.desc = Type.getMethodDescriptor(Type.VOID_TYPE, args);
+									mn.name = "renderArmorGlint";
+									mn.setOpcode(Opcodes.INVOKESTATIC);
+									mn.owner = HOOKS_CLASS;
+									LOG.info("CPM Armor Hook/LayerGlint: injected");
+								}
+							}
+						}
 					}
 				}
 				return input;

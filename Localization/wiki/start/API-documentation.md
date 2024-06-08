@@ -37,7 +37,7 @@ API version: ![API version badge](https://img.shields.io/maven-metadata/v?color=
 
 | Minecraft Version | Runtime version (Forge) | Runtime version (NeoForge) | Runtime version (Fabric) | Runtime version (Quilt) |
 | ----------------- | ----------------------- | -------------------------- | ------------------------ | ----------------------- |
-| 1.20.5 | ![1.20.5 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.20.5%2Fmaven-metadata.xml) | ![1.20.5 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20.5%2Fmaven-metadata.xml) | ![1.20.5 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20.5%2Fmaven-metadata.xml) | - |
+| 1.20.6 | ![1.20.6 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.20.6%2Fmaven-metadata.xml) | ![1.20.6 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20.6%2Fmaven-metadata.xml) | ![1.20.6 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20.6%2Fmaven-metadata.xml) | - |
 | 1.20.4 | ![1.20.4 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.20.4%2Fmaven-metadata.xml) | ![1.20.4 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20.4%2Fmaven-metadata.xml) | ![1.20.4 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20.4%2Fmaven-metadata.xml) | ![1.20.4 quilt version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Quilt-1.20.4%2Fmaven-metadata.xml) |
 | 1.20.2 | ![1.20.2 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.20.2%2Fmaven-metadata.xml) | ![1.20.2 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20.2%2Fmaven-metadata.xml) | ![1.20.2 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20.2%2Fmaven-metadata.xml) | Use the Fabric version |
 | 1.20 | ![1.20 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20%2Fmaven-metadata.xml) | Use the Forge version | ![1.20 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20%2Fmaven-metadata.xml) | ![1.20 quilt version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Quilt-1.20%2Fmaven-metadata.xml) |
@@ -216,14 +216,14 @@ else
 ### Voice animation
 Register a voice level supplier.  
 `IClientAPI:registerVoice(Player.class, player -> voiceLevel);`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 
 Register a voice level supplier. (UUID variant) (0.6.0+)  
 `IClientAPI:registerVoice(playerUUID -> voiceLevel);`  
 
 Register a voice muted supplier. (0.6.0+)  
 `IClientAPI:registerVoiceMute(Player.class, player -> voiceMuted);`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 
 Register a voice muted supplier. (UUID variant) (0.6.0+)  
 `IClientAPI:registerVoiceMute(playerUUID -> voiceMuted);`  
@@ -233,11 +233,11 @@ Create a player renderer to render CPM models on any Humanoid Entity.
 `PlayerRenderer<Model, ResourceLocation, RenderType, MultiBufferSource, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class)`  
 For 1.12 and lower use:  
 `RetroPlayerRenderer<Model, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, GameProfile.class);`  
-[Model.class](#client-model-class)  
-[ResourceLocation.class](#client-resourcelocation-class)  
-[RenderType.class](#client-rendertype-class)  
-[MultiBufferSource.class](#client-multibuffersource-class)  
-[GameProfile.class](#client-gameprofile-class)  
+[Model.class](#client-modelclass)  
+[ResourceLocation.class](#client-resourcelocationclass)  
+[RenderType.class](#client-rendertypeclass)  
+[MultiBufferSource.class](#client-multibuffersourceclass)  
+[GameProfile.class](#client-gameprofileclass)  
 
 #### Rendering an Entity with CPM model
 1. Using the renderer set the GameProfile or LocalModel before rendering.  
@@ -359,7 +359,7 @@ Returns: The animation value (value layer: 0-255, other animations: 0-1), -1 if 
 ### Client Networking (0.6.1+)
 Register a NBT message to send to the server, or broadcast it to other clients.  
 `MessageSender sender = IClientAPI.registerPluginMessage(Player.class, message_id, (player, message) -> {/*Handle message*/}, broadcastToTracking);`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 or UUID version:  
 `MessageSender sender = IClientAPI.registerPluginMessage(message_id, (player_uuid, message) -> {/*Handle message*/}, broadcastToTracking);`  
 Use the `MessageSender` to send messages.  
@@ -372,7 +372,7 @@ When using broadcastToTracking, or State Messages your mod/plugin is not require
 #### State Messages
 The last state message is stored on the server and sent to every client that enters the tracking range (render distance).  
 `MessageSender sender = IClientAPI.registerPluginStateMessage(Player.class, message_id, (player, message) -> {/*Handle message*/});`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 or UUID version:  
 `MessageSender sender = IClientAPI.registerPluginMessage(message_id, (player_uuid, message) -> {/*Handle message*/});`  
 
@@ -414,12 +414,12 @@ Create a ModelFile using `ModelFile.load(file);` or `ModelFile.load(inputstream)
 or  
 `ICommonAPI.resetPlayerModel(Player.class, playerObj);`  
 clear the server set model  
-[Player.class](#common-player-class)  
+[Player.class](#common-playerclass)  
 
 ### Jump (0.4.1+)
 Play the jump animation on for a player.  
 `ICommonAPI.playerJumped(Player.class, playerObj);`  
-[Player.class](#common-player-class)
+[Player.class](#common-playerclass)
 
 ### Play Animation (0.6.0+)
 Play the given command animation for a player (Server-side).  
@@ -428,12 +428,12 @@ Name: Animation name
 `ICommonAPI.playAnimation(Player.class, playerObj, name);` or  
 `ICommonAPI.playAnimation(Player.class, playerObj, name, value);`  
 Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or -1 to switch state  
-[Player.class](#common-player-class)
+[Player.class](#common-playerclass)
 
 ### Server Networking (0.6.1+)
 Register a NBT message to receive non broadcast messages/send messages to clients.  
 `MessageSender<Player> sender = ICommonAPI.registerPluginMessage(Player.class, message_id, (player, message) -> {/*Handle message*/});`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 Use the `MessageSender` to send messages.  
 `boolean success = sender.sendMessageTo(player, message_tag);`  
 or broadcast to nearby players:  
@@ -445,7 +445,7 @@ sendToSelf: Send message to the selected player in argument 1
 Detect if an animation is playing for the player  
 `int value = ICommonAPI.getAnimationPlaying(Player.class, playerObj, name);`  
 Returns: The animation value (value layer: 0-255, other animations: 0-1), -1 if animation doesn't exist  
-[Player.class](#common-player-class)  
+[Player.class](#common-playerclass)  
 
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  

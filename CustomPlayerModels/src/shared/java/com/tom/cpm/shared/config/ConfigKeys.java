@@ -64,6 +64,7 @@ public class ConfigKeys {
 	public static final String ENABLE_INVIS_GLOW = "enableInvisibleGlow";
 	public static final String MOUSE_WHEEL_SENSITIVITY = "mouseWheelSensitivity";
 	public static final String EDITOR_EXPERIMENTAL_EXPORT = "experimentalExport0614";
+	public static final String UPDATE_CHECKER = "updateChecker";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

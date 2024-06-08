@@ -23,7 +23,7 @@ public enum ModelEventType {
 	IN_MENU(VanillaPose.IN_MENU, booleanType(a -> a.inMenu, (a, b) -> a.inMenu = b)),
 	;
 	public static final ModelEventType[] VALUES = values();
-	public static final ModelEventType[] SNYC_TYPES = Arrays.stream(VALUES).filter(ModelEventType::autoSync).toArray(ModelEventType[]::new);
+	public static final ModelEventType[] SYNC_TYPES = Arrays.stream(VALUES).filter(ModelEventType::autoSync).toArray(ModelEventType[]::new);
 	private final String name;
 	private final VanillaPose pose;
 	private final ValueSync sync;

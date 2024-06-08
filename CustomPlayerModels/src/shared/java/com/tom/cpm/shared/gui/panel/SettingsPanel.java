@@ -94,6 +94,8 @@ public class SettingsPanel extends Panel {
 
 			makeCheckbox(general, ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false);
 
+			makeCheckbox(general, ConfigKeys.UPDATE_CHECKER, true);
+
 			MinecraftClientAccess.get().populatePlatformSettings("general", general);
 
 			layout.reflow();

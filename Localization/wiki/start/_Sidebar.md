@@ -19,3 +19,4 @@ Customizable Player Models Wiki
   * [/cpmclient command](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpmclient-command)
   * [/cpm command](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command)
 * [API (Beta)](https://github.com/tom5454/CustomPlayerModels/wiki/API-documentation)
+* [Wiki Markdown Cheatsheet](https://github.com/tom5454/CustomPlayerModels/wiki/CPMMarkdownCheatsheet)

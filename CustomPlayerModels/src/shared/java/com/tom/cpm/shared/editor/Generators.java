@@ -401,7 +401,15 @@ public class Generators {
 			boolean add = editor.selectedAnim.add;
 			ActionBuilder ab = editor.action("i", "button.cpm.fixAdditiveToggle");
 			editor.selectedAnim.getFrames().forEach(frm -> frm.getComponents().forEach((p, f) -> {
-				Vec3f pos = add ? f.getPosition().sub(p.pos) : f.getPosition().add(p.pos);
+				Vec3f pos;
+				if (p.type == ElementType.ROOT_PART) {
+					VanillaModelPart part = (VanillaModelPart) p.typeData;
+					PartValues pv = part.getDefaultSize(editor.skinType);
+					pos = pv.getPos().add(p.pos);
+				} else {
+					pos = p.pos;
+				}
+				pos = add ? f.getPosition().sub(pos) : f.getPosition().add(pos);
 				Vec3f rot = add ? f.getRotation().sub(p.rotation) : f.getRotation().add(p.rotation);
 				ab.updateValueOp(f, f.getPosition(), pos, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, FrameData::setPos, v -> {});
 				ab.updateValueOp(f, f.getRotation(), rot, 0, 360, true, FrameData::setRot, v -> {});

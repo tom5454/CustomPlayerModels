@@ -138,6 +138,7 @@ public class PlayerData {
 				if (s != null) {
 					Log.debug("Scaling " + e.getKey() + " " + oldV + " -> " + newV);
 					s.applyScaling(player, newV);
+					scale.put(e.getKey(), newV);
 				}
 			}
 			if(blocked != null && newV != selNewV && selNewV != 0) {

@@ -32,6 +32,7 @@ Use the `meta.cpm.embedLocale` tag and enter your language locale.
 Check if your language is already present!  
 Start with the `start` folder from this folder, copy and rename it to your locale.  
 The locale name must follow github's naming system. Example: `en-US`  
+[Markdown Cheatsheet](https://github.com/tom5454/CustomPlayerModels/wiki/CPMMarkdownCheatsheet)  
 
 Don't change any Markdown links `[...](...)`, the correct localized link will be inserted by the page preprocessor.  
 When translating headers (`# ...`), please keep the original title inbetween `{...}`.  

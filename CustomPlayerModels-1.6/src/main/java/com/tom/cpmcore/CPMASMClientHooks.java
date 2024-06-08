@@ -88,6 +88,10 @@ public class CPMASMClientHooks {
 		RetroGL.color4f(r, g, b, a);
 	}
 
+	public static void glColor3f(float r, float g, float b) {
+		RetroGL.color4f(r, g, b, 1);
+	}
+
 	public static void prePlayerRender() {
 		RetroGL.color4f(1, 1, 1, 1);
 		RetroGL.renderCallLoc = 0;

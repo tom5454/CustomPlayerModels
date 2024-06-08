@@ -98,14 +98,15 @@ public class Image {
 	}
 
 	public void draw(Image i, int xs, int ys, int w, int h) {
-		for(int y = ys;y<h;y++) {
-			for(int x = xs;x<w;x++) {
+		for (int y = 0;y<h;y++) {
+			int yp = (y + ys) * w;
+			for (int x = 0;x<w;x++) {
 				float fx = x / (float) w;
 				float fy = y / (float) h;
-				dataSet(data, y * w + x, 0);
+				dataSet(data, yp + x + xs, 0);
 				int sx = Math.min((int) (fx * i.getWidth()), i.getWidth()-1);
 				int sy = Math.min((int) (fy * i.getHeight()), i.getHeight()-1);
-				data.setAt(y * w + x, i.data.getAt(sy * i.w + sx));
+				data.setAt(yp + x + xs, i.data.getAt(sy * i.w + sx));
 			}
 		}
 	}

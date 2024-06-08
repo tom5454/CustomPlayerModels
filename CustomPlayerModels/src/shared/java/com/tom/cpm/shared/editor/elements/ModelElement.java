@@ -420,14 +420,14 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 					if(faceUV == null) {
 						editor.setSingleTex.accept(this.singleTex);
 						editor.setExtrudeEffect.accept(this.extrude);
+						editor.setPerFaceUV.accept(extrude || singleTex ? null : false);
 					} else {
 						editor.setFaceRot.accept(faceUV.getRot(editor.perfaceFaceDir.get()));
 						editor.setFaceUVs.accept(faceUV.getVec(editor.perfaceFaceDir.get()));
 						editor.setAutoUV.accept(faceUV.isAutoUV(editor.perfaceFaceDir.get()));
 						editor.setSingleTex.accept(null);
+						editor.setPerFaceUV.accept(true);
 					}
-					if(!singleTex)editor.setPerFaceUV.accept(this.faceUV != null);
-					else editor.setPerFaceUV.accept(null);
 				}
 				editor.updateName.accept(this.name);
 			}
@@ -481,7 +481,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	@Override
 	public void setMCScale(float value) {
-		editor.action("set", "label.cpm.mcScale").updateValueOp(this, mcScale, value, -7f, 7f, (a, b) -> a.mcScale = b, editor.setMCScale).onAction(this::markDirty).execute();
+		editor.action("set", "label.cpm.mcScale").updateValueOp(this, mcScale, value, (float) -Vec3f.MAX_POS, (float) Vec3f.MAX_POS, (a, b) -> a.mcScale = b, editor.setMCScale).onAction(this::markDirty).execute();
 	}
 
 	@Override
@@ -517,17 +517,27 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			break;
 
 		case SINGLE_TEX:
-			editor.action("switch", "label.cpm.singleTex").updateValueOp(this, this.singleTex, !this.singleTex, (a, b) -> a.singleTex = b, editor.setSingleTex).onAction(this::markDirty).execute();
+			if (faceUV == null)
+				editor.action("switch", "label.cpm.singleTex").
+				updateValueOp(this, this.singleTex, !this.singleTex, (a, b) -> a.singleTex = b, editor.setSingleTex).
+				updateValueOp(this, this.extrude, false, (a, b) -> a.extrude = b, editor.setExtrudeEffect).
+				onAction(this::markDirty).execute();
 			break;
 
 		case EXTRUDE:
-			editor.action("switch", "label.cpm.extrude_effect").updateValueOp(this, this.extrude, !this.extrude, (a, b) -> a.extrude = b, editor.setExtrudeEffect).onAction(this::markDirty).execute();
+			if (faceUV == null)
+				editor.action("switch", "label.cpm.extrude_effect").
+				updateValueOp(this, this.extrude, !this.extrude, (a, b) -> a.extrude = b, editor.setExtrudeEffect).
+				updateValueOp(this, this.singleTex, false, (a, b) -> a.singleTex = b, editor.setSingleTex).
+				onAction(this::markDirty).execute();
 			break;
 
 		case PER_FACE_UV:
 			editor.action("switch", "label.cpm.perfaceUV").updateValueOp(this, this.texture, true, (a, b) -> a.texture = b).
 			update(editor.setModePanel, ModeDisplayType.TEX_FACE).
 			updateValueOp(this, this.faceUV, faceUV == null ? new PerFaceUV(this) : null, (a, b) -> a.faceUV = b, v -> editor.setPerFaceUV.accept(v != null)).
+			updateValueOp(this, this.singleTex, false, (a, b) -> a.singleTex = b, editor.setSingleTex).
+			updateValueOp(this, this.extrude, false, (a, b) -> a.extrude = b, editor.setExtrudeEffect).
 			onAction(this::markDirty).execute();
 			editor.updateGui();
 			break;

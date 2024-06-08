@@ -373,13 +373,13 @@ public class CPMTransformerService {
 								}
 							}
 						}
-					} else if(spc && checkMethod(method, mth4)) {
-						LOG.info("CPM SPC Hook: Found runTick");
+					} else if(checkMethod(method, mth4)) {
+						LOG.info("CPM Tick Hook: Found runTick");
 
 						int i = 0;
 						for (ListIterator<AbstractInsnNode> it = method.instructions.iterator(); it.hasNext(); ) {
 							AbstractInsnNode insnNode = it.next();
-							if (insnNode instanceof MethodInsnNode && checkMethod((MethodInsnNode) insnNode, mth5) && i++ < 2) {
+							if (spc && insnNode instanceof MethodInsnNode && checkMethod((MethodInsnNode) insnNode, mth5) && i++ < 2) {
 								LOG.info("CPM SPC Hook: Found isMultiplayerWorld " + i);
 								MethodInsnNode mn = (MethodInsnNode) insnNode;
 								mn.owner = HOOKS_CLASS;
@@ -387,6 +387,9 @@ public class CPMTransformerService {
 								mn.desc = "(Lnet/minecraft/client/Minecraft;)Z";
 								mn.setOpcode(Opcodes.INVOKESTATIC);
 								LOG.info("CPM SPC Hook: injected " + i);
+							} else if (insnNode.getOpcode() == Opcodes.RETURN) {
+								method.instructions.insertBefore(insnNode, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "clientTickEnd", "()V"));
+								LOG.info("CPM Tick Hook: injected");
 							}
 						}
 					} else if (spc && checkMethod(method, mth6)) {

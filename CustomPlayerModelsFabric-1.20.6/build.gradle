@@ -1,0 +1,144 @@
+plugins {
+	id 'fabric-loom' version '1.6-SNAPSHOT'
+	id 'maven-publish'
+}
+
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
+
+archivesBaseName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
+
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+
+repositories {
+	maven { url 'https://jitpack.io' }
+	maven { url "https://maven.terraformersmc.com/releases/"}
+	maven {
+        url 'https://www.cursemaven.com'
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+def useLib = System.getProperty("useLib")
+
+dependencies {
+	// To change the versions see the gradle.properties file
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// Fabric API. This is technically optional, but you probably want it anyway.
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	
+	modImplementation("com.terraformersmc:modmenu:10.0.0-beta.1") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+	
+	modImplementation ('com.github.Virtuoel:Pehkui:3.8.1') {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+	
+	compileOnly files("../CustomPlayerModels-1.20.6/stubs/of.jar")
+	
+	if (useLib) {
+		modCompileOnly('maven.modrinth:sodium:mc1.20.5-0.5.8')
+    	modCompileOnly('maven.modrinth:iris:1.7.0+1.20.5')
+    	//modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.9-fabric')//1.20.4 fallback
+    	modCompileOnly('maven.modrinth:first-person-model:51Nzrb3j')//1.20.4 fallback
+	} else {
+		compileOnly files("../CustomPlayerModels-1.20.6/stubs/iris.jar")
+		//compileOnly files("../CustomPlayerModels-1.20.6/stubs/vc.jar")
+		compileOnly files("../CustomPlayerModels-1.20.6/stubs/fpm.jar")
+	}
+	
+    modCompileOnly('maven.modrinth:vivecraft:1.20.6-1.1.9-b1-fabric')
+    implementation "com.electronwill.night-config:core:3.6.3"
+    implementation "com.electronwill.night-config:toml:3.6.3"
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows")
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/cpm.accesswidener")
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "../CustomPlayerModels/src/shared/java"
+			srcDir "../CustomPlayerModels-1.20.6/src/platform-shared/java"
+			srcDir "src/rawmc-shared/java"
+		}
+		resources {
+			srcDir "../CustomPlayerModels/src/shared/resources"
+			srcDir "../CustomPlayerModels-1.20.6/src/platform-shared/resources"
+			srcDir "src/rawmc-shared/resources"
+			exclude "**/*.lang"
+		}
+	}
+}
+
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
+	it.options.release = 17
+}
+
+java {
+	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+	// if it is present.
+	// If you remove this line, sources will not be generated.
+	withSourcesJar()
+}
+
+jar {
+	from("LICENSE") {
+		rename { "${it}_${project.archivesBaseName}"}
+	}
+}
+
+// configure the maven publication
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			// add all the jars that should be included when publishing to maven
+			artifact(remapJar) {
+				builtBy remapJar
+			}
+			artifact(sourcesJar) {
+				builtBy remapSourcesJar
+			}
+		}
+	}
+
+	// select the repositories you want to publish to
+	repositories {
+		// uncomment to publish to the local maven
+		// mavenLocal()
+	}
+}

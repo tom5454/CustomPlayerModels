@@ -104,11 +104,13 @@ public class EditorGui extends Frame {
 		String last = ModConfig.getCommonConfig().getString(ConfigKeys.EDITOR_LAST_VERSION, null);
 		if(last == null)showFirstStart = true;
 		else if(!MinecraftObjectHolder.DEBUGGING) {
-			ComparableVersion l = new ComparableVersion(last);
-			ComparableVersion c = new ComparableVersion(MinecraftCommonAccess.get().getModVersion());
-			if(c.compareTo(l) > 0)showChangelog = last;
-			else {
-				showNewVersionPopup = MinecraftCommonAccess.get().getVersionCheck().isOutdated();
+			if (ModConfig.getCommonConfig().getBoolean(ConfigKeys.UPDATE_CHECKER, true)) {
+				ComparableVersion l = new ComparableVersion(last);
+				ComparableVersion c = new ComparableVersion(MinecraftCommonAccess.get().getModVersion());
+				if(c.compareTo(l) > 0)showChangelog = last;
+				else {
+					showNewVersionPopup = MinecraftCommonAccess.get().getVersionCheck().isOutdated();
+				}
 			}
 		}
 		ModConfig.getCommonConfig().setString(ConfigKeys.EDITOR_LAST_VERSION, MinecraftCommonAccess.get().getModVersion());
@@ -572,7 +574,9 @@ public class EditorGui extends Frame {
 
 		pp.addButton(gui.i18nFormat("label.cpm.wiki.title"), () -> openPopup(new WikiBrowserPopup(gui)));
 
-		pp.addButton(gui.i18nFormat("label.cpm.changelog.title"), () -> openPopup(new ChangelogPopup(gui, null)));
+		if (ModConfig.getCommonConfig().getBoolean(ConfigKeys.UPDATE_CHECKER, true)) {
+			pp.addButton(gui.i18nFormat("label.cpm.changelog.title"), () -> openPopup(new ChangelogPopup(gui, null)));
+		}
 
 		MinecraftClientAccess.get().populatePlatformSettings("editPopup", pp);
 	}
@@ -875,6 +879,7 @@ public class EditorGui extends Frame {
 		getKeybindHandler().registerKeybind(Keybinds.FIND_ELEMENT, () -> {
 			if (!hasPopupOpen())openPopup(new PartSearchPopup(gui, editor));
 		});
+		getKeybindHandler().registerKeybind(Keybinds.RELOAD_TEXTURE, editor::reloadSkin);
 		if(event.matches(gui.getKeyCodes().KEY_F5)) {
 			editor.refreshCaches();
 			event.consume();

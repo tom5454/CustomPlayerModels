@@ -137,9 +137,19 @@ public class RetroGL implements RetroGLAccess<ResourceLocation> {
 
 	}
 
+	private static Vec4f colorHold;
 	public static Vec4f getColor() {
+		if (colorHold != null)return colorHold;
 		GlStateManager.Color c = GlStateManager.colorState;
 		return new Vec4f(val(c.red), val(c.green), val(c.blue), val(c.alpha));
+	}
+
+	public static void colorHold() {
+		colorHold = getColor();
+	}
+
+	public static void colorHoldEnd() {
+		colorHold = null;
 	}
 
 	private static float val(float color) {
