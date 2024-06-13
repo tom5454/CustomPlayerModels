@@ -201,7 +201,7 @@ public class CPMTransformerService implements IClassTransformer {
 							AbstractInsnNode insnNode = it.next();
 							if(insnNode instanceof MethodInsnNode) {
 								MethodInsnNode mn = (MethodInsnNode) insnNode;
-								if((mn.name.equals("a") && mn.desc.equals("(Lpr;FFFFFF)V")) || mn.name.equals("render")) {
+								if((mn.name.equals("a") && mn.desc.equals("(Lpk;FFFFFF)V")) || mn.name.equals("render")) {
 									LOG.info("CPM Armor Hook/LayerGlint: Found render call");
 									Type[] argsD = Type.getArgumentTypes(mn.desc);
 									Type[] args = new Type[argsD.length + 1];

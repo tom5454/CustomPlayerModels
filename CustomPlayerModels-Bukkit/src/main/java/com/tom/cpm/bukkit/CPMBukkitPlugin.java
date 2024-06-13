@@ -23,7 +23,7 @@ import com.tom.cpl.util.ILogger;
 import com.tom.cpm.api.CPMApiManager;
 import com.tom.cpm.api.CPMPluginRegistry;
 import com.tom.cpm.api.ICPMPlugin;
-import com.tom.cpm.bukkit.Commands.CommandHandler;
+import com.tom.cpm.bukkit.Commands.FallbackCommandHandler;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.MinecraftServerAccess;
@@ -37,6 +37,7 @@ public class CPMBukkitPlugin extends JavaPlugin {
 	private BukkitLogger log;
 	private CommandHandler cmd;
 	private CPMApiManager api;
+	public TextRemapper<String> stringMapper;
 
 	@Override
 	public void onDisable() {
@@ -83,7 +84,13 @@ public class CPMBukkitPlugin extends JavaPlugin {
 				api.commonApi().callInit(plugin);
 			}
 		}, this, ServicePriority.Normal);
-		cmd = new CommandHandler(this);
+		stringMapper = TextRemapper.stringMapper(i18n::format);
+		try {
+			cmd = CommandAPICommands.init(this);
+		} catch (Throwable e) {
+			cmd = new FallbackCommandHandler(this);
+			log.warn("Command API not found, using fallback command system.");
+		}
 		MinecraftObjectHolder.setCommonObject(new MinecraftCommonAccess() {
 
 			@Override
@@ -107,8 +114,8 @@ public class CPMBukkitPlugin extends JavaPlugin {
 			}
 
 			@Override
-			public TextRemapper<String> getTextRemapper() {
-				return TextRemapper.stringMapper(i18n::format);
+			public TextRemapper<?> getTextRemapper() {
+				return cmd.remapper();
 			}
 
 			@Override

@@ -74,12 +74,12 @@ public class Panel3dImpl extends Panel3dNative {
 	@Override
 	public Image takeScreenshot(Vec2i size) {
 		GuiImpl gui = panel.getGui().getNativeGui();
-		float multiplierX = mc.render.renderWidth / (float)gui.width;
-		float multiplierY = mc.render.renderHeight / (float)gui.height;
+		float multiplierX = this.mc.resolution.width / (float)gui.width;
+		float multiplierY = this.mc.resolution.height / (float)gui.height;
 		int width = (int) (multiplierX * size.x);
 		int height = (int) (multiplierY * size.y);
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(width * height * 3);
-		GL11.glReadPixels((int) (multiplierX * renderPos.x), mc.render.renderHeight - height - ((int) (multiplierY * renderPos.y)), width, height, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
+		GL11.glReadPixels((int) (multiplierX * renderPos.x), this.mc.resolution.height - height - ((int) (multiplierY * renderPos.y)), width, height, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
 		Image img = new Image(width, height);
 		for(int y = 0;y<height;y++) {
 			for(int x = 0;x<width;x++) {

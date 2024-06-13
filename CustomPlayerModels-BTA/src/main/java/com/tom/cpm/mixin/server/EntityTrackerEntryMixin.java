@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.core.entity.Entity;
-import net.minecraft.core.entity.EntityTrackerEntry;
 import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.server.entity.EntityTrackerEntry;
 import net.minecraft.server.entity.player.EntityPlayerMP;
 import net.minecraft.server.net.handler.NetServerHandler;
 

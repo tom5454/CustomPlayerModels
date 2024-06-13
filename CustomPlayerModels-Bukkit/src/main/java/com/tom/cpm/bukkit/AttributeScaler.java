@@ -1,5 +1,6 @@
 package com.tom.cpm.bukkit;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +42,13 @@ public class AttributeScaler implements ScalerInterface<Player, List<Attribute>>
 			case FLIGHT_SPEED: return Collections.singletonList(Attribute.GENERIC_FLYING_SPEED);
 			case MOB_VISIBILITY: return Collections.singletonList(Attribute.GENERIC_FOLLOW_RANGE);
 			case MOTION: return Collections.singletonList(Attribute.GENERIC_MOVEMENT_SPEED);
+			case ENTITY: return Collections.singletonList(Attribute.GENERIC_SCALE);
+			case REACH: return Arrays.asList(Attribute.PLAYER_BLOCK_INTERACTION_RANGE, Attribute.PLAYER_ENTITY_INTERACTION_RANGE);
+			case MINING_SPEED: return Collections.singletonList(Attribute.PLAYER_BLOCK_BREAK_SPEED);
+			case SAFE_FALL_DISTANCE: return Collections.singletonList(Attribute.GENERIC_SAFE_FALL_DISTANCE);
+			case JUMP_HEIGHT: return Collections.singletonList(Attribute.GENERIC_JUMP_STRENGTH);
 			case KNOCKBACK_RESIST: return Collections.singletonList(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+			case STEP_HEIGHT: return Collections.singletonList(Attribute.GENERIC_STEP_HEIGHT);
 			default: return null;
 			}
 		} catch (Throwable e) {

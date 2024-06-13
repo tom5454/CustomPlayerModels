@@ -11,11 +11,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import com.tom.cpl.command.StringCommandHandler;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpl.text.IText;
+import com.tom.cpl.text.TextRemapper;
+import com.tom.cpm.bukkit.text.BukkitText;
+import com.tom.cpm.bukkit.text.BukkitText.Simple;
 
 public class Commands {
 
@@ -28,21 +30,24 @@ public class Commands {
 		}
 	}
 
-	public static class CommandHandler extends StringCommandHandler<Void, CommandSender, CommandException> {
+	public static class FallbackCommandHandler extends StringCommandHandler<Void, CommandSender, CommandException> implements CommandHandler {
 		private Map<String, CommandImpl> commands;
+		private CPMBukkitPlugin plugin;
 
-		private CommandHandler(JavaPlugin pl, Map<String, CommandImpl> commands) {
+		private FallbackCommandHandler(CPMBukkitPlugin pl, Map<String, CommandImpl> commands) {
 			super(i -> {
 				commands.put(i.getName(), i);
 				pl.getCommand(i.getName()).setExecutor(pl);
 			}, false);
+			this.plugin = pl;
 			this.commands = commands;
 		}
 
-		public CommandHandler(JavaPlugin pl) {
+		public FallbackCommandHandler(CPMBukkitPlugin pl) {
 			this(pl, new HashMap<>());
 		}
 
+		@Override
 		public boolean onCommand(CommandSender s, Command cmdIn, String name, String[] args) {
 			try {
 				CommandImpl cmd = commands.get(cmdIn.getName());
@@ -50,12 +55,13 @@ public class Commands {
 					cmd.execute(null, s, args);
 				}
 			} catch (CommandException e) {
-				s.sendMessage(ChatColor.RED + e.msg.<String>remap());
+				s.sendMessage(ChatColor.RED + e.msg.<BukkitText>remap().toString());
 				return false;
 			}
 			return true;
 		}
 
+		@Override
 		public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 			CommandImpl cmd = commands.get(command.getName());
 			if(cmd != null) {
@@ -71,7 +77,7 @@ public class Commands {
 
 		@Override
 		public void sendSuccess(CommandSender sender, IText text) {
-			sender.sendMessage(text.<String>remap());
+			text.<BukkitText>remap().sendTo(sender);
 		}
 
 		@Override
@@ -98,6 +104,11 @@ public class Commands {
 		public CommandException checkExc(Exception exc) {
 			if(exc instanceof CommandException)return (CommandException) exc;
 			return new CommandException(new FormatText("commands.generic.exception"));
+		}
+
+		@Override
+		public TextRemapper<Simple> remapper() {
+			return BukkitText.simple(plugin);
 		}
 	}
 }
