@@ -5,7 +5,6 @@ import net.minecraft.server.level.ServerPlayer;
 import com.tom.cpm.shared.network.NetHandler.ScalerInterface;
 import com.tom.cpm.shared.util.ScalingOptions;
 
-import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleType;
 import virtuoel.pehkui.api.ScaleTypes;
 
@@ -13,7 +12,7 @@ public class PehkuiInterface implements ScalerInterface<ServerPlayer, ScaleType>
 
 	@Override
 	public void setScale(ScaleType key, ServerPlayer player, float newScale) {
-		ScaleData scaleData = key.getScaleData(player);
+		var scaleData = key.getScaleData(player);
 		scaleData.setTargetScale(newScale);
 		scaleData.setScale(newScale);
 		scaleData.setScale(newScale);
@@ -74,7 +73,7 @@ public class PehkuiInterface implements ScalerInterface<ServerPlayer, ScaleType>
 			return null;
 		}
 	}
-	
+
 	@Override
 	public String getMethodName() {
 		return PEHKUI;

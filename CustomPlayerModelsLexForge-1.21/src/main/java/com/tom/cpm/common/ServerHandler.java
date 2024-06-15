@@ -5,15 +5,16 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import com.mojang.brigadier.CommandDispatcher;
 
@@ -27,9 +28,6 @@ public class ServerHandler extends ServerHandlerBase {
 		netHandler = init();
 		netHandler.setGetOnlinePlayers(() -> ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers());
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
-		if(ModList.get().isLoaded("pehkui")) {
-			netHandler.addScaler(new PehkuiInterface());
-		}
 	}
 
 	@SubscribeEvent
@@ -62,8 +60,10 @@ public class ServerHandler extends ServerHandlerBase {
 	}
 
 	@SubscribeEvent
-	public void onTick(ServerTickEvent.Post evt) {
-		netHandler.tick();
+	public void onTick(ServerTickEvent evt) {
+		if(evt.phase == Phase.END) {
+			netHandler.tick();
+		}
 	}
 
 	@SubscribeEvent

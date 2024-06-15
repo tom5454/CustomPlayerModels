@@ -11,9 +11,12 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type;
 
 public class NetworkInit {
 
-	public static void register(PacketRegistry toClient, PacketRegistry toServer) {
-		ServerHandler.netHandler.registerIn(id -> makeCodec(id, toServer));
+	public static void registerToClient(PacketRegistry toClient) {
 		ServerHandler.netHandler.registerOut(id -> makeCodec(id, toClient));
+	}
+
+	public static void registerToServer(PacketRegistry toServer) {
+		ServerHandler.netHandler.registerIn(id -> makeCodec(id, toServer));
 	}
 
 	public static void register(PacketRegistry toClient, PacketRegistry toServer, PacketRegistry bidirectional) {
@@ -21,14 +24,15 @@ public class NetworkInit {
 		Map<CustomPacketPayload.Type<ByteArrayPayload>, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload>> se = new HashMap<>();
 		Map<CustomPacketPayload.Type<ByteArrayPayload>, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload>> bi = new HashMap<>();
 
-		register((a, b) -> {
+		registerToClient((a, b) -> {
 			if (se.containsKey(a)) {
 				se.remove(a);
 				bi.put(a, b);
 			} else {
 				cl.put(a, b);
 			}
-		}, (a, b) -> {
+		});
+		registerToServer((a, b) -> {
 			if (cl.containsKey(a)) {
 				cl.remove(a);
 				bi.put(a, b);

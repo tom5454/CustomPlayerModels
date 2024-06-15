@@ -37,6 +37,7 @@ base {
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+def useLib = System.getProperty("useLib")
 
 minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
 //minecraft.accessTransformers.entry public net.minecraft.client.Minecraft textureManager # textureManager
@@ -94,7 +95,6 @@ sourceSets {
 		java {
 			srcDir "../CustomPlayerModels/src/shared/java"
 			srcDir "src/platform-shared/java"
-			exclude "com/tom/cpm/common/PehkuiInterface.java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
@@ -134,10 +134,16 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     compileOnly files("stubs/of.jar")
-    compileOnly files("stubs/vc.jar")
     compileOnly files("stubs/iris.jar")
     compileOnly files("stubs/fpm.jar")
-    //compileOnly 'curse.maven:vivecraft-667903:4887905'
+    
+    if (useLib) {
+    	compileOnly 'maven.modrinth:vivecraft:1.20.6-1.1.9-b1-neoforge'
+    	compileOnly 'com.github.Virtuoel:Pehkui:3.8.2-1.20.6-neoforge'
+    } else {
+    	compileOnly files("stubs/pehkui.jar")
+    	compileOnly files("stubs/vc.jar")
+    }
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
