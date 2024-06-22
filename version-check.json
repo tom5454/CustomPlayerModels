@@ -2,23 +2,23 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
   "homepage-fabric": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric",
   "promos": {
-    "1.12.2-latest": "0.6.17a",
+    "1.12.2-latest": "0.6.17b",
     "1.16.4-latest": "0.4.3a",
     "1.16.5-latest": "0.6.17a",
-    "1.8.9-latest": "0.6.17a",
+    "1.8.9-latest": "0.6.17b",
     "1.7.10-latest": "0.6.17a",
     "1.15.2-latest": "0.6.17a",
     "1.16.4-fabric-latest": "0.4.3a",
     "1.16.5-fabric-latest": "0.6.17a",
     "1.17-fabric-latest": "0.4.3a",
-    "bukkit-latest": "0.6.17a",
+    "bukkit-latest": "0.6.17b",
     "1.17.1-fabric-latest": "0.6.17a",
     "1.17.1-latest": "0.6.17a",
     "1.18-latest": "0.4.0a",
     "1.18.1-latest": "0.4.0a",
     "1.18-fabric-latest": "0.4.1a",
     "1.18.1-fabric-latest": "0.4.1a",
-    "1.10.2-latest": "0.6.17a",
+    "1.10.2-latest": "0.6.17b",
     "1.18.2-latest": "0.6.17a",
     "1.18.2-fabric-latest": "0.6.17a",
     "1.19-latest": "0.6.17a",
@@ -53,12 +53,13 @@
     "1.4.7-latest": "0.6.17a",
     "1.5.2-latest": "0.6.17a",
     "1.6.4-latest": "0.6.17a",
-    "b1.7.3-bta-babric-latest": "0.6.17a",
+    "b1.7.3-bta-babric-latest": "0.6.17b",
     "1.20.5-latest": "0.6.16c",
     "1.20.4-quilt-latest": "0.6.17a",
     "1.20.6-latest": "0.6.17a",
     "1.20.6-fabric-latest": "0.6.17a",
-    "1.21-fabric-latest": "0.6.17a"
+    "1.21-fabric-latest": "0.6.17c",
+    "1.21-latest": "0.6.17e"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -128,7 +129,8 @@
     "0.6.16b": "Fixed value layers bugging out in some cases",
     "0.6.16c": "NeoForge, Fabric 1.20.5 port \nQuilt 1.20.4 port\n\nFixed SSL exception on old Minecraft versions with old Java installations\nFixed mixin crash on 1.16.5 fabric\nFixed Iris 1.7 crashing on Quilt (Closes #599)",
     "0.6.16d": "24w21b port\nMinecraft Forge 1.20.6 port\nFixed in editor chat on 1.20.6\nFixed armor in 1.20.6\nFixed tinted armor on 1.4.7-1.12 (Closes #604)\nFixed 1.4.7 and 1.5.2 crashing on startup",
-    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube"
+    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube",
+    "0.6.17b": "1.21 port\nAdded 1.20.6 scaling support to bukkit plugin\nAdded CommandAPI support on Bukkit plugin, fixing issues with the cpm command on Bukkit\nUpdated to BTA 7.2-pre1\nFixed enchanted armor on 1.8.9-1.12.2 (Closes #617)\nFixed bukkit plugin not working on old versions (1.8)"
   },
   "1.16.4": {
     "0.0.5a": "First release",
@@ -477,7 +479,8 @@
     "0.6.16b": "Fixed value layers bugging out in some cases",
     "0.6.16c": "NeoForge, Fabric 1.20.5 port \nQuilt 1.20.4 port\n\nFixed SSL exception on old Minecraft versions with old Java installations\nFixed mixin crash on 1.16.5 fabric\nFixed Iris 1.7 crashing on Quilt (Closes #599)",
     "0.6.16d": "24w21b port\nMinecraft Forge 1.20.6 port\nFixed in editor chat on 1.20.6\nFixed armor in 1.20.6\nFixed tinted armor on 1.4.7-1.12 (Closes #604)\nFixed 1.4.7 and 1.5.2 crashing on startup",
-    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube"
+    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube",
+    "0.6.17b": "1.21 port\nAdded 1.20.6 scaling support to bukkit plugin\nAdded CommandAPI support on Bukkit plugin, fixing issues with the cpm command on Bukkit\nUpdated to BTA 7.2-pre1\nFixed enchanted armor on 1.8.9-1.12.2 (Closes #617)\nFixed bukkit plugin not working on old versions (1.8)"
   },
   "1.7.10": {
     "0.0.5a": "First release",
@@ -639,7 +642,8 @@
     "0.6.15a": "Added /cpmclient command\nSubcommands:\n- profile \u003cname\u003e: open the social settings menu for player\n- safety: opens the safety settings\n- animate \u003canimation\u003e [value]: play animation\n- set_model \u003cmodel file\u003e: change your model\n- reset_model: remove your selected model\nAdded Safe Fall Distance Scaling (1.20.5+)\nAdded attack speed attribute scaling\nEditor QoL:\n- Added Export UV Map under Edit/Tools\n- Editable display names for roots\n- Improved part highlights\n- Set Part Name Color\n- Multi-select parts with animation editor\nUpdated Spanish and Chinese translations (#563, #559)\nTranslatable wiki pages\n24w10a port\n\nFixed dragging and dropping .cpmmodels while inside the Models menu on the Minecraft window not working in some cases.\nFixed value layer default value showing negative (Closes #553)\nFixed model elements getting stuck inside the animation system after delete (Closes #536)\nFixed scaling staying stuck on model disable/switch (Closes #546)\nFixed first person hand rotations not wrapping around correctly (Closes #574)\nFixed initial part pose not copying over (Closes #575)\nFixed fill UV not working with per-face uv\nFixed parts tree scrolling to the bottom in some cases",
     "0.6.16a": "Backports:\n- b1.7.3 port (StationAPI required)\n- 1.2.5 port\n- 1.4.7 port\n- 1.5.2 port\n- 1.6.4 port\nPorted to 24w13a and 24w14potato\nAdded Iris 1.7 beta compatibility to 1.20.1 and 1.20.4 (Fixes the crash)\nAdded linear interpolation to value layer updates\nUpdated Simplified Chinese translation (#586)\n\nFixed first person hand flashing red on 1.7.10 (Closes #583)\nFixed crash with RenderPlayer API on 1.12.2 (Closes #566)\nFixed translucent textures showing solid on 1.7.10 and 1.8.9 (#401)\nFixed crash with Optifine 1.20.4 (Closes #585)\nFixed Copy Transform tooltip reports incorrect toggles (Closes #587)",
     "0.6.16b": "Fixed value layers bugging out in some cases",
-    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube"
+    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube",
+    "0.6.17b": "1.21 port\nAdded 1.20.6 scaling support to bukkit plugin\nAdded CommandAPI support on Bukkit plugin, fixing issues with the cpm command on Bukkit\nUpdated to BTA 7.2-pre1\nFixed enchanted armor on 1.8.9-1.12.2 (Closes #617)\nFixed bukkit plugin not working on old versions (1.8)"
   },
   "1.17.1-fabric": {
     "0.0.0": "1.17-fabric",
@@ -789,7 +793,8 @@
     "0.6.16b": "Fixed value layers bugging out in some cases",
     "0.6.16c": "NeoForge, Fabric 1.20.5 port \nQuilt 1.20.4 port\n\nFixed SSL exception on old Minecraft versions with old Java installations\nFixed mixin crash on 1.16.5 fabric\nFixed Iris 1.7 crashing on Quilt (Closes #599)",
     "0.6.16d": "24w21b port\nMinecraft Forge 1.20.6 port\nFixed in editor chat on 1.20.6\nFixed armor in 1.20.6\nFixed tinted armor on 1.4.7-1.12 (Closes #604)\nFixed 1.4.7 and 1.5.2 crashing on startup",
-    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube"
+    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube",
+    "0.6.17b": "1.21 port\nAdded 1.20.6 scaling support to bukkit plugin\nAdded CommandAPI support on Bukkit plugin, fixing issues with the cpm command on Bukkit\nUpdated to BTA 7.2-pre1\nFixed enchanted armor on 1.8.9-1.12.2 (Closes #617)\nFixed bukkit plugin not working on old versions (1.8)"
   },
   "1.18.2": {
     "0.0.0": "1.18.1",
@@ -1452,7 +1457,8 @@
     "0.6.16a": "1.20.5-pre1 port\nBTA-Babric port\nAdded Pehkui support on 1.20.4 NeoForge\n\nFixed fullbright entities on b1.7.3 (Closes #589)",
     "0.6.16b": "Added dedicated server support for BTA, b1.7.3\n\nFixed NeoForge dedicated server not working (Closes #596)",
     "0.6.16c": "NeoForge, Fabric 1.20.5 port \nQuilt 1.20.4 port\n\nFixed SSL exception on old Minecraft versions with old Java installations\nFixed mixin crash on 1.16.5 fabric\nFixed Iris 1.7 crashing on Quilt (Closes #599)",
-    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube"
+    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube",
+    "0.6.17b": "1.21 port\nAdded 1.20.6 scaling support to bukkit plugin\nAdded CommandAPI support on Bukkit plugin, fixing issues with the cpm command on Bukkit\nUpdated to BTA 7.2-pre1\nFixed enchanted armor on 1.8.9-1.12.2 (Closes #617)\nFixed bukkit plugin not working on old versions (1.8)"
   },
   "1.20.5": {
     "0.0.0": "1.20.4",
@@ -1480,6 +1486,14 @@
   "1.21-fabric": {
     "0.0.0": "1.20.6-fabric",
     "0.6.16a": "24w21b port\nMinecraft Forge 1.20.6 port\nFixed in editor chat on 1.20.6\nFixed armor in 1.20.6\nFixed tinted armor on 1.4.7-1.12 (Closes #604)\nFixed 1.4.7 and 1.5.2 crashing on startup",
-    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube"
+    "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube",
+    "0.6.17b": "1.21 port\nAdded 1.20.6 scaling support to bukkit plugin\nAdded CommandAPI support on Bukkit plugin, fixing issues with the cpm command on Bukkit\nUpdated to BTA 7.2-pre1\nFixed enchanted armor on 1.8.9-1.12.2 (Closes #617)\nFixed bukkit plugin not working on old versions (1.8)",
+    "0.6.17c": "Pehkui support on 1.21\nMinecraftForge 1.21 port"
+  },
+  "1.21": {
+    "0.0.0": "1.20.6",
+    "0.6.17d": "1.21 port\nAdded 1.20.6 scaling support to bukkit plugin\nAdded CommandAPI support on Bukkit plugin, fixing issues with the cpm command on Bukkit\nUpdated to BTA 7.2-pre1\nFixed enchanted armor on 1.8.9-1.12.2 (Closes #617)\nFixed bukkit plugin not working on old versions (1.8)",
+    "0.6.17e": "Pehkui support on 1.21\nMinecraftForge 1.21 port",
+    "0.6.17a": "Pehkui support on 1.21\nMinecraftForge 1.21 port"
   }
 }

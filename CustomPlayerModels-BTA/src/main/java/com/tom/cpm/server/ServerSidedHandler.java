@@ -7,10 +7,10 @@ import java.util.function.Consumer;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.entity.Entity;
-import net.minecraft.core.entity.EntityTrackerEntry;
 import net.minecraft.core.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.entity.EntityTracker;
+import net.minecraft.server.entity.EntityTrackerEntry;
 import net.minecraft.server.entity.player.EntityPlayerMP;
 import net.minecraft.server.world.WorldServer;
 

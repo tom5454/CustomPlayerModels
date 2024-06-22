@@ -41,7 +41,7 @@ public abstract class ClientNetworkHandlerMixin implements ClientNetworkImpl {
 	@Override
 	public Entity cpm$getEntityByID(int id) {
 		if (mc.thePlayer.id == id)return mc.thePlayer;
-		return worldClient.getEntityById(id);
+		return worldClient.getEntityFromId(id);
 	}
 
 	@Override

@@ -13,11 +13,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.render.EntityRenderDispatcher;
 import net.minecraft.client.render.FontRenderer;
-import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.entity.LivingRenderer;
 import net.minecraft.client.render.entity.PlayerRenderer;
 import net.minecraft.client.render.model.ModelBase;
 import net.minecraft.client.render.model.ModelBiped;
+import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.EntityLiving;
 import net.minecraft.core.entity.player.EntityPlayer;
@@ -78,7 +78,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 	public void postInit() {
 		KeyBindings.init();
 		RetroGL.init();
-		new Command(CommandHelper.Client::createCommand, true);
+		new Command(c -> CommandHelper.createClientCommand(__ -> c), true);
 	}
 
 	public void apiInit() {
@@ -254,20 +254,20 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		mc.onLogOut();
 	}
 
-	//Copy from PlayerEntityRenderer.method_827
+	//Copy from PlayerRenderer.renderSpecials
 	public static void renderCape(EntityPlayer playerIn, float partialTicks, ModelBiped model, ModelDefinition modelDefinition) {
 		GL11.glPushMatrix();
 		GL11.glTranslatef(0.0F, 0.0F, 0.125F);
 		float f5, f6, f7;
 		if(playerIn != null) {
-			double d3 = playerIn.field_20066_r
-					+ (playerIn.field_20063_u - playerIn.field_20066_r) * partialTicks
+			double d3 = playerIn.xdO
+					+ (playerIn.xd - playerIn.xdO) * partialTicks
 					- (playerIn.xo + (playerIn.x - playerIn.xo) * partialTicks);
-			double d4 = playerIn.field_20065_s
-					+ (playerIn.field_20062_v - playerIn.field_20065_s) * partialTicks
+			double d4 = playerIn.ydO
+					+ (playerIn.yd - playerIn.ydO) * partialTicks
 					- (playerIn.yo + (playerIn.y - playerIn.yo) * partialTicks);
-			double d0 = playerIn.field_20064_t
-					+ (playerIn.field_20061_w - playerIn.field_20064_t) * partialTicks
+			double d0 = playerIn.zd0
+					+ (playerIn.zd - playerIn.zd0) * partialTicks
 					- (playerIn.zo + (playerIn.z - playerIn.zo) * partialTicks);
 			float f4 = playerIn.prevRenderYawOffset + (playerIn.renderYawOffset - playerIn.prevRenderYawOffset) * partialTicks;
 

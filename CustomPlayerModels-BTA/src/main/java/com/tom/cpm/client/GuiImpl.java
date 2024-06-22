@@ -21,7 +21,7 @@ import net.minecraft.client.gui.GuiRenderItem;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.input.InputType;
-import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.client.util.debug.DebugRender;
 import net.minecraft.core.item.ItemStack;
 
@@ -243,9 +243,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 		if(i != 0) {
 			try {
-				int x = Mouse.getEventX() * this.width / this.mc.render.renderWidth;
-				int y = this.height - Mouse.getEventY() * this.height / this.mc.render.renderHeight - 1;
-				gui.mouseWheel(new MouseEvent(x, y, i));
+				gui.mouseWheel(new MouseEvent(mouseX, mouseY, i));
 			} catch (Throwable e) {
 				onGuiException("Error processing mouse event", e, false);
 			}
@@ -347,10 +345,10 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void setupCut() {
-		float multiplierX = mc.render.renderWidth / (float)width;
-		float multiplierY = mc.render.renderHeight / (float)height;
+		float multiplierX = this.mc.resolution.width / (float)width;
+		float multiplierY = this.mc.resolution.height / (float)height;
 		Box box = getContext().cutBox;
-		GL11.glScissor((int) (box.x * multiplierX), mc.render.renderHeight - (int) ((box.y + box.h) * multiplierY),
+		GL11.glScissor((int) (box.x * multiplierX), this.mc.resolution.height - (int) ((box.y + box.h) * multiplierY),
 				(int) (box.w * multiplierX), (int) (box.h * multiplierY));
 	}
 

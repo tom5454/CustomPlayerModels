@@ -104,7 +104,7 @@ dependencies {
 	// If you do not need Halplibe you can comment this line out or delete this line
 	modImplementation "com.github.Turnip-Labs:bta-halplibe:${project.halplibe_version}"
 
-	modImplementation "ModMenu:ModMenu:2.0.4"
+	modImplementation "ModMenu:ModMenu:2.0.6"
 
 	implementation "org.slf4j:slf4j-api:1.8.0-beta4"
 	implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"

@@ -18,6 +18,7 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.tom.cpm.bukkit.text.BukkitText;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.io.FastByteArrayInputStream;
@@ -30,6 +31,7 @@ public class Network implements PluginMessageListener, Listener {
 	private final CPMBukkitPlugin plugin;
 	public NetHandler<String, Player, Meta> netHandler;
 
+	@SuppressWarnings("deprecation")
 	public Network(CPMBukkitPlugin plugin) {
 		this.plugin = plugin;
 		try {
@@ -37,23 +39,34 @@ public class Network implements PluginMessageListener, Listener {
 			netHandler.setSendPacketDirect((pl, pck, dt) -> pl.owner.sendPluginMessage(plugin, pck, dt), this::sendToAllTrackingAndSelf);
 			netHandler.setGetPlayerUUID(Player::getUniqueId);
 			netHandler.setFindTracking((p, c) -> getPlayersWithin(p, 64, c));
-			netHandler.setSendChat((pl, msg) -> pl.sendMessage(msg.<String>remap()));
+			netHandler.setSendChat((pl, msg) -> msg.<BukkitText>remap().sendTo(pl));
 			netHandler.setExecutor(() -> Runnable::run);
 			netHandler.setGetNet(this::getMetadata);
 			netHandler.setGetPlayer(n -> n.owner);
 			netHandler.setGetPlayerId(Player::getEntityId);
 			netHandler.setGetOnlinePlayers(Bukkit::getOnlinePlayers);
-			netHandler.setKickPlayer((p, m) -> p.kickPlayer(m.remap()));
+			netHandler.setKickPlayer((p, m) -> p.kickPlayer(m.<Object>remap().toString()));
+			boolean hasAttributes = false;
+			try {
+				Attribute.values();
+				hasAttributes = true;
+			} catch (Throwable e) {
+			}
+			final boolean fhasAttributes = hasAttributes;
 			netHandler.setGetPlayerAnimGetters((t, u) -> {
 				u.updated = true;
 				u.creativeFlying = t.isFlying();
 				u.falling = t.getFallDistance();
-				u.health = (float) (t.getHealth() / t.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+				if (fhasAttributes) {
+					u.health = (float) (t.getHealth() / t.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+				} else {
+					u.health = (float) (t.getHealth() / t.getMaxHealth());
+				}
 				u.air = Math.max(t.getRemainingAir() / (float) t.getMaximumAir(), 0);
 				u.hunger = t.getFoodLevel() / 20f;
 				u.inMenu = t.getOpenInventory() != null;
 			});
-			netHandler.addScaler(new AttributeScaler());
+			if(fhasAttributes)netHandler.addScaler(new AttributeScaler());
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}

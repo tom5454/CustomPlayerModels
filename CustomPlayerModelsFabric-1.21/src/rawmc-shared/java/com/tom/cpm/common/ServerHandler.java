@@ -25,7 +25,7 @@ public class ServerHandler extends ServerHandlerBase {
 		netHandler.setGetOnlinePlayers(() -> getServer().getPlayerList().getPlayers());
 		netHandler.setExecutor(n -> n.server);
 		if(CustomPlayerModels.isModLoaded("pehkui")) {
-			//netHandler.setScaler(new PehkuiInterface());
+			netHandler.addScaler(new PehkuiInterface());
 		}
 	}
 

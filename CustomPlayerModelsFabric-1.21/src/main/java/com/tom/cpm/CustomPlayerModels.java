@@ -55,10 +55,11 @@ public class CustomPlayerModels extends CommonBase implements ModInitializer {
 		PlayPayloadHandler<ByteArrayPayload> h = (p, c) -> {
 			ServerHandler.netHandler.receiveServer(p.id(), new FastByteArrayInputStream(p.data()), (ServerNetH) c.player().connection);
 		};
-		NetworkInit.register((a, b) -> {
+		NetworkInit.registerToClient((a, b) -> {
 			PayloadTypeRegistry.playS2C().register(a, b);
 			clientPackets.add(a);
-		}, (a, b) -> {
+		});
+		NetworkInit.registerToServer((a, b) -> {
 			PayloadTypeRegistry.playC2S().register(a, b);
 			ServerPlayNetworking.registerGlobalReceiver(a, h);
 		});

@@ -62,7 +62,7 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 		log.info(api.getPluginStatus());
 		api.buildCommon().player(EntityPlayer.class).init();
 
-		new Command(CommandHelper.Core::createCommand, false);
+		new Command(CommandHelper::createCommand, false);
 	}
 
 	private ModConfigFile cfg;
