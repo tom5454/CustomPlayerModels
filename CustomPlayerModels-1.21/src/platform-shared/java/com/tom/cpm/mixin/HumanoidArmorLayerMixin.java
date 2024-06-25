@@ -4,10 +4,12 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Desc;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -52,6 +54,11 @@ public abstract class HumanoidArmorLayerMixin extends RenderLayer<LivingEntity, 
 	@Inject(at = @At("HEAD"), method = "renderModel(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I"
 			+ "Lnet/minecraft/client/model/HumanoidModel;ILnet/minecraft/resources/ResourceLocation;)V")
 	private void preRenderTexture(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, HumanoidModel model, int j, ResourceLocation resLoc, CallbackInfo cbi) {
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
+	}
+
+	@Inject(at = @At("HEAD"), target = @Desc(value = "renderModel", args = {PoseStack.class, MultiBufferSource.class, int.class, Model.class, int.class, ResourceLocation.class}), remap = false, require = 0, expect = 0)
+	private void preRenderTexture(PoseStack p_289664_, MultiBufferSource p_289689_, int p_289681_, net.minecraft.client.model.Model model, int color, ResourceLocation resLoc, CallbackInfo cbi) {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(resLoc, PlayerRenderManager.armor), model == innerModel ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 	}
 }

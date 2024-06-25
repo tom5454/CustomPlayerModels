@@ -52,6 +52,14 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 	private String skinType;
 
 	public PlayerProfile(GameProfile profile) {
+		if (profile.getProperties().isEmpty()) {
+			var conn = Minecraft.getInstance().getConnection();
+			if (conn != null) {
+				var info = conn.getPlayerInfo(profile.getId());
+				if(info != null)profile = info.getProfile();
+			}
+		}
+
 		this.profile = new GameProfile(profile.getId(), profile.getName());
 		cloneProperties(profile.getProperties(), this.profile.getProperties());
 
