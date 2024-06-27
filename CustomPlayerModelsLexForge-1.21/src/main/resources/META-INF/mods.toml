@@ -50,6 +50,6 @@ Customize your minecraft avatar!
 [[dependencies.cpm]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.20.5,1.21)"
+    versionRange="[1.21,1.22)"
     ordering="NONE"
     side="BOTH"

@@ -1,6 +1,6 @@
 plugins {
 	id 'maven-publish'
-	id 'org.quiltmc.loom' version '1.+'
+	id 'org.quiltmc.loom' version '1.7.3'
 }
 
 archivesBaseName = project.archives_base_name

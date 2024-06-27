@@ -314,12 +314,11 @@ public class GuiBase extends Screen implements IGui {
 
 		@Override
 		public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-			this.renderBackground(graphics, mouseX, mouseY, partialTicks);
+			super.render(graphics, mouseX, mouseY, partialTicks);
 			String[] txt = I18n.get("error.cpm.crash", error).split("\\\\");
 			for (int i = 0; i < txt.length; i++) {
 				graphics.drawCenteredString(this.font, txt[i], this.width / 2, 15 + i * 10, 16777215);
 			}
-			super.render(graphics, mouseX, mouseY, partialTicks);
 		}
 
 		@Override
