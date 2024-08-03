@@ -1,4 +1,10 @@
+
+<a name="paste-site-api"/>
+
 # Paste site API
+
+<a name="endpoints"/>
+
 ## Endpoints
 * [Download](#download)
 * [Connect](#connect)
@@ -16,8 +22,14 @@
 API url: `https://paste.tom5454.com/`  
 Full implenetation in Java: [PasteClient in CPM](https://github.com/tom5454/CustomPlayerModels/blob/master/CustomPlayerModels/src/shared/java/com/tom/cpm/shared/paste/PasteClient.java)  
 
+
+<a name="download"/>
+
 ### Download
 URL: `raw/<paste_id>`
+
+
+<a name="connect"/>
 
 ### Connect
 URL: `api/connect?name=<username>`  
@@ -48,6 +60,9 @@ Java example code:
 
 Call [Authenticate](#authenticate) to finish setting up the session.
 
+
+<a name="authenticate"/>
+
 ### Authenticate
 URL: `api/session`  
 HTTP headers:  
@@ -55,6 +70,9 @@ HTTP headers:
 
 Response: (JSON)  
 	Empty JSON on success
+
+
+<a name="list"/>
 
 ### List
 URL: `api/list`  
@@ -71,6 +89,9 @@ Response: (JSON)
  * maxSize  
  * maxFiles  
 
+
+<a name="upload"/>
+
 ### Upload
 URL: `api/upload`  
 HTTP headers:  
@@ -84,6 +105,9 @@ Post body: paste content
 Response: (JSON)  
  * id: new random paste id for the paste
 
+
+<a name="delete"/>
+
 ### Delete
 URL: `api/delete?file=<paste_id>`  
 HTTP headers:  
@@ -92,6 +116,9 @@ HTTP headers:
 Auth required  
 Response: (JSON)  
 	Empty JSON on success 
+
+
+<a name="update"/>
 
 ### Update
 URL: `api/update?file=<paste_id>`  
@@ -105,6 +132,9 @@ Post body: paste content
 Response: (JSON)  
 	Empty JSON on success
 	
+
+<a name="browser-login"/>
+
 ### Browser Login
 URL: `api/browser_login`
 HTTP headers:  
@@ -114,6 +144,9 @@ Auth required
 Response: (JSON)  
  * id: browser login token valid for 5 minutes, usable with `/login.html?id=<id>` site
 
+
+<a name="app-login"/>
+
 ### App Login
 URL: `api/app_login`
 HTTP headers:  
@@ -122,6 +155,9 @@ HTTP headers:
 Response: (JSON)  
  * id: application login token valid for 5 minutes, usable with `/auth.html?id=<id>` site
  
+
+<a name="app-check"/>
+
 ### App Check
 URL: `api/app_check`
 HTTP headers:  
@@ -133,6 +169,9 @@ Response: (JSON)
 or
  * empty JSON if not authorized yet
  
+
+<a name="app-token-request"/>
+
 ### App Token Request
 URL: `api/app_token_req`
 HTTP headers:  
@@ -141,6 +180,9 @@ HTTP headers:
  
 Response: (JSON)  
  * id: paste session token usable with [List](#list), [Upload](#upload), [Delete](#delete), [Update](#update)
+
+
+<a name="error-messages"/>
 
 ### Error messages
 Respose: (JSON)  

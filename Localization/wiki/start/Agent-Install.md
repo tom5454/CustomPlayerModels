@@ -1,3 +1,6 @@
+
+<a name="java-agent-installation"/>
+
 ## Java Agent Installation
 The Minecraft 1.2.5 version of CPM is a java agent.  
 1. Copy the CPM jar into your `.minecraft` folder.  
