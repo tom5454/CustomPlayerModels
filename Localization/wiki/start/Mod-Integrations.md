@@ -33,5 +33,5 @@ Requires compat mod: Customizable Player Models Plasmo Voice compat [CurseForge]
 ## OSC Protocol
 You can set up Eye/Face tracking animations, animations based on your heart rate, or buttons on your streamdeck, etc.  
 [Wiki page](https://github.com/tom5454/CustomPlayerModels/wiki/OSC-Setup)  
-Or setup custom scripts using any external program that suports OSC. [Scripting with OSC](https://github.com/tom5454/CustomPlayerModels/wiki/OSC-Setup#Scripting)  
+Or setup custom scripts using any external program that suports OSC. [Scripting with OSC](https://github.com/tom5454/CustomPlayerModels/wiki/OSC-Setup#scripting)  
 Requires addon mod: Customizable Player Models OSC Compat [CurseForge](https://www.curseforge.com/minecraft/mc-mods/cpmoscc), [Modrinth](https://modrinth.com/mod/cpmoscc)

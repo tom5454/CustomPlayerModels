@@ -862,6 +862,7 @@
   "label.cpm.keybind.animPrevFrame": "UNLOCALIZED: Animation Previous Frame",
   "label.cpm.keybind.animNextFrame": "UNLOCALIZED: Animation Next Frame",
   "label.cpm.keybind.reloadTexture": "UNLOCALIZED: Reload Texture",
+  "label.cpm.reset_profile": "UNLOCALIZED: [Default Values]",
   "label.cpm.paste.connecting.title": "Подключение...",
   "label.cpm.paste.connecting.message": "Подключение к сайту для вставки...",
   "label.cpm.paste.listing": "Обновление списка файлов...",
@@ -1039,6 +1040,7 @@
   "commands.cpmclient.usage": "UNLOCALIZED: Valid sub commands: safety, animate, profile",
   "commands.cpmclient.animate.invalid": "UNLOCALIZED: Can\u0027t find animation: %s",
   "commands.cpmclient.set_model.not_found": "UNLOCALIZED: Model file not found: %s",
+  "commands.cpmclient.genericFail": "UNLOCALIZED: Command Failed: %s",
   "chat.cpm.skinForced": "Невозможно изменить скин. Ваш скин был принудительно установлен операторами сервера.",
   "chat.cpm.serverSafetySettings": "[CPM] На сервере рекомендуется использовать настройки безопасности. Откройте меню жестов [%s], чтобы изменить настройки безопасности.",
   "chat.cpm.serverRequiresCPM": "Для работы на сервере необходим установленный мод CPM и включенное взаимодействие. В настоящее время настройка \u0027Отключить взаимодействие с сервером\u0027 установлена в \u0027true\u0027, и вы будете выгнаны с сервера. Откройте меню жестов [%s], чтобы изменить настройки.",
@@ -1239,5 +1241,8 @@
   "fbxtool-button.exportGLTF": "UNLOCALIZED: Export GLTF",
   "fbxtool-button.setupRig": "UNLOCALIZED: Setup Rig",
   "fbxtool-label.humanoidRig": "UNLOCALIZED: Humanoid Rig",
-  "fbxtool-label.threeLoading": "UNLOCALIZED: Three.js Loading..."
+  "fbxtool-label.threeLoading": "UNLOCALIZED: Three.js Loading...",
+  "wikibuilder-pageChanged": "UNLOCALIZED: This page is missing some chapters from the source.\\See the English version of this page: %s",
+  "wikibuilder-link": "UNLOCALIZED: Here",
+  "wikibuilder-chapterChanged": "UNLOCALIZED: This chapter may be out of date.\\See the English version of this page: %s"
 }

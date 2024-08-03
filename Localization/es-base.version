@@ -1229,5 +1229,10 @@
   "commands.cpm.usage": "Valid sub commands: setskin, safety, kick, scaling, animate, effects, detect",
   "label.cpm.keybind.animPrevFrame": "Animation Previous Frame",
   "label.cpm.keybind.animNextFrame": "Animation Next Frame",
-  "label.cpm.keybind.reloadTexture": "Reload Texture"
+  "label.cpm.keybind.reloadTexture": "Reload Texture",
+  "label.cpm.reset_profile": "[Default Values]",
+  "commands.cpmclient.genericFail": "Command Failed: %s",
+  "wikibuilder-pageChanged": "This page is missing some chapters from the source.\\See the English version of this page: %s",
+  "wikibuilder-link": "Here",
+  "wikibuilder-chapterChanged": "This chapter may be out of date.\\See the English version of this page: %s"
 }

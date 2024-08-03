@@ -33,5 +33,5 @@
 ## OSC协议
 您可以设置眼睛/面部跟踪动画、基于心率的动画或 Streamdeck 上的按钮等。 
 [Wiki页面](https://github.com/tom5454/CustomPlayerModels/wiki/OSC-Setup)  
-或者使用支持 OSC 的外部程序设置自定义脚本。 [使用 OSC 编写脚本](https://github.com/tom5454/CustomPlayerModels/wiki/OSC-Setup#Scripting)
+或者使用支持 OSC 的外部程序设置自定义脚本。 [使用 OSC 编写脚本](https://github.com/tom5454/CustomPlayerModels/wiki/OSC-Setup#scripting)
 需要扩展Mod：自定义玩家模型OSC兼容 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/cpmoscc), [Modrinth](https://modrinth.com/mod/cpmoscc)

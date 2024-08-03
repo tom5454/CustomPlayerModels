@@ -31,7 +31,7 @@ You can change your model while in-game, under the `Gestures Menu/Models`.
 
 ### Base64
 Base64 models are for server owners, map makers.  
-The models can be loaded [using commands](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command#setskin), or the [API](https://github.com/tom5454/CustomPlayerModels/wiki/API-documentation#set-model-041).  
+The models can be loaded [using commands](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command#setskin), or the [API](https://github.com/tom5454/CustomPlayerModels/wiki/API-documentation#set-model).  
 This options is for developers only.  
 
 

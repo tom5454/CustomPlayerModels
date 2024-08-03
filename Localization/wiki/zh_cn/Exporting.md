@@ -31,7 +31,7 @@
 
 ### Base64
 Base64 模型适用于服务器所有者、地图制作者。
-可以[使用命令](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command#setskin)或[API](https://github.com/tom5454/CustomPlayerModels/wiki/API-documentation#set-model-041)来加载模型。
+可以[使用命令](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command#setskin)或[API](https://github.com/tom5454/CustomPlayerModels/wiki/API-documentation#set-model)来加载模型。
 此选项仅适用于开发人员。 
 
 

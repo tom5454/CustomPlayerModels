@@ -1,5 +1,7 @@
-Customizable Player Models Wiki  
+Customizable Player Models Wiki
+
 ~[language_selector]
+
 * [Home](https://github.com/tom5454/CustomPlayerModels/wiki)
 * [First Start Guide](https://github.com/tom5454/CustomPlayerModels/wiki/FirstStartGuide)
 * [FAQ](https://github.com/tom5454/CustomPlayerModels/wiki/FAQ)

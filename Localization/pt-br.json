@@ -853,6 +853,7 @@
   "label.cpm.keybind.animPrevFrame": "Quadro de Animação Anterior",
   "label.cpm.keybind.animNextFrame": "Próximo Quadro de Animação",
   "label.cpm.keybind.reloadTexture": "Recarregar Textura",
+  "label.cpm.reset_profile": "UNLOCALIZED: [Default Values]",
   "label.cpm.paste.connecting.title": "Conectando...",
   "label.cpm.paste.connecting.message": "Conectando ao site de colagem...",
   "label.cpm.paste.listing": "Atualizando lista de arquivos...",
@@ -1029,6 +1030,7 @@
   "commands.cpmclient.usage": "Subcomandos válidos: safety, animate, profile",
   "commands.cpmclient.animate.invalid": "Não foi possível encontrar a animação: %s",
   "commands.cpmclient.set_model.not_found": "Arquivo de modelo não encontrado: %s",
+  "commands.cpmclient.genericFail": "UNLOCALIZED: Command Failed: %s",
   "chat.cpm.skinForced": "Não é possível mudar a skin. Sua skin foi definida à força pelos operadores do servidor.",
   "chat.cpm.serverSafetySettings": "[CPM] O servidor recomendou configurações de segurança. Abra o menu de Gestos [%s] para editar as configurações de segurança.",
   "chat.cpm.serverRequiresCPM": "O servidor requer que o CPM esteja instalado e a comunicação habilitada. Atualmente, a configuração \u0027Desativar comunicação com o servidor\u0027 está definida como \u0027verdadeiro\u0027, e você será expulso do servidor. Abra o menu de Gestos [%s] para editar as configurações.",
@@ -1229,5 +1231,8 @@
   "fbxtool-button.exportGLTF": "Exportar GLTF",
   "fbxtool-button.setupRig": "Configurar Rig",
   "fbxtool-label.humanoidRig": "Rig Humanóide",
-  "fbxtool-label.threeLoading": "Carregando Three.js..."
+  "fbxtool-label.threeLoading": "Carregando Three.js...",
+  "wikibuilder-pageChanged": "UNLOCALIZED: This page is missing some chapters from the source.\\See the English version of this page: %s",
+  "wikibuilder-link": "UNLOCALIZED: Here",
+  "wikibuilder-chapterChanged": "UNLOCALIZED: This chapter may be out of date.\\See the English version of this page: %s"
 }

@@ -276,14 +276,14 @@ else
 ### 语音动画
 注册语音级别支持。
 `IClientAPI:registerVoice(Player.class, player -> voiceLevel);`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 
 注册语音级别支持。（UUID变体）（0.6.0+）
 `IClientAPI:registerVoice(playerUUID -> voiceLevel);`  
 
 注册语音静音支持。（0.6.0+）
 `IClientAPI:registerVoiceMute(Player.class, player -> voiceMuted);`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 
 注册语音静音支持。（UUID变体）（0.6.0+）
 `IClientAPI:registerVoiceMute(playerUUID -> voiceMuted);`  
@@ -296,11 +296,11 @@ else
 `PlayerRenderer<Model, ResourceLocation, RenderType, MultiBufferSource, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class)`  
 对于 1.12 及更低版本需要使用：
 `RetroPlayerRenderer<Model, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, GameProfile.class);`  
-[Model.class](#client-model-class)  
-[ResourceLocation.class](#client-resourcelocation-class)  
-[RenderType.class](#client-rendertype-class)  
-[MultiBufferSource.class](#client-multibuffersource-class)  
-[GameProfile.class](#client-gameprofile-class)  
+[Model.class](#client-modelclass)  
+[ResourceLocation.class](#client-resourcelocationclass)  
+[RenderType.class](#client-rendertypeclass)  
+[MultiBufferSource.class](#client-multibuffersourceclass)  
+[GameProfile.class](#client-gameprofileclass)  
 
 
 <a name="rendering-an-entity-with-cpm-model"/>
@@ -440,7 +440,7 @@ value：0：重置姿势/手势，1：播放姿势/手势，对于图层值：0-
 ### 客户端网络（0.6.1+）
 注册NBT消息发送到服务器，或广播给其他客户端。
 `MessageSender sender = IClientAPI.registerPluginMessage(Player.class, message_id, (player, message) -> {/*Handle message*/}, broadcastToTracking);`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 或 UUID 版本：
 `MessageSender sender = IClientAPI.registerPluginMessage(message_id, (player_uuid, message) -> {/*Handle message*/}, broadcastToTracking);`  
 使用`MessageSender`发送消息。
@@ -456,7 +456,7 @@ broadcastToTracking：false：将消息发送到服务器/true：向附近的玩
 #### 状态消息
 最后的状态消息存储在服务器上，并发送给进入跟踪范围（渲染距离）的每个客户端。
 `MessageSender sender = IClientAPI.registerPluginStateMessage(Player.class, message_id, (player, message) -> {/*Handle message*/});`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 或 UUID 版本：
 `MessageSender sender = IClientAPI.registerPluginMessage(message_id, (player_uuid, message) -> {/*Handle message*/});`  
 
@@ -553,7 +553,7 @@ Value：0：重置姿势/手势，1：播放姿势/手势，图层值：0-255，
 ### 服务器网络（0.6.1+）
 注册NBT消息，用于接收非广播消息/向客户端发送消息。
 `MessageSender<Player> sender = ICommonAPI.registerPluginMessage(Player.class, message_id, (player, message) -> {/*Handle message*/});`  
-[Player.class](#client-player-class)  
+[Player.class](#client-playerclass)  
 使用`MessageSender`发送消息。
 `boolean success = sender.sendMessageTo(player, message_tag);`  
 或广播给附近的玩家：

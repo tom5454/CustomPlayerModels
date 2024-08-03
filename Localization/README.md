@@ -34,10 +34,9 @@ Start with the `start` folder from this folder, copy and rename it to your local
 The locale name must follow github's naming system. Example: `en-US`  
 [Markdown Cheatsheet](https://github.com/tom5454/CustomPlayerModels/wiki/CPMMarkdownCheatsheet)  
 
-Don't change any Markdown links `[...](...)`, the correct localized link will be inserted by the page preprocessor.  
-When translating headers (`# ...`), please keep the original title inbetween `{...}`.  
-Example: `# Translated title {Original Title}`  
-This is necessary to keep the links working on the pages.  
+Don't change any Markdown links `[You can change this](DONT CHANGE THIS)`, the correct localized link will be inserted by the page preprocessor.  
+When translating don't edit the `<a name="something"/>` markers, these keep the links working after changing the headers.  
+This is necessary to keep the links working on and between the pages.  
 
 ## Base folder
 If your language has multiple variants you can create a base folder and overrides for each variant.    

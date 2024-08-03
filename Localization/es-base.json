@@ -854,6 +854,7 @@
   "label.cpm.keybind.animPrevFrame": "Fotograma Previo",
   "label.cpm.keybind.animNextFrame": "Fotograma Siguiente",
   "label.cpm.keybind.reloadTexture": "Recargar Textura",
+  "label.cpm.reset_profile": "UNLOCALIZED: [Default Values]",
   "label.cpm.paste.connecting.title": "Conectando...",
   "label.cpm.paste.connecting.message": "Conectando a paste...",
   "label.cpm.paste.listing": "Refrescando Lista de Archivos...",
@@ -1030,6 +1031,7 @@
   "commands.cpmclient.usage": "Sub-Comandos Validos: safety, animate, profile",
   "commands.cpmclient.animate.invalid": "No se encuentra la animación: %s",
   "commands.cpmclient.set_model.not_found": "Archivo de Modelo no encontrado: %s",
+  "commands.cpmclient.genericFail": "UNLOCALIZED: Command Failed: %s",
   "chat.cpm.skinForced": "No se pudo cambiar la Skin. Tu Skin fue forzada por un operador del servidor.",
   "chat.cpm.serverSafetySettings": "[CPM] El servidor tiene configración de seguridad recomendada. Abre el menú de gestos [%s] Para editar las configuraciones de seguridad.",
   "chat.cpm.serverRequiresCPM": "El servidor requiere CPM instalado con la comunicación habilitada. Actualmente la opción de \u0027deshabilitar la comunicación\u0027 está establecida en \u0027true\u0027, y vas a ser expulsado del servidor. Abre el menú de gestos [%s] para editar las opciones. ",
@@ -1230,5 +1232,8 @@
   "fbxtool-button.exportGLTF": "Exportar GLTF",
   "fbxtool-button.setupRig": "Establecer Rig",
   "fbxtool-label.humanoidRig": "Rig Humanoide",
-  "fbxtool-label.threeLoading": "Three.js Cargando..."
+  "fbxtool-label.threeLoading": "Three.js Cargando...",
+  "wikibuilder-pageChanged": "UNLOCALIZED: This page is missing some chapters from the source.\\See the English version of this page: %s",
+  "wikibuilder-link": "UNLOCALIZED: Here",
+  "wikibuilder-chapterChanged": "UNLOCALIZED: This chapter may be out of date.\\See the English version of this page: %s"
 }

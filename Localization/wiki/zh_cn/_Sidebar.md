@@ -1,7 +1,8 @@
 自定义玩家模型 Wiki
+
 ~[language_selector]
 
-* [主页](https://github.com/tom5454/CustomPlayerModels/wiki)
+* [主页](https://github.com/tom5454/CustomPlayerModels/wiki/Home)
 * [快速开始指南](https://github.com/tom5454/CustomPlayerModels/wiki/FirstStartGuide)
 * [常见问题](https://github.com/tom5454/CustomPlayerModels/wiki/FAQ)
 * 创建模型

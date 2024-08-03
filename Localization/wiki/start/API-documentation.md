@@ -80,7 +80,7 @@ API version: ![API version badge](https://img.shields.io/maven-metadata/v?color=
 | BTA | - | - | ![BTA babric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-BTA%2Fmaven-metadata.xml) | - |
 
 
-<a name="gradle-properties"/>
+<a name="gradleproperties"/>
 
 #### gradle.properties
 ```ini

@@ -4,7 +4,7 @@
 ## 动画纹理
 
 通过添加动画纹理效果，可以对部分纹理进行动画处理。  
-选择要添加动画的纹理，然后按 `效果/添加动画纹理`
+选择要添加动画的纹理，然后按 `效果/添加动画纹理`  
 ![模型树中的动画纹理](https://github.com/tom5454/CustomPlayerModels/wiki/images/animated_tree.png)  
 
 
@@ -24,7 +24,7 @@
 **水平：**
 动画帧的布局。
 **插值：**
-在帧之间进行插值。
+在帧之间进行插值。  
 ![皮肤面板中的动画纹理](https://github.com/tom5454/CustomPlayerModels/wiki/images/animated_tex.png)  
 黄色区域将会有动画效果。 白色区域是动画框架。
 示例项目：[链接]（https://github.com/tom5454/CustomPlayerModels/raw/master/examples/animated_texture.cpmproject）

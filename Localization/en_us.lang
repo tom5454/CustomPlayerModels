@@ -857,6 +857,7 @@ label.cpm.config.updateChecker=Check for Updates
 label.cpm.keybind.animPrevFrame=Animation Previous Frame
 label.cpm.keybind.animNextFrame=Animation Next Frame
 label.cpm.keybind.reloadTexture=Reload Texture
+label.cpm.reset_profile=[Default Values]
 
 label.cpm.paste.connecting.title=Connecting...
 label.cpm.paste.connecting.message=Connecting to paste site...
@@ -1045,6 +1046,7 @@ commands.cpm.scalingReset=Reset scaling for %s
 commands.cpmclient.usage=Valid sub commands: safety, animate, profile
 commands.cpmclient.animate.invalid=Can't find animation: %s
 commands.cpmclient.set_model.not_found=Model file not found: %s
+commands.cpmclient.genericFail=Command Failed: %s
 
 chat.cpm.skinForced=Can't change skin. Your skin was force set by the operators of the server.
 chat.cpm.serverSafetySettings=[CPM] The server has recommended safety settings. Open the Gestures menu [%s] to edit the safety settings.
@@ -1260,3 +1262,7 @@ fbxtool-button.setupRig=Setup Rig
 
 fbxtool-label.humanoidRig=Humanoid Rig
 fbxtool-label.threeLoading=Three.js Loading...
+
+wikibuilder-pageChanged=This page is missing some chapters from the source.\See the English version of this page: %s
+wikibuilder-link=Here
+wikibuilder-chapterChanged=This chapter may be out of date.\See the English version of this page: %s

@@ -376,6 +376,7 @@
   "tooltip.cpm.export": "导出模型以在游戏中使用。",
   "tooltip.cpm.tree.scaling.safe_fall_distance": "安全摔落高度属性乘数",
   "tooltip.cpm.tools.exportUVMap": "导出选定的纹理 UV 映射。",
+  "tooltip.cpm.uvexport.layered": "UNLOCALIZED: Layered OpenRaster (.ora) file.\\Each cube map is on a separate layer.",
   "tooltip.cpm.config.updateChecker": "首次启动游戏/打开编辑器时启用检查更新。\\Neo/Forge 版本使用与此设置分开的内置更新检查器。\\同时隐藏“更改日志”的用户编辑按钮，因为它不再起作用。",
   "tab.cpm.model": "模型",
   "tab.cpm.texture": "纹理",
@@ -853,6 +854,7 @@
   "label.cpm.keybind.animPrevFrame": "动画前一帧",
   "label.cpm.keybind.animNextFrame": "动画下一帧",
   "label.cpm.keybind.reloadTexture": "重新加载纹理",
+  "label.cpm.reset_profile": "UNLOCALIZED: [Default Values]",
   "label.cpm.paste.connecting.title": "连接...",
   "label.cpm.paste.connecting.message": "正在连接到粘贴站点...",
   "label.cpm.paste.listing": "正在刷新文件列表...",
@@ -1029,6 +1031,7 @@
   "commands.cpmclient.usage": "有效的子命令：安全、动画、配置文件",
   "commands.cpmclient.animate.invalid": "找不到动画：%s",
   "commands.cpmclient.set_model.not_found": "找不到模型文件：%s",
+  "commands.cpmclient.genericFail": "UNLOCALIZED: Command Failed: %s",
   "chat.cpm.skinForced": "无法切换皮肤。 你的皮肤是服务器管理员强制设置的.",
   "chat.cpm.serverSafetySettings": "[CPM] 服务器有推荐的安全设置。 打开手势菜单 [%s] 以编辑安全设置。",
   "chat.cpm.serverRequiresCPM": "服务器需要安装 CPM 并开启通讯。 当前“禁用服务器通信”设置设置为“true”，您将被踢出服务器。 打开手势菜单 [%s] 以编辑设置。 ",
@@ -1229,5 +1232,8 @@
   "fbxtool-button.exportGLTF": "导出GLTF",
   "fbxtool-button.setupRig": "设置骨骼",
   "fbxtool-label.humanoidRig": "人型骨骼",
-  "fbxtool-label.threeLoading": "Three.js 加载中..."
+  "fbxtool-label.threeLoading": "Three.js 加载中...",
+  "wikibuilder-pageChanged": "UNLOCALIZED: This page is missing some chapters from the source.\\See the English version of this page: %s",
+  "wikibuilder-link": "UNLOCALIZED: Here",
+  "wikibuilder-chapterChanged": "UNLOCALIZED: This chapter may be out of date.\\See the English version of this page: %s"
 }
