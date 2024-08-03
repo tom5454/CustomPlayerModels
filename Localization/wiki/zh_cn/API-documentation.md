@@ -3,10 +3,10 @@
 
 # CPM Api 文档
 目录：
-* [开始](#开始) ([Versions](#latest-versions))
-* [创建你的插件](#创建你的插件)
-* [客户端 API](#客户端-api)
-* [通用 API](#通用-api)
+* [开始](#开始) ([版本](#latest-versions))
+* [创建你的插件](#create-your-plugin)
+* [客户端 API](#client-api)
+* [通用 API](#common-api)
 
 
 <a name="setup"/>
@@ -308,7 +308,7 @@ else
 #### 使用 CPM 模型渲染实体
 1. 在渲染之前使用渲染器设置 GameProfile 或 LocalModel。
 `setGameProfile(gameProfile)`：渲染玩家模型
-`setLocalModel(localModel)`：渲染本地模型，[加载本地模型](#加载本地模型)
+`setLocalModel(localModel)`：渲染本地模型，[加载本地模型](#loading-a-local-model)
 2. 设置基础模型，必须是人形或双足模型：`setRenderModel(model)`
 3. 在 1.16+ 上设置默认 RenderType 工厂：例如：半透明实体：`setRenderType(RenderType::entityTranslucent)`。
 4. 设置模型姿势，使用`getAnimationState()`、`setActivePose(pose)`、`setActiveGesture(gesture)`将动画应用到模型。
@@ -391,7 +391,7 @@ public class ExampleRenderer extends LivingEntityRenderer<ExampleEntity, PlayerM
 #### 加载本地模型
 从“.cpmmodel”文件加载模型。
 `IClientAPI.loadModel(name, inputstream)`
-使用加载的模型进行[渲染实体](#使用-cpm-模型渲染实体)
+使用加载的模型进行[渲染实体](#rendering-an-entity-with-cpm-model)
 
 
 <a name="register-editor-generator"/>
@@ -525,7 +525,7 @@ Fabric: `VertexConsumerProvider.class`
 或
 `ICommonAPI.resetPlayerModel(Player.class, playerObj);`  
 清除服务器设置模型
-[Player.class](#通用-player-class)  
+[Player.class](#common-playerclass)  
 
 
 <a name="jump"/>
@@ -533,7 +533,7 @@ Fabric: `VertexConsumerProvider.class`
 ### 跳跃（0.4.1+）
 为玩家播放跳跃动画。
 `ICommonAPI.playerJumped(Player.class, playerObj);`  
-[Player.class](#通用-player-class)
+[Player.class](#common-playerclass)
 
 
 <a name="play-animation"/>
@@ -545,7 +545,7 @@ name：动画名称
 `ICommonAPI.playAnimation(Player.class, playerObj, name);` or  
 `ICommonAPI.playAnimation(Player.class, playerObj, name, value);`  
 Value：0：重置姿势/手势，1：播放姿势/手势，图层值：0-255，切换：0-1 或 -1 切换状态
-[Player.class](#通用-player-class)
+[Player.class](#common-playerclass)
 
 
 <a name="server-networking"/>
@@ -568,7 +568,7 @@ sendToSelf：向参数 1 中选定的玩家发送消息
 检测玩家是否正在播放动画
 `int value = ICommonAPI.getAnimationPlaying(Player.class, playerObj, name);`  
 返回：动画值（值层：0-255，其他动画：0-1），如果动画不存在则返回 -1
-[Player.class](#通用-player-class)  
+[Player.class](#common-playerclass)  
 
 
 <a name="class-map"/>

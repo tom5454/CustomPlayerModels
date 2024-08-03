@@ -6,18 +6,18 @@
 <a name="endpoints"/>
 
 ## Endpoints
-* [下载](#下载)
-* [连接](#连接)
-* [认证](#认证)
-* [列表](#列表)
-* [上传](#上传)
-* [删除](#删除)
-* [更新](#更新)
-* [浏览器登录](#浏览器登录)
-* [应用程序登录](#应用程序登录)
-* [应用程序检查](#应用程序检查)
-* [应用程序令牌请求](#应用程序令牌请求)
-* [错误信息](#错误信息)
+* [下载](#download)
+* [连接](#connect)
+* [认证](#authenticate)
+* [列表](#list)
+* [上传](#upload)
+* [删除](#delete)
+* [更新](#update)
+* [浏览器登录](#browser-login)
+* [应用程序登录](#app-login)
+* [应用程序检查](#app-check)
+* [应用程序令牌请求](#app-token-request)
+* [错误信息](#error-messages)
 
 API 地址：`https://paste.tom5454.com/` 
 Java中的完整实现：[CPM中的粘贴客户端](https://github.com/tom5454/CustomPlayerModels/blob/master/CustomPlayerModels/src/shared/java/com/tom/cpm/shared/paste/PasteClient.java)
