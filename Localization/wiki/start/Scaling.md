@@ -1,7 +1,13 @@
+
+<a name="scaling"/>
+
 ## Scaling
 
 - [Attribute scaling](#attribute-scaling)
 - [Supported mods](#supported-mods)
+
+
+<a name="attribute-scaling"/>
 
 ### Attribute Scaling
 CPM can apply some scaling settings using [attributes](https://minecraft.wiki/w/Attribute). See the list below for the supported attributes per Minecraft version:  
@@ -27,7 +33,13 @@ CPM can apply some scaling settings using [attributes](https://minecraft.wiki/w/
 
 Method name: `attribute`  
 
+
+<a name="supported-mods"/>
+
 ### Supported mods
+
+
+<a name="pehkui"/>
 
 #### Pehkui
 Only on 1.14+  
@@ -35,17 +47,26 @@ Player size, health, movement, and various attributes can be scaled:
 Method name: `pehkui`  
 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/pehkui), [Modrinth](https://modrinth.com/mod/pehkui)  
 
+
+<a name="chiseled-me"/>
+
 #### Chiseled Me
 Only on 1.10.2 and 1.12.2  
 Only supports Entity Scaling  
 Method name: `chiseledme`  
 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/chiseled-me)  
 
+
+<a name="artemislib"/>
+
 #### ArtemisLib
 Only on 1.12.2  
 Only supports Entity Scaling, Width, Height  
 Method name: `artemislib`  
 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/artemislib)  
+
+
+<a name="server-settings"/>
 
 ## Server settings
 Some attributes' scaling is disabled by default and have to be enabled using the [/cpm command](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command#scaling) on the server.  
