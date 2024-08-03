@@ -1,3 +1,6 @@
+
+<a name="java-agent-installation"/>
+
 ## Java Agent 安装
 
 Minecraft 1.2.5版本的CPM是一个Java Agent。

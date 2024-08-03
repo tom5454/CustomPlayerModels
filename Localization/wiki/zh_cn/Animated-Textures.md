@@ -1,8 +1,14 @@
+
+<a name="animated-textures"/>
+
 ## 动画纹理
 
 通过添加动画纹理效果，可以对部分纹理进行动画处理。  
 选择要添加动画的纹理，然后按 `效果/添加动画纹理`
 ![模型树中的动画纹理](https://github.com/tom5454/CustomPlayerModels/wiki/images/animated_tree.png)  
+
+
+<a name="options"/>
 
 ### 选项
 

@@ -1,3 +1,6 @@
+
+<a name="exporting-models"/>
+
 ## 导出模型
 
 有~~三种~~方法可以导出你的模型：
@@ -5,11 +8,17 @@
 * [模型文件](#模型文件)  
 * [Base64（仅适用于开发者，不适用于普通玩家）](#base64)  
 
+
+<a name="stored-in-skin"/>
+
 ### 保存在皮肤中
 模型将存储在你的 Minecraft 皮肤未使用的区域中。
 此方式可以让你在原版服务器和没有此模组的服务器上使用。 
 但是您无法在游戏中改变您的模型。
 [更多信息如下](#皮肤)
+
+
+<a name="model-file"/>
 
 ### 模型文件
 该模型将存储在 `<你的 Minecraft 目录>/player_models` 内的 `.cpmmodel` 文件中。
@@ -17,10 +26,16 @@
 您可以在游戏中在`手势菜单/模型`下更改您的模型。
 [更多信息如下](#导出为本地模型)
 
+
+<a name="base64"/>
+
 ### Base64
 Base64 模型适用于服务器所有者、地图制作者。
 可以[使用命令](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command#setskin)或[API](https://github.com/tom5454/CustomPlayerModels/wiki/API-documentation#set-model-041)来加载模型。
 此选项仅适用于开发人员。 
+
+
+<a name="skin"/>
 
 ## 皮肤
 要在游戏中使用自定义模型，您必须使用编辑器导出模型，然后上传导出的皮肤。
@@ -29,6 +44,9 @@ Base64 模型适用于服务器所有者、地图制作者。
 
 单击“...”按钮设置输出文件，然后点击“导出”。您可以使用“更改原版皮肤”按钮更改基本皮肤。如果您未安装该模组，则会显示此皮肤，默认情况下它会加载您当前的皮肤。
 皮肤层设置用于[创建自定义动画]（https://github.com/tom5454/CustomPlayerModels/wiki/Animations#custom-animations-encoding）。
+
+
+<a name="data-overflow"/>
 
 ### 数据溢出
 如果模型太大，无法放入皮肤文件中未使用的空间，那么您必须将其上传到以下位置之一：
@@ -50,6 +68,9 @@ Base64 模型适用于服务器所有者、地图制作者。
 如果启动器显示无法加载皮肤，请尝试重新启动启动器。
 
 在服务器上安装了该模组的用户都可以加载此模型。
+
+
+<a name="exporting-as-local-model"/>
 
 ## 导出为本地模型
 > [!NOTE]

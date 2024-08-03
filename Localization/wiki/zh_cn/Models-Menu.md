@@ -1,3 +1,6 @@
+
+<a name="the-models-menu"/>
+
 # 模型菜单
 
 > [!NOTE]
@@ -10,12 +13,21 @@
 
 `从皮肤加载`按钮（以前叫`重置皮肤`）会禁用已启用的`.cpmmodel`并从[皮肤](https://github.com/tom5454/CustomPlayerModels/wiki/Exporting#stored-in-skin)加载模型。
 
+
+<a name="folders"/>
+
 ## 文件夹
 模型菜单支持模型文件夹。
 您可以在模型菜单中应用`icon.png`和`description.txt`来设置文件夹图标和描述。
 
+
+<a name="importing"/>
+
 ## 导入
 当模型菜单打开时，您可以将`.cpmmodel`文件拖放到 Minecraft 游戏窗口中以导入它们。
+
+
+<a name="models-popup"/>
 
 ## 模型窗口
 

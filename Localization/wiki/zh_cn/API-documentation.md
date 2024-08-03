@@ -1,3 +1,6 @@
+
+<a name="cpm-api-documentation"/>
+
 # CPM Api 文档
 目录：
 * [开始](#开始) ([Versions](#latest-versions))
@@ -5,8 +8,14 @@
 * [客户端 API](#客户端-api)
 * [通用 API](#通用-api)
 
+
+<a name="setup"/>
+
 ## 开始
 将 CPM api 添加到你的 gradle 构建脚本（`build.gradle`）：
+
+
+<a name="manual"/>
 
 ### 手动
 从 [Releases](https://github.com/tom5454/CustomPlayerModels/releases/tag/0.4.0a) 下载 api
@@ -19,7 +28,13 @@ dependencies {
 }
 ```
 
+
+<a name="gradle"/>
+
 ### Gradle
+
+
+<a name="repositories"/>
 
 #### 存储库
 
@@ -31,6 +46,9 @@ repositories {
   }
 }
 ```
+
+
+<a name="latest-versions"/>
 
 #### 最新版本
 API 版本： ![API 版本徽章](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-API%2Fmaven-metadata.xml)
@@ -60,6 +78,9 @@ API 版本： ![API 版本徽章](https://img.shields.io/maven-metadata/v?color=
 | b1.7.3 | - | - | ![b1.7.3 babric 版本徽章](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-b1.7.3%2Fmaven-metadata.xml) | - |
 | BTA | - | - | ![BTA babric 版本徽章](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-BTA%2Fmaven-metadata.xml) | - |
 
+
+<a name="gradleproperties"/>
+
 #### gradle.properties
 ```ini
 # CPM 版本
@@ -68,6 +89,9 @@ cpm_mc_version=<Minecraft 版本>
 cpm_runtime_version=<运行版本>
 ```
 
+
+<a name="dependencies-using-fg2"/>
+
 #### 使用 FG2 的依赖项
 ```gradle
 dependencies {
@@ -75,6 +99,9 @@ dependencies {
   deobfProvided "com.tom5454.cpm:CustomPlayerModels-${project.cpm_mc_version}:${project.cpm_runtime_version}"
 }
 ```
+
+
+<a name="dependencies-using-fg3"/>
 
 #### 使用 FG3+ 的依赖
 
@@ -87,6 +114,9 @@ dependencies {
 }
 ```
 
+
+<a name="dependencies-using-neogradle"/>
+
 #### 使用 NeoGradle 的依赖
 
 ```gradle
@@ -98,6 +128,9 @@ dependencies {
 }
 ```
 
+
+<a name="dependencies-using-fabric"/>
+
 #### 使用 Fabric 的依赖
 
 ```gradle
@@ -108,6 +141,9 @@ dependencies {
   modRuntimeOnly "com.tom5454.cpm:CustomPlayerModels-Fabric-${project.cpm_mc_version}:${project.cpm_runtime_version}"
 }
 ```
+
+
+<a name="dependencies-using-voldeloom"/>
 
 #### 使用 Voldeloom 的依赖
 
@@ -148,6 +184,9 @@ dependencies {
 
 您必须将当前模组版本从 Modrinth 放置到项目根文件夹中，否则 Java 代理将无法加载。
 
+
+<a name="create-your-plugin"/>
+
 ## 创建你的插件
 
 创建一个实现 `ICPMPlugin` 的类。
@@ -168,12 +207,21 @@ public class CPMCompat implements ICPMPlugin {
 }
 ```
 
+
+<a name="forge-125"/>
+
 ### Forge 1.2.5
 插件加载器未实现。
+
+
+<a name="forge-112-and-lower"/>
 
 ### Forge 1.12 及更低版本
 发送包含您的插件类位置的 IMC 消息。
 `FMLInterModComms.sendMessage("customplayermodels", "api", "com.example.mod.CPMCompat");`
+
+
+<a name="forge-116-and-up"/>
 
 ### Forge 1.16 及更高版本
 发送 IMC 消息。
@@ -191,6 +239,9 @@ private void enqueueIMC(final InterModEnqueueEvent event)  {
 }
 ```
 
+
+<a name="fabric"/>
+
 ### Fabric
 在 fabric.mod.json 文件中的`entrypoints`字段添加`cpmapi`字段，如下所示：
 
@@ -199,6 +250,9 @@ private void enqueueIMC(final InterModEnqueueEvent event)  {
     "cpmapi": [ "com.example.mod.CPMCompat" ]
 }
 ```
+
+
+<a name="bukkit-spigot-paper"/>
 
 ### Bukkit、Spigot、Paper（0.4.1+）
 使用服务管理器注册您的插件，您的插件的`initCommon`方法将使用`ICommonAPI`实例调用。
@@ -211,7 +265,13 @@ else
 	log.info("Customizable Player Models plugin not installed, compat disabled");
 ```
 
+
+<a name="client-api"/>
+
 ## 客户端 API
+
+
+<a name="voice-animation"/>
 
 ### 语音动画
 注册语音级别支持。
@@ -228,6 +288,9 @@ else
 注册语音静音支持。（UUID变体）（0.6.0+）
 `IClientAPI:registerVoiceMute(playerUUID -> voiceMuted);`  
 
+
+<a name="rendering-api"/>
+
 ### 渲染 API
 创建一个玩家渲染器以在任何玩家实体上渲染 CPM 模型。
 `PlayerRenderer<Model, ResourceLocation, RenderType, MultiBufferSource, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class)`  
@@ -238,6 +301,9 @@ else
 [RenderType.class](#client-rendertype-class)  
 [MultiBufferSource.class](#client-multibuffersource-class)  
 [GameProfile.class](#client-gameprofile-class)  
+
+
+<a name="rendering-an-entity-with-cpm-model"/>
 
 #### 使用 CPM 模型渲染实体
 1. 在渲染之前使用渲染器设置 GameProfile 或 LocalModel。
@@ -319,10 +385,16 @@ public class ExampleRenderer extends LivingEntityRenderer<ExampleEntity, PlayerM
 
 当模型在后台加载时，`renderer.getDefaultTexture()`将返回 null！
 
+
+<a name="loading-a-local-model"/>
+
 #### 加载本地模型
 从“.cpmmodel”文件加载模型。
 `IClientAPI.loadModel(name, inputstream)`
 使用加载的模型进行[渲染实体](#使用-cpm-模型渲染实体)
+
+
+<a name="register-editor-generator"/>
 
 ### 注册编辑器生成器
 为编辑器注册一个模型生成器。生成器位于“编辑/工具”下。  
@@ -342,6 +414,9 @@ public class ExampleGenerator {
 本地化（i18n）：
 将 `button.example_mod.example_generator`、`tooltip.example_mod.example_generator` 添加到您的语言文件中。在工具提示中使用 `\` 字符作为换行符。
 
+
+<a name="play-animation"/>
+
 ### 播放动画（0.6.0+）
 为玩家播放指定的命令动画（客户端）。
 
@@ -351,10 +426,16 @@ value：0：重置姿势/手势，1：播放姿势/手势，对于图层值：0-
 `IClientAPI.playAnimation(name, value);`  
 返回：如果找到动画并开始播放，则返回 true
 
+
+<a name="detect-animation"/>
+
 ### 检测动画 (0.6.14+)
 检测玩家是否正在播放动画
 `int value = IClientAPI.getAnimationPlaying(name);`  
 返回：动画值（值层：0-255，其他动画：0-1），如果动画不存在则返回 -1
+
+
+<a name="client-networking"/>
 
 ### 客户端网络（0.6.1+）
 注册NBT消息发送到服务器，或广播给其他客户端。
@@ -369,6 +450,9 @@ broadcastToTracking：false：将消息发送到服务器/true：向附近的玩
 服务器端需要 CPM 0.6.1+ 才能实现网络功能。
 当使用broadcastToTracking或状态消息时，服务器上不需要您的模组/插件即可使数据包转发正常工作，您无需注册任何内容。 要接收非广播消息，请使用 ICommonAPI.registerPluginMessage
 
+
+<a name="state-messages"/>
+
 #### 状态消息
 最后的状态消息存储在服务器上，并发送给进入跟踪范围（渲染距离）的每个客户端。
 `MessageSender sender = IClientAPI.registerPluginStateMessage(Player.class, message_id, (player, message) -> {/*Handle message*/});`  
@@ -376,34 +460,61 @@ broadcastToTracking：false：将消息发送到服务器/true：向附近的玩
 或 UUID 版本：
 `MessageSender sender = IClientAPI.registerPluginMessage(message_id, (player_uuid, message) -> {/*Handle message*/});`  
 
+
+<a name="class-map"/>
+
 ### 类映射
 类取决于您的 Minecraft 版本和模组加载器。
+
+<a name="client-playerclass"/>
+
 #### 客户端 Player.class
 Minecraft Forge 1.12 及更低版本：`EntityPlayer.class`
 Minecraft Forge 1.16 和 Fabric：`PlayerEntity.class`
 Minecraft Forge 1.17 及更高版本：来自 `net.minecraft.*` 的 `Player.class`
 
+
+<a name="client-modelclass"/>
+
 #### 客户端 Model.class
 Minecraft Forge 1.16+ 和 Fabric：来自 `net.minecraft.client.*` 的 `Model.class`
 Minecraft Forge 1.12 及更低版本：`ModelBase.class`
+
+
+<a name="client-resourcelocationclass"/>
 
 #### 客户端 ResourceLocation.class
 Minecraft Forge: `ResourceLocation.class`  
 Fabric: `Identifier.class`  
 
+
+<a name="client-rendertypeclass"/>
+
 #### 客户端 RenderType.class
 Minecraft Forge: `RenderType.class`  
 Fabric: `RenderLayer.class`  
+
+
+<a name="client-multibuffersourceclass"/>
 
 #### 客户端 MultiBufferSource.class
 Minecraft Forge 1.16: `IRenderTypeBuffer.class`  
 Minecraft Forge (1.17+): `MultiBufferSource.class`  
 Fabric: `VertexConsumerProvider.class`  
 
+
+<a name="client-gameprofileclass"/>
+
 #### 客户端 GameProfile.class
 来自 AuthLib 的 GameProfile：`com.mojang.authlib.GameProfile`
 
+
+<a name="common-api"/>
+
 ## 通用 API
+
+
+<a name="set-model"/>
 
 ### 设置模型（0.4.1+）
 设置玩家模型
@@ -416,10 +527,16 @@ Fabric: `VertexConsumerProvider.class`
 清除服务器设置模型
 [Player.class](#通用-player-class)  
 
+
+<a name="jump"/>
+
 ### 跳跃（0.4.1+）
 为玩家播放跳跃动画。
 `ICommonAPI.playerJumped(Player.class, playerObj);`  
 [Player.class](#通用-player-class)
+
+
+<a name="play-animation"/>
 
 ### 播放动画（0.6.0+）
 为玩家播放指定的命令动画（服务器端）。
@@ -429,6 +546,9 @@ name：动画名称
 `ICommonAPI.playAnimation(Player.class, playerObj, name, value);`  
 Value：0：重置姿势/手势，1：播放姿势/手势，图层值：0-255，切换：0-1 或 -1 切换状态
 [Player.class](#通用-player-class)
+
+
+<a name="server-networking"/>
 
 ### 服务器网络（0.6.1+）
 注册NBT消息，用于接收非广播消息/向客户端发送消息。
@@ -441,14 +561,23 @@ Value：0：重置姿势/手势，1：播放姿势/手势，图层值：0-255，
 使用来自“com.tom.cpl.nbt.*”包的独立于平台的 NBT 实现。
 sendToSelf：向参数 1 中选定的玩家发送消息
 
+
+<a name="detect-animation"/>
+
 ### 检测动画（0.6.9+）
 检测玩家是否正在播放动画
 `int value = ICommonAPI.getAnimationPlaying(Player.class, playerObj, name);`  
 返回：动画值（值层：0-255，其他动画：0-1），如果动画不存在则返回 -1
 [Player.class](#通用-player-class)  
 
+
+<a name="class-map"/>
+
 ### 类映射
 类别取决于你的 Minecraft 版本和模组加载器。
+
+<a name="common-playerclass"/>
+
 #### 通用 Player.class
 Minecraft Forge 1.12 及更低版本：`EntityPlayer.class`
 Minecraft Forge 1.16 和 Fabric：`PlayerEntity.class`

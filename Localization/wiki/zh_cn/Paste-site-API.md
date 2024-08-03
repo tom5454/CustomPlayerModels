@@ -1,4 +1,10 @@
+
+<a name="paste-site-api"/>
+
 # 粘贴站点API
+
+<a name="endpoints"/>
+
 ## Endpoints
 * [下载](#下载)
 * [连接](#连接)
@@ -16,8 +22,14 @@
 API 地址：`https://paste.tom5454.com/` 
 Java中的完整实现：[CPM中的粘贴客户端](https://github.com/tom5454/CustomPlayerModels/blob/master/CustomPlayerModels/src/shared/java/com/tom/cpm/shared/paste/PasteClient.java)
 
+
+<a name="download"/>
+
 ### 下载
 URL：`raw/<粘贴ID>`
+
+
+<a name="connect"/>
 
 ### 连接
 URL：`api/connect?name=<玩家名称>`  
@@ -48,6 +60,9 @@ Java示例代码：
 
 调用 [认证](#认证) 完成会话设置。
 
+
+<a name="authenticate"/>
+
 ### 认证
 URL：`api/session`  
 HTTP 报头：
@@ -55,6 +70,9 @@ HTTP 报头：
 
 响应：（JSON）
 	成功时返回空 JSON
+
+
+<a name="list"/>
 
 ### 列表
 URL：`api/list`  
@@ -71,6 +89,9 @@ HTTP 报头：
  * maxSize  
  * maxFiles  
 
+
+<a name="upload"/>
+
 ### 上传
 URL: `api/upload`  
 HTTP 报头：
@@ -84,6 +105,9 @@ Post body：粘贴内容
 响应：（JSON）
  * id：粘贴的新随机粘贴 ID
 
+
+<a name="delete"/>
+
 ### 删除
 URL: `api/delete?file=<paste_id>`  
 HTTP 报头：
@@ -92,6 +116,9 @@ HTTP 报头：
 需要身份验证
 响应：（JSON）
 	成功时返回空 JSON
+
+
+<a name="update"/>
 
 ### 更新
 URL: `api/update?file=<paste_id>`  
@@ -105,6 +132,9 @@ Post body：粘贴内容
 响应：（JSON）
 	成功时返回空 JSON
 	
+
+<a name="browser-login"/>
+
 ### 浏览器登录
 URL: `api/browser_login`
 HTTP 报头：
@@ -114,6 +144,9 @@ HTTP 报头：
 响应：（JSON）
  * id：浏览器登录令牌，有效期 5 分钟，可与`/login.html?id=<id>`站点一起使用
 
+
+<a name="app-login"/>
+
 ### 应用程序登录
 HTTP 报头：
  * AppID：<应用程序 ID>
@@ -121,6 +154,9 @@ HTTP 报头：
 响应：（JSON）
  * id：应用程序登录令牌有效期为 5 分钟，可与`/auth.html?id=<id>`站点一起使用
  
+
+<a name="app-check"/>
+
 ### 应用程序检查
 URL: `api/app_check`
 HTTP 报头：
@@ -132,6 +168,9 @@ HTTP 报头：
 或者
  * 如果尚未授权，则为空 JSON
  
+
+<a name="app-token-request"/>
+
 ### 应用程序令牌请求
 URL: `api/app_token_req`
 HTTP 报头：
@@ -140,6 +179,9 @@ HTTP 报头：
  
 响应：（JSON） 
  * id：粘贴可用于[列表](#列表)、[上传](#上传)、[删除](#删除)、[更新](#更新)的会话令牌
+
+
+<a name="error-messages"/>
 
 ### 错误信息
 响应：（JSON） 
