@@ -20,6 +20,9 @@ public class Spinner extends GuiElement implements Focusable {
 	private TextField txtf;
 	private boolean txtfNeedsUpdate;
 	private String error, lastValue;
+	// for holding down the mouse on the up/down buttons
+	private java.util.Timer mouseRepeatTimer = new java.util.Timer();
+	private java.util.TimerTask mouseRepeatTask = null;
 
 	public Spinner(IGui gui) {
 		super(gui);
@@ -57,24 +60,44 @@ public class Spinner extends GuiElement implements Focusable {
 	@Override
 	public void mouseClick(MouseEvent e) {
 		if(bounds.isInBounds(e.x, e.y) && enabled) {
-			Box bUp = new Box(bounds.x + bounds.w - 9, bounds.y, bounds.w, bounds.h / 2);
-			Box bDown = new Box(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, bounds.w, bounds.h / 2);
-			float v = gui.isAltDown() && dp > 1 ? (gui.isShiftDown() && dp > 2 ? 0.001f : 0.01f) : (gui.isShiftDown() && dp > 0 ? 0.1f : (gui.isCtrlDown() ? (gui.isShiftDown() ? 100f : 10f) : 1f));
-			if(!e.isConsumed()) {
-				if(bUp.isInBounds(e.x, e.y)) {
-					value += v;
-					changeListeners.forEach(Runnable::run);
-					txtf.setText(lastValue = roundValue());
-					e.consume();
-				} else if(bDown.isInBounds(e.x, e.y)) {
-					value -= v;
-					changeListeners.forEach(Runnable::run);
-					txtf.setText(lastValue = roundValue());
-					e.consume();
-				}
-			}
+			if (e.isConsumed())return;
+			this.arrowClicked(e, 0);
 		}
 		txtf.mouseClick(e);
+	}
+
+	@Override
+	public void mouseRelease(MouseEvent e) {
+		if (this.mouseRepeatTask != null) this.mouseRepeatTask.cancel();
+	}
+
+	// keeps looping until mouse is released
+	private void arrowClicked(MouseEvent e, int counter) {
+		Box bUp = new Box(bounds.x + bounds.w - 9, bounds.y, bounds.w, bounds.h / 2);
+		Box bDown = new Box(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, bounds.w, bounds.h / 2);
+		float v = gui.isAltDown() && dp > 1 ? (gui.isShiftDown() && dp > 2 ? 0.001f : 0.01f) : (gui.isShiftDown() && dp > 0 ? 0.1f : (gui.isCtrlDown() ? (gui.isShiftDown() ? 100f : 10f) : 1f));
+		if(bUp.isInBounds(e.x, e.y)) {
+			value += v;
+			changeListeners.forEach(Runnable::run);
+			txtf.setText(lastValue = roundValue());
+			e.consume();
+		} else if(bDown.isInBounds(e.x, e.y)) {
+			value -= v;
+			changeListeners.forEach(Runnable::run);
+			txtf.setText(lastValue = roundValue());
+			e.consume();
+		}
+
+		this.mouseRepeatTask = new java.util.TimerTask() {
+			@Override
+			public void run() {
+				Spinner.this.arrowClicked(new MouseEvent(e.x, e.y, e.btn), counter+1);
+			}
+		};
+		this.mouseRepeatTimer.schedule(
+				this.mouseRepeatTask,
+				Math.max(500 - counter * 100, 50)
+		);
 	}
 
 	@Override
