@@ -20,9 +20,8 @@ public class Spinner extends GuiElement implements Focusable {
 	private TextField txtf;
 	private boolean txtfNeedsUpdate;
 	private String error, lastValue;
-	// for holding down the mouse on the up/down buttons
-	private java.util.Timer mouseRepeatTimer = new java.util.Timer();
-	private java.util.TimerTask mouseRepeatTask = null;
+	private MouseEvent currentClick;
+	private float mouseRepeatTimer;
 
 	public Spinner(IGui gui) {
 		super(gui);
@@ -55,24 +54,42 @@ public class Spinner extends GuiElement implements Focusable {
 		if(txtf.isFocused() && error != null) {
 			gui.drawRectangle(bounds.x, bounds.y, bounds.w, bounds.h, 0xffff0000);
 		}
+		// mouse click repeat
+		if (currentClick != null) {
+			mouseRepeatTimer -= partialTicks;
+			if (mouseRepeatTimer <= 0) {
+				arrowClicked(currentClick);
+				mouseRepeatTimer = 1;
+			}
+		}
 	}
 
 	@Override
 	public void mouseClick(MouseEvent e) {
 		if(bounds.isInBounds(e.x, e.y) && enabled) {
 			if (e.isConsumed())return;
-			this.arrowClicked(e, 0);
+			arrowClicked(e);
+			// new mouse event since mouseDrag modifies its position
+			currentClick = new MouseEvent(e.x, e.y, e.btn);
+			mouseRepeatTimer = 10;
 		}
 		txtf.mouseClick(e);
 	}
 
+	public void mouseDrag(MouseEvent e) {
+		if (currentClick != null) {
+			currentClick.x = e.x;
+			currentClick.y = e.y;
+		}
+	}
+
 	@Override
 	public void mouseRelease(MouseEvent e) {
-		if (this.mouseRepeatTask != null) this.mouseRepeatTask.cancel();
+		currentClick = null;
 	}
 
 	// keeps looping until mouse is released
-	private void arrowClicked(MouseEvent e, int counter) {
+	private void arrowClicked(MouseEvent e) {
 		Box bUp = new Box(bounds.x + bounds.w - 9, bounds.y, bounds.w, bounds.h / 2);
 		Box bDown = new Box(bounds.x + bounds.w - 9, bounds.y + bounds.h / 2, bounds.w, bounds.h / 2);
 		float v = gui.isAltDown() && dp > 1 ? (gui.isShiftDown() && dp > 2 ? 0.001f : 0.01f) : (gui.isShiftDown() && dp > 0 ? 0.1f : (gui.isCtrlDown() ? (gui.isShiftDown() ? 100f : 10f) : 1f));
@@ -87,17 +104,6 @@ public class Spinner extends GuiElement implements Focusable {
 			txtf.setText(lastValue = roundValue());
 			e.consume();
 		}
-
-		this.mouseRepeatTask = new java.util.TimerTask() {
-			@Override
-			public void run() {
-				Spinner.this.arrowClicked(new MouseEvent(e.x, e.y, e.btn), counter+1);
-			}
-		};
-		this.mouseRepeatTimer.schedule(
-				this.mouseRepeatTask,
-				Math.max(500 - counter * 100, 50)
-		);
 	}
 
 	@Override
