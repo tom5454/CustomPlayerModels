@@ -15,15 +15,17 @@ public class Cube {
 	public static final int HAS_MESH    = 1 << 0;
 	public static final int HAS_TEXTURE = 1 << 1;
 	public static final int HIDDEN      = 1 << 2;
-	public static final int SCALED      = 1 << 3;
+	public static final int MESH_SCALED = 1 << 3;
 	public static final int UV_SCALED   = 1 << 4;
 	public static final int MC_SCALED   = 1 << 5;
+	public static final int SCALED      = 1 << 6;
 
 	public Vec3f offset;
 	public Vec3f rotation;
 	public Vec3f pos;
 	public Vec3f size;
 	public Vec3f scale;
+	public Vec3f meshScale;
 	public int parentId;
 	public int id;
 	public int rgb;
@@ -38,6 +40,7 @@ public class Cube {
 		c.pos = din.readVec6b();
 		c.offset = din.readVec6b();
 		c.rotation = din.readAngle();
+		c.meshScale = new Vec3f(1, 1, 1);
 		c.scale = new Vec3f(1, 1, 1);
 		c.parentId = din.readVarInt();
 		int tex = din.readByte();
@@ -88,6 +91,12 @@ public class Cube {
 			c.offset = new Vec3f();
 		}
 
+		if ((flags & MESH_SCALED) != 0) {
+			c.meshScale = din.readVarVec3();
+		} else {
+			c.meshScale = new Vec3f(1, 1, 1);
+		}
+
 		if ((flags & SCALED) != 0) {
 			c.scale = din.readVarVec3();
 		} else {
@@ -103,7 +112,7 @@ public class Cube {
 		c.pos = new Vec3f((Map<String, Object>) map.get("pos"), new Vec3f());
 		c.rotation = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f());
 		c.size = new Vec3f((Map<String, Object>) map.get("size"), new Vec3f(1, 1, 1));
-		c.scale = new Vec3f((Map<String, Object>) map.get("scale"), new Vec3f(1, 1, 1));
+		c.meshScale = new Vec3f((Map<String, Object>) map.get("scale"), new Vec3f(1, 1, 1));
 		c.u = ((Number)map.get("u")).intValue();
 		c.v = ((Number)map.get("v")).intValue();
 		c.rgb = Integer.parseUnsignedInt((String) map.get("color"), 16);
@@ -144,11 +153,12 @@ public class Cube {
 		boolean hasMesh = !cube.size.epsilon(0.001f);
 		boolean texture = hasMesh && cube.texSize != 0;
 		boolean hidden = cube.hidden;
+		boolean mesh_scaled = cube.meshScale != null && !cube.meshScale.sub(1).epsilon(0.001f);
 		boolean scaled = cube.scale != null && !cube.scale.sub(1).epsilon(0.001f);
 		boolean uv_scaled = texture && cube.texSize != 1;
 		boolean mc_scaled = hasMesh && Math.abs(cube.mcScale) > 0.0001f;
 		int flags = 0;
-		boolean[] flagsArray = new boolean[] {hasMesh, texture, hidden, scaled, uv_scaled, mc_scaled};
+		boolean[] flagsArray = new boolean[] {hasMesh, texture, hidden, mesh_scaled, uv_scaled, mc_scaled, scaled};
 		for (int i = flagsArray.length - 1;i >= 0;i--)
 			flags = (flags << 1) | (flagsArray[i] ? 1 : 0);
 
@@ -177,6 +187,10 @@ public class Cube {
 			}
 		}
 
+		if (mesh_scaled) {
+			dout.writeVarVec3(cube.meshScale);
+		}
+
 		if (scaled) {
 			dout.writeVarVec3(cube.scale);
 		}
@@ -187,7 +201,7 @@ public class Cube {
 		map.put("pos", cube.pos.toMap());
 		map.put("rotation", cube.rotation.toMap());
 		map.put("size", cube.size.toMap());
-		if (cube.scale != null)map.put("scale", cube.scale.toMap());
+		if (cube.meshScale != null)map.put("scale", cube.meshScale.toMap());
 		map.put("u", cube.u);
 		map.put("v", cube.v);
 		map.put("color", Integer.toHexString(cube.rgb));

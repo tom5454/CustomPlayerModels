@@ -56,7 +56,7 @@ public class PosPanel extends Panel {
 		addVec3("offset", v -> editor.setVec(v, VecType.OFFSET), this, editor.setOffset, 2, tabHandler);
 		addVec3("rotation", v -> editor.setVec(v, VecType.ROTATION), this, editor.setRot, 1, tabHandler);
 		addVec3("position", v -> editor.setVec(v, VecType.POSITION), this, editor.setPosition, 2, tabHandler);
-		Panel sc =  addVec3("scale", v -> editor.setVec(v, VecType.SCALE), this, editor.setScale, 2, tabHandler);
+		Panel sc =  addVec3("scale", v -> editor.setVec(v, VecType.MESH_SCALE), this, editor.setMeshScale, 2, tabHandler);
 		editor.updateGui.add(() -> {
 			sc.setVisible(editor.displayAdvScaling);
 			layout.reflow();

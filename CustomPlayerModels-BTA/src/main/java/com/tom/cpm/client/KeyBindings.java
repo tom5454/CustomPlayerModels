@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.options.components.KeyBindingComponent;
 import net.minecraft.client.gui.options.components.OptionsCategory;
 import net.minecraft.client.gui.options.data.OptionsPages;
+import net.minecraft.client.input.InputDevice;
 import net.minecraft.client.option.KeyBinding;
 
 import com.tom.cpl.gui.IKeybind;
@@ -23,7 +24,7 @@ public class KeyBindings implements IKeybind {
 	public static void init() {
 		cpmBinds = new OptionsCategory("key.cpm.category");
 
-		gestureMenuBinding = new KeyBinding("key.cpm.gestureMenu").bindKeyboard(Keyboard.KEY_G);
+		gestureMenuBinding = new KeyBinding("key.cpm.gestureMenu").setDefault(InputDevice.keyboard, Keyboard.KEY_G);
 		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu"));
 
 		renderToggleBinding = new KeyBinding("key.cpm.renderToggle");

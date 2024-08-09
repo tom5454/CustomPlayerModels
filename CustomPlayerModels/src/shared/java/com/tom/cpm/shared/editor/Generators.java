@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -14,6 +16,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
+import com.tom.cpl.gui.elements.ChooseElementPopup;
 import com.tom.cpl.gui.elements.ConfirmPopup;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.math.Box;
@@ -24,6 +27,7 @@ import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Direction.Axis;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
+import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
@@ -43,8 +47,10 @@ import com.tom.cpm.shared.editor.util.SafetyLevel.SafetyReport;
 import com.tom.cpm.shared.model.PartValues;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.PlayerPartValues;
+import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.ItemRenderer;
+import com.tom.cpm.shared.model.render.PerFaceUV;
 import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
 import com.tom.cpm.shared.skin.TextureType;
@@ -61,6 +67,8 @@ public class Generators {
 		register("button.cpm.tools.safetyLevel", null, Generators::checkSafetyLevel);
 		register("button.cpm.tools.mirror", null, Generators::mirrorElement);
 		register("button.cpm.tools.exportUVMap", "tooltip.cpm.tools.exportUVMap", Generators::exportUVMap);
+		register("button.cpm.tools.make2ndLayer", "tooltip.cpm.tools.make2ndLayer", Generators::make2ndLayer);
+		register("button.cpm.tools.makeArmorLayer", "tooltip.cpm.tools.makeArmorLayer", Generators::makeArmorLayer);
 	}
 
 	public String name;
@@ -414,12 +422,126 @@ public class Generators {
 				ab.updateValueOp(f, f.getPosition(), pos, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, FrameData::setPos, v -> {});
 				ab.updateValueOp(f, f.getRotation(), rot, 0, 360, true, FrameData::setRot, v -> {});
 			}));
-			ab.onAction(editor::updateGui);
+			ab.onAction(editor.selectedAnim, EditorAnim::clearCache);
+			ab.onRun(editor::updateGui);
 			ab.execute();
 		}
 	}
 
 	private static void exportUVMap(EditorGui eg) {
 		eg.openPopup(new ExportUVMapPopup(eg));
+	}
+
+	private static void make2ndLayer(EditorGui eg) {
+		Editor editor = eg.getEditor();
+		ActionBuilder b = eg.getEditor().action("i", "button.cpm.tools.make2ndLayer");
+		editor.forEachSeletectedElement(el -> {
+			if(el instanceof ModelElement) {
+				ModelElement me = (ModelElement) el;
+				if(me.type == ElementType.NORMAL) {
+					ModelElement elem = new ModelElement(editor);
+					b.addToList(me.children, elem);
+					elem.parent = me;
+					elem.size = new Vec3f(me.size);
+					elem.offset = new Vec3f(me.offset);
+					elem.texture = me.texture;
+					if (me.texture) {
+						if (me.faceUV != null) {
+							elem.faceUV = new PerFaceUV(me.faceUV);
+							elem.faceUV.faces.values().forEach(f -> {
+								int d = Math.abs(f.sx - f.ex);
+								f.sx += d;
+								f.ex += d;
+							});
+						} else {
+							elem.u = me.u + me.getTextureBox().w;
+							elem.v = me.v;
+							elem.texSize = me.texSize;
+							elem.singleTex = me.singleTex;
+						}
+					}
+					elem.name = editor.ui.i18nFormat("label.cpm.generated2ndLayer", me.name);
+					elem.mcScale = 0.25F;
+				}
+			}
+		});
+		b.onRun(editor::updateGui);
+		b.execute();
+	}
+
+	private static void makeArmorLayer(EditorGui eg) {
+		Editor editor = eg.getEditor();
+		NameMapper<RootModelType> map = new NameMapper<>(RootGroups.ARMOR.types, n -> editor.ui.i18nFormat("label.cpm.elem." + n.getName()));
+		eg.openPopup(new ChooseElementPopup<>(eg, editor.ui.i18nFormat("label.cpm.model.selectArmorRootToMake"), map.asList(), root -> {
+			RootModelType rmt = root.getElem();
+			ModelElement addTo = findPart(editor, rmt);
+
+			if (addTo == null) {
+				editor.ui.displayMessagePopup(editor.ui.i18nFormat("label.cpm.error"), editor.ui.i18nFormat("label.cpm.model.rootNotFound"));
+				return;
+			}
+
+			ActionBuilder b = eg.getEditor().action("i", "button.cpm.tools.makeArmorLayer");
+			Map<ModelElement, ModelElement> ctLookup = new HashMap<>();
+			editor.forEachSeletectedElement(el -> {
+				if(el instanceof ModelElement) {
+					ModelElement me = (ModelElement) el;
+					if (me.type == ElementType.NORMAL) {
+						makeArmorLayer(editor, b, me, addTo, ctLookup, rmt);
+					}
+				}
+			});
+			b.onRun(editor::updateGui);
+			b.execute();
+		}, null));
+	}
+
+	private static void makeArmorLayer(Editor editor, ActionBuilder ab, ModelElement me, ModelElement addTo, Map<ModelElement, ModelElement> ctLookup, RootModelType rmt) {
+		ModelElement i = me;
+		List<ModelElement> parts = new ArrayList<>();
+		while (i.type == ElementType.NORMAL) {
+			parts.add(i);
+			i = i.parent;
+		}
+		i = addTo;
+		for (int j = parts.size() - 1; j >= 0; j--) {
+			ModelElement el = parts.get(j);
+
+			final ModelElement fi = i;
+			i = ctLookup.computeIfAbsent(el, __ -> {
+				for (ModelElement c : fi.children) {
+					if (c.copyTransform != null && c.copyTransform.from == el) {
+						return c;
+					}
+				}
+
+				ModelElement elem = new ModelElement(editor);
+				ab.addToList(fi.children, elem);
+				elem.size = new Vec3f(0);
+				elem.name = editor.ui.i18nFormat("label.cpm.generatedArmorLayer.ct", el.name);
+				elem.parent = fi;
+				elem.copyTransform = new CopyTransformEffect(elem);
+				elem.copyTransform.from = el;
+				elem.copyTransform.setAll(true);
+				return elem;
+			});
+		}
+
+		if (i.size.epsilon(0.1f)) {
+			ab.updateValueOp(i, i.size, new Vec3f(me.size), (a, b) -> a.size = b);
+			ab.updateValueOp(i, i.offset, new Vec3f(me.offset), (a, b) -> a.offset = b);
+			ab.updateValueOp(i, i.texture, true, (a, b) -> a.texture = b);
+			ab.updateValueOp(i, i.name, editor.ui.i18nFormat("label.cpm.generatedArmorLayer", me.name), (a, b) -> a.name = b);
+			ab.updateValueOp(i, i.mcScale, rmt.getDefaultSize(editor.skinType).getMCScale(), (a, b) -> a.mcScale = b);
+		} else {
+			ModelElement elem = new ModelElement(editor);
+			ab.addToList(i.children, elem);
+			elem.parent = i;
+			elem.size = new Vec3f(me.size);
+			elem.offset = new Vec3f(me.offset);
+			elem.texture = true;
+			elem.name = editor.ui.i18nFormat("label.cpm.generatedArmorLayer", me.name);
+			elem.mcScale = rmt.getDefaultSize(editor.skinType).getMCScale();
+		}
 	}
 }

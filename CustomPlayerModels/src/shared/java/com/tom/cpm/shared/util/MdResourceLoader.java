@@ -120,13 +120,9 @@ public class MdResourceLoader implements MarkdownResourceLoader {
 		} else if(url.startsWith(WIKI_ROOT)) {
 			Matcher m = LOCALE_EXT.matcher(url);
 			if (m.matches()) {
-				CompletableFuture<byte[]> cf;
 				String b = m.group(1);
 				String lang = m.group(2);
-				if (b.equals("_Sidebar"))
-					cf = fetch(LOCALE_ROOT + lang + "/_Sidebar.md", offline, false);
-				else
-					cf = fetch(LOCALE_ROOT + lang + "/" + b + "-" + lang + ".md", offline, false);
+				CompletableFuture<byte[]>  cf = fetch(LOCALE_ROOT + lang + "/" + b + "-" + lang + ".md", offline, false);
 				return cf.exceptionally(ex -> null).thenCompose(d -> {
 					if (d == null)return fetch(WIKI_ROOT + "/" + b + ".md", offline, logWarn);
 					else return CompletableFuture.completedFuture(d);

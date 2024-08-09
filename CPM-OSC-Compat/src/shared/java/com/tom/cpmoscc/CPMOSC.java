@@ -19,9 +19,7 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.AnimationState;
-import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.ServerAnimationState;
 import com.tom.cpm.shared.animation.VanillaPose;
@@ -29,6 +27,9 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.network.ServerCaps;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction.ActionType;
+import com.tom.cpm.shared.parts.anim.menu.CustomPoseGestureButtonData;
 import com.tom.cpm.shared.util.ErrorLog;
 import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 
@@ -82,32 +83,26 @@ public class CPMOSC {
 						}
 						if(def != null) {
 							AnimationRegistry reg = def.getAnimations();
-							reg.forEachLayer((g, id) -> {
-								if(g.command)return;
-								String gid = g.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "");
+							reg.getCommandActionsMap().values().forEach(a -> {
+								if (isCommandControlledTemp(a))return;
+								String gid = a.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "");
 								if (gid.isEmpty())
-									gid = "unnamed" + id;
+									gid = "unnamed";
 								try {
-									if(st.gestureData.length > id) {
-										if(g.type == AnimationType.VALUE_LAYER)
-											transmit.send("/cpm/layer/" + gid + "/value", Integer.valueOf(st.gestureData[id]));
-										else
-											transmit.send("/cpm/layer/" + gid + "/toggle", st.gestureData[id] != 0);
-									} else {
-										if(g.type == AnimationType.VALUE_LAYER)
-											transmit.send("/cpm/layer/" + gid + "/value", Integer.valueOf(g.defVal));
-										else
-											transmit.send("/cpm/layer/" + gid + "/toggle", g.defVal != 0);
-									}
+									int value = a.getValue();
+									if(a.getType() == ActionType.VALUE)
+										transmit.send("/cpm/layer/" + gid + "/value", value);
+									else
+										transmit.send("/cpm/layer/" + gid + "/toggle", value != 0);
 								} catch (IOException e) {
 								}
 							});
 							int gesture = st.encodedState;
-							Gesture g = null;
+							CustomPoseGestureButtonData g = null;
 							if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES) && st.gestureData != null && st.gestureData.length > 1) {
-								g = reg.getGesture(st.gestureData[1]);
+								g = reg.getGestureById(st.gestureData[1]);
 							} else {
-								g = reg.getGesture(gesture);
+								g = reg.getGestureById(gesture);
 							}
 							transmit.send("/cpm/gesture", g != null ? g.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "") : "null");
 							VanillaPose pose = st.getMainPose(time, reg);
@@ -115,10 +110,10 @@ public class CPMOSC {
 							IPose currentPose = pose;
 							if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES) && st.gestureData != null && st.gestureData.length > 1) {
 								if(st.gestureData[0] != 0) {
-									currentPose = reg.getPose(st.gestureData[0], player.currentPose);
+									currentPose = reg.getPoseById(st.gestureData[0], player.currentPose);
 								}
 							} else {
-								currentPose = reg.getPose(gesture, player.currentPose);
+								currentPose = reg.getPoseById(gesture, player.currentPose);
 							}
 							if(currentPose instanceof VanillaPose) {
 								VanillaPose e = (VanillaPose) currentPose;
@@ -130,12 +125,12 @@ public class CPMOSC {
 							}
 							if (st.playerInventory != null) {
 								Inventory i = st.playerInventory;
-								sendItem(def, "held_item", getStackTemp(i, i.getNamedSlotId(NamedSlot.MAIN_HAND)));
-								sendItem(def, "armor/helmet", getStackTemp(i, i.getNamedSlotId(NamedSlot.ARMOR_HELMET)));
-								sendItem(def, "armor/chestplate", getStackTemp(i, i.getNamedSlotId(NamedSlot.ARMOR_CHESTPLATE)));
-								sendItem(def, "armor/leggings", getStackTemp(i, i.getNamedSlotId(NamedSlot.ARMOR_LEGGINGS)));
-								sendItem(def, "armor/boots", getStackTemp(i, i.getNamedSlotId(NamedSlot.ARMOR_BOOTS)));
-								sendItem(def, "off_hand", getStackTemp(i, i.getNamedSlotId(NamedSlot.OFF_HAND)));
+								sendItem(def, "held_item", i.getStack(i.getNamedSlotId(NamedSlot.MAIN_HAND)));
+								sendItem(def, "armor/helmet", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_HELMET)));
+								sendItem(def, "armor/chestplate", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_CHESTPLATE)));
+								sendItem(def, "armor/leggings", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_LEGGINGS)));
+								sendItem(def, "armor/boots", i.getStack(i.getNamedSlotId(NamedSlot.ARMOR_BOOTS)));
+								sendItem(def, "off_hand", i.getStack(i.getNamedSlotId(NamedSlot.OFF_HAND)));
 								transmit.send("/cpm/heldSlot", i.getNamedSlotId(NamedSlot.MAIN_HAND));
 							}
 							World w = st.world;
@@ -143,6 +138,7 @@ public class CPMOSC {
 								sendBlock(def, "below", w.getBlock(0, -1, 0));
 								sendBlock(def, "feet", w.getBlock(0, 0, 0));
 								sendBlock(def, "head", w.getBlock(0, 1, 0));
+								sendBlock(def, "above", w.getBlock(0, 2, 0));
 								transmit.send("/cpm/world/canSeeSky", w.isCovered());
 								sendEnum("/cpm/world/weather", w.getWeather());
 								transmit.send("/cpm/world/y", (w.getYHeight() - w.getMinHeight()) / (float) (w.getMaxHeight() - w.getMinHeight()), w.getYHeight(), w.getMinHeight(), w.getMaxHeight());
@@ -169,11 +165,6 @@ public class CPMOSC {
 				}
 			}
 		}
-	}
-
-	private static Stack getStackTemp(Inventory t, int i) {
-		if(i >= 0 && i < t.size())return t.getInSlot(i);
-		else return Stack.EMPTY;
 	}
 
 	private static <T> List<String> listTags(TagManager<T> mngr, T e) {
@@ -239,5 +230,16 @@ public class CPMOSC {
 			}
 		}
 		return osc;
+	}
+
+	//TODO update to api method a.isCommandControlled(), missing in current beta test
+	public static boolean isCommandControlledTemp(CommandAction a) {
+		try {
+			Field ccf = a.getClass().getDeclaredField("cc");
+			ccf.setAccessible(true);
+			return ccf.getBoolean(a);
+		} catch (Exception e) {
+			return false;
+		}
 	}
 }

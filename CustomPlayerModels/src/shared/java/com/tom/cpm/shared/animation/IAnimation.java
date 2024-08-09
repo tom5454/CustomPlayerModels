@@ -1,7 +1,6 @@
 package com.tom.cpm.shared.animation;
 
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
-import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 
 public interface IAnimation {
@@ -16,7 +15,7 @@ public interface IAnimation {
 		return true;
 	}
 
-	default boolean canPlay(Player<?> player, AnimationMode mode) {
+	default boolean useTriggerTime() {
 		return true;
 	}
 }

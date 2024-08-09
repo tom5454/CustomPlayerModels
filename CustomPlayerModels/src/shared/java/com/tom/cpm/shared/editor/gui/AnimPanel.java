@@ -2,6 +2,8 @@ package com.tom.cpm.shared.editor.gui;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.KeybindHandler;
@@ -47,6 +49,7 @@ public class AnimPanel extends Panel {
 	private ListPicker<NamedElement<EditorAnim>> animSel;
 	private TabFocusHandler tabHandler;
 	private Button prevFrm, nextFrm, clearAnimData;
+	private ButtonIcon newFrmBtn;
 	private AnimFrame cpyFrame;
 	private FrameData cpyData;
 
@@ -145,6 +148,9 @@ public class AnimPanel extends Panel {
 						}
 						animPopup.addButton(gui.i18nFormat("button.cpm.reverseAnimation"), this0::reverseAnim).
 						setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.reverseAnimation")));
+
+						animPopup.addButton(gui.i18nFormat("button.cpm.clearFrame"), this0::clearFrame).
+						setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.clearFrame")));
 					}
 					if(animPopup.getY() != 0)
 						animPopup.display(p.x - evt.x + bounds.x / 2, p.y - evt.y + bounds.h + bounds.y, 160);
@@ -192,8 +198,9 @@ public class AnimPanel extends Panel {
 		p.setBounds(new Box(0, 0, bounds.w, 20));
 		addElement(p);
 
-		ButtonIcon newFrmBtn = new ButtonIcon(gui, "editor", 0, 16, editor::addNewAnimFrame);
+		newFrmBtn = new ButtonIcon(gui, "editor", 0, 16, this::newFrame);
 		newFrmBtn.setBounds(new Box(5, 0, 20, 20));
+		newFrmBtn.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.anim.newFrame")));
 		p.addElement(newFrmBtn);
 		editor.setFrameAddEn.add(newFrmBtn::setEnabled);
 
@@ -357,8 +364,8 @@ public class AnimPanel extends Panel {
 		if(editor.selectedAnim != null && cpyData != null && me != null) {
 			ActionBuilder ab = editor.action("setAnim", "action.cpm.value");
 			editor.selectedAnim.getSelectedFrame().importFrameData(ab, me, cpyData);
+			ab.onAction(editor.selectedAnim::clearCache);
 			ab.execute();
-			cpyData = null;
 			editor.updateGui();
 		}
 	}
@@ -368,8 +375,8 @@ public class AnimPanel extends Panel {
 		if(editor.selectedAnim != null && cpyData != null && me != null) {
 			ActionBuilder ab = editor.action("setAnim", "action.cpm.value");
 			editor.selectedAnim.getFrames().forEach(f -> f.importFrameData(ab, me, cpyData));
+			ab.onAction(editor.selectedAnim::clearCache);
 			ab.execute();
-			cpyData = null;
 			editor.updateGui();
 		}
 	}
@@ -381,6 +388,7 @@ public class AnimPanel extends Panel {
 			if(d != null) {
 				ActionBuilder ab = editor.action("i", "button.cpm.tools.mirror");
 				d.mirror(ab);
+				ab.onAction(editor.selectedAnim::clearCache);
 				ab.execute();
 			}
 		}
@@ -392,6 +400,26 @@ public class AnimPanel extends Panel {
 			editor.selectedAnim.reverseFrameOrder(ab);
 			ab.execute();
 		}
+	}
+
+	private void clearFrame() {
+		if(editor.selectedAnim != null) {
+			ActionBuilder ab = editor.action("i", "button.cpm.clearFrame");
+			Map<ModelElement, FrameData> comp = editor.selectedAnim.getSelectedFrame().getComponents();
+			Map<ModelElement, FrameData> bck = new HashMap<>(comp);
+			ab.onRun(() -> {
+				comp.clear();
+			});
+			ab.onUndo(() -> {
+				comp.putAll(bck);
+			});
+			ab.onAction(editor.selectedAnim::clearCache);
+			ab.execute();
+		}
+	}
+
+	private void newFrame() {
+		editor.addNewAnimFrame(!gui.isShiftDown());
 	}
 
 	@Override
@@ -415,6 +443,11 @@ public class AnimPanel extends Panel {
 			prevFrm.setText("<");
 			nextFrm.setText(">");
 			clearAnimData.setText(gui.i18nFormat("button.cpm.clearAnimData"));
+		}
+		if (gui.isShiftDown()) {
+			newFrmBtn.setU(96);
+		} else {
+			newFrmBtn.setU(0);
 		}
 		super.draw(event, partialTicks);
 	}
@@ -444,6 +477,7 @@ public class AnimPanel extends Panel {
 		h.registerKeybind(Keybinds.PASTE_ANIM_PART, this::pasteData);
 		h.registerKeybind(Keybinds.ANIM_PREV_FRAME, editor::animPrevFrm);
 		h.registerKeybind(Keybinds.ANIM_NEXT_FRAME, editor::animNextFrm);
+		h.registerKeybind(Keybinds.ANIM_NEW_FRAME, this::newFrame);
 		super.keyPressed(event);
 	}
 }

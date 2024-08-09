@@ -25,6 +25,8 @@ import com.tom.cpl.util.EmbeddedLocalizations;
 import com.tom.cpl.util.Util;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.definition.Link;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
@@ -38,6 +40,8 @@ import com.tom.cpm.shared.gui.SelectSkinPopup;
 import com.tom.cpm.shared.gui.SkinUploadPopup;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.parts.ModelPartDefinitionLink;
+import com.tom.cpm.shared.parts.ModelPartLink;
 import com.tom.cpm.shared.util.Log;
 
 public abstract class ExportPopup extends PopupPanel {
@@ -296,12 +300,20 @@ public abstract class ExportPopup extends PopupPanel {
 
 		private void detectLink() {
 			ModelDefinition def = MinecraftClientAccess.get().getDefinitionLoader().loadModel(editorGui.getEditor().vanillaSkin, MinecraftClientAccess.get().getClientPlayer());
-			if(def != null) {
-				defLink = def.findDefLink();
+			boolean incompatibleDef = false;
+			if (def != null) {
+				ModelPartLink link = def.findDefLink();
+				defLink = link.getLink();
+				if ((link instanceof ModelPartDefinitionLink) == ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false)) {
+					defLink = null;
+					incompatibleDef = true;
+				}
 			}
 			okDef.setEnabled(defLink != null);
 			if(defLink != null) {
 				okDef.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export_def")));
+			} else if (incompatibleDef) {
+				okDef.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export_def.incompatible")));
 			} else {
 				okDef.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export_def.noLink")));
 			}
@@ -591,7 +603,7 @@ public abstract class ExportPopup extends PopupPanel {
 					export();
 				}
 			});
-			okDef.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export_def")));
+			okDef.setTooltip(new Tooltip(e, gui.i18nFormat("tooltip.cpm.export_def.model")));
 			okDef.setBounds(new Box(90, 235, 80, 20));
 			addElement(okDef);
 
@@ -645,18 +657,31 @@ public abstract class ExportPopup extends PopupPanel {
 			String fileName = nameField.getText().replaceAll("[^a-zA-Z0-9\\.\\-]", "") + ".cpmmodel";
 			File selFile = new File(modelsDir, fileName);
 			defLink = null;
+			boolean incompatibleDef = false;
 			if(selFile.exists()) {
 				try {
 					ModelFile mf = ModelFile.load(selFile);
 					ModelDefinition def = MinecraftClientAccess.get().getDefinitionLoader().loadModel(mf.getDataBlock(), MinecraftClientAccess.get().getClientPlayer());
 					if(def != null) {
-						defLink = def.findDefLink();
+						ModelPartLink link = def.findDefLink();
+						defLink = link.getLink();
+						if ((link instanceof ModelPartDefinitionLink) == ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false)) {
+							defLink = null;
+							incompatibleDef = true;
+						}
 					}
 				} catch (IOException e) {
 					Log.error("Failed to load file", e);
 				}
 			}
 			okDef.setEnabled(defLink != null);
+			if(defLink != null) {
+				okDef.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export_def.model")));
+			} else if (incompatibleDef) {
+				okDef.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export_def.incompatible")));
+			} else {
+				okDef.setTooltip(new Tooltip(editorGui, gui.i18nFormat("tooltip.cpm.export_def.noLink.model")));
+			}
 		}
 
 		@Override

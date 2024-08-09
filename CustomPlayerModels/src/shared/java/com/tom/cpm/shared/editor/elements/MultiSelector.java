@@ -146,8 +146,8 @@ public interface MultiSelector extends TreeElement {
 				return e.getPosition();
 			case ROTATION:
 				return e.getRotation();
-			case SCALE:
-				return e.scale;
+			case MESH_SCALE:
+				return e.meshScale;
 			case SIZE:
 				return e.size;
 			case TEXTURE:

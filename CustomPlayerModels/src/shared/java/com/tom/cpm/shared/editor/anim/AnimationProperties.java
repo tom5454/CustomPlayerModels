@@ -13,7 +13,9 @@ public class AnimationProperties {
 	public InterpolatorType it;
 	public boolean command;
 	public boolean layerCtrl;
+	public boolean mustFinish;
 
+	@Deprecated
 	public AnimationProperties(IPose pose, String displayName, AnimationType type, boolean add, boolean loop,
 			InterpolatorType it, boolean command, boolean layerCtrl) {
 		this.pose = pose;
@@ -24,5 +26,18 @@ public class AnimationProperties {
 		this.it = it;
 		this.command = command;
 		this.layerCtrl = layerCtrl;
+	}
+
+	public AnimationProperties(IPose pose, String displayName, AnimationType type, boolean add, boolean loop,
+			InterpolatorType it, boolean command, boolean layerCtrl, boolean mustFinish) {
+		this.pose = pose;
+		this.displayName = displayName;
+		this.type = type;
+		this.add = add;
+		this.loop = loop;
+		this.it = it;
+		this.command = command;
+		this.layerCtrl = layerCtrl;
+		this.mustFinish = mustFinish;
 	}
 }

@@ -1,10 +1,8 @@
 package com.tom.cpm.shared.animation;
 
 import com.tom.cpl.text.I18n;
-import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.config.Player;
 
-public class CustomPose implements IPose, IManualGesture {
+public class CustomPose implements IPose {
 	private String name;
 	public int order;
 	public boolean command;
@@ -20,7 +18,6 @@ public class CustomPose implements IPose, IManualGesture {
 		return name;
 	}
 
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -35,21 +32,6 @@ public class CustomPose implements IPose, IManualGesture {
 	@Override
 	public String toString() {
 		return "Custom Pose: " + name;
-	}
-
-	@Override
-	public String getGestureId() {
-		return "p" + name;
-	}
-
-	@Override
-	public void play(AnimationRegistry reg, Player<?> player) {
-		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setCustomPose(reg, this);
-	}
-
-	@Override
-	public AnimationType getType() {
-		return AnimationType.CUSTOM_POSE;
 	}
 
 	@Override
@@ -70,20 +52,5 @@ public class CustomPose implements IPose, IManualGesture {
 			if (other.name != null) return false;
 		} else if (!name.equals(other.name)) return false;
 		return true;
-	}
-
-	@Override
-	public int getOrder() {
-		return order;
-	}
-
-	@Override
-	public boolean isCommand() {
-		return command;
-	}
-
-	@Override
-	public boolean isLayerControlled() {
-		return layerCtrl;
 	}
 }

@@ -207,6 +207,7 @@ public class ModelDefinition {
 			cube.pos = new Vec3f(0, 0, 0);
 			cube.size = val.getSize();
 			cube.scale = new Vec3f(1, 1, 1);
+			cube.meshScale = new Vec3f(1, 1, 1);
 			cube.u = val.u;
 			cube.v = val.v;
 			cube.texSize = 1;
@@ -322,10 +323,10 @@ public class ModelDefinition {
 		textures.put(key, value);
 	}
 
-	public Link findDefLink() {
+	public ModelPartLink findDefLink() {
 		for (IModelPart iModelPart : parts) {
 			if(iModelPart instanceof ModelPartDefinitionLink || iModelPart instanceof ModelPartCollection.PackageLink) {
-				return ((ModelPartLink) iModelPart).getLink();
+				return (ModelPartLink) iModelPart;
 			}
 		}
 		return null;

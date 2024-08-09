@@ -22,6 +22,7 @@ public enum ElementType {
 			elem.size = new Vec3f(1, 1, 1);
 			elem.rotation = new Vec3f();
 			elem.scale = new Vec3f(1, 1, 1);
+			elem.meshScale = new Vec3f(1, 1, 1);
 			elem.textureSize = 1;
 			elem.name = editor.ui.i18nFormat("label.cpm.newCube");
 			elem.rc = new RenderedCube(elem) {

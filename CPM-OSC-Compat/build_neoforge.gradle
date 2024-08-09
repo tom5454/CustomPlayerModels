@@ -15,6 +15,13 @@ repositories {
 		name = "tom5454 maven"
 		url = "https://raw.githubusercontent.com/tom5454/maven/main"
 	}
+	maven {
+    	url = "http://localhost:8000"
+		allowInsecureProtocol true
+		content {
+            includeGroup "local"
+        }
+	}
     mavenLocal()
 }
 
@@ -33,6 +40,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 runs {
     // applies to all the run configs below
     configureEach {
+    	workingDirectory project.file('run')
         // Recommended logging data for a userdev environment
         // The markers can be added/remove as needed separated by commas.
         // "SCAN": For mods scan.

@@ -210,8 +210,8 @@ public class Exporter {
 				if(el.glow) {
 					otherParts.add(new ModelPartRenderEffect(new EffectGlow(el.id)));
 				}
-				if(Math.abs(el.mcScale) > 0.0001f || Math.abs(el.scale.x - 1) > 0.01f || Math.abs(el.scale.y - 1) > 0.01f || Math.abs(el.scale.z - 1) > 0.01f) {
-					otherParts.add(new ModelPartRenderEffect(new EffectScale(el.id, el.scale, el.mcScale)));
+				if(Math.abs(el.mcScale) > 0.0001f || Math.abs(el.meshScale.x - 1) > 0.01f || Math.abs(el.meshScale.y - 1) > 0.01f || Math.abs(el.meshScale.z - 1) > 0.01f) {
+					otherParts.add(new ModelPartRenderEffect(new EffectScale(el.id, el.meshScale, el.mcScale)));
 				}
 				if(el.hidden) {
 					otherParts.add(new ModelPartRenderEffect(new EffectHide(el.id)));

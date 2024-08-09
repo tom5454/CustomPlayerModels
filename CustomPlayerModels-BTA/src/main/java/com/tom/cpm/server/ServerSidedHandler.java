@@ -24,7 +24,7 @@ public class ServerSidedHandler implements SidedHandler {
 		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
 		WorldServer ws = (WorldServer) player.world;
 		EntityTracker et = server.getEntityTracker(ws.dimension.id);
-		for (EntityTrackerEntry tr : (Set<EntityTrackerEntry>) et.trackedEntitySet) {
+		for (EntityTrackerEntry tr : et.trackedEntitySet) {
 			if (tr.trackedEntity instanceof EntityPlayer && tr.trackedPlayers.contains(player)) {
 				f.accept((EntityPlayer) tr.trackedEntity);
 			}
@@ -37,11 +37,11 @@ public class ServerSidedHandler implements SidedHandler {
 		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
 		WorldServer ws = (WorldServer) entity.world;
 		EntityTracker et = server.getEntityTracker(ws.dimension.id);
-		EntityTrackerEntry entry = (EntityTrackerEntry) et.trackedEntityHashTable.get(entity.id);
+		EntityTrackerEntry entry = et.trackedEntityHashTable.get(entity.id);
 		if (entry == null)
 			return Collections.emptySet();
 		else
-			return entry.trackedPlayers;
+			return (Set) entry.trackedPlayers;
 	}
 
 	@SuppressWarnings({ "unchecked", "deprecation" })

@@ -19,6 +19,10 @@ public class Vec3f {
 	public Vec3f() {
 	}
 
+	public Vec3f(float xyz) {
+		this(xyz, xyz, xyz);
+	}
+
 	public Vec3f(float x, float y, float z) {
 		this.x = x;
 		this.y = y;

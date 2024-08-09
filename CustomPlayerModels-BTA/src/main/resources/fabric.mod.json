@@ -38,7 +38,7 @@
   "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.13.3",
-    "minecraft": "~7.2-beta.1",
+    "minecraft": "~7.2-beta.2",
     "halplibe": "*"
   }
 }

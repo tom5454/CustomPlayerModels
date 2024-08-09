@@ -96,6 +96,9 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 		e.group = data.getString("group", null);
 		e.command = data.getBoolean("command", false);
 		e.layerControlled = data.getBoolean("layerControlled", true);
+		e.maxValue = data.getInt("maxValue", 100);
+		e.interpolateValue = data.getBoolean("interpolateVal", true);
+		e.mustFinish = data.getBoolean("mustFinish", false);
 		JsonList frames = data.getList("frames");
 		frames.forEachMap(d -> initFrame(e, d));
 	}
@@ -124,6 +127,9 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 		if(e.group != null && !e.group.isEmpty())data.put("group", e.group);
 		data.put("command", e.command);
 		data.put("layerControlled", e.layerControlled);
+		data.put("maxValue", e.maxValue);
+		data.put("interpolateVal", e.interpolateValue);
+		data.put("mustFinish", e.mustFinish);
 		data.put("frames", writeFrames(e));
 	}
 

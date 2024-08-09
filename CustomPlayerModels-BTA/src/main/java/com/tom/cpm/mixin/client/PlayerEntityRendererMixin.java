@@ -32,15 +32,15 @@ public class PlayerEntityRendererMixin extends LivingRenderer {
 	public @Shadow ModelBiped modelArmorChestplate;
 	public @Shadow ModelBiped modelArmor;
 
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/model/ModelBiped;onGround:F"), method = "drawFirstPersonHand(Lnet/minecraft/core/entity/player/EntityPlayer;)V")
-	public void onHandPre(EntityPlayer player, CallbackInfo cbi) {
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/model/ModelBiped;onGround:F"), method = "drawFirstPersonHand(Lnet/minecraft/core/entity/player/EntityPlayer;Z)V")
+	public void onHandPre(EntityPlayer player, boolean isLeft, CallbackInfo cbi) {
 		RetroGL.renderCallLoc = 0;
 		CustomPlayerModelsClient.INSTANCE.manager.bindHand(Minecraft.INSTANCE.thePlayer, null, modelBipedMain);
 		CustomPlayerModelsClient.INSTANCE.manager.bindSkin(modelBipedMain, TextureSheetType.SKIN);
 	}
 
-	@Inject(at = @At(value = "RETURN"), method = "drawFirstPersonHand(Lnet/minecraft/core/entity/player/EntityPlayer;)V")
-	public void onHandPost(EntityPlayer player, CallbackInfo cbi) {
+	@Inject(at = @At(value = "RETURN"), method = "drawFirstPersonHand(Lnet/minecraft/core/entity/player/EntityPlayer;Z)V")
+	public void onHandPost(EntityPlayer player, boolean isLeft, CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.manager.unbindClear(modelBipedMain);
 	}
 

@@ -1,3 +1,6 @@
+
+<a name="cpm-api-documentation"/>
+
 # CPM Api documentation
 Table of contents:
 * [Setup](#setup) ([Versions](#latest-versions))
@@ -5,21 +8,33 @@ Table of contents:
 * [Client API](#client-api)
 * [Common API](#common-api)
 
+
+<a name="setup"/>
+
 ## Setup
 Add the CPM api to your gradle build script (`build.gradle`):  
 
+
+<a name="manual"/>
+
 ### Manual
-Download the api from [Releases](https://github.com/tom5454/CustomPlayerModels/releases/tag/0.4.0a)
+Download the api from [Releases](https://github.com/tom5454/CustomPlayerModels/releases)
 and put it into your mod dev folder.  
 Add it to your gradle file
 
 ```gradle
 dependencies {
-	implementation files("CustomPlayerModels-API-0.4.0.jar");
+	implementation files("CustomPlayerModels-API-${cpm_api_version}.jar");
 }
 ```
 
+
+<a name="gradle"/>
+
 ### Gradle
+
+
+<a name="repositories"/>
 
 #### Repositories
 
@@ -32,12 +47,16 @@ repositories {
 }
 ```
 
+
+<a name="latest-versions"/>
+
 #### Latest versions
 API version: ![API version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-API%2Fmaven-metadata.xml)
 
 | Minecraft Version | Runtime version (Forge) | Runtime version (NeoForge) | Runtime version (Fabric) | Runtime version (Quilt) |
 | ----------------- | ----------------------- | -------------------------- | ------------------------ | ----------------------- |
-| 1.20.6 | ![1.20.6 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.20.6%2Fmaven-metadata.xml) | ![1.20.6 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20.6%2Fmaven-metadata.xml) | ![1.20.6 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20.6%2Fmaven-metadata.xml) | - |
+| 1.21 | ![1.21 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.21%2Fmaven-metadata.xml) | ![1.21 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.21%2Fmaven-metadata.xml) | ![1.21 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.21%2Fmaven-metadata.xml) | ![1.21 quilt version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Quilt-1.21%2Fmaven-metadata.xml) |
+| 1.20.6 | ![1.20.6 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.20.6%2Fmaven-metadata.xml) | ![1.20.6 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20.6%2Fmaven-metadata.xml) | ![1.20.6 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20.6%2Fmaven-metadata.xml) | Use the Fabric version |
 | 1.20.4 | ![1.20.4 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.20.4%2Fmaven-metadata.xml) | ![1.20.4 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20.4%2Fmaven-metadata.xml) | ![1.20.4 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20.4%2Fmaven-metadata.xml) | ![1.20.4 quilt version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Quilt-1.20.4%2Fmaven-metadata.xml) |
 | 1.20.2 | ![1.20.2 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModelsLexForge-1.20.2%2Fmaven-metadata.xml) | ![1.20.2 neoforge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20.2%2Fmaven-metadata.xml) | ![1.20.2 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20.2%2Fmaven-metadata.xml) | Use the Fabric version |
 | 1.20 | ![1.20 forge version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-1.20%2Fmaven-metadata.xml) | Use the Forge version | ![1.20 fabric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Fabric-1.20%2Fmaven-metadata.xml) | ![1.20 quilt version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-Quilt-1.20%2Fmaven-metadata.xml) |
@@ -60,6 +79,9 @@ API version: ![API version badge](https://img.shields.io/maven-metadata/v?color=
 | b1.7.3 | - | - | ![b1.7.3 babric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-b1.7.3%2Fmaven-metadata.xml) | - |
 | BTA | - | - | ![BTA babric version badge](https://img.shields.io/maven-metadata/v?color=forestgreen&label=release&metadataUrl=https%3A%2F%2Fraw.githubusercontent.com%2Ftom5454%2Fmaven%2Fmain%2Fcom%2Ftom5454%2Fcpm%2FCustomPlayerModels-BTA%2Fmaven-metadata.xml) | - |
 
+
+<a name="gradleproperties"/>
+
 #### gradle.properties
 ```ini
 # CPM versions
@@ -68,6 +90,9 @@ cpm_mc_version=<minecraft version>
 cpm_runtime_version=<runtime version>
 ```
 
+
+<a name="dependencies-using-fg2"/>
+
 #### Dependencies using FG2
 ```gradle
 dependencies {
@@ -75,6 +100,9 @@ dependencies {
   deobfProvided "com.tom5454.cpm:CustomPlayerModels-${project.cpm_mc_version}:${project.cpm_runtime_version}"
 }
 ```
+
+
+<a name="dependencies-using-fg3"/>
 
 #### Dependencies using FG3+
 
@@ -87,6 +115,9 @@ dependencies {
 }
 ```
 
+
+<a name="dependencies-using-neogradle"/>
+
 #### Dependencies using NeoGradle
 
 ```gradle
@@ -98,6 +129,9 @@ dependencies {
 }
 ```
 
+
+<a name="dependencies-using-fabric"/>
+
 #### Dependencies using Fabric
 
 ```gradle
@@ -108,6 +142,9 @@ dependencies {
   modRuntimeOnly "com.tom5454.cpm:CustomPlayerModels-Fabric-${project.cpm_mc_version}:${project.cpm_runtime_version}"
 }
 ```
+
+
+<a name="dependencies-using-voldeloom"/>
 
 #### Dependencies using Voldeloom
 
@@ -148,6 +185,9 @@ dependencies {
 
 You have to place the current mod version from Modrinth to the project root folder, or the Java Agent won't load.
 
+
+<a name="create-your-plugin"/>
+
 ## Create your Plugin
 
 Create a class implementing `ICPMPlugin`.
@@ -168,12 +208,21 @@ public class CPMCompat implements ICPMPlugin {
 }
 ```
 
+
+<a name="forge-125"/>
+
 ### Forge 1.2.5
 The plugin loader isn't implemented yet.
+
+
+<a name="forge-112-and-lower"/>
 
 ### Forge 1.12 and lower
 Send an IMC message with your plugin class location.  
 `FMLInterModComms.sendMessage("customplayermodels", "api", "com.example.mod.CPMCompat");`
+
+
+<a name="forge-116-and-up"/>
 
 ### Forge 1.16 and up
 Send an IMC message. 
@@ -191,6 +240,9 @@ private void enqueueIMC(final InterModEnqueueEvent event)  {
 }
 ```
 
+
+<a name="fabric"/>
+
 ### Fabric
 Register your plugin class as entry point in your fabric.mod.json as such:
 
@@ -199,6 +251,9 @@ Register your plugin class as entry point in your fabric.mod.json as such:
     "cpmapi": [ "com.example.mod.CPMCompat" ]
 }
 ```
+
+
+<a name="bukkit-spigot-paper"/>
 
 ### Bukkit, Spigot, Paper (0.4.1+)
 Register your plugin using the service manager, your plugin's `initCommon` method will be called with the `ICommonAPI` instance.
@@ -211,7 +266,13 @@ else
 	log.info("Customizable Player Models plugin not installed, compat disabled");
 ```
 
+
+<a name="client-api"/>
+
 ## Client API
+
+
+<a name="voice-animation"/>
 
 ### Voice animation
 Register a voice level supplier.  
@@ -228,6 +289,9 @@ Register a voice muted supplier. (0.6.0+)
 Register a voice muted supplier. (UUID variant) (0.6.0+)  
 `IClientAPI:registerVoiceMute(playerUUID -> voiceMuted);`  
 
+
+<a name="rendering-api"/>
+
 ### Rendering API
 Create a player renderer to render CPM models on any Humanoid Entity.  
 `PlayerRenderer<Model, ResourceLocation, RenderType, MultiBufferSource, GameProfile> renderer = IClientAPI.createPlayerRenderer(Model.class, ResourceLocation.class, RenderType.class, MultiBufferSource.class, GameProfile.class)`  
@@ -238,6 +302,9 @@ For 1.12 and lower use:
 [RenderType.class](#client-rendertypeclass)  
 [MultiBufferSource.class](#client-multibuffersourceclass)  
 [GameProfile.class](#client-gameprofileclass)  
+
+
+<a name="rendering-an-entity-with-cpm-model"/>
 
 #### Rendering an Entity with CPM model
 1. Using the renderer set the GameProfile or LocalModel before rendering.  
@@ -319,10 +386,16 @@ public class ExampleRenderer extends LivingEntityRenderer<ExampleEntity, PlayerM
 
 While the model is loading in the background `renderer.getDefaultTexture()` will return null!
 
+
+<a name="loading-a-local-model"/>
+
 #### Loading a local model
 Load a model from a `.cpmmodel` file.  
 `IClientAPI.loadModel(name, inputstream)`  
 Use the loaded model for [Rendering an Entity](#rendering-an-entity-with-cpm-model)
+
+
+<a name="register-editor-generator"/>
 
 ### Register Editor Generator
 Register a model generator for the editor. Generators are under `Edit/Tools`.  
@@ -342,6 +415,9 @@ public class ExampleGenerator {
 Localization:  
 Add `button.example_mod.example_generator`, `tooltip.example_mod.example_generator` to your language file. Use `\` characters for line breaks in the tooltip.
 
+
+<a name="play-animation"/>
+
 ### Play Animation (0.6.0+)
 Play the given command animation for a player (Client-side).  
 
@@ -351,10 +427,16 @@ Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, tog
 `IClientAPI.playAnimation(name, value);`  
 Returns: true if the animation was found and started playing  
 
+
+<a name="detect-animation"/>
+
 ### Detect animation (0.6.14+)
 Detect if an animation is playing for the player  
 `int value = IClientAPI.getAnimationPlaying(name);`  
 Returns: The animation value (value layer: 0-255, other animations: 0-1), -1 if animation doesn't exist  
+
+
+<a name="client-networking"/>
 
 ### Client Networking (0.6.1+)
 Register a NBT message to send to the server, or broadcast it to other clients.  
@@ -369,6 +451,9 @@ broadcastToTracking: false: Send the message to the server / true: broadcast mes
 CPM 0.6.1+ is required on the server side for the networking to work.  
 When using broadcastToTracking, or State Messages your mod/plugin is not required on the server for the packet forwarding to work, you don't have to register anything. To receive non broadcast messages use the ICommonAPI.registerPluginMessage  
 
+
+<a name="state-messages"/>
+
 #### State Messages
 The last state message is stored on the server and sent to every client that enters the tracking range (render distance).  
 `MessageSender sender = IClientAPI.registerPluginStateMessage(Player.class, message_id, (player, message) -> {/*Handle message*/});`  
@@ -376,34 +461,61 @@ The last state message is stored on the server and sent to every client that ent
 or UUID version:  
 `MessageSender sender = IClientAPI.registerPluginMessage(message_id, (player_uuid, message) -> {/*Handle message*/});`  
 
+
+<a name="class-map"/>
+
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  
+
+<a name="client-playerclass"/>
+
 #### Client Player.class
 Minecraft Forge 1.12 and lower: `EntityPlayer.class`  
 Minecraft Forge 1.16 and Fabric: `PlayerEntity.class`  
 Minecraft Forge 1.17 and up: `Player.class` from `net.minecraft.*`  
 
+
+<a name="client-modelclass"/>
+
 #### Client Model.class
 Minecraft Forge 1.16+ and Fabric: `Model.class` from `net.minecraft.client.*`  
 Minecraft Forge 1.12 and lower: `ModelBase.class`  
+
+
+<a name="client-resourcelocationclass"/>
 
 #### Client ResourceLocation.class
 Minecraft Forge: `ResourceLocation.class`  
 Fabric: `Identifier.class`  
 
+
+<a name="client-rendertypeclass"/>
+
 #### Client RenderType.class
 Minecraft Forge: `RenderType.class`  
 Fabric: `RenderLayer.class`  
+
+
+<a name="client-multibuffersourceclass"/>
 
 #### Client MultiBufferSource.class
 Minecraft Forge 1.16: `IRenderTypeBuffer.class`  
 Minecraft Forge (1.17+): `MultiBufferSource.class`  
 Fabric: `VertexConsumerProvider.class`  
 
+
+<a name="client-gameprofileclass"/>
+
 #### Client GameProfile.class
 GameProfile from AuthLib: `com.mojang.authlib.GameProfile`  
 
+
+<a name="common-api"/>
+
 ## Common API
+
+
+<a name="set-model"/>
 
 ### Set Model (0.4.1+)
 Set the player model  
@@ -416,10 +528,16 @@ or
 clear the server set model  
 [Player.class](#common-playerclass)  
 
+
+<a name="jump"/>
+
 ### Jump (0.4.1+)
 Play the jump animation on for a player.  
 `ICommonAPI.playerJumped(Player.class, playerObj);`  
 [Player.class](#common-playerclass)
+
+
+<a name="play-animation"/>
 
 ### Play Animation (0.6.0+)
 Play the given command animation for a player (Server-side).  
@@ -429,6 +547,9 @@ Name: Animation name
 `ICommonAPI.playAnimation(Player.class, playerObj, name, value);`  
 Value: 0: reset pose/gesture, 1: play pose/gesture, for layers value: 0-255, toggle: 0-1 or -1 to switch state  
 [Player.class](#common-playerclass)
+
+
+<a name="server-networking"/>
 
 ### Server Networking (0.6.1+)
 Register a NBT message to receive non broadcast messages/send messages to clients.  
@@ -441,14 +562,23 @@ or broadcast to nearby players:
 Use the platform independent NBT implementation from `com.tom.cpl.nbt.*` package.  
 sendToSelf: Send message to the selected player in argument 1
 
+
+<a name="detect-animation"/>
+
 ### Detect Animation (0.6.9+)
 Detect if an animation is playing for the player  
 `int value = ICommonAPI.getAnimationPlaying(Player.class, playerObj, name);`  
 Returns: The animation value (value layer: 0-255, other animations: 0-1), -1 if animation doesn't exist  
 [Player.class](#common-playerclass)  
 
+
+<a name="class-map"/>
+
 ### Class Map
 Classes are dependent on your minecraft version and mod loader.  
+
+<a name="common-playerclass"/>
+
 #### Common Player.class
 Minecraft Forge 1.12 and lower: `EntityPlayer.class`  
 Minecraft Forge 1.16 and Fabric: `PlayerEntity.class`  

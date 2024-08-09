@@ -1,3 +1,6 @@
+
+<a name="modelling"/>
+
 ## Modelling
 Model parts can only be added to existing elements (such as vanilla player parts, or another model part). The custom parts will move with their parent element when rotated or moved.  
 Vanilla model parts can be hidden with the Toggle Visibility button, this option will not hide custom model parts when exporting.  

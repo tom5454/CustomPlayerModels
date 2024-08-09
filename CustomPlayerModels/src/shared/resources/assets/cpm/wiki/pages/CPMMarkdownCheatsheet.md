@@ -3,6 +3,9 @@ This contains all of the features that the CPM ingame wiki viewer supports.
 
 This is intended as a quick reference and showcase. For more complete info, see [John Gruber's original spec](http://daringfireball.net/projects/markdown/) and the [Github-flavored Markdown info page](http://github.github.com/github-flavored-markdown/).
 
+
+<a name="table-of-contents"/>
+
 ##### Table of Contents  
 [Headers](#headers)  
 [Emphasis](#emphasis)  
@@ -24,11 +27,29 @@ This is intended as a quick reference and showcase. For more complete info, see 
 ```no-highlight
 <a name="custom-name"/>
 
+
+<a name="h1"/>
+
 # H1
+
+<a name="h2"/>
+
 ## H2
+
+<a name="h3"/>
+
 ### H3
+
+<a name="h4"/>
+
 #### H4
+
+<a name="h5"/>
+
 ##### H5
+
+<a name="h6"/>
+
 ###### H6
 
 [Jump To H1](#custom-name)
@@ -36,11 +57,29 @@ This is intended as a quick reference and showcase. For more complete info, see 
 
 <a name="custom-name"/>
 
+
+<a name="h1"/>
+
 # H1
+
+<a name="h2"/>
+
 ## H2
+
+<a name="h3"/>
+
 ### H3
+
+<a name="h4"/>
+
 #### H4
+
+<a name="h5"/>
+
 ##### H5
+
+<a name="h6"/>
+
 ###### H6
 
 [Jump To H1](#custom-name)

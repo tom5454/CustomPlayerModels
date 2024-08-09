@@ -154,7 +154,8 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		map.put("pos", elem.pos.toMap());
 		map.put("rotation", elem.rotation.toMap());
 		map.put("size", elem.size.toMap());
-		map.put("scale", elem.scale.toMap());
+		map.put("rscale", elem.scale.toMap());
+		map.put("scale", elem.meshScale.toMap());
 		map.put("u", elem.u);
 		map.put("v", elem.v);
 		map.put("color", Integer.toHexString(elem.rgb));
@@ -181,7 +182,8 @@ public class ElementsLoaderV1 implements ProjectPartLoader {
 		elem.pos = new Vec3f(map.getMap("pos"), new Vec3f());
 		elem.rotation = new Vec3f(map.getMap("rotation"), new Vec3f());
 		elem.size = new Vec3f(map.getMap("size"), new Vec3f(1, 1, 1));
-		elem.scale = new Vec3f(map.getMap("scale"), new Vec3f(1, 1, 1));
+		elem.scale = new Vec3f(map.getMap("rscale"), new Vec3f(1, 1, 1));
+		elem.meshScale = new Vec3f(map.getMap("scale"), new Vec3f(1, 1, 1));
 		elem.u = map.getInt("u");
 		elem.v = map.getInt("v");
 		elem.rgb = Integer.parseUnsignedInt(map.getString("color"), 16);

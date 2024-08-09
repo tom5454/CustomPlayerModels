@@ -52,7 +52,7 @@ public class RenderedCube implements IModelComponent {
 		if(cube.offset != null)this.offset = new Vec3f(cube.offset);
 		if(cube.rotation != null)this.rotation = new Rotation(cube.rotation, false);
 		if(cube.pos != null)this.pos = new Vec3f(cube.pos);
-		this.renderScale = new Vec3f(1, 1, 1);
+		if(cube.scale != null)this.renderScale = new Vec3f(cube.scale);
 		this.color = recolor || cube.texSize == 0 ? cube.rgb : 0xffffff;
 		this.display = !cube.hidden;
 	}
@@ -156,7 +156,7 @@ public class RenderedCube implements IModelComponent {
 		float g = f * 2;
 		float scale = 1 / 16f;
 		return BoundingBox.create(offset.x * scale - f, offset.y * scale - f, offset.z * scale - f,
-				cube.size.x * scale * cube.scale.x + g, cube.size.y * scale * cube.scale.y + g, cube.size.z * scale * cube.scale.z + g);
+				cube.size.x * scale * cube.meshScale.x + g, cube.size.y * scale * cube.meshScale.y + g, cube.size.z * scale * cube.meshScale.z + g);
 	}
 
 	public static enum ElementSelectMode {

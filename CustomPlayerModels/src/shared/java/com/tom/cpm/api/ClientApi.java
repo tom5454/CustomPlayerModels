@@ -22,7 +22,6 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationState;
 import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Generators;
@@ -30,6 +29,7 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.io.ModelFile;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.model.render.ModelRenderManager;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction;
 
 public class ClientApi extends SharedApi implements IClientAPI {
 	private List<ToFloatFunction<Object>> voice = new ArrayList<>();
@@ -169,10 +169,11 @@ public class ClientApi extends SharedApi implements IClientAPI {
 				profile.animState = animState;
 				animState.encodedState = 0;
 				CustomPose pose = def.getAnimations().getCustomPoses().get(activePose);
-				Gesture gesture = def.getAnimations().getGestures().get(activeGesture);
+				//TODO reimplement
+				/*Gesture gesture = def.getAnimations().getGestures().get(activeGesture);
 				if(gesture != null) {
 					animState.encodedState = def.getAnimations().getEncoded(gesture);
-				}
+				}*/
 				if(pose != null) {
 					profile.currentPose = pose;
 				} else {
@@ -354,9 +355,9 @@ public class ClientApi extends SharedApi implements IClientAPI {
 		if (def == null)return -1;
 		CustomPose pose = def.getAnimations().getCustomPoses().get(name);
 		if (pose == null) {
-			Gesture g = def.getAnimations().getGestures().get(name);
-			if (g == null)return -1;
-			return MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), g);
+			CommandAction act = def.getAnimations().getCommandActionsMap().get(name);
+			if (act != null)return act.getValue();
+			return -1;
 		}
 		return pl.currentPose == pose ? 1 : 0;
 	}

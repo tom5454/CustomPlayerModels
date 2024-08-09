@@ -1,41 +1,28 @@
 package com.tom.cpm.shared.gui;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.IKeybind;
-import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.Checkbox;
-import com.tom.cpl.gui.elements.ComboSlider;
-import com.tom.cpl.gui.elements.DropDownBox;
+import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
-import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.ScrollPanel;
-import com.tom.cpl.gui.elements.Slider;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.math.Vec2i;
-import com.tom.cpl.util.NamedElement;
-import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.animation.AnimationType;
-import com.tom.cpm.shared.animation.Gesture;
-import com.tom.cpm.shared.animation.IManualGesture;
+import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.config.ConfigChangeRequest;
-import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -44,17 +31,20 @@ import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 import com.tom.cpm.shared.editor.TestIngameManager;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.FirstPersonHandPosGui;
+import com.tom.cpm.shared.gui.gesture.GestureGuiButtons;
+import com.tom.cpm.shared.gui.gesture.IGestureButton;
+import com.tom.cpm.shared.gui.gesture.IGestureButtonContainer;
 import com.tom.cpm.shared.model.TextureSheetType;
 import com.tom.cpm.shared.network.ServerCaps;
 import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.Log;
 
-public class GestureGui extends Frame {
-	private GestureButton hoveredBtn;
-	private Panel panel, contentPanel;
+public class GestureGui extends Frame implements IGestureButtonContainer {
+	private Panel contentPanel;
 	private int tickCounter;
 	private ModelDefinition def;
 	private ModelLoadingState state;
+	private List<IGestureButton> buttons = new ArrayList<>();
 
 	public GestureGui(IGui gui) {
 		super(gui);
@@ -65,43 +55,13 @@ public class GestureGui extends Frame {
 		tickCounter = 3;
 	}
 
-	@Override
-	public void keyPressed(KeyboardEvent event) {
-		if(hoveredBtn != null && !hoveredBtn.value) {
-			String keybindPressed = null;
-			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
-				if(kb.getName().startsWith("qa")) {
-					if(kb.isPressed(event)) {
-						keybindPressed = kb.getName();
-					}
-				}
-			}
-			if(keybindPressed != null) {
-				updateKeybind(keybindPressed, hoveredBtn.gesture.getGestureId(), !hoveredBtn.layer && gui.isCtrlDown());
-				event.consume();
-			}
-		}
-		if(Keybinds.RESET_VALUE_LAYER.isPressed(gui, event)) {
-			if(gui.isCtrlDown()) {
-				panel.getElements().forEach(e -> {
-					if(e instanceof GestureButton) {
-						GestureButton b = (GestureButton) e;
-						if (b.gesture.getType() == AnimationType.VALUE_LAYER) {
-							b.setLayerValue(b.gesture.getDefaultValue());
-						}
-					}
-				});
-				event.consume();
-			} else if(hoveredBtn != null && hoveredBtn.gesture.getType() == AnimationType.VALUE_LAYER) {
-				hoveredBtn.setLayerValue(hoveredBtn.gesture.getDefaultValue());
-				event.consume();
-			}
-		}
-		super.keyPressed(event);
+	private ConfigEntry getEntryForModel(boolean make) {
+		return AnimationEngine.getEntryForModel(def, make);
 	}
 
-	private void updateKeybind(String keybind, String gesture, boolean mode) {
-		ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
+	@Override
+	public void updateKeybind(String keybind, String gesture, boolean mode) {
+		ConfigEntry ce = getEntryForModel(true);
 		for(int j = 1;j<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;j++) {
 			String c = ce.getString("qa_" + j, null);
 			if(c != null && c.equals(gesture)) {
@@ -111,10 +71,7 @@ public class GestureGui extends Frame {
 		ce.setString(keybind, gesture);
 		ce.setString(keybind + "_mode", mode ? "hold" : "press");
 
-		panel.getElements().forEach(e -> {
-			if(e instanceof GestureButton)
-				((GestureButton)e).updateKb();
-		});
+		this.buttons.forEach(IGestureButton::updateKeybinds);
 	}
 
 	@Override
@@ -154,6 +111,7 @@ public class GestureGui extends Frame {
 		Log.debug(def);
 		if(def != null)
 			this.state = def.getResolveState();
+		buttons.clear();
 		ServerStatus status = MinecraftClientAccess.get().getServerSideStatus();
 		if(status == ServerStatus.OFFLINE) {
 			String str = "How did you get here?";
@@ -213,26 +171,27 @@ public class GestureGui extends Frame {
 		}
 		int h;
 		if(def != null && this.state == ModelLoadingState.LOADED && status != ServerStatus.UNAVAILABLE) {
-			int[] id = new int[] {0};
-			panel = new Panel(gui);
-			Map<String, Group> groups = new HashMap<>();
-			Stream.concat(def.getAnimations().getGestures().values().stream(), def.getAnimations().getCustomPoses().values().stream()).
-			filter(g -> !g.isProperty() && !g.isCommand()).sorted(Comparator.comparingInt(IManualGesture::getOrder)).
-			forEach(g -> {
-				if (g instanceof Gesture && ((Gesture)g).group != null) {
-					groups.computeIfAbsent(((Gesture)g).group, k -> new Group(k, panel, id[0]++)).add((Gesture) g);
-				} else
-					panel.addElement(new GestureButton(g, id[0]++));
-			});
-			groups.values().forEach(Group::update);
-			if(id[0] == 0) {
+			List<GuiElement> buttons = def.getAnimations().getNamedActions().stream().
+					filter(d -> !d.isProperty() && d.canShow()).map(t -> GestureGuiButtons.make(this, t)).
+					filter(e -> e != null).collect(Collectors.toList());
+
+			Panel panel = new Panel(gui);
+
+			if (buttons.isEmpty()) {
 				String str = gui.i18nFormat("label.cpm.nothing_here");
 				Label lbl = new Label(gui, str);
 				lbl.setBounds(new Box(width / 2 - gui.textWidth(str) / 2, height / 2 - 4, 0, 0));
 				p.addElement(lbl);
 				h = 10;
 			} else {
-				h = (id[0] / 4 + 1) * 40;
+				h = (buttons.size() / 4 + 1) * 40;
+
+				for (int j = 0; j < buttons.size(); j++) {
+					GuiElement b = buttons.get(j);
+					panel.addElement(b);
+					b.setBounds(new Box((j % 4) * 90, (j / 4) * 40, 80, 30));
+					this.buttons.add((IGestureButton) b);//Enforced in GestureGuiButtons.make
+				}
 
 				if(h < height - 150) {
 					panel.setBounds(new Box(width / 2 - 180, height / 2 - h / 2, 360, h));
@@ -245,6 +204,8 @@ public class GestureGui extends Frame {
 					scp.setDisplay(panel);
 					p.addElement(scp);
 				}
+
+				this.buttons.forEach(IGestureButton::updateKeybinds);
 			}
 		} else if(def != null && (this.state == ModelLoadingState.ERRORRED || this.state == ModelLoadingState.SAFETY_BLOCKED)) {
 			String txt = "";
@@ -376,47 +337,8 @@ public class GestureGui extends Frame {
 		}
 	}
 
-	private class Group {
-		private NameMapper<Gesture> groupGestures;
-		private List<Gesture> list;
-		private DropDownBox<NamedElement<Gesture>> box;
-
-		public Group(String name, Panel panel, int id) {
-			list = new ArrayList<>();
-			list.add(null);
-			groupGestures = new NameMapper<>(list, g -> g == null ? gui.i18nFormat("label.cpm.layerNone") : g.name);
-			box = new DropDownBox<>(gui.getFrame(), groupGestures.asList());
-			groupGestures.setSetter(box::setSelected);
-
-			Panel p = new Panel(gui);
-			p.setBounds(new Box((id % 4) * 90, (id / 4) * 40, 80, 30));
-			panel.addElement(p);
-
-			p.addElement(new Label(gui, name).setBounds(new Box(0, 0, 70, 10)));
-			p.addElement(box);
-			box.setBounds(new Box(0, 10, 80, 20));
-			box.setAction(() -> {
-				Gesture s = box.getSelected().getElem();
-				list.forEach(g -> {
-					MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setLayerValue(def.getAnimations(), g, g == s ? 1 : 0);
-				});
-			});
-		}
-
-		public void add(Gesture g) {
-			list.add(g);
-		}
-
-		public void update() {
-			groupGestures.refreshValues();
-			Gesture s = list.stream().filter(g -> MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), g) != 0).findFirst().orElse(null);
-			groupGestures.setValue(s);
-		}
-	}
-
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
-		hoveredBtn = null;
 		super.draw(event, partialTicks);
 
 		ModelDefinition def = MinecraftClientAccess.get().getCurrentClientPlayer().getModelDefinition0();
@@ -438,174 +360,38 @@ public class GestureGui extends Frame {
 		}
 	}
 
+	@Override
+	public IGui gui() {
+		return gui;
+	}
+
 	private void clearGesture() {
-		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().playGesture(def.getAnimations(), null, def.getPlayerObj());
+		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().clearGesture(def);
 	}
 
 	private void clearPose() {
-		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setCustomPose(def.getAnimations(), null);
+		if(def != null)MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().clearCustomPose(def);
 	}
 
-	private void setManualGesture(IManualGesture g) {
-		if(def != null)g.play(def.getAnimations(), def.getPlayerObj());
+	@Override
+	public BoundKeyInfo getBoundKey(String id) {
+		ConfigEntry ce = getEntryForModel(false);
+		for (IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
+			if (kb.getName().startsWith("qa")) {
+				String c = ce.getString(kb.getName(), null);
+				if (c != null && c.equals(id)) {
+					String kbn = kb.getName();
+					String kbMode = ce.getString(kb.getName() + "_mode", "press");
+					String k = kb.getBoundKey();
+					if(k.isEmpty())k = null;
+					return new BoundKeyInfo(kbn, kbMode, k);
+				}
+			}
+		}
+		return null;
 	}
 
-	private class GestureButton extends Panel {
-		private IManualGesture gesture;
-		private String kb, kbMode, name;
-		private boolean layer, value;
-		private ComboSlider slider;
-
-		public GestureButton(int id) {
-			super(GestureGui.this.gui);
-			setBounds(new Box((id % 4) * 90, (id / 4) * 40, 80, 30));
-		}
-
-		public GestureButton(IManualGesture g, int id) {
-			this(id);
-			String nm = g.getName();
-			layer = g.getType() == AnimationType.LAYER;
-			value = g.getType() == AnimationType.VALUE_LAYER;
-			this.name = nm;
-			this.gesture = g;
-			updateKb();
-			if(layer || value || !g.isLayerControlled()) {
-				if(!MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
-					setEnabled(false);
-					Slider s = new Slider(gui, nm);
-					s.setBounds(new Box(0, 0, bounds.w, bounds.h));
-					s.setEnabled(false);
-					s.setTooltip(new Tooltip(GestureGui.this, gui.i18nFormat("label.cpm.feature_unavailable")));
-					addElement(s);
-				} else if(value) {
-					slider = new ComboSlider(gui, a -> nm, a -> a * 100f, a -> a / 100f);
-					slider.getSpinner().setDp(0);
-					slider.setBounds(new Box(0, 0, bounds.w, bounds.h));
-					slider.setAction(() -> setLayerValue(slider.getValue()));
-					if(def != null)
-						slider.setValue(Byte.toUnsignedInt(MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), (Gesture) g)) / 255f);
-					slider.setTooltip(new Tooltip(GestureGui.this, gui.i18nFormat("tooltip.cpm.gesture.valueDefaultValue", (int) (g.getDefaultValue() * 100), Keybinds.RESET_VALUE_LAYER.getSetKey(gui))));
-					addElement(slider);
-				} else {
-					Button btn = new Button(gui, "", () -> setManualGesture(g));
-					btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
-					addElement(btn);
-				}
-			} else {
-				Button btn = new Button(gui, "", () -> setManualGesture(g));
-				btn.setBounds(new Box(0, 0, bounds.w, bounds.h));
-				addElement(btn);
-			}
-		}
-
-		protected void setLayerValue(float value) {
-			slider.setValue(value);
-			if(def != null)
-				MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().setLayerValue(def.getAnimations(), (Gesture) gesture, value);
-		}
-
-		public void updateKb() {
-			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
-			this.kb = null;
-			this.kbMode = null;
-			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
-				if(kb.getName().startsWith("qa")) {
-					String c = ce.getString(kb.getName(), null);
-					if(c != null) {
-						if(c.equals(gesture.getGestureId())) {
-							this.kb = kb.getName();
-							this.kbMode = ce.getString(kb.getName() + "_mode", "press");
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		@Override
-		public void draw(MouseEvent event, float partialTicks) {
-			if(value) {
-				super.draw(event, partialTicks);
-				if(event.isHovered(bounds) && enabled)hoveredBtn = this;
-				return;
-			}
-			int w = gui.textWidth(name);
-			int bgColor = gui.getColors().button_fill;
-			int color = gui.getColors().button_text_color;
-			if(!enabled) {
-				color = gui.getColors().button_text_disabled;
-				bgColor = gui.getColors().button_disabled;
-			} else if(event.isHovered(bounds)) {
-				color = gui.getColors().button_text_hover;
-				bgColor = gui.getColors().button_hover;
-			}
-			gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
-			if(layer) {
-				if(def != null) {
-					boolean on = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getGestureValue(def.getAnimations(), (Gesture) gesture) != 0;
-					int bw = bounds.w-2;
-					gui.drawBox(bounds.x + 1,          bounds.y + 1, bw / 2, bounds.h - 2, on ? 0xff00ff00 : bgColor);
-					gui.drawBox(bounds.x + 1 + bw / 2, bounds.y + 1, bw / 2, bounds.h - 2, on ? bgColor : 0xffff0000);
-				}
-			} else {
-				gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
-			}
-			gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 - 8, name, color);
-			String boundKey = gui.i18nFormat("label.cpm.key_unbound");
-			if(kb != null) {
-				for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
-					if(kb.getName().equals(this.kb)) {
-						String k = kb.getBoundKey();
-						if(k.isEmpty())k = gui.i18nFormat("label.cpm.key_unbound");
-						boundKey = k;
-						w = gui.textWidth(k);
-						gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 + 4, k, color);
-						break;
-					}
-				}
-			}
-			if(event.isHovered(bounds)) {
-				if(!enabled) {
-					new Tooltip(GestureGui.this, gui.i18nFormat("label.cpm.feature_unavailable")).set();
-				} else {
-					hoveredBtn = this;
-					String kbMode = this.kbMode != null ? gui.i18nFormat("label.cpm.gestureMode." + this.kbMode) : gui.i18nFormat("label.cpm.key_unbound");
-					if(layer)
-						new Tooltip(GestureGui.this, gui.i18nFormat("tooltip.cpm.gestureButton", name, boundKey)).set();
-					else
-						new Tooltip(GestureGui.this, gui.i18nFormat("tooltip.cpm.gestureButton.mode", name, boundKey, kbMode)).set();
-				}
-			}
-		}
-
-		@Override
-		public void mouseClick(MouseEvent event) {
-			if(event.isHovered(bounds) && event.btn == 1 && !value) {
-				PopupMenu p = new PopupMenu(gui, GestureGui.this);
-
-				for(int i = 1;i<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;i++) {
-					String id = "qa_" + i;
-					p.addButton(gui.i18nFormat("button.cpm.quick_key.bind", i), () -> {
-						updateKeybind(id, gesture.getGestureId(), !this.layer && gui.isCtrlDown());
-					});
-				}
-
-				p.addButton(gui.i18nFormat("button.cpm.quick_key.unbind"), () -> {
-					ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
-					for(int j = 1;j<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;j++) {
-						String c = ce.getString("qa_" + j, null);
-						if(c != null && c.equals(gesture.getGestureId())) {
-							ce.setString("qa_" + j, "");
-						}
-					}
-					updateKb();
-				});
-
-				Vec2i pos = event.getPos();
-				p.display(pos.x, pos.y);
-				event.consume();
-			}
-			super.mouseClick(event);
-		}
+	@Override
+	public void valueChanged() {
 	}
 }

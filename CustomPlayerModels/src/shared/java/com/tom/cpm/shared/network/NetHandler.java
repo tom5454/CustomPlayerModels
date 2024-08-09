@@ -32,15 +32,12 @@ import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpl.util.TriConsumer;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationRegistry;
-import com.tom.cpm.shared.animation.AnimationType;
-import com.tom.cpm.shared.animation.IManualGesture;
 import com.tom.cpm.shared.animation.ServerAnimationState;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.config.ConfigChangeRequest;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.PlayerData;
-import com.tom.cpm.shared.config.PlayerData.AnimationInfo;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.model.ScaleData;
@@ -60,6 +57,8 @@ import com.tom.cpm.shared.network.packet.SetScaleC2S;
 import com.tom.cpm.shared.network.packet.SetSkinC2S;
 import com.tom.cpm.shared.network.packet.SetSkinS2C;
 import com.tom.cpm.shared.network.packet.SubEventC2S;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction.LegacyCommandActionWriter;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction.ServerCommandAction;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.ScalingOptions;
 
@@ -170,6 +169,7 @@ public class NetHandler<RL, P, NET> {
 		setCap(data, ServerCaps.GESTURES);
 		setCap(data, ServerCaps.PLUGIN_MESSAGES);
 		if(ModConfig.getWorldConfig().getBoolean(ConfigKeys.ENABLE_INVIS_GLOW, true))setCap(data, ServerCaps.INVIS_GLOW);
+		setCap(data, ServerCaps.NAMED_PARAMETERS);
 		return data;
 	}
 
@@ -300,37 +300,32 @@ public class NetHandler<RL, P, NET> {
 			{
 				NBTTagList list = new NBTTagList();
 				tag.setTag(NetworkUtil.EVENT_LIST, list);
-				def.getAnimations().getAnimations().keySet().stream().filter(e -> e instanceof VanillaPose).
-				map(ModelEventType::getType).filter(e -> e != null).distinct().map(ModelEventType::getName).
-				map(NBTTagString::new).forEach(list::appendTag);
+				def.getAnimations().getAnimations().stream().flatMap(e -> e.onPoses.stream()).
+				filter(e -> e instanceof VanillaPose).map(ModelEventType::getType).filter(e -> e != null).
+				distinct().map(ModelEventType::getName).map(NBTTagString::new).forEach(list::appendTag);
 			}
 
 			AnimationRegistry reg = def.getAnimations();
 			NBTTagList list = new NBTTagList();
-			tag.setTag(NetworkUtil.ANIMATIONS, list);
-			reg.getCustomPoses().values().forEach(p -> {
-				int enc = reg.getEncoded(p);
-				if(enc == -1)return;
-				addAnimTag(list, p, (byte) enc, 0);
+			NBTTagList na = new NBTTagList();
+			if (serverCaps.contains(ServerCaps.NAMED_PARAMETERS))tag.setTag(NetworkUtil.NAMED_PARAMETERS, na);
+			else tag.setTag(NetworkUtil.ANIMATIONS, list);
+			reg.getCommandActionsMap().forEach((k, v) -> {
+				if (v instanceof LegacyCommandActionWriter) {
+					LegacyCommandActionWriter w = (LegacyCommandActionWriter) v;
+					NBTTagCompound t = new NBTTagCompound();
+					w.writeLegacy(t);
+					list.appendTag(t);
+				}
+				NBTTagCompound t = new NBTTagCompound();
+				v.write(t);
+				t.setString("name", k);
+				t.setString("type", v.getType().name());
+				na.appendTag(t);
 			});
-			reg.getGestures().values().forEach(g -> {
-				if(g.getType() != AnimationType.GESTURE)return;
-				int enc = reg.getEncoded(g);
-				if(enc == -1)return;
-				addAnimTag(list, g, (byte) enc, 1);
-			});
-			reg.forEachLayer((g, i) -> addAnimTag(list, g, i.byteValue(), 2));
 
 			sendPacketToServer(new SubEventC2S(tag));
 		}
-	}
-
-	private void addAnimTag(NBTTagList list, IManualGesture g, byte id, int typeId) {
-		NBTTagCompound t = new NBTTagCompound();
-		t.setString("name", g.getName());
-		t.setByte("id", id);
-		t.setByte("type", (byte) ((g.isCommand() ? 16 : 0) | typeId));
-		list.appendTag(t);
 	}
 
 	public boolean hasServerCap(ServerCaps cap) {
@@ -369,19 +364,9 @@ public class NetHandler<RL, P, NET> {
 
 	public int getAnimationPlaying(P player, String animation) {
 		PlayerData pd = getSNetH(player).cpm$getEncodedModelData();
-		AnimationInfo id = pd.animNames.get(animation);
+		ServerCommandAction id = pd.animNames.get(animation);
 		if(id == null)return -1;
-		switch (id.type & 0xf) {
-		case 0://Pose
-			return pd.gestureData[0] == id.id ? 1 : 0;
-		case 1://Gesture
-			return pd.gestureData[1] == id.id ? 1 : 0;
-		case 2://Layer
-			if (id.id > 1 && id.id < pd.gestureData.length)return Byte.toUnsignedInt(pd.gestureData[id.id]);
-			else return -1;
-		default:
-			return -1;
-		}
+		return id.getValue();
 	}
 
 	public void requestPlayerState(UUID other) {

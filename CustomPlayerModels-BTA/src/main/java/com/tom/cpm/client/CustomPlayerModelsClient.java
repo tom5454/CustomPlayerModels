@@ -293,7 +293,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 				f6 = 0.0F;
 			}
 
-			float f8 = playerIn.field_775_e + (playerIn.field_774_f - playerIn.field_775_e) * partialTicks;
+			float f8 = playerIn.prevRenderYawOffset + (playerIn.renderYawOffset - playerIn.prevRenderYawOffset) * partialTicks;
 			f5 += MathHelper.sin((playerIn.walkDistO + (playerIn.walkDist - playerIn.walkDistO) * partialTicks) * 6.0F) * 32.0F * f8;
 
 			if (playerIn.isSneaking()) {

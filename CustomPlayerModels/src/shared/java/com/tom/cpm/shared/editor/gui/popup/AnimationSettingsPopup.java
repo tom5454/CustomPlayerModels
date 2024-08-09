@@ -202,6 +202,15 @@ public class AnimationSettingsPopup extends PopupPanel {
 		});
 		this.addElement(boxLayerCtrl);
 
+		Checkbox boxMustFinish = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_mustFinish"));
+		if(edit && editor.selectedAnim != null)boxMustFinish.setSelected(editor.selectedAnim.mustFinish);
+		boxMustFinish.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.anim_mustFinish")));
+		boxMustFinish.setBounds(new Box(5, 0, 190, 20));
+		boxMustFinish.setAction(() -> {
+			boxMustFinish.setSelected(!boxMustFinish.isSelected());
+		});
+		this.addElement(boxMustFinish);
+
 		Button okBtn = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			String name = nameField.getText();
 			AnimType at = typeDd.getSelected();
@@ -211,7 +220,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 				if(s == null)return;
 				name = s.getName();
 			}
-			AnimationProperties pr = new AnimationProperties(pose, name, at.option, boxAdd.isSelected(), at.canLoop() && boxLoop.isSelected(), intBox.getSelected().getElem(), boxCommand.isSelected(), boxLayerCtrl.isSelected());
+			AnimationProperties pr = new AnimationProperties(pose, name, at.option, boxAdd.isSelected(), at.canLoop() && boxLoop.isSelected(), intBox.getSelected().getElem(), boxCommand.isSelected(), boxLayerCtrl.isSelected(), boxMustFinish.isSelected());
 			if(edit) {
 				editor.editAnim(pr);
 			} else {

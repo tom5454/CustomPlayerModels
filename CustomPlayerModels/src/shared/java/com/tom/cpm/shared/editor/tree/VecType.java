@@ -5,7 +5,7 @@ public enum VecType {
 	OFFSET,
 	ROTATION,
 	POSITION,
-	SCALE,
+	MESH_SCALE,
 	TEXTURE,
 	;
 	public static final VecType[] MOUSE_EDITOR_TYPES = {SIZE, OFFSET, ROTATION, POSITION};

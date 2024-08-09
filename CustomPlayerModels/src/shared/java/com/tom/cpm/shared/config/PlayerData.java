@@ -20,6 +20,7 @@ import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.network.NetHandler.Scaler;
 import com.tom.cpm.shared.network.NetworkUtil;
 import com.tom.cpm.shared.network.NetworkUtil.ScalingSettings;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction.ServerCommandAction;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.ScalingOptions;
 
@@ -31,7 +32,7 @@ public class PlayerData {
 	public final Map<ScalingOptions, Float> targetScale = new EnumMap<>(ScalingOptions.class);
 	public final EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
 	public byte[] gestureData = new byte[0];
-	public Map<String, AnimationInfo> animNames = new HashMap<>();
+	public Map<String, ServerCommandAction> animNames = new HashMap<>();
 	public final Map<String, NBTTagCompound> pluginStates = new HashMap<>();
 	public final ServerAnimationState state = new ServerAnimationState();
 
@@ -88,19 +89,6 @@ public class PlayerData {
 		sc.clear();
 		scale.forEach((k, v) -> sc.setFloat(k.getNetKey(), v));
 		ModConfig.getWorldConfig().save();
-	}
-
-	public static class AnimationInfo {
-		public final int type, id;
-
-		public AnimationInfo(int type, int id) {
-			this.type = type;
-			this.id = id;
-		}
-
-		public boolean isCommandControlled() {
-			return (type & 16) != 0;
-		}
 	}
 
 	public <P> void rescale(NetHandler<?, P, ?> handler, P player) {

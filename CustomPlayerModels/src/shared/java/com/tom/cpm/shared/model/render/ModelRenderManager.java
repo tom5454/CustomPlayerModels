@@ -548,7 +548,7 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 						((IExtraRenderDefinition)holder.def).render(this, matrixStackIn, buf, holder.renderTypes, cube, doRenderElems);
 					}
 					matrixStackIn.translate(c.offset.x / 16f, c.offset.y / 16f, c.offset.z / 16f);
-					matrixStackIn.scale(c.scale.x, c.scale.y, c.scale.z);
+					matrixStackIn.scale(c.meshScale.x, c.meshScale.y, c.meshScale.z);
 					holder.def.storeTransform(cube.itemRenderer, matrixStackIn, (!doRenderRoot || doRenderElems) && cube.display);
 					matrixStackIn.pop();
 					continue;
@@ -628,31 +628,31 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 		if(c.texSize == 0) {
 			return BoxRender.createColored(
 					c.offset.x, c.offset.y, c.offset.z,
-					c.size.x * c.scale.x, c.size.y * c.scale.y, c.size.z * c.scale.z,
+					c.size.x * c.meshScale.x, c.size.y * c.meshScale.y, c.size.z * c.meshScale.z,
 					c.mcScale, holder.sheetX, holder.sheetY
 					);
 		} else {
 			if(elem.singleTex)
 				return BoxRender.createTexturedSingle(
-						c.offset, c.size, c.scale,
+						c.offset, c.size, c.meshScale,
 						c.mcScale,
 						c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
 						);
 			else if(elem.extrude)
 				return BoxRender.createTexturedExtruded(
-						c.offset, c.size, c.scale,
+						c.offset, c.size, c.meshScale,
 						c.mcScale,
 						c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
 						);
 			else if(elem.faceUVs != null)
 				return BoxRender.createTextured(
-						c.offset, c.size, c.scale,
+						c.offset, c.size, c.meshScale,
 						c.mcScale,
 						elem.faceUVs, c.texSize, holder.sheetX, holder.sheetY
 						);
 			else
 				return BoxRender.createTextured(
-						c.offset, c.size, c.scale,
+						c.offset, c.size, c.meshScale,
 						c.mcScale,
 						c.u, c.v, c.texSize, holder.sheetX, holder.sheetY
 						);

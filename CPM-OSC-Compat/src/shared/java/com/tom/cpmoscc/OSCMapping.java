@@ -1,13 +1,13 @@
 package com.tom.cpmoscc;
 
 import java.util.List;
+import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.tom.cpl.math.MathHelper;
-import com.tom.cpm.shared.animation.AnimationType;
-import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.animation.Gesture;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction.ActionType;
 import com.tom.cpmoscc.gui.OSCDataPanel.OSCChannel;
 
 public class OSCMapping {
@@ -22,21 +22,17 @@ public class OSCMapping {
 
 	private int previousValue;
 	private int currentValue;
-
-	public OSCMapping(CustomPose pose) {
-		this.animationId = pose.getName();
-		this.boolOnly = true;
-		parseName();
-	}
-
-	public OSCMapping(Gesture gesture) {
-		this.animationId = gesture.getName();
-		this.boolOnly = gesture.type != AnimationType.VALUE_LAYER;
-		parseName();
-	}
+	private IntConsumer apply;
 
 	public OSCMapping(String displayName) {
 		this.animationId = displayName;
+		parseName();
+	}
+
+	public OSCMapping(CommandAction p) {
+		this.animationId = p.getName();
+		this.boolOnly = p.getType() != ActionType.VALUE;
+		this.apply = p::setValue;
 		parseName();
 	}
 
@@ -103,7 +99,7 @@ public class OSCMapping {
 	public void tick() {
 		if(currentValue != previousValue) {
 			previousValue = currentValue;
-			CPMOSC.api.playAnimation(animationId, currentValue);
+			if (apply != null)apply.accept(currentValue);
 		}
 	}
 

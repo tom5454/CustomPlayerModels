@@ -6,6 +6,7 @@ import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.elements.Slider;
+import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.elements.TextField;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
@@ -16,7 +17,7 @@ public abstract class LayerDefaultPopup extends PopupPanel {
 	protected Editor editor;
 	private Checkbox chbxProp;
 
-	protected LayerDefaultPopup(IGui gui, Editor e) {
+	protected LayerDefaultPopup(IGui gui, Editor e, int height) {
 		super(gui);
 		this.editor = e;
 
@@ -24,7 +25,7 @@ public abstract class LayerDefaultPopup extends PopupPanel {
 		String tt = gui.i18nFormat("tooltip.cpm.anim_is_property");
 		if(e.modelId == null)chbxProp.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.anim_is_property.disable", tt)));
 		else chbxProp.setTooltip(new Tooltip(gui.getFrame(), tt));
-		chbxProp.setBounds(new Box(5, 65, 160, 20));
+		chbxProp.setBounds(new Box(5, height - 50, 160, 20));
 		chbxProp.setEnabled(e.modelId != null);
 		chbxProp.setAction(() -> {
 			chbxProp.setSelected(!chbxProp.isSelected());
@@ -36,10 +37,10 @@ public abstract class LayerDefaultPopup extends PopupPanel {
 			close();
 			apply();
 		});
-		btn.setBounds(new Box(5, 90, 50, 20));
+		btn.setBounds(new Box(5, height - 25, 50, 20));
 		addElement(btn);
 
-		setBounds(new Box(0, 0, 180, 115));
+		setBounds(new Box(0, 0, 180, height));
 	}
 
 	protected abstract void apply();
@@ -60,7 +61,7 @@ public abstract class LayerDefaultPopup extends PopupPanel {
 		private TextField groupField;
 
 		public Toggle(IGui gui, Editor e) {
-			super(gui, e);
+			super(gui, e, 115);
 
 			float ld = e.selectedAnim.layerDefault;
 			chbx = new Checkbox(gui, gui.i18nFormat("label.cpm.defLayerSettings.toggle"));
@@ -92,9 +93,11 @@ public abstract class LayerDefaultPopup extends PopupPanel {
 
 	public static class Value extends LayerDefaultPopup {
 		private Slider progressSlider;
+		private Spinner maxValueSpinner;
+		private Checkbox interpolate;
 
 		public Value(IGui gui, Editor e) {
-			super(gui, e);
+			super(gui, e, 130);
 
 			float ld = e.selectedAnim.layerDefault;
 			progressSlider = new Slider(gui, gui.i18nFormat("label.cpm.defLayerSettings.value", (int) (ld * 100)));
@@ -103,12 +106,37 @@ public abstract class LayerDefaultPopup extends PopupPanel {
 			progressSlider.setAction(() -> {
 				progressSlider.setText(gui.i18nFormat("label.cpm.defLayerSettings.value", (int) (progressSlider.getValue() * 100)));
 			});
+			progressSlider.setSteps(e.selectedAnim.maxValue);
 			addElement(progressSlider);
+
+			addElement(new Label(gui, gui.i18nFormat("label.cpm.defLayerSettings.max")).setBounds(new Box(5, 30, 0, 0)));
+			maxValueSpinner = new Spinner(gui);
+			maxValueSpinner.setBounds(new Box(95, 30, 70, 20));
+			maxValueSpinner.setDp(0);
+			maxValueSpinner.setValue(1f / e.selectedAnim.maxValue);
+			maxValueSpinner.addChangeListener(() -> {
+				int v = (int) maxValueSpinner.getValue();
+				if (v < 1)maxValueSpinner.setValue(1);
+				else if(v > 255)maxValueSpinner.setValue(255);
+				progressSlider.setSteps(1f / v);
+			});
+			addElement(maxValueSpinner);
+
+			interpolate = new Checkbox(gui, gui.i18nFormat("label.cpm.defLayerSettings.interpolate"));
+			interpolate.setBounds(new Box(5, 55, 160, 20));
+			interpolate.setAction(() -> {
+				interpolate.setSelected(!interpolate.isSelected());
+			});
+			interpolate.setSelected(e.selectedAnim.interpolateValue);
+			addElement(interpolate);
 		}
 
 		@Override
 		protected void apply() {
-			setDefaultLayerValue(progressSlider.getValue()).execute();
+			setDefaultLayerValue(progressSlider.getValue()).
+			updateValueOp(editor.selectedAnim, editor.selectedAnim.maxValue, (int) maxValueSpinner.getValue(), (a, b) -> a.maxValue = b).
+			updateValueOp(editor.selectedAnim, editor.selectedAnim.interpolateValue, interpolate.isSelected(), (a, b) -> a.interpolateValue = b).
+			execute();
 		}
 	}
 }

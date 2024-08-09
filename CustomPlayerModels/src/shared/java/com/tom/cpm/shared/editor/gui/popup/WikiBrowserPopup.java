@@ -95,7 +95,7 @@ public class WikiBrowserPopup extends PopupPanel {
 
 		sidebar = new SidebarContent(gui, new MdResourceLoader(gui::openURL, null, offline), "Loading");
 		sidebar.setBounds(new Box(0, 0, 100, 100));
-		sidebar.setContent("https://github.com/tom5454/CustomPlayerModels/wiki/_Sidebar");
+		sidebarLocale = "unknown";
 
 		content.browse(mainPage);
 

@@ -1,5 +1,8 @@
 Addon mod required: [CPM OSC compat on CurseForge](https://www.curseforge.com/minecraft/mc-mods/cpmoscc), [CPM OSC compat on Modrinth](https://modrinth.com/mod/cpmoscc)  
 
+
+<a name="setting-up-osc-triggered-animations-with-cpm"/>
+
 ## Setting up OSC triggered animations with CPM
 You have to configure OSC under `Edit/Tools/OSC Settings`.  
 Use `Edit/Tools/OSC Animation Wizard` to create OSC triggered animations.  
@@ -12,9 +15,15 @@ CPM requires normalized values (0-1), set the Minimum and Maximum value using th
 
 CPM is compatible with OSC/VMC values.
 
+
+<a name="scripting"/>
+
 ## Scripting
 You can use [TouchOSC](https://hexler.net/touchosc#get) to run lua scripts that react to OSC commands. [TouchOSC scripting examples](https://hexler.net/touchosc/manual/script-examples)  
 Python library for OSC: [python-osc](https://github.com/attwad/python-osc)  
+
+
+<a name="other-applications"/>
 
 ## Other applications
 Face tracking: [VSeeFace](https://www.vseeface.icu/)  

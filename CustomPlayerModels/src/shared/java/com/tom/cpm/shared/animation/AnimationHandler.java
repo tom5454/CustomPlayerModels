@@ -16,8 +16,6 @@ public class AnimationHandler {
 	private List<PlayingAnim> currentAnimations = new ArrayList<>();
 	private List<NextAnim> nextAnims = new ArrayList<>();
 
-	private Gesture currentGesture;
-
 	public AnimationHandler(Supplier<ModelDefinition> player, AnimationMode mode) {
 		this.player = player;
 		this.mode = mode;
@@ -25,7 +23,7 @@ public class AnimationHandler {
 
 	public void animate(AnimationState state, long currentTime) {
 		boolean needsSort = false;
-		currentAnimations.removeIf(a -> nextAnims.stream().noneMatch(n -> n.animation == a.currentAnimation) && a.currentAnimation.checkAndUpdateRemove(mode));
+		currentAnimations.removeIf(a -> nextAnims.stream().noneMatch(n -> n.animation == a.currentAnimation) && a.checkAndUpdateRemove(mode));
 		for (NextAnim animation : nextAnims) {
 			boolean found = false;
 			for (int i = 0; i < currentAnimations.size(); i++) {
@@ -35,8 +33,7 @@ public class AnimationHandler {
 				}
 			}
 			if(!found) {
-				currentAnimations.add(new PlayingAnim(animation, currentTime,
-						currentGesture != null ? (currentGesture.animation.contains(animation.animation) ? currentGesture.isLoop : true) : true, mode));
+				currentAnimations.add(new PlayingAnim(animation, currentTime));
 				needsSort = true;
 			}
 		}
@@ -59,52 +56,61 @@ public class AnimationHandler {
 		nextAnims.clear();
 	}
 
-	public void addAnimations(List<? extends IAnimation> next, IPose pose) {
+	public void addAnimations(List<AnimationTrigger> next, IPose pose) {
 		Player<?> pl = player.get().getPlayerObj();
-		next.stream().filter(a -> a.canPlay(pl, mode)).map(a -> new NextAnim(a, pose)).forEach(nextAnims::add);
-	}
-
-	public void setGesture(Gesture next) {
-		currentGesture = next;
-		if(next != null) {
-			addAnimations(next.animation, null);
-		}
+		next.stream().filter(t -> t.canPlay(pl, mode)).forEach(t -> {
+			for (IAnimation a : t.animations) {
+				nextAnims.add(new NextAnim(a, t));
+			}
+		});
 	}
 
 	public void clear() {
-		currentGesture = null;
 		nextAnims.clear();
 		currentAnimations.clear();
 	}
 
 	private static class NextAnim {
 		private IAnimation animation;
-		private IPose pose;
+		private AnimationTrigger trigger;
 
-		public NextAnim(IAnimation animation, IPose pose) {
+		public NextAnim(IAnimation animation, AnimationTrigger trigger) {
 			this.animation = animation;
-			this.pose = pose;
+			this.trigger = trigger;
+		}
+
+		public boolean isLoop() {
+			return trigger.looping;
 		}
 	}
 
-	private static class PlayingAnim {
+	private class PlayingAnim {
 		private IAnimation currentAnimation;
-		private IPose pose;
+		private AnimationTrigger trigger;
 		private long currentStart;
-		private boolean loop, finished;
+		private boolean loop, finished, mustFinish;
 
-		public PlayingAnim(NextAnim anim, long currentStart, boolean loop, AnimationMode mode) {
+		public PlayingAnim(NextAnim anim, long currentStart) {
 			this.currentAnimation = anim.animation;
 			currentAnimation.prepare(mode);
-			this.pose = anim.pose;
+			this.trigger = anim.trigger;
 			this.currentStart = currentStart;
-			this.loop = loop;
+			this.loop = anim.isLoop();
 			this.finished = false;
+			this.mustFinish = anim.trigger.mustFinish;
+		}
+
+		public boolean checkAndUpdateRemove(AnimationMode mode) {
+			if (mustFinish) {
+				loop = false;
+				return currentAnimation.checkAndUpdateRemove(mode) && finished;
+			}
+			return currentAnimation.checkAndUpdateRemove(mode);
 		}
 
 		public long getTime(AnimationState state, long time) {
-			if(pose == null)return time;
-			else return pose.getTime(state, time);
+			if(trigger == null || !currentAnimation.useTriggerTime())return time;
+			else return trigger.getTime(state, time);
 		}
 	}
 }

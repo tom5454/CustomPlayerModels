@@ -232,7 +232,7 @@ public class EditorRenderer {
 			return drawRotationDragPane(f, bufferIn, type, Vec3f.ZERO, new Vec3f(), size, true);
 		}
 
-		case SCALE:
+		case MESH_SCALE:
 		case TEXTURE:
 		default:
 			break;
@@ -435,7 +435,7 @@ public class EditorRenderer {
 		}
 		break;
 
-		case SCALE:
+		case MESH_SCALE:
 			break;
 
 		case SIZE:

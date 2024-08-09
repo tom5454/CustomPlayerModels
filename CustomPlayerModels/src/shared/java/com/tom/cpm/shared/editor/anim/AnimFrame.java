@@ -306,10 +306,6 @@ public class AnimFrame {
 		return data.hasScaleChanges();
 	}
 
-	public void copy(AnimFrame from) {
-		from.components.forEach((e, dt) -> components.put(e, new FrameData(dt)));
-	}
-
 	public void clearSelectedData(ActionBuilder ab, ModelElement me) {
 		ab.removeFromMap(components, me);
 	}

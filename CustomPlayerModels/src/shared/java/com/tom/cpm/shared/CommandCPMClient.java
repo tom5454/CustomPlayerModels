@@ -19,9 +19,6 @@ import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.animation.AnimationRegistry;
-import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.animation.Gesture;
-import com.tom.cpm.shared.animation.IManualGesture;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.Player;
@@ -139,14 +136,9 @@ public class CommandCPMClient {
 		ModelDefinition def = player.getModelDefinition();
 		if(def != null) {
 			AnimationRegistry ar = def.getAnimations();
-			ar.getCustomPoses().values().stream().filter(p -> canPlay(p)).forEach(p -> l.add(p.getName()));
-			ar.getGestures().values().stream().filter(p -> canPlay(p)).forEach(p -> l.add(p.getName()));
+			return new ArrayList<>(ar.getCommandActionsMap().keySet());
 		}
 		return l;
-	}
-
-	private static boolean canPlay(IManualGesture p) {
-		return !p.isCommand() || p.getName().startsWith("client:");
 	}
 
 	private static void setAnimation(CommandCtx<?> context, int value) {
@@ -158,29 +150,6 @@ public class CommandCPMClient {
 
 	private static boolean playAnimation(String id, int value) {
 		AnimationEngine an = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine();
-		Player<?> pl = MinecraftClientAccess.get().getCurrentClientPlayer();
-		ModelDefinition def = pl.getModelDefinition();
-		if(def != null) {
-			CustomPose pose = def.getAnimations().getCustomPoses().get(id);
-			if(pose != null) {
-				if (!canPlay(pose))return false;
-				if(value == 0)an.setCustomPose(def.getAnimations(), null);
-				else an.setCustomPose(def.getAnimations(), pose, false);
-				return true;
-			} else {
-				Gesture g = def.getAnimations().getGestures().get(id);
-				if(g != null && canPlay(g)) {
-					if(g.type.isLayer() && value != -1) {
-						an.setLayerValue(def.getAnimations(), g, value / 255f);
-						return true;
-					} else {
-						if(value == 0)an.playGesture(def.getAnimations(), null, pl);
-						else an.playGesture(def.getAnimations(), g, false, pl);
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+		return an.applyCommand(id, value);
 	}
 }

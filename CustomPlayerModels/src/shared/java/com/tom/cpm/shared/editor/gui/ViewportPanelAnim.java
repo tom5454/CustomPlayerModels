@@ -63,6 +63,9 @@ public class ViewportPanelAnim extends ViewportPanel {
 				spr = 2;
 				break;
 
+			case LIGHT:
+				spr = 3;
+
 			default:
 				break;
 			}

@@ -11,7 +11,7 @@ import com.tom.cpm.client.RetroGL;
 @Mixin(value = EntityRenderDispatcher.class, remap = false)
 public class EntityRenderDispatcherMixin {
 
-	@Redirect(at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glColor3f(FFF)V", remap = false), method = "renderEntity(Lnet/minecraft/core/entity/Entity;F)V")
+	@Redirect(at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glColor3f(FFF)V", remap = false), method = "renderEntity(Lnet/minecraft/client/render/tessellator/Tessellator;Lnet/minecraft/core/entity/Entity;F)V")
 	public void onRenderC(float r, float g, float b) {
 		RetroGL.lightColor3f(r, g, b);
 	}

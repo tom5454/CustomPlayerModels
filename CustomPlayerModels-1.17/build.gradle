@@ -141,6 +141,10 @@ repositories {
     //     dir 'libs'
     // }
     maven { url 'https://jitpack.io' }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
 }
 
 mixin {
@@ -174,7 +178,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     compileOnly files("of.jar")
     
-    compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.8-1.17.1-forge")
+    compileOnly fg.deobf("maven.modrinth:pehkui:3.8.2+1.17.1-forge")
 }
 
 sourceSets {

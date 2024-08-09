@@ -1,3 +1,6 @@
+
+<a name="the-models-menu"/>
+
 # The Models Menu
 
 > [!NOTE]
@@ -10,12 +13,21 @@ Export your model with the [Model option](https://github.com/tom5454/CustomPlaye
 
 The `Load from Skin` button (previously `Reset Skin`) removes the active `.cpmmodel` and loads your model from your [skin](https://github.com/tom5454/CustomPlayerModels/wiki/Exporting#stored-in-skin).
 
+
+<a name="folders"/>
+
 ## Folders
 The models menu support folders of models.  
 You can place an `icon.png` and a `description.txt` to set the folder icon and description in the models menu.
 
+
+<a name="importing"/>
+
 ## Importing
 You can drag and drop `.cpmmodel` files into the Minecraft game window while the models menu is open to import them.
+
+
+<a name="models-popup"/>
 
 ## Models Popup
 

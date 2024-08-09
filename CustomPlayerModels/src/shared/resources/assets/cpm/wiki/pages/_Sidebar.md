@@ -1,4 +1,6 @@
-Customizable Player Models Wiki  
+Customizable Player Models Wiki
+
+[English](https://github.com/tom5454/CustomPlayerModels/wiki/Home), [简体中文 (中国大陆)](https://github.com/tom5454/CustomPlayerModels/wiki/Home-zh-CN)
 
 * [Home](https://github.com/tom5454/CustomPlayerModels/wiki)
 * [First Start Guide](https://github.com/tom5454/CustomPlayerModels/wiki/FirstStartGuide)

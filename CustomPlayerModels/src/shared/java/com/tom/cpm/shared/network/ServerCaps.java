@@ -10,6 +10,7 @@ public enum ServerCaps {
 	GESTURES,
 	PLUGIN_MESSAGES,
 	INVIS_GLOW,
+	NAMED_PARAMETERS,
 	;
 	public static final ServerCaps[] VALUES = values();
 }

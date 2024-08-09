@@ -8,8 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import com.tom.cpm.shared.animation.AnimationRegistry;
-import com.tom.cpm.shared.animation.CustomPose;
-import com.tom.cpm.shared.animation.Gesture;
 import com.tom.cpm.shared.definition.ModelDefinition;
 
 public class OSCMessageManager {
@@ -19,12 +17,7 @@ public class OSCMessageManager {
 		this.mappings.clear();
 		Set<OSCMapping> mappings = new HashSet<>();
 		AnimationRegistry ar = def.getAnimations();
-		ar.getCustomPoses().values().stream().filter(CustomPose::isCommand).filter(p -> p.getName().startsWith("osc:/")).forEach(p -> {
-			OSCMapping m = new OSCMapping(p);
-			if(m.getOscPacketId() != null)
-				mappings.add(m);
-		});
-		ar.getGestures().values().stream().filter(Gesture::isCommand).filter(p -> p.getName().startsWith("osc:/")).forEach(p -> {
+		ar.getCommandActionsMap().values().stream().filter(CPMOSC::isCommandControlledTemp).filter(p -> p.getName().startsWith("osc:/")).forEach(p -> {
 			OSCMapping m = new OSCMapping(p);
 			if(m.getOscPacketId() != null)
 				mappings.add(m);

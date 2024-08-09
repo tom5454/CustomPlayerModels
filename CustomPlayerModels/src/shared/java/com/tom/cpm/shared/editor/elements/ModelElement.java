@@ -104,6 +104,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		rotation = new Vec3f(element.rotation);
 		size = new Vec3f(element.size);
 		scale = new Vec3f(element.scale);
+		meshScale = new Vec3f(element.meshScale);
 		u = element.u;
 		v = element.v;
 		rgb = element.rgb;
@@ -259,9 +260,9 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			execute();
 			break;
 
-		case SCALE:
+		case MESH_SCALE:
 			editor.action("set", "label.cpm.scale").
-			updateValueOp(this, this.scale, v, 0, FormatLimits.getSizeLimit(), false, (a, b) -> a.scale = b, editor.setScale).
+			updateValueOp(this, this.meshScale, v, 0, FormatLimits.getSizeLimit(), false, (a, b) -> a.meshScale = b, editor.setMeshScale).
 			onAction(this::markDirty).
 			execute();
 			break;
@@ -291,8 +292,8 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			return new Vec3f(pos);
 		case ROTATION:
 			return new Vec3f(rotation);
-		case SCALE:
-			return new Vec3f(scale);
+		case MESH_SCALE:
+			return new Vec3f(meshScale);
 		case SIZE:
 			return new Vec3f(size);
 		case TEXTURE:
@@ -324,10 +325,10 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setRot.accept(rotation);
 			break;
 
-		case SCALE:
+		case MESH_SCALE:
 			ActionBuilder.limitVec(v, 0, FormatLimits.getSizeLimit(), false);
-			scale = v;
-			editor.setScale.accept(scale);
+			meshScale = v;
+			editor.setMeshScale.accept(meshScale);
 			markDirty();
 			break;
 
@@ -400,7 +401,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			editor.setPosition.accept(this.pos);
 			if(itemRenderer == null)
 				editor.setSize.accept(this.size);
-			editor.setScale.accept(this.scale);
+			editor.setMeshScale.accept(this.meshScale);
 			if(itemRenderer == null) {
 				editor.setMCScale.accept(this.mcScale);
 				editor.setMirror.accept(this.mirror);
@@ -747,7 +748,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	public boolean canEditVec(VecType type) {
 		if (locked)return false;
 		if(this.type == ElementType.ROOT_PART)return type == VecType.POSITION || type == VecType.ROTATION;
-		if(itemRenderer != null)return type == VecType.POSITION || type == VecType.ROTATION || type == VecType.SCALE || type == VecType.OFFSET;
+		if(itemRenderer != null)return type == VecType.POSITION || type == VecType.ROTATION || type == VecType.MESH_SCALE || type == VecType.OFFSET;
 		else return true;
 	}
 

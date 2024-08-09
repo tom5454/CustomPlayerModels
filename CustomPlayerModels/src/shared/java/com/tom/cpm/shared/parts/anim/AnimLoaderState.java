@@ -4,24 +4,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.tom.cpm.shared.animation.AnimationRegistry;
-import com.tom.cpm.shared.animation.AnimationType;
-import com.tom.cpm.shared.animation.InterpolatorChannel;
-import com.tom.cpm.shared.animation.VanillaPose;
+import com.tom.cpm.shared.definition.ModelDefinition;
+import com.tom.cpm.shared.editor.AnimationExporter;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.anim.AnimFrame;
-import com.tom.cpm.shared.editor.anim.EditorAnim;
-import com.tom.cpm.shared.editor.anim.IElem;
-import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.parts.anim.menu.AbstractGestureButtonData;
 
 public class AnimLoaderState {
+	private ModelDefinition def;
+	private ParameterDetails parameters = ParameterDetails.DEFAULT;
+	private List<AbstractGestureButtonData> gestureButtons = new ArrayList<>();
 	private Map<Integer, SerializedAnimation> anims = new HashMap<>();
 	private Map<Integer, SerializedTrigger> triggers = new HashMap<>();
 	private int trID = 0;
@@ -32,6 +29,15 @@ public class AnimLoaderState {
 	private String modelProfilesId;
 	private int defGidMask, valGidMask;
 	private List<PlayerSkinLayer> allLayers;
+	private List<Integer> stagedList = new ArrayList<>();
+
+	public AnimLoaderState(ModelDefinition def) {
+		this.def = def;
+	}
+
+	public ModelDefinition getDefinition() {
+		return def;
+	}
 
 	public SerializedTrigger getTrigger() {
 		return cT;
@@ -75,97 +81,13 @@ public class AnimLoaderState {
 
 	public void loadFromEditor(Editor e) {
 		loadInfo(e);
-		Map<SerializedTrigger, Integer> triggers = new HashMap<>();
-		Map<EditorAnim, SerializedTrigger> stagingIds = new HashMap<>();
-		Map<EditorAnim, Integer> animTriggers = new HashMap<>();
-		Set<ModelElement> allElems = new HashSet<>();
-		Editor.walkElements(e.elements, allElems::add);
-		e.animations.forEach(a -> {
-			SerializedTrigger tr = new SerializedTrigger();
-			if (a.pose instanceof VanillaPose)tr.pose = (VanillaPose) a.pose;
-			else if(a.type == AnimationType.CUSTOM_POSE || a.type == AnimationType.GESTURE || a.type.isLayer()) {
-				tr.name = a.getId();
-				tr.anim = a.type;
-				tr.group = a.group;
-				if (!a.type.isLayer())
-					tr.layerCtrl = a.layerControlled;
-				tr.command = a.command;
-				tr.isProperty = a.isProperty;
-				tr.order = a.order;
-				tr.defaultValue = (byte) (a.layerDefault * 0xff);
-				tr.looping = a.loop;
-			} else if(a.type.isStaged()) {
-				tr.anim = a.type;
-				tr.triggerID = stagingIds.size();
-				stagingIds.put(a, tr);
-			}
-			int id = triggers.computeIfAbsent(tr, this::newTrigger);
-			animTriggers.put(a, id);
-			SerializedAnimation anim = new SerializedAnimation();
-			anim.triggerID = id;
-			anim.priority = a.priority;
-			anim.duration = a.duration;
-			newAnimation(anim);
-			List<ModelElement> elems = a.getComponentsFiltered();
-			List<AnimFrame> frames = a.getFrames();
-			elems.forEach(me -> {
-				if(!allElems.contains(me))return;
-				Map<InterpolatorChannel, Integer> c = AnimatorChannel.addCubeToChannels(anim, me.id, a.add);
-				//TODO replace with include system later
-				if (frames.stream().anyMatch(f -> f.hasPosChanges(me))) {
-					addChannel(anim, c, me, InterpolatorChannel.POS_X, a, 0);
-					addChannel(anim, c, me, InterpolatorChannel.POS_Y, a, 0);
-					addChannel(anim, c, me, InterpolatorChannel.POS_Z, a, 0);
-				}
-				if (frames.stream().anyMatch(f -> f.hasRotChanges(me))) {
-					addChannel(anim, c, me, InterpolatorChannel.ROT_X, a, 0);
-					addChannel(anim, c, me, InterpolatorChannel.ROT_Y, a, 0);
-					addChannel(anim, c, me, InterpolatorChannel.ROT_Z, a, 0);
-				}
-				if (frames.stream().anyMatch(f -> f.hasColorChanges(me))) {
-					addChannel(anim, c, me, InterpolatorChannel.COLOR_R, a, 0);
-					addChannel(anim, c, me, InterpolatorChannel.COLOR_G, a, 0);
-					addChannel(anim, c, me, InterpolatorChannel.COLOR_B, a, 0);
-				}
-				if (frames.stream().anyMatch(f -> f.hasVisChanges(me))) {
-					boolean[] array = new boolean[frames.size()];
-					for (int i = 0; i < frames.size(); i++) {
-						AnimFrame frm = frames.get(i);
-						IElem dt = frm.getData(me);
-						if(dt == null) array[i] = me.isVisible();
-						else array[i] = dt.isVisible();
-					}
-					anim.animatorChannels.get(c.get(null)).frameData = new ConstantTimeBool(array);
-				}
-				if (frames.stream().anyMatch(f -> f.hasScaleChanges(me))) {
-					addChannel(anim, c, me, InterpolatorChannel.SCALE_X, a, 1);
-					addChannel(anim, c, me, InterpolatorChannel.SCALE_Y, a, 1);
-					addChannel(anim, c, me, InterpolatorChannel.SCALE_Z, a, 1);
-				}
-			});
-		});
-		stagingIds.forEach((ea, t) -> {
-			EditorAnim a = ea.findLinkedAnim();
-			Integer id = animTriggers.get(a);
-			if (id != null) {
-				t.triggerID = id;
-			}
-		});
-		handleLayers();
-	}
-
-	private static void addChannel(SerializedAnimation anim, Map<InterpolatorChannel, Integer> c, ModelElement elem, InterpolatorChannel chn, EditorAnim ea, float empty) {
-		List<AnimFrame> frames = ea.getFrames();
-		float[] array = new float[frames.size()];
-		for (int i = 0; i < frames.size(); i++) {
-			AnimFrame frm = frames.get(i);
-			IElem dt = frm.getData(elem);
-			if(dt == null) {
-				if(ea.add)array[i] = empty;
-				else array[i] = elem.part(chn);
-			} else array[i] = dt.part(chn);
-		}
-		anim.animatorChannels.get(c.get(chn)).frameData = new ConstantTimeFloat(ea.intType, array);
+		AnimationExporter exporter = new AnimationExporter(e, this);
+		exporter.processElements();
+		e.animations.forEach(exporter::processAnimation);
+		parameters = exporter.paramAlloc.finish();
+		gestureButtons = exporter.sortButtons();
+		exporter.linkStagingAnims();
+		LayerEncondingHelper.handleLayers(this.triggers, allLayers, gestureButtons, blankId, resetId, valGidMask, defGidMask);
 	}
 
 	public static void parseInfo(IOHelper block, AnimLoaderState state) throws IOException {
@@ -181,19 +103,41 @@ public class AnimLoaderState {
 			if (modelProfilesId == null)d.writeVarInt(0);
 			else d.writeUTF(modelProfilesId);
 		}
+		if (!parameters.equals(ParameterDetails.DEFAULT)) {
+			try (IOHelper d = dout.writeNextObjectBlock(TagType.PARAMETERS)) {
+				parameters.write(d);
+			}
+		}
 	}
 
 	public void applyInfos(AnimationRegistry reg) {
 		reg.setBlankGesture(blankId);
 		reg.setPoseResetId(resetId);
 		reg.setProfileId(modelProfilesId);
-	}
-
-	public void handleLayers() {
-		SerializedTrigger.handleLayers(triggers, allLayers, blankId, resetId, valGidMask, defGidMask);
+		reg.setParams(parameters);
 	}
 
 	public void processTriggers() {
-		SerializedTrigger.handleGestures(triggers, blankId, resetId);
+		//SerializedTrigger.handleGestures(triggers, blankId, resetId);
+	}
+
+	public void setParameters(ParameterDetails parameters) {
+		this.parameters = parameters;
+	}
+
+	public ParameterDetails getParameters() {
+		return parameters;
+	}
+
+	public void addGestureButton(AbstractGestureButtonData button) {
+		gestureButtons.add(button);
+	}
+
+	public List<AbstractGestureButtonData> getGestureButtons() {
+		return gestureButtons;
+	}
+
+	public List<Integer> getStagedList() {
+		return stagedList;
 	}
 }

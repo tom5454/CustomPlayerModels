@@ -40,6 +40,7 @@ public class Keybinds {
 	public static final Keybind PASTE_ANIM_PART = new Keybind("pasteAnimPart", "v", Keybind.CTRL);
 	public static final Keybind ANIM_PREV_FRAME = new Keybind("animPrevFrame");
 	public static final Keybind ANIM_NEXT_FRAME = new Keybind("animNextFrame");
+	public static final Keybind ANIM_NEW_FRAME = new Keybind("animNewFrame");
 
 	public static final Keybind RESET_VALUE_LAYER = new Keybind("resetValueLayer", "r");
 

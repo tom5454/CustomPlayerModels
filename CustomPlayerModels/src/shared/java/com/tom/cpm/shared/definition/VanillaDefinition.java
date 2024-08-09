@@ -43,6 +43,7 @@ public class VanillaDefinition extends ModelDefinition {
 			cube.rotation = new Vec3f(0, 0, 0);
 			cube.pos = new Vec3f(0, 0, 0);
 			cube.size = val.getSize();
+			cube.meshScale = new Vec3f(1, 1, 1);
 			cube.scale = new Vec3f(1, 1, 1);
 			cube.u = val.u;
 			cube.v = val.v;
@@ -58,6 +59,7 @@ public class VanillaDefinition extends ModelDefinition {
 			cube.rotation = new Vec3f(0, 0, 0);
 			cube.pos = new Vec3f(0, 0, 0);
 			cube.size = val.getSize();
+			cube.meshScale = new Vec3f(1, 1, 1);
 			cube.scale = new Vec3f(1, 1, 1);
 			cube.u = val.u2;
 			cube.v = val.v2;

@@ -40,7 +40,7 @@ public class EffectScale implements IRenderEffect {
 	public void apply(ModelDefinition def) {
 		RenderedCube cube = def.getElementById(id);
 		if(cube != null) {
-			cube.getCube().scale = scale;
+			cube.getCube().meshScale = scale;
 			cube.getCube().mcScale = mcScale;
 		}
 	}

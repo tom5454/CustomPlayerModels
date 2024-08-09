@@ -8,9 +8,7 @@ import java.util.UUID;
 
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.gui.IKeybind;
-import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.text.FormatText;
-import com.tom.cpl.text.I18n;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
 import com.tom.cpm.shared.animation.AnimationState.VRState;
@@ -22,6 +20,9 @@ import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.network.ServerCaps;
 import com.tom.cpm.shared.network.packet.GestureC2S;
+import com.tom.cpm.shared.parts.anim.ParameterDetails;
+import com.tom.cpm.shared.parts.anim.menu.AbstractGestureButtonData;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction;
 import com.tom.cpm.shared.util.Log;
 import com.tom.cpm.shared.util.ScalingOptions;
 
@@ -33,7 +34,9 @@ public class AnimationEngine {
 	private long resetCounter;
 	private boolean[] quickAccessPressed = new boolean[IKeybind.QUICK_ACCESS_KEYBINDS_COUNT];
 	private int gestureAutoResetTimer = -1;
+	private ParameterDetails lastDetails;
 	private byte[] gestureData = new byte[2];
+	private boolean gesturesChanged;
 	private boolean checkedUUID;
 
 	public void tick() {
@@ -42,27 +45,25 @@ public class AnimationEngine {
 			Player<?> player = MinecraftClientAccess.get().getCurrentClientPlayer();//Keep client player loaded
 			ModelDefinition def = player.getModelDefinition();
 			if(def != null) {
-				int lc = def.getAnimations().getLayerCount();
+				ParameterDetails param = def.getAnimations().getParams();
 
-				if(gestureData.length != lc) {
+				if (lastDetails != param) {
 					byte v0 = gestureData[0];
 					byte v1 = gestureData[1];
-					gestureData = new byte[lc];
+					gestureData = param.createSyncParams();
 					gestureData[0] = v0;
 					gestureData[1] = v1;
-					ConfigEntry vals = def.getAnimations().getProfileId() != null ? ModConfig.getCommonConfig().getEntry(ConfigKeys.MODEL_PROPERTIES).getEntry(def.getAnimations().getProfileId()).getEntry(ConfigKeys.MODEL_PROPERTIES_VALUES) : null;
-					def.getAnimations().forEachLayer((g, id) -> {
-						if(g.isProperty && vals != null) {
-							float v = vals.getFloat(g.name, g.defVal / 255f);
-							gestureData[id] = (byte) (g.type == AnimationType.VALUE_LAYER ? v * 255f : (v > 0 ? 1 : 0));
-						} else
-							gestureData[id] = g.defVal;
-					});
-					sendGestureData();
+					if (def.getAnimations().getProfileId() != null) {
+						ConfigEntry vals = ModConfig.getCommonConfig().getEntry(ConfigKeys.MODEL_PROPERTIES).getEntry(def.getAnimations().getProfileId()).getEntry(ConfigKeys.MODEL_PROPERTIES_VALUES);
+						def.getAnimations().getNamedActions().forEach(a -> {
+							if (a.isProperty()) a.loadFrom(vals);
+						});
+					}
+					gesturesChanged = true;
+					this.lastDetails = param;
 				}
-				if(player.animState.gestureData == null) {
+				if (player.animState.gestureData == null) {
 					player.animState.gestureData = Arrays.copyOf(gestureData, gestureData.length);
-					sendGestureData();
 				}
 			}
 			if(MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
@@ -88,7 +89,7 @@ public class AnimationEngine {
 			}
 			if(gestureAutoResetTimer >= 0)gestureAutoResetTimer--;
 			if(gestureAutoResetTimer == 0 && def != null) {
-				playGesture(def.getAnimations(), null, player);
+				clearGesture(def);
 			}
 			if (!checkedUUID) {
 				checkedUUID = true;
@@ -125,7 +126,7 @@ public class AnimationEngine {
 				if(player.animState.gestureData[0] == 0) {
 					player.currentPose = pose;
 				} else {
-					player.currentPose = reg.getPose(player.animState.gestureData[0], player.currentPose);
+					player.currentPose = reg.getPoseById(player.animState.gestureData[0], player.currentPose);
 					player.prevPose = pose;
 				}
 			} else {
@@ -133,7 +134,7 @@ public class AnimationEngine {
 				if(pose != player.prevPose || gesture == reg.getPoseResetId()) {
 					player.currentPose = pose;
 				}
-				player.currentPose = reg.getPose(gesture, player.currentPose);
+				player.currentPose = reg.getPoseEncoded(gesture, player.currentPose);
 				player.prevPose = pose;
 			}
 		}
@@ -152,53 +153,26 @@ public class AnimationEngine {
 			switch (mode) {
 			case HAND:
 				def.resetAnimationPos();
-				if(player.animState.vrState == VRState.FIRST_PERSON) {
-					List<IAnimation> a = reg.getPoseAnimations(VanillaPose.VR_FIRST_PERSON);
-					h.addAnimations(a, VanillaPose.VR_FIRST_PERSON);
-				} else {
-					List<IAnimation> a = reg.getPoseAnimations(VanillaPose.FIRST_PERSON_HAND);
-					h.addAnimations(a, VanillaPose.FIRST_PERSON_HAND);
-				}
-				h.animate(player.animState, time);
-				return;
+				VanillaPose pose = player.animState.vrState == VRState.FIRST_PERSON ? VanillaPose.VR_FIRST_PERSON : VanillaPose.FIRST_PERSON_HAND;
+				List<AnimationTrigger> a = reg.getPoseAnimations(pose);
+				h.addAnimations(a, pose);
+				break;
 
 			case PLAYER:
 			case FIRST_PERSON:
 			case GUI:
 			{
 				player.animState.preAnimate();
-				if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES) && player.animState.gestureData != null && player.animState.gestureData.length > 1) {
-					List<IAnimation> anim = reg.getPoseAnimations(player.currentPose);
-					h.addAnimations(anim, player.currentPose);
-					player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p), reg);
-					h.setGesture(reg.getGesture(player.animState.gestureData[1]));
-					reg.forEachLayer((g, id) -> {
-						if(player.animState.gestureData.length > id) {
-							if(g.type == AnimationType.VALUE_LAYER)
-								h.addAnimations(g.animation, new ValueLayerPose(id));
-							else if(player.animState.gestureData[id] != 0)
-								h.addAnimations(g.animation, null);
-						} else {
-							if(g.type == AnimationType.VALUE_LAYER)
-								h.addAnimations(g.animation, new DefaultValuePose(g.defVal));
-							else if(g.defVal != 0)
-								h.addAnimations(g.animation, null);
-						}
-					});
-				} else {
-					int gesture = player.animState.encodedState;
-					List<IAnimation> anim = reg.getPoseAnimations(player.currentPose);
-					h.addAnimations(anim, player.currentPose);
-					player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p), reg);
-					h.setGesture(reg.getGesture(gesture));
-				}
+				List<AnimationTrigger> anim = reg.getPoseAnimations(player.currentPose);
+				h.addAnimations(anim, player.currentPose);
+				player.animState.collectAnimations(p -> h.addAnimations(reg.getPoseAnimations(p), p), reg);
 			}
 			break;
 
 			case SKULL:
 			{
-				List<IAnimation> anim = reg.getPoseAnimations(VanillaPose.SKULL_RENDER);
-				List<IAnimation> global = reg.getPoseAnimations(VanillaPose.GLOBAL);
+				List<AnimationTrigger> anim = reg.getPoseAnimations(VanillaPose.SKULL_RENDER);
+				List<AnimationTrigger> global = reg.getPoseAnimations(VanillaPose.GLOBAL);
 				h.addAnimations(anim, VanillaPose.SKULL_RENDER);
 				h.addAnimations(global, VanillaPose.GLOBAL);
 			}
@@ -221,60 +195,17 @@ public class AnimationEngine {
 		}
 	}
 
-	private static class ValueLayerPose implements IPose {
-		private final int id;
-
-		public ValueLayerPose(int id) {
-			this.id = id;
-		}
-
-		@Override
-		public String getName(I18n gui, String display) {
-			return "value";
-		}
-
-		@Override
-		public long getTime(AnimationState state, long animTime) {
-			if (state.gestureData.length > id) {
-				float val = Byte.toUnsignedInt(state.gestureData[id]) / 256f;
-				long time = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
-				if (state.prevGestureData != null && state.prevGestureData.length == state.gestureData.length && state.lastGestureReceiveTime + 50 >= time) {
-					float prev = Byte.toUnsignedInt(state.prevGestureData[id]) / 256f;
-					val = MathHelper.lerp((time - state.lastGestureReceiveTime) / 50f, prev, val);
-				}
-				return (long) (val * VanillaPose.DYNAMIC_DURATION_MUL);
-			} else
-				return 0L;
-		}
-	}
-
-	private static class DefaultValuePose implements IPose {
-		private final byte v;
-
-		public DefaultValuePose(byte v) {
-			this.v = v;
-		}
-
-		@Override
-		public String getName(I18n gui, String display) {
-			return "value";
-		}
-
-		@Override
-		public long getTime(AnimationState state, long time) {
-			return (long) ((Byte.toUnsignedInt(v) / 256f) * VanillaPose.DYNAMIC_DURATION_MUL);
-		}
-	}
-
 	public void handleGuiAnimation(AnimationHandler h, ModelDefinition def) {
 		try {
 			long time = getTime();
 			AnimationRegistry reg = def.getAnimations();
 			reg.tickAnimated(time, true);
-			List<IAnimation> anim = def.getAnimations().getPoseAnimations(VanillaPose.STANDING);
-			List<IAnimation> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
+			List<AnimationTrigger> anim = def.getAnimations().getPoseAnimations(VanillaPose.STANDING);
+			List<AnimationTrigger> global = def.getAnimations().getPoseAnimations(VanillaPose.GLOBAL);
+			List<AnimationTrigger> inGui = def.getAnimations().getPoseAnimations(VanillaPose.IN_GUI);
 			h.addAnimations(anim, VanillaPose.STANDING);
 			h.addAnimations(global, VanillaPose.GLOBAL);
+			h.addAnimations(inGui, VanillaPose.IN_GUI);
 			h.animate(null, time);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -283,110 +214,8 @@ public class AnimationEngine {
 		}
 	}
 
-	private void onKeybind(int id) {
-		Player<?> pl = MinecraftClientAccess.get().getCurrentClientPlayer();
-		ModelDefinition def = pl.getModelDefinition();
-		if(def != null) {
-			ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
-			String c = ce.getString("qa_" + id, null);
-			if(c != null) {
-				if(c.startsWith("p")) {
-					CustomPose pose = def.getAnimations().getCustomPoses().get(c.substring(1));
-					if(pose != null) {
-						setCustomPose(def.getAnimations(), pose);
-					}
-				} else if(c.startsWith("g")) {
-					Gesture g = def.getAnimations().getGestures().get(c.substring(1));
-					if(g != null) {
-						playGesture(def.getAnimations(), g, pl);
-					}
-				}
-			}
-		}
-	}
-
-	public void setCustomPose(AnimationRegistry reg, CustomPose pose) {
-		setCustomPose(reg, pose, true);
-	}
-
-	public void setCustomPose(AnimationRegistry reg, CustomPose pose, boolean toggle) {
-		ServerStatus status = MinecraftClientAccess.get().getServerSideStatus();
-		if(status == ServerStatus.OFFLINE || status == ServerStatus.UNAVAILABLE)return;
-		int enc = pose == null ? reg.getPoseResetId() : reg.getEncoded(pose);
-		if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
-			gestureData[0] = pose == null || (gestureData[0] == enc && toggle) ? 0 : (byte) enc;
-			sendGestureData();
-		} else {
-			if(enc != -1) {
-				if(enc == MinecraftClientAccess.get().getCurrentClientPlayer().animState.encodedState && toggle) {
-					enc = reg.getPoseResetId();
-				}
-				MinecraftClientAccess.get().setEncodedGesture(enc);
-			}
-		}
-	}
-
-	public void playGesture(AnimationRegistry reg, Gesture g, Player<?> pl) {
-		playGesture(reg, g, true, pl);
-	}
-
-	public void playGesture(AnimationRegistry reg, Gesture g, boolean toggle, Player<?> pl) {
-		ServerStatus status = MinecraftClientAccess.get().getServerSideStatus();
-		boolean serverGc = MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES);
-		if(status == ServerStatus.OFFLINE || status == ServerStatus.UNAVAILABLE)return;
-		if(g != null) {
-			if (g.getType() == AnimationType.LAYER) {
-				if(serverGc) {
-					int id = reg.getLayerId(g);
-					if(id == -1 || id >= gestureData.length)return;
-					gestureData[id] = (byte) (gestureData[id] != 0 && toggle ? 0 : 1);
-					sendGestureData();
-				}
-				return;
-			}
-		} else if (serverGc) {
-			gestureData[1] = 0;
-			sendGestureData();
-			return;
-		}
-		if(g != null && !g.isLoop && ModConfig.getCommonConfig().getBoolean(ConfigKeys.GESTURE_AUTO_RESET, true)) {
-			int len = g.animation.stream().filter(a -> a.canPlay(pl, AnimationMode.PLAYER)).mapToInt(a -> a.getDuration(AnimationMode.PLAYER)).max().orElse(-1);
-			gestureAutoResetTimer = len == -1 ? -1 : ((int) Math.ceil(len / 50f) + 5);
-		}
-		int enc = g == null ? reg.getBlankGesture() : reg.getEncoded(g);
-		if (serverGc) {
-			gestureData[1] = g == null || (gestureData[1] == enc && toggle) ? 0 : (byte) enc;
-			sendGestureData();
-		} else {
-			if(enc != -1) {
-				if(enc == MinecraftClientAccess.get().getCurrentClientPlayer().animState.encodedState && toggle) {
-					enc = reg.getBlankGesture();
-				}
-				MinecraftClientAccess.get().setEncodedGesture(enc);
-			}
-		}
-	}
-
-	public void setLayerValue(AnimationRegistry reg, Gesture g, float value) {
-		if (g == null || !MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES))return;
-		if (g.type == AnimationType.VALUE_LAYER) {
-			int id = reg.getLayerId(g);
-			if(id == -1 || id >= gestureData.length)return;
-			byte old = gestureData[id];
-			gestureData[id] = (byte) (value * 0xff);
-			if(gestureData[id] != old)
-				sendGestureData();
-		} else if (g.type == AnimationType.LAYER) {
-			int id = reg.getLayerId(g);
-			if(id == -1 || id >= gestureData.length)return;
-			byte old = gestureData[id];
-			gestureData[id] = (byte) (value > 0 ? 1 : 0);
-			if(gestureData[id] != old)
-				sendGestureData();
-		}
-	}
-
 	private void sendGestureData() {
+		System.out.println("Gesture Sync: " + Arrays.toString(gestureData));
 		MinecraftClientAccess.get().getNetHandler().sendPacketToServer(new GestureC2S(gestureData));
 	}
 
@@ -407,51 +236,63 @@ public class AnimationEngine {
 		resetCounter = tickCounter + 100;
 	}
 
+	public static ConfigEntry getEntryForModel(ModelDefinition def, boolean make) {
+		String pf = def.getAnimations().getProfileId();
+		if (pf != null) {
+			ConfigEntry cem = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS_MODEL);
+			if (cem.hasEntry(pf) || make) {
+				boolean copy = !cem.hasEntry(pf);
+				ConfigEntry cfg = cem.getEntry(pf);
+				if (copy) {
+					ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
+					for (String k : ce.keySet()) {
+						cfg.setString(k, ce.getString(k, ""));
+					}
+				}
+				return cfg;
+			}
+		}
+		return ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
+	}
+
 	public void updateKeys(IKeybind[] kbs) {
 		Player<?> pl = MinecraftClientAccess.get().getCurrentClientPlayer();
 		ModelDefinition def = pl.getModelDefinition();
 		if(def != null) {
+			ConfigEntry ce = getEntryForModel(def, false);
 			for (int i = 1; i <= kbs.length; i++) {
 				IKeybind kb = kbs[i - 1];
 				boolean pr = kb.isPressed();
 				boolean prevPr = quickAccessPressed[i - 1];
 				if (!prevPr && pr) {
-					onKeybind(i);
-				} else if (prevPr && !pr) {
-					ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
 					String mode = ce.getString("qa_" + i + "_mode", "press");
 					String c = ce.getString("qa_" + i, null);
-					if(c != null && mode.equals("hold")) {
-						if(c.startsWith("p")) {
-							setCustomPose(def.getAnimations(), null);
-						} else if(c.startsWith("g")) {
-							Gesture g = def.getAnimations().getGestures().get(c.substring(1));
-							if(g != null && g.isLoop)
-								playGesture(def.getAnimations(), null, pl);
-						}
+					if (c != null) {
+						String[] sp = c.split("/");
+						AbstractGestureButtonData dt = def.getAnimations().getNamedActionByKeybind().get(sp[0]);
+						dt.onKeybind(sp.length > 1 ? sp[1] : null, true, !mode.equals("hold"));
+					}
+				} else if (prevPr && !pr) {
+					String mode = ce.getString("qa_" + i + "_mode", "press");
+					String c = ce.getString("qa_" + i, null);
+					if (c != null && mode.equals("hold")) {
+						String[] sp = c.split("/");
+						AbstractGestureButtonData dt = def.getAnimations().getNamedActionByKeybind().get(sp[0]);
+						dt.onKeybind(sp.length > 1 ? sp[1] : null, false, false);
 					}
 				}
 				quickAccessPressed[i - 1] = pr;
 			}
+
+			if (MinecraftClientAccess.get().getServerSideStatus() == ServerStatus.INSTALLED) {
+				if (gesturesChanged) {
+					sendGestureData();
+					gesturesChanged = false;
+				}
+			}
 		} else {
 			Arrays.fill(quickAccessPressed, false);
 		}
-	}
-
-	public byte getGestureValue(AnimationRegistry reg, Gesture g) {
-		boolean serverGc = MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES);
-		int id = reg.getLayerId(g);
-		if (!serverGc) {
-			if (id == -1)return 0;
-			int enc = reg.getEncoded(g);
-			return (byte) (MinecraftClientAccess.get().getCurrentClientPlayer().animState.encodedState == enc ? 1 : 0);
-		}
-		if (id >= gestureData.length)return 0;
-		if (id == -1) {
-			int enc = reg.getEncoded(g);
-			return (byte) (gestureData[1] == enc ? 1 : 0);
-		}
-		return gestureData[id];
 	}
 
 	public void resetGestureData() {
@@ -462,27 +303,46 @@ public class AnimationEngine {
 		Player<?> pl = MinecraftClientAccess.get().getCurrentClientPlayer();
 		ModelDefinition def = pl.getModelDefinition();
 		if(def != null) {
-			CustomPose pose = def.getAnimations().getCustomPoses().get(id);
-			if(pose != null) {
-				if(pose.isCommand()) {
-					if(value == 0)setCustomPose(def.getAnimations(), null);
-					else setCustomPose(def.getAnimations(), pose, false);
-					return true;
-				}
-			} else {
-				Gesture g = def.getAnimations().getGestures().get(id);
-				if(g != null && g.isCommand()) {
-					if(g.type.isLayer() && value != -1) {
-						setLayerValue(def.getAnimations(), g, value / 255f);
-						return true;
-					} else {
-						if(value == 0)playGesture(def.getAnimations(), null, pl);
-						else playGesture(def.getAnimations(), g, false, pl);
-						return true;
-					}
-				}
+			CommandAction ca = def.getAnimations().getCommandActionsMap().get(id);
+			if (ca != null) {
+				ca.setValue(value);
+				return true;
 			}
 		}
 		return false;
+	}
+
+	public void clearCustomPose(ModelDefinition def) {
+		if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
+			setGestureValue(0, 0);
+		} else {
+			MinecraftClientAccess.get().setEncodedGesture(def.getAnimations().getPoseResetId());
+		}
+	}
+
+	public void clearGesture(ModelDefinition def) {
+		if (MinecraftClientAccess.get().getNetHandler().hasServerCap(ServerCaps.GESTURES)) {
+			setGestureValue(1, 0);
+		} else {
+			MinecraftClientAccess.get().setEncodedGesture(def.getAnimations().getBlankGesture());
+		}
+		gestureAutoResetTimer = -1;
+	}
+
+	public byte getGestureValue(int id) {
+		return gestureData.length > id && id >= 0 ? gestureData[id] : 0;
+	}
+
+	public void setGestureValue(int id, int val) {
+		System.out.println("Set: " + id + " to " + val);
+		byte v = (byte) val;
+		if (gestureData[id] != v) {
+			gestureData[id] = v;
+			gesturesChanged = true;
+		}
+	}
+
+	public void setGestureTimeout(int gestureTimeout) {
+		gestureAutoResetTimer = gestureTimeout;
 	}
 }

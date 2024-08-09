@@ -89,7 +89,7 @@ public class Editor {
 	public Updater<Vec3f> setRot = updaterReg.create(null);
 	public Updater<Vec3f> setPosition = updaterReg.create(null);
 	public Updater<Vec3f> setSize = updaterReg.create(null);
-	public Updater<Vec3f> setScale = updaterReg.create(null);
+	public Updater<Vec3f> setMeshScale = updaterReg.create(null);
 	public Updater<Float> setMCScale = updaterReg.create(null);
 	public Updater<Boolean> setMirror = updaterReg.create(null);
 	public Updater<String> updateName = updaterReg.create(null);
@@ -718,6 +718,10 @@ public class Editor {
 	}
 
 	public void addNewAnimFrame() {
+		addNewAnimFrame(true);
+	}
+
+	public void addNewAnimFrame(boolean copyCurrent) {
 		if(selectedAnim != null) {
 			selectedAnim.addFrame();
 			updateGui();

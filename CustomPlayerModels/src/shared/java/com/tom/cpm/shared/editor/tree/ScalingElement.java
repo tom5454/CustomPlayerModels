@@ -109,7 +109,7 @@ public class ScalingElement implements TreeElement {
 		public void updateGui() {
 			editor.setRot.accept(rotation);
 			editor.setPosition.accept(pos);
-			editor.setScale.accept(scale);
+			editor.setMeshScale.accept(scale);
 		}
 
 		@Override
@@ -131,9 +131,9 @@ public class ScalingElement implements TreeElement {
 				execute();
 				break;
 
-			case SCALE:
+			case MESH_SCALE:
 				editor.action("set", "label.cpm.scale").
-				updateValueOp(ScalingElement.this, scale, v, 0, 25, false, (a, b) -> a.scale = b, editor.setScale).
+				updateValueOp(ScalingElement.this, scale, v, 0, 25, false, (a, b) -> a.scale = b, editor.setMeshScale).
 				execute();
 				break;
 

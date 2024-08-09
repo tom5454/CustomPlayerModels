@@ -3,7 +3,7 @@
 
 # CPM Api 文档
 目录：
-* [开始](#开始) ([版本](#latest-versions))
+* [开始](#setup) ([版本](#latest-versions))
 * [创建你的插件](#create-your-plugin)
 * [客户端 API](#client-api)
 * [通用 API](#common-api)

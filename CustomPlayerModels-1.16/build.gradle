@@ -123,6 +123,10 @@ repositories {
     	name = "Jared's maven"
     	url = "https://maven.blamejared.com/"
 	}
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
 }
 
 dependencies {
@@ -162,7 +166,7 @@ dependencies {
   	
   	compileOnly files("of.jar")
   	
-  	compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.0-1.16.5-forge")
+  	compileOnly fg.deobf("maven.modrinth:pehkui:3.8.2+1.16.5-forge")
 }
 
 sourceSets {

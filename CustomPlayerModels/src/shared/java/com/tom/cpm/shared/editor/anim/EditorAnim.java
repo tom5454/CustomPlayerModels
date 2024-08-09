@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
@@ -52,6 +53,9 @@ public class EditorAnim implements IAnimation {
 	public int order;
 	public boolean isProperty;
 	public String group;
+	public int maxValue = 100;
+	public boolean interpolateValue = true;
+	public boolean mustFinish;
 
 	public EditorAnim(Editor e, String filename, AnimationType type, boolean initNew) {
 		this.editor = e;
@@ -91,7 +95,8 @@ public class EditorAnim implements IAnimation {
 		updateValueOp(this, this.filename, fn, (a, b) -> a.filename = b).
 		updateValueOp(this, this.intType, p.it, (a, b) -> a.intType = b).
 		updateValueOp(this, this.command, p.command, (a, b) -> a.command = b).
-		updateValueOp(this, this.layerControlled, p.layerCtrl, (a, b) -> a.layerControlled = b);
+		updateValueOp(this, this.layerControlled, p.layerCtrl, (a, b) -> a.layerControlled = b).
+		updateValueOp(this, this.mustFinish, p.mustFinish, (a, b) -> a.mustFinish = b);
 	}
 
 	private void calculateSplines() {
@@ -234,10 +239,17 @@ public class EditorAnim implements IAnimation {
 	}
 
 	public void addFrame() {
-		AnimFrame frm = new AnimFrame(this);
-		editor.action("add", "action.cpm.animFrame").addToList(frames, frm).onAction(this::clearCache).execute();
-		if(currentFrame != null)frm.copy(currentFrame);
-		currentFrame = frm;
+		addFrame(true);
+	}
+
+	public void addFrame(boolean copyCurrent) {
+		if(currentFrame != null && copyCurrent)
+			addFrame(currentFrame);
+		else {
+			AnimFrame frm = new AnimFrame(this);
+			editor.action("add", "action.cpm.animFrame").addToList(frames, frm).onAction(this::clearCache).execute();
+			currentFrame = frm;
+		}
 	}
 
 	public void addFrame(AnimFrame cpyFrame) {
@@ -351,6 +363,10 @@ public class EditorAnim implements IAnimation {
 	}
 
 	public EditorAnim findLinkedAnim() {
+		return findLinkedAnims().findFirst().orElse(null);
+	}
+
+	public Stream<EditorAnim> findLinkedAnims() {
 		String[] nm = displayName.split(":", 2);
 		if(nm.length == 2) {
 			Predicate<EditorAnim> search = null;
@@ -377,10 +393,10 @@ public class EditorAnim implements IAnimation {
 			}
 
 			if(search != null) {
-				return editor.animations.stream().filter(search).findFirst().orElse(null);
+				return editor.animations.stream().filter(search);
 			}
 		}
-		return null;
+		return Stream.empty();
 	}
 
 	public void updateGui() {
@@ -504,6 +520,7 @@ public class EditorAnim implements IAnimation {
 			frames.clear();
 			frames.addAll(f);
 		});
+		ab.onAction(this::clearCache);
 		ab.onRun(editor::updateGui);
 	}
 

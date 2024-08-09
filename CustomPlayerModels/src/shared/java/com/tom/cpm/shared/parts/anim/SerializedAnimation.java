@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.tom.cpm.shared.animation.AnimationNew;
+import com.tom.cpm.shared.animation.IAnimation;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.parts.anim.AnimatorChannel.CubeColorDriver;
 import com.tom.cpm.shared.parts.anim.AnimatorChannel.CubePosDriver;
@@ -127,5 +130,11 @@ public class SerializedAnimation {
 		});
 		return sb.toString();*/
 		return "Animation: " + triggerID;
+	}
+
+	public IAnimation compile(ModelDefinition def) {
+		AnimationNew a = new AnimationNew(priority, duration);
+		animatorChannels.values().forEach(ac -> ac.addToAnim(a, def));
+		return a;
 	}
 }
