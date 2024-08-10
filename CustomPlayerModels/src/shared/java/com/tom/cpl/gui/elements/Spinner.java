@@ -11,6 +11,7 @@ import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.util.TabFocusHandler.Focusable;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.externals.com.udojava.evalex.Expression.ExpressionException;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.util.ExpressionExt;
 
 public class Spinner extends GuiElement implements Focusable {
@@ -21,7 +22,7 @@ public class Spinner extends GuiElement implements Focusable {
 	private boolean txtfNeedsUpdate;
 	private String error, lastValue;
 	private MouseEvent currentClick;
-	private float mouseRepeatTimer;
+	private int currentClickStartTime;
 
 	public Spinner(IGui gui) {
 		super(gui);
@@ -55,12 +56,8 @@ public class Spinner extends GuiElement implements Focusable {
 			gui.drawRectangle(bounds.x, bounds.y, bounds.w, bounds.h, 0xffff0000);
 		}
 		// mouse click repeat
-		if (currentClick != null) {
-			mouseRepeatTimer -= partialTicks;
-			if (mouseRepeatTimer <= 0) {
+		if (currentClick != null && MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTicks() - currentClickStartTime > 10) {
 				arrowClicked(currentClick);
-				mouseRepeatTimer = 1;
-			}
 		}
 	}
 
@@ -71,7 +68,7 @@ public class Spinner extends GuiElement implements Focusable {
 			arrowClicked(e);
 			// new mouse event since mouseDrag modifies its position
 			currentClick = new MouseEvent(e.x, e.y, e.btn);
-			mouseRepeatTimer = 10;
+			currentClickStartTime = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTicks();
 		}
 		txtf.mouseClick(e);
 	}
