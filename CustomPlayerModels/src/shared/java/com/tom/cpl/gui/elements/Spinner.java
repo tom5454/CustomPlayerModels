@@ -57,6 +57,7 @@ public class Spinner extends GuiElement implements Focusable {
 		}
 		// mouse click repeat
 		if (currentClick != null && MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTicks() - currentClickStartTime > 10) {
+				currentClickStartTime++;
 				arrowClicked(currentClick);
 		}
 	}
