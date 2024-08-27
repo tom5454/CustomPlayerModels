@@ -11,6 +11,7 @@ public interface CommandAction {
 	ActionType getType();
 	int getValue();
 	void setValue(int value);
+	boolean isCommandControlled();
 
 	public static enum ActionType {
 		SIMPLE(SimpleParameterValueAction.ServerAction::new),

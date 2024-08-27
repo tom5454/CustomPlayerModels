@@ -402,7 +402,7 @@ public class AnimTestPanel extends Panel {
 				anims.forEach(a -> {
 					if(a.type == AnimationType.SETUP)handler.addPre(a);
 					else if(a.type == AnimationType.FINISH)handler.addPost(a);
-					else handler.addPlay(a);
+					else handler.addPlay(a, a.mustFinish);
 				});
 			}
 			if(key.type == AnimationType.GESTURE) {

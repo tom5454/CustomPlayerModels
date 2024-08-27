@@ -57,8 +57,8 @@ public class Spinner extends GuiElement implements Focusable {
 		}
 		// mouse click repeat
 		if (currentClick != null && MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTicks() - currentClickStartTime > 10) {
-				currentClickStartTime++;
-				arrowClicked(currentClick);
+			currentClickStartTime++;
+			arrowClicked(currentClick);
 		}
 	}
 
@@ -74,6 +74,7 @@ public class Spinner extends GuiElement implements Focusable {
 		txtf.mouseClick(e);
 	}
 
+	@Override
 	public void mouseDrag(MouseEvent e) {
 		if (currentClick != null) {
 			currentClick.x = e.x;

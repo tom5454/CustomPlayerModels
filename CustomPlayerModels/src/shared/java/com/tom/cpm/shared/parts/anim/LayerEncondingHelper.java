@@ -8,8 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.animation.AnimationType;
-import com.tom.cpm.shared.editor.Exporter;
+import com.tom.cpm.shared.editor.ExportException;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.parts.anim.menu.AbstractGestureButtonData;
 import com.tom.cpm.shared.parts.anim.menu.CustomPoseGestureButtonData;
@@ -25,7 +26,7 @@ public class LayerEncondingHelper {
 		for (int I = 0;I<triggers.size();I++) {
 			SerializedTrigger t = triggers.get(I);
 			if ((t.anim == AnimationType.CUSTOM_POSE || t.anim == AnimationType.GESTURE) && t.layerCtrl) {
-				if (allLayers.size() < 2)throw new Exporter.ExportException("error.cpm.custom_anims_not_supported");
+				if (allLayers.size() < 2)throw new ExportException(new FormatText("error.cpm.custom_anims_not_supported"));
 				int gid = layerId++;
 				Set<PlayerSkinLayer> encL = new HashSet<>();
 				for (int i = 0; i < allLayers.size(); i++) {
@@ -34,7 +35,7 @@ public class LayerEncondingHelper {
 						encL.add(l);
 					}
 				}
-				if(encL.containsAll(allLayers))throw new Exporter.ExportException("error.cpm.too_many_animations");
+				if(encL.containsAll(allLayers))throw new ExportException(new FormatText("error.cpm.too_many_animations"));
 				t.gid = PlayerSkinLayer.encode(encL);
 				t.gid &= valMask;
 				t.gid |= defMask;

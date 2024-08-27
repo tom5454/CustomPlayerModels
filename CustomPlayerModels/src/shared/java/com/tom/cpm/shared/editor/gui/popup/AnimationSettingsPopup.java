@@ -162,19 +162,21 @@ public class AnimationSettingsPopup extends PopupPanel {
 
 		Checkbox boxLayerCtrl = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_layerCtrl"));
 
+		Checkbox boxMustFinish = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_mustFinish"));
+
+		Checkbox boxHidden = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_hidden"));
+
 		Runnable r = () -> {
 			AnimType at = typeDd.getSelected();
 			boxLoop.setEnabled(at.canLoop());
 			boxCommand.setEnabled(at.option.isCustom() && !at.option.isStaged());
 			boxLayerCtrl.setEnabled(at.option == AnimationType.CUSTOM_POSE || at.option == AnimationType.GESTURE);
 			if(!edit)intMap.setValue(intBox.getSelected().getElem().getAlt(at.useLooping()));
-			if(at.option.isStaged()) {
-				nameField.setVisible(false);
-				dropDownAnimSel.setVisible(true);
-			} else {
-				nameField.setVisible(true);
-				dropDownAnimSel.setVisible(false);
-			}
+			boolean st = at.option.isStaged();
+			nameField.setVisible(!st);
+			dropDownAnimSel.setVisible(st);
+			boxMustFinish.setEnabled(!st);
+			boxHidden.setEnabled(at.option.isCustom() && !st);
 		};
 		typeDd.setAction(r);
 		r.run();
@@ -202,7 +204,6 @@ public class AnimationSettingsPopup extends PopupPanel {
 		});
 		this.addElement(boxLayerCtrl);
 
-		Checkbox boxMustFinish = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_mustFinish"));
 		if(edit && editor.selectedAnim != null)boxMustFinish.setSelected(editor.selectedAnim.mustFinish);
 		boxMustFinish.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.anim_mustFinish")));
 		boxMustFinish.setBounds(new Box(5, 0, 190, 20));
@@ -210,6 +211,14 @@ public class AnimationSettingsPopup extends PopupPanel {
 			boxMustFinish.setSelected(!boxMustFinish.isSelected());
 		});
 		this.addElement(boxMustFinish);
+
+		if(edit && editor.selectedAnim != null)boxHidden.setSelected(editor.selectedAnim.hidden);
+		boxHidden.setTooltip(new Tooltip(gui.getFrame(), gui.i18nFormat("tooltip.cpm.anim_hidden")));
+		boxHidden.setBounds(new Box(5, 0, 190, 20));
+		boxHidden.setAction(() -> {
+			boxHidden.setSelected(!boxHidden.isSelected());
+		});
+		this.addElement(boxHidden);
 
 		Button okBtn = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			String name = nameField.getText();
@@ -220,7 +229,7 @@ public class AnimationSettingsPopup extends PopupPanel {
 				if(s == null)return;
 				name = s.getName();
 			}
-			AnimationProperties pr = new AnimationProperties(pose, name, at.option, boxAdd.isSelected(), at.canLoop() && boxLoop.isSelected(), intBox.getSelected().getElem(), boxCommand.isSelected(), boxLayerCtrl.isSelected(), boxMustFinish.isSelected());
+			AnimationProperties pr = new AnimationProperties(pose, name, at.option, boxAdd.isSelected(), at.canLoop() && boxLoop.isSelected(), intBox.getSelected().getElem(), boxCommand.isSelected(), boxLayerCtrl.isSelected(), boxMustFinish.isSelected(), boxHidden.isSelected());
 			if(edit) {
 				editor.editAnim(pr);
 			} else {

@@ -99,6 +99,7 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 		e.maxValue = data.getInt("maxValue", 100);
 		e.interpolateValue = data.getBoolean("interpolateVal", true);
 		e.mustFinish = data.getBoolean("mustFinish", false);
+		e.hidden = data.getBoolean("hidden", false);
 		JsonList frames = data.getList("frames");
 		frames.forEachMap(d -> initFrame(e, d));
 	}
@@ -130,6 +131,7 @@ public class AnimationsLoaderV1 implements ProjectPartLoader {
 		data.put("maxValue", e.maxValue);
 		data.put("interpolateVal", e.interpolateValue);
 		data.put("mustFinish", e.mustFinish);
+		data.put("hidden", e.hidden);
 		data.put("frames", writeFrames(e));
 	}
 

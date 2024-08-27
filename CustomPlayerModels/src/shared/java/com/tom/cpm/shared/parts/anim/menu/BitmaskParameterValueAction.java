@@ -82,4 +82,9 @@ public class BitmaskParameterValueAction implements CommandAction {
 			return cc;
 		}
 	}
+
+	@Override
+	public boolean isCommandControlled() {
+		return cc;
+	}
 }

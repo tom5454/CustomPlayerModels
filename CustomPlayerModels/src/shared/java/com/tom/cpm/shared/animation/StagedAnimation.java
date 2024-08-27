@@ -18,6 +18,7 @@ public class StagedAnimation {
 	public StagedAnimation() {
 	}
 
+	@Deprecated
 	public IAnimation addPre(IAnimation anim) {
 		Anim a = new Anim(null, anim, Stage.SETUP);
 		pre.add(a);
@@ -25,14 +26,16 @@ public class StagedAnimation {
 		return a;
 	}
 
-	public IAnimation addPlay(IAnimation anim) {
+	@Deprecated
+	public IAnimation addPlay(IAnimation anim, boolean mustFinish) {
 		if(anim instanceof Anim)return anim;
-		Anim a = new Anim(null, anim, Stage.PLAY);
+		Anim a = new Anim(mustFinish, anim, Stage.PLAY);
 		play.add(a);
 		all.add(a);
 		return a;
 	}
 
+	@Deprecated
 	public IAnimation addPost(IAnimation anim) {
 		Anim a = new Anim(null, anim, Stage.FINISH);
 		post.add(a);
@@ -67,7 +70,7 @@ public class StagedAnimation {
 	private static class AnimData {
 		private long offset, lastFrame;
 		private boolean finished;
-		private boolean mustFinish, finishing;
+		private boolean finishing;
 	}
 
 	private class Anim implements IAnimation {
@@ -75,9 +78,19 @@ public class StagedAnimation {
 		private final IAnimation parent;
 		private final Stage stage;
 		private Map<AnimationMode, AnimData> data = new EnumMap<>(AnimationMode.class);
+		private boolean mustFinish;
 
 		public Anim(AnimationTrigger tr, IAnimation parent, Stage stage) {
 			this.tr = tr;
+			this.parent = parent;
+			this.stage = stage;
+			this.mustFinish = stage == Stage.PLAY && tr.mustFinish;
+		}
+
+		@Deprecated
+		public Anim(boolean mustFinish, IAnimation parent, Stage stage) {
+			this.tr = null;
+			this.mustFinish = mustFinish;
 			this.parent = parent;
 			this.stage = stage;
 		}
@@ -120,7 +133,7 @@ public class StagedAnimation {
 			if(stage == Stage.FINISH) {
 				if (play.stream().allMatch(a -> {
 					AnimData dt = a.data.get(mode);
-					return !dt.mustFinish || dt.finished;
+					return !a.mustFinish || dt.finished;
 				})) {
 					currentStage.put(mode, Stage.FINISH);
 					if(d.lastFrame >= d.offset + parent.getDuration(mode)) {
@@ -129,7 +142,7 @@ public class StagedAnimation {
 					}
 				}
 				return false;
-			} else if (stage == Stage.PLAY && d.mustFinish) {
+			} else if (stage == Stage.PLAY && mustFinish) {
 				d.finishing = true;
 				return d.finished;
 			}
@@ -155,7 +168,6 @@ public class StagedAnimation {
 			d.offset = 0;
 			d.finished = false;
 			d.finishing = false;
-			d.mustFinish = stage == Stage.PLAY && tr != null && tr.mustFinish;
 		}
 	}
 

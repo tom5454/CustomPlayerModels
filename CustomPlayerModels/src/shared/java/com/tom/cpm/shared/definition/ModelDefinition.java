@@ -42,6 +42,7 @@ import com.tom.cpm.shared.model.RootModelElement;
 import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.TextureSheetType;
+import com.tom.cpm.shared.model.render.BoxRender;
 import com.tom.cpm.shared.model.render.ItemRenderer;
 import com.tom.cpm.shared.model.render.ItemTransform;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
@@ -158,7 +159,13 @@ public class ModelDefinition {
 				throw new IOException("Cube without parent");
 			}
 		}
-		ConfigKeys.MAX_CUBE_COUNT.checkFor(playerObj, cubes.size(), BlockReason.TOO_MANY_CUBES);
+		int cc = cubes.size();
+		for (RenderedCube rc : cubes) {
+			if (rc.extrude) {
+				cc += BoxRender.getExtrudeSize(rc.getCube().size, rc.getCube().texSize);
+			}
+		}
+		ConfigKeys.MAX_CUBE_COUNT.checkFor(playerObj, cc, BlockReason.TOO_MANY_CUBES);
 		TextureStitcher stitcher = new TextureStitcher(playerObj.isClientPlayer() ? 8192 : ConfigKeys.MAX_TEX_SHEET_SIZE.getValueFor(playerObj));
 		if(textures.containsKey(TextureSheetType.SKIN)) {
 			stitcher.setBase(textures.get(TextureSheetType.SKIN));

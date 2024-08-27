@@ -24,6 +24,7 @@ import com.tom.cpl.util.ImageIO;
 
 public class IOHelper implements DataInput, DataOutput, Closeable {
 	private static final int DIV = Short.MAX_VALUE / Vec3f.MAX_POS;
+	private static final int MAX_BLOCK_SIZE = 16 * 1024 * 1024;
 	private DataInputStream din;
 	private DataOutputStream dout;
 	private ByteArrayOutputStream baos;
@@ -380,7 +381,7 @@ public class IOHelper implements DataInput, DataOutput, Closeable {
 
 	public IOHelper readNextBlock() throws IOException {
 		int size = readVarInt();
-		if(size > 1024*1024 || size < 0)throw new IOException();
+		if(size > MAX_BLOCK_SIZE || size < 0)throw new IOException("Invalid block size: " + size);
 		byte[] dt = new byte[size];
 		readFully(dt);
 		return new IOHelper(dt);

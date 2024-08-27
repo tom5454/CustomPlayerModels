@@ -58,6 +58,11 @@ public class SimpleParameterValueAction implements CommandAction, LegacyCommandA
 			an.setGestureValue(parameter, value);
 	}
 
+	@Override
+	public boolean isCommandControlled() {
+		return cc;
+	}
+
 	public static class ServerAction implements ServerCommandAction {
 		private PlayerData data;
 		private String name;

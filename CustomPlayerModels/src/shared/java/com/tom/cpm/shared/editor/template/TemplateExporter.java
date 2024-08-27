@@ -12,7 +12,7 @@ import com.google.gson.GsonBuilder;
 
 import com.tom.cpl.gui.UI;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.Exporter.ExportException;
+import com.tom.cpm.shared.editor.ExportException;
 import com.tom.cpm.shared.editor.elements.ElementType;
 import com.tom.cpm.shared.editor.util.ExportHelper;
 import com.tom.cpm.shared.editor.util.ModelDescription;

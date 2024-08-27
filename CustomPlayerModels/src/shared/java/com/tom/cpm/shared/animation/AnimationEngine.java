@@ -299,12 +299,12 @@ public class AnimationEngine {
 		gestureData = new byte[2];
 	}
 
-	public boolean applyCommand(String id, int value) {
+	public boolean applyCommand(String id, int value, Boolean cmd) {
 		Player<?> pl = MinecraftClientAccess.get().getCurrentClientPlayer();
 		ModelDefinition def = pl.getModelDefinition();
 		if(def != null) {
 			CommandAction ca = def.getAnimations().getCommandActionsMap().get(id);
-			if (ca != null) {
+			if (ca != null && (cmd == null || ca.isCommandControlled() == cmd)) {
 				ca.setValue(value);
 				return true;
 			}

@@ -56,6 +56,7 @@ public class EditorAnim implements IAnimation {
 	public int maxValue = 100;
 	public boolean interpolateValue = true;
 	public boolean mustFinish;
+	public boolean hidden;
 
 	public EditorAnim(Editor e, String filename, AnimationType type, boolean initNew) {
 		this.editor = e;
@@ -96,7 +97,8 @@ public class EditorAnim implements IAnimation {
 		updateValueOp(this, this.intType, p.it, (a, b) -> a.intType = b).
 		updateValueOp(this, this.command, p.command, (a, b) -> a.command = b).
 		updateValueOp(this, this.layerControlled, p.layerCtrl, (a, b) -> a.layerControlled = b).
-		updateValueOp(this, this.mustFinish, p.mustFinish, (a, b) -> a.mustFinish = b);
+		updateValueOp(this, this.mustFinish, p.mustFinish, (a, b) -> a.mustFinish = b).
+		updateValueOp(this, this.hidden, p.hidden, (a, b) -> a.hidden = b);
 	}
 
 	private void calculateSplines() {

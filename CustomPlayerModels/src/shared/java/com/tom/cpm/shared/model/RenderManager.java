@@ -50,6 +50,31 @@ public class RenderManager<G, P, M, D> {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
+	public Player<P> loadPlayerState(G gprofile, P player, String unique, AnimationMode mode) {
+		if(gprofile == null)gprofile = getProfile.apply(player);
+		Player<P> profile = (Player<P>) loader.loadPlayer(gprofile, unique);
+		if(profile == null) {
+			return null;
+		}
+		ModelDefinition def = profile.getModelDefinition();
+		if(def != null) {
+			this.profile = profile;
+			profile.animState.animationMode = mode;
+			if(player != null)
+				profile.updatePlayer(player);
+			def.itemTransforms.clear();
+			return profile;
+		}
+		return null;
+	}
+
+	public void bindPlayerState(Player<P> player, D buffer, M toBind, String arg) {
+		ModelDefinition def = profile.getModelDefinition();
+		renderManager.bindModel(toBind, arg, buffer, def, profile, profile.animState.animationMode);
+		renderManager.getAnimationEngine().prepareAnimations(profile, profile.animState.animationMode, def);
+	}
+
 	public void unbindClear(M model) {
 		unbindFlush(model);
 		clearBoundPlayer();

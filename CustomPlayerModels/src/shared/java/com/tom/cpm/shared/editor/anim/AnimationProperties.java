@@ -14,6 +14,7 @@ public class AnimationProperties {
 	public boolean command;
 	public boolean layerCtrl;
 	public boolean mustFinish;
+	public boolean hidden;
 
 	@Deprecated
 	public AnimationProperties(IPose pose, String displayName, AnimationType type, boolean add, boolean loop,
@@ -29,7 +30,7 @@ public class AnimationProperties {
 	}
 
 	public AnimationProperties(IPose pose, String displayName, AnimationType type, boolean add, boolean loop,
-			InterpolatorType it, boolean command, boolean layerCtrl, boolean mustFinish) {
+			InterpolatorType it, boolean command, boolean layerCtrl, boolean mustFinish, boolean hidden) {
 		this.pose = pose;
 		this.displayName = displayName;
 		this.type = type;
@@ -39,5 +40,6 @@ public class AnimationProperties {
 		this.command = command;
 		this.layerCtrl = layerCtrl;
 		this.mustFinish = mustFinish;
+		this.hidden = hidden;
 	}
 }

@@ -4,8 +4,9 @@ import com.tom.cpl.nbt.NBTTagCompound;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.config.PlayerData;
+import com.tom.cpm.shared.parts.anim.menu.CommandAction.LegacyCommandActionWriter;
 
-public class ValueParameterValueAction implements CommandAction {
+public class ValueParameterValueAction implements CommandAction, LegacyCommandActionWriter {
 	private final String name;
 	private int parameter;
 	private int max;
@@ -47,6 +48,11 @@ public class ValueParameterValueAction implements CommandAction {
 		an.setGestureValue(parameter, v * 255 / max);
 	}
 
+	@Override
+	public boolean isCommandControlled() {
+		return cc;
+	}
+
 	public static class ServerAction implements ServerCommandAction {
 		private PlayerData data;
 		private String name;
@@ -84,5 +90,12 @@ public class ValueParameterValueAction implements CommandAction {
 		public boolean isCommandControlled() {
 			return cc;
 		}
+	}
+
+	@Override
+	public void writeLegacy(NBTTagCompound tag) {
+		tag.setString("name", name);
+		tag.setByte("id", (byte) parameter);
+		tag.setByte("type", (byte) ((cc ? 16 : 0) | 2));
 	}
 }

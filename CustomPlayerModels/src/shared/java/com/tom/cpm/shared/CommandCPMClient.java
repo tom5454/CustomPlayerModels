@@ -3,6 +3,7 @@ package com.tom.cpm.shared;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -136,7 +137,9 @@ public class CommandCPMClient {
 		ModelDefinition def = player.getModelDefinition();
 		if(def != null) {
 			AnimationRegistry ar = def.getAnimations();
-			return new ArrayList<>(ar.getCommandActionsMap().keySet());
+			return ar.getCommandActionsMap().entrySet().stream().
+					filter(e -> !e.getValue().isCommandControlled()).
+					map(Map.Entry::getKey).collect(Collectors.toList());
 		}
 		return l;
 	}
@@ -150,6 +153,6 @@ public class CommandCPMClient {
 
 	private static boolean playAnimation(String id, int value) {
 		AnimationEngine an = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine();
-		return an.applyCommand(id, value);
+		return an.applyCommand(id, value, false);
 	}
 }

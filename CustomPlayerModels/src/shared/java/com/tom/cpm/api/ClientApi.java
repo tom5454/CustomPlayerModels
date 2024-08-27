@@ -340,7 +340,7 @@ public class ClientApi extends SharedApi implements IClientAPI {
 
 	@Override
 	public <P> boolean playAnimation(String name, int value) {
-		return MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().applyCommand(name, value);
+		return MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().applyCommand(name, value, null);
 	}
 
 	@Override

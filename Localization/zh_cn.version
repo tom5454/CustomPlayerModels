@@ -1239,7 +1239,7 @@
   "tooltip.cpm.export_def.noLink.model": "The selected CPMModel doesn\u0027t have an encoded link file",
   "tooltip.cpm.export_def.model": "Create an update for the linked file.",
   "tooltip.cpm.anim_mustFinish": "Animation Must Finish playing",
-  "label.cpm.defLayerSettings.max": "Max value: %s",
+  "label.cpm.defLayerSettings.max": "Max value:",
   "label.cpm.defLayerSettings.interpolate": "Interpolate Value",
   "label.cpm.anim_mustFinish": "Must Finish",
   "button.cpm.clearFrame": "Clear Frame Data",
@@ -1254,5 +1254,7 @@
   "label.cpm.model.rootNotFound": "Selected Root not found in the Model Tree",
   "label.cpm.model.selectArmorRootToMake": "Select Armor Root to add to",
   "label.cpm.generatedArmorLayer": "%s Armor",
-  "label.cpm.generatedArmorLayer.ct": "Transform (%s)"
+  "label.cpm.generatedArmorLayer.ct": "Transform (%s)",
+  "tooltip.cpm.anim_hidden": "Hides the button in the Gestures Gui,\\useful for animations with `/cpmclient animate` or the API.",
+  "label.cpm.anim_hidden": "Hidden in Gestures Gui"
 }

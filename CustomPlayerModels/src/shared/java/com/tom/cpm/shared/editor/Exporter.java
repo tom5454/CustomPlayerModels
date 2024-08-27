@@ -20,6 +20,7 @@ import com.tom.cpl.gui.UI;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.tag.TagType;
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -144,7 +145,7 @@ public class Exporter {
 				gui.displayPopup(frame -> new ExportStringResultPopup(frame, "skin_update", b64));
 			}
 		} catch (ExportException ex) {
-			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", gui.i18nFormat(ex.getMessage())));
+			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), ex.toString(gui));
 		} catch (Exception ex) {
 			gui.onGuiException("Error while exporting", ex, false);
 		}
@@ -183,7 +184,6 @@ public class Exporter {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Deprecated
 	private static ModelPartDefinition prepareDefinition(Editor e) throws IOException {
 		List<Cube> flatList = new ArrayList<>();
@@ -322,13 +322,13 @@ public class Exporter {
 				writeOut(e, gui, def, result);
 				return true;
 			} catch (IOException e1) {
-				throw new ExportException("error.cpm.unknownError", e1);
+				throw new ExportException(new FormatText("error.cpm.unknownError"), e1);
 			}
 			result.close();
 			return true;
 		} catch (ExportException ex) {
 			Log.error("Export exception", ex);
-			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", gui.i18nFormat(ex.getMessage())));
+			gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), ex.toString(gui));
 			return false;
 		} catch (Exception ex) {
 			gui.onGuiException("Error while exporting", ex, false);
@@ -359,7 +359,7 @@ public class Exporter {
 				}
 				result.close();
 			} catch (ExportException ex) {
-				gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", ex.getMessage()));
+				gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), ex.toString(gui));
 			} catch (Exception ex) {
 				gui.onGuiException("Error while exporting", ex, false);
 			}
@@ -378,18 +378,6 @@ public class Exporter {
 		String b64 = Base64.getEncoder().encodeToString(data);
 		Log.info(b64);
 		gui.displayPopup(f -> new OverflowPopup(f, e, b64, reason, linkC));
-	}
-
-	public static class ExportException extends RuntimeException {
-		private static final long serialVersionUID = 3255847899314886673L;
-
-		public ExportException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-		public ExportException(String message) {
-			super(message);
-		}
 	}
 
 	private static class Result implements Supplier<OutputStream>, Closeable {
@@ -487,7 +475,7 @@ public class Exporter {
 				cos.close();
 				return true;
 			} catch (ExportException ex) {
-				gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), gui.i18nFormat("label.cpm.export_error", gui.i18nFormat(ex.getMessage())));
+				gui.displayMessagePopup(gui.i18nFormat("label.cpm.error"), ex.toString(gui));
 			} catch (Exception ex) {
 				gui.onGuiException("Error while exporting", ex, false);
 			}

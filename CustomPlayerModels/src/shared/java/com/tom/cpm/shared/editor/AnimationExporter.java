@@ -51,6 +51,8 @@ public class AnimationExporter {
 	public Map<EditorAnim, SerializedAnimation> anims = new HashMap<>();
 	public Map<EditorAnim, Staging> stagingAnimMap = new HashMap<>();
 	public List<Staging> stagingAnimList = new ArrayList<>();
+	public Map<String, Integer> dropdownParams = new HashMap<>();
+	public Map<EditorAnim, Integer> dropdownAnims = new HashMap<>();
 
 	public void processElements() {
 		Editor.walkElements(editor.elements, allElems::add);
@@ -192,6 +194,12 @@ public class AnimationExporter {
 			}
 			an.getStagedList().add(s.triggerId);
 		});
+		dropdownParams.forEach((g, p) -> {
+			EditorAnim defV = editor.animations.stream().filter(e -> g.equals(e.group) && e.layerDefault > 0.5f).findFirst().orElse(null);
+			if (defV != null) {
+				paramAlloc.setDefaultValue(p, dropdownAnims.get(defV));
+			}
+		});
 	}
 
 	private ParameterInfo makeButtonInfo(EditorAnim a) {
@@ -203,6 +211,7 @@ public class AnimationExporter {
 			dt.setName(a.getId());
 			dt.id = a.type == AnimationType.CUSTOM_POSE ? paramAlloc.newPose(a.getId()) : paramAlloc.newGesture(a.getId());
 			dt.layerCtrl = a.layerControlled;
+			dt.hidden = a.hidden;
 			ParameterInfo param = new ParameterInfo(dt, dt.id);
 			allButtons.put(a.getId(), param);
 			buttons.add(Pair.of(a.order, dt));
@@ -219,20 +228,24 @@ public class AnimationExporter {
 					ParameterInfo param = new ParameterInfo(dt, dt.parameter, 0, false);
 					allButtons.put(a.group, param);
 					buttons.add(Pair.of(a.order, dt));
+					dropdownParams.put(a.group, dt.parameter);
 				}
 				ParameterInfo info = allButtons.get(a.group);
 				if (!(info.button instanceof DropdownButtonData)) {
 					throw new RuntimeException("Animation name conflict " + a.group);//TODO localize
 				}
 				DropdownButtonData dt = (DropdownButtonData) info.button;
-				ParameterInfo pr = new ParameterInfo(dt, dt.parameter, dt.add(a.getId()), false);
+				int id = dt.add(a.getId());
+				ParameterInfo pr = new ParameterInfo(dt, dt.parameter, id, false);
 				allButtons.put(a.getId(), pr);
+				dropdownAnims.put(a, id);
 				return pr;
 			} else {
 				BoolParameterToggleButtonData dt = new BoolParameterToggleButtonData();
 				BitInfo bit = paramAlloc.allocBitSync(a.getId(), a.layerDefault > 0.5f);
 				dt.setInfo(bit);
 				dt.setName(a.getId());
+				dt.hidden = a.hidden;
 				ParameterInfo param = new ParameterInfo(dt, bit);
 				allButtons.put(a.getId(), param);
 				buttons.add(Pair.of(a.order, dt));
@@ -245,6 +258,7 @@ public class AnimationExporter {
 			dt.setName(a.getId());
 			dt.parameter = paramAlloc.allocByteSync(a.getId(), (byte) (a.layerDefault * a.maxValue));
 			dt.maxValue = a.maxValue;
+			dt.hidden = a.hidden;
 			ParameterInfo param = new ParameterInfo(dt, dt.parameter, a.interpolateValue);
 			allButtons.put(a.getId(), param);
 			buttons.add(Pair.of(a.order, dt));

@@ -9,9 +9,8 @@ import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.animation.AnimationEngine;
 import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.parts.anim.AnimLoaderState;
-import com.tom.cpm.shared.parts.anim.menu.AbstractGestureButtonData.AbstractCommandTriggerableData;
 
-public class DropdownButtonData extends AbstractCommandTriggerableData {
+public class DropdownButtonData extends AbstractDropdownButtonData {
 	public int parameter;
 	public List<String> opts = new ArrayList<>();
 
@@ -59,16 +58,19 @@ public class DropdownButtonData extends AbstractCommandTriggerableData {
 		return i;
 	}
 
+	@Override
 	public List<String> getActiveOptions() {
 		return opts;
 	}
 
+	@Override
 	public void set(String selected) {
 		AnimationEngine an = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine();
 		int i = opts.indexOf(selected);
 		an.setGestureValue(parameter, i == -1 ? 0 : i);
 	}
 
+	@Override
 	public String get() {
 		AnimationEngine an = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine();
 		int val = Byte.toUnsignedInt(an.getGestureValue(parameter));

@@ -857,7 +857,6 @@
   "label.cpm.keybind.animPrevFrame": "Fotograma Previo",
   "label.cpm.keybind.animNextFrame": "Fotograma Siguiente",
   "label.cpm.keybind.reloadTexture": "Recargar Textura",
-  "label.cpm.defLayerSettings.max": "UNLOCALIZED: Max value: %s",
   "label.cpm.paste.connecting.title": "Conectando...",
   "label.cpm.paste.connecting.message": "Conectando a paste...",
   "label.cpm.paste.listing": "Refrescando Lista de Archivos...",

@@ -820,7 +820,6 @@
   "label.cpm.tags.raw.title": "Добавить сырой элемент",
   "label.cpm.tags.raw.desc": "Введите идентификатор объекта для добавления:",
   "label.cpm.import": "Импорт",
-  "label.cpm.defLayerSettings.max": "UNLOCALIZED: Max value: %s",
   "label.cpm.paste.connecting.title": "Подключение...",
   "label.cpm.paste.connecting.message": "Подключение к сайту для вставки...",
   "label.cpm.paste.listing": "Обновление списка файлов...",

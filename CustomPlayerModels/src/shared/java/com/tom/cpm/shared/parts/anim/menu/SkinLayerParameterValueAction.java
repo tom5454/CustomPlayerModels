@@ -75,4 +75,9 @@ public class SkinLayerParameterValueAction implements CommandAction, LegacyComma
 			MinecraftClientAccess.get().setEncodedGesture(id);
 		}
 	}
+
+	@Override
+	public boolean isCommandControlled() {
+		return cc;
+	}
 }

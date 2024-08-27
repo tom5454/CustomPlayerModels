@@ -116,6 +116,10 @@ public class ParameterDetails {
 		public int newGesture(String id) {
 			return gestureCounter++;
 		}
+
+		public void setDefaultValue(int id, int defaultValue) {
+			syncBytes.set(id, defaultValue);
+		}
 	}
 
 	@Override

@@ -34,6 +34,6 @@ public class ServerAnimationS2C implements IS2CPacket {
 
 	@Override
 	public void handle(NetHandler<?, ?, ?> handler, NetH from) {
-		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().applyCommand(id, value);
+		MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().applyCommand(id, value, true);
 	}
 }

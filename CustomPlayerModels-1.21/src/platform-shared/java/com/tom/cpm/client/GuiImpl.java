@@ -107,7 +107,8 @@ public class GuiImpl extends Screen implements IGui {
 			graphics.pose().pushPose();
 			stack = new CtxStack(width, height);
 			RenderSystem.disableDepthTest();
-			RenderSystem.runAsFancy(() -> this.gui.draw(mouseX, mouseY, partialTicks));
+			float pt = minecraft.getTimer().getRealtimeDeltaTicks();
+			RenderSystem.runAsFancy(() -> this.gui.draw(mouseX, mouseY, pt));
 		} catch (Throwable e) {
 			onGuiException("Error drawing gui", e, true);
 		} finally {

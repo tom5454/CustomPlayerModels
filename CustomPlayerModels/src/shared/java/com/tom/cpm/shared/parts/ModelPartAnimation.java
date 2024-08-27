@@ -14,9 +14,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.tom.cpl.math.Vec3f;
+import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.animation.Animation;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationRegistry;
@@ -35,7 +37,7 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.Exporter;
+import com.tom.cpm.shared.editor.ExportException;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.IElem;
 import com.tom.cpm.shared.editor.elements.ModelElement;
@@ -45,9 +47,8 @@ import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.parts.anim.ParameterDetails;
 import com.tom.cpm.shared.parts.anim.menu.BoolParameterToggleButtonData;
 import com.tom.cpm.shared.parts.anim.menu.CustomPoseGestureButtonData;
-import com.tom.cpm.shared.parts.anim.menu.DropdownButtonData;
+import com.tom.cpm.shared.parts.anim.menu.LegacyDropdownButtonData;
 import com.tom.cpm.shared.parts.anim.menu.ValueParameterButtonData;
-import com.tom.cpm.shared.util.Log;
 
 @Deprecated
 public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
@@ -263,6 +264,34 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			}
 			break;
 
+			case ANIMATION_MUST_FINISH:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.finish = true;
+			}
+			break;
+
+			case ANIMATION_SLIDER_OPT:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.interpolateVal = block.readBoolean();
+				rd.maxValue = block.readByte();
+			}
+			break;
+
+			case ANIMATION_BUTTON_HIDDEN:
+			{
+				int id = block.read();
+				ResolvedData rd = parsedData.get(id);
+				if(rd == null)continue;
+				rd.buttonHidden = true;
+			}
+			break;
+
 			default:
 				break;
 			}
@@ -323,7 +352,6 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.gid |= defMask;
 			if(ea.type.isStaged() || ea.type.isLayer())rd.gid = -1;
 			parsedData.put(id, rd);
-			Log.debug(ea.filename + " " + Integer.toString(rd.gid, 2));
 			List<ModelElement> elems = ea.getComponentsFiltered();
 			List<AnimFrame> frames = ea.getFrames();
 			int fc = frames.size();
@@ -338,9 +366,14 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			rd.show = new Boolean[cs][];
 			rd.loop = ea.loop;
 			rd.priority = ea.priority;
+			if (ea.type == AnimationType.VALUE_LAYER) {
+				rd.maxValue = (byte) ea.maxValue;
+				rd.interpolateVal = ea.interpolateValue;
+			}
 			if(ea.isCustom() && !ea.type.isStaged()) {
 				rd.command = ea.command;
 				if(!ea.command)rd.order = ea.order;
+				rd.buttonHidden = ea.hidden;
 			}
 			if(ea.isLayer() && !ea.command)rd.isProperty = ea.isProperty;
 			if(ea.group != null && !ea.group.isEmpty() && !ea.command)rd.group = ea.group;
@@ -378,11 +411,11 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		});
 	}
 
-	public ModelPartAnimation() {
+	private ModelPartAnimation() {
 	}
 
 	private static void resolveEncID(ResolvedData rd, int id, List<PlayerSkinLayer> allLayers) {
-		if(allLayers.size() < 2)throw new Exporter.ExportException("error.cpm.custom_anims_not_supported");
+		if(allLayers.size() < 2)throw new ExportException(new FormatText("error.cpm.custom_anims_not_supported"));
 		Set<PlayerSkinLayer> encL = new HashSet<>();
 		for (int i = 0; i < allLayers.size(); i++) {
 			PlayerSkinLayer l = allLayers.get(i);
@@ -390,7 +423,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				encL.add(l);
 			}
 		}
-		if(encL.containsAll(allLayers))throw new Exporter.ExportException("error.cpm.too_many_animations");
+		if(encL.containsAll(allLayers))throw new ExportException(new FormatText("error.cpm.too_many_animations"));
 		rd.gid = PlayerSkinLayer.encode(encL);
 		rd.layerCtrl = true;
 	}
@@ -566,6 +599,26 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					d.write(id);
 				}
 			}
+			if(dt.finish) {
+				dout.writeEnum(Type.ANIMATION_MUST_FINISH);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+				}
+			}
+			if(dt.maxValue != 0) {
+				dout.writeEnum(Type.ANIMATION_SLIDER_OPT);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+					d.writeBoolean(dt.interpolateVal);
+					d.writeByte(dt.maxValue);
+				}
+			}
+			if(dt.buttonHidden) {
+				dout.writeEnum(Type.ANIMATION_BUTTON_HIDDEN);
+				try(IOHelper d = dout.writeNextBlock()) {
+					d.write(id);
+				}
+			}
 		}
 		dout.writeEnum(Type.CTRL_IDS);
 		try(IOHelper d = dout.writeNextBlock()) {
@@ -646,20 +699,25 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		Map<String, List<IAnimation>> gestures = new HashMap<>();
 		Map<IPose, List<IAnimation>> animations = new HashMap<>();
 		Map<String, Gesture> gesturesMap = new HashMap<>();
-		Map<String, CustomPose> customPoses = new HashMap<>();
+		Map<String, Pose> customPoses = new HashMap<>();
+		Set<IPose> mustFinishPoses = new HashSet<>();
 		State state = new State(def);
 		parsedData.values().forEach(rd -> {
 			if(rd.pose instanceof VanillaPose) {
 				animations.computeIfAbsent(rd.pose, __ -> new ArrayList<>()).add(rd.anim);
+				if (rd.finish)mustFinishPoses.add(rd.pose);
 			} else if(rd.name != null) {
 				gestures.computeIfAbsent(rd.name, k -> {
 					List<IAnimation> l = new ArrayList<>();
-					Gesture g = new Gesture(AnimationsLoaderV1.getType(rd.name), l, AnimationsLoaderV1.cleanName(rd.name), rd.loop, rd.order);
+					Gesture g = new Gesture(AnimationsLoaderV1.getType(rd.name), l, AnimationsLoaderV1.cleanName(rd.name), rd.loop, rd.order, rd.finish);
 					g.defVal = rd.defaultValue;
 					g.isProperty = rd.isProperty;
 					g.group = rd.group;
 					g.command = rd.command;
 					g.layerCtrl = rd.layerCtrl;
+					g.maxValue = rd.maxValue;
+					g.interpolateVal = rd.interpolateVal;
+					g.hidden = rd.buttonHidden;
 					if (g.type.isStaged()) {
 						stageGestures.add(g);
 					} else {
@@ -674,7 +732,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			} else {
 				animations.computeIfAbsent(rd.pose, __ -> new ArrayList<>()).add(rd.anim);
 				CustomPose cp = (CustomPose) rd.pose;
-				customPoses.put(cp.getName(), cp);
+				if (rd.finish)mustFinishPoses.add(rd.pose);
+				Pose p = new Pose(cp);
+				p.hidden = rd.buttonHidden;
+				customPoses.put(cp.getName(), p);
 				cp.command = rd.command;
 				cp.layerCtrl = rd.layerCtrl;
 				if(rd.gid != -1)
@@ -685,10 +746,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		reg.setBlankGesture(blankId);
 		reg.setPoseResetId(resetId);
 		reg.setProfileId(modelProfilesId);
-		finishLoading(reg, stageGestures, animations, gesturesMap);
+		finishLoading(reg, stageGestures, animations, gesturesMap, mustFinishPoses);
 		Map<String, Group> groups = new HashMap<>();
 
-		Stream.concat(gesturesMap.values().stream(), customPoses.values().stream().map(Pose::new)).
+		Stream.concat(gesturesMap.values().stream(), customPoses.values().stream()).
 		sorted(Comparator.comparingInt(IPoseGesture::getOrder)).
 		map(g -> {
 			if (g instanceof Gesture && ((Gesture)g).group != null) {
@@ -705,13 +766,13 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			} else {
 				return g;
 			}
-		}).filter(e -> e != null).
+		}).filter(e -> e != null).collect(Collectors.toList()).
 		forEach(g -> g.register(state));
 		byte[] sync = new byte[state.layerToId.size() + 2];
 		state.layerToId.forEach((g, i) -> sync[i] = g.defVal);
 		reg.setParams(new ParameterDetails(sync, new byte[0]));
 		animations.forEach((p, an) -> {
-			AnimationTrigger t = new AnimationTrigger(Collections.singleton(p), p instanceof VanillaPose ? (VanillaPose) p : null, an, true, false);
+			AnimationTrigger t = new AnimationTrigger(Collections.singleton(p), p instanceof VanillaPose ? (VanillaPose) p : null, an, true, mustFinishPoses.contains(p));
 			reg.register(t);
 		});
 	}
@@ -731,6 +792,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 	private static class Group implements IPoseGesture {
 		private List<Gesture> gs = new ArrayList<>();
 		private String id;
+		private int order = Integer.MIN_VALUE;
 
 		public Group(String id) {
 			this.id = id;
@@ -742,20 +804,25 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 
 		@Override
 		public int getOrder() {
-			return 0;
+			if (order == Integer.MIN_VALUE)
+				order = gs.stream().mapToInt(Gesture::getOrder).max().orElse(0);
+
+			return order;
 		}
 
 		@Override
 		public void register(State reg) {
-			DropdownButtonData dt = new DropdownButtonData();
+			LegacyDropdownButtonData dt = new LegacyDropdownButtonData();
 			dt.setName(id);
 			dt.command = gs.stream().anyMatch(g -> g.command);
 			dt.isProperty = gs.stream().anyMatch(g -> g.isProperty);
 			dt.setDef(reg.def);
-			//TODO register and custom handler
 			for (Gesture g : gs) {
-				reg.reg.register(new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), g.animation, reg.layerToId.get(g), 1, true, false));
+				int l = reg.layerToId.get(g);
+				reg.reg.register(new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), g.animation, l, 1, true, g.mustFinish));
+				dt.register(g.name, l);
 			}
+			reg.reg.register(dt);
 		}
 	}
 
@@ -766,6 +833,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 
 	private static class Pose implements IPoseGesture {
 		private CustomPose pose;
+		private boolean hidden;
 
 		public Pose(CustomPose pose) {
 			this.pose = pose;
@@ -782,6 +850,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			data.setName(pose.getId());
 			data.layerCtrl = pose.layerCtrl;
 			data.command = pose.command;
+			data.hidden = hidden;
 			int id = reg.poseGid.get(pose);
 			if(pose.layerCtrl)data.gid = id;
 			data.id = id;
@@ -797,16 +866,20 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		public String name;
 		public byte defVal;
 		private int order;
-		public boolean isProperty, command, layerCtrl;
+		public boolean isProperty, command, layerCtrl, mustFinish;
 		public String group;
 		public int gid;
+		private byte maxValue;
+		private boolean interpolateVal;
+		private boolean hidden;
 
-		public Gesture(AnimationType type, List<IAnimation> animation, String name, boolean isLoop, int order) {
+		public Gesture(AnimationType type, List<IAnimation> animation, String name, boolean isLoop, int order, boolean mustFinish) {
 			this.type = type;
 			this.animation = animation;
 			this.name = name;
 			this.isLoop = isLoop;
 			this.order = order;
+			this.mustFinish = mustFinish;
 		}
 
 		@Override
@@ -824,6 +897,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				data.layerCtrl = layerCtrl;
 				data.command = command;
 				data.id = gid;
+				data.hidden = hidden;
 				if (layerCtrl)data.gid = gid;
 				if (!isLoop) {
 					int len = animation.stream().mapToInt(a -> a.getDuration(AnimationMode.PLAYER)).max().orElse(-1);
@@ -831,7 +905,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				}
 				data.setDef(reg.def);
 				reg.reg.register(data);
-				reg.reg.register(new GestureTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, gid, gid, isLoop, false));
+				reg.reg.register(new GestureTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, gid, gid, isLoop, mustFinish));
 			}
 			break;
 
@@ -843,9 +917,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				dt.isProperty = isProperty;
 				dt.parameter = reg.layerToId.get(this);
 				dt.mask = 1;
+				dt.hidden = hidden;
 				dt.setDef(reg.def);
 				reg.reg.register(dt);
-				reg.reg.register(new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, 1, true, false));
+				reg.reg.register(new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, 1, true, mustFinish));
 			}
 			break;
 
@@ -856,10 +931,11 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				dt.command = command;
 				dt.isProperty = isProperty;
 				dt.parameter = reg.layerToId.get(this);
-				dt.maxValue = 255;//TODO later
+				dt.maxValue = maxValue == 0 ? 255 : maxValue;
+				dt.hidden = hidden;
 				dt.setDef(reg.def);
 				reg.reg.register(dt);
-				reg.reg.register(new ValueTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, true));
+				reg.reg.register(new ValueTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, maxValue == 0 ? true : interpolateVal));
 			}
 			break;
 
@@ -869,7 +945,7 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		}
 	}
 
-	private void finishLoading(AnimationRegistry reg, List<Gesture> stageGestures, Map<IPose, List<IAnimation>> animations, Map<String, Gesture> gesturesMap) {
+	private void finishLoading(AnimationRegistry reg, List<Gesture> stageGestures, Map<IPose, List<IAnimation>> animations, Map<String, Gesture> gesturesMap, Set<IPose> finishPoses) {
 		Map<String, StagedAnimation> anims = new HashMap<>();
 		for (Gesture g : stageGestures) {
 			String[] nm = g.name.split(":", 2);
@@ -890,14 +966,15 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				case "c":
 					if(pose == null)pose = reg.getCustomPoses().get(nm[1]);
 					animations.computeIfPresent(pose, (p, an) -> {
-						an.forEach(san::addPlay);
+						boolean mf = finishPoses.contains(p);
+						an.forEach(a -> san.addPlay(a, mf));
 						return san.getAll();
 					});
 					break;
 
 				case "g":
 					gesturesMap.computeIfPresent(nm[1], (k, gs) -> {
-						gs.animation.forEach(san::addPlay);
+						gs.animation.forEach(a -> san.addPlay(a, gs.mustFinish));
 						gs.animation = san.getAll();
 						return gs;
 					});
@@ -946,6 +1023,9 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		MODEL_PROFILES_ID,
 		ANIMATION_DATA_COMMAND,
 		ANIMATION_DATA_ENC,
+		ANIMATION_MUST_FINISH,
+		ANIMATION_SLIDER_OPT,
+		ANIMATION_BUTTON_HIDDEN,
 		;
 		public static final Type[] VALUES = values();
 	}
@@ -972,6 +1052,10 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 		private String group;
 		private boolean command;
 		private boolean layerCtrl;
+		private boolean finish;
+		private byte maxValue;
+		private boolean interpolateVal;
+		private boolean buttonHidden;
 
 		public ResolvedData(VanillaPose pose, boolean add) {
 			this.pose = pose;

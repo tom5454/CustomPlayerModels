@@ -7,13 +7,13 @@ import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.math.Box;
 import com.tom.cpl.util.NamedElement;
 import com.tom.cpl.util.NamedElement.NameMapper;
-import com.tom.cpm.shared.parts.anim.menu.DropdownButtonData;
+import com.tom.cpm.shared.parts.anim.menu.AbstractDropdownButtonData;
 
 public class GestureDropdown extends Panel implements IGestureButton {
 	private NameMapper<String> gestureNameMapper;
 	private DropDownBox<NamedElement<String>> box;
 
-	public GestureDropdown(IGestureButtonContainer c, DropdownButtonData data) {
+	public GestureDropdown(IGestureButtonContainer c, AbstractDropdownButtonData data) {
 		super(c.gui());
 		String none = gui.i18nFormat("label.cpm.layerNone");
 		gestureNameMapper = new NameMapper<>(data.getActiveOptions(), e -> e.isEmpty() ? none : e);
