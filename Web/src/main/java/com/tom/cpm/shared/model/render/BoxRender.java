@@ -537,4 +537,15 @@ public class BoxRender {
 		float tv = texV + dy;
 		return new ExtrudedMesh(e.getMatrix(), e.getNormal(), texU / (float) sheetSizeX, texV / (float) sheetSizeY, tu / sheetSizeX, tv / sheetSizeY, dx, dy);
 	}
+
+	public static int getExtrudeSize(Vec3f size, int texSize) {
+		float w = size.x;
+		float h = size.y;
+
+		int ts = Math.abs(texSize);
+		int dx = MathHelper.ceil(w * ts);
+		int dy = MathHelper.ceil(h * ts);
+
+		return (dx * dy * 3) / 4;
+	}
 }

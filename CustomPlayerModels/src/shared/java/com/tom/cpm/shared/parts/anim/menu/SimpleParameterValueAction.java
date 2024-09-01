@@ -85,7 +85,7 @@ public class SimpleParameterValueAction implements CommandAction, LegacyCommandA
 
 		@Override
 		public int getValue() {
-			if (parameter < 0 || data.gestureData.length >= parameter)return -1;
+			if (parameter < 0 || data.gestureData.length <= parameter)return -1;
 			return data.gestureData[parameter] == value ? 1 : 0;
 		}
 

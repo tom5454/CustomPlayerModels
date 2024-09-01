@@ -4,6 +4,7 @@ import com.tom.cpm.blockbench.proxy.Animation.AnimatorChannel;
 import com.tom.cpm.blockbench.proxy.Animation.GeneralAnimator;
 import com.tom.ugwt.client.JsArrayE;
 
+import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
@@ -34,5 +35,23 @@ public class BoneAnimator extends GeneralAnimator {
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class Props {
 		public JsPropertyMap<AnimatorChannel> channels;
+	}
+
+	@JsOverlay
+	public final boolean hasVisible() {
+		return visible != null && visible.length > 0;
+	}
+
+	@JsOverlay
+	public final boolean hasColor() {
+		return color != null && color.length > 0;
+	}
+
+	@JsOverlay
+	public final boolean hasTransform() {
+		return (position != null && position.length > 0) ||
+				(rotation != null && rotation.length > 0) ||
+				(scale != null && scale.length > 0) ||
+				hasColor() || hasVisible();
 	}
 }

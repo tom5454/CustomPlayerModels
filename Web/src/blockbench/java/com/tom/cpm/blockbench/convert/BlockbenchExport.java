@@ -561,7 +561,7 @@ public class BlockbenchExport {
 			GeneralAnimator ga = anim.animators.get(k);
 			if(ga instanceof BoneAnimator) {
 				BoneAnimator ba = (BoneAnimator) ga;
-				if(ba.position.length == 0 && ba.rotation.length == 0 && ba.scale.length == 0 && ba.visible.length == 0 && ba.color.length == 0)return;
+				if(!ba.hasTransform())return;
 				anims.add(ba);
 			}
 		});
@@ -1024,9 +1024,9 @@ public class BlockbenchExport {
 			if((mode & 4) != 0) {
 				set.accept(baseMul);
 			} else if((mode & 2) != 0) {
-				set.accept((int) (val * baseMul * ((mode & 1) != 0 ? mul.y : mul.x)));
+				set.accept(Math.round(val * baseMul * ((mode & 1) != 0 ? mul.y : mul.x)));
 			} else
-				set.accept((int) (val * ((mode & 1) != 0 ? mul.y : mul.x)));
+				set.accept(Math.round(val * ((mode & 1) != 0 ? mul.y : mul.x)));
 		}
 	}
 

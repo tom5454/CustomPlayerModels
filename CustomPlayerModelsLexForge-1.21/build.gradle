@@ -163,7 +163,7 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.21-51.0.17'
+    minecraft 'net.minecraftforge:forge:1.21.1-52.0.6'
 
     // Mixin annotation processor - generates the refmap
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"

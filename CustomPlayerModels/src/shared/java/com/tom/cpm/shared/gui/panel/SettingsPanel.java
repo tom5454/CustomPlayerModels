@@ -160,6 +160,8 @@ public class SettingsPanel extends Panel {
 				return (rv + 1f) / (15 * 60 + 1);
 			});
 
+			makeCheckbox(editor, ConfigKeys.EDITOR_CAMERA_Y_INVERT, false);
+
 			MinecraftClientAccess.get().populatePlatformSettings("editor", editor);
 
 			editorLayout.reflow();

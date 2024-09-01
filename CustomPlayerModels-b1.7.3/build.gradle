@@ -103,9 +103,10 @@ dependencies {
 	modImplementation "net.modificationstation:StationAPI:${project.stapi_version}"
 
 	// Optional, but convenient mods for mod creators and users alike.
-	modImplementation("com.github.calmilamsy:ModMenu:${project.modmenu_version}") {
+	/*modImplementation("com.github.calmilamsy:ModMenu:${project.modmenu_version}") {
 		transitive false
-	}
+	}*///Jitpack lost the artifact
+	modImplementation('maven.modrinth:modmenu-beta:1.8.5-beta.3')
 	modImplementation("net.glasslauncher.mods:GlassConfigAPI:${project.gcapi_version}") {
 		transitive false
 	}

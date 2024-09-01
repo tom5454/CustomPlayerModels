@@ -357,7 +357,7 @@ public class BBActions {
 							GeneralAnimator ga = a.animators.get(k);
 							if(ga instanceof BoneAnimator) {
 								BoneAnimator ba = (BoneAnimator) ga;
-								if(ba.visible.length == 0)return;
+								if(!ba.hasVisible())return;
 								anims.put(k, ba);
 							}
 						});

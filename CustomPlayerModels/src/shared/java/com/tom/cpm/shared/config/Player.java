@@ -21,7 +21,6 @@ import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
 public abstract class Player<P> {
 	private static boolean enableRendering = true;
-	private static boolean enableNames = true;
 
 	private CompletableFuture<ModelDefinition> definition;
 	private EnumMap<AnimationMode, AnimationHandler> animHandler = new EnumMap<>(AnimationMode.class);
@@ -103,11 +102,12 @@ public abstract class Player<P> {
 	}
 
 	public static boolean isEnableNames() {
-		return enableNames;
+		return ModConfig.getCommonConfig().getBoolean(ConfigKeys.RENDER_NAMES, true);
 	}
 
 	public static void setEnableNames(boolean enableNames) {
-		Player.enableNames = enableNames;
+		ModConfig.getCommonConfig().setBoolean(ConfigKeys.RENDER_NAMES, enableNames);
+		ModConfig.getCommonConfig().save();
 	}
 
 	public static boolean isEnableLoadingInfo() {

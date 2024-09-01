@@ -1256,5 +1256,7 @@
   "label.cpm.generatedArmorLayer": "%s Armor",
   "label.cpm.generatedArmorLayer.ct": "Transform (%s)",
   "tooltip.cpm.anim_hidden": "Hides the button in the Gestures Gui,\\useful for animations with `/cpmclient animate` or the API.",
-  "label.cpm.anim_hidden": "Hidden in Gestures Gui"
+  "label.cpm.anim_hidden": "Hidden in Gestures Gui",
+  "tooltip.cpm.config.editorInvertCamY": "Inverts the camera\u0027s vertical rotation in the editor.",
+  "label.cpm.config.editorInvertCamY": "Invert Camera Y Rotation"
 }

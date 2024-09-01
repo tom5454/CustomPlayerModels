@@ -256,7 +256,7 @@ public class AnimationExporter {
 		{
 			ValueParameterButtonData dt = new ValueParameterButtonData();
 			dt.setName(a.getId());
-			dt.parameter = paramAlloc.allocByteSync(a.getId(), (byte) (a.layerDefault * a.maxValue));
+			dt.parameter = paramAlloc.allocByteSync(a.getId(), (byte) (a.layerDefault * 255));
 			dt.maxValue = a.maxValue;
 			dt.hidden = a.hidden;
 			ParameterInfo param = new ParameterInfo(dt, dt.parameter, a.interpolateValue);

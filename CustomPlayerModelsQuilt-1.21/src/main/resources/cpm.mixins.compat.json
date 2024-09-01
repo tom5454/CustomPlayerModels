@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.tom.cpm.mixin.compat",
+  "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "CustomPlayerModels-Fabric-1.21-refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "AbstractTextureMixin_OF",
+    "BlockEntityWithoutLevelRendererMixinFabric_OF",
+	"VRArmRendererMixin_$vivecraft",
+	"BlockEntityRenderDispatcherMixin_Iris"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

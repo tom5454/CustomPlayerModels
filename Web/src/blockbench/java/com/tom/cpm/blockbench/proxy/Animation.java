@@ -165,7 +165,7 @@ public class Animation {
 
 	@JsOverlay
 	public static boolean interpolateVisible(BoneAnimator anim, float time, boolean def) {
-		if(anim == null || anim.visible.length == 0)return def;
+		if(anim == null || !anim.hasVisible())return def;
 		Keyframe before = null;
 
 		for (Keyframe keyframe : anim.visible.array()) {
@@ -182,7 +182,7 @@ public class Animation {
 
 	@JsOverlay
 	public static JsVec3 interpolate(JsArrayE<Keyframe> keyframes, float time) {
-		if(keyframes.length == 0)return null;
+		if(keyframes == null || keyframes.length == 0)return null;
 		Keyframe before = null;
 		Keyframe after = null;
 		Keyframe result = null;

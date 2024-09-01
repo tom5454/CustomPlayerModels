@@ -100,25 +100,26 @@ public abstract class LayerDefaultPopup extends PopupPanel {
 			super(gui, e, 130);
 
 			float ld = e.selectedAnim.layerDefault;
-			progressSlider = new Slider(gui, gui.i18nFormat("label.cpm.defLayerSettings.value", (int) (ld * 100)));
+			progressSlider = new Slider(gui, gui.i18nFormat("label.cpm.defLayerSettings.value", (int) (ld * e.selectedAnim.maxValue)));
 			progressSlider.setBounds(new Box(5, 5, 160, 20));
 			progressSlider.setValue(ld);
 			progressSlider.setAction(() -> {
-				progressSlider.setText(gui.i18nFormat("label.cpm.defLayerSettings.value", (int) (progressSlider.getValue() * 100)));
+				progressSlider.setText(gui.i18nFormat("label.cpm.defLayerSettings.value", (int) (progressSlider.getValue() * e.selectedAnim.maxValue)));
 			});
-			progressSlider.setSteps(e.selectedAnim.maxValue);
+			progressSlider.setSteps(1f / e.selectedAnim.maxValue);
 			addElement(progressSlider);
 
 			addElement(new Label(gui, gui.i18nFormat("label.cpm.defLayerSettings.max")).setBounds(new Box(5, 30, 0, 0)));
 			maxValueSpinner = new Spinner(gui);
 			maxValueSpinner.setBounds(new Box(95, 30, 70, 20));
 			maxValueSpinner.setDp(0);
-			maxValueSpinner.setValue(1f / e.selectedAnim.maxValue);
+			maxValueSpinner.setValue(e.selectedAnim.maxValue);
 			maxValueSpinner.addChangeListener(() -> {
 				int v = (int) maxValueSpinner.getValue();
 				if (v < 1)maxValueSpinner.setValue(1);
 				else if(v > 255)maxValueSpinner.setValue(255);
 				progressSlider.setSteps(1f / v);
+				progressSlider.setText(gui.i18nFormat("label.cpm.defLayerSettings.value", (int) (progressSlider.getValue() * v)));
 			});
 			addElement(maxValueSpinner);
 

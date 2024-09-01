@@ -73,7 +73,7 @@ public class BitmaskParameterValueAction implements CommandAction {
 
 		@Override
 		public int getValue() {
-			if (parameter < 0 || data.gestureData.length >= parameter)return -1;
+			if (parameter < 0 || data.gestureData.length <= parameter)return -1;
 			return (data.gestureData[parameter] & value) == value ? 1 : 0;
 		}
 

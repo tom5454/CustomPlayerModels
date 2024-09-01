@@ -190,7 +190,7 @@ dependencies {
     compileOnly files("stubs/of.jar")
     compileOnly files("stubs/iris.jar")
     
-    compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.8-1.20.1-forge")
+    compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.8.2-1.20.1-forge")
     compileOnly fg.deobf('maven.modrinth:vivecraft:1.20.1-1.1.9-forge')
     
     compileOnly fg.deobf('curse.maven:oculus-581495:5080444')

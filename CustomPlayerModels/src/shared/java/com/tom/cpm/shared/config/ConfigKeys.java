@@ -66,6 +66,8 @@ public class ConfigKeys {
 	public static final String EDITOR_EXPERIMENTAL_EXPORT = "experimentalExport0614";
 	public static final String UPDATE_CHECKER = "updateChecker";
 	public static final String KEYBINDS_MODEL = "keybindPerModel";
+	public static final String EDITOR_CAMERA_Y_INVERT = "editorInvertCamY";
+	public static final String RENDER_NAMES = "renderNames";
 
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_MODEL_LOADING = PlayerSpecificConfigKey.createBool("models", true);
 	public static final PlayerSpecificConfigKey<Boolean> ENABLE_ANIMATED_TEXTURES = PlayerSpecificConfigKey.createBool("animatedTex", false, KeyGroup.FRIEND, true);

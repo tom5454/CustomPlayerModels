@@ -421,7 +421,7 @@ public class BlockbenchImport {
 			Cube.CubeProperties c = new Cube.CubeProperties();
 			c.name = me.name;
 			Vec3f o = me.offset;
-			Vec3f s = new Vec3f(me.size.x * me.scale.x, me.size.y * me.scale.y, me.size.z * me.scale.z);
+			Vec3f s = new Vec3f(me.size.x * me.meshScale.x, me.size.y * me.meshScale.y, me.size.z * me.meshScale.z);
 			c.from = JsVec3.make(gr.origin.x - o.x - s.x, gr.origin.y - o.y - s.y, gr.origin.z + o.z);
 			c.inflate = me.mcScale;
 			c.mirror_uv = me.mirror;
@@ -453,7 +453,7 @@ public class BlockbenchImport {
 
 	private void importTextureUV(ModelElement me, Cube cube, UVMul uvm, boolean forcePF) {
 		if(!me.texture)return;
-		if(me.faceUV != null || forcePF || uvm.needsPF() || me.textureSize > 1 || me.singleTex || me.extrude || me.scale.x != 1 || me.scale.y != 1 || me.scale.z != 1) {
+		if(me.faceUV != null || forcePF || uvm.needsPF() || me.textureSize > 1 || me.singleTex || me.extrude || me.meshScale.x != 1 || me.meshScale.y != 1 || me.meshScale.z != 1) {
 			cube.box_uv = false;
 			cube.autouv = 0;
 			if(me.faceUV != null) {
@@ -536,7 +536,7 @@ public class BlockbenchImport {
 					cube.faces.west.uv = uv;
 				}
 			} else {
-				boxToPFUV(cube, me.textureSize, me.scale.x, me.scale.y, me.scale.z, uvm);
+				boxToPFUV(cube, me.textureSize, me.meshScale.x, me.meshScale.y, me.meshScale.z, uvm);
 			}
 		} else {
 			cube.box_uv = true;

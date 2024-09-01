@@ -19,6 +19,8 @@ import com.tom.cpl.render.VertexBuffer;
 import com.tom.cpl.util.Hand;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
+import com.tom.cpm.shared.config.ConfigKeys;
+import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.editor.DisplayItem;
 import com.tom.cpm.shared.gui.Keybinds;
@@ -332,12 +334,15 @@ public abstract class ViewportPanelBase3d extends Panel3d {
 				cam.position.y += -f * move * dy;
 				cam.position.z += pz + by1.z;
 			} else {
+				boolean yFlip = ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_CAMERA_Y_INVERT, false);
 				float pitch = (float) Math.asin(cam.look.y);
 				float yaw = cam.look.getYaw();
 				if(Float.isNaN(pitch))pitch = 0;
 				if(Float.isNaN(yaw))yaw = 0;
 				yaw += Math.toRadians(x - mx);
-				pitch -= Math.toRadians(y - my);
+				double dPitch = Math.toRadians(y - my);
+				if (yFlip)pitch += dPitch;
+				else pitch -= dPitch;
 				if(yaw < -Math.PI)yaw += 2 * Math.PI;
 				if(yaw > Math.PI)yaw -= 2 * Math.PI;
 				yaw = (float) MathHelper.clamp(yaw, -Math.PI, Math.PI);

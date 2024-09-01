@@ -82,7 +82,7 @@ public class ValueParameterValueAction implements CommandAction, LegacyCommandAc
 
 		@Override
 		public int getValue() {
-			if (parameter < 0 || data.gestureData.length >= parameter)return -1;
+			if (parameter < 0 || data.gestureData.length <= parameter)return -1;
 			return Byte.toUnsignedInt(data.gestureData[parameter]) * max / 255;
 		}
 
