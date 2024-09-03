@@ -22,6 +22,7 @@ public class GestureToggleButton extends AbstractGestureButton implements IGestu
 
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
+		isHovered = event.isHovered(bounds);
 		boolean on = data.getValue();
 		int bw = bounds.w-2;
 		int w = gui.textWidth(name);
@@ -39,11 +40,13 @@ public class GestureToggleButton extends AbstractGestureButton implements IGestu
 		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
 		gui.drawBox(bounds.x + 1,          bounds.y + 1, bw / 2, bounds.h - 2, on ? 0xff00ff00 : bgColor);
 		gui.drawBox(bounds.x + 1 + bw / 2, bounds.y + 1, bw / 2, bounds.h - 2, on ? bgColor : 0xffff0000);
-		gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 - 4, name, color);
+		int nameY = -4;
 		if (kb != null && kb.bound != null) {
-			w = gui.textWidth(kb.bound);
-			gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 + 4, kb.bound, color);
+			int w2 = gui.textWidth(kb.bound);
+			gui.drawText(bounds.x + bounds.w / 2 - w2 / 2, bounds.y + bounds.h / 2 + 4, kb.bound, color);
+			nameY = -10;
 		}
+		gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 + nameY, name, color);
 	}
 
 	@Override

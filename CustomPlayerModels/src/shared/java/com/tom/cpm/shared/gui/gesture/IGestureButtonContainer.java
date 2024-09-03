@@ -7,6 +7,7 @@ public interface IGestureButtonContainer {
 	void updateKeybind(String keybind, String id, boolean mode);
 	BoundKeyInfo getBoundKey(String id);
 	void valueChanged();
+	boolean canBindKeys();
 
 	public static class BoundKeyInfo {
 		public final String key;

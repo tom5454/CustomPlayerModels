@@ -228,4 +228,9 @@ public class PropertiesPopup extends PopupPanel implements IGestureButtonContain
 			profileBox.setSelected(createNew);
 		}
 	}
+
+	@Override
+	public boolean canBindKeys() {
+		return false;
+	}
 }

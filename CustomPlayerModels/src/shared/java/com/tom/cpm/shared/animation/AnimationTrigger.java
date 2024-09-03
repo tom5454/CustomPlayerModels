@@ -88,7 +88,7 @@ public class AnimationTrigger {
 
 		@Override
 		public long getTime(AnimationState state, long animTime) {
-			if (state.gestureData != null && state.gestureData.length > id) {
+			if (state != null && state.gestureData != null && state.gestureData.length > id) {
 				float val = Byte.toUnsignedInt(state.gestureData[id]) / 256f;
 				long time = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().getTime();
 				if (interpolate && state.prevGestureData != null && state.prevGestureData.length == state.gestureData.length && state.lastGestureReceiveTime + 50 >= time) {

@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
@@ -189,8 +191,17 @@ public class AnimationExporter {
 			if (trigs.size() == 1) {
 				s.triggerId = triggers.get(trigs.get(0));
 				trigs.get(0).mustFinish = false;//TODO fix later
+			} else if (trigs.isEmpty()) {
+				throw new ExportException(new FormatText("error.cpm.stagingMissingMain", Stream.concat(s.setup.stream(), s.finish.stream()).map(e -> e.toString()).findFirst().orElse("??")));
 			} else {
-				throw new RuntimeException("Multiple triggers not supported");
+				String anims = Stream.concat(s.setup.stream(), s.finish.stream()).map(e -> "'" + e + "'").collect(Collectors.joining("\\"));
+				String info = s.play.stream().map(e -> Pair.of(e, an.getTriggers().get(animTriggers.get(e)))).
+						filter(e -> e.getValue() != null).collect(Collectors.groupingBy(Pair::getValue)).
+						values().stream().map(l -> {
+							return l.stream().map(p -> "'" + p.getKey() + "'").collect(Collectors.joining("\\"));
+						}).
+						collect(Collectors.joining("\\----\\", "----\\", ""));
+				throw new ExportException(new FormatText("error.cpm.stagingMultipleMain", anims, info));
 			}
 			an.getStagedList().add(s.triggerId);
 		});

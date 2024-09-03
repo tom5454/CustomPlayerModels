@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.CopyTransform;
+import com.tom.cpm.shared.parts.anim.LegacyAnimationParser;
 import com.tom.cpm.shared.parts.anim.ParameterDetails;
 import com.tom.cpm.shared.parts.anim.menu.AbstractGestureButtonData;
 import com.tom.cpm.shared.parts.anim.menu.CommandAction;
@@ -31,6 +33,7 @@ public class AnimationRegistry {
 	private int blankGesture;
 	private int poseResetId;
 	private String profileId;
+	private LegacyAnimationParser legacyParser;
 
 	public Set<AnimationTrigger> getAnimations() {
 		return animations;
@@ -152,5 +155,15 @@ public class AnimationRegistry {
 	public void register(AnimationTrigger trigger) {
 		animations.add(trigger);
 		trigger.onPoses.forEach(p -> poseToTriggers.computeIfAbsent(p, __ -> new ArrayList<>()).add(trigger));
+	}
+
+	public LegacyAnimationParser getLegacyParser(ModelDefinition def) {
+		if (legacyParser == null)legacyParser = new LegacyAnimationParser(def);
+		return legacyParser;
+	}
+
+	public void finishLoading() {
+		if (legacyParser != null)legacyParser.register();
+		legacyParser = null;
 	}
 }

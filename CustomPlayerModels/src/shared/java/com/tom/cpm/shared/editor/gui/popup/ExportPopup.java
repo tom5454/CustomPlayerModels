@@ -303,10 +303,12 @@ public abstract class ExportPopup extends PopupPanel {
 			boolean incompatibleDef = false;
 			if (def != null) {
 				ModelPartLink link = def.findDefLink();
-				defLink = link.getLink();
-				if ((link instanceof ModelPartDefinitionLink) == ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false)) {
-					defLink = null;
-					incompatibleDef = true;
+				if (link != null) {
+					defLink = link.getLink();
+					if ((link instanceof ModelPartDefinitionLink) == ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false)) {
+						defLink = null;
+						incompatibleDef = true;
+					}
 				}
 			}
 			okDef.setEnabled(defLink != null);
@@ -664,10 +666,12 @@ public abstract class ExportPopup extends PopupPanel {
 					ModelDefinition def = MinecraftClientAccess.get().getDefinitionLoader().loadModel(mf.getDataBlock(), MinecraftClientAccess.get().getClientPlayer());
 					if(def != null) {
 						ModelPartLink link = def.findDefLink();
-						defLink = link.getLink();
-						if ((link instanceof ModelPartDefinitionLink) == ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false)) {
-							defLink = null;
-							incompatibleDef = true;
+						if (link != null) {
+							defLink = link.getLink();
+							if ((link instanceof ModelPartDefinitionLink) == ModConfig.getCommonConfig().getBoolean(ConfigKeys.EDITOR_EXPERIMENTAL_EXPORT, false)) {
+								defLink = null;
+								incompatibleDef = true;
+							}
 						}
 					}
 				} catch (IOException e) {
