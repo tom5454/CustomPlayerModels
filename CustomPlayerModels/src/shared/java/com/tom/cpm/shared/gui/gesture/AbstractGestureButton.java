@@ -1,21 +1,23 @@
 package com.tom.cpm.shared.gui.gesture;
 
-import com.tom.cpl.config.ConfigEntry;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.gui.KeyboardEvent;
 import com.tom.cpl.gui.MouseEvent;
 import com.tom.cpl.gui.elements.Button;
+import com.tom.cpl.gui.elements.ChooseElementPopup;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpm.shared.MinecraftClientAccess;
-import com.tom.cpm.shared.config.ConfigKeys;
-import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.gui.gesture.IGestureButtonContainer.BoundKeyInfo;
 import com.tom.cpm.shared.parts.anim.menu.AbstractGestureButtonData;
 
 public class AbstractGestureButton extends Button implements IGestureButton {
 	protected boolean isHovered;
-	private AbstractGestureButtonData data;
+	protected AbstractGestureButtonData data;
 	protected BoundKeyInfo kb;
 	protected IGestureButtonContainer container;
 
@@ -28,7 +30,28 @@ public class AbstractGestureButton extends Button implements IGestureButton {
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
 		isHovered = event.isHovered(bounds);
-		super.draw(event, partialTicks);
+
+		int w = gui.textWidth(name);
+		int bgColor = gui.getColors().button_fill;
+		int color = gui.getColors().button_text_color;
+		if(!enabled) {
+			color = gui.getColors().button_text_disabled;
+			bgColor = gui.getColors().button_disabled;
+		} else if(event.isHovered(bounds)) {
+			color = gui.getColors().button_text_hover;
+			bgColor = gui.getColors().button_hover;
+		}
+		if(event.isHovered(bounds) && tooltip != null)
+			tooltip.set();
+		gui.drawBox(bounds.x, bounds.y, bounds.w, bounds.h, gui.getColors().button_border);
+		gui.drawBox(bounds.x+1, bounds.y+1, bounds.w-2, bounds.h-2, bgColor);
+		int nameY = -4;
+		if (kb != null && kb.bound != null) {
+			int w2 = gui.textWidth(kb.bound);
+			gui.drawText(bounds.x + bounds.w / 2 - w2 / 2, bounds.y + bounds.h / 2 + 4, kb.bound, color);
+			nameY = -10;
+		}
+		gui.drawText(bounds.x + bounds.w / 2 - w / 2, bounds.y + bounds.h / 2 + nameY, name, color);
 	}
 
 	protected boolean canHold() {
@@ -37,23 +60,18 @@ public class AbstractGestureButton extends Button implements IGestureButton {
 
 	@Override
 	public void mouseClick(MouseEvent event) {
-		if (event.isHovered(bounds) && event.btn == 1) {
+		if (event.isHovered(bounds) && event.btn == 1 && container.canBindKeys()) {
 			PopupMenu p = new PopupMenu(gui, gui.getFrame());
-			for (int i = 1;i<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;i++) {
-				String id = "qa_" + i;
-				p.addButton(gui.i18nFormat("button.cpm.quick_key.bind", i), () -> {
-					container.updateKeybind(data.getKeybindId(), id, canHold() && gui.isCtrlDown());
-				});
-			}
 
 			p.addButton(gui.i18nFormat("button.cpm.quick_key.unbind"), () -> {
-				ConfigEntry ce = ModConfig.getCommonConfig().getEntry(ConfigKeys.KEYBINDS);
-				for(int j = 1;j<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;j++) {
-					String c = ce.getString("qa_" + j, null);
-					if(c != null && c.equals(data.getKeybindId())) {
-						ce.setString("qa_" + j, "");
-					}
-				}
+				container.updateKeybind(null, data.getKeybindId(), false);
+			});
+
+			p.addButton(gui.i18nFormat("button.cpm.quick_key.bindMenu"), () -> {
+				List<QuickAccess> qas = IntStream.rangeClosed(1, IKeybind.QUICK_ACCESS_KEYBINDS_COUNT).mapToObj(QuickAccess::new).collect(Collectors.toList());
+				gui.getFrame().openPopup(new ChooseElementPopup<>(gui.getFrame(), gui.i18nFormat("button.cpm.quick_key.bindMenu"), gui.i18nFormat("label.cpm.quick_key.bindMenu"), qas, q -> {
+					container.updateKeybind(q.getId(), data.getKeybindId(), canHold() && gui.isCtrlDown());
+				}, null));
 			});
 
 			Vec2i pos = event.getPos();
@@ -66,22 +84,50 @@ public class AbstractGestureButton extends Button implements IGestureButton {
 	@Override
 	public void keyPressed(KeyboardEvent event) {
 		super.keyPressed(event);
-		String keybindPressed = null;
-		for (IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
-			if(kb.getName().startsWith("qa")) {
-				if(kb.isPressed(event)) {
-					keybindPressed = kb.getName();
+		if (isHovered) {
+			String keybindPressed = null;
+			for (IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
+				if(kb.getName().startsWith("qa")) {
+					if(kb.isPressed(event)) {
+						keybindPressed = kb.getName();
+					}
 				}
 			}
-		}
-		if (keybindPressed != null) {
-			container.updateKeybind(data.getKeybindId(), keybindPressed, canHold() && gui.isCtrlDown());
-			event.consume();
+			if (keybindPressed != null) {
+				container.updateKeybind(keybindPressed, data.getKeybindId(), canHold() && gui.isCtrlDown());
+				event.consume();
+			}
 		}
 	}
 
 	@Override
 	public void updateKeybinds() {
 		kb = container.getBoundKey(data.getKeybindId());
+	}
+
+	private class QuickAccess {
+		private final int id;
+
+		public QuickAccess(int id) {
+			this.id = id;
+		}
+
+		public String getId() {
+			return "qa_" + id;
+		}
+
+		@Override
+		public String toString() {
+			String i = getId();
+			String bound = null;
+			for (IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
+				if (kb.getName().equals(i)) {
+					bound = kb.getBoundKey();
+					if (bound.isEmpty())bound = null;
+				}
+			}
+			if (bound == null)bound = gui.i18nFormat("label.cpm.key_unbound");
+			return gui.i18nFormat("key.cpm.qa_" + id) + " (" + bound + ")";
+		}
 	}
 }

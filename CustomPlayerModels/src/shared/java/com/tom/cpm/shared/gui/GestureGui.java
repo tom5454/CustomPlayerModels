@@ -31,6 +31,7 @@ import com.tom.cpm.shared.definition.SafetyException.BlockReason;
 import com.tom.cpm.shared.editor.TestIngameManager;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.gui.FirstPersonHandPosGui;
+import com.tom.cpm.shared.gui.gesture.BindingsInfoPopup;
 import com.tom.cpm.shared.gui.gesture.GestureGuiButtons;
 import com.tom.cpm.shared.gui.gesture.IGestureButton;
 import com.tom.cpm.shared.gui.gesture.IGestureButtonContainer;
@@ -62,14 +63,18 @@ public class GestureGui extends Frame implements IGestureButtonContainer {
 	@Override
 	public void updateKeybind(String keybind, String gesture, boolean mode) {
 		ConfigEntry ce = getEntryForModel(true);
-		for(int j = 1;j<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;j++) {
-			String c = ce.getString("qa_" + j, null);
-			if(c != null && c.equals(gesture)) {
-				ce.setString("qa_" + j, "");
+		if (gesture != null) {
+			for(int j = 1;j<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;j++) {
+				String c = ce.getString("qa_" + j, null);
+				if(c != null && c.equals(gesture)) {
+					ce.setString("qa_" + j, "");
+				}
 			}
 		}
-		ce.setString(keybind, gesture);
-		ce.setString(keybind + "_mode", mode ? "hold" : "press");
+		if (keybind != null) {
+			ce.setString(keybind, gesture == null ? "" : gesture);
+			ce.setString(keybind + "_mode", mode ? "hold" : "press");
+		}
 
 		this.buttons.forEach(IGestureButton::updateKeybinds);
 	}
@@ -121,6 +126,7 @@ public class GestureGui extends Frame implements IGestureButtonContainer {
 			return;
 		}
 		List<String> keys = new ArrayList<>();
+		String bindingInfo, bindingKeys, bindingTt;
 		{
 			int i = 0;
 			for(IKeybind kb : MinecraftClientAccess.get().getKeybinds()) {
@@ -128,47 +134,30 @@ public class GestureGui extends Frame implements IGestureButtonContainer {
 					i++;
 					String k = kb.getBoundKey();
 					if(k.isEmpty())k = gui.i18nFormat("label.cpm.key_unbound");
-					keys.add(gui.i18nFormat("label.cpm.quick_key_bound", i, k));
+					keys.add(gui.i18nFormat("key.cpm.qa_" + i) + ": " + k);
 				}
 			}
-			i++;
-			keys.add(gui.i18nFormat("label.cpm.quick_key_info"));
-		}
-		if((bounds.w - 360) / 2 > 100) {
-			String tt = gui.i18nFormat("tooltip.cpm.gestureQuickAccess");
-			Panel qk = new Panel(gui);
-			int i = 0;
-			int mw = 0;
-			for (String k : keys) {
-				i++;
-				qk.addElement(new Label(gui, k).setBounds(new Box(0, i * 10, 0, 10)));
-				mw = Math.max(gui.textWidth(k), mw);
-			}
-			i++;
-			qk.setBounds(new Box(10, 0, 200, i * 10));
-
-			Label lbl = new Label(gui, "");
-			tt += "\\" + gui.i18nFormat("tooltip.cpm.gesture.valueReset", Keybinds.RESET_VALUE_LAYER.getSetKey(gui));
-			lbl.setTooltip(new Tooltip(this, tt));
-			qk.addElement(lbl.setBounds(new Box(0, 0, 200, i * 10)));
-			p.addElement(qk);
-		} else {
 			StringBuilder tt = new StringBuilder();
-			for (String key : keys) {
-				tt.append(key);
-				tt.append('\\');
-			}
-
 			tt.append(gui.i18nFormat("label.cpm.quick_key_info"));
-			tt.append("\\\\");
+			tt.append("\\");
 			tt.append(gui.i18nFormat("tooltip.cpm.gestureQuickAccess"));
 			tt.append("\\");
 			tt.append(gui.i18nFormat("tooltip.cpm.gesture.valueReset", Keybinds.RESET_VALUE_LAYER.getSetKey(gui)));
-			String text = gui.i18nFormat("label.cpm.quick_key_short");
-			Label lbl = new Label(gui, text);
-			lbl.setTooltip(new Tooltip(this, tt.toString()));
-			p.addElement(lbl.setBounds(new Box(10, 10, gui.textWidth(text), 10)));
+			bindingInfo = tt.toString();
+			tt.append("\\");
+			tt.append(gui.i18nFormat("tooltip.cpm.gesture.clickBindings"));
+			bindingTt = tt.toString();
+			tt.setLength(0);
+			tt.append(gui.i18nFormat("label.cpm.quick_key_short") + ":");
+			keys.forEach(k -> tt.append("\\" + k));
+			bindingKeys = tt.toString();
 		}
+		Button bindingsButton = new Button(gui, gui.i18nFormat("button.cpm.bindingAndInfo"), () -> {
+			openPopup(new BindingsInfoPopup(this, gui.i18nFormat("button.cpm.bindingAndInfo"), bindingInfo, bindingKeys));
+		});
+		bindingsButton.setTooltip(new Tooltip(this, bindingTt));
+		bindingsButton.setBounds(new Box(10, 10, 100, 20));
+		p.addElement(bindingsButton);
 		int h;
 		if(def != null && this.state == ModelLoadingState.LOADED && status != ServerStatus.UNAVAILABLE) {
 			List<GuiElement> buttons = def.getAnimations().getNamedActions().stream().
@@ -393,5 +382,10 @@ public class GestureGui extends Frame implements IGestureButtonContainer {
 
 	@Override
 	public void valueChanged() {
+	}
+
+	@Override
+	public boolean canBindKeys() {
+		return true;
 	}
 }

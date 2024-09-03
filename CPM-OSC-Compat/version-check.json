@@ -1,25 +1,46 @@
 {
 	"homepage": "https://www.curseforge.com/minecraft/mc-mods/cpmoscc",
 	"promos": {
-		"1.20.1-latest": "1.4.2",
-		"1.19.4-latest": "1.4.2",
-		"1.19.3-latest": "1.4.2",
-		"1.19.2-latest": "1.4.2",
-		"1.18.2-latest": "1.4.2",
-		"1.17.1-latest": "1.4.2",
-		"1.16.5-latest": "1.4.2",
-		"1.15.2-latest": "1.4.2",
-		"1.14.4-latest": "1.4.2",
-		"1.12.2-latest": "1.4.2",
-		"1.10.2-latest": "1.4.2",
-		"1.8.9-latest": "1.4.2"
+		"1.21.1-latest": "1.6.0",
+		"1.20.6-latest": "1.6.0",
+		"1.20.4-latest": "1.6.0",
+		"1.20.2-latest": "1.6.0",
+		"1.20.1-latest": "1.6.0",
+		"1.19.4-latest": "1.6.0",
+		"1.19.3-latest": "1.6.0",
+		"1.19.2-latest": "1.6.0",
+		"1.18.2-latest": "1.6.0",
+		"1.17.1-latest": "1.6.0",
+		"1.16.5-latest": "1.6.0",
+		"1.15.2-latest": "1.6.0",
+		"1.14.4-latest": "1.6.0",
+		"1.12.2-latest": "1.6.0",
+		"1.10.2-latest": "1.6.0",
+		"1.8.9-latest": "1.6.0"
+	},
+	"1.20.6": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.2": "1.20.6 port"
+	},
+	"1.20.4": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
+		"1.5.0": "NeoForge 1.20.2+ port",
+		"1.4.2": "Fixed first hotbar slot not outputting",
+		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
+		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity"
 	},
 	"1.20.2": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
+		"1.5.0": "NeoForge 1.20.2+ port",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity"
 	},
 	"1.20.1": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
@@ -27,6 +48,8 @@
 		"1.2.2": "Output layer states and active pose"
 	},
 	"1.19.4": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
@@ -40,6 +63,8 @@
 		"1.0.0": "First Release"
 	},
 	"1.19.3": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
@@ -53,6 +78,8 @@
 		"1.0.0": "First Release"
 	},
 	"1.19.2": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
@@ -66,6 +93,8 @@
 		"1.0.0": "First Release"
 	},
 	"1.18.2": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
@@ -79,6 +108,8 @@
 		"1.0.0": "First Release"
 	},
 	"1.17.1": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
@@ -92,6 +123,8 @@
 		"1.0.0": "First Release"
 	},
 	"1.16.5": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
@@ -105,30 +138,40 @@
 		"1.0.0": "First Release"
 	},
 	"1.15.2": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
 		"1.3.0": "Ported to older MC versions\nNew OSC output parameters:\n- Sky/Block Light level\n- In-game day time\n- Held & armor items id, count, damage, and tags\n- Blocks below and inside the player id and tags\n- Selected hotbar slot"
 	},
 	"1.14.4": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.5.1": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
 		"1.3.0": "Ported to older MC versions\nNew OSC output parameters:\n- Sky/Block Light level\n- In-game day time\n- Held & armor items id, count, damage, and tags\n- Blocks below and inside the player id and tags\n- Selected hotbar slot"
 	},
 	"1.12.2": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.4.3": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
 		"1.3.0": "OSC Retro port\nNew OSC output parameters:\n- Sky/Block Light level\n- In-game day time\n- Held & armor items id, count, damage, and tags\n- Blocks below and inside the player id and tags\n- Selected hotbar slot"
 	},
 	"1.10.2": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.4.3": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",
 		"1.3.0": "OSC Retro port\nNew OSC output parameters:\n- Sky/Block Light level\n- In-game day time\n- Held & armor items id, count, damage, and tags\n- Blocks below and inside the player id and tags\n- Selected hotbar slot"
 	},
 	"1.8.9": {
+		"1.6.0": "Updated to CPM version 0.6.18",
+		"1.4.3": "Fixed OSC input not working with vectors",
 		"1.4.2": "Fixed first hotbar slot not outputting",
 		"1.4.1": "Fixed value layers not outputting\nFixed log spam with certain gestures",
 		"1.4.0": "New output parameters:\n- current biome details\n- current dimension\n- y level and world min/max\n- current weather\n- active potion effects\n- vehicle entity",

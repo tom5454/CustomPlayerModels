@@ -11,6 +11,7 @@ import com.tom.cpl.gui.IKeybind;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftClientAccess.ServerStatus;
+import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationState.VRState;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -215,7 +216,7 @@ public class AnimationEngine {
 	}
 
 	private void sendGestureData() {
-		System.out.println("Gesture Sync: " + Arrays.toString(gestureData));
+		if(MinecraftObjectHolder.DEBUGGING)Log.debug("Gesture Sync: " + Arrays.toString(gestureData));
 		MinecraftClientAccess.get().getNetHandler().sendPacketToServer(new GestureC2S(gestureData));
 	}
 
@@ -270,7 +271,7 @@ public class AnimationEngine {
 					if (c != null) {
 						String[] sp = c.split("/");
 						AbstractGestureButtonData dt = def.getAnimations().getNamedActionByKeybind().get(sp[0]);
-						dt.onKeybind(sp.length > 1 ? sp[1] : null, true, !mode.equals("hold"));
+						if (dt != null)dt.onKeybind(sp.length > 1 ? sp[1] : null, true, !mode.equals("hold"));
 					}
 				} else if (prevPr && !pr) {
 					String mode = ce.getString("qa_" + i + "_mode", "press");
@@ -278,7 +279,7 @@ public class AnimationEngine {
 					if (c != null && mode.equals("hold")) {
 						String[] sp = c.split("/");
 						AbstractGestureButtonData dt = def.getAnimations().getNamedActionByKeybind().get(sp[0]);
-						dt.onKeybind(sp.length > 1 ? sp[1] : null, false, false);
+						if (dt != null)dt.onKeybind(sp.length > 1 ? sp[1] : null, false, false);
 					}
 				}
 				quickAccessPressed[i - 1] = pr;
@@ -334,11 +335,15 @@ public class AnimationEngine {
 	}
 
 	public void setGestureValue(int id, int val) {
-		System.out.println("Set: " + id + " to " + val);
-		byte v = (byte) val;
-		if (gestureData[id] != v) {
-			gestureData[id] = v;
-			gesturesChanged = true;
+		if(MinecraftObjectHolder.DEBUGGING)Log.debug("Set: " + id + " to " + val);
+		if (gestureData.length > id && id >= 0) {
+			byte v = (byte) val;
+			if (gestureData[id] != v) {
+				gestureData[id] = v;
+				gesturesChanged = true;
+			}
+		} else {
+			Log.error("Parameter out of bounds", new IndexOutOfBoundsException(id + ", len=" + gestureData.length));
 		}
 	}
 

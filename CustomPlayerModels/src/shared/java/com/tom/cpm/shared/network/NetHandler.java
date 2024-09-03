@@ -384,7 +384,8 @@ public class NetHandler<RL, P, NET> {
 	}
 
 	public NET getClientNet() {
-		return getNet.apply(getClient.get());
+		P p = getClient.get();
+		return p != null ? getNet.apply(p) : null;
 	}
 
 	public ServerNetH getSNetH(P player) {

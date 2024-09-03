@@ -19,6 +19,7 @@ import com.tom.cpl.gui.elements.Button;
 import com.tom.cpl.gui.elements.ButtonIcon;
 import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.DropDownBox;
+import com.tom.cpl.gui.elements.GuiElement;
 import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupMenu;
@@ -87,38 +88,21 @@ public class AnimTestPanel extends Panel {
 					collect(Collectors.toSet());
 
 			Set<String> addedLayers = new HashSet<>();
+			List<PlayableAnim> customLayersList = new ArrayList<>();
 			animations.forEach(a -> {
 				if(a.key.type.isCustom()) {
 					if(a.key.type == AnimationType.CUSTOM_POSE) {
 						String name = a.key.name;
 						poses.add(new NamedElement<>(a.key.pose, k -> name));
 					} else if(a.key.type.isLayer()) {
-						String id = a.key.name;
-						addedLayers.add(id);
-						if(a.key.type == AnimationType.VALUE_LAYER) {
-							Slider progressSlider = new Slider(gui, id + ": 0");
-							progressSlider.setBounds(new Box(0, 0, 160, 20));
-							progressSlider.setValue(editor.animTestSliders.getOrDefault(id, a.anims.get(0).layerDefault));
-							progressSlider.setAction(() -> {
-								progressSlider.setText(id + ": " + ((int) (progressSlider.getValue() * 100)));
-								editor.animTestSliders.put(id, progressSlider.getValue());
-							});
-							customLayers.add(progressSlider);
-						} else {
-							customLayers.addCheckbox(id, b -> {
-								if(enabledLayers.contains(id)) {
-									enabledLayers.remove(id);
-								} else {
-									enabledLayers.add(id);
-								}
-								b.setSelected(enabledLayers.contains(id));
-							}).setSelected(enabledLayers.contains(id));
-						}
+						addedLayers.add(a.key.name);
+						customLayersList.add(a);
 					} else if(a.key.type == AnimationType.GESTURE) {
 						gestures.add(new NamedElement<>(a.key.name, Function.identity()));
 					}
 				}
 			});
+			customLayersList.stream().sorted(Comparator.comparing(p -> p.key.name)).forEach(this::addCustomLayer);
 			if(addedLayers.isEmpty()) {
 				customLayers.add(new Label(gui, gui.i18nFormat("label.cpm.no_elements")).setBounds(new Box(5, 5, 0, 0)));
 			}
@@ -163,10 +147,11 @@ public class AnimTestPanel extends Panel {
 		});
 		poseBoxes.add(mainPose);
 
-		progressSlider = new Slider(gui, gui.i18nFormat("label.cpm.animProgress", 0));
+		float progressVal = editor.animTestSliders.getOrDefault("__pose", 0f);
+		progressSlider = new Slider(gui, gui.i18nFormat("label.cpm.animProgress", (int) (progressVal * 100)));
 		progressSlider.setVisible(false);
 		progressSlider.setBounds(new Box(5, 0, 160, 20));
-		progressSlider.setValue(editor.animTestSliders.getOrDefault("__pose", 0f));
+		progressSlider.setValue(progressVal);
 		progressSlider.setAction(() -> {
 			progressSlider.setText(gui.i18nFormat("label.cpm.animProgress", (int) (progressSlider.getValue() * 100)));
 			editor.animTestSliders.put("__pose", progressSlider.getValue());
@@ -241,6 +226,39 @@ public class AnimTestPanel extends Panel {
 		addElement(layersPanel);
 
 		layout.reflow();
+	}
+
+	private void addCustomLayer(PlayableAnim a) {
+		String id = a.key.name;
+		if(a.key.type == AnimationType.VALUE_LAYER) {
+			float defVal = editor.animTestSliders.getOrDefault(id, a.anims.get(0).layerDefault);
+			Slider progressSlider = new Slider(gui, id + ": " + ((int) (defVal * 100)));
+			progressSlider.setBounds(new Box(0, 0, 160, 20));
+			progressSlider.setValue(defVal);
+			progressSlider.setAction(() -> {
+				progressSlider.setText(id + ": " + ((int) (progressSlider.getValue() * 100)));
+				editor.animTestSliders.put(id, progressSlider.getValue());
+			});
+			Panel sliderPanel = new Panel(gui) {
+				@Override
+				public GuiElement setBounds(Box bounds) {
+					progressSlider.setBounds(new Box(0, 0, bounds.w - 3, bounds.h));
+					return super.setBounds(bounds);
+				}
+			};
+			sliderPanel.addElement(progressSlider);
+			customLayers.add(sliderPanel.setBounds(new Box(0, 0, 160, 20)));
+		} else {
+			customLayers.addCheckbox(id, b -> {
+				if(enabledLayers.contains(id)) {
+					enabledLayers.remove(id);
+				} else {
+					enabledLayers.add(id);
+				}
+				b.setSelected(enabledLayers.contains(id));
+			}).setSelected(enabledLayers.contains(id));
+		}
+
 	}
 
 	private <T> DropDownPanel<T> createDropDown(String name, List<NamedElement<T>> val) {

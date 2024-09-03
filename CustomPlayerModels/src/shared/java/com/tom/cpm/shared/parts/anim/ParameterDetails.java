@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.tom.cpm.shared.io.IOHelper;
+import com.tom.cpm.shared.util.Log;
 
 public class ParameterDetails {
 	public static final ParameterDetails DEFAULT = new ParameterDetails(2, 0);
@@ -132,6 +133,11 @@ public class ParameterDetails {
 	}
 
 	public byte getDefaultParam(int parameter) {
-		return syncDefault[parameter];
+		Log.debug("Get Value: " + parameter + ", len=" + syncDefault.length);
+		if(parameter >= syncDefault.length) {
+			Log.error("Parameter out of bounds", new IndexOutOfBoundsException(parameter + ", len=" + syncDefault.length));
+			return 0;
+		}
+		return parameter >= 0 && parameter < syncDefault.length ? syncDefault[parameter] : 0;
 	}
 }

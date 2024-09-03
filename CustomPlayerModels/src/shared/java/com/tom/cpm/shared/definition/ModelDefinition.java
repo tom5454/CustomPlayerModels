@@ -198,6 +198,7 @@ public class ModelDefinition {
 		cubes.addAll(playerModelParts.values());
 		cubes.forEach(c -> cubeMap.put(c.getId(), c));
 		resolved.forEach(r -> r.apply(this));
+		animations.finishLoading();
 		resetAnimationPos();
 		resolveState = ModelLoadingState.LOADED;
 		Log.debug(this);

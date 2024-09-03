@@ -5,34 +5,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.shared.animation.Animation;
-import com.tom.cpm.shared.animation.AnimationEngine.AnimationMode;
 import com.tom.cpm.shared.animation.AnimationRegistry;
-import com.tom.cpm.shared.animation.AnimationTrigger;
-import com.tom.cpm.shared.animation.AnimationTrigger.GestureTrigger;
-import com.tom.cpm.shared.animation.AnimationTrigger.LayerTrigger;
-import com.tom.cpm.shared.animation.AnimationTrigger.ValueTrigger;
 import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IAnimation;
 import com.tom.cpm.shared.animation.IModelComponent;
 import com.tom.cpm.shared.animation.IPose;
 import com.tom.cpm.shared.animation.InterpolatorChannel;
-import com.tom.cpm.shared.animation.StagedAnimation;
 import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.shared.animation.interpolator.InterpolatorType;
 import com.tom.cpm.shared.definition.ModelDefinition;
@@ -44,11 +34,9 @@ import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.project.loaders.AnimationsLoaderV1;
 import com.tom.cpm.shared.editor.util.PlayerSkinLayer;
 import com.tom.cpm.shared.io.IOHelper;
-import com.tom.cpm.shared.parts.anim.ParameterDetails;
-import com.tom.cpm.shared.parts.anim.menu.BoolParameterToggleButtonData;
-import com.tom.cpm.shared.parts.anim.menu.CustomPoseGestureButtonData;
-import com.tom.cpm.shared.parts.anim.menu.LegacyDropdownButtonData;
-import com.tom.cpm.shared.parts.anim.menu.ValueParameterButtonData;
+import com.tom.cpm.shared.parts.anim.LegacyAnimationParser;
+import com.tom.cpm.shared.parts.anim.LegacyAnimationParser.Gesture;
+import com.tom.cpm.shared.parts.anim.LegacyAnimationParser.Pose;
 
 @Deprecated
 public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
@@ -636,7 +624,6 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 
 	@Override
 	public void apply(ModelDefinition def) {
-		List<Gesture> stageGestures = new ArrayList<>();
 		parsedData.values().forEach(rd -> {
 			IModelComponent[] comp = new IModelComponent[rd.components.length];
 			for (int i = 0; i < comp.length; i++) {
@@ -696,18 +683,14 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 			if(rd.dynamicProgress())rd.duration = VanillaPose.DYNAMIC_DURATION_DIV;
 			rd.anim = new Animation(comp, data, rd.show, rd.duration, rd.priority, rd.add, rd.it);
 		});
-		Map<String, List<IAnimation>> gestures = new HashMap<>();
-		Map<IPose, List<IAnimation>> animations = new HashMap<>();
-		Map<String, Gesture> gesturesMap = new HashMap<>();
-		Map<String, Pose> customPoses = new HashMap<>();
-		Set<IPose> mustFinishPoses = new HashSet<>();
-		State state = new State(def);
+
+		AnimationRegistry reg = def.getAnimations();
+		LegacyAnimationParser state = reg.getLegacyParser(def);
 		parsedData.values().forEach(rd -> {
 			if(rd.pose instanceof VanillaPose) {
-				animations.computeIfAbsent(rd.pose, __ -> new ArrayList<>()).add(rd.anim);
-				if (rd.finish)mustFinishPoses.add(rd.pose);
+				state.addPose(rd.pose, rd.anim, rd.finish);
 			} else if(rd.name != null) {
-				gestures.computeIfAbsent(rd.name, k -> {
+				state.gestures.computeIfAbsent(rd.name, k -> {
 					List<IAnimation> l = new ArrayList<>();
 					Gesture g = new Gesture(AnimationsLoaderV1.getType(rd.name), l, AnimationsLoaderV1.cleanName(rd.name), rd.loop, rd.order, rd.finish);
 					g.defVal = rd.defaultValue;
@@ -718,273 +701,22 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 					g.maxValue = rd.maxValue;
 					g.interpolateVal = rd.interpolateVal;
 					g.hidden = rd.buttonHidden;
-					if (g.type.isStaged()) {
-						stageGestures.add(g);
-					} else {
-						gesturesMap.put(g.name, g);
-						if(g.type.isLayer())
-							state.layerToId.put(g, state.layerToId.size() + 2);
-						if(rd.gid != -1)
-							g.gid = rd.gid;
-					}
+					state.addGesture(g, rd.gid);
 					return l;
 				}).add(rd.anim);
 			} else {
-				animations.computeIfAbsent(rd.pose, __ -> new ArrayList<>()).add(rd.anim);
+				state.addPose(rd.pose, rd.anim, rd.finish);
 				CustomPose cp = (CustomPose) rd.pose;
-				if (rd.finish)mustFinishPoses.add(rd.pose);
 				Pose p = new Pose(cp);
 				p.hidden = rd.buttonHidden;
-				customPoses.put(cp.getName(), p);
 				cp.command = rd.command;
 				cp.layerCtrl = rd.layerCtrl;
-				if(rd.gid != -1)
-					state.poseGid.put(cp, rd.gid);
+				state.addCustomPose(p, rd.gid);
 			}
 		});
-		AnimationRegistry reg = def.getAnimations();
 		reg.setBlankGesture(blankId);
 		reg.setPoseResetId(resetId);
 		reg.setProfileId(modelProfilesId);
-		finishLoading(reg, stageGestures, animations, gesturesMap, mustFinishPoses);
-		Map<String, Group> groups = new HashMap<>();
-
-		Stream.concat(gesturesMap.values().stream(), customPoses.values().stream()).
-		sorted(Comparator.comparingInt(IPoseGesture::getOrder)).
-		map(g -> {
-			if (g instanceof Gesture && ((Gesture)g).group != null) {
-				String k = ((Gesture)g).group;
-				Group gr = groups.get(k);
-				if (gr == null) {
-					gr = new Group(k);
-					groups.put(k, gr);
-					gr.add((Gesture) g);
-					return gr;
-				}
-				gr.add((Gesture) g);
-				return null;
-			} else {
-				return g;
-			}
-		}).filter(e -> e != null).collect(Collectors.toList()).
-		forEach(g -> g.register(state));
-		byte[] sync = new byte[state.layerToId.size() + 2];
-		state.layerToId.forEach((g, i) -> sync[i] = g.defVal);
-		reg.setParams(new ParameterDetails(sync, new byte[0]));
-		animations.forEach((p, an) -> {
-			AnimationTrigger t = new AnimationTrigger(Collections.singleton(p), p instanceof VanillaPose ? (VanillaPose) p : null, an, true, mustFinishPoses.contains(p));
-			reg.register(t);
-		});
-	}
-
-	private static class State {
-		private final ModelDefinition def;
-		private final AnimationRegistry reg;
-		private Map<Gesture, Integer> layerToId = new HashMap<>();
-		private Map<CustomPose, Integer> poseGid = new HashMap<>();
-
-		public State(ModelDefinition def) {
-			this.def = def;
-			this.reg = def.getAnimations();
-		}
-	}
-
-	private static class Group implements IPoseGesture {
-		private List<Gesture> gs = new ArrayList<>();
-		private String id;
-		private int order = Integer.MIN_VALUE;
-
-		public Group(String id) {
-			this.id = id;
-		}
-
-		public void add(Gesture g) {
-			gs.add(g);
-		}
-
-		@Override
-		public int getOrder() {
-			if (order == Integer.MIN_VALUE)
-				order = gs.stream().mapToInt(Gesture::getOrder).max().orElse(0);
-
-			return order;
-		}
-
-		@Override
-		public void register(State reg) {
-			LegacyDropdownButtonData dt = new LegacyDropdownButtonData();
-			dt.setName(id);
-			dt.command = gs.stream().anyMatch(g -> g.command);
-			dt.isProperty = gs.stream().anyMatch(g -> g.isProperty);
-			dt.setDef(reg.def);
-			for (Gesture g : gs) {
-				int l = reg.layerToId.get(g);
-				reg.reg.register(new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), g.animation, l, 1, true, g.mustFinish));
-				dt.register(g.name, l);
-			}
-			reg.reg.register(dt);
-		}
-	}
-
-	private static interface IPoseGesture {
-		int getOrder();
-		void register(State state);
-	}
-
-	private static class Pose implements IPoseGesture {
-		private CustomPose pose;
-		private boolean hidden;
-
-		public Pose(CustomPose pose) {
-			this.pose = pose;
-		}
-
-		@Override
-		public int getOrder() {
-			return pose.order;
-		}
-
-		@Override
-		public void register(State reg) {
-			CustomPoseGestureButtonData data = new CustomPoseGestureButtonData(true);
-			data.setName(pose.getId());
-			data.layerCtrl = pose.layerCtrl;
-			data.command = pose.command;
-			data.hidden = hidden;
-			int id = reg.poseGid.get(pose);
-			if(pose.layerCtrl)data.gid = id;
-			data.id = id;
-			data.setDef(reg.def);
-			reg.reg.register(data);
-		}
-	}
-
-	private static class Gesture implements IPoseGesture {
-		public final AnimationType type;
-		public List<IAnimation> animation;
-		public boolean isLoop;
-		public String name;
-		public byte defVal;
-		private int order;
-		public boolean isProperty, command, layerCtrl, mustFinish;
-		public String group;
-		public int gid;
-		private byte maxValue;
-		private boolean interpolateVal;
-		private boolean hidden;
-
-		public Gesture(AnimationType type, List<IAnimation> animation, String name, boolean isLoop, int order, boolean mustFinish) {
-			this.type = type;
-			this.animation = animation;
-			this.name = name;
-			this.isLoop = isLoop;
-			this.order = order;
-			this.mustFinish = mustFinish;
-		}
-
-		@Override
-		public int getOrder() {
-			return order;
-		}
-
-		@Override
-		public void register(State reg) {
-			switch (type) {
-			case GESTURE:
-			{
-				CustomPoseGestureButtonData data = new CustomPoseGestureButtonData(false);
-				data.setName(name);
-				data.layerCtrl = layerCtrl;
-				data.command = command;
-				data.id = gid;
-				data.hidden = hidden;
-				if (layerCtrl)data.gid = gid;
-				if (!isLoop) {
-					int len = animation.stream().mapToInt(a -> a.getDuration(AnimationMode.PLAYER)).max().orElse(-1);
-					data.gestureTimeout = len == -1 ? -1 : ((int) Math.ceil(len / 50f) + 5);
-				}
-				data.setDef(reg.def);
-				reg.reg.register(data);
-				reg.reg.register(new GestureTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, gid, gid, isLoop, mustFinish));
-			}
-			break;
-
-			case LAYER:
-			{
-				BoolParameterToggleButtonData dt = new BoolParameterToggleButtonData();
-				dt.setName(name);
-				dt.command = command;
-				dt.isProperty = isProperty;
-				dt.parameter = reg.layerToId.get(this);
-				dt.mask = 1;
-				dt.hidden = hidden;
-				dt.setDef(reg.def);
-				reg.reg.register(dt);
-				reg.reg.register(new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, 1, true, mustFinish));
-			}
-			break;
-
-			case VALUE_LAYER:
-			{
-				ValueParameterButtonData dt = new ValueParameterButtonData();
-				dt.setName(name);
-				dt.command = command;
-				dt.isProperty = isProperty;
-				dt.parameter = reg.layerToId.get(this);
-				dt.maxValue = maxValue == 0 ? 255 : maxValue;
-				dt.hidden = hidden;
-				dt.setDef(reg.def);
-				reg.reg.register(dt);
-				reg.reg.register(new ValueTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, maxValue == 0 ? true : interpolateVal));
-			}
-			break;
-
-			default:
-				break;
-			}
-		}
-	}
-
-	private void finishLoading(AnimationRegistry reg, List<Gesture> stageGestures, Map<IPose, List<IAnimation>> animations, Map<String, Gesture> gesturesMap, Set<IPose> finishPoses) {
-		Map<String, StagedAnimation> anims = new HashMap<>();
-		for (Gesture g : stageGestures) {
-			String[] nm = g.name.split(":", 2);
-			if(nm.length == 2) {
-				IPose pose = null;
-				StagedAnimation san = anims.computeIfAbsent(g.name, k -> new StagedAnimation());
-				if(g.type == AnimationType.SETUP)g.animation.forEach(san::addPre);
-				else if(g.type == AnimationType.FINISH)g.animation.forEach(san::addPost);
-				switch (nm[0]) {
-				case "p":
-					for(VanillaPose p : VanillaPose.VALUES) {
-						if(nm[1].equals(p.name().toLowerCase(Locale.ROOT))) {
-							pose = p;
-							break;
-						}
-					}
-					//Fall through
-				case "c":
-					if(pose == null)pose = reg.getCustomPoses().get(nm[1]);
-					animations.computeIfPresent(pose, (p, an) -> {
-						boolean mf = finishPoses.contains(p);
-						an.forEach(a -> san.addPlay(a, mf));
-						return san.getAll();
-					});
-					break;
-
-				case "g":
-					gesturesMap.computeIfPresent(nm[1], (k, gs) -> {
-						gs.animation.forEach(a -> san.addPlay(a, gs.mustFinish));
-						gs.animation = san.getAll();
-						return gs;
-					});
-					break;
-
-				default:
-					break;
-				}
-			}
-		}
 	}
 
 	@Override
