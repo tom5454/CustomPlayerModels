@@ -11,7 +11,7 @@
   "client": [
     "PlayerRendererMixin",
 	"CapeLayerMixin",
-	"ElytraLayerMixin",
+	"WingsLayerMixin",
 	"HumanoidArmorLayerMixin",
 	"SkullBlockRendererMixin",
 	"CustomHeadLayerMixin",
@@ -27,7 +27,8 @@
 	"NativeImageAccessor",
 	"LivingRendererMixinFabric",
 	"PlayerRenderStateMixin",
-	"HumanoidModelAccessor"
+	"HumanoidModelAccessor",
+	"EquipmentLayerRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

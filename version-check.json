@@ -67,7 +67,8 @@
     "1.21.1-latest": "0.6.19a",
     "1.21-quilt-latest": "0.6.19a",
     "1.21.1-fabric-latest": "0.6.19a",
-    "1.21.1-quilt-latest": "0.6.19a"
+    "1.21.1-quilt-latest": "0.6.19a",
+    "1.21.2-fabric-latest": "0.6.19b"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -1630,5 +1631,9 @@
   },
   "1.21.1-quilt": {
     "0.6.19a": "Increased Quick Access keybinds to 16\nAdded alphabetical sorting to animation test custom layers dropdown\nUpdated Spanish translations (#673)\nFixed arms breaking in 1.21.2 snapshot version\nFixed Gesture Gui keybinds not working\nFixed Export popup showing an error (Closes #669)\nFixed log spam in the models menu and gesture gui\nFixed quick actions crashing (Closes #670)\nFixed model loading breaking when using over 256 animations\nFixed game crash with corrupted animations (Closes #668)\nFixed setup/finish animations not loading for custom poses\nFixed custom layers dropdown not showing the correct value in the slider name"
+  },
+  "1.21.2-fabric": {
+    "0.6.19a": "Increased Quick Access keybinds to 16\nAdded alphabetical sorting to animation test custom layers dropdown\nUpdated Spanish translations (#673)\nFixed arms breaking in 1.21.2 snapshot version\nFixed Gesture Gui keybinds not working\nFixed Export popup showing an error (Closes #669)\nFixed log spam in the models menu and gesture gui\nFixed quick actions crashing (Closes #670)\nFixed model loading breaking when using over 256 animations\nFixed game crash with corrupted animations (Closes #668)\nFixed setup/finish animations not loading for custom poses\nFixed custom layers dropdown not showing the correct value in the slider name",
+    "0.6.19b": "24w36a port"
   }
 }
