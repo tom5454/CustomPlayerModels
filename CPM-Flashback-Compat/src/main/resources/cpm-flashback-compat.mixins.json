@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "com.tom.cpmflashback.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"RecorderMixin",
+		"AnimationEngineMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

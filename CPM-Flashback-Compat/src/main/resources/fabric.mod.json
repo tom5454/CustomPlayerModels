@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "cpm-flashback-compat",
+	"version": "${version}",
+	"name": "CPM Flashback Compat",
+	"description": "Adds compatibility between CPM and Flashback",
+	"authors": [
+		"tom5454"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/project/cpm-flashback",
+		"sources": "https://github.com/tom5454/CustomPlayerModels",
+		"issues": "https://github.com/tom5454/CustomPlayerModels/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/cpm-flashback-compat/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.tom.cpmflashback.CPMFlashbackCompat"
+		]
+	},
+	"mixins": [
+		"cpm-flashback-compat.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.0",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cpm": "*",
+		"flashback": ">=0.5.0"
+	}
+}
