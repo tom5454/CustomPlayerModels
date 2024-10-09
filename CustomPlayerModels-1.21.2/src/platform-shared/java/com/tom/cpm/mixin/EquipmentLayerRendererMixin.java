@@ -1,7 +1,5 @@
 package com.tom.cpm.mixin;
 
-import java.util.function.Function;
-
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -35,16 +32,15 @@ public class EquipmentLayerRendererMixin {
 	private static final String CPMRENDERLAYERSMETHOD = "renderLayers("
 			+ "Lnet/minecraft/world/item/equipment/EquipmentModel$LayerType;"
 			+ "Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/model/Model;"
-			+ "Lnet/minecraft/world/item/ItemStack;Ljava/util/function/Function;"
+			+ "Lnet/minecraft/world/item/ItemStack;"
 			+ "Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;"
 			+ "ILnet/minecraft/resources/ResourceLocation;)V";
 
-	@Inject(at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;", ordinal = 1, shift = Shift.BEFORE), method = CPMRENDERLAYERSMETHOD)
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;armorCutoutNoCull(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;", shift = Shift.BEFORE), method = CPMRENDERLAYERSMETHOD)
 	public void grabTexture(EquipmentModel.LayerType layerType,
 			ResourceLocation resourceLocation,
 			Model model,
 			ItemStack itemStack,
-			Function<ResourceLocation, RenderType> function,
 			PoseStack poseStack,
 			MultiBufferSource multiBufferSource,
 			int i,
@@ -71,7 +67,6 @@ public class EquipmentLayerRendererMixin {
 			ResourceLocation resourceLocation,
 			Model model,
 			ItemStack itemStack,
-			Function<ResourceLocation, RenderType> function,
 			PoseStack poseStack,
 			MultiBufferSource multiBufferSource,
 			int i,
