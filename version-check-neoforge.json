@@ -4,7 +4,9 @@
     "1.20.4-latest": "0.6.19a",
     "1.20.6-latest": "0.6.19a",
     "1.21-latest": "0.6.19a",
-    "1.21.1-latest": "0.6.19a"
+    "1.21.1-latest": "0.6.19a",
+    "1.21.2-latest": "0.6.19a",
+    "1.21.3-latest": "0.6.19a"
   },
   "1.20.2": {
     "0.0.0": "1.20.1-forge",
@@ -58,6 +60,12 @@
   "1.21.1": {
     "0.6.18a": "Added animation must finish option to animations (#486)\nAdded value layer interpolated setting, improved value layer interpolations\nAdded max value setting to value layers (sliders snap in gesture gui now)\nAdded repeat to spinners when holding down mouse (#651)\nAdded a hidden from gesture gui (useful for animations with /cpmclient)\nDrop Down menus and toggle layers use the available parameter space more efficiently (experimental export only) (Closes #608)\nIncreased max data block size in exported models to 16 MB\nExtruded cubes now count to cube count for safety settings (3/4 of a cube)\nThe Show Names toggle is now saved\nEditor QoL:\n- Shift+Add Frame adds an empty frame\n- Added clear frame button to animation dropdown\n- Animation Data paste won\u0027t clear the clipboard\n- New Animation Frame keybind\n- Added Make Armor and Make 2nd layer to Edit/Tools\n- Added an indicator to light level animation in the editor\n- Added an Invert Camera Y option to settings\n\nUpdated to BTA 7.2-pre2\nPorted to Quilt 1.21, Fabric 24w35a\nUpdated Spanish translations (#625)\nAdded Brazilian Portuguese translations (#624)\nUpdated Simplified Chinese translations (#623, #649)\nFixed crash when opening the config screen from the modlist on NeoForge 1.21\nFixed player head items not showing on 1.20.6+\nFixed wiki sidebar not loading the localized variant\nFixed open wiki tooltip not opening the localized variant\nFixed Export Update allowing incompatible update exports\nFixed finish animations breaking with value poses (Closes #647)\nFixed gui animation jittering on NeoForge 1.21",
     "0.6.19a": "Increased Quick Access keybinds to 16\nAdded alphabetical sorting to animation test custom layers dropdown\nUpdated Spanish translations (#673)\nFixed arms breaking in 1.21.2 snapshot version\nFixed Gesture Gui keybinds not working\nFixed Export popup showing an error (Closes #669)\nFixed log spam in the models menu and gesture gui\nFixed quick actions crashing (Closes #670)\nFixed model loading breaking when using over 256 animations\nFixed game crash with corrupted animations (Closes #668)\nFixed setup/finish animations not loading for custom poses\nFixed custom layers dropdown not showing the correct value in the slider name"
+  },
+  "1.21.2": {
+    "0.6.19a": "1.21.3 port"
+  },
+  "1.21.3": {
+    "0.6.19a": "1.21.3 port"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }

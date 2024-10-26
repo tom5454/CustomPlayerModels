@@ -19,6 +19,7 @@ This is intended as a quick reference and showcase. For more complete info, see 
 [Horizontal Rule](#hr)  
 [Line Breaks](#lines)  
 [YouTube Videos](#videos)  
+[Highlighting/Alerts](#highlighting)  
 
 <a name="headers"/>
 
@@ -426,6 +427,44 @@ They can't be added directly but you can add an image with a link to the video l
 
 See [Images](#images) on how to load your custom image.
 
+<a name="highlighting"/>
+
+## Highlighting / Alerts
+
+Section pulled from [GitHub docs](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts)
+
+```
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+```
+
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+
 ---
 
-License: [CC-BY](https://creativecommons.org/licenses/by/3.0/)
+Source License: [CC-BY](https://creativecommons.org/licenses/by/3.0/)
