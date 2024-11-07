@@ -12,6 +12,7 @@ archivesBaseName = 'CustomPlayerModelsLexForge-1.21.3'
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+jarJar.enable()
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
@@ -163,7 +164,7 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.21.3-53.0.0'
+    minecraft 'net.minecraftforge:forge:1.21.3-53.0.9'
 
     // Mixin annotation processor - generates the refmap
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
@@ -221,6 +222,12 @@ jar {
                 "MixinConfigs": "cpm.mixins.json,cpm.mixins.compat.json"
         ])
     }
+    archiveClassifier = "lite"
+    finalizedBy "jarJar"
+}
+
+tasks.named('jarJar') {
+    archiveClassifier = ""
 }
 
 java {

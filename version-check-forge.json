@@ -28,8 +28,8 @@
     "1.20.5-latest": "0.6.16c",
     "1.20.6-latest": "0.6.19a",
     "1.21-latest": "0.6.19a",
-    "1.21.2-latest": "0.6.19a",
-    "1.21.3-latest": "0.6.19a"
+    "1.21.2-latest": "0.6.19b",
+    "1.21.3-latest": "0.6.19b"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -835,10 +835,12 @@
     "0.6.19a": "Increased Quick Access keybinds to 16\nAdded alphabetical sorting to animation test custom layers dropdown\nUpdated Spanish translations (#673)\nFixed arms breaking in 1.21.2 snapshot version\nFixed Gesture Gui keybinds not working\nFixed Export popup showing an error (Closes #669)\nFixed log spam in the models menu and gesture gui\nFixed quick actions crashing (Closes #670)\nFixed model loading breaking when using over 256 animations\nFixed game crash with corrupted animations (Closes #668)\nFixed setup/finish animations not loading for custom poses\nFixed custom layers dropdown not showing the correct value in the slider name"
   },
   "1.21.2": {
-    "0.6.19a": "1.21.3 port"
+    "0.6.19a": "1.21.3 port",
+    "0.6.19b": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3"
   },
   "1.21.3": {
-    "0.6.19a": "1.21.3 port"
+    "0.6.19a": "1.21.3 port",
+    "0.6.19b": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }

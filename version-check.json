@@ -68,10 +68,11 @@
     "1.21-quilt-latest": "0.6.19a",
     "1.21.1-fabric-latest": "0.6.19a",
     "1.21.1-quilt-latest": "0.6.19a",
-    "1.21.2-fabric-latest": "0.6.19e",
-    "1.21.2-latest": "0.6.19a",
-    "1.21.3-latest": "0.6.19a",
-    "1.21.3-fabric-latest": "0.6.19e"
+    "1.21.2-fabric-latest": "0.6.19f",
+    "1.21.2-latest": "0.6.19b",
+    "1.21.3-latest": "0.6.19b",
+    "1.21.3-fabric-latest": "0.6.19f",
+    "1.21.4-fabric-latest": "0.6.19a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -1640,15 +1641,22 @@
     "0.6.19b": "24w36a port",
     "0.6.19c": "24w40a port",
     "0.6.19d": "1.21.2-pre1 port",
-    "0.6.19e": "1.21.3 port"
+    "0.6.19e": "1.21.3 port",
+    "0.6.19f": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3"
   },
   "1.21.2": {
-    "0.6.19a": "1.21.3 port"
+    "0.6.19a": "1.21.3 port",
+    "0.6.19b": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3"
   },
   "1.21.3": {
-    "0.6.19a": "1.21.3 port"
+    "0.6.19a": "1.21.3 port",
+    "0.6.19b": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3"
   },
   "1.21.3-fabric": {
-    "0.6.19e": "1.21.3 port"
+    "0.6.19e": "1.21.3 port",
+    "0.6.19f": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3"
+  },
+  "1.21.4-fabric": {
+    "0.6.19a": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3"
   }
 }
