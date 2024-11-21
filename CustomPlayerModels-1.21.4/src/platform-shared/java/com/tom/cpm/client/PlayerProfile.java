@@ -4,11 +4,10 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import com.tom.cpl.block.entity.ActiveEffect;
@@ -197,19 +197,32 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 
 	@Override
 	protected PlayerTextureLoader initTextures() {
-		return new PlayerTextureLoader() {
+		var cache = Minecraft.getInstance().getSkinManager().skinTextures.root.toFile();
+		return new PlayerTextureLoader(cache) {
 
 			@Override
 			protected CompletableFuture<Void> load0() {
-				Minecraft mc = Minecraft.getInstance();
-				return mc.getSkinManager().getOrLoad(profile).thenAcceptAsync(skin -> {
-					AbstractTexture s = mc.getTextureManager().getTexture(skin.texture(), null);
-					AbstractTexture c = mc.getTextureManager().getTexture(skin.capeTexture(), null);
-					AbstractTexture e = mc.getTextureManager().getTexture(skin.elytraTexture(), null);
-					if (s instanceof HttpTexture h)defineTexture(TextureType.SKIN, h.urlString, h.file);
-					if (c instanceof HttpTexture h)defineTexture(TextureType.CAPE, h.urlString, h.file);
-					if (e instanceof HttpTexture h)defineTexture(TextureType.ELYTRA, h.urlString, h.file);
-					skinType = skin.model().id();
+				return CompletableFuture.supplyAsync(() -> {
+					Minecraft mc = Minecraft.getInstance();
+					var mss = mc.getMinecraftSessionService();
+					var pt = mss.getPackedTextures(profile);
+					if (pt == null)return MinecraftProfileTextures.EMPTY;
+					var mpts = mss.unpackTextures(pt);
+					return mpts;
+				}, Util.backgroundExecutor().forName("CPM:unpackSkinTextures")).thenAcceptAsync(mpts -> {
+					var skin = mpts.skin();
+					var cape = mpts.cape();
+					var elytra = mpts.elytra();
+					if (skin != null) {
+						skinType = skin.getMetadata("model");
+						defineTexture(TextureType.SKIN, skin.getUrl(), skin.getHash());
+					}
+					if (cape != null) {
+						defineTexture(TextureType.CAPE, cape.getUrl(), cape.getHash());
+					}
+					if (elytra != null) {
+						defineTexture(TextureType.ELYTRA, elytra.getUrl(), elytra.getHash());
+					}
 				}, t -> RenderSystem.recordRenderCall(t::run));
 			}
 		};

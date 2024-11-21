@@ -75,6 +75,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 	}
 
 	public static class DynTexture implements ITexture {
+		private static int ID = 0;
 		private final DynamicTexture dynTex;
 		private final ResourceLocation loc;
 		private final Minecraft mc;
@@ -83,7 +84,8 @@ public class MinecraftObject implements MinecraftClientAccess {
 		public DynTexture(Minecraft mc) {
 			dynTex = new DynamicTexture(1, 1, true);
 			this.mc = mc;
-			loc = mc.getTextureManager().register("cpm", dynTex);
+			loc = ResourceLocation.fromNamespaceAndPath("cpm", "dyn_" + (ID++));
+			mc.getTextureManager().register(loc, dynTex);
 		}
 
 		@Override
