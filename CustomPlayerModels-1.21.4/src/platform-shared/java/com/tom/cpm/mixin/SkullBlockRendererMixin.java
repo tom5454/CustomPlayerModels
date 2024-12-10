@@ -55,9 +55,9 @@ public class SkullBlockRendererMixin {
 			target = "Lnet/minecraft/client/renderer/RenderType;entityTranslucent("
 					+ "Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
 			),
-			method = "getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;)"
+			method = "getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;Lnet/minecraft/resources/ResourceLocation;)"
 					+ "Lnet/minecraft/client/renderer/RenderType;")
-	private static RenderType onGetRenderType(ResourceLocation resLoc, SkullBlock.Type skullType, ResolvableProfile gameProfileIn) {
+	private static RenderType onGetRenderType(ResourceLocation resLoc, SkullBlock.Type skullType, ResolvableProfile gameProfileIn, ResourceLocation resourceLocation) {
 		if(RefHolder.CPM_MODELS == null)return RenderType.entityTranslucent(resLoc);
 		SkullModelBase model = RefHolder.CPM_MODELS.apply(skullType);
 		RefHolder.CPM_MODELS = null;
@@ -71,9 +71,9 @@ public class SkullBlockRendererMixin {
 			target = "Lnet/minecraft/client/renderer/RenderType;entityCutoutNoCullZOffset("
 					+ "Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
 			),
-			method = "getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;)"
+			method = "getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;Lnet/minecraft/resources/ResourceLocation;)"
 					+ "Lnet/minecraft/client/renderer/RenderType;")
-	private static RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, SkullBlock.Type skullType, ResolvableProfile gameProfileIn) {
+	private static RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, SkullBlock.Type skullType, ResolvableProfile gameProfileIn, ResourceLocation resourceLocation) {
 		if(RefHolder.CPM_MODELS == null)return RenderType.entityCutoutNoCullZOffset(resLoc);
 		SkullModelBase model = RefHolder.CPM_MODELS.apply(skullType);
 		RefHolder.CPM_MODELS = null;

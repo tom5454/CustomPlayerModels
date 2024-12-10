@@ -122,9 +122,7 @@ public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractC
 	public void onExtractRenderState(final AbstractClientPlayer abstractClientPlayer, final PlayerRenderState playerRenderState, final float f, CallbackInfo cbi) {
 		PlayerRenderStateAccess sa = (PlayerRenderStateAccess) playerRenderState;
 		FormatText st = CustomPlayerModelsClient.INSTANCE.manager.getStatus(abstractClientPlayer.getGameProfile(), ModelDefinitionLoader.PLAYER_UNIQUE);
-		if(st != null) {
-			sa.cpm$setModelStatus(st.remap());
-		}
+		sa.cpm$setModelStatus(st != null ? st.remap() : null);
 		var pl = CustomPlayerModelsClient.INSTANCE.manager.loadPlayerState(abstractClientPlayer.getGameProfile(), abstractClientPlayer, ModelDefinitionLoader.PLAYER_UNIQUE, AnimationMode.PLAYER);
 		sa.cpm$setPlayer(pl);
 		if (pl != null) {

@@ -2,7 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0.29,6.2)'
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
@@ -164,7 +164,7 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.21.3-53.0.9'
+    minecraft 'net.minecraftforge:forge:1.21.3-53.0.10'
 
     // Mixin annotation processor - generates the refmap
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
