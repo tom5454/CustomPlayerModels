@@ -2,6 +2,8 @@ package com.tom.cpmoscc;
 
 import java.util.function.Supplier;
 
+import net.minecraft.SharedConstants;
+import net.minecraft.server.packs.PackType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.InterModComms;
 import net.neoforged.fml.common.Mod;
@@ -21,6 +23,13 @@ public class CPMOSCModNeoForge {
 	}
 
 	private void doClientStuff(final FMLClientSetupEvent event) {
-		CPMOSCClientNeoForge.INSTANCE.init();
+		try {
+			String clazz = SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES) >= 34 ? "CPMOSCClientNeoForgeNew" : "CPMOSCClientNeoForge";
+			var clz = Class.forName("com.tom.cpmoscc." + clazz);
+			var inst = clz.getDeclaredField("INSTANCE").get(null);
+			clz.getDeclaredMethod("init").invoke(inst);
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to load CPMOSC compat", e);
+		}
 	}
 }

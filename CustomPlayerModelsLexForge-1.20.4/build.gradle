@@ -148,6 +148,13 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven {
+    	url = "http://localhost:8000"
+		allowInsecureProtocol true
+		content {
+            includeGroup "local"
+        }
+	}
 }
 
 mixin {
@@ -186,7 +193,8 @@ dependencies {
 	compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris.jar")
 	compileOnly files("../CustomPlayerModels-1.20.4/stubs/fpm.jar")
     
-    compileOnly fg.deobf('curse.maven:vivecraft-667903:4941635')
+    //compileOnly fg.deobf('curse.maven:vivecraft-667903:4941635')
+    compileOnly fg.deobf('local:vivecraft-1.20.4:1.1.14-fbttest14-forge')
 }
 
 sourceSets {

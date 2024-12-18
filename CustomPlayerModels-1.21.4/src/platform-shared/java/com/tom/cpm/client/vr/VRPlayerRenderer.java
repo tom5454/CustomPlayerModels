@@ -4,7 +4,6 @@ import org.vivecraft.client.render.VRPlayerModel;
 import org.vivecraft.client.render.VRPlayerModel_WithArms;
 
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 import com.tom.cpm.client.ModelTexture;
@@ -20,7 +19,7 @@ public class VRPlayerRenderer {
 	}
 
 	public static RedirectHolder<?, MultiBufferSource, ModelTexture, ModelPart> createVRPlayer(PlayerRenderManager mngr, Object model) {
-		return new RedirectHolderVRPlayer(mngr, (VRPlayerModel<AbstractClientPlayer>) model);
+		return new RedirectHolderVRPlayer(mngr, (VRPlayerModel) model);
 	}
 
 	public static VRState getVRState(AnimationMode mode, Object model) {

@@ -1,12 +1,13 @@
 {
   "promos": {
     "1.20.2-latest": "0.6.19a",
-    "1.20.4-latest": "0.6.19a",
+    "1.20.4-latest": "0.6.19b",
     "1.20.6-latest": "0.6.19a",
     "1.21-latest": "0.6.19a",
     "1.21.1-latest": "0.6.19a",
-    "1.21.2-latest": "0.6.19c",
-    "1.21.3-latest": "0.6.19c"
+    "1.21.2-latest": "0.6.19d",
+    "1.21.3-latest": "0.6.19d",
+    "1.21.4-latest": "0.6.19a"
   },
   "1.20.2": {
     "0.0.0": "1.20.1-forge",
@@ -38,7 +39,8 @@
     "0.6.17a": "Increased the MCScale limit to 48 (Closes #610)\nAdded on option to turn off the update checker (Closes #611)\nNew keybinds: (#620)\n- animation previous and next frame\n- reload texture\nUpdated Spanish translations (#606)\nScaling changes:\n- All scaling settings must be enabled by the server admin\n- This changes: Entity Scaling, Eye Height and Hitbox Scaling\n- These options were enabled by default in previous versions\n1.21 PreRelease 2 port\nPehkui Support on 1.20.6\n\nFixed enchanted armor on 1.2.5-1.12 (Closes #617)\nFixed editor unable to open projects on 1.2.5\nFixed wiki reader images not loading\nFixed wiki and changelog reader not parsing markdown correctly (Closes #590)\nFixed additive fixer not applying to roots\nFixed tag editor not working (Closes #609)\nFixed GL exception on 1.8 with above head error messages\nFixed experimental exporter not loading layer animations correctly\nFixed scaling settings resetting when dying\nFixed enabling single texture and per-face UV breaking the cube",
     "0.6.17b": "Fixed models not loading from skins on some servers on 1.20.2+ (Closes #630)\nFixed armor not working on NeoForge 1.21\nFixed GL exception on Optifine 1.20.1+ (Closes #631)\nFixed editor crash screen not displaying correctly on 1.20.4+\nFixed Minecraft Forge 1.21 not working",
     "0.6.18a": "Added animation must finish option to animations (#486)\nAdded value layer interpolated setting, improved value layer interpolations\nAdded max value setting to value layers (sliders snap in gesture gui now)\nAdded repeat to spinners when holding down mouse (#651)\nAdded a hidden from gesture gui (useful for animations with /cpmclient)\nDrop Down menus and toggle layers use the available parameter space more efficiently (experimental export only) (Closes #608)\nIncreased max data block size in exported models to 16 MB\nExtruded cubes now count to cube count for safety settings (3/4 of a cube)\nThe Show Names toggle is now saved\nEditor QoL:\n- Shift+Add Frame adds an empty frame\n- Added clear frame button to animation dropdown\n- Animation Data paste won\u0027t clear the clipboard\n- New Animation Frame keybind\n- Added Make Armor and Make 2nd layer to Edit/Tools\n- Added an indicator to light level animation in the editor\n- Added an Invert Camera Y option to settings\n\nUpdated to BTA 7.2-pre2\nPorted to Quilt 1.21, Fabric 24w35a\nUpdated Spanish translations (#625)\nAdded Brazilian Portuguese translations (#624)\nUpdated Simplified Chinese translations (#623, #649)\nFixed crash when opening the config screen from the modlist on NeoForge 1.21\nFixed player head items not showing on 1.20.6+\nFixed wiki sidebar not loading the localized variant\nFixed open wiki tooltip not opening the localized variant\nFixed Export Update allowing incompatible update exports\nFixed finish animations breaking with value poses (Closes #647)\nFixed gui animation jittering on NeoForge 1.21",
-    "0.6.19a": "Increased Quick Access keybinds to 16\nAdded alphabetical sorting to animation test custom layers dropdown\nUpdated Spanish translations (#673)\nFixed arms breaking in 1.21.2 snapshot version\nFixed Gesture Gui keybinds not working\nFixed Export popup showing an error (Closes #669)\nFixed log spam in the models menu and gesture gui\nFixed quick actions crashing (Closes #670)\nFixed model loading breaking when using over 256 animations\nFixed game crash with corrupted animations (Closes #668)\nFixed setup/finish animations not loading for custom poses\nFixed custom layers dropdown not showing the correct value in the slider name"
+    "0.6.19a": "Increased Quick Access keybinds to 16\nAdded alphabetical sorting to animation test custom layers dropdown\nUpdated Spanish translations (#673)\nFixed arms breaking in 1.21.2 snapshot version\nFixed Gesture Gui keybinds not working\nFixed Export popup showing an error (Closes #669)\nFixed log spam in the models menu and gesture gui\nFixed quick actions crashing (Closes #670)\nFixed model loading breaking when using over 256 animations\nFixed game crash with corrupted animations (Closes #668)\nFixed setup/finish animations not loading for custom poses\nFixed custom layers dropdown not showing the correct value in the slider name",
+    "0.6.19b": "1.21.4 port\n\nUpdated vivecraft support on 1.20.4 (Closes #716)\nUpdated Iris support on 1.21.4 (Closes #726)"
   },
   "1.20.6": {
     "0.0.0": "1.20.4-neoforge",
@@ -64,12 +66,17 @@
   "1.21.2": {
     "0.6.19a": "1.21.3 port",
     "0.6.19b": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3",
-    "0.6.19c": "1.21.4-pre1 port\n\nFixed model status indicator not clearing on 1.21.3 (Closes #711)"
+    "0.6.19c": "1.21.4-pre1 port\n\nFixed model status indicator not clearing on 1.21.3 (Closes #711)",
+    "0.6.19d": "1.21.4 port\n\nUpdated vivecraft support on 1.20.4 (Closes #716)\nUpdated Iris support on 1.21.4 (Closes #726)"
   },
   "1.21.3": {
     "0.6.19a": "1.21.3 port",
     "0.6.19b": "24w45a port\n\nFixed glowing eyes on 1.21.3 (#702)\nFixed crash with Iris on 1.21.3 (Closes #701)\nFixed startup crash with Minecraft Forge on 1.21.3",
-    "0.6.19c": "1.21.4-pre1 port\n\nFixed model status indicator not clearing on 1.21.3 (Closes #711)"
+    "0.6.19c": "1.21.4-pre1 port\n\nFixed model status indicator not clearing on 1.21.3 (Closes #711)",
+    "0.6.19d": "1.21.4 port\n\nUpdated vivecraft support on 1.20.4 (Closes #716)\nUpdated Iris support on 1.21.4 (Closes #726)"
+  },
+  "1.21.4": {
+    "0.6.19a": "1.21.4 port\n\nUpdated vivecraft support on 1.20.4 (Closes #716)\nUpdated Iris support on 1.21.4 (Closes #726)"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }

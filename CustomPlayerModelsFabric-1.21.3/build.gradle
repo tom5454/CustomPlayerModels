@@ -54,25 +54,25 @@ dependencies {
 	if (useLib) {
 		modCompileOnly('maven.modrinth:sodium:mc1.20.5-0.5.8')
     	modCompileOnly('maven.modrinth:iris:1.7.0+1.20.5')
-    	modCompileOnly('maven.modrinth:vivecraft:1.20.6-1.1.9-b1-fabric')//1.20.4 fallback
+    	//modCompileOnly('maven.modrinth:vivecraft:1.20.6-1.1.9-b1-fabric')//1.20.4 fallback
     	modCompileOnly('maven.modrinth:first-person-model:51Nzrb3j')//1.20.4 fallback
     	modImplementation ('com.github.Virtuoel:Pehkui:3.8.3') {
         	exclude(group: "net.fabricmc.fabric-api")
     	}
 	} else {
 		compileOnly files("../CustomPlayerModels-1.21.3/stubs/iris.jar")
-		compileOnly files("../CustomPlayerModels-1.21.3/stubs/vc.jar")
+		//compileOnly files("../CustomPlayerModels-1.21.3/stubs/vc.jar")
 		compileOnly files("../CustomPlayerModels-1.21.3/stubs/fpm.jar")
 		compileOnly files("../CustomPlayerModels-1.21.3/stubs/pehkui.jar")
 	}
 	
-    /*modCompileOnly('maven.modrinth:vivecraft:1.20.5-1.1.9-a2-fabric')
-    implementation "com.electronwill.night-config:core:3.6.3"
-    implementation "com.electronwill.night-config:toml:3.6.3"
+    modCompileOnly('maven.modrinth:vivecraft:1.21.3-1.1.14-b2-fabric')
+    implementation "com.electronwill.night-config:core:3.6.6"
+    implementation "com.electronwill.night-config:toml:3.6.6"
     implementation("org.lwjgl:lwjgl-openvr:3.3.3")
     implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux")
     implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos")
-    implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows")*/
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows")
 }
 
 loom {

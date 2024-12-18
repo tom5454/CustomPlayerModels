@@ -32,6 +32,13 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+    maven {
+    	url = "http://localhost:8000"
+		allowInsecureProtocol true
+		content {
+            includeGroup "local"
+        }
+	}
 }
 
 def useLib = System.getProperty("useLib")
@@ -62,24 +69,24 @@ dependencies {
 
 	compileOnly files("../CustomPlayerModels-1.20.4/stubs/of.jar")
 	
-	if (useLib) {
+	/*if (useLib) {
     	modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.6-fabric')
     	implementation "com.electronwill.night-config:core:3.6.3"
     	implementation "com.electronwill.night-config:toml:3.6.3"
     } else 
-    	compileOnly files("../CustomPlayerModels-1.20.4/stubs/vc.jar")
+    	compileOnly files("../CustomPlayerModels-1.20.4/stubs/vc.jar")*/
     	
     compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris_old.jar")
 	compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris.jar")
 	compileOnly files("../CustomPlayerModels-1.20.4/stubs/fpm.jar")
 	
-	/*modCompileOnly('maven.modrinth:vivecraft:1.20.4-1.1.8-fabric')
+	modCompileOnly('local:vivecraft-1.20.4:1.1.14-fbttest14-fabric')
     implementation "com.electronwill.night-config:core:3.6.3"
     implementation "com.electronwill.night-config:toml:3.6.3"
     implementation("org.lwjgl:lwjgl-openvr:3.3.1")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
-    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")*/
+    implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
 }
 
 loom {

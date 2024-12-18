@@ -3,8 +3,8 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.94'
-    id 'net.neoforged.gradle.mixin' version '7.0.94'
+    id 'net.neoforged.gradle.userdev' version '7.0.168'
+    id 'net.neoforged.gradle.mixin' version '7.0.168'
 }
 
 version = mod_version
@@ -19,6 +19,13 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven {
+    	url = "http://localhost:8000"
+		allowInsecureProtocol true
+		content {
+            includeGroup "local"
+        }
+	}
 }
 
 base {
@@ -58,7 +65,7 @@ runs {
 
     server {
         systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
+        arguments '--nogui'
     }
 
     // This run config launches GameTestServer and runs all registered gametests, then exits.
@@ -73,7 +80,7 @@ runs {
         // workingDirectory project.file('run-data')
 
         // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        arguments '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
 
@@ -132,7 +139,8 @@ dependencies {
 	compileOnly files("stubs/iris.jar")
 	compileOnly files("stubs/fpm.jar")
     //compileOnly files("vc.jar")
-    compileOnly 'curse.maven:vivecraft-667903:5144688'
+    //compileOnly 'curse.maven:vivecraft-667903:5144688'
+    compileOnly "local:vivecraft-1.20.4:1.1.14-fbttest14-neoforge"
     compileOnly 'com.github.Virtuoel:Pehkui:3.8.0-1.20.4-neoforge'
 }
 

@@ -1,5 +1,12 @@
 package com.tom.cpm.client.vr;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import org.vivecraft.client.render.VRPlayerModel;
 import org.vivecraft.client.render.VRPlayerModel_WithArms;
 
@@ -13,12 +20,29 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
 import com.tom.cpm.shared.model.render.ModelRenderManager.Field;
 import com.tom.cpm.shared.model.render.ModelRenderManager.RedirectRenderer;
+import com.tom.cpm.shared.util.Log;
 
 public class RedirectHolderVRPlayer extends RDH {
 	private RedirectRenderer<ModelPart> head;
 	private RedirectRenderer<ModelPart> leftArm;
 	private RedirectRenderer<ModelPart> rightArm;
 	private boolean seated;
+	private static boolean FBT;
+	private static java.lang.reflect.Field[] OLD_FIELDS;
+	static {
+		try {
+			OLD_FIELDS = new java.lang.reflect.Field[] {
+					VRPlayerModel_WithArms.class.getDeclaredField("leftShoulder"),
+					VRPlayerModel_WithArms.class.getDeclaredField("rightShoulder"),
+					VRPlayerModel_WithArms.class.getDeclaredField("leftShoulder_sleeve"),
+					VRPlayerModel_WithArms.class.getDeclaredField("rightShoulder_sleeve"),
+			};
+			FBT = false;
+		} catch (Throwable e) {
+			e.printStackTrace();
+			FBT = true;
+		}
+	}
 
 	public RedirectHolderVRPlayer(PlayerRenderManager mngr, VRPlayerModel<AbstractClientPlayer> model) {
 		super(mngr, model);
@@ -48,11 +72,38 @@ public class RedirectHolderVRPlayer extends RDH {
 		register(new Field<>(() -> model.vrHMD, v -> model.vrHMD = v, null));//disable
 		if(!seated) {
 			VRPlayerModel_WithArms<AbstractClientPlayer> w = (VRPlayerModel_WithArms<AbstractClientPlayer>) model;
-			register(new Field<>(() -> w.leftShoulder , v -> w.leftShoulder  = v, null));//disable
-			register(new Field<>(() -> w.rightShoulder, v -> w.rightShoulder = v, null));//disable
+			if (FBT) {
+				register(new Field<>(() -> w.leftArm , v -> w.leftArm  = v, null));//disable
+				register(new Field<>(() -> w.rightArm, v -> w.rightArm = v, null));//disable
 
-			register(new Field<>(() -> w.leftShoulder_sleeve , v -> w.leftShoulder_sleeve  = v, null));//disable
-			register(new Field<>(() -> w.rightShoulder_sleeve, v -> w.rightShoulder_sleeve = v, null));//disable
+				register(new Field<>(() -> w.leftHandSleeve , v -> w.leftHandSleeve  = v, null));//disable
+				register(new Field<>(() -> w.rightHandSleeve, v -> w.rightHandSleeve = v, null));//disable
+			} else {
+				try {
+					var lookup = MethodHandles.lookup();
+					for (int i = 0; i < OLD_FIELDS.length; i++) {
+						var field = OLD_FIELDS[i];
+						MethodHandle get = lookup.unreflectGetter(field).bindTo(w);
+						MethodHandle set = lookup.unreflectSetter(field).bindTo(w);
+
+						register(new Field<>(() -> {
+							try {
+								return (ModelPart) get.invoke();
+							} catch (Throwable e) {
+								return model.vrHMD;//Fallback nonull
+							}
+						}, v -> {
+							try {
+								set.invoke(v);
+							} catch (Throwable e) {
+								// Do nothing
+							}
+						}, null));//disable
+					}
+				} catch (Throwable e) {
+					Log.warn("Failed to bind legacy field accessors for VRPlayerModel_WithArms class", e);
+				}
+			}
 		}
 
 		register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
@@ -61,7 +112,25 @@ public class RedirectHolderVRPlayer extends RDH {
 	@Override
 	protected void setupTransform(MatrixStack stack, RedirectRenderer<ModelPart> part, boolean pre) {
 		if(!pre && (leftArm == part || rightArm == part) && !seated) {
-			stack.translate(0, -8 / 16f, 0);
+			//stack.translate(0, -8 / 16f, 0);
+		}
+	}
+
+	public static interface GetOld extends Function<VRPlayerModel_WithArms<AbstractClientPlayer>, ModelPart> {
+		@Override
+		ModelPart apply(VRPlayerModel_WithArms<AbstractClientPlayer> t);
+
+		default Supplier<ModelPart> bind(VRPlayerModel_WithArms<AbstractClientPlayer> v) {
+			return () -> apply(v);
+		}
+	}
+
+	public static interface SetOld extends BiConsumer<VRPlayerModel_WithArms<AbstractClientPlayer>, ModelPart> {
+		@Override
+		void accept(VRPlayerModel_WithArms<AbstractClientPlayer> t, ModelPart part);
+
+		default Consumer<ModelPart> bind(VRPlayerModel_WithArms<AbstractClientPlayer> v) {
+			return e -> accept(v, e);
 		}
 	}
 }
