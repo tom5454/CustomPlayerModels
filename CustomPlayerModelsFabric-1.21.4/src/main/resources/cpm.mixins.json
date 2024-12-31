@@ -18,16 +18,17 @@
 	"ParrotOnShoulderLayerMixin",
 	"LocalPlayerMixin",
 	"LivingRendererMixin",
-	"MinecraftMixinFabric",
-	"PlayerRendererMixinFabric",
 	"SkullModelMixin",
 	"ClientPacketListenerMixin",
 	"GuiAccessor",
 	"NativeImageAccessor",
-	"LivingRendererMixinFabric",
 	"PlayerRenderStateMixin",
 	"EquipmentLayerRendererMixin",
-	"SkullSpecialRendererMixin"
+	"SkullSpecialRendererMixin",
+	
+	"MinecraftMixinFabric",
+	"LivingRendererMixinFabric",
+	"PlayerRendererMixinFabric"
   ],
   "injectors": {
     "defaultRequire": 1

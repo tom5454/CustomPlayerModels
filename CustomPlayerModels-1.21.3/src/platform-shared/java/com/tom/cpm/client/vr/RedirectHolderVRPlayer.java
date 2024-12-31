@@ -4,7 +4,6 @@ import org.vivecraft.client.render.VRPlayerModel;
 import org.vivecraft.client.render.VRPlayerModel_WithArms;
 
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.player.AbstractClientPlayer;
 
 import com.tom.cpl.math.MatrixStack;
 import com.tom.cpm.client.PlayerRenderManager;
@@ -13,29 +12,29 @@ import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.render.ModelRenderManager.Field;
 import com.tom.cpm.shared.model.render.ModelRenderManager.RedirectRenderer;
 
-public class RedirectHolderVRPlayer extends RDH<VRPlayerModel<AbstractClientPlayer>> {
+public class RedirectHolderVRPlayer extends RDH<VRPlayerModel> {
 	private RedirectRenderer<ModelPart> head;
 	private RedirectRenderer<ModelPart> leftArm;
 	private RedirectRenderer<ModelPart> rightArm;
 	private boolean seated;
 
-	public RedirectHolderVRPlayer(PlayerRenderManager mngr, VRPlayerModel<AbstractClientPlayer> model) {
+	public RedirectHolderVRPlayer(PlayerRenderManager mngr, VRPlayerModel model) {
 		super(mngr, model);
 
 		seated = !(model instanceof VRPlayerModel_WithArms);
 
-		head = registerHead(new Field<>(    () -> model.head     , v -> model.head      = v, PlayerModelParts.HEAD));
-		register(new Field<>(           () -> model.body     , v -> model.body      = v, PlayerModelParts.BODY));
+		head = registerHead(createRendered(    () -> model.head     , v -> model.head      = v, PlayerModelParts.HEAD));
+		register(createRendered(           () -> model.body     , v -> model.body      = v, PlayerModelParts.BODY));
 		if(seated) {
-			rightArm = register(new Field<>(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
-			leftArm = register(new Field<>( () -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			rightArm = register(createRendered(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			leftArm = register(createRendered( () -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
 		} else {
-			VRPlayerModel_WithArms<AbstractClientPlayer> w = (VRPlayerModel_WithArms<AbstractClientPlayer>) model;
-			rightArm = register(new Field<>(() -> w.rightHand, v -> w.rightHand = v, PlayerModelParts.RIGHT_ARM));
-			leftArm = register(new Field<>( () -> w.leftHand , v -> w.leftHand  = v, PlayerModelParts.LEFT_ARM));
+			VRPlayerModel_WithArms w = (VRPlayerModel_WithArms) model;
+			rightArm = register(createRendered(() -> w.rightHand, v -> w.rightHand = v, PlayerModelParts.RIGHT_ARM));
+			leftArm = register(createRendered( () -> w.leftHand , v -> w.leftHand  = v, PlayerModelParts.LEFT_ARM));
 		}
-		register(new Field<>(           () -> model.rightLeg , v -> model.rightLeg  = v, PlayerModelParts.RIGHT_LEG));
-		register(new Field<>(           () -> model.leftLeg  , v -> model.leftLeg   = v, PlayerModelParts.LEFT_LEG));
+		register(createRendered(           () -> model.rightLeg , v -> model.rightLeg  = v, PlayerModelParts.RIGHT_LEG));
+		register(createRendered(           () -> model.leftLeg  , v -> model.leftLeg   = v, PlayerModelParts.LEFT_LEG));
 
 		register(new Field<>(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
 		register(new Field<>(() -> model.leftSleeve , v -> model.leftSleeve  = v, null));
@@ -46,15 +45,13 @@ public class RedirectHolderVRPlayer extends RDH<VRPlayerModel<AbstractClientPlay
 
 		register(new Field<>(() -> model.vrHMD, v -> model.vrHMD = v, null));//disable
 		if(!seated) {
-			VRPlayerModel_WithArms<AbstractClientPlayer> w = (VRPlayerModel_WithArms<AbstractClientPlayer>) model;
-			register(new Field<>(() -> w.leftShoulder , v -> w.leftShoulder  = v, null));//disable
-			register(new Field<>(() -> w.rightShoulder, v -> w.rightShoulder = v, null));//disable
+			VRPlayerModel_WithArms w = (VRPlayerModel_WithArms) model;
+			register(new Field<>(() -> w.leftArm , v -> w.leftArm  = v, null));//disable
+			register(new Field<>(() -> w.rightArm, v -> w.rightArm = v, null));//disable
 
-			register(new Field<>(() -> w.leftShoulder_sleeve , v -> w.leftShoulder_sleeve  = v, null));//disable
-			register(new Field<>(() -> w.rightShoulder_sleeve, v -> w.rightShoulder_sleeve = v, null));//disable
+			register(new Field<>(() -> w.leftHandSleeve , v -> w.leftHandSleeve  = v, null));//disable
+			register(new Field<>(() -> w.rightHandSleeve, v -> w.rightHandSleeve = v, null));//disable
 		}
-
-		//register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
 	}
 
 	@Override
@@ -66,11 +63,11 @@ public class RedirectHolderVRPlayer extends RDH<VRPlayerModel<AbstractClientPlay
 
 	@Override
 	protected ModelPart getRoot() {
-		return null;
+		return model().root;
 	}
 
 	@Override
 	protected void setRoot(ModelPart part) {
-
+		model().root = part;
 	}
 }

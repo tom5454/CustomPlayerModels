@@ -301,7 +301,7 @@ You can also use words, to fit your writing style more closely[^note].
 
 ## Tables
 
-Tables aren't part of the core Markdown spec, but they are part of GFM and CPM Wiki Viewer supports them. They are an easy way of adding tables to your email -- a task that would otherwise require copy-pasting from another application.
+Tables aren't part of the core Markdown spec, but they are part of GFM and CPM Wiki Viewer supports them. They are an easy way of adding tables to your wiki page.
 
 ```no-highlight
 Colons can be used to align columns.
@@ -342,7 +342,7 @@ There must be at least 3 dashes separating each header cell. The outer pipes (|)
 ## Blockquotes
 
 ```no-highlight
-> Blockquotes are very handy in email to emulate reply text.
+> Blockquotes are very handy
 > This line is part of the same quote.
 
 Quote break.
@@ -350,7 +350,7 @@ Quote break.
 > This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote. 
 ```
 
-> Blockquotes are very handy in email to emulate reply text.
+> Blockquotes are very handy
 > This line is part of the same quote.
 
 Quote break.
