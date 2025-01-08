@@ -1,10 +1,9 @@
 plugins {
-	id 'fabric-loom' version '1.2-SNAPSHOT'
+	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
 }
 
 repositories {
-maven { url 'https://jitpack.io' }
 maven { url "https://maven.terraformersmc.com/releases/"}
 }
 
@@ -50,9 +49,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.7.8') {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+	modImplementation ('maven.modrinth:pehkui:3.8.2+1.14.4-1.20.6')
 	
 	compileOnly files("../CustomPlayerModels-1.19/of.jar")
 	
@@ -61,13 +58,15 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     modImplementation (files('firstperson-fabric-2.1.2-mc1.19.1.jar'))*/
     
-    modCompileOnly('curse.maven:vivecraft-667903:4794418')
+    modImplementation ('maven.modrinth:vivecraft:1.19.2-1.2.0-fabric')
     implementation('com.electronwill.night-config:toml:3.6.6')
     implementation('com.electronwill.night-config:core:3.6.6')
     implementation("org.lwjgl:lwjgl-openvr:3.3.1")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+    implementation("com.illposed.osc:javaosc-core:0.9")
+    implementation("org.joml:joml:1.10.2")
 }
 
 loom {

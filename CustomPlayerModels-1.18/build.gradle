@@ -140,11 +140,16 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
-    maven { url 'https://jitpack.io' }
     maven {
         url 'https://www.cursemaven.com'
         content {
             includeGroup "curse.maven"
+        }
+    }
+    maven {
+        url 'https://api.modrinth.com/maven'
+        content {
+            includeGroup "maven.modrinth"
         }
     }
 }
@@ -182,8 +187,8 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     compileOnly files("of.jar")
     
-    compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.7.8-1.18.2-forge")
-    compileOnly fg.deobf('curse.maven:vivecraft-667903:4794416')
+    compileOnly fg.deobf("maven.modrinth:pehkui:3.8.2+1.18.2-forge")
+    compileOnly fg.deobf('maven.modrinth:vivecraft:1.18.2-1.2.0-forge')
 }
 
 sourceSets {

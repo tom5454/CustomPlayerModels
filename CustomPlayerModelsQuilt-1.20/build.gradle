@@ -13,7 +13,6 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
-	maven { url 'https://jitpack.io' }
 	maven { url "https://maven.terraformersmc.com/releases/"}
 	maven {
         url 'https://www.cursemaven.com'
@@ -53,22 +52,21 @@ dependencies {
         exclude(group: "net.fabricmc")
     }
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.7.8') {
-        exclude(group: "net.fabricmc.fabric-api")
-        exclude(group: "net.fabricmc")
-    }
+	modImplementation ('maven.modrinth:pehkui:3.7.8+1.14.4-1.20.1')
 
 	compileOnly files("../CustomPlayerModels-1.20/stubs/of.jar")
 	compileOnly files("../CustomPlayerModels-1.20/stubs/iris_old.jar")
 	compileOnly files("../CustomPlayerModels-1.20/stubs/fpm.jar")
 	
-	modImplementation ('maven.modrinth:vivecraft:1.20.1-1.1.9-fabric')
+	modImplementation ('maven.modrinth:vivecraft:1.20.1-1.2.0-fabric')
     implementation('com.electronwill.night-config:toml:3.6.6')
     implementation('com.electronwill.night-config:core:3.6.6')
     implementation("org.lwjgl:lwjgl-openvr:3.3.1")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-linux")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-macos")
     implementation("org.lwjgl:lwjgl-openvr:3.3.1:natives-windows")
+	implementation("com.illposed.osc:javaosc-core:0.9")
+    implementation("org.joml:joml:1.10.2")
     
     modImplementation('maven.modrinth:sodium:mc1.20.1-0.5.8')
     modImplementation "net.fabricmc.fabric-api:fabric-rendering-data-attachment-v1:0.3.36+92a0d36777"
