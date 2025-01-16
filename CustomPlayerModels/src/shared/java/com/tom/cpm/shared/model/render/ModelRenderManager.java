@@ -515,6 +515,9 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 		public default void translateRotate(RenderedCube rc, MatrixStack matrixStackIn) {
 			translateRotate(rc.pos.x, rc.pos.y, rc.pos.z, rc.rotation, matrixStackIn);
+			if(rc.renderScale == null){
+				rc.renderScale = new Vec3f();
+			}
 			if(rc.renderScale.x != 1 || rc.renderScale.y != 1 || rc.renderScale.z != 1 ||
 					rc.renderScale.x > 0 || rc.renderScale.y > 0 || rc.renderScale.z > 0) {
 				matrixStackIn.scale(Math.max(rc.renderScale.x, 0.01f), Math.max(rc.renderScale.y, 0.01f), Math.max(rc.renderScale.z, 0.01f));
