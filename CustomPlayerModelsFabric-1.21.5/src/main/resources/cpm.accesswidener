@@ -1,0 +1,58 @@
+accessWidener	v1	named
+mutable field net/minecraft/client/model/PlayerModel leftSleeve Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel rightSleeve Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel leftPants Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel rightPants Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/PlayerModel jacket Lnet/minecraft/client/model/geom/ModelPart;
+
+extendable class net/minecraft/client/model/geom/ModelPart
+mutable field net/minecraft/client/model/HumanoidModel head Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel hat Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel body Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel rightArm Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel leftArm Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel rightLeg Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel leftLeg Lnet/minecraft/client/model/geom/ModelPart;
+
+mutable field net/minecraft/client/model/PlayerCapeModel cape Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/PlayerCapeModel cape Lnet/minecraft/client/model/geom/ModelPart;
+
+mutable field net/minecraft/client/model/Model root Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/Model root Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible field net/minecraft/client/gui/components/AbstractWidget height I
+
+accessible field net/minecraft/client/Options modelParts Ljava/util/Set;
+
+accessible field net/minecraft/client/model/SkullModel head Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/SkullModel head Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible field net/minecraft/client/model/ElytraModel rightWing Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/ElytraModel leftWing Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/ElytraModel rightWing Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/ElytraModel leftWing Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
+accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;IZZLnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
+
+accessible class net/minecraft/server/level/ChunkMap$TrackedEntity
+accessible field net/minecraft/server/level/ChunkMap entityMap Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
+accessible field net/minecraft/server/level/ChunkMap$TrackedEntity seenBy Ljava/util/Set;
+accessible field net/minecraft/server/level/ChunkMap$TrackedEntity entity Lnet/minecraft/world/entity/Entity;
+
+accessible method net/minecraft/world/level/storage/LevelResource <init> (Ljava/lang/String;)V
+
+accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
+
+accessible field net/minecraft/client/gui/components/EditBox highlightPos I
+
+accessible field net/minecraft/server/network/ServerCommonPacketListenerImpl server Lnet/minecraft/server/MinecraftServer;
+
+accessible class net/minecraft/world/level/biome/Biome$ClimateSettings 
+accessible field net/minecraft/world/level/biome/Biome climateSettings Lnet/minecraft/world/level/biome/Biome$ClimateSettings;
+
+accessible field net/minecraft/client/renderer/RenderType EYES Ljava/util/function/BiFunction;
+
+accessible class net/minecraft/client/resources/SkinManager$TextureCache
+accessible field net/minecraft/client/resources/SkinManager skinTextures Lnet/minecraft/client/resources/SkinManager$TextureCache;
+accessible field net/minecraft/client/resources/SkinManager$TextureCache root Ljava/nio/file/Path;

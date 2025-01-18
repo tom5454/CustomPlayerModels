@@ -15,6 +15,7 @@ public class Project {
 	public static boolean box_uv;
 	public static JsArrayE<Animation> animations;
 	public static ModelFormat format;
+	public static JsArrayE<Group> selected_groups;
 
 	@JsProperty(name = "cpm_data")
 	public static String pluginData;

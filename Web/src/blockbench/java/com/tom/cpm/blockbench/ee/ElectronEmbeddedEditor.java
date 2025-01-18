@@ -1,6 +1,5 @@
 package com.tom.cpm.blockbench.ee;
 
-import com.tom.cpl.util.Pair;
 import com.tom.cpm.blockbench.BlockBenchFS;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
 import com.tom.cpm.blockbench.proxy.Blockbench;
@@ -10,30 +9,37 @@ import com.tom.cpm.blockbench.proxy.electron.BrowserWindow.BrowserWindowProperti
 import com.tom.cpm.blockbench.proxy.electron.BrowserWindow.BrowserWindowWebPreferences;
 import com.tom.cpm.blockbench.proxy.electron.BrowserWindow.WebContents;
 import com.tom.cpm.blockbench.proxy.electron.Electron;
+import com.tom.cpm.blockbench.proxy.electron.ElectronDialog.DialogProperties;
 import com.tom.cpm.blockbench.proxy.electron.Http.NodeURL;
 import com.tom.cpm.blockbench.proxy.electron.Http.NodeURLProperties;
 import com.tom.cpm.blockbench.proxy.electron.IPCRenderer.IPCEventHandler;
+import com.tom.cpm.blockbench.util.SystemFileChooser;
 import com.tom.cpm.shared.MinecraftObjectHolder;
-import com.tom.cpm.shared.editor.Editor;
-import com.tom.cpm.shared.editor.gui.EditorGui;
-import com.tom.cpm.shared.editor.project.ProjectIO;
 import com.tom.cpm.web.client.FS;
 import com.tom.cpm.web.client.WebMC;
-import com.tom.cpm.web.client.util.JSZip;
+import com.tom.cpm.web.client.resources.Resources;
 import com.tom.ugwt.client.UGWTContext;
 
 import elemental2.core.ArrayBuffer;
 import elemental2.dom.DomGlobal;
 import elemental2.promise.Promise;
+import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
 
 public class ElectronEmbeddedEditor implements EmbeddedEditor {
 	private static final String EMBEDDED_PAGE = ".embedded_page.html";
-	private static final String PAGE_SCRIPT = "(function() {document.title = \"CPM Embedded Editor (Beta) $ver\"; _embeddedPlatform = atob(\"$platform\"); _cpmEmbeddedEditorMarker = true; isApp = true; _embeddedHandler = 'electron'; _editorWorkDir = atob('$workDir'); electron = require('electron'); var scr = document.createElement('script'); scr.innerText = atob(\"$$$\"); document.head.appendChild(scr);})()";
 	private BrowserWindow electronWindow;
 	private boolean loadingFinished;
+
+	private static final String IPC_CPM_READY = "cpm_on_ready";
+	private static final String IPC_OPEN_IN_BB = "cpm_open_bb";
+	private static final String IPC_OPEN_IN_BB_FIN = "cpm_open_finish_bb";
+	private static final String IPC_OPEN_PROJECT = "cpm_on_ready";
+	private static final String IPC_OPEN_PROJECT_FIN = "cpm_on_ready";
+	private static final String IPC_SHOW_FC = "cpm_show_file_dialog";
+	private static final String IPC_FC_FIN = "cpm_file_dialog_finish";
 
 	public ElectronEmbeddedEditor() {
 	}
@@ -42,7 +48,7 @@ public class ElectronEmbeddedEditor implements EmbeddedEditor {
 	public Promise<EmbeddedEditor> open() {
 		return new Promise<>((res, rej) -> {
 			String path = BlockBenchFS.PATH.join(FS.getWorkDir(), EMBEDDED_PAGE);
-			FS.setContent(path, DomGlobal.btoa(PAGE_HTML)).then(__ -> {
+			FS.setContent(path, Resources.getResource("assets/cpmblockbench/ee/embedded_page.html")).then(__ -> {
 				BrowserWindowProperties pr = new BrowserWindowProperties();
 				pr.width = 1280;
 				pr.height = 720;
@@ -63,31 +69,53 @@ public class ElectronEmbeddedEditor implements EmbeddedEditor {
 				electronWindow.loadURL(url.format(up));
 				electronWindow.webContents.on("dom-ready", () -> {
 					electronWindow.webContents.executeJavaScript(BlockBenchFS.getLibrary("jszip.min.js"));
-					electronWindow.webContents.executeJavaScript(PAGE_SCRIPT.
+					String bootstrap = DomGlobal.atob(Resources.getResource("assets/cpmblockbench/ee/electron_bootstrap.js"));
+					electronWindow.webContents.executeJavaScript(bootstrap.
 							replace("$workDir", DomGlobal.btoa(FS.getWorkDir())).
 							replace("$ver", System.getProperty("cpm.version")).
 							replace("$platform", DomGlobal.btoa(WebMC.platform)).
 							replace("$$$", DomGlobal.btoa("(" + UGWTContext.getAppScript() + ")()"))
 							);
 				});
-				electronWindow.webContents.ipc.on("cpm_on_ready", (ev, msg) -> {
+				electronWindow.webContents.ipc.on(IPC_CPM_READY, (ev, msg) -> {
 					if (ev.sender == electronWindow.webContents) {
 						DomGlobal.console.log("Embedded Editor Ready");
 						loadingFinished = true;
 						res.onInvoke(this);
 					}
 				});
-				electronWindow.webContents.ipc.on("cpm_open_bb", (ev, msg) -> {
+				electronWindow.webContents.ipc.on(IPC_OPEN_IN_BB, (ev, msg) -> {
 					if (ev.sender == electronWindow.webContents) {
 						DomGlobal.console.log("Opening CPM project from Embedded editor");
+						Blockbench.focus();
 						ProjectConvert.parse((ArrayBuffer) msg).then(___ -> {
-							electronWindow.webContents.send("cpm_open_finish_bb", "");
-							Blockbench.focus();
+							electronWindow.webContents.send(IPC_OPEN_IN_BB_FIN, "");
 							return null;
 						}).catch_(ex -> {
-							electronWindow.webContents.send("cpm_open_finish_bb", "Error: " + ex);
+							electronWindow.webContents.send(IPC_OPEN_IN_BB_FIN, "Error: " + ex);
 							return null;
 						});
+					}
+				});
+				electronWindow.webContents.ipc.on(IPC_SHOW_FC, (ev, msg) -> {
+					if (ev.sender == electronWindow.webContents) {
+						DomGlobal.console.log("Opening File chooser");
+						DialogMessage m = Js.uncheckedCast(elemental2.core.Global.JSON.parse((String) msg));
+						if (m.dialog != null) {
+							Promise<String> fc = m.isSave ? SystemFileChooser.showSaveDialog(electronWindow, m.dialog) : SystemFileChooser.showOpenDialog(electronWindow, m.dialog);
+							fc.then(pth -> {
+								DialogResponseMessage r = new DialogResponseMessage();
+								r.path = pth;
+								r.cancel = pth == null;
+								electronWindow.webContents.send(IPC_FC_FIN, elemental2.core.Global.JSON.stringify(r));
+								return null;
+							}).catch_(ex -> {
+								DialogResponseMessage r = new DialogResponseMessage();
+								r.error = "Error: " + ex;
+								electronWindow.webContents.send(IPC_FC_FIN, elemental2.core.Global.JSON.stringify(r));
+								return null;
+							});
+						}
 					}
 				});
 				electronWindow.on("closed", () -> {
@@ -124,49 +152,19 @@ public class ElectronEmbeddedEditor implements EmbeddedEditor {
 
 	@Override
 	public void onReady() {
-		Electron.getElectron().ipcRenderer.on("cpm_open_project", (ev, msg) -> {
+		Electron.getElectron().ipcRenderer.on(IPC_OPEN_PROJECT, (ev, msg) -> {
 			DomGlobal.console.log("Opening project", msg);
 			ArrayBuffer blob = (ArrayBuffer) msg;
-			openProject0(blob).then(__ -> {
-				Electron.getElectron().ipcRenderer.send("cpm_open_finish", "");
+			EmbeddedEditor.openProjectFromBuffer(blob).then(__ -> {
+				Electron.getElectron().ipcRenderer.send(IPC_OPEN_PROJECT_FIN, "");
 				return null;
 			}).catch_(e -> {
-				Electron.getElectron().ipcRenderer.send("cpm_open_finish", "Error: " + e);
+				Electron.getElectron().ipcRenderer.send(IPC_OPEN_PROJECT_FIN, "Error: " + e);
 				return null;
 			});
 		});
 
-		Electron.getElectron().ipcRenderer.send("cpm_on_ready", "");
-	}
-
-	private Promise<Object> openProject0(ArrayBuffer ab) {
-		EditorGui eg = (EditorGui) WebMC.getInstance().getGui().getFrame();
-		Editor editor = eg.getEditor();
-		editor.setInfoMsg.accept(Pair.of(200000, editor.ui.i18nFormat("tooltip.cpm.loading", "BlockBench Transfer")));
-		return new JSZip().loadAsync(ab).then(z -> {
-			Promise<Object> load;
-			if (editor.dirty) {
-				load = Promise.reject("Project has unsaved changes");
-			} else {
-				load = Promise.resolve((Object) null);
-			}
-			return load.then(__ -> {
-				editor.loadDefaultPlayerModel();
-				return editor.project.load(z);
-			}).then(__ -> {
-				try {
-					ProjectIO.loadProject(editor, editor.project);
-				} catch (Exception e) {
-					return Promise.reject(e);
-				}
-				return Promise.resolve((Void) null);
-			}).then(__ -> {
-				editor.restitchTextures();
-				editor.updateGui();
-				editor.setInfoMsg.accept(Pair.of(2000, editor.ui.i18nFormat("tooltip.cpm.loadSuccess", "BlockBench Transfer")));
-				return null;
-			});
-		});
+		Electron.getElectron().ipcRenderer.send(IPC_CPM_READY, "");
 	}
 
 	@Override
@@ -182,12 +180,12 @@ public class ElectronEmbeddedEditor implements EmbeddedEditor {
 				if (ev.sender == electronWindow.webContents) {
 					DomGlobal.console.log(msg);
 					res.onInvoke((Void) null);
-					electronWindow.webContents.ipc.removeListener("cpm_open_finish", h[0]);
+					electronWindow.webContents.ipc.removeListener(IPC_OPEN_PROJECT_FIN, h[0]);
 					electronWindow.focus();
 				}
 			};
-			electronWindow.webContents.ipc.on("cpm_open_finish", h[0]);
-			electronWindow.webContents.send("cpm_open_project", dt);
+			electronWindow.webContents.ipc.on(IPC_OPEN_PROJECT_FIN, h[0]);
+			electronWindow.webContents.send(IPC_OPEN_PROJECT, dt);
 		});
 	}
 
@@ -199,10 +197,53 @@ public class ElectronEmbeddedEditor implements EmbeddedEditor {
 			h[0] = (ev, msg) -> {
 				DomGlobal.console.log(msg);
 				res.onInvoke((Void) null);
-				Electron.getElectron().ipcRenderer.removeListener("cpm_open_finish_bb", h[0]);
+				Electron.getElectron().ipcRenderer.removeListener(IPC_OPEN_IN_BB_FIN, h[0]);
 			};
-			Electron.getElectron().ipcRenderer.on("cpm_open_finish_bb", h[0]);
-			Electron.getElectron().ipcRenderer.send("cpm_open_bb", dt);
+			Electron.getElectron().ipcRenderer.on(IPC_OPEN_IN_BB_FIN, h[0]);
+			Electron.getElectron().ipcRenderer.send(IPC_OPEN_IN_BB, dt);
 		});
+	}
+
+	@Override
+	public Promise<String> openFileDialog(boolean isSave, DialogProperties dialog) {
+		return new Promise<>((res, rej) -> {
+			DomGlobal.console.log("Opening file chooser");
+			IPCEventHandler[] h = new IPCEventHandler[1];
+			h[0] = (ev, msg) -> {
+				DomGlobal.console.log(msg);
+				DialogResponseMessage m = Js.uncheckedCast(elemental2.core.Global.JSON.parse((String) msg));
+				Electron.getElectron().ipcRenderer.removeListener(IPC_FC_FIN, h[0]);
+				if (m.path != null) {
+					res.onInvoke(m.path);
+				} else if (m.cancel) {
+					res.onInvoke((String) null);
+				} else {
+					rej.onInvoke(m.error);
+				}
+			};
+			Electron.getElectron().ipcRenderer.on(IPC_FC_FIN, h[0]);
+			Electron.getElectron().ipcRenderer.send(IPC_SHOW_FC, elemental2.core.Global.JSON.stringify(DialogMessage.make(dialog, isSave)));
+		});
+	}
+
+	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
+	public static class DialogMessage {
+		public DialogProperties dialog;
+		public boolean isSave;
+
+		@JsOverlay
+		public static final DialogMessage make(DialogProperties dialog, boolean isSave) {
+			DialogMessage m = new DialogMessage();
+			m.dialog = dialog;
+			m.isSave = isSave;
+			return m;
+		}
+	}
+
+	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
+	public static class DialogResponseMessage {
+		public String path;
+		public boolean cancel;
+		public String error;
 	}
 }

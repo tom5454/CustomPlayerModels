@@ -73,7 +73,8 @@
     "1.21.3-latest": "0.6.19e",
     "1.21.3-fabric-latest": "0.6.19i",
     "1.21.4-fabric-latest": "0.6.19d",
-    "1.21.4-latest": "0.6.19b"
+    "1.21.4-latest": "0.6.19b",
+    "1.21.5-fabric-latest": "0.6.19a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -1708,5 +1709,8 @@
   "1.21.4": {
     "0.6.19a": "1.21.4 port\n\nUpdated vivecraft support on 1.20.4 (Closes #716)\nUpdated Iris support on 1.21.4 (Closes #726)",
     "0.6.19b": "Updated ViveCraft support (#716)"
+  },
+  "1.21.5-fabric": {
+    "0.6.19a": "25w03a port"
   }
 }

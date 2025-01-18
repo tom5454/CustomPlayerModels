@@ -22,7 +22,6 @@ public class Group extends OutlinerNode {
 	@JsOverlay
 	public static final Group ROOT = Js.uncheckedCast("root");
 
-	public static Group selected;
 	public static Group[] all;
 	public static JsPropertyMap<Group> uuids;
 

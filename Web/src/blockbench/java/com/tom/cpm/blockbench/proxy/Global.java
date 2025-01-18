@@ -15,7 +15,6 @@ import jsinterop.base.JsPropertyMap;
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_window_$$")
 public class Global {
 	public static native boolean newProject(ModelFormat format);
-	public static native void loadTextureDraggable();
 	public static native void setProjectTitle();
 	public static native void updateSelection();
 

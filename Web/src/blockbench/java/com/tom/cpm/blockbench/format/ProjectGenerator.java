@@ -134,7 +134,6 @@ public class ProjectGenerator {
 	}
 
 	public static void updateAll() {
-		Global.loadTextureDraggable();
 		Canvas.updateAllBones();
 		Canvas.updateVisibility();
 		Global.setProjectTitle();

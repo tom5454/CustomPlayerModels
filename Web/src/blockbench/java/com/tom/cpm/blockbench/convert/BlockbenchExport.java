@@ -2,6 +2,8 @@ package com.tom.cpm.blockbench.convert;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
+import java.util.stream.Collectors;
 
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.math.Rotation;
@@ -46,6 +49,7 @@ import com.tom.cpm.blockbench.proxy.Undo.UndoData;
 import com.tom.cpm.blockbench.proxy.Vectors.JsVec3;
 import com.tom.cpm.blockbench.util.JsonUtil;
 import com.tom.cpm.blockbench.util.PopupDialogs;
+import com.tom.cpm.blockbench.util.PopupDialogs.UserException;
 import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.animation.CustomPose;
 import com.tom.cpm.shared.animation.IPose;
@@ -81,6 +85,7 @@ import com.tom.cpm.shared.model.render.PerFaceUV;
 import com.tom.cpm.shared.model.render.PerFaceUV.Face;
 import com.tom.cpm.shared.model.render.PerFaceUV.Rot;
 import com.tom.cpm.shared.model.render.VanillaModelPart;
+import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.java.JsBuilder;
 import com.tom.cpm.web.client.util.I18n;
 import com.tom.cpm.web.client.util.ImageIO;
@@ -180,6 +185,7 @@ public class BlockbenchExport {
 				me.offset.z = fr.z - or.z;
 				me.name = cube.name;
 				convertUV(me, cube);
+				fixDecimals(me);
 			}
 		});
 		log("Exported loose cubes");
@@ -268,6 +274,7 @@ public class BlockbenchExport {
 				me.rotation = me.rotation.sub(((DirectPartValues)pv).getRotation());
 			}
 			me.pos = o;
+			fixDecimals(me);
 			modelTree.put(group.uuid, new CPMElem(me));
 			group.children.forEach(in -> {
 				if(!(in instanceof Cube))return;
@@ -277,6 +284,7 @@ public class BlockbenchExport {
 				add(me, e);
 				e.texture = true;
 				convert(e, group, cube);
+				fixDecimals(e);
 			});
 		});
 
@@ -338,6 +346,22 @@ public class BlockbenchExport {
 		});
 	}
 
+	private void fixDecimals(ModelElement me) {
+		me.size = fixDecimals(me.size, 1);
+		me.pos = fixDecimals(me.pos, 2);
+		me.rotation = fixDecimals(me.rotation, 1);
+		me.offset = fixDecimals(me.offset, 2);
+	}
+
+	private Vec3f fixDecimals(Vec3f size, int dp) {
+		if (size == null)return null;
+		return new Vec3f(
+				new BigDecimal(size.x).setScale(dp, RoundingMode.HALF_UP).floatValue(),
+				new BigDecimal(size.y).setScale(dp, RoundingMode.HALF_UP).floatValue(),
+				new BigDecimal(size.z).setScale(dp, RoundingMode.HALF_UP).floatValue()
+				);
+	}
+
 	private void rootWarning(Group group) {
 		warnings.add(new WarnEntry(I18n.format("bb-label.warn.unknownRoot", group.name), () -> {
 			return new Promise<>((res, rej) -> {
@@ -362,6 +386,7 @@ public class BlockbenchExport {
 						put("dup", Dialog.FormCheckboxElement.make(I18n.get("bb-label.export.markDuplicateRoot"))).
 						put("rename", renameBox).
 						build();
+				Dialog.link(pr.form);
 				if(group.children.asList().stream().allMatch(n -> n instanceof Group)) {
 					pr.buttons = new String[] {"action.resolve_group", "dialog.confirm", "dialog.cancel"};
 					pr.confirmIndex = 1;
@@ -378,11 +403,11 @@ public class BlockbenchExport {
 					String root = Js.cast(dr.get("root"));
 					boolean dupRoot = Js.isTruthy(dr.get("dup"));
 					boolean en = dupRoot || Arrays.stream(Group.all).noneMatch(gr -> gr.parent == Group.ROOT && gr.name.equals(root));
-					renameBox.bar.find("input#rename").disabled(!en);
+					renameBox.getBar().find("input#rename").disabled(!en);
 				};
-				pr.onBuild = () -> {
+				pr.onOpen = () -> {
 					boolean en = Arrays.stream(Group.all).noneMatch(gr -> gr.parent == Group.ROOT && gr.name.equals("head"));
-					renameBox.bar.find("input#rename").disabled(!en);
+					renameBox.getBar().find("input#rename").disabled(!en);
 				};
 				pr.onConfirm = d -> {
 					JsPropertyMap<Object> dr = Js.uncheckedCast(d);
@@ -491,21 +516,46 @@ public class BlockbenchExport {
 		});
 	}
 
+	private Promise<Boolean> showDecimalFixed(Set<String> decFixApplied) {
+		return new Promise<>((res, rej) -> {
+			DialogProperties pr = new DialogProperties();
+			pr.id = "cpm_list_decimals";
+			pr.title = I18n.get("bb-label.warn.uvDecimalFixer.list");
+			pr.singleButton = true;
+			pr.lines = new String[]{ decFixApplied.stream().collect(Collectors.joining("<br>")) };
+			pr.onCancel = () -> {
+				res.onInvoke(false);
+				return true;
+			};
+			new Dialog(pr).show();
+		});
+	}
+
 	private void finishExport() {
+		Set<String> decFixApplied = new HashSet<>();
 		uvMul.entrySet().forEach(e -> {
 			UVMul m = e.getValue();
 			TextureSheetType tst = e.getKey();
 			if(tst.editable) {
 				ETextures tex = editor.textures.get(tst);
-				if (tex.provider.size.x * 16 < 16384 && tex.provider.size.y * 16 < 16384 && m.elems.stream().anyMatch(DecimalFixOp::needsFix)) {
-					tex.provider.size.x *= 16;
-					tex.provider.size.y *= 16;
-					m.elems.forEach(d -> d.baseMul *= 16);
+				if (tex.provider.size.x * 16 < 16384 && tex.provider.size.y * 16 < 16384) {
+					List<DecimalFixOp> reqFix = m.elems.stream().filter(DecimalFixOp::needsFix).collect(Collectors.toList());
+					if (!reqFix.isEmpty()) {
+						for (DecimalFixOp op : reqFix) {
+							decFixApplied.add(op.getDisplayName());
+							op.baseMul *= 16;
+						}
+						tex.provider.size.x *= 16;
+						tex.provider.size.y *= 16;
+					}
 				}
 			}
 			m.elems.forEach(DecimalFixOp::apply);
 		});
 		log("Applied UV decimal fixer");
+		if (!decFixApplied.isEmpty()) {
+			warnings.add(new WarnEntry(I18n.format("bb-label.warn.uvDecimalFixer.applied"), () -> showDecimalFixed(decFixApplied)).setTooltip(I18n.format("bb-tooltip.warn.uvDecimalFixerApplied", I18n.get("bb-button.autoFix"))));
+		}
 
 		ProjectData pd = Project.getData();
 		if(!pd.animations.isEmpty())new AnimEnc().load(new JsonMapImpl(pd.animations));
@@ -544,8 +594,6 @@ public class BlockbenchExport {
 		e.@com.tom.cpm.shared.editor.Editor::undoQueue.@java.util.Stack::clear()();
 		e.@com.tom.cpm.shared.editor.Editor::redoQueue.@java.util.Stack::clear()();
 	}-*/;
-
-	private static final int FRAME_TICKS = 10;
 
 	private void convertAnimation(Animation anim) {
 		if(Js.typeof(anim.type) != "string") {
@@ -698,9 +746,9 @@ public class BlockbenchExport {
 			float time = anim.length;
 			ea.duration = (int) (time * 1000);
 
-			int frameCount = MathHelper.ceil(time * FRAME_TICKS);
+			int frameCount = MathHelper.ceil(time * anim.snapping);
 			for (int i = 0; i < frameCount; i++) {
-				float ftime = i / (float) FRAME_TICKS;
+				float ftime = i / (float) anim.snapping;
 				generateFrame(anims, ea, ftime, error);
 			}
 		}
@@ -868,7 +916,7 @@ public class BlockbenchExport {
 							return null;
 						};
 						reader.onerror = __ -> {
-							rej.onInvoke(null);
+							rej.onInvoke("File read error");
 							return null;
 						};
 						reader.readAsDataURL(blob);
@@ -880,6 +928,9 @@ public class BlockbenchExport {
 						fe.setImage(img);
 						fe.setEdited(true);
 						return Promise.resolve((Void) null);
+					}).catch_(er -> {
+						Throwable error = Java.convertRejectObject(er);
+						return Promise.reject(new UserException(I18n.formatBr("bb-label.error.failedToLoadTexture", t.name, error.toString())));
 					});
 		}
 		return Promise.resolve((Void) null);
@@ -965,9 +1016,9 @@ public class BlockbenchExport {
 		}
 
 		if(cube.box_uv && !isDecimal(elem.size.x) && !isDecimal(elem.size.y) && !isDecimal(elem.size.z)) {
-			m.elems.add(new DecimalFixOp(cube.uv_offset.x, 0, m, a -> elem.u = a));
-			m.elems.add(new DecimalFixOp(cube.uv_offset.y, 1, m, a -> elem.v = a));
-			m.elems.add(new DecimalFixOp(1, 4, m, a -> elem.textureSize = a));
+			m.elems.add(new DecimalFixOp(cube, null, cube.uv_offset.x, 0, m, a -> elem.u = a));
+			m.elems.add(new DecimalFixOp(cube, null, cube.uv_offset.y, 1, m, a -> elem.v = a));
+			m.elems.add(new DecimalFixOp(cube, null, 1, 4, m, a -> elem.textureSize = a));
 			elem.mirror = cube.mirror_uv;
 		} else {
 			elem.faceUV = new PerFaceUV();
@@ -978,10 +1029,10 @@ public class BlockbenchExport {
 					continue;
 				}
 				Face f = elem.faceUV.faces.computeIfAbsent(d, __ -> new Face());
-				m.elems.add(new DecimalFixOp(cf.uv.sx, 2, m, a -> f.sx = a));
-				m.elems.add(new DecimalFixOp(cf.uv.sy, 3, m, a -> f.sy = a));
-				m.elems.add(new DecimalFixOp(cf.uv.ex, 2, m, a -> f.ex = a));
-				m.elems.add(new DecimalFixOp(cf.uv.ey, 3, m, a -> f.ey = a));
+				m.elems.add(new DecimalFixOp(cube, d, cf.uv.sx, 2, m, a -> f.sx = a));
+				m.elems.add(new DecimalFixOp(cube, d, cf.uv.sy, 3, m, a -> f.sy = a));
+				m.elems.add(new DecimalFixOp(cube, d, cf.uv.ex, 2, m, a -> f.ex = a));
+				m.elems.add(new DecimalFixOp(cube, d, cf.uv.ey, 3, m, a -> f.ey = a));
 				if(d == Direction.UP || d == Direction.DOWN)
 					f.rotation = intToRot((cf.rotation + 180) % 360);
 				else
@@ -1006,18 +1057,27 @@ public class BlockbenchExport {
 		private UVMul mul;
 		private IntConsumer set;
 		private int baseMul = 1;
+		private Cube cube;
+		private Direction face;
 
-		public DecimalFixOp(float val, int mode, UVMul mul, IntConsumer set) {
+		public DecimalFixOp(Cube cube, Direction face, float val, int mode, UVMul mul, IntConsumer set) {
+			this.cube = cube;
 			this.val = val;
 			this.mode = mode;
 			this.mul = mul;
 			this.set = set;
+			this.face = face;
+		}
+
+		public String getDisplayName() {
+			if (face != null)return I18n.format("bb-label.warn.uvDecimalFixer.face", cube.name, I18n.get("label.cpm.dir." + face.name().toLowerCase(Locale.ROOT)));
+			else return cube.name;
 		}
 
 		public boolean needsFix() {
 			if((mode & 4) != 0)return false;
 			float m = val * baseMul * ((mode & 1) != 0 ? mul.y : mul.x);
-			return (m - Math.floor(m)) > 0.05f;
+			return (m - Math.round(m)) > 0.05f;
 		}
 
 		public void apply() {
@@ -1109,6 +1169,7 @@ public class BlockbenchExport {
 					part.size = new Vec3f();
 					convertGroup(part, group);
 				}
+				fixDecimals(part);
 			}
 		}
 
