@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.6-SNAPSHOT'
+	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -13,7 +13,6 @@ group = project.maven_group
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 repositories {
-	maven { url 'https://jitpack.io' }
 	maven { url "https://maven.terraformersmc.com/releases/"}
 	maven {
         url 'https://www.cursemaven.com'
@@ -49,9 +48,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modImplementation ('com.github.Virtuoel:Pehkui:3.8.1') {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+	modImplementation ('maven.modrinth:pehkui:3.8.2+1.14.4-1.20.6')
 	
 	compileOnly files("../CustomPlayerModels-1.20.6/stubs/of.jar")
 	
@@ -66,13 +63,14 @@ dependencies {
 		compileOnly files("../CustomPlayerModels-1.20.6/stubs/fpm.jar")
 	}
 	
-    modCompileOnly('maven.modrinth:vivecraft:1.20.6-1.1.9-b1-fabric')
+    modCompileOnly('maven.modrinth:vivecraft:1.20.6-1.2.0-fabric')
     implementation "com.electronwill.night-config:core:3.6.3"
     implementation "com.electronwill.night-config:toml:3.6.3"
     implementation("org.lwjgl:lwjgl-openvr:3.3.3")
     implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux")
     implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos")
     implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows")
+	implementation("com.illposed.osc:javaosc-core:0.9")
 }
 
 loom {

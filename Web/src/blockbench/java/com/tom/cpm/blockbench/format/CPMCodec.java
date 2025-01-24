@@ -17,7 +17,6 @@ import com.tom.cpm.blockbench.proxy.Codec;
 import com.tom.cpm.blockbench.proxy.Codecs;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Global;
-import com.tom.cpm.blockbench.proxy.Group;
 import com.tom.cpm.blockbench.proxy.KeyframeDataPoint;
 import com.tom.cpm.blockbench.proxy.ModelFormat;
 import com.tom.cpm.blockbench.proxy.ModelFormat.FormatPage;
@@ -196,8 +195,8 @@ public class CPMCodec {
 					BBActions.glowButton.value = ((Cube)Outliner.selected[0]).glow;
 					BBActions.glowButton.updateEnabledState();
 				}
-				if(Group.selected != null) {
-					BBActions.hiddenButton.value = Group.selected.hidden;
+				if(Project.selected_groups.length > 0) {
+					BBActions.hiddenButton.value = Project.selected_groups.getAt(0).hidden;
 					BBActions.hiddenButton.updateEnabledState();
 				}
 			}

@@ -49,7 +49,7 @@ public class VRArmRendererMixin_$vivecraft extends PlayerRenderer {
 			value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/RenderType;entityTranslucent("
 					+ "Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
-			), method = "renderItem", require = 0)
+			), method = "renderHand")
 	public ResourceLocation getSkinTex(ResourceLocation arg) {
 		ModelTexture tex = new ModelTexture(arg);
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(getModel(), tex, TextureSheetType.SKIN);

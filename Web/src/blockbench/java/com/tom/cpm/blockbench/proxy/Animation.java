@@ -26,6 +26,7 @@ public class Animation {
 	public JsPropertyMap<GeneralAnimator> animators;
 	public float length;
 	public boolean playing;
+	public int snapping;
 
 	@JsProperty(name = "cpm_type")
 	public String type;

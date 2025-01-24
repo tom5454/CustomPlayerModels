@@ -54,7 +54,8 @@ public class VRArmRendererMixin_$vivecraft extends PlayerRenderer {
 					+ "Lorg/vivecraft/client_vr/provider/ControllerType;"
 					+ "Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;"
 					+ "ILnet/minecraft/client/player/AbstractClientPlayer;"
-					+ "Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;)V"
+					+ "Lnet/minecraft/client/model/geom/ModelPart;Lnet/minecraft/client/model/geom/ModelPart;)V",
+					require = 0
 			)
 	public ResourceLocation getSkinTex(AbstractClientPlayer player) {
 		return getTextureLocation(player);

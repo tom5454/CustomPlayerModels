@@ -141,7 +141,6 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
-    maven { url 'https://jitpack.io' }
     maven {
         url 'https://www.cursemaven.com'
         content {
@@ -149,12 +148,11 @@ repositories {
         }
     }
     maven {
-    	url = "http://localhost:8000"
-		allowInsecureProtocol true
-		content {
-            includeGroup "local"
+        url 'https://api.modrinth.com/maven'
+        content {
+            includeGroup "maven.modrinth"
         }
-	}
+    }
 }
 
 mixin {
@@ -193,8 +191,7 @@ dependencies {
 	compileOnly files("../CustomPlayerModels-1.20.4/stubs/iris.jar")
 	compileOnly files("../CustomPlayerModels-1.20.4/stubs/fpm.jar")
     
-    //compileOnly fg.deobf('curse.maven:vivecraft-667903:4941635')
-    compileOnly fg.deobf('local:vivecraft-1.20.4:1.1.14-fbttest14-forge')
+    compileOnly fg.deobf('maven.modrinth:vivecraft:1.20.4-1.2.0-forge')
 }
 
 sourceSets {

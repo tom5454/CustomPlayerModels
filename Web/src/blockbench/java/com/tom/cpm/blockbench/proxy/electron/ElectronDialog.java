@@ -9,6 +9,8 @@ import jsinterop.annotations.JsType;
 public class ElectronDialog {
 	public native Promise<OpenDialogResult> showOpenDialog(DialogProperties pr);
 	public native Promise<SaveDialogResult> showSaveDialog(DialogProperties pr);
+	public native Promise<OpenDialogResult> showOpenDialog(BrowserWindow window, DialogProperties pr);
+	public native Promise<SaveDialogResult> showSaveDialog(BrowserWindow window, DialogProperties pr);
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class DialogProperties {

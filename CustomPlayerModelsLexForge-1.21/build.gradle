@@ -131,7 +131,6 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
-    maven { url 'https://jitpack.io' }
     maven {
         url 'https://www.cursemaven.com'
         content {
@@ -184,8 +183,7 @@ dependencies {
     compileOnly files("../CustomPlayerModels-1.21/stubs/of.jar")
 	compileOnly files("../CustomPlayerModels-1.21/stubs/iris.jar")
 	compileOnly files("../CustomPlayerModels-1.21/stubs/fpm.jar")
-	compileOnly files("../CustomPlayerModels-1.21/stubs/vc.jar")
-    //compileOnly 'maven.modrinth:vivecraft:1.20.6-1.1.9-b3-forge'
+    compileOnly 'maven.modrinth:vivecraft:1.21.1-1.2.0-forge'
 }
 
 sourceSets {

@@ -6,11 +6,13 @@ import java.util.concurrent.CompletableFuture;
 
 import com.tom.cpl.gui.elements.FileChooserPopup;
 import com.tom.cpl.gui.elements.FileChooserPopup.FileFilter;
+import com.tom.cpm.blockbench.ee.EmbeddedEditorHandler;
 import com.tom.cpm.blockbench.proxy.electron.Electron;
 import com.tom.cpm.blockbench.proxy.electron.ElectronDialog.DialogProperties;
 import com.tom.cpm.blockbench.proxy.electron.ElectronDialog.FileFilterJS;
 import com.tom.cpm.blockbench.proxy.electron.FileSystem;
 import com.tom.cpm.blockbench.proxy.electron.FileSystem.Buffer;
+import com.tom.cpm.blockbench.util.SystemFileChooser;
 import com.tom.cpm.web.client.FS.IFS;
 import com.tom.cpm.web.client.IFile;
 import com.tom.cpm.web.client.java.Java;
@@ -221,23 +223,31 @@ public class BlockBenchFS implements IFS {
 			FileFilter ff = (FileFilter) fc.getFilter();
 			if(ff.isFolder()) {
 				dp.properties = new String[] {"openDirectory"};
-				return Electron.dialog.showOpenDialog(dp).then(d -> {
-					return Promise.resolve(d.canceled ? null : new File(d.filePaths[0]));
-				});
+				return openFileChooser1(false, dp);
 			} else if(ff.getExt() != null) {
 				dp.filters = new FileFilterJS[] {FileFilterJS.make(fc.getDescription(), ff.getExt())};
 			}
 		}
 		if(fc.isSaveDialog()) {
-			return Electron.dialog.showSaveDialog(dp).then(d -> {
-				return Promise.resolve(d.canceled ? null : new File(d.filePath));
-			});
+			return openFileChooser1(true, dp);
 		} else {
 			dp.properties = new String[] {"openFile"};
-			return Electron.dialog.showOpenDialog(dp).then(d -> {
-				return Promise.resolve(d.canceled ? null : new File(d.filePaths[0]));
-			});
+			return openFileChooser1(false, dp);
 		}
+	}
+
+	private static Promise<File> openFileChooser1(boolean save, DialogProperties dialog) {
+		Promise<String> pr;
+		if (EmbeddedEditorHandler.isRunningInEmbeddedEditor()) {
+			pr = EmbeddedEditorHandler.openFileDialog(save, dialog);
+		} else {
+			if (save) {
+				pr = SystemFileChooser.showSaveDialog(dialog);
+			} else {
+				pr = SystemFileChooser.showOpenDialog(dialog);
+			}
+		}
+		return pr.then(p -> Promise.resolve(p != null ? new File(p) : null));
 	}
 
 	public static String getLibrary(String name) {

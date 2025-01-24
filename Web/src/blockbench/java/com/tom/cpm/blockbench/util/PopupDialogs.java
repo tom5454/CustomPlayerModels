@@ -49,6 +49,12 @@ public class PopupDialogs {
 
 	public static void displayError(String msg, Object err) {
 		if(err instanceof PopupDialogs.CancelException)return;
+		if(err instanceof UserException) {
+			UserException ex = (UserException) err;
+			errorDialog.setLines(msg, "<br>", ex.getMessage());
+			errorDialog.show();
+			return;
+		}
 		String errorMsg;
 		if(err instanceof Throwable) {
 			String st = ExceptionUtil.getStackTrace((Throwable) err);
@@ -72,6 +78,12 @@ public class PopupDialogs {
 	}
 
 	public static class CancelException extends Exception {
+	}
+
+	public static class UserException extends Exception {
+		public UserException(String message) {
+			super(message);
+		}
 	}
 
 	@JsFunction

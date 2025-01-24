@@ -7,7 +7,10 @@ import elemental2.core.JsObject;
 import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
+import jsinterop.base.Js;
+import jsinterop.base.JsPropertyMap;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Dialog_$$")
 public class Dialog {
@@ -18,6 +21,7 @@ public class Dialog {
 	private static @JsOverlay final String FORM_FILE = "file";
 	private static @JsOverlay final String FORM_VECTOR = "vector";
 	private static @JsOverlay final String FORM_INFO = "info";
+	private static @JsOverlay final String FORM_NUMBER = "number";
 
 	public Dialog(DialogProperties ctr) {}
 
@@ -36,11 +40,20 @@ public class Dialog {
 		public CallbackCancel onCancel;
 		public CallbackButton onButton;
 		public CallbackFormChange onFormChange;
-		public CallbackBuild onBuild;
+		public CallbackBuild onOpen;
 		public String[] lines, buttons;
 		public boolean singleButton;
 		public int width, confirmIndex, cancelIndex;
 		public VueComponent component;
+	}
+
+	@JsOverlay
+	public static void link(JsObject obj) {
+		JsPropertyMap<FormElement> elem = Js.uncheckedCast(obj);
+		elem.forEach(k -> {
+			FormElement e = elem.get(k);
+			e.barId = k;
+		});
 	}
 
 	@JsFunction
@@ -72,12 +85,14 @@ public class Dialog {
 	public static class FormElement {
 		public String label, type, description;
 		public Condition condition;
-		public JQueryNode bar;
-	}
 
-	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
-	public static class FormElementBar {
-		public native void toggle(boolean show);
+		@JsProperty(name = "cpm_bar_id")
+		public String barId;
+
+		@JsOverlay
+		public final JQueryNode getBar() {
+			return JQueryNode.jq(".form_bar_" + barId);
+		}
 	}
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
@@ -200,6 +215,22 @@ public class Dialog {
 			e.label = label;
 			e.text = text;
 			e.description = desc;
+			return e;
+		}
+	}
+
+	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
+	public static class FormNumberElement extends FormElement {
+		public int value, step, min, max;
+
+		@JsOverlay
+		public static FormNumberElement make(String label, int step, int min, int max) {
+			FormNumberElement e = new FormNumberElement();
+			e.type = FORM_NUMBER;
+			e.label = label;
+			e.step = step;
+			e.min = min;
+			e.max = max;
 			return e;
 		}
 	}

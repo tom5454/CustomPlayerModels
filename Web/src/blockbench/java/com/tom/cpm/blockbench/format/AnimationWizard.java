@@ -12,6 +12,7 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.web.client.java.JsBuilder;
 import com.tom.cpm.web.client.util.I18n;
 
+import elemental2.dom.DomGlobal;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
@@ -81,6 +82,11 @@ public class AnimationWizard {
 		Dialog.FormCheckboxElement layerDefaultB = Dialog.FormCheckboxElement.make(I18n.get("label.cpm.defLayerSettings.toggle"));
 		if(anIn != null)layerDefaultB.value = anIn.getLayerDefault() > 0.5f;
 
+		Dialog.FormNumberElement snapping = Dialog.FormNumberElement.make("menu.animation.snapping", 1, 10, 500);
+		if (anIn != null)snapping.value = anIn.snapping;
+		else snapping.value = 10;
+		snapping.description = I18n.formatNl("bb-tooltip.anim.snapping");
+
 		dctr.form = new JsBuilder<>().
 				put("name", name).
 				put("loop", loop).
@@ -94,35 +100,38 @@ public class AnimationWizard {
 				put("group", group).
 				put("layerDefaultF", layerDefaultF).
 				put("layerDefaultB", layerDefaultB).
+				put("snapping", snapping).
 				build();
+		Dialog.link(dctr.form);
 
 		Consumer<String> update = t -> {
-			prop.bar.toggle(false);
-			group.bar.toggle(false);
-			layerDefaultF.bar.toggle(false);
-			layerDefaultB.bar.toggle(false);
-			lc.bar.toggle(false);
-			cc.bar.toggle(false);
-			order.bar.toggle(false);
+			DomGlobal.console.log(prop);
+			prop.getBar().toggle(false);
+			group.getBar().toggle(false);
+			layerDefaultF.getBar().toggle(false);
+			layerDefaultB.getBar().toggle(false);
+			lc.getBar().toggle(false);
+			cc.getBar().toggle(false);
+			order.getBar().toggle(false);
 			if(t.equals(AnimationType.LAYER.name().toLowerCase(Locale.ROOT))) {
-				prop.bar.toggle(true);
-				group.bar.toggle(true);
-				layerDefaultB.bar.toggle(true);
-				cc.bar.toggle(true);
-				order.bar.toggle(true);
+				prop.getBar().toggle(true);
+				group.getBar().toggle(true);
+				layerDefaultB.getBar().toggle(true);
+				cc.getBar().toggle(true);
+				order.getBar().toggle(true);
 			} else if(t.equals(AnimationType.VALUE_LAYER.name().toLowerCase(Locale.ROOT))) {
-				prop.bar.toggle(true);
-				layerDefaultF.bar.toggle(true);
-				cc.bar.toggle(true);
-				order.bar.toggle(true);
+				prop.getBar().toggle(true);
+				layerDefaultF.getBar().toggle(true);
+				cc.getBar().toggle(true);
+				order.getBar().toggle(true);
 			} else if(t.equals(AnimationType.CUSTOM_POSE.name().toLowerCase(Locale.ROOT))) {
-				lc.bar.toggle(true);
-				cc.bar.toggle(true);
-				order.bar.toggle(true);
+				lc.getBar().toggle(true);
+				cc.getBar().toggle(true);
+				order.getBar().toggle(true);
 			} else if(t.equals(AnimationType.GESTURE.name().toLowerCase(Locale.ROOT))) {
-				lc.bar.toggle(true);
-				cc.bar.toggle(true);
-				order.bar.toggle(true);
+				lc.getBar().toggle(true);
+				cc.getBar().toggle(true);
+				order.getBar().toggle(true);
 			}
 		};
 
@@ -131,7 +140,7 @@ public class AnimationWizard {
 			update.accept(r.type);
 		};
 
-		dctr.onBuild = () -> {
+		dctr.onOpen = () -> {
 			if(anIn != null)update.accept(anIn.type);
 			else update.accept(AnimationType.CUSTOM_POSE.name().toLowerCase(Locale.ROOT));
 		};
@@ -156,6 +165,7 @@ public class AnimationWizard {
 			a.group = r.group;
 			a.isProperty = r.prop;
 			a.setOrder(Math.round(r.order));
+			a.snapping = r.snapping;
 			if(a.type.equals(AnimationType.LAYER.name().toLowerCase(Locale.ROOT)))
 				a.setLayerDefault(r.layerDefaultB ? 1 : 0);
 			else
@@ -181,5 +191,6 @@ public class AnimationWizard {
 		public boolean add, layerCtrl, commandCtrl, prop, layerDefaultB;
 		public float priority, order;
 		public float[] layerDefaultF;
+		public int snapping;
 	}
 }

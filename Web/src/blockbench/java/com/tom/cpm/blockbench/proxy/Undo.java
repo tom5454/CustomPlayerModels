@@ -15,6 +15,7 @@ public class Undo {
 		public OutlinerElement[] elements;
 		public boolean selection, outliner, uv_mode, uv_only;
 		public Group group;
+		public Group[] groups;
 		public Texture[] textures;
 		public Animation[] animations;
 
@@ -36,6 +37,13 @@ public class Undo {
 		public static UndoData make(Animation... an) {
 			UndoData d = new UndoData();
 			d.animations = an;
+			return d;
+		}
+
+		@JsOverlay
+		public static UndoData make(Group... elem) {
+			UndoData d = new UndoData();
+			d.groups = elem;
 			return d;
 		}
 	}

@@ -223,8 +223,12 @@ public class Java {
 			cf.complete(i);
 			return null;
 		}).catch_(e -> {
-			cf.completeExceptionally(e instanceof Throwable ? (Throwable) e : new JavaScriptException(e));
+			cf.completeExceptionally(convertRejectObject(e));
 			return null;
 		});
+	}
+
+	public static Throwable convertRejectObject(Object e) {
+		return e instanceof Throwable ? (Throwable) e : new JavaScriptException(e);
 	}
 }

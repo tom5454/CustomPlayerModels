@@ -202,12 +202,12 @@ public class BBActions {
 			a.name = I18n.get("label.cpm.hidden_effect");
 			a.description = "";
 			a.condition = new Action.Condition();
-			a.condition.method = c -> Group.selected != null && Group.selected.parent != Group.ROOT;
+			a.condition.method = c -> Project.selected_groups.length > 0;
 			a.onChange = v -> {
-				if(Group.selected != null) {
-					Undo.initEdit(UndoData.make(Group.selected));
-					Group.selected.hidden = v;
-					Undo.finishEdit(I18n.format("action.cpm.switch", I18n.get("label.cpm.hidden_effect")), UndoData.make(Group.selected));
+				if(Project.selected_groups.length > 0) {
+					Undo.initEdit(UndoData.make(Project.selected_groups.array()));
+					Project.selected_groups.forEach(g -> g.hidden = v);
+					Undo.finishEdit(I18n.format("action.cpm.switch", I18n.get("label.cpm.hidden_effect")), UndoData.make(Project.selected_groups.array()));
 				}
 			};
 			hiddenButton = new Toggle("cpm_hidden", a);

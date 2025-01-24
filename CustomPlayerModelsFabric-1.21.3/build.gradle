@@ -66,13 +66,14 @@ dependencies {
 		compileOnly files("../CustomPlayerModels-1.21.3/stubs/pehkui.jar")
 	}
 	
-    modCompileOnly('maven.modrinth:vivecraft:1.21.3-1.1.14-b2-fabric')
+    modCompileOnly('maven.modrinth:vivecraft:1.21.3-1.2.0-fabric')
     implementation "com.electronwill.night-config:core:3.6.6"
     implementation "com.electronwill.night-config:toml:3.6.6"
     implementation("org.lwjgl:lwjgl-openvr:3.3.3")
     implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux")
     implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos")
     implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows")
+	implementation("com.illposed.osc:javaosc-core:0.9")
 }
 
 loom {

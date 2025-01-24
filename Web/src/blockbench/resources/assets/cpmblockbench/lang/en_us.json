@@ -49,5 +49,12 @@
   "bb-label.autoFix.stagedAnim": "Staged Animation Base",
   "bb-label.warn.unknownAnimation": "Unknown Animation Type (%s)",
   "bb-label.language.reloadRequired.desc": "Please restart Blockbench to apply language change.",
-  "bb-tooltip.export.renameGroup": "Rename the group to the selected type\\If a group with the same name already exists the action will fail."
+  "bb-label.warn.uvDecimalFixer.applied": "UV Decimal Fixer was applied",
+  "bb-label.warn.uvDecimalFixer.face": "%s/ Face: %s",
+  "bb-label.warn.uvDecimalFixer.list": "UV Decimal Cubes List",
+  "bb-label.error.failedToLoadTexture": "Failed to load the image data for texture: %s\\Please restart Blockbench and try again\\Cause: %s",
+  "bb-label.openedInBB": "Please click back to the Blockbench tab to continue.",
+  "bb-tooltip.export.renameGroup": "Rename the group to the selected type\\If a group with the same name already exists the action will fail.",
+  "bb-tooltip.anim.snapping": "Snapping determines the export resolution for CPM.\\The exported animation will linearly interpolate at the snapping frames per second.",
+  "bb-tooltip.warn.uvDecimalFixerApplied": "Click the %s button to show a list of affected cubes."
 }

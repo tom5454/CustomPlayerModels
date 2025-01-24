@@ -14,8 +14,6 @@ import com.tom.cpm.shared.model.render.ModelRenderManager.RedirectRenderer;
 
 public class RedirectHolderVRPlayer extends RDH<VRPlayerModel> {
 	private RedirectRenderer<ModelPart> head;
-	private RedirectRenderer<ModelPart> leftArm;
-	private RedirectRenderer<ModelPart> rightArm;
 	private boolean seated;
 
 	public RedirectHolderVRPlayer(PlayerRenderManager mngr, VRPlayerModel model) {
@@ -26,12 +24,12 @@ public class RedirectHolderVRPlayer extends RDH<VRPlayerModel> {
 		head = registerHead(createRendered(    () -> model.head     , v -> model.head      = v, PlayerModelParts.HEAD));
 		register(createRendered(           () -> model.body     , v -> model.body      = v, PlayerModelParts.BODY));
 		if(seated) {
-			rightArm = register(createRendered(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
-			leftArm = register(createRendered( () -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			register(createRendered(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			register(createRendered( () -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
 		} else {
 			VRPlayerModel_WithArms w = (VRPlayerModel_WithArms) model;
-			rightArm = register(createRendered(() -> w.rightHand, v -> w.rightHand = v, PlayerModelParts.RIGHT_ARM));
-			leftArm = register(createRendered( () -> w.leftHand , v -> w.leftHand  = v, PlayerModelParts.LEFT_ARM));
+			register(createRendered(() -> w.rightHand, v -> w.rightHand = v, PlayerModelParts.RIGHT_ARM));
+			register(createRendered( () -> w.leftHand , v -> w.leftHand  = v, PlayerModelParts.LEFT_ARM));
 		}
 		register(createRendered(           () -> model.rightLeg , v -> model.rightLeg  = v, PlayerModelParts.RIGHT_LEG));
 		register(createRendered(           () -> model.leftLeg  , v -> model.leftLeg   = v, PlayerModelParts.LEFT_LEG));
@@ -43,7 +41,7 @@ public class RedirectHolderVRPlayer extends RDH<VRPlayerModel> {
 		register(new Field<>(() -> model.rightPants , v -> model.rightPants  = v, null));
 		register(new Field<>(() -> model.jacket     , v -> model.jacket      = v, null));
 
-		register(new Field<>(() -> model.vrHMD, v -> model.vrHMD = v, null));//disable
+		//register(new Field<>(() -> model.vrHMD, v -> model.vrHMD = v, null));//disable
 		if(!seated) {
 			VRPlayerModel_WithArms w = (VRPlayerModel_WithArms) model;
 			register(new Field<>(() -> w.leftArm , v -> w.leftArm  = v, null));//disable
@@ -52,13 +50,11 @@ public class RedirectHolderVRPlayer extends RDH<VRPlayerModel> {
 			register(new Field<>(() -> w.leftHandSleeve , v -> w.leftHandSleeve  = v, null));//disable
 			register(new Field<>(() -> w.rightHandSleeve, v -> w.rightHandSleeve = v, null));//disable
 		}
+		//register(new Field<>(() -> model.cloak, v -> model.cloak = v, RootModelType.CAPE));
 	}
 
 	@Override
 	protected void setupTransform(MatrixStack stack, RedirectRenderer<ModelPart> part, boolean pre) {
-		if(!pre && (leftArm == part || rightArm == part) && !seated) {
-			stack.translate(0, -8 / 16f, 0);
-		}
 	}
 
 	@Override

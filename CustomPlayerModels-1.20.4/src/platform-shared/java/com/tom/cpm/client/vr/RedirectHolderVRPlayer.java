@@ -27,7 +27,7 @@ public class RedirectHolderVRPlayer extends RDH {
 	private RedirectRenderer<ModelPart> leftArm;
 	private RedirectRenderer<ModelPart> rightArm;
 	private boolean seated;
-	private static boolean FBT;
+	private static boolean VC120;
 	private static java.lang.reflect.Field[] OLD_FIELDS;
 	static {
 		try {
@@ -37,10 +37,9 @@ public class RedirectHolderVRPlayer extends RDH {
 					VRPlayerModel_WithArms.class.getDeclaredField("leftShoulder_sleeve"),
 					VRPlayerModel_WithArms.class.getDeclaredField("rightShoulder_sleeve"),
 			};
-			FBT = false;
+			VC120 = false;
 		} catch (Throwable e) {
-			e.printStackTrace();
-			FBT = true;
+			VC120 = true;
 		}
 	}
 
@@ -72,7 +71,7 @@ public class RedirectHolderVRPlayer extends RDH {
 		register(new Field<>(() -> model.vrHMD, v -> model.vrHMD = v, null));//disable
 		if(!seated) {
 			VRPlayerModel_WithArms<AbstractClientPlayer> w = (VRPlayerModel_WithArms<AbstractClientPlayer>) model;
-			if (FBT) {
+			if (VC120) {
 				register(new Field<>(() -> w.leftArm , v -> w.leftArm  = v, null));//disable
 				register(new Field<>(() -> w.rightArm, v -> w.rightArm = v, null));//disable
 
@@ -111,8 +110,9 @@ public class RedirectHolderVRPlayer extends RDH {
 
 	@Override
 	protected void setupTransform(MatrixStack stack, RedirectRenderer<ModelPart> part, boolean pre) {
+		if (VC120)return;
 		if(!pre && (leftArm == part || rightArm == part) && !seated) {
-			//stack.translate(0, -8 / 16f, 0);
+			stack.translate(0, -8 / 16f, 0);
 		}
 	}
 
