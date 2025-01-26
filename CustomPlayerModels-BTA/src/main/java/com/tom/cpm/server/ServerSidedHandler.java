@@ -7,11 +7,11 @@ import java.util.function.Consumer;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.entity.Entity;
-import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.core.entity.player.Player;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.entity.EntityTracker;
-import net.minecraft.server.entity.EntityTrackerEntry;
-import net.minecraft.server.entity.player.EntityPlayerMP;
+import net.minecraft.server.entity.EntityTrackerEntryImpl;
+import net.minecraft.server.entity.EntityTrackerImpl;
+import net.minecraft.server.entity.player.PlayerServer;
 import net.minecraft.server.world.WorldServer;
 
 import com.tom.cpm.SidedHandler;
@@ -20,24 +20,24 @@ import com.tom.cpm.common.ServerNetworkImpl;
 public class ServerSidedHandler implements SidedHandler {
 
 	@Override
-	public void getTracking(EntityPlayer player, Consumer<EntityPlayer> f) {
+	public void getTracking(Player player, Consumer<Player> f) {
 		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
 		WorldServer ws = (WorldServer) player.world;
-		EntityTracker et = server.getEntityTracker(ws.dimension.id);
-		for (EntityTrackerEntry tr : et.trackedEntitySet) {
-			if (tr.trackedEntity instanceof EntityPlayer && tr.trackedPlayers.contains(player)) {
-				f.accept((EntityPlayer) tr.trackedEntity);
+		EntityTrackerImpl et = server.getEntityTracker(ws.dimension.id);
+		for (EntityTrackerEntryImpl tr : et.trackedEntitySet) {
+			if (tr.trackedEntity instanceof Player && tr.trackedPlayers.contains(player)) {
+				f.accept((Player) tr.trackedEntity);
 			}
 		}
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Set<EntityPlayer> getTrackingPlayers(Entity entity) {
+	public Set<Player> getTrackingPlayers(Entity entity) {
 		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
 		WorldServer ws = (WorldServer) entity.world;
-		EntityTracker et = server.getEntityTracker(ws.dimension.id);
-		EntityTrackerEntry entry = et.trackedEntityHashTable.get(entity.id);
+		EntityTrackerImpl et = server.getEntityTracker(ws.dimension.id);
+		EntityTrackerEntryImpl entry = et.trackedEntityHashTable.get(entity.id);
 		if (entry == null)
 			return Collections.emptySet();
 		else
@@ -46,13 +46,13 @@ public class ServerSidedHandler implements SidedHandler {
 
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Override
-	public List<EntityPlayer> getPlayersOnline() {
+	public List<Player> getPlayersOnline() {
 		MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
 		return (List) server.playerList.playerEntities;
 	}
 
 	@Override
-	public ServerNetworkImpl getServer(EntityPlayer pl) {
-		return (ServerNetworkImpl) ((EntityPlayerMP) pl).playerNetServerHandler;
+	public ServerNetworkImpl getServer(Player pl) {
+		return (ServerNetworkImpl) ((PlayerServer) pl).playerNetServerHandler;
 	}
 }

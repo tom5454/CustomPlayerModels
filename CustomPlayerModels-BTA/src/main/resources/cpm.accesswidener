@@ -1,16 +1,11 @@
 accessWidener	v1	named
-accessible field net/minecraft/client/render/entity/PlayerRenderer modelBipedMain Lnet/minecraft/client/render/model/ModelBiped;
-accessible field net/minecraft/client/render/entity/PlayerRenderer modelArmorChestplate Lnet/minecraft/client/render/model/ModelBiped;
-accessible field net/minecraft/client/render/entity/PlayerRenderer modelArmor Lnet/minecraft/client/render/model/ModelBiped;
+accessible field net/minecraft/client/render/entity/MobRendererPlayer modelBipedMain Lnet/minecraft/client/render/model/ModelBiped;
+accessible field net/minecraft/client/render/entity/MobRendererPlayer modelArmorChestplate Lnet/minecraft/client/render/model/ModelBiped;
+accessible field net/minecraft/client/render/entity/MobRendererPlayer modelArmor Lnet/minecraft/client/render/model/ModelBiped;
 
-accessible field net/minecraft/core/item/ItemStack tag Lcom/mojang/nbt/CompoundTag;
-
-mutable field net/minecraft/client/gui/GuiTextField width I
-mutable field net/minecraft/client/gui/GuiTextField height I
+mutable field net/minecraft/client/gui/TextFieldElement width I
+mutable field net/minecraft/client/gui/TextFieldElement height I
 
 accessible field net/minecraft/core/lang/Language entries Ljava/util/Properties;
 
 accessible field net/minecraft/client/Minecraft INSTANCE Lnet/minecraft/client/Minecraft;
-
-accessible field net/minecraft/server/entity/EntityTracker trackedEntityHashTable Lnet/minecraft/core/world/pathfinder/IdHashMap;
-accessible field net/minecraft/server/entity/EntityTracker trackedEntitySet Ljava/util/Set;

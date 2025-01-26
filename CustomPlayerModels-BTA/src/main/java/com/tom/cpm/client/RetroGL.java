@@ -15,7 +15,7 @@ import com.tom.cpl.render.VertexBuffer;
 import com.tom.cpm.client.MinecraftObject.Texture;
 import com.tom.cpm.shared.retro.RetroGLAccess;
 
-public class RetroGL implements RetroGLAccess<Integer> {
+public class RetroGL implements RetroGLAccess<net.minecraft.client.render.texture.Texture> {
 	public static RetroTessellator tessellator;
 	public static int renderCallLoc;
 	public static final int HURT_OVERLAY_LOC = 3;
@@ -35,7 +35,7 @@ public class RetroGL implements RetroGLAccess<Integer> {
 	}, GL11.GL_QUADS);
 
 	@Override
-	public RenderStage texture(Integer tex) {
+	public RenderStage texture(net.minecraft.client.render.texture.Texture tex) {
 		return new RenderStage(true, true, true, true, () -> {
 			bindTex(tex);
 			GL11.glEnable(GL11.GL_BLEND);
@@ -48,7 +48,7 @@ public class RetroGL implements RetroGLAccess<Integer> {
 	private static float lx, ly;*/
 
 	@Override
-	public RenderStage eyes(Integer tex) {
+	public RenderStage eyes(net.minecraft.client.render.texture.Texture tex) {
 		return new RenderStage(true, true, true, false, () -> {
 			if(renderCallLoc == RetroGL.HURT_OVERLAY_LOC)return;
 			//lx = clx;
@@ -85,9 +85,9 @@ public class RetroGL implements RetroGLAccess<Integer> {
 		return color;
 	}
 
-	private static void bindTex(Integer tex) {
-		if(tex != null) {
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+	private static void bindTex(net.minecraft.client.render.texture.Texture tex) {
+		if (tex != null) {
+			tex.bind();
 		}
 	}
 
@@ -239,8 +239,8 @@ public class RetroGL implements RetroGLAccess<Integer> {
 	}
 
 	@Override
-	public Integer getDynTexture() {
-		return Texture.bound != null ? Texture.bound.getId() : null;
+	public net.minecraft.client.render.texture.Texture getDynTexture() {
+		return Texture.bound != null ? Texture.bound.getMcTex() : null;
 	}
 
 	private static boolean blendExt, openGL14;

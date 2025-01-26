@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 import net.minecraft.core.item.Item;
 import net.minecraft.core.item.ItemStack;
 
-import com.mojang.nbt.ByteArrayTag;
-import com.mojang.nbt.CompoundTag;
-import com.mojang.nbt.ListTag;
-import com.mojang.nbt.Tag;
+import com.mojang.nbt.tags.ByteArrayTag;
+import com.mojang.nbt.tags.CompoundTag;
+import com.mojang.nbt.tags.ListTag;
+import com.mojang.nbt.tags.Tag;
 
 import com.tom.cpl.item.ItemStackHandler;
 import com.tom.cpl.item.NbtMapper;
@@ -194,7 +194,7 @@ public class ItemStackHandlerImpl extends ItemStackHandler<ItemStack> {
 
 	@Override
 	public NBTTagCompound getTag(ItemStack stack) {
-		return stack != null && stack.tag != null ? nbt.wrap(stack.tag) : null;
+		return stack != null && stack.getData() != null ? nbt.wrap(stack.getData()) : null;
 	}
 
 	@Override

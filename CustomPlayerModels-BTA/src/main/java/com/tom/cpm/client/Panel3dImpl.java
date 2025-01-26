@@ -6,6 +6,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.render.OpenGLHelper;
 
 import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Mat4f;
@@ -55,6 +56,8 @@ public class Panel3dImpl extends Panel3dNative {
 			GL11.glDisable(GL11.GL_CULL_FACE);
 
 			panel.render(new MatrixStack(), new VBuffers(RetroGL::buffer), partialTicks);
+
+			OpenGLHelper.checkError("CPM Panel3dImpl Post render");
 		} finally {
 			GL11.glDisable(GL11.GL_DEPTH_TEST);
 			GL11.glPopMatrix();
@@ -63,23 +66,23 @@ public class Panel3dImpl extends Panel3dNative {
 
 	@Override
 	public RenderTypes<RenderMode> getRenderTypes() {
-		return getRenderTypes0(Texture.bound != null ? Texture.bound.getId() : null);
+		return getRenderTypes0(Texture.bound != null ? Texture.bound.getMcTex() : null);
 	}
 
 	@Override
 	public RenderTypes<RenderMode> getRenderTypes(String tex) {
-		return getRenderTypes0(mc.renderEngine.getTexture("/assets/cpm/textures/gui/" + tex + ".png"));
+		return getRenderTypes0(mc.textureManager.loadTexture("/assets/cpm/textures/gui/" + tex + ".png"));
 	}
 
 	@Override
 	public Image takeScreenshot(Vec2i size) {
 		GuiImpl gui = panel.getGui().getNativeGui();
-		float multiplierX = this.mc.resolution.width / (float)gui.width;
-		float multiplierY = this.mc.resolution.height / (float)gui.height;
+		float multiplierX = this.mc.resolution.getWidthScreenCoords() / (float)gui.width;
+		float multiplierY = this.mc.resolution.getHeightScreenCoords() / (float)gui.height;
 		int width = (int) (multiplierX * size.x);
 		int height = (int) (multiplierY * size.y);
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(width * height * 3);
-		GL11.glReadPixels((int) (multiplierX * renderPos.x), this.mc.resolution.height - height - ((int) (multiplierY * renderPos.y)), width, height, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
+		GL11.glReadPixels((int) (multiplierX * renderPos.x), this.mc.resolution.getHeightScreenCoords() - height - ((int) (multiplierY * renderPos.y)), width, height, GL11.GL_RGB, GL11.GL_FLOAT, buffer);
 		Image img = new Image(width, height);
 		for(int y = 0;y<height;y++) {
 			for(int x = 0;x<width;x++) {
@@ -97,11 +100,11 @@ public class Panel3dImpl extends Panel3dNative {
 
 	@Override
 	public Mat4f getView() {
-		return Mat4f.map(GL11.GL_MODELVIEW_MATRIX, GL11::glGetFloat);
+		return Mat4f.map(GL11.GL_MODELVIEW_MATRIX, GL11::glGetFloatv);
 	}
 
 	@Override
 	public Mat4f getProjection() {
-		return Mat4f.map(GL11.GL_PROJECTION_MATRIX, GL11::glGetFloat);
+		return Mat4f.map(GL11.GL_PROJECTION_MATRIX, GL11::glGetFloatv);
 	}
 }

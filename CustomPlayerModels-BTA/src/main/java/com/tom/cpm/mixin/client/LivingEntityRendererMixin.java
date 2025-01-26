@@ -6,44 +6,45 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.render.entity.LivingRenderer;
-import net.minecraft.client.render.entity.PlayerRenderer;
+import net.minecraft.client.render.entity.MobRenderer;
+import net.minecraft.client.render.entity.MobRendererPlayer;
 import net.minecraft.client.render.model.ModelBase;
 import net.minecraft.client.render.model.ModelBiped;
-import net.minecraft.core.entity.EntityLiving;
+import net.minecraft.client.render.tessellator.Tessellator;
+import net.minecraft.core.entity.Mob;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.IBipedModel;
 import com.tom.cpm.client.PlayerRenderManager;
 import com.tom.cpm.client.RetroGL;
 
-@Mixin(value = LivingRenderer.class, remap = false)
+@Mixin(value = MobRenderer.class, remap = false)
 public class LivingEntityRendererMixin {
-	private static final String RENDER_METHOD = "render(Lnet/minecraft/core/entity/EntityLiving;DDDFF)V";
+	private static final String RENDER_METHOD = "render(Lnet/minecraft/client/render/tessellator/Tessellator;Lnet/minecraft/core/entity/Mob;DDDFF)V";
 	private static final String MODEL_RENDER_METHOD = "Lnet/minecraft/client/render/model/ModelBase;render(FFFFFF)V";
 
 	private void onRenderPart(ModelBase model, int callLoc) {
 		RetroGL.renderCallLoc = callLoc;
 		Object r = this;
-		if (r instanceof PlayerRenderer && model instanceof ModelBiped) {
-			PlayerRenderer rp = (PlayerRenderer) r;
+		if (r instanceof MobRendererPlayer && model instanceof ModelBiped) {
+			MobRendererPlayer rp = (MobRendererPlayer) r;
 			if(model == rp.modelArmor || model == rp.modelArmorChestplate) {
 				PlayerRenderManager m = CustomPlayerModelsClient.mc.getPlayerRenderManager();
 				ModelBiped player = rp.modelBipedMain;
 				ModelBiped armor = (ModelBiped) model;
-				m.copyModelForArmor(player.bipedBody, armor.bipedBody);
-				m.copyModelForArmor(player.bipedHead, armor.bipedHead);
-				m.copyModelForArmor(player.bipedLeftArm, armor.bipedLeftArm);
-				m.copyModelForArmor(player.bipedLeftLeg, armor.bipedLeftLeg);
-				m.copyModelForArmor(player.bipedRightArm, armor.bipedRightArm);
-				m.copyModelForArmor(player.bipedRightLeg, armor.bipedRightLeg);
+				m.copyModelForArmor(player.body, armor.body);
+				m.copyModelForArmor(player.head, armor.head);
+				m.copyModelForArmor(player.armLeft, armor.armLeft);
+				m.copyModelForArmor(player.legLeft, armor.legLeft);
+				m.copyModelForArmor(player.armRight, armor.armRight);
+				m.copyModelForArmor(player.legRight, armor.legRight);
 				((IBipedModel) armor).cpm$setNoSetup(true);
 			}
 		}
 	}
 
 	@Inject(at = @At(value = "HEAD"), method = RENDER_METHOD)
-	public void onRender(EntityLiving arg, double d, double e, double f, float g, float h, CallbackInfo cbi) {
+	public void onRender(Tessellator tessellator, Mob arg, double d, double e, double f, float g, float h, CallbackInfo cbi) {
 		RetroGL.renderCallLoc = 0;
 	}
 

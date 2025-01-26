@@ -48,17 +48,17 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, Cube, Mo
 			}
 
 		});
-		setVis(m -> m.showModel, (m, v) -> m.showModel = v);
-		setModelPosGetters(m -> m.rotationPointX, m -> m.rotationPointY, m -> m.rotationPointZ);
-		setModelRotGetters(m -> m.rotateAngleX, m -> m.rotateAngleY, m -> m.rotateAngleZ);
+		setVis(m -> m.visible, (m, v) -> m.visible = v);
+		setModelPosGetters(m -> m.x, m -> m.y, m -> m.z);
+		setModelRotGetters(m -> m.xRot, m -> m.yRot, m -> m.zRot);
 		setModelSetters((m, x, y, z) -> {
-			m.rotationPointX = x;
-			m.rotationPointY = y;
-			m.rotationPointZ = z;
+			m.x = x;
+			m.y = y;
+			m.z = z;
 		}, (m, x, y, z) -> {
-			m.rotateAngleX = x;
-			m.rotateAngleY = y;
-			m.rotateAngleZ = z;
+			m.xRot = x;
+			m.yRot = y;
+			m.zRot = z;
 		});
 		setRenderPart(new Cube(0, 0));
 	}
@@ -68,16 +68,16 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, Cube, Mo
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, ModelBiped model) {
 			super(mngr, model);
-			head = registerHead(new Field<>(() -> model.bipedHead, v -> model.bipedHead = v, PlayerModelParts.HEAD));
-			register(new Field<>(() -> model.bipedBody    , v -> model.bipedBody     = v, PlayerModelParts.BODY));
-			register(new Field<>(() -> model.bipedRightArm, v -> model.bipedRightArm = v, PlayerModelParts.RIGHT_ARM));
-			register(new Field<>(() -> model.bipedLeftArm , v -> model.bipedLeftArm  = v, PlayerModelParts.LEFT_ARM));
-			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, PlayerModelParts.RIGHT_LEG));
-			register(new Field<>(() -> model.bipedLeftLeg , v -> model.bipedLeftLeg  = v, PlayerModelParts.LEFT_LEG));
+			head = registerHead(new Field<>(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
+			register(new Field<>(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+			register(new Field<>(() -> model.armRight, v -> model.armRight = v, PlayerModelParts.RIGHT_ARM));
+			register(new Field<>(() -> model.armLeft , v -> model.armLeft  = v, PlayerModelParts.LEFT_ARM));
+			register(new Field<>(() -> model.legRight, v -> model.legRight = v, PlayerModelParts.RIGHT_LEG));
+			register(new Field<>(() -> model.legLeft , v -> model.legLeft  = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.bipedHeadOverlay, v -> model.bipedHeadOverlay = v, null)).setCopyFrom(head);
+			register(new Field<>(() -> model.hair, v -> model.hair = v, null)).setCopyFrom(head);
 
-			register(new Field<>(() -> model.bipedCloak,    v -> model.bipedCloak    = v, RootModelType.CAPE));
+			register(new Field<>(() -> model.cloak,    v -> model.cloak    = v, RootModelType.CAPE));
 
 			if (model instanceof ModelPlayer) {
 				ModelPlayer p = (ModelPlayer) model;
@@ -95,14 +95,14 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, Cube, Mo
 		public RedirectHolderArmor1(PlayerRenderManager mngr, ModelBiped model) {
 			super(mngr, model);
 
-			register(new Field<>(() -> model.bipedHead,     v -> model.bipedHead     = v, RootModelType.ARMOR_HELMET));
-			register(new Field<>(() -> model.bipedBody,     v -> model.bipedBody     = v, RootModelType.ARMOR_BODY));
-			register(new Field<>(() -> model.bipedRightArm, v -> model.bipedRightArm = v, RootModelType.ARMOR_RIGHT_ARM));
-			register(new Field<>(() -> model.bipedLeftArm,  v -> model.bipedLeftArm  = v, RootModelType.ARMOR_LEFT_ARM));
-			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, RootModelType.ARMOR_RIGHT_FOOT));
-			register(new Field<>(() -> model.bipedLeftLeg,  v -> model.bipedLeftLeg  = v, RootModelType.ARMOR_LEFT_FOOT));
+			register(new Field<>(() -> model.head,     v -> model.head     = v, RootModelType.ARMOR_HELMET));
+			register(new Field<>(() -> model.body,     v -> model.body     = v, RootModelType.ARMOR_BODY));
+			register(new Field<>(() -> model.armRight, v -> model.armRight = v, RootModelType.ARMOR_RIGHT_ARM));
+			register(new Field<>(() -> model.armLeft,  v -> model.armLeft  = v, RootModelType.ARMOR_LEFT_ARM));
+			register(new Field<>(() -> model.legRight, v -> model.legRight = v, RootModelType.ARMOR_RIGHT_FOOT));
+			register(new Field<>(() -> model.legLeft,  v -> model.legLeft  = v, RootModelType.ARMOR_LEFT_FOOT));
 
-			register(new Field<>(() -> model.bipedHeadOverlay, v -> model.bipedHeadOverlay = v, null));
+			register(new Field<>(() -> model.hair, v -> model.hair = v, null));
 		}
 
 	}
@@ -112,9 +112,9 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, Cube, Mo
 		public RedirectHolderArmor2(PlayerRenderManager mngr, ModelBiped model) {
 			super(mngr, model);
 
-			register(new Field<>(() -> model.bipedBody,     v -> model.bipedBody     = v, RootModelType.ARMOR_LEGGINGS_BODY));
-			register(new Field<>(() -> model.bipedRightLeg, v -> model.bipedRightLeg = v, RootModelType.ARMOR_RIGHT_LEG));
-			register(new Field<>(() -> model.bipedLeftLeg,  v -> model.bipedLeftLeg  = v, RootModelType.ARMOR_LEFT_LEG));
+			register(new Field<>(() -> model.body,     v -> model.body     = v, RootModelType.ARMOR_LEGGINGS_BODY));
+			register(new Field<>(() -> model.legRight, v -> model.legRight = v, RootModelType.ARMOR_RIGHT_LEG));
+			register(new Field<>(() -> model.legLeft,  v -> model.legLeft  = v, RootModelType.ARMOR_LEFT_LEG));
 		}
 
 	}
@@ -168,13 +168,13 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, Cube, Mo
 		}
 
 		private static void copyModel(Cube s, Cube d) {
-			d.rotationPointX = s.rotationPointX;
-			d.rotationPointY = s.rotationPointY;
-			d.rotationPointZ = s.rotationPointZ;
-			d.rotateAngleX   = s.rotateAngleX  ;
-			d.rotateAngleY   = s.rotateAngleY  ;
-			d.rotateAngleZ   = s.rotateAngleZ  ;
-			d.showModel      = s.showModel     ;
+			d.x = s.x;
+			d.y = s.y;
+			d.z = s.z;
+			d.xRot = s.xRot;
+			d.yRot = s.yRot;
+			d.zRot = s.zRot;
+			d.visible = s.visible;
 		}
 
 		@Override
@@ -208,30 +208,30 @@ public class PlayerRenderManager extends ModelRenderManager<Void, Void, Cube, Mo
 		}
 
 		@Override
-		public void postRender(float scale) {
+		public void translateTo(float scale) {
 			MatrixStack.Entry e = getPartTransform();
 			if(e != null) {
 				multiplyStacks(e);
 			} else {
-				if (this.rotateAngleX != 0.0f || this.rotateAngleY != 0.0f || this.rotateAngleZ != 0.0f) {
-					GL11.glTranslatef(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
-					if (this.rotateAngleZ != 0.0f) {
-						GL11.glRotatef(this.rotateAngleZ * 57.29578f, 0.0f, 0.0f, 1.0f);
+				if (this.xRot != 0.0f || this.yRot != 0.0f || this.zRot != 0.0f) {
+					GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
+					if (this.zRot != 0.0f) {
+						GL11.glRotatef(this.zRot * 57.29578f, 0.0f, 0.0f, 1.0f);
 					}
-					if (this.rotateAngleY != 0.0f) {
-						GL11.glRotatef(this.rotateAngleY * 57.29578f, 0.0f, 1.0f, 0.0f);
+					if (this.yRot != 0.0f) {
+						GL11.glRotatef(this.yRot * 57.29578f, 0.0f, 1.0f, 0.0f);
 					}
-					if (this.rotateAngleX != 0.0f) {
-						GL11.glRotatef(this.rotateAngleX * 57.29578f, 1.0f, 0.0f, 0.0f);
+					if (this.xRot != 0.0f) {
+						GL11.glRotatef(this.xRot * 57.29578f, 1.0f, 0.0f, 0.0f);
 					}
-				} else if (this.rotationPointX != 0.0f || this.rotationPointY != 0.0f || this.rotationPointZ != 0.0f) {
-					GL11.glTranslatef(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
+				} else if (this.x != 0.0f || this.y != 0.0f || this.z != 0.0f) {
+					GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
 				}
 			}
 		}
 	}
 
 	public static void multiplyStacks(MatrixStack.Entry e) {
-		e.getMatrix().multiplyNative(GL11::glMultMatrix);
+		e.getMatrix().multiplyNative(GL11::glMultMatrixf);
 	}
 }

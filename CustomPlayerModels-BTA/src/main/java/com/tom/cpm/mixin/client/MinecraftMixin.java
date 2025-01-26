@@ -9,14 +9,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.EntityPlayerSP;
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.entity.player.PlayerLocal;
+import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.ScreenMainMenu;
+import net.minecraft.client.world.WorldClient;
 import net.minecraft.core.Timer;
-import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.core.entity.player.Player;
 import net.minecraft.core.lang.I18n;
-import net.minecraft.core.world.World;
 import net.minecraft.core.world.save.LevelStorage;
+import net.minecraft.core.world.type.WorldTypeGroups;
 
 import com.tom.cpm.MinecraftServerObject;
 import com.tom.cpm.client.CustomPlayerModelsClient;
@@ -33,9 +34,9 @@ import com.tom.cpm.shared.editor.gui.EditorGui;
 public abstract class MinecraftMixin {
 
 	@Shadow private Timer timer;
-	@Shadow public GuiScreen currentScreen;
-	@Shadow public EntityPlayerSP thePlayer;
-	@Shadow public abstract void displayGuiScreen(GuiScreen screen);
+	@Shadow public Screen currentScreen;
+	@Shadow public PlayerLocal thePlayer;
+	@Shadow public abstract void displayScreen(Screen screen);
 	@Shadow public abstract boolean isMultiplayerWorld();
 
 	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/core/util/phys/AABB;initializePool()V"), method = "run()V")
@@ -43,27 +44,27 @@ public abstract class MinecraftMixin {
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().getAnimationEngine().update(this.timer.partialTicks);
 	}
 
-	@Inject(at = @At("HEAD"), method = "displayGuiScreen(Lnet/minecraft/client/gui/GuiScreen;)V", cancellable = true)
-	public void onOpenScreen(GuiScreen screen, CallbackInfo cbi) {
+	@Inject(at = @At("HEAD"), method = "displayScreen(Lnet/minecraft/client/gui/Screen;)V", cancellable = true)
+	public void onOpenScreen(Screen screen, CallbackInfo cbi) {
 		if(screen == null && this.currentScreen instanceof GuiImpl.Overlay) {
 			cbi.cancel();
-			displayGuiScreen(((GuiImpl.Overlay)this.currentScreen).getGui());
+			displayScreen(((GuiImpl.Overlay)this.currentScreen).getGui());
 		}
-		if(screen instanceof GuiMainMenu && EditorGui.doOpenEditor()) {
+		if(screen instanceof ScreenMainMenu && EditorGui.doOpenEditor()) {
 			cbi.cancel();
-			displayGuiScreen(new GuiImpl(EditorGui::new, screen));
+			displayScreen(new GuiImpl(EditorGui::new, screen));
 		}
 		if(screen instanceof GuiImpl)((GuiImpl)screen).onOpened();
 	}
 
-	@Inject(at = @At(value = "NEW", target = "net/minecraft/core/world/World", shift = Shift.AFTER), method = "startWorld(Ljava/lang/String;Ljava/lang/String;J)V", locals = LocalCapture.CAPTURE_FAILHARD)
-	public void onStartWorld(String string, String string2, long l, CallbackInfo cbi, int i, I18n i18n, LevelStorage sh) {
+	@Inject(at = @At(value = "NEW", target = "net/minecraft/client/world/WorldClient"), method = "startWorld(Ljava/lang/String;Ljava/lang/String;JLnet/minecraft/core/world/type/WorldTypeGroups$Group;)V", locals = LocalCapture.CAPTURE_FAILHARD)
+	public void onStartWorld(String string, String string2, long l, final WorldTypeGroups.Group worldTypeGroup, CallbackInfo cbi, int worldSaveVersion, I18n i18n, LevelStorage sh) {
 		EmulNetwork.reset();
 		MinecraftObjectHolder.setServerObject(new MinecraftServerObject(sh));
 	}
 
-	@Inject(at = @At("HEAD"), method = "changeWorld(Lnet/minecraft/core/world/World;Ljava/lang/String;Lnet/minecraft/core/entity/player/EntityPlayer;)V")
-	public void onSetWorld(World world, String string, EntityPlayer arg2, CallbackInfo cbi) {
+	@Inject(at = @At("HEAD"), method = "changeWorld(Lnet/minecraft/client/world/WorldClient;Ljava/lang/String;Lnet/minecraft/core/entity/player/Player;)V")
+	public void onSetWorld(WorldClient world, String string, Player arg2, CallbackInfo cbi) {
 		if (world == null) {
 			CustomPlayerModelsClient.INSTANCE.onLogout();
 			if (MinecraftServerAccess.get() != null)
@@ -72,8 +73,8 @@ public abstract class MinecraftMixin {
 		}
 	}
 
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;thePlayer:Lnet/minecraft/client/entity/player/EntityPlayerSP;", shift = Shift.AFTER), method = "changeWorld(Lnet/minecraft/core/world/World;Ljava/lang/String;Lnet/minecraft/core/entity/player/EntityPlayer;)V")
-	public void onSetPlayer(World world, String string, EntityPlayer arg2, CallbackInfo cbi) {
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;thePlayer:Lnet/minecraft/client/entity/player/PlayerLocal;", shift = Shift.AFTER), method = "changeWorld(Lnet/minecraft/client/world/WorldClient;Ljava/lang/String;Lnet/minecraft/core/entity/player/Player;)V")
+	public void onSetPlayer(WorldClient world, String string, Player arg2, CallbackInfo cbi) {
 		if (thePlayer != null && !isMultiplayerWorld())
 			ServerHandler.netHandler.onJoin(thePlayer);
 	}

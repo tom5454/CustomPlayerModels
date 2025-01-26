@@ -3,13 +3,13 @@ package com.tom.cpm.common;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.core.entity.player.Player;
 
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.retro.NetHandlerExt;
 
 public class ServerHandler {
-	public static NetHandlerExt<String, EntityPlayer, ServerNetworkImpl> netHandler;
+	public static NetHandlerExt<String, Player, ServerNetworkImpl> netHandler;
 
 	static {
 		netHandler = new NetHandlerExt<>((a, b) -> a + ":" + b);

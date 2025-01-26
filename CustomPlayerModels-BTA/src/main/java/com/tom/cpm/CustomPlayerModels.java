@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.core.entity.player.Player;
+import net.minecraft.core.net.command.CommandManager;
 
 import com.tom.cpl.block.BlockStateHandler;
 import com.tom.cpl.block.entity.EntityTypeHandler;
@@ -22,7 +23,6 @@ import com.tom.cpm.api.ICPMPlugin;
 import com.tom.cpm.client.Lang;
 import com.tom.cpm.common.BlockStateHandlerImpl;
 import com.tom.cpm.common.Command;
-import com.tom.cpm.common.CustomPayload;
 import com.tom.cpm.common.EntityTypeHandlerImpl;
 import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.shared.MinecraftCommonAccess;
@@ -30,9 +30,6 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.PlatformFeature;
 import com.tom.cpm.shared.util.IVersionCheck;
 import com.tom.cpm.shared.util.VersionCheck;
-
-import turniplabs.halplibe.helper.CommandHelper;
-import turniplabs.halplibe.helper.NetworkHelper;
 
 public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("CPM");
@@ -44,8 +41,6 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 	public void onInitialize() {
 		cfg = new ModConfigFile(new File(FabricLoader.getInstance().getConfigDir().toFile(), "cpm.json"));
 		MinecraftObjectHolder.setCommonObject(this);
-
-		NetworkHelper.register(CustomPayload.class, true, true);
 
 		api = new CPMApiManager();
 		FabricLoader.getInstance().getEntrypointContainers("cpmapi", ICPMPlugin.class).forEach(entrypoint -> {
@@ -60,9 +55,9 @@ public class CustomPlayerModels implements MinecraftCommonAccess, ModInitializer
 		});
 		log.info("Customizable Player Models Initialized");
 		log.info(api.getPluginStatus());
-		api.buildCommon().player(EntityPlayer.class).init();
+		api.buildCommon().player(Player.class).init();
 
-		new Command(CommandHelper::createCommand, false);
+		CommandManager.registerCommand(d -> new Command(d, false));
 	}
 
 	private ModConfigFile cfg;

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.core.block.Block;
+import net.minecraft.core.block.Blocks;
 import net.minecraft.core.item.ItemStack;
 
 import com.tom.cpl.block.BlockState;
@@ -26,7 +27,7 @@ public class BlockStateHandlerImpl extends BlockStateHandler<BlockMeta> {
 	public String getBlockId(BlockMeta stack) {
 		//UniqueIdentifier id = GameRegistry.findUniqueIdentifierFor(stack.getBlock());
 		//if (id != null)return id.modId + ":" + id.name;
-		return "id:" + stack.getBlock().id;
+		return "id:" + stack.getBlock().id();
 	}
 
 	@Override
@@ -89,8 +90,8 @@ public class BlockStateHandlerImpl extends BlockStateHandler<BlockMeta> {
 	@Override
 	public List<BlockState> getAllElements() {
 		List<BlockState> list = new ArrayList<>();
-		for (int i = 0; i < Block.blocksList.length; i++) {
-			Block b = Block.blocksList[i];
+		for (int i = 0; i < Blocks.blocksList.length; i++) {
+			Block b = Blocks.blocksList[i];
 			if (b == null)continue;
 			list.add(wrap(new BlockMeta(i, 0)));
 		}

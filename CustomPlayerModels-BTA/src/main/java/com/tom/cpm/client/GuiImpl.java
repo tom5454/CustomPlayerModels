@@ -15,11 +15,11 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.GuiRenderItem;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.gui.ButtonElement;
+import net.minecraft.client.gui.ItemElement;
+import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.TextFieldElement;
+import net.minecraft.client.gui.chat.ScreenChat;
 import net.minecraft.client.input.InputType;
 import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.client.util.debug.DebugRender;
@@ -41,18 +41,19 @@ import com.tom.cpl.math.Box;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.text.IText;
 import com.tom.cpl.util.AWTChooser;
+import com.tom.cpm.client.MinecraftObject.Texture;
 import com.tom.cpm.client.RetroGL.RetroTessellator;
 import com.tom.cpm.common.ItemStackHandlerImpl;
 import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 import com.tom.cpm.shared.util.Log;
 
-public class GuiImpl extends GuiScreen implements IGui {
+public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new LWJGLKeyCodes();
 	private static final NativeGuiComponents nativeComponents = new NativeGuiComponents();
-	protected static GuiRenderItem itemRenderer = new GuiRenderItem(Minecraft.INSTANCE);
+	protected static ItemElement itemRenderer = new ItemElement(Minecraft.INSTANCE);
 	private Frame gui;
-	private GuiScreen parent;
+	private Screen parent;
 	private CtxStack stack;
 	private UIColors colors;
 	private Consumer<Runnable> closeListener;
@@ -64,7 +65,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 		nativeComponents.register(Panel3d.class, Panel3dImpl::new);
 	}
 
-	public GuiImpl(Function<IGui, Frame> creator, GuiScreen parent) {
+	public GuiImpl(Function<IGui, Frame> creator, Screen parent) {
 		this.colors = new UIColors();
 		this.parent = parent;
 		try {
@@ -79,13 +80,13 @@ public class GuiImpl extends GuiScreen implements IGui {
 	}
 
 	@Override
-	public boolean pausesGame() {
+	public boolean isPauseScreen() {
 		return false;
 	}
 
 	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-		this.drawDefaultBackground();
+	public void render(int mouseX, int mouseY, float partialTicks) {
+		this.renderBackground();
 		try {
 			GL11.glEnable(GL11.GL_SCISSOR_TEST);
 			stack = new CtxStack(width, height);
@@ -95,9 +96,9 @@ public class GuiImpl extends GuiScreen implements IGui {
 		} finally {
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
 			String s = "Minecraft " + Minecraft.VERSION  + " " + MinecraftCommonAccess.get().getModVersion();
-			fontRenderer.drawString(s, width - fontRenderer.getStringWidth(s) - 4, 2, 0xff000000);
+			font.drawString(s, width - font.getStringWidth(s) - 4, 2, 0xff000000);
 			s = mc.debugFPS;
-			fontRenderer.drawString(s, width - fontRenderer.getStringWidth(s) - 4, 11, 0xff000000);
+			font.drawString(s, width - font.getStringWidth(s) - 4, 11, 0xff000000);
 		}
 		/*if(mc.thePlayer != null && gui.enableChat()) {
 			try {
@@ -111,15 +112,15 @@ public class GuiImpl extends GuiScreen implements IGui {
 	}
 
 	@Override
-	public void onClosed() {
+	public void removed() {
 		Keyboard.enableRepeatEvents(false);
 		if(vanillaScale != -1 && vanillaScale != mc.gameSettings.guiScale.value) {
 			mc.gameSettings.guiScale.set(vanillaScale);
 		}
 		if(parent != null) {
-			GuiScreen p = parent;
+			Screen p = parent;
 			parent = null;
-			mc.displayGuiScreen(p);
+			mc.displayScreen(p);
 		}
 	}
 
@@ -144,17 +145,17 @@ public class GuiImpl extends GuiScreen implements IGui {
 	public void drawText(int x, int y, String text, int color) {
 		x += getOffset().x;
 		y += getOffset().y;
-		fontRenderer.drawString(text, x, y, color);
+		font.drawString(text, x, y, color);
 	}
 
 	@Override
-	public void keyTyped(final char typedChar, final int keyCode, final int mouseX, final int mouseY) {
+	public void keyPressed(final char typedChar, final int keyCode, final int mouseX, final int mouseY) {
 		try {
 			KeyboardEvent evt = new KeyboardEvent(keyCode, 0, typedChar, Keyboard.getKeyName(keyCode));
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
 				if(mc.thePlayer != null && mc.gameSettings.keyChat.getKeyCode() == keyCode) {
-					mc.displayGuiScreen(new Overlay());
+					mc.displayScreen(new Overlay());
 				}
 			}
 		} catch (Throwable e) {
@@ -193,9 +194,9 @@ public class GuiImpl extends GuiScreen implements IGui {
 	private long dragStart = 0L;
 
 	@Override
-	public void handleInput() {
-		final int mouseX = Mouse.getEventX() * this.width / this.mc.resolution.width;
-		final int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.resolution.height - 1;
+	public void updateEvents() {
+		final int mouseX = Mouse.getEventX() * this.width / this.mc.resolution.getWidthScreenCoords();
+		final int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.resolution.getHeightScreenCoords() - 1;
 		while (Mouse.next()) {
 			if (this.mc.inputType == InputType.CONTROLLER) {
 				break;
@@ -220,7 +221,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			final int eventKey = Keyboard.getEventKey();
 			final char eventChar = Keyboard.getEventCharacter();
 			if (eventKey == 0 && Character.isDefined(eventChar)) {
-				this.keyTyped(eventChar, eventKey, mouseX, mouseY);
+				this.keyPressed(eventChar, eventKey, mouseX, mouseY);
 			}
 			if (!Keyboard.getEventKeyState()) {
 				continue;
@@ -229,7 +230,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 				this.mc.gameWindow.toggleFullscreen();
 				return;
 			}
-			this.keyTyped(eventChar, eventKey, mouseX, mouseY);
+			this.keyPressed(eventChar, eventKey, mouseX, mouseY);
 		}
 
 		int i = Mouse.getEventDWheel();
@@ -252,10 +253,10 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void displayError(String e) {
-		GuiScreen p = parent;
+		Screen p = parent;
 		parent = null;
-		mc.displayGuiScreen(new GuiScreen() {
-			private GuiScreen parent = p;
+		mc.displayScreen(new Screen() {
+			private Screen parent = p;
 			private String message1 = "Custom Player Models";
 			private String message2 = Lang.format("error.cpm.crash", e);
 
@@ -263,33 +264,33 @@ public class GuiImpl extends GuiScreen implements IGui {
 			@Override
 			public void init() {
 				super.init();
-				this.controlList.add(new GuiButton(0, this.width / 2 - 100, 140, Lang.format("gui.cancel", new Object[0])));
+				this.buttons.add(new ButtonElement(0, this.width / 2 - 100, 140, Lang.format("gui.cancel", new Object[0])));
 			}
 
 			@Override
-			public void keyTyped(final char c, final int key, final int mouseX, final int mouseY) {
+			public void keyPressed(final char c, final int key, final int mouseX, final int mouseY) {
 			}
 
 			@Override
-			public void drawScreen(int par1, int par2, float par3) {
+			public void render(int par1, int par2, float par3) {
 				GuiImpl.drawGradientRect(0, 0, this.width, this.height, -12574688, -11530224, 0);
-				this.drawStringCentered(this.fontRenderer, this.message1, this.width / 2, 90, 16777215);
-				this.drawStringCentered(this.fontRenderer, this.message2, this.width / 2, 110, 16777215);
-				super.drawScreen(par1, par2, par3);
+				this.drawStringCentered(this.font, this.message1, this.width / 2, 90, 16777215);
+				this.drawStringCentered(this.font, this.message2, this.width / 2, 110, 16777215);
+				super.render(par1, par2, par3);
 			}
 
 			@Override
-			public void onClosed() {
+			public void removed() {
 				if(parent != null) {
-					GuiScreen p = parent;
+					Screen p = parent;
 					parent = null;
-					mc.displayGuiScreen(p);
+					mc.displayScreen(p);
 				}
 			}
 
 			@Override
-			protected void buttonPressed(GuiButton button) {
-				this.mc.displayGuiScreen((GuiScreen)null);
+			protected void buttonClicked(ButtonElement button) {
+				this.mc.displayScreen((Screen)null);
 			}
 		});
 	}
@@ -297,14 +298,14 @@ public class GuiImpl extends GuiScreen implements IGui {
 	@Override
 	public void closeGui() {
 		if(closeListener != null) {
-			closeListener.accept(() -> this.mc.displayGuiScreen((GuiScreen)null));
+			closeListener.accept(() -> this.mc.displayScreen((Screen)null));
 		} else
-			this.mc.displayGuiScreen((GuiScreen)null);
+			this.mc.displayScreen((Screen)null);
 	}
 
 	@Override
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture) {
-		mc.renderEngine.bindTexture(this.mc.renderEngine.getTexture("/assets/cpm/textures/gui/" + texture + ".png"));
+		mc.textureManager.bindTexture(this.mc.textureManager.loadTexture("/assets/cpm/textures/gui/" + texture + ".png"));
 		x += getOffset().x;
 		y += getOffset().y;
 		GL11.glColor4f(1, 1, 1, 1);
@@ -313,7 +314,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void drawTexture(int x, int y, int w, int h, int u, int v, String texture, int color) {
-		mc.renderEngine.bindTexture(this.mc.renderEngine.getTexture("/assets/cpm/textures/gui/" + texture + ".png"));
+		mc.textureManager.bindTexture(this.mc.textureManager.loadTexture("/assets/cpm/textures/gui/" + texture + ".png"));
 		x += getOffset().x;
 		y += getOffset().y;
 		float a = (color >> 24 & 255) / 255.0F;
@@ -329,6 +330,8 @@ public class GuiImpl extends GuiScreen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		GL11.glColor4f(1, 1, 1, 1);
+		if (Texture.bound != null)
+			Texture.bound.getMcTex().bind();
 		Tessellator t = Tessellator.instance;
 		t.startDrawingQuads();
 		t.addVertexWithUV(x, y + height, 0.0D, u1, v2);
@@ -345,16 +348,16 @@ public class GuiImpl extends GuiScreen implements IGui {
 
 	@Override
 	public void setupCut() {
-		float multiplierX = this.mc.resolution.width / (float)width;
-		float multiplierY = this.mc.resolution.height / (float)height;
+		float multiplierX = this.mc.resolution.getWidthScreenCoords() / (float)width;
+		float multiplierY = this.mc.resolution.getHeightScreenCoords() / (float)height;
 		Box box = getContext().cutBox;
-		GL11.glScissor((int) (box.x * multiplierX), this.mc.resolution.height - (int) ((box.y + box.h) * multiplierY),
+		GL11.glScissor((int) (box.x * multiplierX), this.mc.resolution.getHeightScreenCoords() - (int) ((box.y + box.h) * multiplierY),
 				(int) (box.w * multiplierX), (int) (box.h * multiplierY));
 	}
 
 	@Override
 	public int textWidth(String text) {
-		return fontRenderer.getStringWidth(text);
+		return font.getStringWidth(text);
 	}
 
 	private ITextField createTextField() {
@@ -362,13 +365,13 @@ public class GuiImpl extends GuiScreen implements IGui {
 	}
 
 	private class TxtField implements ITextField {
-		private GuiTextField field;
+		private TextFieldElement field;
 		private Runnable eventListener;
 		private Vec2i currentOff = new Vec2i(0, 0);
 		private Box bounds = new Box(0, 0, 0, 0);
 		private boolean refreshTextBox;
 		public TxtField() {
-			this.field = new GuiTextField(GuiImpl.this, fontRenderer, 0, 0, 0, 0, "", "");
+			this.field = new TextFieldElement(GuiImpl.this, font, 0, 0, 0, 0, "", "");
 			this.field.setMaxStringLength(1024*1024);
 			this.field.drawBackground = false;
 		}
@@ -501,15 +504,15 @@ public class GuiImpl extends GuiScreen implements IGui {
 		return false;
 	}
 
-	public class Overlay extends GuiChat {
+	public class Overlay extends ScreenChat {
 
 		@Override
-		public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-			GuiImpl.this.drawScreen(Integer.MIN_VALUE, Integer.MIN_VALUE, partialTicks);
-			super.drawScreen(mouseX, mouseY, partialTicks);
+		public void render(int mouseX, int mouseY, float partialTicks) {
+			GuiImpl.this.render(Integer.MIN_VALUE, Integer.MIN_VALUE, partialTicks);
+			super.render(mouseX, mouseY, partialTicks);
 		}
 
-		public GuiScreen getGui() {
+		public Screen getGui() {
 			return GuiImpl.this;
 		}
 	}
@@ -642,13 +645,13 @@ public class GuiImpl extends GuiScreen implements IGui {
 		GL11.glPushMatrix();
 		GL11.glTranslatef(x, y, 0);
 		GL11.glScalef(scale, scale, scale);
-		fontRenderer.drawString(text.<String>remap(), 0, 0, color);
+		font.drawString(text.<String>remap(), 0, 0, color);
 		GL11.glPopMatrix();
 	}
 
 	@Override
 	public int textWidthFormatted(IText text) {
-		return fontRenderer.getStringWidth(text.<String>remap());
+		return font.getStringWidth(text.<String>remap());
 	}
 
 	@Override
@@ -686,7 +689,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 		/*List<String> list = new ArrayList<>();
 		list.add(class_629.method_2049(par1ItemStack.getTranslationKey() + ".name"));
 
-		this.drawHoveringText(list, par2, par3, this.fontRenderer);*/
+		this.drawHoveringText(list, par2, par3, this.font);*/
 	}
 
 	/*protected void drawHoveringText(List<String> par1List, int par2, int par3, TextRenderer font) {

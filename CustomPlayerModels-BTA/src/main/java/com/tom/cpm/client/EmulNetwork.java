@@ -1,11 +1,10 @@
 package com.tom.cpm.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.EntityClientPlayerMP;
+import net.minecraft.client.entity.player.PlayerLocalMultiplayer;
 import net.minecraft.core.entity.Entity;
-import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.core.entity.player.Player;
 
-import com.tom.cpm.common.CustomPayload;
 import com.tom.cpm.common.ServerHandler;
 import com.tom.cpm.common.ServerNetworkImpl;
 import com.tom.cpm.shared.config.PlayerData;
@@ -15,9 +14,9 @@ public class EmulNetwork {
 	public static final ClientNetworkImpl emulClient = new EmulClient();
 	public static final ServerNetworkImpl emulServer = new EmulServer();
 
-	public static ClientNetworkImpl getClient(EntityPlayer pl) {
-		if (pl instanceof EntityClientPlayerMP) {
-			return (ClientNetworkImpl) ((EntityClientPlayerMP) pl).sendQueue;
+	public static ClientNetworkImpl getClient(net.minecraft.core.entity.player.Player pl) {
+		if (pl instanceof PlayerLocalMultiplayer) {
+			return (ClientNetworkImpl) ((PlayerLocalMultiplayer) pl).sendQueue;
 		}
 		return EmulNetwork.emulClient;
 	}
@@ -52,7 +51,8 @@ public class EmulNetwork {
 		}
 
 		@Override
-		public void cpm$processCustomPayload(CustomPayload p) {
+		public String cpm$getConnectedServer() {
+			return null;
 		}
 	}
 
@@ -87,20 +87,16 @@ public class EmulNetwork {
 
 		@Override
 		public void cpm$sendChat(String msg) {
-			Minecraft.INSTANCE.ingameGUI.addChatMessage(msg);
+			Minecraft.INSTANCE.hudIngame.addChatMessage(msg);
 		}
 
 		@Override
-		public EntityPlayer cpm$getPlayer() {
+		public Player cpm$getPlayer() {
 			return Minecraft.INSTANCE.thePlayer;
 		}
 
 		@Override
 		public void cpm$kickPlayer(String msg) {
-		}
-
-		@Override
-		public void cpm$processCustomPayload(CustomPayload p) {
 		}
 	}
 }

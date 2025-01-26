@@ -10,23 +10,21 @@ import org.lwjgl.opengl.GL11;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.ButtonElement;
 import net.minecraft.client.render.EntityRenderDispatcher;
-import net.minecraft.client.render.FontRenderer;
-import net.minecraft.client.render.entity.LivingRenderer;
-import net.minecraft.client.render.entity.PlayerRenderer;
+import net.minecraft.client.render.Font;
+import net.minecraft.client.render.entity.MobRenderer;
+import net.minecraft.client.render.entity.MobRendererPlayer;
 import net.minecraft.client.render.model.ModelBase;
 import net.minecraft.client.render.model.ModelBiped;
 import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.core.entity.Entity;
-import net.minecraft.core.entity.EntityLiving;
-import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.core.entity.Mob;
 import net.minecraft.core.util.helper.MathHelper;
 
 import com.tom.cpl.text.FormatText;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.SidedHandler;
-import com.tom.cpm.common.Command;
 import com.tom.cpm.common.PlayerAnimUpdater;
 import com.tom.cpm.common.ServerNetworkImpl;
 import com.tom.cpm.lefix.FixSSL;
@@ -41,14 +39,12 @@ import com.tom.cpm.shared.gui.GestureGui;
 import com.tom.cpm.shared.model.RenderManager;
 import com.tom.cpm.shared.model.TextureSheetType;
 
-import turniplabs.halplibe.helper.CommandHelper;
-
 public class CustomPlayerModelsClient implements ClientModInitializer, SidedHandler {
 	public static MinecraftObject mc;
 	private Minecraft minecraft;
 	public static CustomPlayerModelsClient INSTANCE;
-	public RenderManager<GameProfile, EntityPlayer, ModelBase, Void> manager;
-	public static NetHandlerExt<String, EntityPlayer, ClientNetworkImpl> netHandler = new NetHandlerExt<>((a, b) -> a + ":" + b);
+	public RenderManager<GameProfile, net.minecraft.core.entity.player.Player, ModelBase, Void> manager;
+	public static NetHandlerExt<String, net.minecraft.core.entity.player.Player, ClientNetworkImpl> netHandler = new NetHandlerExt<>((a, b) -> a + ":" + b);
 
 	@Override
 	public void onInitializeClient() {
@@ -63,14 +59,14 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		netHandler.setPlayerToLoader(e -> GameProfileManager.getProfile(e.username));
 		netHandler.setGetPlayerById(id -> {
 			Entity ent = EmulNetwork.getClient(minecraft.thePlayer).cpm$getEntityByID(id);
-			if(ent instanceof EntityPlayer) {
-				return (EntityPlayer) ent;
+			if(ent instanceof net.minecraft.core.entity.player.Player) {
+				return (net.minecraft.core.entity.player.Player) ent;
 			}
 			return null;
 		});
 		netHandler.setGetClient(() -> minecraft.thePlayer);
 		netHandler.setGetNet(EmulNetwork::getClient);
-		netHandler.setDisplayText(f -> minecraft.ingameGUI.addChatMessage(f.remap()));
+		netHandler.setDisplayText(f -> minecraft.hudIngame.addChatMessage(f.remap()));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
 		apiInit();
 	}
@@ -78,7 +74,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 	public void postInit() {
 		KeyBindings.init();
 		RetroGL.init();
-		new Command(c -> CommandHelper.createClientCommand(__ -> c), true);
+		//new Command(c -> CommandHelper.createClientCommand(__ -> c), true);
 	}
 
 	public void apiInit() {
@@ -86,7 +82,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		renderApi(ModelBase.class, GameProfile.class).init();
 	}
 
-	public void playerRenderPre(PlayerRenderer renderer, EntityPlayer entityPlayer) {
+	public void playerRenderPre(MobRendererPlayer renderer, net.minecraft.core.entity.player.Player entityPlayer) {
 		manager.bindPlayer(entityPlayer, null, renderer.modelBipedMain);
 		manager.bindSkin(renderer.modelBipedMain, TextureSheetType.SKIN);
 		ModelBiped model = renderer.modelBipedMain;
@@ -96,7 +92,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		manager.bindSkin(renderer.modelArmor, TextureSheetType.ARMOR2);
 	}
 
-	public void playerRenderPost(PlayerRenderer renderer) {
+	public void playerRenderPost(MobRendererPlayer renderer) {
 		manager.unbind(renderer.modelArmor);
 		manager.unbind(renderer.modelArmorChestplate);
 		manager.unbindClear(renderer.modelBipedMain);
@@ -118,7 +114,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 
 		if (minecraft.currentScreen == null) {
 			if(KeyBindings.gestureMenuBinding.isPressed()) {
-				minecraft.displayGuiScreen(new GuiImpl(GestureGui::new, null));
+				minecraft.displayScreen(new GuiImpl(GestureGui::new, null));
 			}
 
 			if(KeyBindings.renderToggleBinding.isPressed()) {
@@ -129,13 +125,13 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		}
 	}
 
-	public boolean onRenderName(LivingRenderer renderer, EntityLiving entity, double xIn, double yIn, double zIn) {
+	public boolean onRenderName(MobRenderer renderer, Mob entity, double xIn, double yIn, double zIn) {
 		boolean res = false;
-		if(entity instanceof EntityPlayer) {
+		if(entity instanceof net.minecraft.core.entity.player.Player) {
 			if(!Player.isEnableNames())
 				res = true;
 			if(Player.isEnableLoadingInfo() && canRenderName(entity)) {
-				GameProfile gp = GameProfileManager.getProfile(((EntityPlayer) entity).username);
+				GameProfile gp = GameProfileManager.getProfile(((net.minecraft.core.entity.player.Player) entity).username);
 				FormatText st = INSTANCE.manager.getStatus(gp, ModelDefinitionLoader.PLAYER_UNIQUE);
 				if(st != null) {
 					float f = 1.6F;
@@ -149,7 +145,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 						String s = st.remap();
 
 						if (entity.isSneaking()) {
-							FontRenderer fontrenderer = minecraft.fontRenderer;
+							Font fontrenderer = minecraft.font;
 							GL11.glPushMatrix();
 							GL11.glTranslatef((float)xIn + 0.0F, (float)y + entity.bbHeight + 0.5F, (float)zIn);
 							GL11.glNormal3f(0.0F, 1.0F, 0.0F);
@@ -189,11 +185,11 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		return res;
 	}
 
-	protected boolean canRenderName(EntityLiving p_110813_1_) {
+	protected boolean canRenderName(Mob p_110813_1_) {
 		return Minecraft.INSTANCE.gameSettings.immersiveMode.drawNames() && p_110813_1_.vehicle == null;
 	}
 
-	protected void renderLivingLabel(EntityLiving p_96449_1_, double p_96449_2_, double p_96449_4_, double p_96449_6_, String p_96449_8_, float p_96449_9_, double p_96449_10_) {
+	protected void renderLivingLabel(Mob p_96449_1_, double p_96449_2_, double p_96449_4_, double p_96449_6_, String p_96449_8_, float p_96449_9_, double p_96449_10_) {
 		if (p_96449_1_.isPlayerSleeping())this.renderLivingLabel0(p_96449_1_, p_96449_8_, p_96449_2_, p_96449_4_ - 1.5D, p_96449_6_, 64);
 		else this.renderLivingLabel0(p_96449_1_, p_96449_8_, p_96449_2_, p_96449_4_, p_96449_6_, 64);
 	}
@@ -202,7 +198,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		double d3 = EntityRenderDispatcher.instance.camera.distanceToSqr(p_147906_1_.x, p_147906_1_.y, p_147906_1_.z);
 
 		if (d3 <= p_147906_9_ * p_147906_9_) {
-			FontRenderer fontrenderer = minecraft.fontRenderer;
+			Font fontrenderer = minecraft.font;
 			float f = 1.6F;
 			float f1 = 0.016666668F * f / 2;
 			GL11.glPushMatrix();
@@ -242,7 +238,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		}
 	}
 
-	public static class Button extends GuiButton {
+	public static class Button extends ButtonElement {
 
 		public Button(int x, int y) {
 			super(99, x, y, 100, 20, Lang.format("button.cpm.open_editor"));
@@ -255,7 +251,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 	}
 
 	//Copy from PlayerRenderer.renderSpecials
-	public static void renderCape(EntityPlayer playerIn, float partialTicks, ModelBiped model, ModelDefinition modelDefinition) {
+	public static void renderCape(net.minecraft.core.entity.player.Player playerIn, float partialTicks, ModelBiped model, ModelDefinition modelDefinition) {
 		GL11.glPushMatrix();
 		GL11.glTranslatef(0.0F, 0.0F, 0.125F);
 		float f5, f6, f7;
@@ -269,7 +265,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 			double d0 = playerIn.zd0
 					+ (playerIn.zd - playerIn.zd0) * partialTicks
 					- (playerIn.zo + (playerIn.z - playerIn.zo) * partialTicks);
-			float f4 = playerIn.prevRenderYawOffset + (playerIn.renderYawOffset - playerIn.prevRenderYawOffset) * partialTicks;
+			float f4 = playerIn.yBodyRotO + (playerIn.yBodyRot - playerIn.yBodyRotO) * partialTicks;
 
 			double d1 = MathHelper.sin(f4 * (float)Math.PI / 180.0F);
 			double d2 = (-MathHelper.cos(f4 * (float)Math.PI / 180.0F));
@@ -293,8 +289,7 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 				f6 = 0.0F;
 			}
 
-			float f8 = playerIn.prevRenderYawOffset + (playerIn.renderYawOffset - playerIn.prevRenderYawOffset) * partialTicks;
-			f5 += MathHelper.sin((playerIn.walkDistO + (playerIn.walkDist - playerIn.walkDistO) * partialTicks) * 6.0F) * 32.0F * f8;
+			f5 += MathHelper.sin((playerIn.walkDistO + (playerIn.walkDist - playerIn.walkDistO) * partialTicks) * 6.0F) * 32.0F * f4;
 
 			if (playerIn.isSneaking()) {
 				f5 += 25.0F;
@@ -305,13 +300,13 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 			f7 = 0;
 		}
 
-		model.bipedCloak.rotateAngleX = (float) -Math.toRadians(6.0F + f6 / 2.0F + f5);
-		model.bipedCloak.rotateAngleY = (float) Math.toRadians(180.0F - f7 / 2.0F);
-		model.bipedCloak.rotateAngleZ = (float) Math.toRadians(f7 / 2.0F);
+		model.cloak.xRot = (float) -Math.toRadians(6.0F + f6 / 2.0F + f5);
+		model.cloak.yRot = (float) Math.toRadians(180.0F - f7 / 2.0F);
+		model.cloak.zRot = (float) Math.toRadians(f7 / 2.0F);
 		mc.getPlayerRenderManager().setModelPose(model);
-		model.bipedCloak.rotateAngleX = 0;
-		model.bipedCloak.rotateAngleY = 0;
-		model.bipedCloak.rotateAngleZ = 0;
+		model.cloak.xRot = 0;
+		model.cloak.yRot = 0;
+		model.cloak.zRot = 0;
 		model.renderCloak(0.0625F);
 		GL11.glPopMatrix();
 	}
@@ -321,21 +316,21 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 	}
 
 	@Override
-	public void getTracking(EntityPlayer player, Consumer<EntityPlayer> f) {
+	public void getTracking(net.minecraft.core.entity.player.Player player, Consumer<net.minecraft.core.entity.player.Player> f) {
 	}
 
 	@Override
-	public Set<EntityPlayer> getTrackingPlayers(Entity entity) {
+	public Set<net.minecraft.core.entity.player.Player> getTrackingPlayers(Entity entity) {
 		return Collections.emptySet();
 	}
 
 	@Override
-	public List<EntityPlayer> getPlayersOnline() {
+	public List<net.minecraft.core.entity.player.Player> getPlayersOnline() {
 		return Collections.singletonList(minecraft.thePlayer);
 	}
 
 	@Override
-	public ServerNetworkImpl getServer(EntityPlayer pl) {
+	public ServerNetworkImpl getServer(net.minecraft.core.entity.player.Player pl) {
 		return EmulNetwork.emulServer;
 	}
 }

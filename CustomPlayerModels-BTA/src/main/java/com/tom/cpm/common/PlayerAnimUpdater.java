@@ -2,14 +2,14 @@ package com.tom.cpm.common;
 
 import java.util.function.BiConsumer;
 
-import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.core.entity.player.Player;
 
 import com.tom.cpm.shared.animation.ServerAnimationState;
 
-public class PlayerAnimUpdater implements BiConsumer<EntityPlayer, ServerAnimationState> {
+public class PlayerAnimUpdater implements BiConsumer<Player, ServerAnimationState> {
 
 	@Override
-	public void accept(EntityPlayer t, ServerAnimationState u) {
+	public void accept(Player t, ServerAnimationState u) {
 		u.updated = true;
 		//u.creativeFlying = t.flySpeed;
 		u.falling = t.fallDistance;

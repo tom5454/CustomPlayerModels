@@ -1,82 +1,51 @@
 package com.tom.cpm.common;
 
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-import net.minecraft.core.entity.player.EntityPlayer;
-import net.minecraft.core.lang.I18n;
-import net.minecraft.core.net.command.CommandError;
-import net.minecraft.core.net.command.CommandHandler;
-import net.minecraft.core.net.command.CommandSender;
+import net.minecraft.core.entity.Entity;
+import net.minecraft.core.entity.player.Player;
+import net.minecraft.core.net.command.CommandSource;
+import net.minecraft.core.net.command.arguments.ArgumentTypeEntity;
+import net.minecraft.core.net.command.helpers.EntitySelector;
 
-import com.tom.cpl.command.StringCommandHandler;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+
+import com.tom.cpl.command.BrigadierCommandHandler;
 import com.tom.cpl.text.IText;
-import com.tom.cpm.CustomPlayerModels;
 
-public class Command extends StringCommandHandler<CommandHandler, CommandSender, CommandError> {
+public class Command extends BrigadierCommandHandler<CommandSource> {
 
-	public Command(Consumer<net.minecraft.core.net.command.Command> register, boolean client) {
-		super(i -> register.accept(new Cmd(i)), client);
-	}
-
-	private static class Cmd extends net.minecraft.core.net.command.Command {
-		private CommandImpl impl;
-
-		public Cmd(CommandImpl i) {
-			super(i.getName(), new String[0]);
-			this.impl = i;
-		}
-
-		@Override
-		public boolean execute(CommandHandler commandHandler, CommandSender commandSender, String[] strings) {
-			impl.execute(commandHandler, commandSender, strings);
-			return true;
-		}
-
-		@Override
-		public boolean opRequired(String[] strings) {
-			return impl.isOp();
-		}
-
-		@Override
-		public void sendCommandSyntax(CommandHandler commandHandler, CommandSender commandSender) {
-		}
+	public Command(CommandDispatcher<CommandSource> dispatcher, boolean client) {
+		super(dispatcher, client);
 	}
 
 	@Override
 	public String toStringPlayer(Object pl) {
-		return ((EntityPlayer) pl).username;
+		return ((Player) pl).getDisplayName();
 	}
 
 	@Override
-	public void sendSuccess(CommandSender sender, IText text) {
+	public void sendSuccess(CommandSource sender, IText text) {
 		sender.sendMessage(text.remap());
 	}
 
 	@Override
-	public CommandError generic(String text, Object... format) {
-		return new CommandError(I18n.getInstance().translateKeyAndFormat(text, format));
+	protected boolean hasOPPermission(CommandSource source) {
+		return source.hasAdmin();
 	}
 
 	@Override
-	public CommandError wrongUsage(String text, Object... format) {
-		return new CommandError(I18n.getInstance().translateKeyAndFormat(text, format));
+	protected ArgumentType<?> player() {
+		return ArgumentTypeEntity.player();
 	}
 
 	@Override
-	public Object getPlayerObj(CommandHandler server, CommandSender sender, String name) throws CommandError {
-		return CustomPlayerModels.proxy.getPlayersOnline().stream().filter(e -> e.nickname.equals(name)).findFirst().orElse(null);
-	}
-
-	@Override
-	public CommandError checkExc(Exception exc) {
-		if(exc instanceof CommandError)return (CommandError) exc;
-		return new CommandError(I18n.getInstance().translateKey("commands.generic.exception"));
-	}
-
-	@Override
-	public List<String> getOnlinePlayers(CommandHandler server) {
-		return CustomPlayerModels.proxy.getPlayersOnline().stream().map(e -> e.username).collect(Collectors.toList());
+	protected Object getPlayer(CommandContext<CommandSource> ctx, String id) throws CommandSyntaxException {
+		final EntitySelector entitySelector = ctx.getArgument(id, EntitySelector.class);
+		final List<? extends Entity> entities = entitySelector.get(ctx.getSource());
+		return entities.size() == 1 ? entities.get(0) : null;
 	}
 }

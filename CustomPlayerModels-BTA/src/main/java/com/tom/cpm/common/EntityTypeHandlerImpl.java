@@ -2,9 +2,9 @@ package com.tom.cpm.common;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
+import net.minecraft.core.entity.Entity;
 import net.minecraft.core.entity.EntityDispatcher;
 
 import com.tom.cpl.block.entity.EntityType;
@@ -18,7 +18,7 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<Class<?>> {
 		if(tag.charAt(0) == '#') {
 			return Collections.emptyList();
 		} else {
-			Class<?> item = EntityDispatcher.keyToClassMap.get(tag);
+			Class<?> item = EntityDispatcher.stringIdToClassMap.get(tag);
 			if (item != null) {
 				return Collections.singletonList(wrap(item));
 			}
@@ -46,10 +46,9 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<Class<?>> {
 		return Collections.emptyList();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<EntityType> getAllElements() {
-		return ((Set<Class<?>>) (Set) EntityDispatcher.classToKeyMap.keySet()).stream().map(this::wrap).collect(Collectors.toList());
+		return EntityDispatcher.stringIdToClassMap.values().stream().map(this::wrap).collect(Collectors.toList());
 	}
 
 	@Override
@@ -59,7 +58,7 @@ public class EntityTypeHandlerImpl extends EntityTypeHandler<Class<?>> {
 
 	@Override
 	public String getEntityId(Class<?> state) {
-		return EntityDispatcher.classToKeyMap.get(state);
+		return EntityDispatcher.nameKeyForClass((Class<? extends Entity>) state);
 	}
 
 	@Override

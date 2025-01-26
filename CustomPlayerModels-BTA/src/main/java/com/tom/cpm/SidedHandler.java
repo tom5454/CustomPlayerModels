@@ -5,13 +5,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import net.minecraft.core.entity.Entity;
-import net.minecraft.core.entity.player.EntityPlayer;
+import net.minecraft.core.entity.player.Player;
 
 import com.tom.cpm.common.ServerNetworkImpl;
 
 public interface SidedHandler {
-	public void getTracking(EntityPlayer player, Consumer<EntityPlayer> f);
-	public Set<EntityPlayer> getTrackingPlayers(Entity entity);
-	public List<EntityPlayer> getPlayersOnline();
-	public ServerNetworkImpl getServer(EntityPlayer pl);
+	public void getTracking(Player player, Consumer<Player> f);
+	public Set<Player> getTrackingPlayers(Entity entity);
+	public List<Player> getPlayersOnline();
+	public ServerNetworkImpl getServer(Player pl);
 }

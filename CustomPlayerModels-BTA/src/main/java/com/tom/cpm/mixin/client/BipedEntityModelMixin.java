@@ -13,7 +13,7 @@ import com.tom.cpm.client.IBipedModel;
 public class BipedEntityModelMixin implements IBipedModel {
 	private boolean cpm$noSetup;
 
-	@Inject(at = @At("HEAD"), method = "setRotationAngles(FFFFFF)V", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "setupAnimation(FFFFFF)V", cancellable = true)
 	public void onSetAngles(float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch,
 			float scale, CallbackInfo cbi) {
 		if (cpm$noSetup)cbi.cancel();

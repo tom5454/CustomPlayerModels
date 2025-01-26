@@ -1,16 +1,15 @@
 package com.tom.cpm.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.options.components.KeyBindingComponent;
 import net.minecraft.client.gui.options.components.OptionsCategory;
 import net.minecraft.client.gui.options.data.OptionsPages;
 import net.minecraft.client.input.InputDevice;
+import net.minecraft.client.option.GameSettings;
 import net.minecraft.client.option.KeyBinding;
 
 import com.tom.cpl.gui.IKeybind;
@@ -33,9 +32,7 @@ public class KeyBindings implements IKeybind {
 		for(int i = 1;i<=IKeybind.QUICK_ACCESS_KEYBINDS_COUNT;i++)
 			createQA(i);
 
-		List<KeyBinding> k = new ArrayList<>(Arrays.asList(Minecraft.INSTANCE.gameSettings.keys));
-		kbs.forEach(e -> k.add(((KeyBindings) e).kb));
-		Minecraft.INSTANCE.gameSettings.keys = k.toArray(new KeyBinding[0]);
+		kbs.forEach(e -> GameSettings.keys.add(((KeyBindings) e).kb));
 
 		OptionsPages.CONTROLS.withComponent(cpmBinds);
 	}

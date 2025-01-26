@@ -1,6 +1,7 @@
 package com.tom.cpm.common;
 
 import net.minecraft.core.block.Block;
+import net.minecraft.core.block.Blocks;
 
 public class BlockMeta {
 	private final int block;
@@ -16,7 +17,7 @@ public class BlockMeta {
 	}
 
 	public Block getBlock() {
-		return Block.blocksList[block];
+		return Blocks.blocksList[block];
 	}
 
 	public int getMeta() {

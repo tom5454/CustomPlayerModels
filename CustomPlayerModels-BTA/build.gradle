@@ -1,6 +1,21 @@
 plugins {
-	id 'babric-loom' version '1.4.+'
+	id 'fabric-loom' version '1.7.bta'
 	id 'java'
+}
+
+import org.gradle.internal.os.OperatingSystem
+
+project.ext.lwjglVersion = "3.3.4"
+
+switch (OperatingSystem.current()) {
+	case OperatingSystem.LINUX:
+		project.ext.lwjglNatives = "natives-linux"
+		break
+	case OperatingSystem.WINDOWS:
+		project.ext.lwjglNatives = "natives-windows"
+		break
+	case OperatingSystem.MAC_OS:
+		project.ext.lwjglNatives = "natives-macos"
 }
 
 archivesBaseName = project.archives_base_name
@@ -8,9 +23,8 @@ version = project.mod_version
 group = project.maven_group
 
 loom {
-	gluedMinecraftJar()
 	noIntermediateMappings()
-	customMinecraftManifest.set("https://github.com/Turnip-Labs/bta-manifest-repo/releases/download/v${project.minecraft_version}/${project.minecraft_version}.json")
+	customMinecraftMetadata.set("https://downloads.betterthanadventure.net/bta-client/${project.bta_channel}/v${project.minecraft_version}/manifest.json")
 }
 
 repositories {
@@ -24,6 +38,14 @@ repositories {
 		name = 'Fabric'
 		url = 'https://maven.fabricmc.net/'
 	}
+	maven {
+		name = 'SignalumMavenInfrastructure'
+		url = 'https://maven.thesignalumproject.net/infrastructure'
+	}
+	maven {
+		name = 'SignalumMavenReleases'
+		url = 'https://maven.thesignalumproject.net/releases'
+	}
 	ivy {
 		url = "https://github.com/Better-than-Adventure"
 		patternLayout {
@@ -33,25 +55,17 @@ repositories {
 		metadataSources { artifact() }
 	}
 	ivy {
-		url = "https://github.com/Turnip-Labs"
+		url = "https://downloads.betterthanadventure.net/bta-client/${project.bta_channel}/"
 		patternLayout {
-			artifact "[organisation]/releases/download/v[revision]/[module]-[revision].jar"
+			artifact "/v[revision]/client.jar"
 			m2compatible = true
 		}
 		metadataSources { artifact() }
 	}
 	ivy {
-		url = "https://github.com/Turnip-Labs"
+		url = "https://downloads.betterthanadventure.net/bta-server/${project.bta_channel}/"
 		patternLayout {
-			artifact "[organisation]/releases/download/[revision]/[module]-[revision].jar"
-			m2compatible = true
-		}
-		metadataSources { artifact() }
-	}
-	ivy {
-		url = "https://github.com/Turnip-Labs"
-		patternLayout {
-			artifact "[organisation]/releases/download/[revision]/[module]-bta-[revision].jar"
+			artifact "/v[revision]/server.jar"
 			m2compatible = true
 		}
 		metadataSources { artifact() }
@@ -60,14 +74,6 @@ repositories {
 		url = "https://piston-data.mojang.com"
 		patternLayout {
 			artifact "v1/[organisation]/[revision]/[module].jar"
-			m2compatible = true
-		}
-		metadataSources { artifact() }
-	}
-	ivy {
-		url = "https://github.com/MartinSVK12"
-		patternLayout {
-			artifact "[organisation]/releases/download/[revision]/[module]-[revision].jar"
 			m2compatible = true
 		}
 		metadataSources { artifact() }
@@ -94,17 +100,17 @@ sourceSets {
 }
 
 dependencies {
-	minecraft "bta-download-repo:bta:${project.minecraft_version}"
+	minecraft "::${project.minecraft_version}"
 	mappings loom.layered() {}
 
 	modRuntimeOnly "objects:client:43db9b498cb67058d2e12d394e6507722e71bb45" // https://piston-data.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar
-	modImplementation "fabric-loader:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Helper library
 	// If you do not need Halplibe you can comment this line out or delete this line
-	modImplementation "com.github.Turnip-Labs:bta-halplibe:${project.halplibe_version}"
+	//implementation("turniplabs:halplibe:${project.halplibe_version}")
 
-	modImplementation "ModMenu:ModMenu:2.0.6"
+	modImplementation("turniplabs:modmenu-bta:${project.mod_menu_version}")
 
 	implementation "org.slf4j:slf4j-api:1.8.0-beta4"
 	implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"
@@ -116,8 +122,23 @@ dependencies {
 	implementation("org.apache.logging.log4j:log4j-api:${log4jVersion}")
 	implementation("org.apache.logging.log4j:log4j-1.2-api:${log4jVersion}")
 
-	implementation("org.apache.commons:commons-lang3:3.12.0")
-	include(implementation("com.google.guava:failureaccess:1.0.2"))//Required depenency for Guava, that's missing in the Prism install for some reason...
+	include(implementation("org.apache.commons:commons-lang3:3.12.0"))
+
+	modImplementation("com.github.zarzelcow:legacy-lwjgl3:1.0.4")
+	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+	implementation "org.lwjgl:lwjgl:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl-assimp:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl-glfw:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl-openal:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion"
+	implementation "org.lwjgl:lwjgl-stb:$lwjglVersion"
 	
 	compileOnly "com.mojang:brigadier:1.0.18"
 }

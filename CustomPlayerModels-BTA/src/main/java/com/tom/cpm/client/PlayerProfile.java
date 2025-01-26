@@ -4,7 +4,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.client.render.model.ModelBiped;
-import net.minecraft.core.entity.player.EntityPlayer;
 
 import com.tom.cpl.util.Hand;
 import com.tom.cpm.common.EntityTypeHandlerImpl;
@@ -18,7 +17,7 @@ import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
 import com.tom.cpm.shared.skin.PlayerTextureLoader;
 
-public class PlayerProfile extends Player<EntityPlayer> implements IPlayerProfile {
+public class PlayerProfile extends Player<net.minecraft.core.entity.player.Player> implements IPlayerProfile {
 	public static boolean inGui;
 	private final GameProfile profile;
 	public int encGesture;
@@ -72,7 +71,7 @@ public class PlayerProfile extends Player<EntityPlayer> implements IPlayerProfil
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void updateFromPlayer(EntityPlayer player) {
+	public void updateFromPlayer(net.minecraft.core.entity.player.Player player) {
 		animState.resetPlayer();
 		if(player.isPlayerSleeping())animState.sleeping = true;
 		if(!player.isAlive())animState.dying = true;
@@ -82,9 +81,9 @@ public class PlayerProfile extends Player<EntityPlayer> implements IPlayerProfil
 		animState.moveAmountX = round(player.x - player.xo);
 		animState.moveAmountY = round(player.y - player.yo);
 		animState.moveAmountZ = round(player.z - player.zo);
-		animState.yaw = player.yRot * 2 - player.renderYawOffset;
+		animState.yaw = player.yRot * 2 - player.yBodyRot;
 		animState.pitch = player.xRot;
-		animState.bodyYaw = player.renderYawOffset;
+		animState.bodyYaw = player.yBodyRot;
 
 		animState.encodedState = encGesture;
 
@@ -114,8 +113,9 @@ public class PlayerProfile extends Player<EntityPlayer> implements IPlayerProfil
 			animState.resetModel();
 			animState.attackTime = m.onGround;
 			animState.leftArm = ArmPose.EMPTY;
-			if(m.field_1278_i)animState.rightArm = ArmPose.ITEM;
-			if(m.field_1279_h)animState.leftArm = ArmPose.ITEM;
+			if(m.holdingRightHand)animState.rightArm = ArmPose.ITEM;
+			if(m.holdingLeftHand)animState.leftArm = ArmPose.ITEM;
+			//holdingLarge
 		}
 	}
 

@@ -7,11 +7,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import org.lwjgl.opengl.GL11;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiSelectWorld;
+import net.minecraft.client.entity.player.PlayerLocalMultiplayer;
+import net.minecraft.client.gui.ScreenSelectWorld;
 
 import com.tom.cpl.block.BiomeHandler;
 import com.tom.cpl.gui.Frame;
@@ -41,7 +42,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 	private final PlayerRenderManager prm;
 	private final AllTagManagers tags;
 	private final ModelDefinitionLoader<GameProfile> loader;
-	private final RenderTypeBuilder<Integer, RetroLayer> renderBuilder = RenderTypeBuilder.setupRetro(new RetroGL());
+	private final RenderTypeBuilder<net.minecraft.client.render.texture.Texture, RetroLayer> renderBuilder = RenderTypeBuilder.setupRetro(new RetroGL());
 
 	public MinecraftObject(Minecraft mc) {
 		this.mc = mc;
@@ -63,32 +64,30 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	public static class Texture implements ITexture {
 		public static Texture bound;
-		private int id = -1;
+		private net.minecraft.client.render.texture.Texture mcTex;
 
 		public Texture() {
-			id = GL11.glGenTextures();
+			mcTex = new net.minecraft.client.render.texture.Texture();
+			mcTex.generate();
 		}
 
 		@Override
 		public void bind() {
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
 			bound = this;
 		}
 
 		@Override
 		public void load(Image image) {
-			if (id == -1)id = GL11.glGenTextures();
-			Minecraft.INSTANCE.renderEngine.setupTexture(AWTImageIO.toBufferedImage(image), id);
+			mcTex.setupTexture(AWTImageIO.toBufferedImage(image));
 		}
 
 		@Override
 		public void free() {
-			Minecraft.INSTANCE.renderEngine.deleteTexture(id);
-			id = -1;
+			mcTex.delete();
 		}
 
-		public int getId() {
-			return id;
+		public net.minecraft.client.render.texture.Texture getMcTex() {
+			return mcTex;
 		}
 	}
 
@@ -149,12 +148,12 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public void openGui(Function<IGui, Frame> creator) {
-		mc.displayGuiScreen(new GuiImpl(creator, mc.currentScreen));
+		mc.displayScreen(new GuiImpl(creator, mc.currentScreen));
 	}
 
 	@Override
 	public Runnable openSingleplayer() {
-		return () -> mc.displayGuiScreen(new GuiSelectWorld(mc.currentScreen));
+		return () -> mc.displayScreen(new ScreenSelectWorld(mc.currentScreen));
 	}
 
 	@Override
@@ -194,26 +193,21 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public String getConnectedServer() {
-		/*INetworkManager netm = CPMClientAccess.getNetMngr(mc);
-		if(netm == null)return null;
-		SocketAddress sa = netm.getSocketAddress();
-		if(sa instanceof InetSocketAddress)
-			return ((InetSocketAddress)sa).getHostString();*/
-		return null;
+		if (mc.thePlayer == null)return null;
+		return EmulNetwork.getClient(mc.thePlayer).cpm$getConnectedServer();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<Object> getPlayers() {
 		if(mc.thePlayer == null)return Collections.emptyList();
-		return Collections.emptyList();
-		/*
-		NetClientHandler net = this.mc.thePlayer.sendQueue;
-		List<GuiPlayerInfo> plInfo = net.playerInfoList;
-		List<EntityPlayer> players = mc.theWorld.playerEntities;
-		return plInfo.stream().map(i -> players.stream().filter(e -> e.getCommandSenderName().equalsIgnoreCase(i.name)).
-				findFirst().orElse(null)).filter(e -> e != null).map(e -> GameProfileManager.getProfile(e.username)).collect(Collectors.toList());
-		 */
+		Stream<String> players;
+		if (mc.thePlayer instanceof PlayerLocalMultiplayer) {
+			PlayerLocalMultiplayer mp = (PlayerLocalMultiplayer) mc.thePlayer;
+			players = mp.sendQueue.players.stream().map(e -> e.playerName);
+		} else {
+			players = Stream.of(mc.thePlayer.username);
+		}
+		return players.map(e -> GameProfileManager.getProfile(e)).collect(Collectors.toList());
 	}
 
 	@Override
