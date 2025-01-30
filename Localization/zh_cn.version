@@ -1279,5 +1279,6 @@
   "bb-label.warn.uvDecimalFixer.list": "UV Decimal Cubes List",
   "bb-tooltip.warn.uvDecimalFixerApplied": "Click the %s button to show a list of affected cubes.",
   "bb-label.error.failedToLoadTexture": "Failed to load the image data for texture: %s\\Please restart Blockbench and try again\\Cause: %s",
-  "bb-label.openedInBB": "Please click back to the Blockbench tab to continue."
+  "bb-label.openedInBB": "Please click back to the Blockbench tab to continue.",
+  "bb-label.warn.uvDecimalFixer.info": "Your model contains cubes decimal UVs or decimal sizes.\\The decimal UV fixer applied a 16x grid resize to your model.\\You can safely ignore this warning if the model looks correct in CPM.\\See the list of the affected cubes:"
 }

@@ -12,7 +12,7 @@ public class Plugin {
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")
 	public static class PluginProperties {
-		public String name, author, description, icon, version, variant;
+		public String name, author, description, icon, version, variant, min_version;
 		public String[] tags;
 		public Callback onload, onunload;
 	}

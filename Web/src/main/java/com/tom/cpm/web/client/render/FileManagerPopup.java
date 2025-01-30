@@ -127,8 +127,9 @@ public class FileManagerPopup extends PopupPanel {
 			upload.onchange = ev -> {
 				Element info = doc.getElementById("info");
 				List<Promise<Void>> prs = new ArrayList<>();
-				upload.files.asList().forEach(f -> {
-					prs.add(loadFile(f));
+				List<Object> files = Js.uncheckedCast(upload.files.asList());
+				files.forEach(f -> {
+					prs.add(loadFile(Js.uncheckedCast(f)));
 				});
 				Promise.all(prs.toArray(new Promise[0])).then(v -> {
 					info.innerHTML = gui.i18nFormat("web-label.filemanager.added");

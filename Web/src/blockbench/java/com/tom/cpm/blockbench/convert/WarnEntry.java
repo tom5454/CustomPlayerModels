@@ -11,6 +11,7 @@ public class WarnEntry implements Comparable<WarnEntry> {
 	private String message, tooltip;
 	private FutureTask autoFix;
 	private boolean fixed;
+	private boolean isInfo;
 
 	public static interface FutureTask {
 		Promise<Boolean> runTask();
@@ -42,12 +43,21 @@ public class WarnEntry implements Comparable<WarnEntry> {
 		return this;
 	}
 
+	public WarnEntry setInfo() {
+		this.isInfo = true;
+		return this;
+	}
+
 	public boolean isFixed() {
 		return fixed;
 	}
 
 	public String getMessage() {
 		return message;
+	}
+
+	public boolean isInfo() {
+		return isInfo;
 	}
 
 	@Override

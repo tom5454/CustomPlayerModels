@@ -21,7 +21,7 @@ import jsinterop.base.Js;
 
 public class ExceptionUtil {
 	private static SourceMapImpl sourceMap;
-	private static final JsRegExp formatRegex = new JsRegExp("(at (?:new )?)([\\w$\\<\\>]+(?:\\.[\\w$\\<\\>]+)? (?:\\[[\\w $]+\\] )?)\\(([\\w:\\/\\.]+\\/[\\w-]+\\.js)(\\?_=\\d+)?:(\\d+):(\\d+)\\)", "g");
+	private static final JsRegExp formatRegex = new JsRegExp("(at (?:new )?)([\\w$\\<\\>]+(?:\\.[\\w$\\<\\>]+)? (?:\\[[\\w $]+\\] )?)\\(((?:[\\w:\\/\\.]+\\/)|(?:PLUGINS\\/\\(Plugin\\):)[\\w-]+\\.js)(\\?_=\\d+)?:(\\d+):(\\d+)\\)", "g");
 	private static final JsRegExp formatRegexFF = new JsRegExp("()([\\w$]+(?:\\.[\\w$]+)?)\\@((?:[\\w:\\/\\.]+\\/)?[\\w-]+\\.js)(\\?_=\\d+)?:(\\d+):(\\d+)", "g");
 	private static final String SOURCE_NAME = new JsError().fileName;
 

@@ -52,6 +52,7 @@
   "bb-label.warn.uvDecimalFixer.applied": "UV Decimal Fixer was applied",
   "bb-label.warn.uvDecimalFixer.face": "%s/ Face: %s",
   "bb-label.warn.uvDecimalFixer.list": "UV Decimal Cubes List",
+  "bb-label.warn.uvDecimalFixer.info": "Your model contains cubes decimal UVs or decimal sizes.\\The decimal UV fixer applied a 16x grid resize to your model.\\You can safely ignore this warning if the model looks correct in CPM.\\See the list of the affected cubes:",
   "bb-label.error.failedToLoadTexture": "Failed to load the image data for texture: %s\\Please restart Blockbench and try again\\Cause: %s",
   "bb-label.openedInBB": "Please click back to the Blockbench tab to continue.",
   "bb-tooltip.export.renameGroup": "Rename the group to the selected type\\If a group with the same name already exists the action will fail.",

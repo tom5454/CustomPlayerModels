@@ -1,0 +1,40 @@
+<div style="display: flex; flex-direction: column; height: 100%; overflow-y: auto;">
+	<p class="format_description">{{ i18nGet("bb-label.cpmCodecDesc") }}</p>
+	<p class="format_target">
+		<b>Target</b>:<span>Minecraft: Java Edition with Customizable Player Models mod</span>
+	</p>
+	<div class="markdown" style="overflow-y: auto;">
+		<h3>{{ tl("mode.start.format.informations") }}</h3>
+		<ul>
+			<li>{{ i18nGet("bb-label.cpmInfo.export") }}</li>
+			<li>{{ i18nGet("bb-label.cpmInfo.import") }}</li>
+		</ul>
+		<h3>{{ tl("mode.start.format.resources") }}</h3>
+		<ul>
+			<li><a href="https://github.com/tom5454/CustomPlayerModels/wiki">Wiki</a></li>
+			<li><a href="https://github.com/tom5454/CustomPlayerModels/issues">Bug tracker</a><br></li>
+			<li><a href="https://discord.gg/mKyXdEsMZD">Discord</a></li>
+			<li><a href="https://www.curseforge.com/minecraft/mc-mods/custom-player-models">CPM on CurseForge (Neo/Forge)</a></li>
+			<li><a href="https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric">CPM on CurseForge (Fabric/Quilt)</a></li>
+			<li><a href="https://modrinth.com/mod/custom-player-models">CPM on Modrinth</a><br></li>
+		</ul>
+	</div>
+	<p>
+		<button @click="open">
+			<i class="material-icons">folder_open</i>
+			{{ i18nGet("bb-button.openCPMProject") }}
+		</button>
+		<button @click="openembed">
+			<i class="material-icons">launch</i>
+			{{ i18nGet("bb-button.openEmbeddedEditor") }}
+		</button>
+	</p>
+	<p style="padding: 4px 0px 0px 0px;">Version: {{platform}}</p>
+	<div class="button_bar">
+		<button id="create_new_model_button" style="margin-top: 20px;"
+			@click="create">
+			<i class="material-icons">arrow_forward</i>
+			{{ tl("mode.start.create_new") }}
+		</button>
+	</div>
+</div>

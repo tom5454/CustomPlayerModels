@@ -30,7 +30,6 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.util.I18n;
 
-import elemental2.core.JsObject;
 import javaemul.internal.annotations.DoNotAutobox;
 import jsinterop.base.Js;
 
@@ -85,32 +84,12 @@ public class CPMCodec {
 		ctr.codec = codec;
 		ctr.category = "minecraft";
 		ctr.format_page = new FormatPage();
-		ctr.format_page.component = new VueComponent();
-		ctr.format_page.component.methods = Js.uncheckedCast(new JsObject());
-		ctr.format_page.component.methods.set("create", ProjectGenerator::newProject);
-		ctr.format_page.component.methods.set("openembed", EmbeddedEditorHandler::open);
-		ctr.format_page.component.methods.set("open", ProjectConvert::open);
-		ctr.format_page.component.template = "<div style=\"display:flex;flex-direction:column;height:100%\">"
-				+ "<p class=\"format_description\">" + I18n.get("bb-label.cpmCodecDesc") + "</p>"
-				+ "<p class=\"format_target\"><b>Target</b>:<span>Minecraft: Java Edition with Customizable Player Models mod</span></p>"
-				+ "<h3 class=\"markdown\">" + Global.translate("mode.start.format.informations") + "</h3>"
-				+ "<p class=\"markdown\">"
-				+ "<ul><li>" + I18n.get("bb-label.cpmInfo.export") + "</li></ul>"
-				+ "<ul><li>" + I18n.get("bb-label.cpmInfo.import") + "</li></ul>"
-				+ "</p>"
-				+ "<h3 class=\"markdown\">" + Global.translate("mode.start.format.resources") + "</h3>"
-				+ "<p class=\"markdown\">"
-				+ "<ul><li><a href=\"https://github.com/tom5454/CustomPlayerModels/wiki\">Wiki</a></li></ul>"
-				+ "<ul><li><a href=\"https://discord.gg/mKyXdEsMZD\">Discord</a></li></ul>"
-				+ "<ul><li><a href=\"https://www.curseforge.com/minecraft/mc-mods/custom-player-models\">CPM on CurseForge</a></li></ul>"
-				+ "<ul><li><a href=\"https://modrinth.com/mod/custom-player-models\">CPM on Modrinth</a><br></li></ul>"
-				+ "<ul><li><a href=\"https://github.com/tom5454/CustomPlayerModels/issues\">Bug tracker</a><br></li></ul>"
-				+ "</p>"
-				+ "<p><button @click=\"open\"><i class=\"material-icons\">folder_open</i> " + I18n.get("bb-button.openCPMProject") + " </button></p>"
-				+ "<p><button @click=\"openembed\"><i class=\"material-icons\">launch</i> " + I18n.get("bb-button.openEmbeddedEditor") + " </button></p>"
-				+ "<p class=\"markdown\"><p>Version: " + WebMC.platform + "</p>"
-				+ "<div class=\"button_bar\"><button id=\"create_new_model_button\" style=\"margin-top: 20px;\" @click=\"create\"><i class=\"material-icons\">arrow_forward</i> Create New Model</button></div>"
-				+ "</div>";
+		VueComponent cm = VueComponent.create("format_desc");
+		cm.setMethod("create", ProjectGenerator::newProject);
+		cm.setMethod("openembed", EmbeddedEditorHandler::open);
+		cm.setMethod("open", ProjectConvert::open);
+		cm.data.set("platform", WebMC.platform);
+		ctr.format_page.component = cm;
 
 		AnimatorChannel visCh = new AnimatorChannel();
 		visCh.name = I18n.get("label.cpm.visible");
@@ -195,7 +174,7 @@ public class CPMCodec {
 					BBActions.glowButton.value = ((Cube)Outliner.selected[0]).glow;
 					BBActions.glowButton.updateEnabledState();
 				}
-				if(Project.selected_groups.length > 0) {
+				if(Project.selected_groups != null && Project.selected_groups.length > 0) {
 					BBActions.hiddenButton.value = Project.selected_groups.getAt(0).hidden;
 					BBActions.hiddenButton.updateEnabledState();
 				}

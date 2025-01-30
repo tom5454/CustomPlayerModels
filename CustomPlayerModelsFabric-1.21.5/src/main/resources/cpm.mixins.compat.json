@@ -4,7 +4,7 @@
   "package": "com.tom.cpm.mixin.compat",
   "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "CustomPlayerModels-Fabric-1.21.4-refmap.json",
+  "refmap": "CustomPlayerModels-Fabric-1.21.5-refmap.json",
   "mixins": [
   ],
   "client": [

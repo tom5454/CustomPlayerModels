@@ -63,6 +63,7 @@ public class PluginStart implements EntryPoint {
 			prop.icon = "icon-player";
 			prop.onload = PluginStart::onLoad;
 			prop.onunload = PluginStart::onUnload;
+			prop.min_version = "4.12.1";
 			Plugin.register(System.getProperty("cpm.pluginId"), prop);
 		});
 	}

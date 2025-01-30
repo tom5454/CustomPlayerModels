@@ -1,5 +1,8 @@
 package com.tom.cpm.mixin.client;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,4 +50,11 @@ public abstract class ClientNetworkHandlerMixin implements ClientNetworkImpl {
 		return field_1973.method_1496(id);
 	}
 
+	@Override
+	public String cpm$getConnectedServer() {
+		SocketAddress sa = connection.getAddress();
+		if (sa instanceof InetSocketAddress)
+			return ((InetSocketAddress) sa).getHostString();
+		return null;
+	}
 }

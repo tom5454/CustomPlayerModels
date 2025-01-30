@@ -19,7 +19,6 @@ import com.tom.cpl.util.Pair;
 public class BlockbenchServer {
 	public static class MyHandler implements HttpHandler {
 		private boolean log;
-		private File file;
 		private File map;
 
 		public MyHandler(boolean log) {
@@ -34,10 +33,12 @@ public class BlockbenchServer {
 				path = path.substring(1);
 				if(log)System.out.println(t.getRemoteAddress() + " " + path);
 				if(path.equals("cpm_plugin.js")) {
-					build();
+					Pair<File, File> r = BuildBlockbench.main(true, false);
+					File in = r.getKey();
+					map = r.getValue();
 					t.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-					try(FileInputStream f = new FileInputStream(file)) {
-						t.sendResponseHeaders(200, file.length());
+					try(FileInputStream f = new FileInputStream(in)) {
+						t.sendResponseHeaders(200, in.length());
 						BuildBlockbench.copy(f, t.getResponseBody());
 					}
 				} else if(map != null && path.equals("src/cpmblockbench.map")) {
@@ -77,13 +78,6 @@ public class BlockbenchServer {
 				throw e;
 			}
 		}
-
-		private void build() {
-			Pair<File, File> r = BuildBlockbench.main(true, false);
-			file = r.getKey();
-			map = r.getValue();
-			System.out.println(file);
-		}
 	}
 	private static HttpServer server;
 
@@ -91,10 +85,9 @@ public class BlockbenchServer {
 		System.out.println("Load the plugin from: http://localhost:8000/cpm_plugin.js");
 		System.out.println("Or use: https://tom5454.com/cpm/cpm_plugin/local/cpm_plugin.js");
 		System.out.println("To bypass blockbench http limit (redirects to localhost:8000)");
-		MyHandler handler;
 		try {
 			server = HttpServer.create(new InetSocketAddress(8000), 0);
-			server.createContext("/", handler = new MyHandler(true));
+			server.createContext("/", new MyHandler(true));
 			server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
 			server.start();
 		} catch (Exception e) {
@@ -102,7 +95,6 @@ public class BlockbenchServer {
 			return;
 		}
 		System.out.println("Press enter to exit");
-		//handler.build();
 		try {
 			System.in.read();
 		} catch (IOException e) {

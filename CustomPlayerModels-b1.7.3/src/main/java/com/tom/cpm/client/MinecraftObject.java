@@ -194,12 +194,8 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public String getConnectedServer() {
-		/*INetworkManager netm = CPMClientAccess.getNetMngr(mc);
-		if(netm == null)return null;
-		SocketAddress sa = netm.getSocketAddress();
-		if(sa instanceof InetSocketAddress)
-			return ((InetSocketAddress)sa).getHostString();*/
-		return null;
+		if (mc.player == null)return null;
+		return EmulNetwork.getClient(mc.player).cpm$getConnectedServer();
 	}
 
 	@SuppressWarnings("unchecked")

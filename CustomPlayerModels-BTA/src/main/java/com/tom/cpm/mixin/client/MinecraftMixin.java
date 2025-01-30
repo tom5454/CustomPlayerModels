@@ -82,6 +82,7 @@ public abstract class MinecraftMixin {
 	@Inject(at = @At("HEAD"), method = "runTick()V")
 	public void onTick(CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.clientTickStart();
+		CustomPlayerModelsClient.mc.getPlayerRenderManager().getAnimationEngine().update(this.timer.partialTicks);
 	}
 
 	@Inject(at = @At("RETURN"), method = "runTick()V")

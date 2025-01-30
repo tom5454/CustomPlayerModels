@@ -522,7 +522,10 @@ public class BlockbenchExport {
 			pr.id = "cpm_list_decimals";
 			pr.title = I18n.get("bb-label.warn.uvDecimalFixer.list");
 			pr.singleButton = true;
-			pr.lines = new String[]{ decFixApplied.stream().collect(Collectors.joining("<br>")) };
+			pr.lines = new String[] {
+					I18n.formatBr("bb-label.warn.uvDecimalFixer.info"),
+					decFixApplied.stream().collect(Collectors.joining("<br>", "<div style='padding: 8px;'>", "</div>"))
+			};
 			pr.onCancel = () -> {
 				res.onInvoke(false);
 				return true;
@@ -543,8 +546,8 @@ public class BlockbenchExport {
 					if (!reqFix.isEmpty()) {
 						for (DecimalFixOp op : reqFix) {
 							decFixApplied.add(op.getDisplayName());
-							op.baseMul *= 16;
 						}
+						m.baseMul *= 16;
 						tex.provider.size.x *= 16;
 						tex.provider.size.y *= 16;
 					}
@@ -554,7 +557,7 @@ public class BlockbenchExport {
 		});
 		log("Applied UV decimal fixer");
 		if (!decFixApplied.isEmpty()) {
-			warnings.add(new WarnEntry(I18n.format("bb-label.warn.uvDecimalFixer.applied"), () -> showDecimalFixed(decFixApplied)).setTooltip(I18n.format("bb-tooltip.warn.uvDecimalFixerApplied", I18n.get("bb-button.autoFix"))));
+			warnings.add(new WarnEntry(I18n.format("bb-label.warn.uvDecimalFixer.applied"), () -> showDecimalFixed(decFixApplied)).setInfo().setTooltip(I18n.format("bb-tooltip.warn.uvDecimalFixerApplied", I18n.get("bb-button.autoFix"))));
 		}
 
 		ProjectData pd = Project.getData();
@@ -1056,7 +1059,6 @@ public class BlockbenchExport {
 		private int mode;
 		private UVMul mul;
 		private IntConsumer set;
-		private int baseMul = 1;
 		private Cube cube;
 		private Direction face;
 
@@ -1076,15 +1078,15 @@ public class BlockbenchExport {
 
 		public boolean needsFix() {
 			if((mode & 4) != 0)return false;
-			float m = val * baseMul * ((mode & 1) != 0 ? mul.y : mul.x);
+			float m = val * mul.baseMul * ((mode & 1) != 0 ? mul.y : mul.x);
 			return (m - Math.round(m)) > 0.05f;
 		}
 
 		public void apply() {
 			if((mode & 4) != 0) {
-				set.accept(baseMul);
+				set.accept(mul.baseMul);
 			} else if((mode & 2) != 0) {
-				set.accept(Math.round(val * baseMul * ((mode & 1) != 0 ? mul.y : mul.x)));
+				set.accept(Math.round(val * mul.baseMul * ((mode & 1) != 0 ? mul.y : mul.x)));
 			} else
 				set.accept(Math.round(val * ((mode & 1) != 0 ? mul.y : mul.x)));
 		}
@@ -1121,6 +1123,7 @@ public class BlockbenchExport {
 	}
 
 	private static class UVMul {
+		private int baseMul = 1;
 		private float x = 1, y = 1;
 		private Set<DecimalFixOp> elems = new HashSet<>();
 		private String texId;

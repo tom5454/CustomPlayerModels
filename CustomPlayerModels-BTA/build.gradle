@@ -122,8 +122,6 @@ dependencies {
 	implementation("org.apache.logging.log4j:log4j-api:${log4jVersion}")
 	implementation("org.apache.logging.log4j:log4j-1.2-api:${log4jVersion}")
 
-	include(implementation("org.apache.commons:commons-lang3:3.12.0"))
-
 	modImplementation("com.github.zarzelcow:legacy-lwjgl3:1.0.4")
 	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
@@ -141,6 +139,7 @@ dependencies {
 	implementation "org.lwjgl:lwjgl-stb:$lwjglVersion"
 	
 	compileOnly "com.mojang:brigadier:1.0.18"
+	include(implementation("com.google.guava:failureaccess:1.0.2"))//Required depenency for Guava, that's missing in the Prism install for some reason...
 }
 
 java {

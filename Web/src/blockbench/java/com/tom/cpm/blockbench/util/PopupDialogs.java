@@ -6,6 +6,7 @@ import java.util.function.Function;
 import com.tom.cpm.blockbench.PluginStart;
 import com.tom.cpm.blockbench.convert.WarnEntry;
 import com.tom.cpm.blockbench.proxy.Dialog;
+import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.util.Clipboard;
 import com.tom.cpm.web.client.util.I18n;
 import com.tom.ugwt.client.ExceptionUtil;
@@ -68,7 +69,8 @@ public class PopupDialogs {
 			DomGlobal.console.log(err);
 			errorMsg = msg + "\n" + err;
 		}
-		errorDialog.setLines(msg, "<br>", err.toString(), "<br>", I18n.get("bb-label.pleaseReport"), "<br>", "<button onclick='" + copyErrorFunc + "(\"" + DomGlobal.btoa(errorMsg) + "\")'>" + I18n.get("bb-button.copyErrorMsg") + "</button>");
+		errorMsg += "\nPlatform: " + WebMC.platform;
+		errorDialog.setLines(msg, "<br>", err.toString(), "<br>", I18n.get("bb-label.pleaseReport"), "<br>", "Platform: " + WebMC.platform, "<br>", "<button onclick='" + copyErrorFunc + "(\"" + DomGlobal.btoa(errorMsg) + "\")'>" + I18n.get("bb-button.copyErrorMsg") + "</button>");
 		errorDialog.show();
 	}
 
@@ -173,15 +175,15 @@ public class PopupDialogs {
 		sb.append("<div style='display: flex;flex-direction: column;'>");
 		ent.stream().filter(w -> !w.isFixed()).sorted().forEach(w -> {
 			String msg = w.getMessage();
-			sb.append("<div class='tool widget cpm_warn_msg' style='text-align: left; display: flex; flex: 1;'>");
+			sb.append("<div class='tool widget cpm_warn_msg' style='text-align: left; display: flex; flex: 1; justify-content: space-between;'>");
 			if(w.getTooltip() != null) {
 				sb.append("<div class='tooltip' style='margin-left: 0px;'>" + w.getTooltip() + "</div>");
 			}
-			sb.append("<div>");
+			sb.append("<div style='align-self: center;'>");
 			sb.append(msg);
 			sb.append("</div>");
 			if(w.canQuickFix()) {
-				sb.append("<div><button onclick='" + quickFix + "(" + ent.indexOf(w) + ")'>" + I18n.get("bb-button.autoFix") + "</button></div>");
+				sb.append("<div><button onclick='" + quickFix + "(" + ent.indexOf(w) + ")'>" + I18n.get(w.isInfo() ? "label.cpm.info" : "bb-button.autoFix") + "</button></div>");
 			}
 			sb.append("</div>");
 		});

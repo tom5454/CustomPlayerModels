@@ -8,4 +8,5 @@ import com.tom.cpm.shared.network.NetH;
 public interface ClientNetworkImpl extends NetH {
 	void cpm$sendPacket(Identifier id, byte[] data);
 	Entity cpm$getEntityByID(int id);
+	String cpm$getConnectedServer();
 }

@@ -67,7 +67,16 @@ public class MinecraftObject implements MinecraftClientAccess {
 		private net.minecraft.client.render.texture.Texture mcTex;
 
 		public Texture() {
-			mcTex = new net.minecraft.client.render.texture.Texture();
+			mcTex = new net.minecraft.client.render.texture.Texture() {
+
+				@Override
+				protected void finalize() throws Throwable {
+					// Fix rare JVM crash due to finalizer not running in the game thread
+					if (isGenerated()) {
+						MCExecutor.addScheduledTask(this::delete);
+					}
+				}
+			};
 			mcTex.generate();
 		}
 

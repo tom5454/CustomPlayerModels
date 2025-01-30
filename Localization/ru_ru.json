@@ -1258,6 +1258,7 @@
   "bb-label.warn.uvDecimalFixer.applied": "UNLOCALIZED: UV Decimal Fixer was applied",
   "bb-label.warn.uvDecimalFixer.face": "UNLOCALIZED: %s/ Face: %s",
   "bb-label.warn.uvDecimalFixer.list": "UNLOCALIZED: UV Decimal Cubes List",
+  "bb-label.warn.uvDecimalFixer.info": "UNLOCALIZED: Your model contains cubes decimal UVs or decimal sizes.\\The decimal UV fixer applied a 16x grid resize to your model.\\You can safely ignore this warning if that\u0027s fine.\\See the list of the affected cubes:",
   "bb-label.error.failedToLoadTexture": "UNLOCALIZED: Failed to load the image data for texture: %s\\Please restart Blockbench and try again\\Cause: %s",
   "bb-label.openedInBB": "UNLOCALIZED: Please click back to the Blockbench tab to continue.",
   "bb-tooltip.export.renameGroup": "Переименовать группу в выбранный тип\\Если группа с таким же именем уже существует, действие завершится ошибкой.",

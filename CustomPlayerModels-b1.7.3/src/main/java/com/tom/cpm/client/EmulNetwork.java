@@ -50,6 +50,11 @@ public class EmulNetwork {
 		public Entity cpm$getEntityByID(int id) {
 			return Minecraft.INSTANCE.player;
 		}
+
+		@Override
+		public String cpm$getConnectedServer() {
+			return null;
+		}
 	}
 
 	private static class EmulServer extends EmulNetwork implements ServerNetworkImpl {
