@@ -59,7 +59,8 @@ public class BBUI implements UI {
 			return true;
 		};
 		dctr.onCancel = () -> {
-			cancel.run();
+			if (cancel != null)
+				cancel.run();
 			return true;
 		};
 		new Dialog(dctr).show();

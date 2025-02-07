@@ -164,7 +164,7 @@ public interface IClientAPI extends ISharedAPI {
 	 *
 	 * @return true if the animation was found and started playing
 	 * */
-	<P> boolean playAnimation(String name, int value);
+	boolean playAnimation(String name, int value);
 
 	/**
 	 * Play the given command animation for a player. For custom poses and gestures only.
@@ -174,7 +174,7 @@ public interface IClientAPI extends ISharedAPI {
 	 *
 	 * @return true if the animation was found and started playing
 	 * */
-	<P> boolean playAnimation(String name);
+	boolean playAnimation(String name);
 
 	/**
 	 * Get the value for the given animation (value or toggle)
@@ -183,6 +183,15 @@ public interface IClientAPI extends ISharedAPI {
 	 * @return The animation value (value layer: 0-255, other animations: 0-1), -1 if animation doesn't exist
 	 * */
 	int getAnimationPlaying(String name);
+
+	/**
+	 * Get the max value for the given animation (value or toggle)
+	 *
+	 * @param name animation name
+	 *
+	 * @return maximum value for layers (value set in the animation 0-255, toggle: always 1, -1 if animation doesn't exist or isn't a layer)
+	 * */
+	int getAnimationMaxValue(String name);
 
 	/**
 	 * Player renderer for 1.16 and newer versions

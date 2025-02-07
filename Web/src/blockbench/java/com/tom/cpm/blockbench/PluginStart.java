@@ -7,6 +7,7 @@ import com.google.gwt.core.client.EntryPoint;
 
 import com.tom.cpm.blockbench.ee.EmbeddedEditorHandler;
 import com.tom.cpm.blockbench.format.CPMCodec;
+import com.tom.cpm.blockbench.format.CPMVisuals;
 import com.tom.cpm.blockbench.format.ProjectGenerator;
 import com.tom.cpm.blockbench.proxy.Blockbench;
 import com.tom.cpm.blockbench.proxy.Blockbench.CallbackEvent;
@@ -70,6 +71,7 @@ public class PluginStart implements EntryPoint {
 
 	public static void onLoad() {
 		CPMCodec.init();
+		CPMVisuals.init();
 		ProjectGenerator.initDialog();
 		BBActions.load();
 	}

@@ -43,7 +43,7 @@ public class GameProfileManager {
 	private static void checkError(Map<String, Object> r) throws IOException {
 		if (r == null)
 			throw new IOException("Invalid data returned from the server");
-		if (r.containsKey("error")) {
+		if (r.containsKey("error") || r.containsKey("errorMessage")) {
 			String error = String.valueOf(r.get("error"));
 			throw new IOException(error + ": " + String.valueOf(r.get("errorMessage")));
 		}

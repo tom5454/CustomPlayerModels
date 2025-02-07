@@ -1,3 +1,7 @@
+> [!NOTE]
+> 此页面缺少源中的一些章节。
+> 查看此页面的英文版本：[跳转](https://github.com/tom5454/CustomPlayerModels/wiki/API-documentation)
+
 
 <a name="cpm-api-documentation"/>
 

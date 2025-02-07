@@ -113,7 +113,7 @@ public enum AnimationDisplayData {
 
 	public static enum Type {
 		GLOBAL(0xFFFFFF),
-		CUSTOM(0x0000FF),
+		CUSTOM(0x3333FF),
 		POSE(0xFFFF00),
 		POSE_SERVER(0x00FF00),
 		LAYERS(0x00FFFF),

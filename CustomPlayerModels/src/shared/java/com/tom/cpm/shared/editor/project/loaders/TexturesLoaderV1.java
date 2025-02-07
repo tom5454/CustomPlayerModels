@@ -57,6 +57,7 @@ public class TexturesLoaderV1 implements ProjectPartLoader {
 					}
 					eTex.setDefaultImg(def);
 					eTex.setImage(new Image(def));
+					eTex.setChangedLocally(false);
 					eTex.markDirty();
 				}
 			} else {
@@ -70,6 +71,7 @@ public class TexturesLoaderV1 implements ProjectPartLoader {
 					if(eTex == null)eTex = new ETextures(editor, tex);
 					editor.textures.put(tex, eTex);
 					eTex.setImage(img);
+					eTex.setChangedLocally(false);
 					eTex.markDirty();
 					JsonMap skinTexSize = data.getMap(name + "Size");
 					eTex.provider.size = new Vec2i(skinTexSize, tex.getDefSize());

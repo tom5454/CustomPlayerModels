@@ -19,6 +19,7 @@ This is intended as a quick reference and showcase. For more complete info, see 
 [Horizontal Rule](#hr)  
 [Line Breaks](#lines)  
 [YouTube Videos](#videos)  
+[Highlighting/Alerts](#highlighting)  
 
 <a name="headers"/>
 
@@ -300,7 +301,7 @@ You can also use words, to fit your writing style more closely[^note].
 
 ## Tables
 
-Tables aren't part of the core Markdown spec, but they are part of GFM and CPM Wiki Viewer supports them. They are an easy way of adding tables to your email -- a task that would otherwise require copy-pasting from another application.
+Tables aren't part of the core Markdown spec, but they are part of GFM and CPM Wiki Viewer supports them. They are an easy way of adding tables to your wiki page.
 
 ```no-highlight
 Colons can be used to align columns.
@@ -341,7 +342,7 @@ There must be at least 3 dashes separating each header cell. The outer pipes (|)
 ## Blockquotes
 
 ```no-highlight
-> Blockquotes are very handy in email to emulate reply text.
+> Blockquotes are very handy
 > This line is part of the same quote.
 
 Quote break.
@@ -349,7 +350,7 @@ Quote break.
 > This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote. 
 ```
 
-> Blockquotes are very handy in email to emulate reply text.
+> Blockquotes are very handy
 > This line is part of the same quote.
 
 Quote break.
@@ -424,8 +425,48 @@ They can't be added directly but you can add an image with a link to the video l
 [![IMAGE ALT TEXT HERE](https://github.com/tom5454/CustomPlayerModels/wiki/images/spinner.png)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
 ```
 
+[![IMAGE ALT TEXT HERE](https://github.com/tom5454/CustomPlayerModels/wiki/images/spinner.png)](http://www.youtube.com/watch?v=dQw4w9WgXcQ)
+
 See [Images](#images) on how to load your custom image.
+
+<a name="highlighting"/>
+
+## Highlighting / Alerts
+
+Section pulled from [GitHub docs](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts)
+
+```
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+```
+
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
 
 ---
 
-License: [CC-BY](https://creativecommons.org/licenses/by/3.0/)
+Source License: [CC-BY](https://creativecommons.org/licenses/by/3.0/)

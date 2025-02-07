@@ -11,6 +11,7 @@ public interface CommandAction {
 	ActionType getType();
 	int getValue();
 	void setValue(int value);
+	int getMaxValue();
 	boolean isCommandControlled();
 
 	public static enum ActionType {

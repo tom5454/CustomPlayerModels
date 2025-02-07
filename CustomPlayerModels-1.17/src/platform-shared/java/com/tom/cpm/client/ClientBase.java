@@ -124,17 +124,17 @@ public class ClientBase {
 			q += Mth.sin(Mth.lerp(partialTicks, abstractClientPlayerEntity.walkDistO,
 					abstractClientPlayerEntity.walkDist) * 6.0F) * 32.0F * t;
 			if (abstractClientPlayerEntity.isCrouching()) {
-				q += 25.0F;
+				q += 50.0F;
 			}
 			if (abstractClientPlayerEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
-				if (abstractClientPlayerEntity.isShiftKeyDown()) {
+				if (abstractClientPlayerEntity.isCrouching()) {
 					model.cloak.z = 1.4F + 0.125F * 3;
 					model.cloak.y = 1.85F + 1 - 0.125F * 4;
 				} else {
 					model.cloak.z = 0.0F + 0.125F * 16f;
 					model.cloak.y = 0.0F;
 				}
-			} else if (abstractClientPlayerEntity.isShiftKeyDown()) {
+			} else if (abstractClientPlayerEntity.isCrouching()) {
 				model.cloak.z = 0.3F + 0.125F * 16f;
 				model.cloak.y = 0.8F + 0.3f;
 			} else {

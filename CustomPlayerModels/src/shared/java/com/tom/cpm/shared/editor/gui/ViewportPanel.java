@@ -528,6 +528,7 @@ public class ViewportPanel extends ViewportPanelBase3d {
 		h.registerKeybind(Keybinds.OFFSET, () -> setVec(VecType.OFFSET));
 		h.registerKeybind(Keybinds.SIZE, () -> setVec(VecType.SIZE));
 		h.registerKeybind(Keybinds.ROTATION, () -> setVec(VecType.ROTATION));
+		h.registerKeybind(Keybinds.PIVOT, () -> setVec(VecType.PIVOT));
 		h.registerKeybind(Keybinds.DELETE, editor::deleteSel);
 		h.registerKeybind(Keybinds.NEW_PART, editor::addNew);
 		h.registerKeybind(Keybinds.FOCUS_CAMERA, this::focusOnSelected);

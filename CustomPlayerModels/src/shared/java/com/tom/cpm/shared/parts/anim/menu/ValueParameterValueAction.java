@@ -39,13 +39,18 @@ public class ValueParameterValueAction implements CommandAction, LegacyCommandAc
 	@Override
 	public int getValue() {
 		AnimationEngine an = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine();
-		return Byte.toUnsignedInt(an.getGestureValue(parameter)) * max / 255;
+		return Math.round(Byte.toUnsignedInt(an.getGestureValue(parameter)) * max / 255f);
 	}
 
 	@Override
 	public void setValue(int v) {
 		AnimationEngine an = MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine();
-		an.setGestureValue(parameter, v * 255 / max);
+		an.setGestureValue(parameter, Math.round(v * 255f / max));
+	}
+
+	@Override
+	public int getMaxValue() {
+		return max;
 	}
 
 	@Override

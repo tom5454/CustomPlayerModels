@@ -151,7 +151,7 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public void keyPressed(final char typedChar, final int keyCode, final int mouseX, final int mouseY) {
 		try {
-			KeyboardEvent evt = new KeyboardEvent(keyCode, 0, typedChar, Keyboard.getKeyName(keyCode));
+			KeyboardEvent evt = new KeyboardEvent(keyCode, 0, typedChar, keyCode == -1 ? null : Keyboard.getKeyName(keyCode));
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
 				if(mc.thePlayer != null && mc.gameSettings.keyChat.getKeyCode() == keyCode) {

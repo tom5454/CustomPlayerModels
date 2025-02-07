@@ -317,6 +317,7 @@ public class Generators {
 				tex.setImage(new Image(def));
 				tex.markDirty();
 				tex.setEdited(tx.texType == null && tx.editable);
+				tex.setChangedLocally(false);
 				if(tx.texType != null) {
 					Player<?> profile = MinecraftClientAccess.get().getClientPlayer();
 					profile.getTextures().load().thenRun(() -> loadTexture(tex, profile, tx.texType));
@@ -332,6 +333,7 @@ public class Generators {
 				if(s != null) {
 					tex.setDefaultImg(s);
 					tex.setImage(new Image(s));
+					tex.setChangedLocally(false);
 					tex.restitchTexture();
 				} else if(type == TextureType.ELYTRA) {
 					loadTexture(tex, profile, TextureType.CAPE);
@@ -341,6 +343,7 @@ public class Generators {
 							if(i != null) {
 								tex.setDefaultImg(i);
 								tex.setImage(new Image(i));
+								tex.setChangedLocally(false);
 								tex.restitchTexture();
 							}
 						}
@@ -542,6 +545,25 @@ public class Generators {
 			elem.texture = true;
 			elem.name = editor.ui.i18nFormat("label.cpm.generatedArmorLayer", me.name);
 			elem.mcScale = rmt.getDefaultSize(editor.skinType).getMCScale();
+		}
+	}
+
+	public static void afterDuplicate(ModelElement from, ModelElement to) {
+		Map<ModelElement, ModelElement> dup = new HashMap<>();
+		List<CopyTransformEffect> cts = new ArrayList<>();
+		walk(from, to, dup, cts);
+		for (CopyTransformEffect e : cts) {
+			e.from = dup.getOrDefault(e.from, e.from);
+		}
+	}
+
+	private static void walk(ModelElement from, ModelElement to, Map<ModelElement, ModelElement> dup, List<CopyTransformEffect> cts) {
+		for (int i = 0; i < from.children.size(); i++) {
+			ModelElement f = from.children.get(i);
+			ModelElement t = to.children.get(i);
+			dup.put(f, t);
+			if (t.copyTransform != null)cts.add(t.copyTransform);
+			walk(f, t, dup, cts);
 		}
 	}
 }

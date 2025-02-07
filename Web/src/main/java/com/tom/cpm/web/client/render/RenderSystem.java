@@ -550,9 +550,9 @@ public class RenderSystem implements RetroGLAccess<String> {
 
 			fragmentShader = gl.createShader((int) WebGLRenderingContext.FRAGMENT_SHADER);
 
-			gl.shaderSource(vertexShader, shaderV.trim());
+			gl.shaderSource(vertexShader, DomGlobal.atob(Resources.getResource("assets/cpmweb/shaders/" + this.shaderV + ".vert")));
 
-			gl.shaderSource(fragmentShader, shaderF.trim());
+			gl.shaderSource(fragmentShader, DomGlobal.atob(Resources.getResource("assets/cpmweb/shaders/" + this.shaderF + ".frag")));
 
 			gl.compileShader(vertexShader);
 			if(Js.isFalsy(gl.getShaderParameter(vertexShader, (int) WebGLRenderingContext.COMPILE_STATUS)))
@@ -767,31 +767,8 @@ public class RenderSystem implements RetroGLAccess<String> {
 	private static final List<RenderStageBuilder> builders = new ArrayList<>();
 
 	private static final RenderStage lines = new RenderStageBuilder(
-			//vertex
-			"#version 300 es\n"
-			+ "\n"
-			+ "in vec3 position;\n"
-			+ "in vec4 color;\n"
-			+ "\n"
-			+ "out vec4 thecolor;\n"
-			+ "\n"
-			+ "uniform mat4 projectionMatrix;\n"
-			+ "\n"
-			+ "void main() {\n"
-			+ "    gl_Position = projectionMatrix * vec4(position, 1.0);\n"
-			+ "    thecolor = color;\n"
-			+ "}",
-			//fragment
-			"#version 300 es\n"
-			+ "precision mediump float;\n"
-			+ "\n"
-			+ "in vec4 thecolor;\n"
-			+ "\n"
-			+ "out vec4 color;\n"
-			+ "\n"
-			+ "void main() {\n"
-			+ "    color = thecolor;\n"
-			+ "}",
+			//shaders
+			"color", "color",
 			//properties
 			true, false, false,
 			//before
@@ -806,31 +783,8 @@ public class RenderSystem implements RetroGLAccess<String> {
 			LINES).make();
 
 	private static final RenderStage color = new RenderStageBuilder(
-			//vertex
-			"#version 300 es\n"
-			+ "\n"
-			+ "in vec3 position;\n"
-			+ "in vec4 color;\n"
-			+ "\n"
-			+ "out vec4 thecolor;\n"
-			+ "\n"
-			+ "uniform mat4 projectionMatrix;\n"
-			+ "\n"
-			+ "void main() {\n"
-			+ "    gl_Position = projectionMatrix * vec4(position, 1.0);\n"
-			+ "    thecolor = color;\n"
-			+ "}",
-			//fragment
-			"#version 300 es\n"
-			+ "precision mediump float;\n"
-			+ "\n"
-			+ "in vec4 thecolor;\n"
-			+ "\n"
-			+ "out vec4 color;\n"
-			+ "\n"
-			+ "void main() {\n"
-			+ "    color = thecolor;\n"
-			+ "}",
+			//shaders
+			"color", "color",
 			//properties
 			true, false, false,
 			//before
@@ -848,41 +802,8 @@ public class RenderSystem implements RetroGLAccess<String> {
 			QUADS).make();
 
 	private static final RenderStageBuilder texture = new RenderStageBuilder(
-			//vertex
-			"#version 300 es\n"
-			+ "\n"
-			+ "in vec3 position;\n"
-			+ "in vec4 color;\n"
-			+ "in highp vec2 texture;\n"
-			+ "in vec3 normal;\n"
-			+ "\n"
-			+ "out vec4 thecolor;\n"
-			+ "out highp vec2 texuv;\n"
-			+ "out vec3 normOut;\n"
-			+ "\n"
-			+ "uniform mat4 projectionMatrix;\n"
-			+ "\n"
-			+ "void main() {\n"
-			+ "    gl_Position = projectionMatrix * vec4(position, 1.0);\n"
-			+ "    thecolor = color;\n"
-			+ "    texuv = texture;\n"
-			+ "    normOut = normal;\n"
-			+ "}",
-			//fragment
-			"#version 300 es\n"
-			+ "precision mediump float;\n"
-			+ "\n"
-			+ "in vec4 thecolor;\n"
-			+ "in highp vec2 texuv;\n"
-			+ "\n"
-			+ "out vec4 color;\n"
-			+ "\n"
-			+ "uniform sampler2D uSampler;\n"
-			+ "\n"
-			+ "void main() {\n"
-			+ "    color = thecolor * texture(uSampler, texuv);\n"
-			+ "    if(color.a < 0.1)discard;\n"
-			+ "}",
+			//shaders
+			"texture", "texture",
 			//properties
 			true, true, true,
 			//before
@@ -900,40 +821,8 @@ public class RenderSystem implements RetroGLAccess<String> {
 			QUADS);
 
 	private static final RenderStageBuilder eyes = new RenderStageBuilder(
-			//vertex
-			"#version 300 es\n"
-			+ "\n"
-			+ "in vec3 position;\n"
-			+ "in vec4 color;\n"
-			+ "in vec2 texture;\n"
-			+ "in vec3 normal;\n"
-			+ "\n"
-			+ "out vec4 thecolor;\n"
-			+ "out vec2 texuv;\n"
-			+ "out vec3 normOut;\n"
-			+ "\n"
-			+ "uniform mat4 projectionMatrix;\n"
-			+ "\n"
-			+ "void main() {\n"
-			+ "    gl_Position = projectionMatrix * vec4(position, 1.0);\n"
-			+ "    thecolor = color;\n"
-			+ "    texuv = texture;\n"
-			+ "    normOut = normal;\n"
-			+ "}",
-			//fragment
-			"#version 300 es\n"
-			+ "precision mediump float;\n"
-			+ "\n"
-			+ "in vec4 thecolor;\n"
-			+ "in vec2 texuv;\n"
-			+ "\n"
-			+ "out vec4 color;\n"
-			+ "\n"
-			+ "uniform sampler2D uSampler;\n"
-			+ "\n"
-			+ "void main() {\n"
-			+ "    color = thecolor * texture(uSampler, texuv);\n"
-			+ "}",
+			//shaders
+			"texture", "texture",
 			//properties
 			true, true, true,
 			//before

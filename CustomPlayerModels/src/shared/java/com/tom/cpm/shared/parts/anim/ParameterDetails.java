@@ -133,7 +133,6 @@ public class ParameterDetails {
 	}
 
 	public byte getDefaultParam(int parameter) {
-		Log.debug("Get Value: " + parameter + ", len=" + syncDefault.length);
 		if(parameter >= syncDefault.length) {
 			Log.error("Parameter out of bounds", new IndexOutOfBoundsException(parameter + ", len=" + syncDefault.length));
 			return 0;

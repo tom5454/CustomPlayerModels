@@ -6,7 +6,7 @@ public class FirstPersonDetector {
 
 	public static void init() {
 		try {
-			PlayerProfile.inFirstPerson = FirstPersonAPI::isRenderingPlayer;
+			PlayerProfile.addInFirstPerson(FirstPersonAPI::isRenderingPlayer);
 		} catch (Throwable e) {
 		}
 	}

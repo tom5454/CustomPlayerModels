@@ -92,4 +92,8 @@ public class MathHelper {
 		int i = (int)value;
 		return value < i ? i - 1 : i;
 	}
+
+	public static float fma(float a, float b, float c) {
+		return a * b + c;
+	}
 }

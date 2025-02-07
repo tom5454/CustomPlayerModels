@@ -183,6 +183,7 @@ dependencies {
     compileOnly files("../CustomPlayerModels-1.21/stubs/of.jar")
 	compileOnly files("../CustomPlayerModels-1.21/stubs/iris.jar")
 	compileOnly files("../CustomPlayerModels-1.21/stubs/fpm.jar")
+	compileOnly files("../CustomPlayerModels-1.21/stubs/realcamera.jar")
     compileOnly 'maven.modrinth:vivecraft:1.21.1-1.2.0-forge'
 }
 

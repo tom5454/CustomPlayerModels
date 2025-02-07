@@ -48,6 +48,7 @@ public class MarkdownRenderer extends Panel {
 	}
 
 	public void setContent(MarkdownParser content) {
+		scp.setScrollY(0);
 		this.content = content;
 		if(bounds != null)
 			refresh();
@@ -70,7 +71,6 @@ public class MarkdownRenderer extends Panel {
 	}
 
 	public void browse(String url) {
-		scp.setScrollY(0);
 		if(url.startsWith("#")) {
 			String h = url.substring(1);
 			if(headerPositions.containsKey(h)) {

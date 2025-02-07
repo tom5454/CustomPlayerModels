@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,6 +23,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
+import com.tom.cpl.tag.AllTagManagers;
 import com.tom.cpm.common.Command;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -33,13 +35,14 @@ import com.tom.cpm.shared.gui.SettingsGui;
 public class CustomPlayerModelsClient extends ClientBase {
 	public static final CustomPlayerModelsClient INSTANCE = new CustomPlayerModelsClient();
 
-	public static void preInit(FMLJavaModLoadingContext ctx) {
+	public void preInit(FMLJavaModLoadingContext ctx) {
+		init0();
 		ctx.getModEventBus().addListener(KeyBindings::init);
+		ctx.getModEventBus().addListener(INSTANCE::registerReloadListeners);
 		ctx.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
 	public void init() {
-		init0();
 		MinecraftForge.EVENT_BUS.register(this);
 		//FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerShaders0);
 		init1();
@@ -139,5 +142,9 @@ public class CustomPlayerModelsClient extends ClientBase {
 	@SubscribeEvent
 	public void registerClientCommands(RegisterClientCommandsEvent event) {
 		new Command(event.getDispatcher(), true);
+	}
+
+	private void registerReloadListeners(RegisterClientReloadListenersEvent event) {
+		mc.setTags(new AllTagManagers(event::registerReloadListener, CPMTagLoader::new));
 	}
 }

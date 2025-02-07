@@ -57,6 +57,7 @@ dependencies {
 	compileOnly files("../CustomPlayerModels-1.20/stubs/of.jar")
 	compileOnly files("../CustomPlayerModels-1.20/stubs/iris_old.jar")
 	compileOnly files("../CustomPlayerModels-1.20/stubs/fpm.jar")
+	compileOnly files("../CustomPlayerModels-1.20/stubs/realcamera.jar")
 	
 	modImplementation ('maven.modrinth:vivecraft:1.20.1-1.2.0-fabric')
     implementation('com.electronwill.night-config:toml:3.6.6')

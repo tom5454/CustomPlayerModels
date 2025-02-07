@@ -77,6 +77,7 @@ public class PlayerProfile extends Player<net.minecraft.core.entity.player.Playe
 		if(!player.isAlive())animState.dying = true;
 		if(player.vehicle != null)animState.riding = true;
 		if(player.isSneaking())animState.sneaking = true;
+		if(player.isSprinting())animState.sprinting = true;
 		if(player.isInWater())animState.retroSwimming = true;
 		animState.moveAmountX = round(player.x - player.xo);
 		animState.moveAmountY = round(player.y - player.yo);

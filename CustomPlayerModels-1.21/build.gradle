@@ -136,6 +136,7 @@ dependencies {
     compileOnly files("stubs/of.jar")
     compileOnly files("stubs/iris.jar")
     compileOnly files("stubs/fpm.jar")
+    compileOnly files("stubs/realcamera.jar")
     compileOnly 'com.github.Virtuoel:Pehkui:3.8.3-1.21-neoforge'
     compileOnly 'maven.modrinth:vivecraft:1.21.1-1.2.0-neoforge'
 }

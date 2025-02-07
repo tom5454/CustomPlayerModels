@@ -55,21 +55,18 @@ public class PlayerEntityRendererMixin extends LivingEntityRenderer {
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/PlayerEntityRenderer;method_2027(Ljava/lang/String;Ljava/lang/String;)Z"), method = "method_827(Lnet/minecraft/entity/player/PlayerEntity;F)V")
 	public boolean onRenderCape(PlayerEntityRenderer r, String string, String string2, PlayerEntity player, float partialTicks) {
-		boolean d = method_2027(string, string2);
-		if (d) {
-			Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
-			if(pl != null) {
-				ModelDefinition def = pl.getModelDefinition();
-				if(def != null && def.hasRoot(RootModelType.CAPE)) {
-					BipedEntityModel model = bipedModel;
-					CustomPlayerModelsClient.mc.getPlayerRenderManager().rebindModel(model);
-					CustomPlayerModelsClient.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
-					CustomPlayerModelsClient.renderCape(player, partialTicks, model, def);
-					return false;
-				}
+		Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
+		if(pl != null) {
+			ModelDefinition def = pl.getModelDefinition();
+			if(def != null && def.hasRoot(RootModelType.CAPE)) {
+				BipedEntityModel model = bipedModel;
+				CustomPlayerModelsClient.mc.getPlayerRenderManager().rebindModel(model);
+				CustomPlayerModelsClient.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
+				CustomPlayerModelsClient.renderCape(player, partialTicks, model, def);
+				return false;
 			}
 		}
-		return d;
+		return method_2027(string, string2);
 	}
 
 	@Inject(at = @At("HEAD"), method = "method_821(Lnet/minecraft/entity/player/PlayerEntity;DDD)V", cancellable = true)

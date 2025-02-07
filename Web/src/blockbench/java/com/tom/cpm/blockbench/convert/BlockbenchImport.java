@@ -65,7 +65,6 @@ import jsinterop.base.Js;
 
 public class BlockbenchImport {
 	private Map<TextureSheetType, Texture> textures = new HashMap<>();
-	private Map<TextureSheetType, UVMul> uvMul = new HashMap<>();
 	private Map<ModelElement, Group> me2group = new HashMap<>();
 	private List<Runnable> postConvert = new ArrayList<>();
 	private final Editor editor;
@@ -107,9 +106,6 @@ public class BlockbenchImport {
 
 	private void checkCompat(List<ModelElement> children) {
 		for (ModelElement me : children) {
-			if(!me.texture) {
-				warnings.add(new WarnEntry(I18n.format("bb-label.warn.coloredCubeNotSupported", me.getElemName())));
-			}
 
 			if(me.copyTransform != null && !copyTrWarn) {
 				warnings.add(new WarnEntry(I18n.format("bb-label.warn.copyTransformNotVis")));
@@ -125,7 +121,6 @@ public class BlockbenchImport {
 		Project.texture_width = tex.x;
 		Project.texture_height = tex.y;
 		Project.box_uv = true;
-		uvMul.put(TextureSheetType.SKIN, new UVMul());
 
 		editor.textures.entrySet().forEach(e -> {
 			Texture.TextureProperties c = new Texture.TextureProperties();
@@ -142,10 +137,8 @@ public class BlockbenchImport {
 			ctx.putImageData(im, 0, 0);
 			t.fromDataURL(canvas.toDataURL()).add(false);
 			textures.put(e.getKey(), t);
-			UVMul m = new UVMul();
-			m.x = Project.texture_width / (float) e.getValue().provider.size.x;
-			m.y = Project.texture_height / (float) e.getValue().provider.size.y;
-			uvMul.put(e.getKey(), m);
+			t.uv_width = e.getValue().provider.size.x;
+			t.uv_height = e.getValue().provider.size.y;
 		});
 
 		for (ModelElement me : editor.elements) {
@@ -195,8 +188,6 @@ public class BlockbenchImport {
 				cube.addTo(gr).init();
 
 				cube.applyTexture(textures.get(tst), true);
-				UVMul uvm = uvMul.get(tst);
-				if(uvm.needsPF())boxToPFUV(cube, uvm);
 			}
 
 			importChildren(me.children, gr, tst);
@@ -346,6 +337,7 @@ public class BlockbenchImport {
 				}
 				pos.y *= -1;
 
+				boolean hasColor = me.type != ElementType.ROOT_PART && (me.recolor || !me.texture);
 				BoneAnimator be = an.get(me);
 				Keyframe kp = be.createKeyframe(ft * i, "position");
 				Keyframe kr = be.createKeyframe(ft * i, "rotation");
@@ -355,16 +347,18 @@ public class BlockbenchImport {
 				KeyframeDataPoint dp = kp.data_points.getAt(0);
 				KeyframeDataPoint dr = kr.data_points.getAt(0);
 				KeyframeDataPoint ds = me.type == ElementType.ROOT_PART ? null : ks.data_points.getAt(0);
-				KeyframeDataPoint dv = kv.data_points.getAt(0);
-				KeyframeDataPoint dc = kc.data_points.getAt(0);
+				KeyframeDataPoint dv = me.type == ElementType.ROOT_PART ? null : kv.data_points.getAt(0);
+				KeyframeDataPoint dc = hasColor ? kc.data_points.getAt(0) : null;
 
 				dp.set(pos);
 				dr.set(rot);
 				if(me.type != ElementType.ROOT_PART)ds.set(scl);
-				dv.visible = f.getVisible(me);
-				dc.x = (int) (v[InterpolatorChannel.COLOR_R.ordinal()] * 255);
-				dc.y = (int) (v[InterpolatorChannel.COLOR_G.ordinal()] * 255);
-				dc.z = (int) (v[InterpolatorChannel.COLOR_B.ordinal()] * 255);
+				if(me.type != ElementType.ROOT_PART)dv.setVisible(f.getVisible(me));
+				if(hasColor) {
+					dc.x = (int) (v[InterpolatorChannel.COLOR_R.ordinal()] * 255);
+					dc.y = (int) (v[InterpolatorChannel.COLOR_G.ordinal()] * 255);
+					dc.z = (int) (v[InterpolatorChannel.COLOR_B.ordinal()] * 255);
+				}
 			}
 		}
 
@@ -379,7 +373,6 @@ public class BlockbenchImport {
 	}
 
 	private void importChildren(List<ModelElement> children, Group parent, TextureSheetType tst) {
-		UVMul uvm = uvMul.get(tst);
 		for (ModelElement me : children) {
 			Group gr;
 			Cube cube;
@@ -430,12 +423,12 @@ public class BlockbenchImport {
 			cube = new Cube(c);
 			cube.glow = me.glow;
 			cube.extrude = me.extrude;
-			cube.setRecolor(me.recolor ? me.rgb : -1);
+			cube.setRecolor(!me.texture || me.recolor ? me.rgb : -1);
 			c = new Cube.CubeProperties();
 			c.to = JsVec3.make(cube.from.x + s.x, cube.from.y + s.y, cube.from.z + s.z);
 			cube.extend(c);
 
-			importTextureUV(me, cube, uvm, s.x < 1 || s.y < 1 || s.z < 1);
+			importTextureUV(me, cube, s.x < 1 || s.y < 1 || s.z < 1);
 
 			cube.addTo(gr).init();
 			cube.applyTexture(textures.get(tst), true);
@@ -451,9 +444,9 @@ public class BlockbenchImport {
 		}
 	}
 
-	private void importTextureUV(ModelElement me, Cube cube, UVMul uvm, boolean forcePF) {
+	private void importTextureUV(ModelElement me, Cube cube, boolean forcePF) {
 		if(!me.texture)return;
-		if(me.faceUV != null || forcePF || uvm.needsPF() || me.textureSize > 1 || me.singleTex || me.extrude || me.meshScale.x != 1 || me.meshScale.y != 1 || me.meshScale.z != 1) {
+		if(me.faceUV != null || forcePF || me.textureSize > 1 || me.singleTex || me.extrude || me.meshScale.x != 1 || me.meshScale.y != 1 || me.meshScale.z != 1) {
 			cube.box_uv = false;
 			cube.autouv = 0;
 			if(me.faceUV != null) {
@@ -461,13 +454,13 @@ public class BlockbenchImport {
 					Face f = me.faceUV.faces.get(d);
 					CubeFace cf = cube.faces.getFace(d);
 					if(f != null) {
-						cf.uv = makeFaceUV(f.sx, f.sy, f.ex, f.ey, uvm);
+						cf.uv = makeFaceUV(f.sx, f.sy, f.ex, f.ey);
 						if(d == Direction.UP || d == Direction.DOWN)
 							cf.rotation = (rotToInt(f.rotation) + 180) % 360;
 						else
 							cf.rotation = rotToInt(f.rotation);
 					} else {
-						cf.uv = makeFaceUV(0, 0, 0, 0, uvm);
+						cf.uv = makeFaceUV(0, 0, 0, 0);
 					}
 				}
 			} else if(me.singleTex || me.extrude) {
@@ -480,11 +473,11 @@ public class BlockbenchImport {
 						for (Direction d : Direction.VALUES) {
 							CubeFace face = cube.faces.getFace(d);
 							if (d == Direction.WEST) {
-								face.uv = makeFaceUV(texU, texV, tu, tv, uvm);
+								face.uv = makeFaceUV(texU, texV, tu, tv);
 							} else if (d == Direction.EAST) {
-								face.uv = makeFaceUV(tu, texV, texU, tv, uvm);
+								face.uv = makeFaceUV(tu, texV, texU, tv);
 							} else {
-								face.uv = makeFaceUV(0, 0, 0, 0, uvm);
+								face.uv = makeFaceUV(0, 0, 0, 0);
 							}
 						}
 					} else if (me.size.y == 0) {
@@ -493,11 +486,11 @@ public class BlockbenchImport {
 						for (Direction d : Direction.VALUES) {
 							CubeFace face = cube.faces.getFace(d);
 							if (d == Direction.UP) {
-								face.uv = makeFaceUV(tu, texV, texU, tv, uvm);
+								face.uv = makeFaceUV(tu, texV, texU, tv);
 							} else if (d == Direction.DOWN) {
-								face.uv = makeFaceUV(texU, texV, tu, tv, uvm);
+								face.uv = makeFaceUV(texU, texV, tu, tv);
 							} else {
-								face.uv = makeFaceUV(0, 0, 0, 0, uvm);
+								face.uv = makeFaceUV(0, 0, 0, 0);
 							}
 						}
 					} else if (me.size.z == 0) {
@@ -506,11 +499,11 @@ public class BlockbenchImport {
 						for (Direction d : Direction.VALUES) {
 							CubeFace face = cube.faces.getFace(d);
 							if (d == Direction.NORTH) {
-								face.uv = makeFaceUV(texU, texV, tu, tv, uvm);
+								face.uv = makeFaceUV(texU, texV, tu, tv);
 							} else if (d == Direction.SOUTH) {
-								face.uv = makeFaceUV(tu, texV, texU, tv, uvm);
+								face.uv = makeFaceUV(tu, texV, texU, tv);
 							} else {
-								face.uv = makeFaceUV(0, 0, 0, 0, uvm);
+								face.uv = makeFaceUV(0, 0, 0, 0);
 							}
 						}
 					}
@@ -536,17 +529,15 @@ public class BlockbenchImport {
 					cube.faces.west.uv = uv;
 				}
 			} else {
-				boxToPFUV(cube, me.textureSize, me.meshScale.x, me.meshScale.y, me.meshScale.z, uvm);
+				boxToPFUV(cube, me.textureSize, me.meshScale.x, me.meshScale.y, me.meshScale.z);
 			}
 		} else {
 			cube.box_uv = true;
 		}
 	}
 
-	private static FaceUV makeFaceUV(float sx, float sy, float ex, float ey, UVMul mul) {
-		FaceUV uv = FaceUV.make(sx, sy, ex, ey);
-		if(mul != null)uv.mul(mul.x, mul.y);
-		return uv;
+	private static FaceUV makeFaceUV(float sx, float sy, float ex, float ey) {
+		return FaceUV.make(sx, sy, ex, ey);
 	}
 
 	private static int rotToInt(Rot r) {
@@ -559,11 +550,7 @@ public class BlockbenchImport {
 		}
 	}
 
-	private static void boxToPFUV(Cube cube, UVMul mul) {
-		boxToPFUV(cube, 1, 1, 1, 1, mul);
-	}
-
-	public static void boxToPFUV(Cube cube, int texSc, float scX, float scY, float scZ, UVMul mul) {
+	public static void boxToPFUV(Cube cube, int texSc, float scX, float scY, float scZ) {
 		Vec3f d = cube.to.toVecF().sub(cube.from.toVecF()).mul(texSc);
 		d.mul(scX == 0 ? 1 : 1f / scX, scY == 0 ? 1 : 1f / scY, scZ == 0 ? 1 : 1f / scZ);
 		float dx = ProjectConvert.ceil(d.x);
@@ -580,12 +567,12 @@ public class BlockbenchImport {
 		float f10 = v;
 		float f11 = v + dz;
 		float f12 = v + dz + dy;
-		cube.faces.up.uv = makeFaceUV(f6, f11, f5, f10, mul);
-		cube.faces.down.uv = makeFaceUV(f7, f10, f6, f11, mul);
-		cube.faces.east.uv = makeFaceUV(f4, f11, f5, f12, mul);
-		cube.faces.north.uv = makeFaceUV(f5, f11, f6, f12, mul);
-		cube.faces.west.uv = makeFaceUV(f6, f11, f8, f12, mul);
-		cube.faces.south.uv = makeFaceUV(f8, f11, f9, f12, mul);
+		cube.faces.up.uv = makeFaceUV(f6, f11, f5, f10);
+		cube.faces.down.uv = makeFaceUV(f7, f10, f6, f11);
+		cube.faces.east.uv = makeFaceUV(f4, f11, f5, f12);
+		cube.faces.north.uv = makeFaceUV(f5, f11, f6, f12);
+		cube.faces.west.uv = makeFaceUV(f6, f11, f8, f12);
+		cube.faces.south.uv = makeFaceUV(f8, f11, f9, f12);
 		if(cube.mirror_uv) {
 			cube.faces.forEach(face -> {
 				float f = face.uv.sx;
@@ -597,13 +584,5 @@ public class BlockbenchImport {
 			cube.faces.west.uv = uv;
 		}
 		cube.autouv = 0;
-	}
-
-	public static class UVMul {
-		public float x = 1, y = 1;
-
-		private boolean needsPF() {
-			return x != 1 || y != 1;
-		}
 	}
 }

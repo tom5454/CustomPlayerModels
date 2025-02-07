@@ -21,6 +21,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 import com.tom.cpl.nbt.NBTTag;
 import com.tom.cpl.nbt.NBTTagCompound;
@@ -30,6 +31,7 @@ import com.tom.cpl.text.IText;
 import com.tom.cpl.text.LiteralText;
 import com.tom.cpl.util.ThrowingConsumer;
 import com.tom.cpl.util.TriConsumer;
+import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.animation.AnimationRegistry;
 import com.tom.cpm.shared.animation.ServerAnimationState;
@@ -266,14 +268,22 @@ public class NetHandler<RL, P, NET> {
 					}
 				}
 				NBTTagCompound evt = new NBTTagCompound();
+				NBTTagCompound evtS = new NBTTagCompound();
 				updatePlayer(p, dt.state);
 				for (ModelEventType type : ModelEventType.SYNC_TYPES) {
 					if(dt.eventSubs.contains(type)) {
 						type.write(dt.state, evt);
 					}
+					if(dt.selfSubs.contains(type)) {
+						type.write(dt.state, evtS);
+					}
 				}
 				if(evt.tagCount() > 0) {
 					sendPacketToTracking(p, new ReceiveEventS2C(getPlayerId.applyAsInt(p), evt));
+				}
+				if(evtS.tagCount() > 0) {
+					evtS.setBoolean(NetworkUtil.SELF_EVENT, true);
+					sendPacketTo(net, new ReceiveEventS2C(getPlayerId.applyAsInt(p), evtS));
 				}
 			}
 		}
@@ -297,12 +307,20 @@ public class NetHandler<RL, P, NET> {
 	public void sendEventSubs(ModelDefinition def) {
 		if(serverCaps.contains(ServerCaps.MODEL_EVENT_SUBS)) {
 			NBTTagCompound tag = new NBTTagCompound();
+			List<ModelEventType> events = def.getAnimations().getAnimations().stream().flatMap(e -> e.onPoses.stream()).
+					filter(e -> e instanceof VanillaPose).map(ModelEventType::getType).filter(e -> e != null).
+					distinct().collect(Collectors.toList());
 			{
 				NBTTagList list = new NBTTagList();
 				tag.setTag(NetworkUtil.EVENT_LIST, list);
-				def.getAnimations().getAnimations().stream().flatMap(e -> e.onPoses.stream()).
-				filter(e -> e instanceof VanillaPose).map(ModelEventType::getType).filter(e -> e != null).
-				distinct().map(ModelEventType::getName).map(NBTTagString::new).forEach(list::appendTag);
+				events.stream().map(ModelEventType::getName).map(NBTTagString::new).forEach(list::appendTag);
+			}
+
+			{
+				NBTTagList list = new NBTTagList();
+				tag.setTag(NetworkUtil.SELF_EVENT_LIST, list);
+				events.stream().filter(MinecraftClientAccess.get()::requiresSelfEventForAnimation).
+				map(ModelEventType::getName).map(NBTTagString::new).forEach(list::appendTag);
 			}
 
 			AnimationRegistry reg = def.getAnimations();

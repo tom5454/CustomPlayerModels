@@ -1,0 +1,9 @@
+{
+  "comment.cpm.doNotEdit1": "#########################################################",
+  "comment.cpm.doNotEdit2": "Auto-generated file DO NOT EDIT! See template jsons in the Localization folder of the GitHub Repo.",
+  "comment.cpm.doNotEdit3": "#########################################################",
+  "fbxtool-button.exportGLTF": "Экспорт GLTF",
+  "fbxtool-button.setupRig": "Настройка Rig",
+  "fbxtool-label.humanoidRig": "Человекоподобный Rig",
+  "fbxtool-label.threeLoading": "Загрузка Three.js..."
+}

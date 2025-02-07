@@ -56,21 +56,18 @@ public class PlayerEntityRendererMixin extends MobRenderer {
 
 	@Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/MobRendererPlayer;bindDownloadableTexture(Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/client/render/ImageParser;)Z"), method = "renderSpecials(Lnet/minecraft/core/entity/player/Player;F)V")
 	public boolean onRenderCape(MobRendererPlayer r, String string, String string2, ImageParser imageParser, Player player, float partialTicks) {
-		boolean d = bindDownloadableTexture(string, string2, imageParser);
-		if (d) {
-			com.tom.cpm.shared.config.Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
-			if(pl != null) {
-				ModelDefinition def = pl.getModelDefinition();
-				if(def != null && def.hasRoot(RootModelType.CAPE)) {
-					ModelBiped model = modelBipedMain;
-					CustomPlayerModelsClient.mc.getPlayerRenderManager().rebindModel(model);
-					CustomPlayerModelsClient.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
-					CustomPlayerModelsClient.renderCape(player, partialTicks, model, def);
-					return false;
-				}
+		com.tom.cpm.shared.config.Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
+		if(pl != null) {
+			ModelDefinition def = pl.getModelDefinition();
+			if(def != null && def.hasRoot(RootModelType.CAPE)) {
+				ModelBiped model = modelBipedMain;
+				CustomPlayerModelsClient.mc.getPlayerRenderManager().rebindModel(model);
+				CustomPlayerModelsClient.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
+				CustomPlayerModelsClient.renderCape(player, partialTicks, model, def);
+				return false;
 			}
 		}
-		return d;
+		return bindDownloadableTexture(string, string2, imageParser);
 	}
 
 	/*@Inject(at = @At("HEAD"), method = "renderSpecials(Lnet/minecraft/client/render/tessellator/Tessellator;Lnet/minecraft/core/entity/player/Player;DDD)V", cancellable = true)

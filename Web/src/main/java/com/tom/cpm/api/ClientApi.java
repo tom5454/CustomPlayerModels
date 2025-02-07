@@ -68,12 +68,12 @@ public class ClientApi implements IClientAPI {
 	}
 
 	@Override
-	public <P> boolean playAnimation(String name, int value) {
+	public boolean playAnimation(String name, int value) {
 		return false;
 	}
 
 	@Override
-	public <P> boolean playAnimation(String name) {
+	public boolean playAnimation(String name) {
 		return false;
 	}
 
@@ -103,6 +103,11 @@ public class ClientApi implements IClientAPI {
 
 	@Override
 	public int getAnimationPlaying(String name) {
+		return -1;
+	}
+
+	@Override
+	public int getAnimationMaxValue(String name) {
 		return -1;
 	}
 }

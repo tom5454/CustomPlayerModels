@@ -23,6 +23,7 @@ public class OSCMapping {
 	private int previousValue;
 	private int currentValue;
 	private IntConsumer apply;
+	private int maxValue;
 
 	public OSCMapping(String displayName) {
 		this.animationId = displayName;
@@ -33,6 +34,7 @@ public class OSCMapping {
 		this.animationId = p.getName();
 		this.boolOnly = p.getType() != ActionType.VALUE;
 		this.apply = p::setValue;
+		this.maxValue = p.getMaxValue();
 		parseName();
 	}
 
@@ -78,17 +80,17 @@ public class OSCMapping {
 				newVal = b ? 255 : 0;
 			} else if(arg instanceof Integer) {
 				int a = (int) arg;
-				if(min == max)newVal = MathHelper.clamp(a, 0, 255);
+				if(min == max)newVal = MathHelper.clamp(a, 0, maxValue);
 				else {
 					float v = (a - min) / (max - min);
-					newVal = (int) (MathHelper.clamp(v, 0, 1) * 0xff);
+					newVal = Math.round(MathHelper.clamp(v, 0, 1) * maxValue);
 				}
 			} else if(arg instanceof Number) {
 				float a = ((Number) arg).floatValue();
-				if(min == max)newVal = (int) (MathHelper.clamp(a, 0, 1) * 0xff);
+				if(min == max)newVal = Math.round(MathHelper.clamp(a, 0, 1) * maxValue);
 				else {
 					float v = (a - min) / (max - min);
-					newVal =  (int) (MathHelper.clamp(v, 0, 1) * 0xff);
+					newVal =  Math.round(MathHelper.clamp(v, 0, 1) * maxValue);
 				}
 			}
 			if(boolOnly)currentValue = newVal > 127 ? 1 : 0;

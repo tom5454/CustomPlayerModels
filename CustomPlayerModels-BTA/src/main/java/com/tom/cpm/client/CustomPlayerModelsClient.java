@@ -251,58 +251,37 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 	}
 
 	//Copy from PlayerRenderer.renderSpecials
-	public static void renderCape(net.minecraft.core.entity.player.Player playerIn, float partialTicks, ModelBiped model, ModelDefinition modelDefinition) {
+	public static void renderCape(net.minecraft.core.entity.player.Player player, float partialTick, ModelBiped model, ModelDefinition modelDefinition) {
 		GL11.glPushMatrix();
 		GL11.glTranslatef(0.0F, 0.0F, 0.125F);
-		float f5, f6, f7;
-		if(playerIn != null) {
-			double d3 = playerIn.xdO
-					+ (playerIn.xd - playerIn.xdO) * partialTicks
-					- (playerIn.xo + (playerIn.x - playerIn.xo) * partialTicks);
-			double d4 = playerIn.ydO
-					+ (playerIn.yd - playerIn.ydO) * partialTicks
-					- (playerIn.yo + (playerIn.y - playerIn.yo) * partialTicks);
-			double d0 = playerIn.zd0
-					+ (playerIn.zd - playerIn.zd0) * partialTicks
-					- (playerIn.zo + (playerIn.z - playerIn.zo) * partialTicks);
-			float f4 = playerIn.yBodyRotO + (playerIn.yBodyRot - playerIn.yBodyRotO) * partialTicks;
-
-			double d1 = MathHelper.sin(f4 * (float)Math.PI / 180.0F);
-			double d2 = (-MathHelper.cos(f4 * (float)Math.PI / 180.0F));
-			f5 = (float)d4 * 10.0F;
-
-			if (f5 < -6.0F)
-			{
-				f5 = -6.0F;
+		float f;
+		if(player != null) {
+			float yawOff = player.yBodyRotO + (player.yBodyRot - player.yBodyRotO) * partialTick;
+			float bodyAngle = 5.0F;
+			if (player.isSneaking()) {
+				bodyAngle += 25.0F;
 			}
 
-			if (f5 > 32.0F)
-			{
-				f5 = 32.0F;
-			}
+			double _xd = player.vehicle instanceof Entity ? ((Entity)player.vehicle).xd : MathHelper.lerp(player.xdO, player.xd, partialTick);
+			double _yd = Math.min(player.vehicle instanceof Entity ? ((Entity)player.vehicle).yd : MathHelper.lerp(player.ydO, player.yd, partialTick), 0.0);
+			double _zd = player.vehicle instanceof Entity ? ((Entity)player.vehicle).zd : MathHelper.lerp(player.zd0, player.zd, partialTick);
+			double vel = -1.0 / (3.0 * Math.hypot(_xd, _zd) + 1.0) + 1.0;
+			double moveAng = Math.atan2(_xd, _zd);
+			double yawRad = Math.toRadians(yawOff);
+			double multiplier = 1.0 - Math.abs((Math.cos(yawRad) + 1.0 - (Math.cos(moveAng) + 1.0) + 2.0) / 2.0 - 1.0);
+			player.wobbleTimer = player.wobbleTimer
+					+ (float)((player.tickCount + partialTick - player.lastRenderTick) / (30.0 - 29.0 * MathHelper.clamp(vel, 0.0, 1.0)));
+			player.lastRenderTick = player.tickCount;
+			double wobble = Math.sin(player.wobbleTimer) * (1.5 + 4.5 * vel * multiplier);
 
-			f6 = (float)(d3 * d1 + d0 * d2) * 100.0F;
-			f7 = (float)(d3 * d2 - d0 * d1) * 100.0F;
-
-			if (f6 < 0.0F)
-			{
-				f6 = 0.0F;
-			}
-
-			f5 += MathHelper.sin((playerIn.walkDistO + (playerIn.walkDist - playerIn.walkDistO) * partialTicks) * 6.0F) * 32.0F * f4;
-
-			if (playerIn.isSneaking()) {
-				f5 += 25.0F;
-			}
+			f = (float) MathHelper.clamp(MathHelper.clamp(bodyAngle + vel * 100.0 * multiplier, bodyAngle, 100.0) + wobble - _yd * 60.0, 0.0, 180.0);
 		} else {
-			f5 = 0;
-			f6 = 0;
-			f7 = 0;
+			f = 0;
 		}
 
-		model.cloak.xRot = (float) -Math.toRadians(6.0F + f6 / 2.0F + f5);
-		model.cloak.yRot = (float) Math.toRadians(180.0F - f7 / 2.0F);
-		model.cloak.zRot = (float) Math.toRadians(f7 / 2.0F);
+		model.cloak.xRot = (float) -Math.toRadians(f);
+		model.cloak.yRot = (float) Math.toRadians(180.0F);
+		model.cloak.zRot = 0f;
 		mc.getPlayerRenderManager().setModelPose(model);
 		model.cloak.xRot = 0;
 		model.cloak.yRot = 0;

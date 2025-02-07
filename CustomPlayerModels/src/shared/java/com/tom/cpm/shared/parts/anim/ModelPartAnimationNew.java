@@ -84,7 +84,7 @@ public class ModelPartAnimationNew implements IModelPart, IResolvedModelPart {
 			StagedAnimation an = new StagedAnimation();
 			final int fi = i;
 			anims.entrySet().stream().filter(e -> e.getKey().stagingID == fi && e.getKey().stage != null).forEach(e -> {
-				AnimationTrigger trigger = e.getKey().compileStaging(e.getValue());
+				AnimationTrigger trigger = e.getKey().compileStaging(reg, e.getValue());
 				switch(e.getKey().stage) {
 				case FINISH:
 					an.addPost(trigger);

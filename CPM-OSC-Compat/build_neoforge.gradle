@@ -99,6 +99,7 @@ sourceSets {
             exclude '**/CPMOSCModForge.java'
             exclude '**/CPMOSCClientForge.java'
             exclude '**/CPMOSCClientFabric.java'
+            exclude '**/CPMOSCClientNeoForgeNew.java'
        }
    }
 }

@@ -33,7 +33,6 @@
   "bb-label.convertedFromOld": "Этот проект был создан с использованием более ранней версии плагина.\\Данные плагина были преобразованы в новый формат.",
   "bb-label.error.oldConvertFail": "Не удалось преобразовать старые данные проекта",
   "bb-label.warn.nonConvertedPartNotSupported": "Корневая часть %s не скрыта. Куб будет преобразован.",
-  "bb-label.warn.coloredCubeNotSupported": "Цветные кубы не поддерживаются: %s",
   "bb-label.warn.copyTransformNotVis": "Элементы с копированием трансформации не будут отображаться корректно",
   "bb-label.warn.multiple": "%s (%s предупреждений)",
   "bb-label.warn.rootScaling": "Масштабирование анимаций на корнях",
@@ -48,5 +47,6 @@
   "bb-label.fixStagedAnim.selectBase": "Выбрать базовую анимацию:",
   "bb-label.autoFix.stagedAnim": "Базовая ступенчатая анимация",
   "bb-label.warn.unknownAnimation": "Неизвестный тип анимации (%s)",
+  "bb-label.language.reloadRequired.desc": "Пожалуйста, перезапустите Blockbench, чтобы применить изменение языка.",
   "bb-tooltip.export.renameGroup": "Переименовать группу в выбранный тип\\Если группа с таким же именем уже существует, действие завершится ошибкой."
 }

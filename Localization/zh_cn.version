@@ -167,7 +167,6 @@
   "tooltip.cpm.reloadSkin.no_file": "No skin bound",
   "tooltip.cpm.new.template": "Create a new Template project\\Read the wiki on Using Templates",
   "tooltip.cpm.anim_priority": "Animation apply priority\\Animations are applied in order from lowest to highest.",
-  "tooltip.cpm.export_def": "Create update for file linked to this skin.",
   "tooltip.cpm.config.titleScreenButton": "Show Open Editor button on the Title Screen\\Open Editor button is also available in Options/Skin Customization gui.",
   "tooltip.cpm.glow": "Previously Glowing.\\Applies the vanilla glowing eyes effect, used by Enderman and Spider eyes,\\to the selected part.",
   "tooltip.cpm.display.onlyDrawOnSelected": "Only allow drawing on selected parts.",
@@ -1062,7 +1061,6 @@
   "bb-label.convertedFromOld": "This project was made using an earlier version of the plugin.\\The plugin data was converted into the new format.",
   "bb-label.error.oldConvertFail": "Failed to convert old project data",
   "bb-label.warn.nonConvertedPartNotSupported": "Root Part %s is not hidden, The cube will be converted.",
-  "bb-label.warn.coloredCubeNotSupported": "Colored cubes not supported: %s",
   "bb-label.warn.copyTransformNotVis": "Elements with Copy Transform won\u0027t show correctly",
   "bb-label.warn.multiple": "%s (%s warnings)",
   "bb-label.warn.rootScaling": "Scaling animations on roots",
@@ -1280,5 +1278,10 @@
   "bb-tooltip.warn.uvDecimalFixerApplied": "Click the %s button to show a list of affected cubes.",
   "bb-label.error.failedToLoadTexture": "Failed to load the image data for texture: %s\\Please restart Blockbench and try again\\Cause: %s",
   "bb-label.openedInBB": "Please click back to the Blockbench tab to continue.",
-  "bb-label.warn.uvDecimalFixer.info": "Your model contains cubes decimal UVs or decimal sizes.\\The decimal UV fixer applied a 16x grid resize to your model.\\You can safely ignore this warning if the model looks correct in CPM.\\See the list of the affected cubes:"
+  "bb-label.warn.uvDecimalFixer.info": "Your model contains cubes decimal UVs or decimal sizes.\\The decimal UV fixer applied a 16x grid resize to your model.\\You can safely ignore this warning if the model looks correct in CPM.\\See the list of the affected cubes:",
+  "tooltip.cpm.export_def": "Create an update for the linked file on this skin.",
+  "label.cpm.pivot": "Pivot Point",
+  "label.cpm.reloadQuestion": "You have edited the texture in the editor.\\Are you sure you want to overwrite it from the image file?",
+  "label.cpm.keybind.pivot": "Pivot Point Tool",
+  "bb-button.recolor.set": "Set Color"
 }

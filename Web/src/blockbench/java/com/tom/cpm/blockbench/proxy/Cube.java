@@ -55,6 +55,32 @@ public class Cube extends OutlinerElement {
 		this.recolor = recolor;
 	}
 
+	@JsOverlay
+	public final void toggleRecolor() {
+		if (getRecolor() == -1)recolor = 0;
+		else recolor = -1;
+	}
+
+	@JsOverlay
+	public final boolean canRecolor() {
+		if (getRecolor() != -1)return true;
+		return isColorCube();
+	}
+
+	@JsOverlay
+	public final boolean isColorCube() {
+		if (box_uv) {
+			boolean[] ht = new boolean[] {false};
+			faces.forEach(c -> {
+				if (Js.isTruthy(c.texture)) {
+					ht[0] = true;
+				}
+			});
+			return !ht[0];
+		}
+		return false;
+	}
+
 	@JsProperty(name = "cpm_extrude")
 	public boolean extrude;
 

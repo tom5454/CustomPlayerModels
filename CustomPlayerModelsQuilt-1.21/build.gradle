@@ -93,9 +93,11 @@ dependencies {
 		modCompileOnly('maven.modrinth:sodium:mc1.20.5-0.5.8')
     	modCompileOnly('maven.modrinth:iris:1.7.0+1.20.5')
     	modCompileOnly('maven.modrinth:first-person-model:51Nzrb3j')//1.20.4 fallback
+    	modCompileOnly('maven.modrinth:real-camera:tC2FE4FT')
 	} else {
 		compileOnly files("../CustomPlayerModels-1.21/stubs/iris.jar")
 		compileOnly files("../CustomPlayerModels-1.21/stubs/fpm.jar")
+		compileOnly files("../CustomPlayerModels-1.21/stubs/realcamera.jar")
 	}
 }
 

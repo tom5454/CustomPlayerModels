@@ -10,6 +10,8 @@
   "web-button.viewer.search": "Поиск",
   "web-button.viewer.download": "Скачать",
   "web-button.viewer.uploadToMc": "Загрузить на Minecraft.net",
+  "web-button.fullscreen": "Переключить на полный экран",
+  "web-button.language": "Язык",
   "web-label.editorBeta": "Веб-версия редактора находится в бета-тесте.\\Возможны незначительные визуальные дефекты с редактором.\\\\Ваши модели будут сохранены внутри вашего браузера.\\Используйте меню Файл/Файловый менеджер, чтобы их скачать, или кнопку ... в окне выбора файла.",
   "web-label.loadFromURL": "Загрузка проекта по URL",
   "web-label.fileName": "Имя файла",
@@ -29,5 +31,7 @@
   "web-label.viewer.clone": "Клонировать модель",
   "web-label.viewer.mode.skin": "Скин Кодированный",
   "web-label.viewer.mode.model": "Модель (.cpmmodel)",
-  "web-label.pasteClient": "Клиент вставки"
+  "web-label.pasteClient": "Клиент вставки",
+  "web-label.language.reloadRequired.title": "Требуется перезагрузка",
+  "web-label.language.reloadRequired.desc": "Для переключения языка требуется перезагрузка страницы."
 }

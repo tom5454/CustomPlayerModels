@@ -7,12 +7,15 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.PlayPayloadHandler;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.options.SkinCustomizationScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackType;
 
+import com.tom.cpl.tag.AllTagManagers;
 import com.tom.cpm.CustomPlayerModels;
 import com.tom.cpm.common.ByteArrayPayload;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -31,6 +34,7 @@ public class CustomPlayerModelsClient extends ClientBase implements ClientModIni
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Init started");
 		INSTANCE = this;
 		init0();
+		mc.setTags(new AllTagManagers(ResourceManagerHelper.get(PackType.CLIENT_RESOURCES), CPMTagLoaderFabric::new));
 		ClientTickEvents.START_CLIENT_TICK.register(cl -> {
 			if(!cl.isPaused())
 				mc.getPlayerRenderManager().getAnimationEngine().tick();

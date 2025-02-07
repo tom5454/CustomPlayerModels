@@ -39,6 +39,7 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.RenderMode;
+import com.tom.cpm.shared.network.ModelEventType;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.MojangAPI;
@@ -248,5 +249,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public BiomeHandler<?> getBiomeHandler() {
 		return BiomeHandlerImpl.clientImpl;
+	}
+
+	@Override
+	public boolean requiresSelfEventForAnimation(ModelEventType type) {
+		return type == ModelEventType.FALLING;
 	}
 }

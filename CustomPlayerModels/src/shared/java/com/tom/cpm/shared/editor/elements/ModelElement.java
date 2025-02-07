@@ -14,8 +14,10 @@ import com.tom.cpl.gui.elements.Checkbox;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpl.gui.elements.Tooltip;
 import com.tom.cpl.math.Box;
+import com.tom.cpl.math.Mat3f;
 import com.tom.cpl.math.Mat4f;
 import com.tom.cpl.math.MathHelper;
+import com.tom.cpl.math.Quaternion;
 import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.math.Vec3i;
@@ -25,6 +27,7 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.EditorTexture;
 import com.tom.cpm.shared.editor.Effect;
 import com.tom.cpm.shared.editor.FormatLimits;
+import com.tom.cpm.shared.editor.Generators;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
@@ -121,11 +124,6 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 
 	public ModelElement(Editor editor) {
 		this(editor, ElementType.NORMAL, null);
-	}
-
-	@Deprecated
-	public ModelElement(Editor editor, ElementType type, Object typeData, IGui gui) {
-		this(editor, type, typeData);
 	}
 
 	public ModelElement(Editor editor, ElementType type, Object typeData) {
@@ -260,6 +258,21 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			execute();
 			break;
 
+		case PIVOT:
+		{
+			Vec3f d = pos.sub(v);
+			d.transform(new Mat3f(new Quaternion(rotation, true)).invert());
+			ActionBuilder ab = editor.action("set", "label.cpm.pivot").
+					updateValueOp(this, this.pos, v, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, (a, b) -> a.pos = b, editor.setPosition).
+					updateValueOp(this, this.offset, offset.add(d), -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, (a, b) -> a.offset = b, editor.setOffset);
+			children.forEach(e -> {
+				ab.updateValueOp(e, e.pos, e.pos.add(d), -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false, (a, b) -> a.pos = b, __ -> {});
+			});
+			ab.onAction(this::markDirty).
+			execute();
+		}
+		break;
+
 		case MESH_SCALE:
 			editor.action("set", "label.cpm.scale").
 			updateValueOp(this, this.meshScale, v, 0, FormatLimits.getSizeLimit(), false, (a, b) -> a.meshScale = b, editor.setMeshScale).
@@ -289,6 +302,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		case OFFSET:
 			return new Vec3f(offset);
 		case POSITION:
+		case PIVOT:
 			return new Vec3f(pos);
 		case ROTATION:
 			return new Vec3f(rotation);
@@ -318,6 +332,20 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 			pos = v;
 			editor.setPosition.accept(pos);
 			break;
+
+		case PIVOT:
+		{
+			ActionBuilder.limitVec(v, -FormatLimits.getVectorLimit(), FormatLimits.getVectorLimit(), false);
+			Vec3f d = pos.sub(v);
+			d.transform(new Mat3f(new Quaternion(rotation, true)).invert());
+			pos = v;
+			offset = offset.add(d);
+			children.forEach(e -> e.pos = e.pos.add(d));
+			editor.setPosition.accept(pos);
+			editor.setOffset.accept(offset);
+			markDirty();
+		}
+		break;
 
 		case ROTATION:
 			ActionBuilder.limitVec(v, 0, 360, true);
@@ -642,6 +670,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	private void duplicate() {
 		if(type == ElementType.NORMAL) {
 			ModelElement elem = new ModelElement(this, parent);
+			Generators.afterDuplicate(this, elem);
 			editor.action("duplicate").addToList(parent.children, elem).onUndo(() -> editor.selectedElement = null).execute();
 			editor.selectedElement = elem;
 			editor.updateGui();
@@ -677,7 +706,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 		CopyTransformEffect c = new CopyTransformEffect(to);
 		c.from = from;
 		c.setAll(true);
-		ab.updateValueOp(to, null, c, (a, b) -> a.copyTransform = b);
+		ab.updateValueOp(to, to.copyTransform, c, (a, b) -> a.copyTransform = b);
 		for (int i = 0; i < from.children.size(); i++) {
 			ModelElement f = from.children.get(i);
 			ModelElement t = to.children.get(i);

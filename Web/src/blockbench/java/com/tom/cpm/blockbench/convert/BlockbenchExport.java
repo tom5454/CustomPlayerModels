@@ -814,7 +814,7 @@ public class BlockbenchExport {
 				}
 				dt.setShow(vis);
 				if(color != null) {
-					dt.setColor(color.toVecF().mul(1 / 256f));
+					dt.setColor(color.toVecF());
 				}
 			}
 		});
@@ -927,7 +927,7 @@ public class BlockbenchExport {
 						String b64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
 						return ImageIO.loadImage(b64, true, false);
 					}).then(img -> {
-						fe.provider.size = new Vec2i(Project.texture_width, Project.texture_height);
+						fe.provider.size = new Vec2i(t.uv_width, t.uv_height);
 						fe.setImage(img);
 						fe.setEdited(true);
 						return Promise.resolve((Void) null);
@@ -1043,15 +1043,19 @@ public class BlockbenchExport {
 				f.autoUV = Js.isTruthy(cube.autouv) ? true : false;
 			}
 		}
-		boolean badTexture = false;
-		for(Direction d : Direction.VALUES) {
-			CubeFace cf = cube.faces.getFace(d);
-			if(!cf.uv.isEmpty() && (m.texId == null || !m.texId.equals(cf.texture))) {
-				badTexture = true;
-				break;
+		if (cube.isColorCube() && cube.getRecolor() != -1) {
+			elem.texture = false;
+		} else {
+			boolean badTexture = false;
+			for(Direction d : Direction.VALUES) {
+				CubeFace cf = cube.faces.getFace(d);
+				if(!cf.uv.isEmpty() && (m.texId == null || !m.texId.equals(cf.texture))) {
+					badTexture = true;
+					break;
+				}
 			}
+			if(badTexture)warnings.add(new WarnEntry(I18n.format("bb-label.warn.invalidTexture", cube.name)));
 		}
-		if(badTexture)warnings.add(new WarnEntry(I18n.format("bb-label.warn.invalidTexture", cube.name)));
 	}
 
 	private static class DecimalFixOp {

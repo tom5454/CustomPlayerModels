@@ -22,6 +22,7 @@ import net.minecraft.world.item.Items;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import com.tom.cpm.client.CapeTransformUtil;
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
 import com.tom.cpm.shared.config.Player;
@@ -57,9 +58,11 @@ public abstract class CapeLayerMixin extends RenderLayer<PlayerRenderState, Play
 					if(mt.getTexture() != null) {
 						VertexConsumer buffer = bufferIn.getBuffer(mt.getRenderType());
 						this.model.setupAnim(state);
+						CapeTransformUtil.applyTransform(model);
 						CustomPlayerModelsClient.mc.getPlayerRenderManager().setModelPose(model);
 						this.model.renderToBuffer(poseStack, buffer, i, OverlayTexture.NO_OVERLAY);
 					}
+					CustomPlayerModelsClient.mc.getPlayerRenderManager().unbindModel(model);
 				}
 				cbi.cancel();
 			}

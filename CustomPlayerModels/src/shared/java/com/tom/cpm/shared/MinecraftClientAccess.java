@@ -18,6 +18,7 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.ScaleData;
 import com.tom.cpm.shared.model.SkinType;
+import com.tom.cpm.shared.network.ModelEventType;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.MojangAPI;
 
@@ -100,5 +101,9 @@ public interface MinecraftClientAccess {
 	@Deprecated
 	default void executeLater(Runnable r) {
 		executeOnGameThread(r);
+	}
+
+	default boolean requiresSelfEventForAnimation(ModelEventType type) {
+		return false;
 	}
 }

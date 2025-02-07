@@ -51,6 +51,11 @@ public class BitmaskParameterValueAction implements CommandAction {
 		an.setGestureValue(parameter, val);
 	}
 
+	@Override
+	public int getMaxValue() {
+		return 1;
+	}
+
 	public static class ServerAction implements ServerCommandAction {
 		private PlayerData data;
 		private String name;

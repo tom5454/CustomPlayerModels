@@ -99,6 +99,7 @@ public class NewSkinPopup extends PopupPanel {
 				updateValueOp(tex, tex.provider.size, size, (a, b) -> a.provider.size = b).
 				updateValueOp(tex, tex.customGridSize, customGridSize.isSelected(), (a, b) -> a.customGridSize = b).
 				updateValueOp(tex, oldImg, newImage, ETextures::setImage).
+				updateValueOp(tex, tex.isChangedLocally(), false, ETextures::setChangedLocally).
 				onAction(tex::restitchTexture).
 				onAction(editor::markElementsDirty).
 				execute();

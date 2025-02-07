@@ -41,7 +41,7 @@ public class CustomPlayerModels extends CommonBase {
 		ctx.getModEventBus().addListener(this::processIMC);
 		MinecraftObjectHolder.setCommonObject(this);
 
-		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.preInit(ctx);
+		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.INSTANCE.preInit(ctx);
 
 		MinecraftForge.EVENT_BUS.register(this);
 	}

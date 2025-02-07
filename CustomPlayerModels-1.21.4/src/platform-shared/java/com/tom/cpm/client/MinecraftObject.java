@@ -39,6 +39,7 @@ import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.RenderMode;
+import com.tom.cpm.shared.network.ModelEventType;
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.MojangAPI;
@@ -47,7 +48,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 	private final Minecraft mc;
 	private final ModelDefinitionLoader<GameProfile> loader;
 	private final PlayerRenderManager prm;
-	private final AllTagManagers tags;
+	private AllTagManagers tags;
 	public RenderTypeBuilder<ResourceLocation, RenderType> renderBuilder;
 
 	public MinecraftObject(Minecraft mc) {
@@ -61,7 +62,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 		renderBuilder.register(RenderMode.COLOR, CustomRenderTypes::entityColorTranslucent, 0);
 		renderBuilder.register(RenderMode.COLOR_GLOW, CustomRenderTypes::entityColorEyes, 1);
 		renderBuilder.register(RenderMode.OUTLINE, CustomRenderTypes::linesNoDepth, 2);
-		tags = new AllTagManagers(mc, CPMTagLoader::new);
+	}
+
+	public void setTags(AllTagManagers tags) {
+		this.tags = tags;
 	}
 
 	@Override
@@ -250,5 +254,10 @@ public class MinecraftObject implements MinecraftClientAccess {
 	@Override
 	public BiomeHandler<?> getBiomeHandler() {
 		return BiomeHandlerImpl.clientImpl;
+	}
+
+	@Override
+	public boolean requiresSelfEventForAnimation(ModelEventType type) {
+		return type == ModelEventType.FALLING;
 	}
 }

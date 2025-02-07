@@ -77,6 +77,11 @@ public class SkinLayerParameterValueAction implements CommandAction, LegacyComma
 	}
 
 	@Override
+	public int getMaxValue() {
+		return 1;
+	}
+
+	@Override
 	public boolean isCommandControlled() {
 		return cc;
 	}

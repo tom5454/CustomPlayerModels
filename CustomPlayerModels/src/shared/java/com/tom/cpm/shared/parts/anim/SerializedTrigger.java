@@ -169,8 +169,8 @@ public class SerializedTrigger {
 		return true;
 	}
 
-	public AnimationTrigger compileStaging(List<IAnimation> animations) {
-		return new AnimationTrigger(Collections.singleton(VanillaPose.GLOBAL), pose, animations, looping, mustFinish);
+	public AnimationTrigger compileStaging(AnimationRegistry reg, List<IAnimation> animations) {
+		return new AnimationTrigger(reg, Collections.singleton(VanillaPose.GLOBAL), pose, animations, looping, mustFinish);
 	}
 
 	public AnimationTrigger compile(AnimationRegistry reg, List<IAnimation> animations) {
@@ -189,13 +189,13 @@ public class SerializedTrigger {
 			return null;
 
 		case LAYER:
-			return new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), animations, parameter, value, bitMask, mustFinish);
+			return new LayerTrigger(reg, Collections.singleton(VanillaPose.GLOBAL), animations, parameter, value, bitMask, mustFinish);
 
 		case VALUE_LAYER:
-			return new ValueTrigger(Collections.singleton(VanillaPose.GLOBAL), animations, parameter, parameterInterpolate);
+			return new ValueTrigger(reg, Collections.singleton(VanillaPose.GLOBAL), animations, parameter, parameterInterpolate);
 
 		case GESTURE:
-			return new GestureTrigger(Collections.singleton(VanillaPose.GLOBAL), animations, value, gid, looping, mustFinish);
+			return new GestureTrigger(reg, Collections.singleton(VanillaPose.GLOBAL), animations, value, gid, looping, mustFinish);
 
 		default:
 			p = VanillaPose.GLOBAL;
@@ -204,7 +204,7 @@ public class SerializedTrigger {
 
 		if (p == null)return null;
 
-		return new AnimationTrigger(Collections.singleton(p), pose, animations, looping, mustFinish);
+		return new AnimationTrigger(reg, Collections.singleton(p), pose, animations, looping, mustFinish);
 	}
 
 	@Override

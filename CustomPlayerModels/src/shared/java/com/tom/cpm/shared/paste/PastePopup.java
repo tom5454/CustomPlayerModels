@@ -150,7 +150,7 @@ public class PastePopup extends PopupPanel {
 
 			tooltip = new Tooltip(frm, gui.i18nFormat("tooltip.cpm.paste.paste", String.format("%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS", entry.time), entry.id));
 
-			Button btn = new Button(gui, gui.i18nFormat("button.cpm.delete"), new ConfirmPopup(frm, gui.i18nFormat("label.cpm.confirm"), gui.i18nFormat("label.cpm.confirmDel"), () -> {
+			Button btn = new Button(gui, gui.i18nFormat("button.cpm.delete"), ConfirmPopup.confirmHandler(frm, gui.i18nFormat("label.cpm.confirm"), gui.i18nFormat("label.cpm.confirmDel"), () -> {
 				runRequest(() -> client.deleteFile(entry.id), PastePopup.this::refreshGui, "deleting");
 			}, null));
 			btn.setBounds(new Box(w - 55, 5, 45, 20));

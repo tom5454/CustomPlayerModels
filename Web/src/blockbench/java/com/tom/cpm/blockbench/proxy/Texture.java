@@ -10,6 +10,7 @@ import jsinterop.annotations.JsType;
 public class Texture {
 	public static JsArrayE<Texture> all;
 	public String name, source, uuid;
+	public int uv_width, uv_height;
 
 	public Texture() {}
 	public Texture(TextureProperties ctr) {}

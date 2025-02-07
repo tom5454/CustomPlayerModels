@@ -488,8 +488,24 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 								mngr.rotSet.set(tp, elem.getRot().asVec3f(false));
 							}
 							if(elem.doDisplay() && doRender && holder.enableParentRendering(part)) {
-								holder.copyModel(tp, parent);
-								renderParent();
+								if (noReset && !skipTransform) {
+									// render method reentry, pos and rot values are poisoned by previous render cycle
+									float _px = mngr.px.apply(parent);
+									float _py = mngr.py.apply(parent);
+									float _pz = mngr.pz.apply(parent);
+									float _rx = mngr.rx.apply(parent);
+									float _ry = mngr.ry.apply(parent);
+									float _rz = mngr.rz.apply(parent);
+
+									holder.copyModel(tp, parent);
+									renderParent();
+
+									mngr.posSet.set(parent, _px, _py, _pz);
+									mngr.rotSet.set(parent, _rx, _ry, _rz);
+								} else {
+									holder.copyModel(tp, parent);
+									renderParent();
+								}
 							}
 							doRender0(elem, doRender);
 						});

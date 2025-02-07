@@ -145,6 +145,7 @@ public class TexEditorArg implements TemplateArg<TexArg> {
 							ETextures tex = editor.textures.get(TextureSheetType.SKIN);
 							ActionBuilder ab = editor.action("placeTex").
 									updateValueOp(tex, new Image(tex.getImage()), tex.getImage(), ETextures::setImage).
+									updateValueOp(tex, tex.isChangedLocally(), true, ETextures::setChangedLocally).
 									onAction(editor::restitchTextures);
 							tex.getImage().draw(et.getTemplateTexture().getImage(), u, v);
 							ab.execute();

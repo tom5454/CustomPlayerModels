@@ -44,7 +44,7 @@ public class CustomPlayerModels extends CommonBase {
 		bus.addListener(this::onPayloadRegister);
 		MinecraftObjectHolder.setCommonObject(this);
 
-		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.preInit(bus);
+		if (FMLEnvironment.dist == Dist.CLIENT) CustomPlayerModelsClient.INSTANCE.preInit(bus);
 
 		NeoForge.EVENT_BUS.register(this);
 	}

@@ -230,7 +230,7 @@ public class MarkdownParser {
 					if(sb.length() > 0)sb.append(' ');
 					sb.append(lnt);
 				}
-				if(ln.startsWith("  ") && lastIndent != null && !prefix.contains(lastIndent))
+				if (ln != null && ln.startsWith("  ") && lastIndent != null && !prefix.contains(lastIndent))
 					prefix.add(lastIndent);
 			}
 			parseLine(sb, 1, prefix);
@@ -259,13 +259,19 @@ public class MarkdownParser {
 
 	private static Line parseLine(StringBuilder sb, float scl, List<Component> prefix, MarkdownParser parser) {
 		if(sb.length() == 0 && (prefix == null || prefix.isEmpty()))return NULL_LINE;
-		String text = sb.toString();
-		sb.setLength(0);
 		List<Component> comp = new ArrayList<>();
 		if(prefix != null) {
 			comp.addAll(prefix);
 			prefix.clear();
 		}
+		parseComponents(comp, sb, parser);
+		return new ComponentLine(comp, scl);
+	}
+
+	private static void parseComponents(List<Component> comp, StringBuilder sb, MarkdownParser parser) {
+		if(sb.length() == 0)return;
+		String text = sb.toString();
+		sb.setLength(0);
 		TextStyle current = new TextStyle();
 		Map<Integer, TextStyle> styleEnd = new HashMap<>();
 		for(int i = 0;i<text.length();i++) {
@@ -360,9 +366,7 @@ public class MarkdownParser {
 				sb.setLength(0);
 				int j = i;
 				i++;
-				for(i++;i<text.length() && text.charAt(i) != ']';i++) {
-					sb.append(text.charAt(i));
-				}
+				i = parseBrackets(text, i, '[', ']', sb);
 				String alt = sb.toString();
 				sb.setLength(0);
 				if(at(text, i + 1) == '(') {
@@ -412,9 +416,7 @@ public class MarkdownParser {
 				comp.add(new TextComponent(sb, current));
 				sb.setLength(0);
 				int j = i;
-				for(i++;i<text.length() && text.charAt(i) != ']';i++) {
-					sb.append(text.charAt(i));
-				}
+				i = parseBrackets(text, i, '[', ']', sb);
 				String lnkText = sb.toString();
 				sb.setLength(0);
 				if(at(text, i + 1) == '(') {
@@ -424,7 +426,7 @@ public class MarkdownParser {
 					}
 					String lnk = sb.toString();
 					sb.setLength(0);
-					comp.add(new LinkComponent(lnkText, new LinkReference(lnk)));
+					comp.add(new LinkComponent(lnkText, new LinkReference(lnk), parser));
 				} else if(at(text, i + 1) == '[') {
 					i++;
 					for(i++;i<text.length() && text.charAt(i) != ']';i++) {
@@ -433,10 +435,10 @@ public class MarkdownParser {
 					String lnk = sb.toString();
 					sb.setLength(0);
 					LinkReference ref = LinkReference.getRef(parser, lnk);
-					comp.add(new LinkComponent(lnkText, ref));
+					comp.add(new LinkComponent(lnkText, ref, parser));
 				} else if(lnkText.startsWith("^")) {
 					LinkReference ref = LinkReference.getRef(parser, lnkText);
-					comp.add(new ScaledComponent(0.5f, 0, new LinkComponent("[" + lnkText.substring(1) + "]", ref)));
+					comp.add(new ScaledComponent(0.5f, 0, new LinkComponent("[" + lnkText.substring(1) + "]", ref, parser)));
 				} else {
 					i = j;
 					sb.append("[");
@@ -461,8 +463,20 @@ public class MarkdownParser {
 		}
 		comp.add(new TextComponent(sb, current));
 		sb.setLength(0);
-		Line line = new ComponentLine(comp, scl);
-		return line;
+	}
+
+	private static int parseBrackets(String text, int i, char open, char close, StringBuilder sb) {
+		int ign = 0;
+		for (i++;i<text.length();i++) {
+			char c = text.charAt(i);
+			if (c == open)ign++;
+			else if (c == close) {
+				if (ign == 0)break;
+				ign--;
+			}
+			sb.append(c);
+		}
+		return i;
 	}
 
 	private static int parseEscape(int i, String text, StringBuilder sb) {
@@ -943,34 +957,34 @@ public class MarkdownParser {
 
 	private static class LinkComponent implements Component {
 		protected LinkReference ref;
-		protected String text;
+		protected List<Component> components;
 
-		public LinkComponent(String text, LinkReference ref) {
-			this.text = text;
+		public LinkComponent(String text, LinkReference ref, MarkdownParser parser) {
+			this.components = new ArrayList<>();
+			parseComponents(components, new StringBuilder(text), parser);
 			this.ref = ref;
 		}
 
 		@Override
 		public List<GuiElement> toElements(MarkdownRenderer mdr, Cursor cursor) {
-			float s = cursor.scale;
 			String url = ref.url;
 			Runnable click = () -> mdr.browse(url);
 			List<Predicate<MouseEvent>> hovers = new ArrayList<>();
 			Tooltip tt = ref.tooltip != null ? new Tooltip(mdr.getGui().getFrame(), ref.tooltip) : null;
-			return linewrapSimple(text, cursor, t -> new Lbl(mdr.getGui(), t, click, s, hovers, tt), mdr.getGui()::textWidth);
+			return components.stream().flatMap(e -> e.toElements(mdr, cursor).stream()).
+					map(e -> new Lnk(mdr.getGui(), e, click, hovers, tt)).collect(Collectors.toList());
 		}
 
-		private static class Lbl extends GuiElement {
-			private LiteralText txt;
-			private float scale;
+		private static class Lnk extends GuiElement {
+			private GuiElement elem;
 			private Runnable click;
 			private List<Predicate<MouseEvent>> hovers;
 			private Tooltip tt;
 
-			public Lbl(IGui gui, String text, Runnable click, float scale, List<Predicate<MouseEvent>> hovers, Tooltip tt) {
+			public Lnk(IGui gui, GuiElement elem, Runnable click, List<Predicate<MouseEvent>> hovers, Tooltip tt) {
 				super(gui);
-				this.txt = new LiteralText(text);
-				this.scale = scale;
+				this.elem = elem;
+				this.bounds = elem.getBounds();
 				this.click = click;
 				this.hovers = hovers;
 				this.tt = tt;
@@ -980,7 +994,11 @@ public class MarkdownParser {
 			@Override
 			public void draw(MouseEvent event, float partialTicks) {
 				if (tt != null && event.isHovered(bounds))tt.set();
-				gui.drawFormattedText(bounds.x, bounds.y, txt, hovers.stream().anyMatch(p -> p.test(event)) ? gui.getColors().link_hover : gui.getColors().link_normal, scale);
+				int color = hovers.stream().anyMatch(p -> p.test(event)) ? gui.getColors().link_hover : gui.getColors().link_normal;
+				if (elem instanceof LabelText) {
+					((LabelText) elem).setColor(color);
+				}
+				elem.draw(event, partialTicks);
 			}
 
 			@Override
@@ -988,6 +1006,12 @@ public class MarkdownParser {
 				if(event.isHovered(bounds) && event.btn == 0) {
 					click.run();
 				}
+			}
+
+			@Override
+			public GuiElement setBounds(Box bounds) {
+				elem.setBounds(bounds);
+				return super.setBounds(bounds);
 			}
 		}
 	}

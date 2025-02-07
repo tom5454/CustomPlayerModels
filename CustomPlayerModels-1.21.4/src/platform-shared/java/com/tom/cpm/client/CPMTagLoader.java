@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -19,23 +19,14 @@ import com.tom.cpm.shared.util.ErrorLog.LogLevel;
 
 public class CPMTagLoader extends SimplePreparableReloadListener<Map<String, List<Map<String, Object>>>> {
 	private final TagManager<?> tags;
-	private final String prefix;
+	protected final String prefix;
+	protected final ResourceLocation id;
 
-	public CPMTagLoader(Minecraft mc, TagManager<?> tags, String prefix) {
+	public CPMTagLoader(Consumer<CPMTagLoader> mc, TagManager<?> tags, String prefix) {
 		this.tags = tags;
 		this.prefix = prefix;
-		ResourceManager mngr = mc.getResourceManager();
-		if (mngr != null) {
-			init(mngr);
-		} else {
-			mc.schedule(() -> init(mc.getResourceManager()));
-		}
-	}
-
-	private void init(ResourceManager mngr) {
-		tags.applyBuiltin(load(mngr), prefix);
-		if(mngr instanceof ReloadableResourceManager r)
-			r.registerReloadListener(this);
+		this.id = ResourceLocation.tryBuild("cpm", "tags_" + prefix);
+		mc.accept(this);
 	}
 
 	@Override

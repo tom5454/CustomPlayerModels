@@ -115,21 +115,19 @@ public class CPMASMClientHooks {
 		ClientProxy.INSTANCE.manager.unbindClear(this0.modelBipedMain);
 	}
 
-	public static boolean renderCape(boolean evtRC, RenderPlayer this0, EntityPlayer player, float partialTicks) {
-		if(evtRC) {
-			Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
-			if(pl != null) {
-				ModelDefinition def = pl.getModelDefinition();
-				if(def != null && def.hasRoot(RootModelType.CAPE)) {
-					ModelBiped model = this0.modelBipedMain;
-					ClientProxy.mc.getPlayerRenderManager().rebindModel(model);
-					ClientProxy.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
-					ClientProxy.renderCape(player, partialTicks, model, def);
-					return false;
-				}
+	public static boolean renderCape(boolean hasTex, RenderPlayer this0, EntityPlayer player, float partialTicks) {
+		Player<?> pl = ClientProxy.INSTANCE.manager.getBoundPlayer();
+		if(pl != null) {
+			ModelDefinition def = pl.getModelDefinition();
+			if(def != null && def.hasRoot(RootModelType.CAPE)) {
+				ModelBiped model = this0.modelBipedMain;
+				ClientProxy.mc.getPlayerRenderManager().rebindModel(model);
+				ClientProxy.INSTANCE.manager.bindSkin(model, TextureSheetType.CAPE);
+				ClientProxy.renderCape(player, partialTicks, model, def);
+				return false;
 			}
 		}
-		return evtRC;
+		return hasTex;
 	}
 
 	public static boolean onRenderPlayerModel(RenderPlayer this0, EntityLiving player0, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor) {

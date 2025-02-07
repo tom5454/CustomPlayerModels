@@ -212,29 +212,57 @@ public class EditorAnim implements IAnimation {
 	}
 
 	public void switchVisible() {
-		if(currentFrame != null && editor.getSelectedElement() != null) {
-			currentFrame.switchVis(editor.getSelectedElement());
+		if(currentFrame != null) {
+			if (editor.selectedElement instanceof ElementImpl) {
+				ElementImpl e = (ElementImpl) editor.selectedElement;
+				e.forEachSelected(el -> {
+					if (el instanceof ModelElement)
+						currentFrame.switchVis((ModelElement) el);
+				});
+			} else if (editor.getSelectedElement() != null)
+				currentFrame.switchVis(editor.getSelectedElement());
 		}
 		components = null;
 		psfs = null;
 	}
 
 	public void clearSelectedData(boolean all) {
-		if(currentFrame != null && editor.getSelectedElement() != null) {
-			ActionBuilder ab = editor.action("clearAnim");
-			if(all) {
-				frames.forEach(f -> f.clearSelectedData(ab, editor.getSelectedElement()));
-			} else
-				currentFrame.clearSelectedData(ab, editor.getSelectedElement());
-			ab.execute();
+		if(currentFrame != null) {
+			if (editor.selectedElement instanceof ElementImpl) {
+				ActionBuilder ab = editor.action("clearAnim");
+				ElementImpl e = (ElementImpl) editor.selectedElement;
+				e.forEachSelected(el -> {
+					if (el instanceof ModelElement)
+						clearFrameData(ab, (ModelElement) el, all);
+				});
+				ab.execute();
+			} else if (editor.getSelectedElement() != null){
+				ActionBuilder ab = editor.action("clearAnim");
+				clearFrameData(ab, editor.getSelectedElement(), all);
+				ab.execute();
+			}
 		}
 		components = null;
 		psfs = null;
 	}
 
+	private void clearFrameData(ActionBuilder ab, ModelElement me, boolean all) {
+		if(all) {
+			frames.forEach(f -> f.clearSelectedData(ab, me));
+		} else
+			currentFrame.clearSelectedData(ab, me);
+	}
+
 	public void setColor(int rgb) {
-		if(currentFrame != null && editor.getSelectedElement() != null) {
-			currentFrame.setColor(editor.getSelectedElement(), rgb);
+		if(currentFrame != null) {
+			if (editor.selectedElement instanceof ElementImpl) {
+				ElementImpl e = (ElementImpl) editor.selectedElement;
+				e.forEachSelected(el -> {
+					if (el instanceof ModelElement)
+						currentFrame.setColor((ModelElement) el, rgb);
+				});
+			} else if (editor.getSelectedElement() != null)
+				currentFrame.setColor(editor.getSelectedElement(), rgb);
 		}
 		components = null;
 		psfs = null;
@@ -444,24 +472,33 @@ public class EditorAnim implements IAnimation {
 				}
 			} else if (editor.selectedElement instanceof ElementImpl) {
 				ElementImpl e = (ElementImpl) editor.selectedElement;
-				Vec3f p = e.getVecAnim(me -> {
-					IElem dt = selFrm.getData(me);
-					if (dt != null)return dt.getPosition();
-					else if(this.add)return new Vec3f();
-					else if(me.type == ElementType.ROOT_PART) {
-						PartValues val = ((VanillaModelPart)me.typeData).getDefaultSize(editor.skinType);
-						return val.getPos().add(me.pos);
+				if (e.hasElements()) {
+					Vec3f p = e.getVecAnim(me -> {
+						IElem dt = selFrm.getData(me);
+						if (dt != null)return dt.getPosition();
+						else if(this.add)return new Vec3f();
+						else if(me.type == ElementType.ROOT_PART) {
+							PartValues val = ((VanillaModelPart)me.typeData).getDefaultSize(editor.skinType);
+							return val.getPos().add(me.pos);
+						}
+						return me.pos;
+					});
+					Vec3f r = e.getVecAnim(me -> {
+						IElem dt = selFrm.getData(me);
+						if (dt != null)return dt.getRotation();
+						else if(this.add)return new Vec3f();
+						return me.rotation;
+					});
+					editor.setAnimPos.accept(p);
+					editor.setAnimRot.accept(r);
+					if (e.allMatch(x -> x.recolor || !x.texture)) {
+						editor.setAnimColor.accept(e.getFirst().rgb);
 					}
-					return me.pos;
-				});
-				Vec3f r = e.getVecAnim(me -> {
-					IElem dt = selFrm.getData(me);
-					if (dt != null)return dt.getRotation();
-					else if(this.add)return new Vec3f();
-					return me.rotation;
-				});
-				editor.setAnimPos.accept(p);
-				editor.setAnimRot.accept(r);
+					ModelElement f = e.getFirst();
+					IElem dt = selFrm.getData(e.getFirst());
+					if (dt != null)editor.setAnimShow.accept(dt.isVisible());
+					else editor.setAnimShow.accept(!f.hidden);
+				}
 			}
 			editor.setFrameDelEn.accept(true);
 		}

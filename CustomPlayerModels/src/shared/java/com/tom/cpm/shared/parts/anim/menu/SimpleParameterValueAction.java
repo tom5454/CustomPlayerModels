@@ -59,6 +59,11 @@ public class SimpleParameterValueAction implements CommandAction, LegacyCommandA
 	}
 
 	@Override
+	public int getMaxValue() {
+		return 1;
+	}
+
+	@Override
 	public boolean isCommandControlled() {
 		return cc;
 	}

@@ -113,6 +113,7 @@ public class Cube {
 		c.rotation = new Vec3f((Map<String, Object>) map.get("rotation"), new Vec3f());
 		c.size = new Vec3f((Map<String, Object>) map.get("size"), new Vec3f(1, 1, 1));
 		c.meshScale = new Vec3f((Map<String, Object>) map.get("scale"), new Vec3f(1, 1, 1));
+		c.scale = new Vec3f(1);
 		c.u = ((Number)map.get("u")).intValue();
 		c.v = ((Number)map.get("v")).intValue();
 		c.rgb = Integer.parseUnsignedInt((String) map.get("color"), 16);

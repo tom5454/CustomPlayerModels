@@ -24,10 +24,16 @@ public class SubEventC2S extends NBTC2S {
 	public <P> void handle(NetHandler<?, P, ?> handler, ServerNetH net, P player) {
 		PlayerData pd = net.cpm$getEncodedModelData();
 		pd.eventSubs.clear();
+		pd.selfSubs.clear();
 		NBTTagList list = tag.getTagList(NetworkUtil.EVENT_LIST, NBTTag.TAG_STRING);
 		for (int i = 0;i<list.tagCount();i++) {
 			ModelEventType type = ModelEventType.of(list.getStringTagAt(i));
 			if(type != null)pd.eventSubs.add(type);
+		}
+		list = tag.getTagList(NetworkUtil.SELF_EVENT_LIST, NBTTag.TAG_STRING);
+		for (int i = 0;i<list.tagCount();i++) {
+			ModelEventType type = ModelEventType.of(list.getStringTagAt(i));
+			if(type != null)pd.selfSubs.add(type);
 		}
 		pd.animNames.clear();
 		if (tag.hasKey(NetworkUtil.NAMED_PARAMETERS, NBTTag.TAG_LIST)) {

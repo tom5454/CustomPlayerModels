@@ -20,7 +20,11 @@ public enum SafetyLevel {
 			arg(SafetyChecks::sizeCheck, 1024),
 			arg(SafetyChecks::cubeCountCheck, 1024)
 			),
-	NONE()
+	NONE(
+			arg(SafetyChecks::textureCheck, Integer.MAX_VALUE),
+			arg(SafetyChecks::sizeCheck, Integer.MAX_VALUE),
+			arg(SafetyChecks::cubeCountCheck, Integer.MAX_VALUE)
+			)
 	;
 	public static final SafetyLevel[] VALUES = values();
 	private List<EditorPredicate> checks;

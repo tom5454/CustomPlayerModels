@@ -33,6 +33,7 @@ public class ETextures implements TreeElement {
 	public List<AnimatedTex> animatedTexs = new ArrayList<>();
 	private final AnimTreeList animsList = new AnimTreeList();
 	public boolean customGridSize;
+	private boolean changedLocally;
 
 	public ETextures(Editor e, TextureSheetType type) {
 		this(e, type, (Consumer<TextureStitcher>) null);
@@ -63,6 +64,7 @@ public class ETextures implements TreeElement {
 	public void clean() {
 		this.provider.texture = null;
 		this.provider.setEdited(false);
+		changedLocally = false;
 		this.file = null;
 		animatedTexs.clear();
 	}
@@ -111,6 +113,7 @@ public class ETextures implements TreeElement {
 
 	public void setRGB(int x, int y, int rgb) {
 		provider.setRGB(x, y, rgb);
+		changedLocally = true;
 	}
 
 	public void write(IOHelper dout) throws IOException {
@@ -237,6 +240,7 @@ public class ETextures implements TreeElement {
 				e.action("delTexture").
 				updateValueOp(this, this.getImage(), this.copyDefaultImg(), ETextures::setImage).
 				updateValueOp(this, this.isEdited(), false, ETextures::setEdited, e.setSkinEdited).
+				updateValueOp(this, this.isChangedLocally(), false, ETextures::setChangedLocally).
 				execute();
 			}, null, e.ui.i18nFormat("button.cpm.resetTexture"));
 		} else {
@@ -253,5 +257,13 @@ public class ETextures implements TreeElement {
 			return gr.getTexSheet((RootModelType) part);
 		}
 		return TextureSheetType.SKIN;
+	}
+
+	public boolean isChangedLocally() {
+		return changedLocally;
+	}
+
+	public void setChangedLocally(boolean changedLocally) {
+		this.changedLocally = changedLocally;
 	}
 }

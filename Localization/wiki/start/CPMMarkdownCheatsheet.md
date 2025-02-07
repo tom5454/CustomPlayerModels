@@ -425,6 +425,8 @@ They can't be added directly but you can add an image with a link to the video l
 [![IMAGE ALT TEXT HERE](https://github.com/tom5454/CustomPlayerModels/wiki/images/spinner.png)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
 ```
 
+[![IMAGE ALT TEXT HERE](https://github.com/tom5454/CustomPlayerModels/wiki/images/spinner.png)](http://www.youtube.com/watch?v=dQw4w9WgXcQ)
+
 See [Images](#images) on how to load your custom image.
 
 <a name="highlighting"/>

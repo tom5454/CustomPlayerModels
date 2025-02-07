@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
@@ -48,25 +49,40 @@ public interface MultiSelector extends TreeElement {
 			return elements.contains(other);
 		}
 
+		public boolean allMatch(Predicate<ModelElement> test) {
+			for (int i = 0; i < elements.size(); i++) {
+				ModelElement e = elements.get(i);
+				if (test.test(e))return false;
+			}
+			return true;
+		}
+
 		@Override
 		public void updateGui() {
-			if(elements.stream().noneMatch(e -> e.type == ElementType.ROOT_PART)) {
+			if (elements.isEmpty())return;
+			if (allMatch(e -> e.type == ElementType.NORMAL)) {
 				editor.setOffset.accept(getVec(VecType.OFFSET));
-				if(elements.stream().allMatch(e -> e.itemRenderer == null && e.texture && e.faceUV == null)) {
-					editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.mode.tex"));
-					editor.setModePanel.accept(ModeDisplayType.TEX);
-					editor.setTexturePanel.accept(getVecUV());
-				} else if(elements.stream().allMatch(e -> e.itemRenderer == null && !e.texture)) {
-					editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.mode.color"));
-					editor.setModePanel.accept(ModeDisplayType.COLOR);
-					editor.setPartColor.accept(0);
+				if (allMatch(e -> e.itemRenderer == null)) {
+					if (allMatch(e -> e.texture)) {
+						if (allMatch(e -> e.faceUV == null)) {
+							editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.mode.tex"));
+							editor.setModePanel.accept(ModeDisplayType.TEX);
+							editor.setTexturePanel.accept(getVecUV());
+						}
+					} else {
+						editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.mode.color"));
+						editor.setModePanel.accept(ModeDisplayType.COLOR);
+						editor.setPartColor.accept(0);
+					}
+					double mc = elements.stream().mapToDouble(e -> e.mcScale).average().orElse(0);
+					editor.setMCScale.accept((float) mc);
 				}
 				editor.setDelEn.accept(true);
-				if (!elements.isEmpty()) {
-					ModelElement me = elements.get(0);
-					editor.setHiddenEffect.accept(me.hidden);
-					editor.setGlow.accept(me.glow);
-				}
+				ModelElement me = elements.get(0);
+				editor.setHiddenEffect.accept(me.hidden);
+				editor.setGlow.accept(me.glow);
+				editor.setMirror.accept(me.mirror);
+				editor.setSingleTex.accept(me.singleTex);
 			}
 			editor.setPosition.accept(getVec(VecType.POSITION));
 			editor.setRot.accept(getVec(VecType.ROTATION));
@@ -118,10 +134,13 @@ public interface MultiSelector extends TreeElement {
 
 		@Override
 		public void modeSwitch() {
+			elements.forEach(ModelElement::modeSwitch);
 		}
 
 		@Override
 		public void setMCScale(float scale) {
+			float mc = (float) (scale - elements.stream().mapToDouble(e -> e.mcScale).average().orElse(0));
+			elements.forEach(e -> e.setMCScale(e.mcScale + mc));
 		}
 
 		@Override
@@ -197,6 +216,14 @@ public interface MultiSelector extends TreeElement {
 		@Override
 		public void forEachSelected(Consumer<TreeElement> c) {
 			elements.forEach(c);
+		}
+
+		public ModelElement getFirst() {
+			return elements.get(0);
+		}
+
+		public boolean hasElements() {
+			return !elements.isEmpty();
 		}
 	}
 }

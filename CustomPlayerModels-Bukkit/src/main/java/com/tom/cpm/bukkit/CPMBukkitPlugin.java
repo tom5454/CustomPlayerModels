@@ -50,6 +50,9 @@ public class CPMBukkitPlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		super.onEnable();
+		if (checkDuplicateInstall()) {
+			throw new Error("CPM is installed twice, remove either the plugin or the mod.");
+		}
 		getDataFolder().mkdirs();
 		log = new BukkitLogger(getLogger());
 		config = new ModConfigFile(new File(getDataFolder(), "cpm.json"));
@@ -174,6 +177,15 @@ public class CPMBukkitPlugin extends JavaPlugin {
 		net.register();
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new PlayerTracker(net), 0, 20);
 		log.info("Customizable Player Models Initialized");
+	}
+
+	private boolean checkDuplicateInstall() {
+		try {
+			Class.forName("com.tom.cpm.CustomPlayerModels");
+			return true;
+		} catch (Throwable e) {
+		}
+		return false;
 	}
 
 	@Override

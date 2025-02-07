@@ -178,7 +178,7 @@ public class Animation {
 		}
 
 		if(before == null)return def;
-		return before.data_points.getAt(0).visible;
+		return before.data_points.getAt(0).getVisible();
 	}
 
 	@JsOverlay

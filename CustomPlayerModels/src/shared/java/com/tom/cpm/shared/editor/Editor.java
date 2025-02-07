@@ -460,6 +460,7 @@ public class Editor {
 					skinTex.provider.size = new Vec2i(vanillaSkin.getWidth(), vanillaSkin.getHeight());
 					skinTex.setDefaultImg(vanillaSkin);
 					skinTex.setImage(new Image(this.vanillaSkin));
+					skinTex.setChangedLocally(false);
 					restitchTextures();
 				}
 			});
@@ -547,7 +548,15 @@ public class Editor {
 	public void reloadSkin() {
 		ETextures tex = getTextureProvider();
 		if(tex != null && tex.file != null) {
-			reloadSkin(null, tex, tex.file);
+			if (tex.isChangedLocally()) {
+				ui.displayConfirm(ui.i18nFormat("label.cpm.reloadQuestion"), () -> {
+					ActionBuilder ab = action("loadTexture");
+					reloadSkin(ab, tex, tex.file);
+				}, null);
+			} else {
+				ActionBuilder ab = action("loadTexture");
+				reloadSkin(ab, tex, tex.file);
+			}
 		}
 		markDirty();
 	}
@@ -558,27 +567,16 @@ public class Editor {
 				ui.displayMessagePopup(ui.i18nFormat("label.cpm.error"), ui.i18nFormat("error.cpm.img_load_failed", ui.i18nFormat("label.cpm.tex_size_too_big", 8192)));
 				return;
 			}
-			if(ab != null) {
-				ab.updateValueOp(tex, tex.getImage(), img, ETextures::setImage).
-				updateValueOp(tex, tex.isEdited(), true, ETextures::setEdited);
-				if(!tex.customGridSize) {
-					ab.updateValueOp(tex, tex.provider.size.x, img.getWidth(), (a, b) -> a.provider.size.x = b).
-					updateValueOp(tex, tex.provider.size.y, img.getHeight(), (a, b) -> a.provider.size.y = b).
-					onAction(this::markElementsDirty);
-				}
-				ab.onAction(tex::restitchTexture);
-				ab.execute();
-			} else {
-				tex.setImage(img);
-				tex.setEdited(true);
-				if(!tex.customGridSize) {
-					tex.provider.size.x = img.getWidth();
-					tex.provider.size.y = img.getHeight();
-					markDirty();
-					markElementsDirty();
-				}
-				tex.restitchTexture();
+			ab.updateValueOp(tex, tex.getImage(), img, ETextures::setImage).
+			updateValueOp(tex, tex.isEdited(), true, ETextures::setEdited).
+			updateValueOp(tex, tex.isChangedLocally(), false, ETextures::setChangedLocally);
+			if(!tex.customGridSize) {
+				ab.updateValueOp(tex, tex.provider.size.x, img.getWidth(), (a, b) -> a.provider.size.x = b).
+				updateValueOp(tex, tex.provider.size.y, img.getHeight(), (a, b) -> a.provider.size.y = b).
+				onAction(this::markElementsDirty);
 			}
+			ab.onAction(tex::restitchTexture);
+			ab.execute();
 			setSkinEdited.accept(true);
 		}, ui::executeLater).exceptionally(e -> {
 			Log.error("Failed to load image", e);
@@ -723,7 +721,7 @@ public class Editor {
 
 	public void addNewAnimFrame(boolean copyCurrent) {
 		if(selectedAnim != null) {
-			selectedAnim.addFrame();
+			selectedAnim.addFrame(copyCurrent);
 			updateGui();
 		}
 	}

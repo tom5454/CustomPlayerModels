@@ -339,12 +339,12 @@ public class ClientApi extends SharedApi implements IClientAPI {
 	}
 
 	@Override
-	public <P> boolean playAnimation(String name, int value) {
+	public boolean playAnimation(String name, int value) {
 		return MinecraftClientAccess.get().getPlayerRenderManager().getAnimationEngine().applyCommand(name, value, null);
 	}
 
 	@Override
-	public <P> boolean playAnimation(String name) {
+	public boolean playAnimation(String name) {
 		return playAnimation(name, -1);
 	}
 
@@ -360,6 +360,16 @@ public class ClientApi extends SharedApi implements IClientAPI {
 			return -1;
 		}
 		return pl.currentPose == pose ? 1 : 0;
+	}
+
+	@Override
+	public int getAnimationMaxValue(String name) {
+		Player<?> pl = MinecraftClientAccess.get().getCurrentClientPlayer();
+		ModelDefinition def = pl.getModelDefinition();
+		if (def == null)return -1;
+		CommandAction act = def.getAnimations().getCommandActionsMap().get(name);
+		if (act != null)return act.getMaxValue();
+		return -1;
 	}
 
 	@SuppressWarnings("unchecked")

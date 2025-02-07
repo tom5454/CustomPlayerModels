@@ -10,12 +10,14 @@ import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.network.ServerCaps;
 
 public class AnimationTrigger {
+	public final AnimationRegistry reg;
 	public final Set<IPose> onPoses;
 	public final List<IAnimation> animations;
 	public final boolean looping, mustFinish;
 	public final VanillaPose valuePose;
 
-	public AnimationTrigger(Set<IPose> onPoses, VanillaPose valuePose, List<IAnimation> animations, boolean looping, boolean mustFinish) {
+	public AnimationTrigger(AnimationRegistry reg, Set<IPose> onPoses, VanillaPose valuePose, List<IAnimation> animations, boolean looping, boolean mustFinish) {
+		this.reg = reg;
 		this.onPoses = onPoses;
 		this.valuePose = valuePose;
 		this.animations = animations;
@@ -35,8 +37,8 @@ public class AnimationTrigger {
 		private final int id, mask;
 		private final boolean bitmask;
 
-		public LayerTrigger(Set<IPose> onPoses, List<IAnimation> animations, int id, int mask, boolean bitmask, boolean mustFinish) {
-			super(onPoses, null, animations, true, mustFinish);
+		public LayerTrigger(AnimationRegistry reg, Set<IPose> onPoses, List<IAnimation> animations, int id, int mask, boolean bitmask, boolean mustFinish) {
+			super(reg, onPoses, null, animations, true, mustFinish);
 			this.id = id;
 			this.mask = mask;
 			this.bitmask = bitmask;
@@ -44,20 +46,22 @@ public class AnimationTrigger {
 
 		@Override
 		public boolean canPlay(Player<?> pl, AnimationMode mode) {
+			byte v;
 			if (pl.animState.gestureData != null && pl.animState.gestureData.length > id) {
-				byte v = pl.animState.gestureData[id];
-				if (bitmask)return (v & mask) == mask;
-				else return v == mask;
+				v = pl.animState.gestureData[id];
+			} else {
+				v = reg.getParams().getDefaultParam(id);
 			}
-			return false;
+			if (bitmask)return (v & mask) == mask;
+			else return v == mask;
 		}
 	}
 
 	public static class GestureTrigger extends AnimationTrigger {
 		private final int value, gid;
 
-		public GestureTrigger(Set<IPose> onPoses, List<IAnimation> animations, int value, int gid, boolean looping, boolean mustFinish) {
-			super(onPoses, null, animations, looping, mustFinish);
+		public GestureTrigger(AnimationRegistry reg, Set<IPose> onPoses, List<IAnimation> animations, int value, int gid, boolean looping, boolean mustFinish) {
+			super(reg, onPoses, null, animations, looping, mustFinish);
 			this.value = value;
 			this.gid = gid;
 		}
@@ -80,8 +84,8 @@ public class AnimationTrigger {
 		private final int id;
 		private boolean interpolate;
 
-		public ValueTrigger(Set<IPose> onPoses, List<IAnimation> animations, int id, boolean interpolate) {
-			super(onPoses, null, animations, true, false);
+		public ValueTrigger(AnimationRegistry reg, Set<IPose> onPoses, List<IAnimation> animations, int id, boolean interpolate) {
+			super(reg, onPoses, null, animations, true, false);
 			this.id = id;
 			this.interpolate = interpolate;
 		}
@@ -96,8 +100,10 @@ public class AnimationTrigger {
 					val = MathHelper.lerp((time - state.lastGestureReceiveTime) / 50f, prev, val);
 				}
 				return (long) (val * VanillaPose.DYNAMIC_DURATION_MUL);
-			} else
-				return 0L;
+			} else {
+				float val = Byte.toUnsignedInt(reg.getParams().getDefaultParam(id)) / 256f;
+				return (long) (val * VanillaPose.DYNAMIC_DURATION_MUL);
+			}
 		}
 	}
 }

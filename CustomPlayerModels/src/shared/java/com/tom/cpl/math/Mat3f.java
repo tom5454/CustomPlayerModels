@@ -202,4 +202,35 @@ public class Mat3f {
 		values[8] = m22;
 		return values;
 	}
+
+	public Mat3f invert(Mat3f dest) {
+		float a = MathHelper.fma(m00, m11, -m01 * m10);
+		float b = MathHelper.fma(m02, m10, -m00 * m12);
+		float c = MathHelper.fma(m01, m12, -m02 * m11);
+		float d = MathHelper.fma(a, m22, MathHelper.fma(b, m21, c * m20));
+		float s = 1.0f / d;
+		float nm00 = MathHelper.fma(m11, m22, -m21 * m12) * s;
+		float nm01 = MathHelper.fma(m21, m02, -m01 * m22) * s;
+		float nm02 = c * s;
+		float nm10 = MathHelper.fma(m20, m12, -m10 * m22) * s;
+		float nm11 = MathHelper.fma(m00, m22, -m20 * m02) * s;
+		float nm12 = b * s;
+		float nm20 = MathHelper.fma(m10, m21, -m20 * m11) * s;
+		float nm21 = MathHelper.fma(m20, m01, -m00 * m21) * s;
+		float nm22 = a * s;
+		dest.m00 = nm00;
+		dest.m01 = nm01;
+		dest.m02 = nm02;
+		dest.m10 = nm10;
+		dest.m11 = nm11;
+		dest.m12 = nm12;
+		dest.m20 = nm20;
+		dest.m21 = nm21;
+		dest.m22 = nm22;
+		return dest;
+	}
+
+	public Mat3f invert() {
+		return invert(this);
+	}
 }

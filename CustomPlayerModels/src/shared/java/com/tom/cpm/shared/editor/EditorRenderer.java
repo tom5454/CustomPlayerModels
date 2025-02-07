@@ -216,6 +216,7 @@ public class EditorRenderer {
 			return drawDragPane(matrixStackIn, bufferIn, type, c.size.mul(1 / 2F), c.offset, size, true);
 
 		case POSITION:
+		case PIVOT:
 		{
 			MatrixStack f = matrixStackIn.fork();
 			f.pop();
@@ -405,6 +406,7 @@ public class EditorRenderer {
 			break;
 
 		case POSITION:
+		case PIVOT:
 		{
 			MatrixStack f = matrixStackIn.fork();
 			f.pop();

@@ -94,7 +94,6 @@ repositories {
     maven { // McJtyLib
         url "https://maven.k-4u.nl"
     }
-	maven { url 'https://jitpack.io' }
 	maven {
 		name = "tom5454 maven"
 		url = "https://raw.githubusercontent.com/tom5454/maven/main"
@@ -111,6 +110,10 @@ repositories {
     	name = "Jared's maven"
     	url = "https://maven.blamejared.com/"
 	}
+	maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
 }
 
 dependencies {
@@ -150,7 +153,7 @@ dependencies {
   	compileOnly "${project.cpm_source}:CustomPlayerModels-API:${project.cpm_api_version}"
   	runtimeOnly fg.deobf("${project.cpm_source}:CustomPlayerModels-1.16:${project.cpm_runtime_version}")
   	
-  	compileOnly fg.deobf("com.github.Virtuoel:Pehkui:3.8.2-1.16.5-forge")
+  	compileOnly fg.deobf("maven.modrinth:pehkui:3.8.2+1.16.5-forge")
 }
 
 sourceSets {

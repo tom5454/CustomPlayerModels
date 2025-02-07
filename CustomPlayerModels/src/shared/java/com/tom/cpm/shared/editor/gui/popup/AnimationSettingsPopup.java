@@ -103,12 +103,15 @@ public class AnimationSettingsPopup extends PopupPanel {
 
 		editor.animations.stream().
 		filter(a -> a.pose == null && !a.type.isStaged() && (a.type != AnimationType.GESTURE || a.loop) && a.type != AnimationType.VALUE_LAYER).
-		map(a -> new AnimSel(a.getId(), a.getDisplayGroup())).distinct().forEach(selAnims::add);
+		map(a -> new AnimSel(a.getId(), a.getDisplayGroup(), a.type)).distinct().forEach(selAnims::add);
 
 		ListPicker<AnimSel> dropDownAnimSel = new ListPicker<>(gui.getFrame(), selAnims);
 		dropDownAnimSel.setBounds(new Box(0, 0, 190, 20));
 		dropDownAnimSel.setVisible(false);
 		nameFieldPanel.addElement(dropDownAnimSel);
+		dropDownAnimSel.setListLoader(l -> {
+			l.setRenderer(AnimSel::draw);
+		});
 
 		if(edit && editor.selectedAnim != null && editor.selectedAnim.type.isStaged()) {
 			nameField.setVisible(false);
@@ -303,14 +306,16 @@ public class AnimationSettingsPopup extends PopupPanel {
 	private class AnimSel {
 		private IPose pose;
 		private String gesture, name;
+		private AnimationType type;
 
 		public AnimSel(IPose pose) {
 			this.pose = pose;
 		}
 
-		public AnimSel(String gesture, String name) {
+		public AnimSel(String gesture, String name, AnimationType type) {
 			this.gesture = gesture;
 			this.name = name;
+			this.type = type;
 		}
 
 		@Override
@@ -347,6 +352,34 @@ public class AnimationSettingsPopup extends PopupPanel {
 			if(pose instanceof VanillaPose)return "p:" + ((VanillaPose)pose).name().toLowerCase(Locale.ROOT);
 			else if(pose instanceof CustomPose)return "c:" + ((CustomPose)pose).getName();
 			return "g:" + gesture;
+		}
+
+		private void draw(int x, int y, int w, int h, boolean hovered, boolean selected) {
+			int bg = gui.getColors().select_background;
+			if(hovered)bg = gui.getColors().popup_background;
+			if(selected || hovered)gui.drawBox(x, y, w, h, bg);
+			int anType = Type.GLOBAL.color;
+			if (pose instanceof VanillaPose) {
+				anType = AnimationDisplayData.getFor((VanillaPose) pose).type.color;
+			} else if (pose != null) {
+				anType = Type.CUSTOM.color;
+			} else if (type != null) {
+				switch (type) {
+				case GESTURE:
+					anType = 0x8888FF;
+					break;
+				case LAYER:
+					anType = 0xFF88FF;
+					break;
+				case VALUE_LAYER:
+					anType = 0x88FFFF;
+					break;
+				default:
+					anType = Type.CUSTOM.color;
+					break;
+				}
+			}
+			gui.drawText(x + 3, y + h / 2 - 4, toString(), anType);
 		}
 	}
 }

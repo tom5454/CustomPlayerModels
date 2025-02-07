@@ -33,7 +33,6 @@
   "bb-label.convertedFromOld": "Este proyecto fue realizado en una versión vieja del plugin.\\La información del proyecto fue convertida al formato nuevo.",
   "bb-label.error.oldConvertFail": "Fallo en convertir al formatio viejo",
   "bb-label.warn.nonConvertedPartNotSupported": "La parte raiz %s no está escondida, El cubo será convertido.",
-  "bb-label.warn.coloredCubeNotSupported": "Los cubos coloreados no son soportados: %s",
   "bb-label.warn.copyTransformNotVis": "Los elementos con Copia Transformación no serán mostrados correctamente",
   "bb-label.warn.multiple": "%s (%s Avisos)",
   "bb-label.warn.rootScaling": "Escalando animación en raices",

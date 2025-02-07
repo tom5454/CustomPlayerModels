@@ -13,7 +13,8 @@
 	"VRArmRendererMixin_$vivecraft",
 	"BlockEntityRenderDispatcherMixin_Iris",
 	"BlockEntityRenderDispatcherMixin_Iris7",
-	"CustomRenderTypesMixin_Iris7"
+	"CustomRenderTypesMixin_Iris7",
+	"RealCameraCoreMixin_RC"
   ],
   "injectors": {
     "defaultRequire": 1

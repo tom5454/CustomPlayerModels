@@ -3,6 +3,7 @@ package com.tom.cpm.shared.editor.gui;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.tom.cpl.gui.IGui;
@@ -35,6 +36,8 @@ import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
 import com.tom.cpm.shared.editor.anim.AnimFrame;
 import com.tom.cpm.shared.editor.anim.AnimFrame.FrameData;
+import com.tom.cpm.shared.editor.anim.AnimationDisplayData;
+import com.tom.cpm.shared.editor.anim.AnimationDisplayData.Type;
 import com.tom.cpm.shared.editor.anim.EditorAnim;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.gui.popup.AnimEncConfigPopup;
@@ -79,6 +82,7 @@ public class AnimPanel extends Panel {
 					thenComparing(Comparator.comparing(NamedElement::toString))
 					);
 			l.setGetTooltip(n -> n.getElem() == null ? null : new Tooltip(e, n.getElem().toString()));
+			l.setRenderer(this::drawAnimInSelector);
 		});
 		animSel.setAction(() -> {
 			editor.selectedAnim = animSel.getSelected().getElem();
@@ -454,6 +458,16 @@ public class AnimPanel extends Panel {
 
 	private static VanillaPose getPose0(EditorAnim ea) {
 		if(ea == null)return null;
+		if (ea.type.isStaged()) {
+			String[] nm = ea.displayName.split(":", 2);
+			if (nm.length == 2 && nm[0].equals("p")) {
+				for (VanillaPose p : VanillaPose.VALUES) {
+					if(nm[1].equals(p.name().toLowerCase(Locale.ROOT))) {
+						return p;
+					}
+				}
+			}
+		}
 		IPose pose = ea.getPose();
 		if(pose == null || !(pose instanceof VanillaPose))
 			return null;
@@ -462,6 +476,15 @@ public class AnimPanel extends Panel {
 
 	private static String getPose1(EditorAnim ea) {
 		if(ea == null)return null;
+		if (ea.type.isLayer() || ea.type == AnimationType.GESTURE) {
+			return ea.displayName;
+		}
+		if (ea.type.isStaged()) {
+			String[] nm = ea.displayName.split(":", 2);
+			if (nm.length == 2 && !nm[0].equals("p")) {
+				return nm[1];
+			}
+		}
 		IPose pose = ea.getPose();
 		if(pose == null || !(pose instanceof CustomPose))
 			return null;
@@ -479,5 +502,63 @@ public class AnimPanel extends Panel {
 		h.registerKeybind(Keybinds.ANIM_NEXT_FRAME, editor::animNextFrm);
 		h.registerKeybind(Keybinds.ANIM_NEW_FRAME, this::newFrame);
 		super.keyPressed(event);
+	}
+
+	private void drawAnimInSelector(NamedElement<EditorAnim> elem, int x, int y, int w, int h, boolean hovered, boolean selected) {
+		int bg = gui.getColors().select_background;
+		if(hovered)bg = gui.getColors().popup_background;
+		if(selected || hovered)gui.drawBox(x, y, w, h, bg);
+		int anType = Type.GLOBAL.color;
+		EditorAnim ea = elem.getElem();
+		if (ea != null) {
+			if (ea.type.isStaged()) {
+				String[] nm = ea.displayName.split(":", 2);
+				if (nm.length == 2) {
+					switch (nm[0]) {
+					case "p":
+						for (VanillaPose p : VanillaPose.VALUES) {
+							if(nm[1].equals(p.name().toLowerCase(Locale.ROOT))) {
+								anType = AnimationDisplayData.getFor(p).type.color;
+								break;
+							}
+						}
+						break;
+
+					case "c":
+						anType = Type.CUSTOM.color;
+						break;
+
+					case "g":
+						anType = 0x8888FF;
+						break;
+
+					default:
+						break;
+					}
+				}
+				if (ea.type == AnimationType.SETUP)
+					anType = anType ^ 0xA0A0A0 | 0x808080;
+				else
+					anType = anType ^ 0x00F0A0 | 0x808080;
+			} else if (ea.pose instanceof VanillaPose) {
+				anType = AnimationDisplayData.getFor((VanillaPose) ea.pose).type.color;
+			} else {
+				switch (ea.type) {
+				case GESTURE:
+					anType = 0x8888FF;
+					break;
+				case LAYER:
+					anType = 0xFF88FF;
+					break;
+				case VALUE_LAYER:
+					anType = 0x88FFFF;
+					break;
+				default:
+					anType = Type.CUSTOM.color;
+					break;
+				}
+			}
+		}
+		gui.drawText(x + 3, y + h / 2 - 4, elem.toString(), anType);
 	}
 }

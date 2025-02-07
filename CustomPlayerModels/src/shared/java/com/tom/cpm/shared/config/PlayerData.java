@@ -31,6 +31,7 @@ public class PlayerData {
 	public final Map<ScalingOptions, Float> scale = new EnumMap<>(ScalingOptions.class);
 	public final Map<ScalingOptions, Float> targetScale = new EnumMap<>(ScalingOptions.class);
 	public final EnumSet<ModelEventType> eventSubs = EnumSet.noneOf(ModelEventType.class);
+	public final EnumSet<ModelEventType> selfSubs = EnumSet.noneOf(ModelEventType.class);
 	public byte[] gestureData = new byte[0];
 	public Map<String, ServerCommandAction> animNames = new HashMap<>();
 	public final Map<String, NBTTagCompound> pluginStates = new HashMap<>();

@@ -1181,7 +1181,6 @@
   "bb-label.convertedFromOld": "This project was made using an earlier version of the plugin.\\The plugin data was converted into the new format.",
   "bb-label.error.oldConvertFail": "Failed to convert old project data",
   "bb-label.warn.nonConvertedPartNotSupported": "Root Part %s is not hidden, The cube will be converted.",
-  "bb-label.warn.coloredCubeNotSupported": "Colored cubes not supported: %s",
   "bb-label.warn.copyTransformNotVis": "Elements with Copy Transform won\u0027t show correctly",
   "bb-label.warn.multiple": "%s (%s warnings)",
   "bb-label.warn.rootScaling": "Scaling animations on roots",
@@ -1280,5 +1279,9 @@
   "bb-tooltip.warn.uvDecimalFixerApplied": "Click the %s button to show a list of affected cubes.",
   "bb-label.error.failedToLoadTexture": "Failed to load the image data for texture: %s\\Please restart Blockbench and try again\\Cause: %s",
   "bb-label.openedInBB": "Please click back to the Blockbench tab to continue.",
-  "bb-label.warn.uvDecimalFixer.info": "Your model contains cubes decimal UVs or decimal sizes.\\The decimal UV fixer applied a 16x grid resize to your model.\\You can safely ignore this warning if the model looks correct in CPM.\\See the list of the affected cubes:"
+  "bb-label.warn.uvDecimalFixer.info": "Your model contains cubes decimal UVs or decimal sizes.\\The decimal UV fixer applied a 16x grid resize to your model.\\You can safely ignore this warning if the model looks correct in CPM.\\See the list of the affected cubes:",
+  "label.cpm.pivot": "Pivot Point",
+  "label.cpm.reloadQuestion": "You have edited the texture in the editor.\\Are you sure you want to overwrite it from the image file?",
+  "label.cpm.keybind.pivot": "Pivot Point Tool",
+  "bb-button.recolor.set": "Set Color"
 }

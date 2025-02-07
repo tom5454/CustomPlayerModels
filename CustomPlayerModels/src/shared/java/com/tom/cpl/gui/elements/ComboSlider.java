@@ -68,7 +68,11 @@ public class ComboSlider extends Slider {
 		if(event.isHovered(bounds)) {
 			if(event.btn == 1) {
 				spinner.setValue(getActualValue());
-				spinner.setBounds(new Box(bounds.x, bounds.y + bounds.h - 20, bounds.w, 20));
+				if (bounds.y < 30) {
+					spinner.setBounds(new Box(bounds.x + bounds.w / 2, bounds.y + bounds.h - 20, bounds.w / 2, 20));
+				} else {
+					spinner.setBounds(new Box(bounds.x, bounds.y + bounds.h - 20, bounds.w, 20));
+				}
 				spinner.visible = true;
 				event.consume();
 			}
@@ -77,6 +81,12 @@ public class ComboSlider extends Slider {
 			event.consume();
 		}
 		super.mouseClick(event);
+	}
+
+	@Override
+	public void mouseRelease(MouseEvent event) {
+		if(spinner.visible)spinner.mouseRelease(event);
+		super.mouseRelease(event);
 	}
 
 	@Override
@@ -101,7 +111,11 @@ public class ComboSlider extends Slider {
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
 		if(spinner.visible) {
-			gui.drawText(bounds.x, bounds.y, name, gui.getColors().button_text_color);
+			if (bounds.y < 30) {
+				gui.drawText(bounds.x, bounds.y + bounds.h / 2 - 4, name, gui.getColors().button_text_color);
+			} else {
+				gui.drawText(bounds.x, bounds.y, name, gui.getColors().button_text_color);
+			}
 			spinner.draw(event, partialTicks);
 		}
 		else super.draw(event, partialTicks);

@@ -113,7 +113,6 @@ public class MainWrapper {
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("Integer\\.parseUnsignedInt\\(", "com.tom.cpm.web.client.java.Java.parseUnsignedInt("));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("(\\w+)\\.class.getResourceAsStream\\(", "com.tom.cpm.web.client.java.Java.getResourceAsStream("));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("System\\.nanoTime\\(\\)", "System.currentTimeMillis()"));
-			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("new ThreadPoolExecutor\\([^;]+;", "new com.tom.cpm.web.client.java.AsyncPool();"));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("Byte\\.toUnsignedInt\\(", "com.tom.cpm.web.client.java.Java.toUnsignedInt("));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("\\/\\/\\$\\{fill_resource_map_lqsnlna\\}\\$", resGen));
 			ClassSrcTransformer.addImportTransformRegex("^java\\.nio\\.(\\w+)$", "com.tom.cpm.web.client.java.nio.$1");

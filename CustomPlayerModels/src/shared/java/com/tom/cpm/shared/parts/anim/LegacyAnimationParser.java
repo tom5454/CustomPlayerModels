@@ -78,7 +78,7 @@ public class LegacyAnimationParser {
 			dt.setDef(reg.def);
 			for (Gesture g : gs) {
 				int l = reg.layerToId.get(g);
-				reg.reg.register(new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), g.animation, l, 1, true, g.mustFinish));
+				reg.reg.register(new LayerTrigger(reg.reg, Collections.singleton(VanillaPose.GLOBAL), g.animation, l, 1, true, g.mustFinish));
 				dt.register(g.name, l);
 			}
 			reg.reg.register(dt);
@@ -164,7 +164,7 @@ public class LegacyAnimationParser {
 				}
 				data.setDef(reg.def);
 				reg.reg.register(data);
-				reg.reg.register(new GestureTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, gid, gid, isLoop, mustFinish));
+				reg.reg.register(new GestureTrigger(reg.reg, Collections.singleton(VanillaPose.GLOBAL), animation, gid, gid, isLoop, mustFinish));
 			}
 			break;
 
@@ -179,7 +179,7 @@ public class LegacyAnimationParser {
 				dt.hidden = hidden;
 				dt.setDef(reg.def);
 				reg.reg.register(dt);
-				reg.reg.register(new LayerTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, 1, true, mustFinish));
+				reg.reg.register(new LayerTrigger(reg.reg, Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, 1, true, mustFinish));
 			}
 			break;
 
@@ -190,11 +190,11 @@ public class LegacyAnimationParser {
 				dt.command = command;
 				dt.isProperty = isProperty;
 				dt.parameter = reg.layerToId.get(this);
-				dt.maxValue = maxValue == 0 ? 255 : maxValue;
+				dt.maxValue = maxValue == 0 ? 255 : Byte.toUnsignedInt(maxValue);
 				dt.hidden = hidden;
 				dt.setDef(reg.def);
 				reg.reg.register(dt);
-				reg.reg.register(new ValueTrigger(Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, maxValue == 0 ? true : interpolateVal));
+				reg.reg.register(new ValueTrigger(reg.reg, Collections.singleton(VanillaPose.GLOBAL), animation, dt.parameter, maxValue == 0 ? true : interpolateVal));
 			}
 			break;
 
@@ -232,6 +232,7 @@ public class LegacyAnimationParser {
 						animations.computeIfPresent(pose, (p, an) -> {
 							boolean mf = mustFinishPoses.contains(p);
 							an.forEach(a -> san.addPlay(a, mf));
+							if (mf)mustFinishPoses.remove(p);//Disable must finish as the staged handler will apply it
 							return san.getAll();
 						});
 					}
@@ -241,6 +242,7 @@ public class LegacyAnimationParser {
 					gesturesMap.computeIfPresent(nm[1], (k, gs) -> {
 						gs.animation.forEach(a -> san.addPlay(a, gs.mustFinish));
 						gs.animation = san.getAll();
+						gs.mustFinish = false;//Disable must finish as the staged handler will apply it
 						return gs;
 					});
 					break;
@@ -276,7 +278,6 @@ public class LegacyAnimationParser {
 	}
 
 	public void register() {
-		AnimationRegistry reg = def.getAnimations();
 		finishLoading();
 		Map<String, Group> groups = new HashMap<>();
 
@@ -303,7 +304,7 @@ public class LegacyAnimationParser {
 		layerToId.forEach((g, i) -> sync[i] = g.defVal);
 		reg.setParams(new ParameterDetails(sync, new byte[0]));
 		animations.forEach((p, an) -> {
-			AnimationTrigger t = new AnimationTrigger(Collections.singleton(p), p instanceof VanillaPose ? (VanillaPose) p : null, an, true, mustFinishPoses.contains(p));
+			AnimationTrigger t = new AnimationTrigger(reg, Collections.singleton(p), p instanceof VanillaPose ? (VanillaPose) p : null, an, true, mustFinishPoses.contains(p));
 			reg.register(t);
 		});
 	}

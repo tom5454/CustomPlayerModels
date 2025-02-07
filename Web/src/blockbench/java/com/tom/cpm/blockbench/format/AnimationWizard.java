@@ -12,7 +12,6 @@ import com.tom.cpm.shared.animation.VanillaPose;
 import com.tom.cpm.web.client.java.JsBuilder;
 import com.tom.cpm.web.client.util.I18n;
 
-import elemental2.dom.DomGlobal;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import jsinterop.base.Js;
@@ -105,7 +104,6 @@ public class AnimationWizard {
 		Dialog.link(dctr.form);
 
 		Consumer<String> update = t -> {
-			DomGlobal.console.log(prop);
 			prop.getBar().toggle(false);
 			group.getBar().toggle(false);
 			layerDefaultF.getBar().toggle(false);

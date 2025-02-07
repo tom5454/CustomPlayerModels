@@ -421,6 +421,7 @@ public class EditorGui extends Frame {
 			Generators.setupTemplateModel(editor);
 			ETextures skin = editor.textures.get(TextureSheetType.SKIN);
 			skin.setImage(new Image(64, 64));
+			skin.setChangedLocally(false);
 			skin.markDirty();
 			this.editor.updateGui();
 		}, null)));

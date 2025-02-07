@@ -2,16 +2,10 @@ package com.tom.cpm.blockbench;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
-import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.ItemSlot;
-import com.tom.cpm.blockbench.convert.BlockbenchImport;
-import com.tom.cpm.blockbench.convert.BlockbenchImport.UVMul;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
 import com.tom.cpm.blockbench.ee.EmbeddedEditorHandler;
 import com.tom.cpm.blockbench.format.AnimationWizard;
@@ -19,21 +13,16 @@ import com.tom.cpm.blockbench.format.CPMCodec;
 import com.tom.cpm.blockbench.proxy.Action;
 import com.tom.cpm.blockbench.proxy.Action.Toggle;
 import com.tom.cpm.blockbench.proxy.Animation;
-import com.tom.cpm.blockbench.proxy.Animation.GeneralAnimator;
-import com.tom.cpm.blockbench.proxy.BoneAnimator;
-import com.tom.cpm.blockbench.proxy.Canvas;
 import com.tom.cpm.blockbench.proxy.Cube;
 import com.tom.cpm.blockbench.proxy.Cube.CubeProperties;
+import com.tom.cpm.blockbench.proxy.Dialog;
 import com.tom.cpm.blockbench.proxy.Group;
 import com.tom.cpm.blockbench.proxy.Group.GroupProperties;
 import com.tom.cpm.blockbench.proxy.Interface;
-import com.tom.cpm.blockbench.proxy.Keyframe;
-import com.tom.cpm.blockbench.proxy.KeyframeDataPoint;
 import com.tom.cpm.blockbench.proxy.MenuBar;
 import com.tom.cpm.blockbench.proxy.MenuBar.BarItem;
 import com.tom.cpm.blockbench.proxy.MenuBar.BarMenu;
 import com.tom.cpm.blockbench.proxy.MenuBar.BarMenuInit;
-import com.tom.cpm.blockbench.proxy.Modes;
 import com.tom.cpm.blockbench.proxy.Outliner;
 import com.tom.cpm.blockbench.proxy.OutlinerElement;
 import com.tom.cpm.blockbench.proxy.Plugin;
@@ -41,7 +30,6 @@ import com.tom.cpm.blockbench.proxy.Plugin.Plugins;
 import com.tom.cpm.blockbench.proxy.Project;
 import com.tom.cpm.blockbench.proxy.Texture;
 import com.tom.cpm.blockbench.proxy.Texture.TextureProperties;
-import com.tom.cpm.blockbench.proxy.Timeline;
 import com.tom.cpm.blockbench.proxy.Toolbars;
 import com.tom.cpm.blockbench.proxy.Undo;
 import com.tom.cpm.blockbench.proxy.Undo.UndoData;
@@ -66,14 +54,10 @@ import com.tom.cpm.web.client.resources.Resources;
 import com.tom.cpm.web.client.util.I18n;
 import com.tom.ugwt.client.JsArrayE;
 
-import elemental2.dom.DomGlobal;
-import elemental2.dom.Event;
-import elemental2.dom.HTMLDivElement;
-import elemental2.dom.HTMLInputElement;
 import jsinterop.base.Js;
 
 public class BBActions {
-	public static Toggle glowButton, hiddenButton;
+	public static Toggle glowButton, hiddenButton, recolorButton;
 
 	public static void load() {
 		List<Object> cpmMenu = new ArrayList<>();
@@ -188,13 +172,80 @@ public class BBActions {
 					Cube cube = (Cube) Outliner.selected[0];
 					Undo.initEdit(UndoData.make(cube));
 					cube.glow = v;
-					//Cube.preview_controller.updateGeometry(cube);
+					Cube.preview_controller.updateGeometry(cube);
 					Undo.finishEdit(I18n.format("action.cpm.switch", I18n.get("label.cpm.glow")), UndoData.make(cube));
 				}
 			};
 			glowButton = new Toggle("cpm_glow", a);
 			cpmMenu.add(glowButton);
 			PluginStart.cleanup.add(glowButton::delete);
+		}
+
+		{
+			Action.ToggleProperties a = new Action.ToggleProperties();
+			a.name = I18n.get("label.cpm.recolor");
+			a.description = "";
+			a.condition = new Action.Condition();
+			a.condition.method = c -> Outliner.selected.length == 1 && Outliner.selected[0] instanceof Cube && !((Cube) Outliner.selected[0]).isColorCube();
+			a.onChange = v -> {
+				if(Outliner.selected.length == 1 && Outliner.selected[0] instanceof Cube) {
+					Cube cube = (Cube) Outliner.selected[0];
+					Undo.initEdit(UndoData.make(cube));
+					cube.toggleRecolor();
+					Cube.preview_controller.updateGeometry(cube);
+					Undo.finishEdit(I18n.format("action.cpm.switch", I18n.get("label.cpm.recolor")), UndoData.make(cube));
+				}
+			};
+			recolorButton = new Toggle("cpm_recolor", a);
+			cpmMenu.add(recolorButton);
+			PluginStart.cleanup.add(recolorButton::delete);
+		}
+
+		{
+			Action.ActionProperties a = new Action.ActionProperties();
+			a.name = I18n.get("bb-button.recolor.set");
+			a.icon = "format_paint";
+			a.condition = new Action.Condition();
+			a.condition.method = c -> Outliner.selected.length == 1 && Outliner.selected[0] instanceof Cube && ((Cube) Outliner.selected[0]).canRecolor();
+			a.click = e -> {
+				Dialog.DialogProperties dctr = new Dialog.DialogProperties();
+				dctr.id = "cpm_pick_color";
+				dctr.title = I18n.get("label.cpm.changeColor");
+				dctr.lines = new String[] {I18n.formatBr("tooltip.cpm.recolor.colorbtn"), "<br><input type='text' id='cpm_recolor_picker' />"};
+				dctr.singleButton = true;
+				dctr.buttons = new String[] {I18n.get("button.cpm.ok"), I18n.get("button.cpm.cancel")};
+				int[] newColor = new int[] {-1};
+				dctr.onConfirm = e_ -> {
+					Cube cube = (Cube) Outliner.selected[0];
+					Undo.initEdit(UndoData.make(cube));
+					cube.setRecolor(newColor[0]);
+					Cube.preview_controller.updateGeometry(cube);
+					Undo.finishEdit(I18n.format("action.cpm.set", I18n.get("label.cpm.recolor")), UndoData.make(cube));
+
+					return true;
+				};
+				dctr.onOpen = () -> {
+					Cube cube = (Cube) Outliner.selected[0];
+					int color = cube.getRecolor();
+					newColor[0] = color;
+
+					SpectrumInit si = new SpectrumInit();
+					si.preferredFormat = "hex";
+					si.showAlpha = false;
+					si.showInput = true;
+					si.color = String.format("#%06X", color);
+					si.change = si.hide = si.move = ci -> {
+						String c = ci.toHexString();
+						newColor[0] = Integer.valueOf(c.substring(1, 7), 16);
+					};
+
+					JQueryNode.jq("#cpm_recolor_picker").spectrum(si);
+				};
+				new Dialog(dctr).show();
+			};
+			Action act = new Action("cpm_recolor_set", a);
+			PluginStart.cleanup.add(act::delete);
+			cpmMenu.add(act);
 		}
 
 		{
@@ -296,139 +347,6 @@ public class BBActions {
 				Animation.menu.structure.remove(a);
 			});
 		}
-
-		PluginStart.addEventListener("update_keyframe_selection", __ -> {
-			JQueryNode v = JQueryNode.jq("#keyframe_bar_cpm_visible");
-			if(v.length != 0) {
-				JQueryNode cb = v.find("#keyframe_bar_cpm_visible_cb");
-				if(cb.length == 0) {
-					HTMLDivElement el = (HTMLDivElement) v.getAt(0);
-					HTMLInputElement inputElement = (HTMLInputElement) el.querySelector("input[type=text]");
-					HTMLInputElement checkboxElement = (HTMLInputElement) DomGlobal.document.createElement("input");
-					checkboxElement.type = "checkbox";
-					checkboxElement.checked = "true".equalsIgnoreCase(inputElement.value);
-					checkboxElement.id = "keyframe_bar_cpm_visible_cb";
-					checkboxElement.addEventListener("change", event -> {
-						inputElement.value = Boolean.toString(checkboxElement.checked);
-						inputElement.dispatchEvent(new Event("input"));
-					});
-					inputElement.style.display = "none";
-					el.append(checkboxElement);
-				} else {
-					HTMLInputElement inputElement = (HTMLInputElement) v.find("input[type=text]").getAt(0);
-					HTMLInputElement checkboxElement = (HTMLInputElement) cb.getAt(0);
-					checkboxElement.checked = "true".equalsIgnoreCase(inputElement.value);
-				}
-			}
-			v = JQueryNode.jq("#keyframe_bar_cpm_color_picker_place");
-			if(v.length != 0) {
-				KeyframeDataPoint kdp = Keyframe.selected.getAt(0).data_points.getAt(0);
-				SpectrumInit si = new SpectrumInit();
-				si.preferredFormat = "hex";
-				si.showAlpha = false;
-				si.showInput = true;
-				si.color = String.format("#%02X%02X%02X", (int) kdp.x, (int) kdp.y, (int) kdp.z);
-				si.change = si.hide = si.move = ci -> {
-					String c = ci.toHexString();
-					kdp.x = Integer.valueOf(c.substring(1, 3), 16);
-					kdp.y = Integer.valueOf(c.substring(3, 5), 16);
-					kdp.z = Integer.valueOf(c.substring(5, 7), 16);
-				};
-				v.find("input[type=text]").spectrum(si);
-
-				JQueryNode.jq("#keyframe_bar_x > label").text("R");
-				JQueryNode.jq("#keyframe_bar_y > label").text("G");
-				JQueryNode.jq("#keyframe_bar_z > label").text("B");
-			} else {
-				JQueryNode.jq("#keyframe_bar_x > label").text("X");
-				JQueryNode.jq("#keyframe_bar_y > label").text("Y");
-				JQueryNode.jq("#keyframe_bar_z > label").text("Z");
-			}
-		});
-
-		PluginStart.addEventListener("display_animation_frame", __ -> {
-			if (Project.format == CPMCodec.format) {
-				if (Modes.animate != null) {
-					Map<String, BoneAnimator> anims = new HashMap<>();
-					Arrays.stream(Animation.all).
-					filter(a -> a.playing && !(a.loop.equals("once") && Timeline.time > a.length && a.length > 0)).
-					sorted(Comparator.comparingInt(Animation::getPriority)).forEach(a -> {
-						a.animators.forEach(k -> {
-							GeneralAnimator ga = a.animators.get(k);
-							if(ga instanceof BoneAnimator) {
-								BoneAnimator ba = (BoneAnimator) ga;
-								if(!ba.hasVisible())return;
-								anims.put(k, ba);
-							}
-						});
-					});
-
-					for (int i = 0; i < Group.all.length; i++) {
-						Group g = Group.all[i];
-						if (g.parent == Group.ROOT)
-							g.currentVisible = true;
-						else
-							g.currentVisible = Animation.interpolateVisible(anims.get(g.uuid), Timeline.time, !g.hidden);
-
-						/*if (g.copyTransform != null && !g.copyTransform.isEmpty()) {//TODO
-							JsonMap s = JsonUtil.fromJson(g.copyTransform);
-							Group from = Group.uuids.get((String) s.get("uuid"));
-							if (from != null) {
-								Vec3f addPos = new Vec3f();
-								Vec3f addRot = new Vec3f();
-								if(from.parent == Group.ROOT) {
-									VanillaModelPart part = from.parent.getRootType();
-									if(part != null) {
-
-									}
-								}
-								if(s.getBoolean("px", false))g.mesh.position.x = from.mesh.position.x + addPos.x;
-								if(s.getBoolean("py", false))g.mesh.position.y = from.mesh.position.y - addPos.y;
-								if(s.getBoolean("pz", false))g.mesh.position.z = from.mesh.position.z - addPos.z;
-								if(s.getBoolean("rx", false))g.mesh.rotation.x = from.mesh.rotation.x + (float) Math.toRadians(addRot.x);
-								if(s.getBoolean("ry", false))g.mesh.rotation.y = from.mesh.rotation.y + (float) Math.toRadians(addRot.y);
-								if(s.getBoolean("rz", false))g.mesh.rotation.z = from.mesh.rotation.z - (float) Math.toRadians(addRot.z);
-								if(s.getBoolean("sx", false))g.mesh.scale.x = from.mesh.scale.x;
-								if(s.getBoolean("sy", false))g.mesh.scale.y = from.mesh.scale.y;
-								if(s.getBoolean("sz", false))g.mesh.scale.z = from.mesh.scale.z;
-								if(s.getBoolean("cv", false))g.currentVisible = from.currentVisible;
-							}
-						}*/
-					}
-
-					for (int i = 0; i < Cube.all.length; i++) {
-						Cube c = Cube.all.getAt(i);
-						if(!c.animatorInit) {
-							c.animatorInit = true;
-							c.defaultVisible = c.visibility;
-						}
-					}
-
-					for (int i = 0; i < Group.all.length; i++) {
-						Group g = Group.all[i];
-						if(g.parent != Group.ROOT)continue;
-						g.applyVisible(true);
-					}
-				} else {
-					for (int i = 0; i < Group.all.length; i++) {
-						Group g = Group.all[i];
-						if(g.animatorInit) {
-							g.animatorInit = false;
-							g.visibility = g.defaultVisible;
-						}
-					}
-
-					for (int i = 0; i < Cube.all.length; i++) {
-						Cube c = Cube.all.getAt(i);
-						if(c.animatorInit) {
-							c.animatorInit = false;
-							c.visibility = c.defaultVisible;
-						}
-					}
-				}
-				Canvas.updateVisibility();
-			}
-		});
 
 		Interface.updateInterface();
 	}
@@ -577,9 +495,12 @@ public class BBActions {
 				tex = new Texture(txp);
 				tex.fromDataURL("data:image/png;base64," + Resources.getResource("assets/cpm/textures/template/" + tst.name().toLowerCase(Locale.ROOT) + ".png"));
 				tex.add(false);
+				tex.uv_width = tst.getDefSize().x;
+				tex.uv_height = tst.getDefSize().y;
 				newTex.add(tex);
 			}
-			makeCubeTex(cube, pv.getUV(), tst == TextureSheetType.SKIN ? new Vec2i(Project.texture_width, Project.texture_height) : tst.getDefSize());
+			cube.uv_offset = JsVec2.make(pv.getUV());
+			cube.box_uv = true;
 			cube.addTo(gr).init();
 			newParts.add(cube);
 			cube.applyTexture(tex, true);
@@ -588,19 +509,6 @@ public class BBActions {
 		udt.elements = newParts.toArray(new OutlinerElement[0]);
 		udt.textures = newTex.toArray(new Texture[0]);
 		Undo.finishEdit(I18n.format("action.cpm.add", I18n.format("action.cpm.root")), udt);
-	}
-
-	private static void makeCubeTex(Cube cube, Vec2i uv, Vec2i sheet) {
-		cube.uv_offset = JsVec2.make(uv);
-		if(sheet.x != Project.texture_width || sheet.y != Project.texture_height) {
-			cube.box_uv = false;
-			UVMul m = new UVMul();
-			m.x = Project.texture_width / (float) sheet.x;
-			m.y = Project.texture_height / (float) sheet.y;
-			BlockbenchImport.boxToPFUV(cube, 1, 1, 1, 1, m);
-		} else {
-			cube.box_uv = true;
-		}
 	}
 
 	public static enum BBGroups {

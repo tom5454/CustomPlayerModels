@@ -18,8 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -35,6 +33,7 @@ import com.tom.cpl.text.FormatText;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.LocalizedIOException;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.MinecraftObjectHolder;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.config.ResourceLoader;
@@ -48,6 +47,7 @@ import com.tom.cpm.shared.io.IOHelper;
 import com.tom.cpm.shared.io.SkinDataInputStream;
 import com.tom.cpm.shared.loaders.GistResourceLoader;
 import com.tom.cpm.shared.loaders.GithubRepoResourceLoader;
+import com.tom.cpm.shared.loaders.ModelsCDNResourceLoader;
 import com.tom.cpm.shared.loaders.PasteResourceLoader;
 import com.tom.cpm.shared.loaders.PastebinResourceLoader;
 import com.tom.cpm.shared.model.SkinType;
@@ -57,21 +57,24 @@ import com.tom.cpm.shared.parts.ModelPartSkinType;
 import com.tom.cpm.shared.parts.ModelPartType;
 import com.tom.cpm.shared.skin.TextureType;
 import com.tom.cpm.shared.util.Log;
+import com.tom.cpm.shared.util.ModelLoadingPool;
 
 public class ModelDefinitionLoader<GP> {
 	public static final String PLAYER_UNIQUE = "player";
 	public static final String SKULL_UNIQUE = "skull";
-	public static final Executor THREAD_POOL = new ThreadPoolExecutor(0, 2, 1L, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
+	public static final Executor THREAD_POOL = ModelLoadingPool.workerPool();
 	private Function<GP, Player<?>> playerFactory;
 	private Function<GP, UUID> getUUID;
 	private Function<GP, String> getName;
-	private final LoadingCache<Key, Player<?>> cache = CacheBuilder.newBuilder().expireAfterAccess(15L, TimeUnit.SECONDS).removalListener(new RemovalListener<Key, Player<?>>() {
+	private final LoadingCache<Key, Player<?>> cache = CacheBuilder.newBuilder().
+			expireAfterAccess(MinecraftObjectHolder.DEBUGGING ? 10000L : 15L, TimeUnit.SECONDS).
+			removalListener(new RemovalListener<Key, Player<?>>() {
 
-		@Override
-		public void onRemoval(RemovalNotification<ModelDefinitionLoader<GP>.Key, Player<?>> notification) {
-			notification.getValue().cleanup();
-		}
-	}).build(CacheLoader.from(this::loadPlayer));
+				@Override
+				public void onRemoval(RemovalNotification<ModelDefinitionLoader<GP>.Key, Player<?>> notification) {
+					notification.getValue().cleanup();
+				}
+			}).build(CacheLoader.from(this::loadPlayer));
 
 	private Player<?> loadPlayer(Key key) {
 		Player<?> player = playerFactory.apply(key.profile);
@@ -110,6 +113,7 @@ public class ModelDefinitionLoader<GP> {
 		LOADERS.put("gh", new GithubRepoResourceLoader());
 		LOADERS.put("p", new PasteResourceLoader());
 		LOADERS.put("pb", new PastebinResourceLoader());
+		LOADERS.put("ms", new ModelsCDNResourceLoader());
 		LOADERS.put("local", new ResourceLoader() {
 
 			@Override

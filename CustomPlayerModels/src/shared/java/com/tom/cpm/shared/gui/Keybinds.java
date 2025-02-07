@@ -33,6 +33,7 @@ public class Keybinds {
 	public static final Keybind TOGGLE_LOCK_ACTION = new Keybind("toggleLock", "l");
 	public static final Keybind FIND_ELEMENT = new Keybind("findElement", "f", Keybind.CTRL);
 	public static final Keybind RELOAD_TEXTURE = new Keybind("reloadTexture");
+	public static final Keybind PIVOT = new Keybind("pivot", "i");
 
 	public static final Keybind COPY_ANIM_FRAME = new Keybind("copyAnimFrame", "c", Keybind.ALT);
 	public static final Keybind PASTE_ANIM_FRAME = new Keybind("pasteAnimFrame", "v", Keybind.ALT);
@@ -56,8 +57,9 @@ public class Keybinds {
 			"3dView",
 			ZOOM_IN_CAMERA, ZOOM_OUT_CAMERA, RESET_CAMERA, FOCUS_CAMERA,
 			"editor",
-			MOUSE_MARKER, OFFSET, ROTATION, POSITION, SIZE, SAVE, UNDO, REDO, NEW_PART, DELETE, TOGGLE_GIZMO, RUN_QUICK_ACTION,
-			TOGGLE_VIS_ACTION, TOGGLE_HIDDEN_ACTION, TOGGLE_LOCK_ACTION, FIND_ELEMENT, RELOAD_TEXTURE,
+			MOUSE_MARKER, OFFSET, ROTATION, POSITION, SIZE, PIVOT, SAVE, UNDO, REDO, NEW_PART, DELETE,
+			TOGGLE_GIZMO, RUN_QUICK_ACTION, TOGGLE_VIS_ACTION, TOGGLE_HIDDEN_ACTION, TOGGLE_LOCK_ACTION,
+			FIND_ELEMENT, RELOAD_TEXTURE,
 			"treeNav",
 			TREE_PREV, TREE_NEXT, TREE_UP, TREE_DOWN,
 			"animAct",
@@ -70,5 +72,6 @@ public class Keybinds {
 		EDITOR_TOOL_KBS.put(VecType.POSITION, POSITION);
 		EDITOR_TOOL_KBS.put(VecType.ROTATION, ROTATION);
 		EDITOR_TOOL_KBS.put(VecType.SIZE, SIZE);
+		EDITOR_TOOL_KBS.put(VecType.PIVOT, PIVOT);
 	}
 }

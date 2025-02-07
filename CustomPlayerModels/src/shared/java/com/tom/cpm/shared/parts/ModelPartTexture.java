@@ -28,7 +28,7 @@ public class ModelPartTexture implements IModelPart, IResolvedModelPart {
 	}
 
 	@Override
-	public void apply(ModelDefinition def) {
+	public void preApply(ModelDefinition def) {
 		def.setTexture(texType, image);
 	}
 

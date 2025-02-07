@@ -77,6 +77,8 @@ public class CPMCodec {
 		ctr.uv_rotation = true;
 		ctr.animation_mode = true;
 		ctr.animation_files = true;
+		ctr.per_texture_uv_size = true;
+		ctr.render_sides = "double";
 		if(MinecraftObjectHolder.DEBUGGING) {
 			//ctr.animation_controllers = true;
 			//ctr.bone_binding_expression = true;
@@ -172,7 +174,9 @@ public class CPMCodec {
 			if(Global.getFormat() == CPMCodec.format) {
 				if(Outliner.selected.length == 1 && Outliner.selected[0] instanceof Cube) {
 					BBActions.glowButton.value = ((Cube)Outliner.selected[0]).glow;
+					BBActions.recolorButton.value = ((Cube)Outliner.selected[0]).getRecolor() != -1;
 					BBActions.glowButton.updateEnabledState();
+					BBActions.recolorButton.updateEnabledState();
 				}
 				if(Project.selected_groups != null && Project.selected_groups.length > 0) {
 					BBActions.hiddenButton.value = Project.selected_groups.getAt(0).hidden;
@@ -181,14 +185,6 @@ public class CPMCodec {
 			}
 		});
 		PluginStart.addEventListener(Codecs.project, "parsed", __ -> OldPluginConvert.convert());
-
-		/*PluginStart.addEventListener(Cube.preview_controller, "update_geometry", dt -> {
-			OutlinerElement elem = NodePreviewEvent.getElement(dt);
-			if(elem instanceof Cube) {
-				Cube c = (Cube) elem;
-				c.mesh.material = c.glow ? c.mesh.material.getGlow() : c.mesh.material.getNormal();
-			}
-		});*/
 	}
 
 	public static Property createProperty(Clazz clz, Type type, String id, String label, @DoNotAutobox Object def, boolean hidden) {

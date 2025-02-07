@@ -12,8 +12,6 @@ import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
-import com.tom.cpl.util.NamedElement;
-import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.editor.CopyTransformEffect;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
@@ -27,13 +25,15 @@ public class CopyTransformSettingsPopup extends PopupPanel {
 
 		FlowLayout layout = new FlowLayout(this, 4, 1);
 
-		List<ModelElement> elems = new ArrayList<>();
-		Editor.walkElements(e.elements, elems::add);
-		NameMapper<ModelElement> mapper = new NameMapper<>(elems, ModelElement::getName);
-		ListPicker<NamedElement<ModelElement>> picker = new ListPicker<>(frm, mapper.asList());
-		mapper.setSetter(picker::setSelected);
-		if(cte.from != null)mapper.setValue(cte.from);
-
+		List<CTOrigin> elems = new ArrayList<>();
+		walkElements(0, e.elements, elems);
+		ListPicker<CTOrigin> picker = new ListPicker<>(frm, elems);
+		if(cte.from != null)picker.setSelected(elems.stream().filter(c -> c.elem == cte.from).findFirst().orElse(null));
+		picker.setListLoader(l -> {
+			//l.setComparator((a, b) -> 0);
+			l.setRenderer(CTOrigin::draw);
+			l.setGetWidth(CTOrigin::width);
+		});
 		picker.setBounds(new Box(5, 0, 280, 20));
 		addElement(picker);
 
@@ -71,6 +71,48 @@ public class CopyTransformSettingsPopup extends PopupPanel {
 		addElement(ok);
 
 		layout.reflow();
+	}
+
+	private class CTOrigin {
+		private ModelElement elem;
+		private int d;
+
+		public CTOrigin(ModelElement elem, int d) {
+			this.elem = elem;
+			this.d = d;
+		}
+
+		public ModelElement getElem() {
+			return elem;
+		}
+
+		@Override
+		public String toString() {
+			return elem.getName();
+		}
+
+		private void draw(int x, int y, int w, int h, boolean hovered, boolean selected) {
+			int bg = gui.getColors().select_background;
+			if(hovered)bg = gui.getColors().popup_background;
+			if(selected || hovered)gui.drawBox(x, y, w, h, bg);
+			int c = elem.textColor(gui);
+			if (c == 0) {
+				c = gui.getColors().button_text_color;
+				if(hovered)c = gui.getColors().button_text_hover;
+			}
+			gui.drawText(x + 3, y + h / 2 - 4, toString(), c);
+		}
+
+		private int width() {
+			return gui.textWidth(elem.getName());
+		}
+	}
+
+	private void walkElements(int d, List<ModelElement> elem, List<CTOrigin> elems) {
+		for (ModelElement modelElement : elem) {
+			elems.add(new CTOrigin(modelElement, d));
+			walkElements(d + 1, modelElement.children, elems);
+		}
 	}
 
 	private void createPanel(String name, boolean[] v) {

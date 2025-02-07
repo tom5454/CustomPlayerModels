@@ -364,8 +364,9 @@ public class ModelPartAnimation implements IModelPart, IResolvedModelPart {
 				rd.buttonHidden = ea.hidden;
 			}
 			if(ea.isLayer() && !ea.command)rd.isProperty = ea.isProperty;
-			if(ea.group != null && !ea.group.isEmpty() && !ea.command)rd.group = ea.group;
+			if(ea.type == AnimationType.LAYER && ea.group != null && !ea.group.isEmpty() && !ea.command)rd.group = ea.group;
 			rd.it = ea.intType;
+			rd.finish = ea.mustFinish;
 			for (int i = 0; i < cs; i++) {
 				ModelElement elem = elems.get(i);
 				if(!allElems.contains(elem))continue;
