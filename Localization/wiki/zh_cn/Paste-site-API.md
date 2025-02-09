@@ -52,7 +52,7 @@ SHA-1 哈希值:
 然后将结果字符串化为十六进制数。
 Java示例代码：
 ```java
-	byte[] mojKey = Base64.getDecoder().decode(key);//key string from api
+	byte[] mojKey = Base64.getDecoder().decode(key); // 来自 API 的密钥字符串
 	// SHA-1 散列所有数据
 	byte[] mojangKey = digestData("tom5454-paste".getBytes(), session.getBytes(), mojKey);
 	String serverId = new BigInteger(mojangKey).toString(16);

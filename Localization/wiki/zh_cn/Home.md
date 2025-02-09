@@ -15,7 +15,7 @@
 <a name="loading-your-custom-model"/>
 
 ## 加载您的自定义定制模型
-要加载自定义模型，您必须[将模型导出为皮肤文件](https://github.com/tom5454/CustomPlayerModels/wiki/Exporting)并将其上传为您的 Minecraft 皮肤。 Mod将会吧模型写入到皮肤文件上未使用的空间。
+要加载自定义模型，您必须[将模型导出为皮肤文件](https://github.com/tom5454/CustomPlayerModels/wiki/Exporting)并将其上传为您的 Minecraft 模组将会吧模型写入到皮肤文件上未使用的空间。
 
 
 <a name="developing-an-addon"/>
