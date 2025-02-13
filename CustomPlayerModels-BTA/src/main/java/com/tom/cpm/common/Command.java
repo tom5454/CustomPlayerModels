@@ -13,10 +13,9 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import com.tom.cpl.command.BrigadierCommandHandler;
 import com.tom.cpl.text.IText;
 
-public class Command extends BrigadierCommandHandler<CommandSource> {
+public class Command extends BrigadierBTACommandHandler<CommandSource> {
 
 	public Command(CommandDispatcher<CommandSource> dispatcher, boolean client) {
 		super(dispatcher, client);
@@ -39,7 +38,7 @@ public class Command extends BrigadierCommandHandler<CommandSource> {
 
 	@Override
 	protected ArgumentType<?> player() {
-		return ArgumentTypeEntity.player();
+		return ArgumentTypeEntity.username();
 	}
 
 	@Override

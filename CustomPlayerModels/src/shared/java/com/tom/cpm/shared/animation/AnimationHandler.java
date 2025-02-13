@@ -47,9 +47,10 @@ public class AnimationHandler {
 				long currentStep = (currentTime - a.currentStart);
 				a.currentAnimation.animate(a.getTime(state, currentStep), player.get(), mode);
 
-				if(!a.loop && currentStep > a.currentAnimation.getDuration(mode)) {
+				if(!a.loop && currentStep / a.currentAnimation.getDuration(mode) != a.lastFrame / a.currentAnimation.getDuration(mode)) {
 					a.finished = true;
 				}
+				a.lastFrame = currentStep;
 			}
 		}
 
@@ -87,7 +88,7 @@ public class AnimationHandler {
 	private class PlayingAnim {
 		private IAnimation currentAnimation;
 		private AnimationTrigger trigger;
-		private long currentStart;
+		private long currentStart, lastFrame;
 		private boolean loop, finished, mustFinish;
 
 		public PlayingAnim(NextAnim anim, long currentStart) {

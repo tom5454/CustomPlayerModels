@@ -1,5 +1,6 @@
 package com.tom.cpm.mixin.client;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,12 +10,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.render.ImageParser;
+import net.minecraft.client.render.camera.EntityCamera;
 import net.minecraft.client.render.entity.MobRenderer;
 import net.minecraft.client.render.entity.MobRendererPlayer;
 import net.minecraft.client.render.model.ModelBase;
 import net.minecraft.client.render.model.ModelBiped;
+import net.minecraft.client.render.model.ModelPlayer;
 import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.core.entity.player.Player;
+import net.minecraft.core.player.gamemode.Gamemode;
 
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.RetroGL;
@@ -31,12 +35,15 @@ public class PlayerEntityRendererMixin extends MobRenderer {
 	public @Shadow ModelBiped modelBipedMain;
 	public @Shadow ModelBiped modelArmorChestplate;
 	public @Shadow ModelBiped modelArmor;
+	private @Shadow @Final ModelPlayer modelThick;
+	private @Shadow @Final ModelPlayer modelSlim;
 
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/model/ModelBiped;onGround:F"), method = "drawFirstPersonHand(Lnet/minecraft/core/entity/player/Player;Z)V")
 	public void onHandPre(Player player, boolean isLeft, CallbackInfo cbi) {
 		RetroGL.renderCallLoc = 0;
-		CustomPlayerModelsClient.INSTANCE.manager.bindHand(Minecraft.INSTANCE.thePlayer, null, modelBipedMain);
-		CustomPlayerModelsClient.INSTANCE.manager.bindSkin(modelBipedMain, TextureSheetType.SKIN);
+		ModelBiped model = player.slimModel ? this.modelSlim : this.modelThick;
+		CustomPlayerModelsClient.INSTANCE.manager.bindHand(Minecraft.INSTANCE.thePlayer, null, model);
+		CustomPlayerModelsClient.INSTANCE.manager.bindSkin(model, TextureSheetType.SKIN);
 	}
 
 	@Inject(at = @At(value = "RETURN"), method = "drawFirstPersonHand(Lnet/minecraft/core/entity/player/Player;Z)V")
@@ -45,8 +52,9 @@ public class PlayerEntityRendererMixin extends MobRenderer {
 	}
 
 	@Inject(at = @At(value = "HEAD"), method = "render(Lnet/minecraft/client/render/tessellator/Tessellator;Lnet/minecraft/core/entity/player/Player;DDDFF)V")
-	public void onRenderPre(Tessellator tessellator, Player arg, double d, double e, double f, float g, float h, CallbackInfo cbi) {
-		CustomPlayerModelsClient.INSTANCE.playerRenderPre((MobRendererPlayer) (Object) this, arg);
+	public void onRenderPre(Tessellator tessellator, Player player, double d, double e, double f, float g, float h, CallbackInfo cbi) {
+		ModelBiped model = player.slimModel ? this.modelSlim : this.modelThick;
+		CustomPlayerModelsClient.INSTANCE.playerRenderPre((MobRendererPlayer) (Object) this, player, model);
 	}
 
 	@Inject(at = @At(value = "RETURN"), method = "render(Lnet/minecraft/client/render/tessellator/Tessellator;Lnet/minecraft/core/entity/player/Player;DDDFF)V")
@@ -70,10 +78,23 @@ public class PlayerEntityRendererMixin extends MobRenderer {
 		return bindDownloadableTexture(string, string2, imageParser);
 	}
 
-	/*@Inject(at = @At("HEAD"), method = "renderSpecials(Lnet/minecraft/client/render/tessellator/Tessellator;Lnet/minecraft/core/entity/player/Player;DDD)V", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "renderSpecials(Lnet/minecraft/client/render/tessellator/Tessellator;Lnet/minecraft/core/entity/player/Player;DDD)V", cancellable = true)
 	protected void onRenderName(Tessellator tessellator, Player entity, double x, double y, double z, CallbackInfo cbi) {
-		if (CustomPlayerModelsClient.INSTANCE.onRenderName(this, entity, x, y, z)) {
+		if (Minecraft.getMinecraft().thePlayer.getGamemode() != Gamemode.spectator
+				&& entity.getGamemode() == Gamemode.spectator) {
+			return;
+		}
+		if (Minecraft.getMinecraft().gameSettings.immersiveMode.drawNames() && this.renderDispatcher.camera != null) {
+			if (this.renderDispatcher.camera instanceof EntityCamera
+					&& ((EntityCamera) this.renderDispatcher.camera).mob == entity) {
+				return;
+			}
+		}
+
+		CustomPlayerModelsClient.INSTANCE.onRenderName(this, entity, x, y, z);
+
+		if (!com.tom.cpm.shared.config.Player.isEnableNames()) {
 			cbi.cancel();
 		}
-	}*/
+	}
 }

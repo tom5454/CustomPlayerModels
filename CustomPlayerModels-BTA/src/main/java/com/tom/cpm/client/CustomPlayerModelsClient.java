@@ -82,10 +82,9 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		renderApi(ModelBase.class, GameProfile.class).init();
 	}
 
-	public void playerRenderPre(MobRendererPlayer renderer, net.minecraft.core.entity.player.Player entityPlayer) {
-		manager.bindPlayer(entityPlayer, null, renderer.modelBipedMain);
-		manager.bindSkin(renderer.modelBipedMain, TextureSheetType.SKIN);
-		ModelBiped model = renderer.modelBipedMain;
+	public void playerRenderPre(MobRendererPlayer renderer, net.minecraft.core.entity.player.Player entityPlayer, ModelBiped model) {
+		manager.bindPlayer(entityPlayer, null, model);
+		manager.bindSkin(model, TextureSheetType.SKIN);
 		manager.bindArmor(model, renderer.modelArmorChestplate, 1);
 		manager.bindArmor(model, renderer.modelArmor, 2);
 		manager.bindSkin(renderer.modelArmorChestplate, TextureSheetType.ARMOR1);
@@ -125,68 +124,58 @@ public class CustomPlayerModelsClient implements ClientModInitializer, SidedHand
 		}
 	}
 
-	public boolean onRenderName(MobRenderer renderer, Mob entity, double xIn, double yIn, double zIn) {
-		boolean res = false;
-		if(entity instanceof net.minecraft.core.entity.player.Player) {
-			if(!Player.isEnableNames())
-				res = true;
-			if(Player.isEnableLoadingInfo() && canRenderName(entity)) {
-				GameProfile gp = GameProfileManager.getProfile(((net.minecraft.core.entity.player.Player) entity).username);
-				FormatText st = INSTANCE.manager.getStatus(gp, ModelDefinitionLoader.PLAYER_UNIQUE);
-				if(st != null) {
-					float f = 1.6F;
-					float f1 = 0.016666668F * f / 2;
-					double d3 = EntityRenderDispatcher.instance.camera.distanceToSqr(entity.x, entity.y, entity.z);
+	public void onRenderName(MobRenderer renderer, net.minecraft.core.entity.player.Player entity, double xIn, double yIn, double zIn) {
+		if(Player.isEnableLoadingInfo()) {
+			GameProfile gp = GameProfileManager.getProfile(entity.username);
+			FormatText st = INSTANCE.manager.getStatus(gp, ModelDefinitionLoader.PLAYER_UNIQUE);
+			if(st != null) {
+				float f = 1.6F;
+				float f1 = 0.016666668F * f / 2;
+				double d3 = EntityRenderDispatcher.instance.camera.distanceToSqr(entity.x, entity.y, entity.z);
 
-					if (d3 < 32*32) {
-						double y = yIn;
+				if (d3 < 32*32) {
+					double y = yIn;
+					GL11.glPushMatrix();
+					GL11.glTranslated(0, -0.15F, 0);
+					String s = st.remap();
+
+					if (entity.isSneaking()) {
+						Font fontrenderer = minecraft.font;
 						GL11.glPushMatrix();
-						GL11.glTranslated(0, 0.125F, 0);
-						String s = st.remap();
-
-						if (entity.isSneaking()) {
-							Font fontrenderer = minecraft.font;
-							GL11.glPushMatrix();
-							GL11.glTranslatef((float)xIn + 0.0F, (float)y + entity.bbHeight + 0.5F, (float)zIn);
-							GL11.glNormal3f(0.0F, 1.0F, 0.0F);
-							GL11.glRotatef(-EntityRenderDispatcher.instance.viewLerpYaw, 0.0F, 1.0F, 0.0F);
-							GL11.glRotatef(EntityRenderDispatcher.instance.viewLerpPitch, 1.0F, 0.0F, 0.0F);
-							GL11.glScalef(-f1, -f1, f1);
-							GL11.glDisable(GL11.GL_LIGHTING);
-							GL11.glTranslatef(0.0F, 0.25F / f1, 0.0F);
-							GL11.glDepthMask(false);
-							GL11.glEnable(GL11.GL_BLEND);
-							RetroGL.glBlendFunc(770, 771, 1, 0);
-							Tessellator tessellator = Tessellator.instance;
-							GL11.glDisable(GL11.GL_TEXTURE_2D);
-							tessellator.startDrawingQuads();
-							int i = fontrenderer.getStringWidth(s) / 2;
-							tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);
-							tessellator.addVertex(-i - 1, -1.0D, 0.0D);
-							tessellator.addVertex(-i - 1, 8.0D, 0.0D);
-							tessellator.addVertex(i + 1, 8.0D, 0.0D);
-							tessellator.addVertex(i + 1, -1.0D, 0.0D);
-							tessellator.draw();
-							GL11.glEnable(GL11.GL_TEXTURE_2D);
-							GL11.glDepthMask(true);
-							fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, 0, 553648127);
-							GL11.glEnable(GL11.GL_LIGHTING);
-							GL11.glDisable(GL11.GL_BLEND);
-							GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-							GL11.glPopMatrix();
-						} else {
-							this.renderLivingLabel(entity, xIn, y, zIn, s, f1, d3);
-						}
+						GL11.glTranslatef((float)xIn + 0.0F, (float)y + entity.bbHeight + 0.5F, (float)zIn);
+						GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+						GL11.glRotatef(-EntityRenderDispatcher.instance.viewLerpYaw, 0.0F, 1.0F, 0.0F);
+						GL11.glRotatef(EntityRenderDispatcher.instance.viewLerpPitch, 1.0F, 0.0F, 0.0F);
+						GL11.glScalef(-f1, -f1, f1);
+						GL11.glDisable(GL11.GL_LIGHTING);
+						GL11.glTranslatef(0.0F, 0.25F / f1, 0.0F);
+						GL11.glDepthMask(false);
+						GL11.glEnable(GL11.GL_BLEND);
+						RetroGL.glBlendFunc(770, 771, 1, 0);
+						Tessellator tessellator = Tessellator.instance;
+						GL11.glDisable(GL11.GL_TEXTURE_2D);
+						tessellator.startDrawingQuads();
+						int i = fontrenderer.getStringWidth(s) / 2;
+						tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);
+						tessellator.addVertex(-i - 1, -1.0D, 0.0D);
+						tessellator.addVertex(-i - 1, 8.0D, 0.0D);
+						tessellator.addVertex(i + 1, 8.0D, 0.0D);
+						tessellator.addVertex(i + 1, -1.0D, 0.0D);
+						tessellator.draw();
+						GL11.glEnable(GL11.GL_TEXTURE_2D);
+						GL11.glDepthMask(true);
+						fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, 0, 553648127);
+						GL11.glEnable(GL11.GL_LIGHTING);
+						GL11.glDisable(GL11.GL_BLEND);
+						GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 						GL11.glPopMatrix();
+					} else {
+						this.renderLivingLabel(entity, xIn, y, zIn, s, f1, d3);
 					}
+					GL11.glPopMatrix();
 				}
 			}
 		}
-		return res;
-	}
-
-	protected boolean canRenderName(Mob p_110813_1_) {
-		return Minecraft.INSTANCE.gameSettings.immersiveMode.drawNames() && p_110813_1_.vehicle == null;
 	}
 
 	protected void renderLivingLabel(Mob p_96449_1_, double p_96449_2_, double p_96449_4_, double p_96449_6_, String p_96449_8_, float p_96449_9_, double p_96449_10_) {

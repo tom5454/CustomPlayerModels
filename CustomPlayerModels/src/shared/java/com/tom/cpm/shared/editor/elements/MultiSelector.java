@@ -52,7 +52,7 @@ public interface MultiSelector extends TreeElement {
 		public boolean allMatch(Predicate<ModelElement> test) {
 			for (int i = 0; i < elements.size(); i++) {
 				ModelElement e = elements.get(i);
-				if (test.test(e))return false;
+				if (!test.test(e))return false;
 			}
 			return true;
 		}
