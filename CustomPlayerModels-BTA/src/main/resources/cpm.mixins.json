@@ -3,6 +3,7 @@
   "package": "com.tom.cpm.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+	"PacketCustomPayloadMixin"
   ],
   "client": [
 	  "client.BipedEntityModelMixin",

@@ -235,13 +235,13 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		public ModelPanel(IGui gui, ModelFile file, boolean sel, int y) {
 			super(gui);
 			Label lbl = new Label(gui, file.getName());
-			lbl.setBounds(new Box(68, 5, 100, 10));
+			lbl.setBounds(new Box(70, 5, 100, 10));
 			if(sel)lbl.setColor(gui.getColors().button_hover);
 			addElement(lbl);
 
 			String[] lines = file.getDesc().split("\\\\");
 			for (int i = 0; i < lines.length; i++) {
-				addElement(new Label(gui, lines[i]).setBounds(new Box(68, 20 + i * 10, 0, 0)));
+				addElement(new Label(gui, lines[i]).setBounds(new Box(70, 20 + i * 10, 0, 0)));
 			}
 			linesC = lines.length;
 			this.y = y;
@@ -277,16 +277,19 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 
 		@Override
 		public int getHeight() {
-			return Math.max(64, linesC * 10 + 30);
+			return Math.max(68, linesC * 10 + 30);
 		}
 
 		@Override
 		public void draw(MouseEvent event, float partialTicks) {
 			super.draw(event, partialTicks);
 
+			gui.drawBox(bounds.x + 1, bounds.y + 1, 66, 66, gui.getColors().popup_background);
 			if(icon != null) {
 				icon.bind();
-				gui.drawTexture(bounds.x + 1, bounds.y + 1, 64, 64, 0, 0, 1, 1);
+				gui.drawTexture(bounds.x + 2, bounds.y + 2, 64, 64, 0, 0, 1, 1);
+			} else {
+				gui.drawTexture(bounds.x + 2, bounds.y + 2, 64, 64, 64, 0, "models_menu");
 			}
 		}
 
@@ -305,14 +308,14 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 			super(gui);
 
 			Label lbl = new Label(gui, folder.getName());
-			lbl.setBounds(new Box(68, 5, 100, 10));
+			lbl.setBounds(new Box(70, 5, 100, 10));
 			addElement(lbl);
 
 			File descFile = new File(folder, "description.txt");
 			if(descFile.exists()) {
 				int i = 0;
 				try(BufferedReader rd = new BufferedReader(new InputStreamReader(new FileInputStream(descFile), StandardCharsets.UTF_8))) {
-					addElement(new Label(gui, rd.readLine()).setBounds(new Box(68, 20 + (i++) * 10, 0, 0)));
+					addElement(new Label(gui, rd.readLine()).setBounds(new Box(70, 20 + (i++) * 10, 0, 0)));
 				}
 				linesC = i;
 			}
@@ -337,7 +340,7 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 
 		@Override
 		public int getHeight() {
-			return Math.max(64, linesC * 10 + 30);
+			return Math.max(68, linesC * 10 + 30);
 		}
 
 		@Override
@@ -355,9 +358,13 @@ public class ModelsPanel extends Panel implements IModelDisplayPanel {
 		public void draw(MouseEvent event, float partialTicks) {
 			super.draw(event, partialTicks);
 
+			gui.drawBox(bounds.x + 1, bounds.y + 1, 66, 66, gui.getColors().popup_background);
 			if(icon != null) {
 				icon.bind();
-				gui.drawTexture(bounds.x + 1, bounds.y + 1, 64, 64, 0, 0, 1, 1);
+				gui.drawTexture(bounds.x + 2, bounds.y + 2, 64, 64, 0, 0, 1, 1);
+				gui.drawTexture(bounds.x + 50, bounds.y + 50, 16, 16, 128, 0, "models_menu");
+			} else {
+				gui.drawTexture(bounds.x + 2, bounds.y + 2, 64, 64, 0, 0, "models_menu");
 			}
 		}
 	}

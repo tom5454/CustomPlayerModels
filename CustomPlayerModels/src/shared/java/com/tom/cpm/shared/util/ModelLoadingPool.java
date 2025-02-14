@@ -12,8 +12,8 @@ public class ModelLoadingPool {
 	private static final Executor THREAD_POOL;
 
 	static {
-		int i = MathHelper.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, getMaxThreads());
-		if (i <= 0) {
+		int i = MathHelper.clamp(Runtime.getRuntime().availableProcessors() - 2, 1, getMaxThreads());
+		if (i <= 1) {
 			THREAD_POOL = Executors.newSingleThreadExecutor(task -> {
 				Thread thread = new Thread(task);
 				thread.setName("CPM Background Loading Thread");

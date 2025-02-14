@@ -141,6 +141,13 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			return new Field<>(get, set, part);
 		}
 
+		protected Field<ModelPart> create2ndLayer(Supplier<ModelPart> get, Consumer<ModelPart> set, RedirectRenderer<ModelPart> layer2) {
+			if (layer2 instanceof RedirectModelRendererBase r) {
+				r.layer2 = get.get();
+			}
+			return new Field<>(get, set, null);
+		}
+
 		protected abstract ModelPart getRoot();
 		protected abstract void setRoot(ModelPart part);
 
@@ -152,22 +159,27 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 	private static class RedirectHolderPlayer extends RDH<PlayerModel> {
 		private RedirectRenderer<ModelPart> head;
+		private RedirectRenderer<ModelPart> body;
+		private RedirectRenderer<ModelPart> leftArm;
+		private RedirectRenderer<ModelPart> rightArm;
+		private RedirectRenderer<ModelPart> leftLeg;
+		private RedirectRenderer<ModelPart> rightLeg;
 
 		public RedirectHolderPlayer(PlayerRenderManager mngr, PlayerModel model) {
 			super(mngr, model);
 			head = registerHead(createRendered(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
-			register(createRendered(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
-			register(createRendered(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
-			register(createRendered(() -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
-			register(createRendered(() -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
-			register(createRendered(() -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
+			body = register(createRendered(() -> model.body    , v -> model.body     = v, PlayerModelParts.BODY));
+			rightArm = register(createRendered(() -> model.rightArm, v -> model.rightArm = v, PlayerModelParts.RIGHT_ARM));
+			leftArm = register(createRendered(() -> model.leftArm , v -> model.leftArm  = v, PlayerModelParts.LEFT_ARM));
+			rightLeg = register(createRendered(() -> model.rightLeg, v -> model.rightLeg = v, PlayerModelParts.RIGHT_LEG));
+			leftLeg = register(createRendered(() -> model.leftLeg , v -> model.leftLeg  = v, PlayerModelParts.LEFT_LEG));
 
-			register(new Field<>(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
-			register(new Field<>(() -> model.leftSleeve , v -> model.leftSleeve  = v, null));
-			register(new Field<>(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
-			register(new Field<>(() -> model.leftPants  , v -> model.leftPants   = v, null));
-			register(new Field<>(() -> model.rightPants , v -> model.rightPants  = v, null));
-			register(new Field<>(() -> model.jacket     , v -> model.jacket      = v, null));
+			register(create2ndLayer(() -> model.hat        , v -> model.hat         = v, head));
+			register(create2ndLayer(() -> model.leftSleeve , v -> model.leftSleeve  = v, leftArm));
+			register(create2ndLayer(() -> model.rightSleeve, v -> model.rightSleeve = v, rightArm));
+			register(create2ndLayer(() -> model.leftPants  , v -> model.leftPants   = v, leftLeg));
+			register(create2ndLayer(() -> model.rightPants , v -> model.rightPants  = v, rightLeg));
+			register(create2ndLayer(() -> model.jacket     , v -> model.jacket      = v, body));
 		}
 
 		@Override
@@ -346,6 +358,7 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 		protected final Supplier<ModelPart> parentProvider;
 		protected ModelPart parent;
 		protected VBuffers buffers;
+		protected ModelPart layer2;
 
 		public RedirectModelRendererBase(RDH<?> holder, Supplier<ModelPart> parent, VanillaModelPart part) {
 			super(Collections.emptyList(), Collections.emptyMap());
@@ -447,7 +460,15 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 		@Override
 		public void renderParent() {
+			boolean lv = false;
+			if (layer2 != null) {
+				lv = layer2.visible;
+				layer2.visible = false;
+			}
 			parent.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, color);
+			if (layer2 != null) {
+				layer2.visible = lv;
+			}
 		}
 	}
 

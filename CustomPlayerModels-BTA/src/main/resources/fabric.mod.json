@@ -38,6 +38,6 @@
   "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.13.3",
-    "minecraft": "~7.3"
+    "minecraft": "~7.3.1"
   }
 }

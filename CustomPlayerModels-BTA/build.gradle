@@ -90,6 +90,7 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/java"
 			exclude "com/tom/cpl/util/NettyByteBufInputStream.java"
 			srcDir "../CustomPlayerModels-1.6/src/retro/java"
+			exclude "com/tom/cpl/command/BrigadierCommandHandler.java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"
@@ -138,7 +139,6 @@ dependencies {
 	implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion"
 	implementation "org.lwjgl:lwjgl-stb:$lwjglVersion"
 	
-	compileOnly "com.mojang:brigadier:1.0.18"
 	include(implementation("com.google.guava:failureaccess:1.0.2"))//Required depenency for Guava, that's missing in the Prism install for some reason...
 }
 

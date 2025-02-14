@@ -263,11 +263,10 @@ public class BlockbenchImport {
 	private void convertAnim(EditorAnim ea) {
 		Animation a = new Animation().add(false);
 		Animation.selected = a;
-		a.name = ea.toString();
+		a.name = ea.displayName;
 		if (ea.type.isStaged()) {
-			a.name = ea.displayName;
 			a.loop = "once";
-		} else if (ea.type.isLayer())a.loop = "loop";
+		} else if (ea.type.isLayer() || ea.pose != null)a.loop = "loop";
 		else a.loop = ea.loop ? "loop" : "once";
 		a.type = Animation.makeType(ea.type, ea.pose);
 		a.additive = ea.add;
@@ -279,6 +278,7 @@ public class BlockbenchImport {
 		a.setLayerDefault(ea.layerDefault);
 		a.isProperty = ea.isProperty;
 		a.length = ea.duration / 1000f;
+		a.snapping = (int) (ea.getFrames().size() / (ea.duration / 1000f));
 		Map<ModelElement, BoneAnimator> an = new HashMap<>();
 		me2group.forEach((e, g) -> {
 			BoneAnimator be = new BoneAnimator(g.uuid, a);

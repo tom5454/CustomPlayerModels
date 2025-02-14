@@ -673,32 +673,25 @@ public class BlockbenchExport {
 				return;
 			}
 		} else {
-			if(anim.loop.equals("loop")) {
-				if(type.getKey().canLoop())loop = true;
-			} else if(anim.loop.equals("once")) {
-				if(!type.getKey().canLoop()) {
-					if(type.getKey() == AnimationType.VALUE_LAYER) {
-						warnings.add(new WarnEntry(I18n.formatBr("bb-label.warn.valueAnimNotLooping", anim.name), () -> new Promise<>((res, rej) -> {
-							Undo.initEdit(UndoData.make(anim));
-							anim.loop = "loop";
-							Undo.finishEdit("Edit animation properties");
-							res.onInvoke(true);
-						})));
-						return;
-					}
-					type = Pair.of(AnimationType.SETUP, null);
-					name = setupName;
-				}
-			} else if(anim.loop.equals("hold")) {
-				if(type.getKey() == AnimationType.VALUE_LAYER) {
+			if (!anim.loop.equals("loop")) {
+				if (type.getKey() == AnimationType.VALUE_LAYER || (type.getKey() == AnimationType.POSE && type.getValue().hasStateGetter())) {
 					warnings.add(new WarnEntry(I18n.formatBr("bb-label.warn.valueAnimNotLooping", anim.name), () -> new Promise<>((res, rej) -> {
 						Undo.initEdit(UndoData.make(anim));
 						anim.loop = "loop";
 						Undo.finishEdit("Edit animation properties");
+						res.onInvoke(true);
 					})));
 					return;
 				}
-
+			}
+			if(anim.loop.equals("loop")) {
+				if(type.getKey().canLoop())loop = true;
+			} else if(anim.loop.equals("once")) {
+				if(!type.getKey().canLoop()) {
+					type = Pair.of(AnimationType.SETUP, null);
+					name = setupName;
+				}
+			} else if(anim.loop.equals("hold")) {
 				IPose pose;
 				if(type.getKey() == AnimationType.CUSTOM_POSE)
 					pose = new CustomPose(anim.name, 0);
