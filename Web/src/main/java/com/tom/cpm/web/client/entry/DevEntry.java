@@ -11,6 +11,7 @@ import com.tom.cpm.web.client.fbxtool.FBXEditorGui;
 import com.tom.cpm.web.client.fbxtool.FBXToolGui;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.render.GuiImpl;
+import com.tom.cpm.web.client.render.ProjectViewerGui;
 import com.tom.cpm.web.client.render.ViewerGui;
 
 import elemental2.dom.DomGlobal;
@@ -35,6 +36,9 @@ public class DevEntry implements EntryPoint, WebEntry {
 		} else if(app != null && app.endsWith("fbxtool.html") || "fbxtool".equals(Java.getQueryVariable("app"))) {
 			DomGlobal.document.title = "CPM FBX Tool";
 			gui.setGui(new FBXToolGui(gui));
+		} else if(app != null && app.endsWith("project_viewer.html") || "project_viewer".equals(Java.getQueryVariable("app"))) {
+			DomGlobal.document.title = "CPM Project Viewer";
+			gui.setGui(new ProjectViewerGui(gui));
 		} else {
 			DomGlobal.document.title = "CPM Web Editor";
 			gui.setGui(new EditorGui(gui));

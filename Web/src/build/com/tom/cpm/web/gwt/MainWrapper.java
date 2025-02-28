@@ -42,6 +42,10 @@ public class MainWrapper {
 			a.add("-setProperty");
 			a.add("cpm.version=" + args[1]);
 			a.add("-saveSource");
+			if (mode.equals("Viewer") || mode.equals("ProjectViewer")) {
+				a.add("-setProperty");
+				a.add("cpm.cdnEndpoint=https://cdn-cpmmodels.tom5454.com/content");
+			}
 			a.add("-setProperty");
 			if(mode.equals("Blockbench")) {
 				a.add("cpm.webApiEndpoint=https://tom5454.com/cpm/api");
@@ -59,7 +63,9 @@ public class MainWrapper {
 			a.add("-setProperty");
 			a.add("cpm.version=dev");
 			a.add("-setProperty");
-			a.add("cpm.webApiEndpoint=https://localhost/cpm/api");
+			a.add("cpm.webApiEndpoint=https://localhost:8443/cpm/api");
+			a.add("-setProperty");
+			a.add("cpm.cdnEndpoint=http://localhost:8003/cdn");
 			a.add("-port");
 			a.add("8888");
 			a.add("-codeServerPort");

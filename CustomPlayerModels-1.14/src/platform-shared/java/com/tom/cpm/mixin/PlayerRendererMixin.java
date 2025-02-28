@@ -3,6 +3,7 @@ package com.tom.cpm.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Desc;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -74,7 +75,7 @@ public abstract class PlayerRendererMixin extends LivingRenderer<AbstractClientP
 		super.renderModel(p_77036_1_, p_77036_2_, p_77036_3_, p_77036_4_, p_77036_5_, p_77036_6_, p_77036_7_);
 	}
 
-	@Inject(at = @At("HEAD"), method = "(Lnet/minecraft/client/entity/player/AbstractClientPlayerEntity;FFFFFF)V", cancellable = true)
+	@Inject(at = @At("HEAD"), target = {@Desc(value = "", args = {AbstractClientPlayerEntity.class, float.class, float.class, float.class, float.class, float.class, float.class})}, cancellable = true)
 	public void onRenderModel(AbstractClientPlayerEntity player, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale, CallbackInfo cbi) {
 		boolean pBodyVisible = this.isVisible(player);
 		boolean pTranslucent = !pBodyVisible && !player.isInvisibleTo(Minecraft.getInstance().player);
