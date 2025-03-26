@@ -1,39 +1,40 @@
 package com.tom.cpm.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.Connection;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.ModList;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-
-import com.tom.cpm.mixinplugin.MixinModLoaded;
 
 import io.netty.channel.Channel;
 
 public class Platform {
+	public static List<RenderPipeline> pipelines = new ArrayList<>();
 
 	public static boolean isSitting(Player player) {
-		return player.isPassenger();
+		return player.isPassenger() && (player.getVehicle() != null && player.getVehicle().shouldRiderSit());
 	}
 
 	public static void setHeight(AbstractWidget w, int h) {
-		w.height = h;
+		w.setHeight(h);
 	}
 
 	public static Channel getChannel(Connection conn) {
-		return conn.channel;
+		return conn.channel();
 	}
 
 	public static boolean isModLoaded(String id) {
-		return MixinModLoaded.isLoaded(id);
+		return ModList.get().isLoaded(id);
 	}
 
 	public static Supplier<RenderPipeline> registerPipeline(Supplier<RenderPipeline> factory) {
-		var p = factory.get();
-		RenderPipelines.register(p);
-		return () -> p;
+		var pipeline = factory.get();
+		pipelines.add(pipeline);
+		return () -> pipeline;
 	}
 }

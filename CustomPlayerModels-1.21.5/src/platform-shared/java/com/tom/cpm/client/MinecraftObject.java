@@ -44,14 +44,12 @@ import com.tom.cpm.shared.network.NetHandler;
 import com.tom.cpm.shared.util.MojangAPI;
 
 public class MinecraftObject implements MinecraftClientAccess {
-	private final Minecraft mc;
 	private final ModelDefinitionLoader<GameProfile> loader;
 	private final PlayerRenderManager prm;
 	private AllTagManagers tags;
 	public RenderTypeBuilder<ResourceLocation, RenderType> renderBuilder;
 
-	public MinecraftObject(Minecraft mc) {
-		this.mc = mc;
+	public MinecraftObject() {
 		MinecraftObjectHolder.setClientObject(this);
 		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::getId, GameProfile::getName);
 		prm = new PlayerRenderManager();
@@ -74,19 +72,15 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ITexture createTexture() {
-		return new DynTexture(mc);
+		return new DynTexture();
 	}
 
 	public static class DynTexture implements ITexture {
 		private static int ID = 0;
 		private DynamicTexture dynTex;
 		private ResourceLocation loc;
-		private final Minecraft mc;
 		private static ResourceLocation bound_loc;
-
-		public DynTexture(Minecraft mc) {
-			this.mc = mc;
-		}
+		private Minecraft mc = Minecraft.getInstance();
 
 		@Override
 		public void bind() {
@@ -127,12 +121,12 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public void executeOnGameThread(Runnable r) {
-		mc.execute(r);
+		Minecraft.getInstance().execute(r);
 	}
 
 	@Override
 	public void executeNextFrame(Runnable r) {
-		mc.schedule(r);
+		Minecraft.getInstance().schedule(r);
 	}
 
 	@Override
@@ -142,19 +136,19 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public SkinType getSkinType() {
-		return SkinType.get(DefaultPlayerSkin.get(mc.getUser().getProfileId()).model().id());
+		return SkinType.get(DefaultPlayerSkin.get(Minecraft.getInstance().getUser().getProfileId()).model().id());
 	}
 
 	@Override
 	public void setEncodedGesture(int value) {
-		Set<PlayerModelPart> s = mc.options.modelParts;
+		Set<PlayerModelPart> s = Minecraft.getInstance().options.modelParts;
 		setEncPart(s, value, 0, PlayerModelPart.HAT);
 		setEncPart(s, value, 1, PlayerModelPart.JACKET);
 		setEncPart(s, value, 2, PlayerModelPart.LEFT_PANTS_LEG);
 		setEncPart(s, value, 3, PlayerModelPart.RIGHT_PANTS_LEG);
 		setEncPart(s, value, 4, PlayerModelPart.LEFT_SLEEVE);
 		setEncPart(s, value, 5, PlayerModelPart.RIGHT_SLEEVE);
-		mc.options.broadcastOptions();
+		Minecraft.getInstance().options.broadcastOptions();
 	}
 
 	private static void setEncPart(Set<PlayerModelPart> s, int value, int off, PlayerModelPart part) {
@@ -164,16 +158,17 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public boolean isInGame() {
-		return mc.player != null;
+		return Minecraft.getInstance().player != null;
 	}
 
 	@Override
 	public Object getPlayerIDObject() {
-		return mc.getGameProfile();
+		return Minecraft.getInstance().getGameProfile();
 	}
 
 	@Override
 	public Object getCurrentPlayerIDObject() {
+		var mc = Minecraft.getInstance();
 		return mc.player != null ? mc.player.getGameProfile() : null;
 	}
 
@@ -184,22 +179,25 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public ServerStatus getServerSideStatus() {
+		var mc = Minecraft.getInstance();
 		ClientPacketListener conn = mc.getConnection();
 		return mc.player != null ? conn instanceof NetH && ((NetH)conn).cpm$hasMod() ? ServerStatus.INSTALLED : ServerStatus.SKIN_LAYERS_ONLY : ServerStatus.OFFLINE;
 	}
 
 	@Override
 	public File getGameDir() {
-		return mc.gameDirectory;
+		return Minecraft.getInstance().gameDirectory;
 	}
 
 	@Override
 	public void openGui(Function<IGui, Frame> creator) {
+		var mc = Minecraft.getInstance();
 		mc.setScreen(new GuiImpl(creator, mc.screen));
 	}
 
 	@Override
 	public Runnable openSingleplayer() {
+		var mc = Minecraft.getInstance();
 		return () -> mc.setScreen(new SelectWorldScreen(mc.screen));
 	}
 
@@ -215,20 +213,21 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public MojangAPI getMojangAPI() {
+		var mc = Minecraft.getInstance();
 		return new MojangAPI(mc.getUser().getName(), mc.getUser().getProfileId(), mc.getUser().getAccessToken());
 	}
 
 	@Override
 	public void clearSkinCache() {
-		MojangAPI.clearYggdrasilCache(mc.getMinecraftSessionService());
+		MojangAPI.clearYggdrasilCache(Minecraft.getInstance().getMinecraftSessionService());
 		//mc.getGameProfile().clear();
 		//mc.getGameProfile();//refresh TODO
 	}
 
 	@Override
 	public String getConnectedServer() {
-		if(mc.getConnection() == null)return null;
-		SocketAddress sa = Platform.getChannel(mc.getConnection().getConnection()).remoteAddress();
+		if(Minecraft.getInstance().getConnection() == null)return null;
+		SocketAddress sa = Platform.getChannel(Minecraft.getInstance().getConnection().getConnection()).remoteAddress();
 		if(sa instanceof InetSocketAddress)
 			return ((InetSocketAddress)sa).getHostString();
 		return null;
@@ -236,13 +235,13 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public List<Object> getPlayers() {
-		if(mc.getConnection() == null)return Collections.emptyList();
-		return mc.getConnection().getOnlinePlayers().stream().map(PlayerInfo::getProfile).collect(Collectors.toList());
+		if(Minecraft.getInstance().getConnection() == null)return Collections.emptyList();
+		return Minecraft.getInstance().getConnection().getOnlinePlayers().stream().map(PlayerInfo::getProfile).collect(Collectors.toList());
 	}
 
 	@Override
 	public Proxy getProxy() {
-		return mc.getProxy();
+		return Minecraft.getInstance().getProxy();
 	}
 
 	@Override

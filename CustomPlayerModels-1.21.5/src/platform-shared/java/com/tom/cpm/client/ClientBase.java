@@ -34,13 +34,11 @@ public abstract class ClientBase {
 	public static final ResourceLocation DEFAULT_CAPE = ResourceLocation.parse("cpm:textures/template/cape.png");
 	public static boolean optifineLoaded, irisLoaded, vrLoaded;
 	public static MinecraftObject mc;
-	protected Minecraft minecraft;
 	public RenderManager<GameProfile, net.minecraft.world.entity.player.Player, Model, MultiBufferSource> manager;
 	public NetHandler<CustomPacketPayload.Type<ByteArrayPayload>, net.minecraft.world.entity.player.Player, ClientPacketListener> netHandler;
 
 	public void init0() {
-		minecraft = Minecraft.getInstance();
-		mc = new MinecraftObject(minecraft);
+		mc = new MinecraftObject();
 		optifineLoaded = OFDetector.doApply();
 		vrLoaded = Platform.isModLoaded("vivecraft");
 		irisLoaded = IrisDetector.doApply();
@@ -53,7 +51,7 @@ public abstract class ClientBase {
 		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), net.minecraft.world.entity.player.Player::getGameProfile);
 		manager.setGPGetters(GameProfile::getProperties, Property::value);
 		netHandler = new NetHandler<>((k, v) -> new CustomPacketPayload.Type<>(ResourceLocation.tryBuild(k, v)));
-		netHandler.setExecutor(() -> minecraft);
+		netHandler.setExecutor(Minecraft::getInstance);
 		netHandler.setSendPacketClient(Function.identity(), (c, rl, pb) -> c.send(new ServerboundCustomPayloadPacket(new ByteArrayPayload(rl, pb))));
 		netHandler.setPlayerToLoader(net.minecraft.world.entity.player.Player::getGameProfile);
 		netHandler.setGetPlayerById(id -> {
@@ -63,9 +61,9 @@ public abstract class ClientBase {
 			}
 			return null;
 		});
-		netHandler.setGetClient(() -> minecraft.player);
+		netHandler.setGetClient(() -> Minecraft.getInstance().player);
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
-		netHandler.setDisplayText(t -> minecraft.player.displayClientMessage(t.remap(), false));
+		netHandler.setDisplayText(t -> Minecraft.getInstance().player.displayClientMessage(t.remap(), false));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
 	}
 
@@ -80,7 +78,7 @@ public abstract class ClientBase {
 	}
 
 	public void renderHand(MultiBufferSource buffer, PlayerModel model) {
-		renderHand(minecraft.player, buffer, model);
+		renderHand(Minecraft.getInstance().player, buffer, model);
 	}
 
 	public void renderHand(AbstractClientPlayer pl, MultiBufferSource buffer, PlayerModel model) {
@@ -110,6 +108,7 @@ public abstract class ClientBase {
 	}
 
 	public void updateJump() {
+		var minecraft = Minecraft.getInstance();
 		if(minecraft.player.onGround() && minecraft.player.input.keyPresses.jump()) {
 			manager.jump(minecraft.player);
 		}

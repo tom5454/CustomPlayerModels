@@ -7,7 +7,8 @@
     "1.21.1-latest": "0.6.21a",
     "1.21.2-latest": "0.6.21a",
     "1.21.3-latest": "0.6.21a",
-    "1.21.4-latest": "0.6.21a"
+    "1.21.4-latest": "0.6.21a",
+    "1.21.5-latest": "0.6.21a"
   },
   "1.20.2": {
     "0.0.0": "1.20.1-forge",
@@ -100,6 +101,9 @@
     "0.6.19b": "Updated ViveCraft support (#716)",
     "0.6.20a": "Improved model loading speed\nAdded models site loader\nUpdated Chinese translations (#710)\nUpdated Russian translations (Closes #685)\nAdded getAnimationMaxValue to the api (Closes #715)\nAdded: RealCamera now plays first person animations (1.20+) (Closes #417)\nEditor QoL:\n- Check Safety Level shows the cube count in Level: None\n- Added color to the current animation selector\n- Setup/Finish animations show up near their normal animation in the list\n- Improved skin compatible export option description\n- Added cube name colors to the Copy Transform selection menu\n- Made reload texture undoable, added a warning popup if the image is edited in game\n- Added Pivot Tool\n- Multi-select improvements\n- Copy Transforms in duplicated elements update if the from is also duplicated\n25w06a port\n\nFixed models menu breaking with experimental exports\nFixed falling animation on 1.21.3+ (Closes #733)\nFixed editor crash with templates present (Closes #683)\nFixed combo slider/spinner breaking (Closes #680)\nFixed slider max value breaking above 127 with normal exporter (Closes #729, Closes #687)\nFixed value slider values change due to rounding issues (Closes #682)\nFixed must finish not working with normal exporter (Closes #703)\nFixed add new empty frame not working\nFixed grouped animation breaks export if changed to different type\nFixed sprinting not working in BTA\nFixed text input fields not working in BTA\nFixed capes in 1.17+ clipping into the body on sneaking (Closes #722)\nFixed capes in 1.4 and older versions not rendering\nFixed root animations accumulating on 1.7.10 and older if root is visible and taking damage (Closes #714)\nFixed layer defaults not applying in model preview",
     "0.6.21a": "Added a default icon for cpmmodels and folders in the models menu\nUpdated to BTA 7.3_01\n\nFixed multi-selecting roots showing an error message\nFixed multi-selecting not working\nFixed 2nd layers showing if roots are visible on 1.21.3+ (Closes #748)\nFixed models swapping between players on BTA (Closes #744)\nFixed disconnecting due to partial read network bug in BTA (Closes #753)\nFixed must-finish not working with looping animations without setup/finish animations"
+  },
+  "1.21.5": {
+    "0.6.21a": "1.21.5 port"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }
