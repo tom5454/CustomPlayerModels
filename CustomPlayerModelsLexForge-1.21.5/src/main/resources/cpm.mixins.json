@@ -1,0 +1,34 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.tom.cpm.mixin",
+  "plugin": "com.tom.cpm.mixinplugin.CPMMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+	"ServerGamePacketListenerImplMixin",
+	"ClientboundCustomPayloadPacketMixin",
+	"ServerboundCustomPayloadPacketMixin",
+	"ClientPacketListenerMixinForge",
+	"ServerGamePacketListenerImplMixinForge"
+  ],
+  "client": [
+    "PlayerRendererMixin",
+	"CapeLayerMixin",
+	"WingsLayerMixin",
+	"HumanoidArmorLayerMixin",
+	"SkullBlockRendererMixin",
+	"CustomHeadLayerMixin",
+	"ParrotOnShoulderLayerMixin",
+	"LocalPlayerMixin",
+	"LivingRendererMixin",
+	"ClientPacketListenerMixin",
+	"GuiAccessor",
+	"NativeImageAccessor",
+	"PlayerRenderStateMixin",
+	"EquipmentLayerRendererMixin",
+	"SkullSpecialRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

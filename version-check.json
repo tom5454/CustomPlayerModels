@@ -74,7 +74,7 @@
     "1.21.3-fabric-latest": "0.6.21a",
     "1.21.4-fabric-latest": "0.6.21a",
     "1.21.4-latest": "0.6.21a",
-    "1.21.5-fabric-latest": "0.6.21d",
+    "1.21.5-fabric-latest": "0.6.21e",
     "1.21.5-latest": "0.6.21a"
   },
   "1.12.2": {
@@ -1843,9 +1843,11 @@
     "0.6.21a": "Added a default icon for cpmmodels and folders in the models menu\nUpdated to BTA 7.3_01\n\nFixed multi-selecting roots showing an error message\nFixed multi-selecting not working\nFixed 2nd layers showing if roots are visible on 1.21.3+ (Closes #748)\nFixed models swapping between players on BTA (Closes #744)\nFixed disconnecting due to partial read network bug in BTA (Closes #753)\nFixed must-finish not working with looping animations without setup/finish animations",
     "0.6.21b": "25w07a port",
     "0.6.21c": "25w09b port\nFixed crash on 1.14.4 fabric (Closes #754)",
-    "0.6.21d": "1.21.5 port"
+    "0.6.21d": "1.21.5 port",
+    "0.6.21e": "Minecraft Forge 1.21.5 port\n\nFixed crash with iris (Closes #768)"
   },
   "1.21.5": {
-    "0.6.21a": "1.21.5 port"
+    "0.6.21a": "Minecraft Forge 1.21.5 port\n\nFixed crash with iris (Closes #768)",
+    "0.6.21b": "Minecraft Forge 1.21.5 port\n\nFixed crash with iris (Closes #768)"
   }
 }

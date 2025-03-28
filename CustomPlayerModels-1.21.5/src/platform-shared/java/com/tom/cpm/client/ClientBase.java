@@ -65,6 +65,7 @@ public abstract class ClientBase {
 		netHandler.setGetNet(c -> ((LocalPlayer)c).connection);
 		netHandler.setDisplayText(t -> Minecraft.getInstance().player.displayClientMessage(t.remap(), false));
 		netHandler.setGetPlayerAnimGetters(new PlayerAnimUpdater());
+		if (irisLoaded)IrisPipelineSetup.setup();
 	}
 
 	public static void apiInit() {
