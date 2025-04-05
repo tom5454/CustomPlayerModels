@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -49,6 +51,7 @@ public class LocalStorageFS implements IFS {
 			DomGlobal.console.warn(e);
 			enable = false;
 		}
+		if (session == null)session = new MemorySession();
 	}
 
 	public static LocalStorageFS getInstance() {
@@ -384,5 +387,44 @@ public class LocalStorageFS implements IFS {
 			input.click();
 		}
 		return f;
+	}
+
+	private static class MemorySession implements Storage {
+		List<String> items = new ArrayList<>();
+		Map<String, String> content = new HashMap<>();
+
+		@Override
+		public void clear() {
+			items.clear();
+			content.clear();
+		}
+
+		@Override
+		public String getItem(String key) {
+			return content.get(key);
+		}
+
+		@Override
+		public int getLength() {
+			return items.size();
+		}
+
+		@Override
+		public String key(int index) {
+			return items.get(index);
+		}
+
+		@Override
+		public void removeItem(String key) {
+			content.remove(key);
+			items.remove(key);
+		}
+
+		@Override
+		public void setItem(String key, String data) {
+			if (!items.contains(key))
+				items.add(key);
+			content.put(key, data);
+		}
 	}
 }

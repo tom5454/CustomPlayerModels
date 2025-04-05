@@ -49,6 +49,7 @@ import com.tom.cpm.web.client.PlayerProfile;
 import com.tom.cpm.web.client.PlayerProfile.PlayerInfo;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.util.AsyncResourceException;
+import com.tom.cpm.web.client.util.CDNUtil;
 import com.tom.cpm.web.client.util.CPMApi;
 import com.tom.cpm.web.client.util.GameProfile;
 import com.tom.cpm.web.client.util.ImageIO;
@@ -87,6 +88,20 @@ public class ViewerGui extends Frame implements IModelDisplayPanel {
 				CPMApi.fetch("file", url).then(f -> {
 					try {
 						fileData = ModelFile.load(new ByteArrayInputStream(Base64.getDecoder().decode((String) f.get("data"))));
+						initModel(null);
+					} catch (IOException e1) {
+						errorLoading(e1);
+						e1.printStackTrace();
+					}
+					return null;
+				}).catch_(e -> {
+					errorLoading(e);
+					return null;
+				});
+			else if(CDNUtil.isCDNLink(url))
+				CDNUtil.fetchFromCDN(url).then(f -> {
+					try {
+						fileData = ModelFile.load(new ByteArrayInputStream(Base64.getDecoder().decode(f)));
 						initModel(null);
 					} catch (IOException e1) {
 						errorLoading(e1);

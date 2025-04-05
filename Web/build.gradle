@@ -60,6 +60,7 @@ sourceSets {
 				exclude "com/tom/cpm/shared/util/MojangAPI.java"
 				exclude "com/tom/cpm/shared/util/MdResourceIO.java"
 				exclude "com/tom/cpm/shared/util/VersionCheck.java"
+				exclude "com/tom/cpm/shared/util/ModelLoadingPool.java"
 			}
 			resources {
 				srcDir "../CustomPlayerModels/src/shared/resources"
@@ -186,6 +187,15 @@ task compileViewer(type:JavaExec, dependsOn: 'compileJava') {
    systemProperties = [ "ugwt.useStrongName":"true" ]
    
    args "--build", "${version}", "Viewer"
+}
+
+task compileProjectViewer(type:JavaExec, dependsOn: 'compileJava') {
+   main = "com.tom.cpm.web.gwt.MainWrapper"
+   classpath = getFixedClasspath()
+   
+   systemProperties = [ "ugwt.useStrongName":"true" ]
+   
+   args "--build", "${version}", "ProjectViewer"
 }
 
 task compileBlockbench(type:JavaExec, dependsOn: 'compileJava') {

@@ -91,6 +91,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 	private static boolean firstOpen = true;
 	private GuiImpl currentGui;
 	private AllTagManagers tags;
+	private NetHandler<Void, Void, Void> netHandler;
 
 	public WebMC(ModConfigFile config, boolean canExit, boolean versionCheck) {
 		instance = this;
@@ -98,6 +99,8 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 		MinecraftObjectHolder.setCommonObject(this);
 		MinecraftObjectHolder.setClientObject(this);
 		this.canExit = canExit;
+		netHandler = new NetHandler<>((a, b) -> null);
+		netHandler.setGetClient(() -> null);
 
 		platform = buildPlatformString();
 		root = new File(FS.getWorkDir());
@@ -240,7 +243,7 @@ public class WebMC implements MinecraftClientAccess, MinecraftCommonAccess, ILog
 
 	@Override
 	public NetHandler<?, ?, ?> getNetHandler() {
-		return null;
+		return netHandler;
 	}
 
 	@Override

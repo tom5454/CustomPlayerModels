@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.8-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -51,17 +51,28 @@ dependencies {
 	
 	compileOnly files("../CustomPlayerModels-1.21.5/stubs/of.jar")
 	
+	modCompileOnly('maven.modrinth:sodium:mc1.21.5-0.6.12-fabric')
+	modCompileOnly('maven.modrinth:iris:1.8.10+1.21.5-fabric')
+	modCompileOnly('maven.modrinth:vivecraft:1.21.5-1.2.5-b3-fabric')
+	implementation "com.electronwill.night-config:core:3.6.6"
+    implementation "com.electronwill.night-config:toml:3.6.6"
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-linux")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-macos")
+    implementation("org.lwjgl:lwjgl-openvr:3.3.3:natives-windows")
+    implementation("com.illposed.osc:javaosc-core:0.9")
+    modImplementation("org.antlr:antlr4-runtime:4.13.1")
+    modImplementation("io.github.douira:glsl-transformer:2.0.1")
+    modImplementation("org.anarres:jcpp:1.4.14")
+	
 	if (useLib) {
-		modCompileOnly('maven.modrinth:sodium:mc1.21.4-0.6.3-fabric')
-		modCompileOnly('maven.modrinth:iris:1.8.4+1.21.4-fabric')
-    	modCompileOnly('maven.modrinth:vivecraft:1.21.4-1.2.0-fabric')
     	modCompileOnly('maven.modrinth:first-person-model:51Nzrb3j')//1.20.4 fallback
     	modImplementation ('com.github.Virtuoel:Pehkui:3.8.3') {
         	exclude(group: "net.fabricmc.fabric-api")
     	}
 	} else {
-		compileOnly files("../CustomPlayerModels-1.21.5/stubs/iris.jar")
-		compileOnly files("../CustomPlayerModels-1.21.5/stubs/vc.jar")
+		//compileOnly files("../CustomPlayerModels-1.21.5/stubs/iris.jar")
+		//compileOnly files("../CustomPlayerModels-1.21.5/stubs/vc.jar")
 		compileOnly files("../CustomPlayerModels-1.21.5/stubs/fpm.jar")
 		compileOnly files("../CustomPlayerModels-1.21.5/stubs/pehkui.jar")
 	}

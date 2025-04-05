@@ -10,6 +10,8 @@
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.tom.cpm.web.client.entry.DevEntry'/>
+  
+  <define-configuration-property name="cpm.cdnEndpoint" is-multi-valued='false' />
 
   <!-- Specify the paths for translatable code                    -->
   <source path='web/client'/>
