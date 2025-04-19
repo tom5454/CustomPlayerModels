@@ -149,10 +149,6 @@ public class BlockbenchExport {
 				loadedTextures.add(loadTexture(tex, tst));
 				if(tst != TextureSheetType.SKIN) {
 					UVMul m = new UVMul();
-					if(!tst.editable) {
-						m.x = tst.getDefSize().x / (float) Project.texture_width;
-						m.y = tst.getDefSize().y / (float) Project.texture_height;
-					}
 					uvMul.put(tst, m);
 				}
 				uvMul.get(tst).texId = tex.uuid;
