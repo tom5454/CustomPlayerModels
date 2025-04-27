@@ -75,7 +75,8 @@
     "1.21.4-fabric-latest": "0.6.21a",
     "1.21.4-latest": "0.6.21a",
     "1.21.5-fabric-latest": "0.6.21e",
-    "1.21.5-latest": "0.6.21a"
+    "1.21.5-latest": "0.6.21a",
+    "1.21.6-fabric-latest": "0.6.21a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -1849,5 +1850,8 @@
   "1.21.5": {
     "0.6.21a": "Minecraft Forge 1.21.5 port\n\nFixed crash with iris (Closes #768)",
     "0.6.21b": "Minecraft Forge 1.21.5 port\n\nFixed crash with iris (Closes #768)"
+  },
+  "1.21.6-fabric": {
+    "0.6.21a": "25w16a port"
   }
 }
