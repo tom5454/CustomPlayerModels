@@ -10,6 +10,10 @@
 <a name="attribute-scaling"/>
 
 ### 属性调整
+> [!NOTE]
+> 本章可能已过时。
+> 查看本页的英文版本：[跳转](https://github.com/tom5454/CustomPlayerModels/wiki/Scaling#attribute-scaling)
+
 CPM 可以使用[属性](https://minecraft.wiki/w/Attribute)应用一些比例设置。 有关每个 Minecraft 版本支持的属性，请查看下面的列表：
 | 比例选项 | 1.6 - 1.8 | 1.10 | 1.12 | 1.14 - 1.17 | 1.18 - 1.20.4 | 1.20.5 |
 | --- | --- | --- | --- | --- | --- | --- |

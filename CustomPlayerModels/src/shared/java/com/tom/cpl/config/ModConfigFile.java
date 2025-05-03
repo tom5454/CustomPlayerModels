@@ -51,6 +51,7 @@ public class ModConfigFile extends ConfigEntry {
 			changed = true;
 			save();
 		}
+		loadConfig();
 	}
 
 	public static ModConfigFile createServer(File file) {

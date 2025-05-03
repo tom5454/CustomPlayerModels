@@ -17,6 +17,7 @@ public class ExportHelper {
 			case NORMAL:
 				me.id = id[0]++;
 				flatList.add(me);
+				me.type.preRenderUpdate(me);
 				break;
 			case ROOT_PART:
 				if(me.duplicated || me.typeData instanceof RootModelType) {

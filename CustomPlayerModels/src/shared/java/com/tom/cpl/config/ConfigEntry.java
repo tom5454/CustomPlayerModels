@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class ConfigEntry {
@@ -18,6 +19,18 @@ public class ConfigEntry {
 	public ConfigEntry(Map<String, Object> data, Runnable changeListener) {
 		this.data = data;
 		this.changeListener = changeListener;
+		loadConfig();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void loadConfig() {
+		for (Entry<String, Object> e : data.entrySet()) {
+			if (e.getValue() instanceof Map) {
+				entries.put(e.getKey(), new ConfigEntry((Map<String, Object>) e.getValue(), changeListener));
+			} else if(e.getValue() instanceof List) {
+				lists.put(e.getKey(), new ConfigEntryList((List<Object>) e.getValue(), changeListener));
+			}
+		}
 	}
 
 	public String getString(String name, String def) {

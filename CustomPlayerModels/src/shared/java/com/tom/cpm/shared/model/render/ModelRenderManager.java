@@ -641,6 +641,9 @@ public abstract class ModelRenderManager<D, S, P, MB> implements IPlayerRenderMa
 
 	private static Mesh createBox(RenderedCube elem, RedirectHolder<?, ?, ?, ?> holder) {
 		Cube c = elem.getCube();
+		if (c.size.x == 0 && c.size.y == 0 && c.size.z == 0 && c.mcScale == 0) {
+			return Mesh.EMPTY;
+		}
 		if(c.texSize == 0) {
 			return BoxRender.createColored(
 					c.offset.x, c.offset.y, c.offset.z,

@@ -40,7 +40,6 @@ public class AttributeScaler implements ScalerInterface<ServerPlayer, List<Holde
 		case ATTACK_KNOCKBACK: return Collections.singletonList(Attributes.ATTACK_KNOCKBACK);
 		case ATTACK_SPEED: return Collections.singletonList(Attributes.ATTACK_SPEED);
 		case DEFENSE: return Collections.singletonList(Attributes.ARMOR);
-		case FLIGHT_SPEED: return Collections.singletonList(Attributes.FLYING_SPEED);
 		case REACH: return List.of(Attributes.BLOCK_INTERACTION_RANGE, Attributes.ENTITY_INTERACTION_RANGE);
 		case MOB_VISIBILITY: return Collections.singletonList(Attributes.FOLLOW_RANGE);
 		case MOTION: return Collections.singletonList(Attributes.MOVEMENT_SPEED);
