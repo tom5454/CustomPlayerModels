@@ -10,6 +10,7 @@
   "bb-button.autoFix": "Auto Arreglar",
   "bb-button.copyErrorMsg": "Copiar Mensaje de Error",
   "bb-button.viewInBB": "Mirar en Blockbench",
+  "bb-button.recolor.set": "Fijar Color",
   "bb-label.cpmCodecDesc": "Modelo para el mod Customizable Player Models",
   "bb-label.cpmInfo.export": "Debes exportar el archivo como proyectro de Customizable Player Models para usar en el juego.",
   "bb-label.cpmInfo.import": "Utiliza la opción de abrir proyecto de Customizable Player Models para importar un archivo existente.",
@@ -48,5 +49,13 @@
   "bb-label.autoFix.stagedAnim": "Base de Animación Escenificada",
   "bb-label.warn.unknownAnimation": "Tipo de Animación Desconocida (%s)",
   "bb-label.language.reloadRequired.desc": "Por favor, reinicia BlockBench para aplicar el nuevo lenguaje.",
-  "bb-tooltip.export.renameGroup": "Renombrar el grupo al tipo seleccionado\\Si un grupo ya tiene el mismo nombre la acción va a fallar."
+  "bb-label.warn.uvDecimalFixer.applied": "Reparador de UVs decimales aplicado.",
+  "bb-label.warn.uvDecimalFixer.face": "%s/ Cara: %s",
+  "bb-label.warn.uvDecimalFixer.list": "Lista de cubos con UVs decimales",
+  "bb-label.warn.uvDecimalFixer.info": "Tu modelo incluye cubos con UVS decimales o tamaños decimales.\\El reparador de UVs decimales aplicó un cambio de tamaño de x16 a la grilla.\\Puedes ignorar este mensaje si eso esta bien.\\Vea la lista de cubos afectados:",
+  "bb-label.error.failedToLoadTexture": "Fallo en cargar los datos para la textura: %s\\Por favor, reinicia Blockbench e intentelo de nuevo\\Causa: %s",
+  "bb-label.openedInBB": "Por favor haga click en la ventana de Blockbench para continuar.",
+  "bb-tooltip.export.renameGroup": "Renombrar el grupo al tipo seleccionado\\Si un grupo ya tiene el mismo nombre la acción va a fallar.",
+  "bb-tooltip.anim.snapping": "El ajuste determina la resolucion de exporte para CPM.\\La animacion exportada va a interpolar linearmente a los fotogramas por segundo.",
+  "bb-tooltip.warn.uvDecimalFixerApplied": "Haga click en el botón %s para mostrar una lista de cubos afectados."
 }

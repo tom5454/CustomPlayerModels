@@ -11,6 +11,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import com.google.common.collect.Iterables;
+
 import com.tom.cpl.command.ArgType;
 import com.tom.cpl.command.CommandCtx;
 import com.tom.cpl.command.CommandHandler;
@@ -19,6 +21,7 @@ import com.tom.cpl.command.RequiredCommandBuilder;
 import com.tom.cpl.config.ConfigEntry;
 import com.tom.cpl.text.FormatText;
 import com.tom.cpl.text.IText;
+import com.tom.cpl.text.LiteralText;
 import com.tom.cpl.util.Pair;
 import com.tom.cpm.shared.config.BuiltInSafetyProfiles;
 import com.tom.cpm.shared.config.ConfigKeys;
@@ -26,6 +29,9 @@ import com.tom.cpm.shared.config.ModConfig;
 import com.tom.cpm.shared.config.PlayerData;
 import com.tom.cpm.shared.config.PlayerSpecificConfigKey;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.network.NetHandler.Scaler;
+import com.tom.cpm.shared.network.NetworkUtil;
+import com.tom.cpm.shared.network.NetworkUtil.ScalingSettings;
 import com.tom.cpm.shared.util.ScalingOptions;
 
 public class CommandCPM {
@@ -263,6 +269,11 @@ public class CommandCPM {
 				run(c -> resetScaling(c))
 				);
 		l.add(reset);
+		LiteralCommandBuilder debug = new LiteralCommandBuilder("debug");
+		debug.then(new RequiredCommandBuilder("target", ArgType.PLAYER).
+				run(c -> debugScaling(c))
+				);
+		l.add(debug);
 		return l;
 	}
 
@@ -273,6 +284,40 @@ public class CommandCPM {
 		PlayerData dt = h.getSNetH(player).cpm$getEncodedModelData();
 		dt.rescaleToTarget(h, player, null);
 		c.sendSuccess(new FormatText("commands.cpm.scalingReset", c.handler.toStringPlayer(player)));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void debugScaling(CommandCtx<?> c) {
+		Object player = c.getArgument("target");
+		NetHandler<?, Object, ?> h = (NetHandler<?, Object, ?>) MinecraftServerAccess.get().getNetHandler();
+		PlayerData dt = h.getSNetH(player).cpm$getEncodedModelData();
+		c.sendSuccess(new LiteralText("---------------------"));
+		c.sendSuccess(new FormatText("commands.cpm.scalingDebug.title", c.handler.toStringPlayer(player)));
+		c.sendSuccess(new LiteralText(""));
+		String id = h.getID(player);
+		for (ScalingOptions o : ScalingOptions.VALUES) {
+			ScalingSettings l = NetworkUtil.getScalingLimits(o, id);
+			String scaler = l.scaler;
+			if (scaler == null) {
+				Map<String, Scaler<Object>> scl = h.getScaleSetters().get(o);
+				scaler = scl != null && !scl.isEmpty() ? Iterables.getLast(scl.keySet()) : null;
+			}
+			float target = dt.targetScale.getOrDefault(o, 1f);
+			FormatText mth;
+			if (scaler == null) {
+				mth = new FormatText("commands.cpm.scalingDebug.unavailable", target);
+			} else if (ConfigKeys.SCALING_METHOD_OFF.equals(scaler)) {
+				mth = new FormatText("commands.cpm.scalingDebug.scaler_disabled", target);
+			} else if(l.min == l.max && l.min == 1) {
+				mth = new FormatText("commands.cpm.scalingDebug.disabled", target);
+			} else {
+				mth = new FormatText("commands.cpm.scalingDebug.enabled", scaler, dt.scale.getOrDefault(o, 1f), target, l.min, l.max);
+			}
+			c.sendSuccess(new FormatText("commands.cpm.scalingDebug.entry", o.asText(), mth));
+		}
+		c.sendSuccess(new LiteralText(""));
+		c.sendSuccess(new FormatText("commands.cpm.scalingDebug.info"));
+		c.sendSuccess(new LiteralText("---------------------"));
 	}
 
 	@SuppressWarnings("unchecked")

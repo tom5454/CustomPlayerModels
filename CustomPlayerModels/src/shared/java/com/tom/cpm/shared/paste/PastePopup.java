@@ -152,7 +152,7 @@ public class PastePopup extends PopupPanel {
 
 			Button btn = new Button(gui, gui.i18nFormat("button.cpm.delete"), ConfirmPopup.confirmHandler(frm, gui.i18nFormat("label.cpm.confirm"), gui.i18nFormat("label.cpm.confirmDel"), () -> {
 				runRequest(() -> client.deleteFile(entry.id), PastePopup.this::refreshGui, "deleting");
-			}, null));
+			}));
 			btn.setBounds(new Box(w - 55, 5, 45, 20));
 			addElement(btn);
 

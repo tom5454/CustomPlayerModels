@@ -209,7 +209,7 @@ public class AnimationEngine {
 			h.addAnimations(inGui, VanillaPose.IN_GUI);
 			h.animate(null, time);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.warn("Error animating model", e);
 			def.resetAnimationPos();
 			h.clear();
 		}
