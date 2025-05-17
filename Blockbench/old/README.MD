@@ -3,12 +3,13 @@
 
 Tested with Blockbench desktop 4.1.4 portable
 
-This version of the plugin is no longer receiving updates.  
+**This version of the plugin is no longer receiving updates.**  
+**This version of the plugin breaks models on export in most cases, please use the current version**  
 
 ## How to install
 You need the desktop version of Blockbench. Link: [https://blockbench.net/downloads/](https://blockbench.net/downloads/)  
 Go to File/Plugins then click the load plugin from URL, and paste the following URL in:  
-`https://tom5454.com/cpm/cpm_plugin/old/cpm_plugin.js`  
+`https://cpmweb.tom5454.com/blockbench/old/cpm_plugin.js`  
 The plugin should be installed and you can import and export `.cpmproject` files.  
 
 <details>
