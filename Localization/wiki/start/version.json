@@ -132,7 +132,7 @@
   "Paste-site-API/browser-login": "371050edc06f8caa5f0b08dc1195c80f72aa817944bf0fec8b1329d94405170a",
   "FAQ/q-does-the-mod-work-in-servers": "1d86d14496fb87d8a678fc42d6242594974b162bba3d320a4d03072db84f5a3b",
   "CPMMarkdownCheatsheet/blockquotes": "9b8780e4a43bf0f3d903213a61db9697dfac076c8bac368ed422153f0b4cbd4d",
-  "The--cpm-command/scaling": "8e2e37d879ac39ec6270be2f82717f398c31e7559252ec544f758c8baca32334",
+  "The--cpm-command/scaling": "3785936b27bbc202b8ad731d2853921ca421bb52f6f718dbea50cf95cd58925a",
   "Scaling/pehkui": "6a2ea3a0dc97981fc2809c04af27f2de4ff01d35e9276d1a46d67cd189a27d93",
   "API-documentation/set-model": "7ea8fa8bfd24d33110090cfc14bf98e2a8cdec04599cf49705da64b422a0546a",
   "API-documentation/detect-animation": "0a6f5a4e83de25a20185700dc05462ab17943bec44d536b99a8f83b912b7cb97",
@@ -206,5 +206,6 @@
   "Paste-site-API/connect": "e9ca1a119847c1c507550dcdb083bdd8587cddfec32afcfeee3e63299418155b",
   "API-documentation/gradleproperties": "8ba2aae7ab15bbb0c842c50812aaa03b958783de77388ef2694005f7d92af415",
   "API-documentation/get-animation-max-value": "34b65981712c4fd3fe0d91cc468d5d4f125028b5d2f5f6b75f3ae7843dcc49ed",
-  "CPMMarkdownCheatsheet/highlighting": "cb54f6ecad57bcc43ee386e7d5e1a82dbba0ac1a4a0d8b6c8135c3ec0376eb9b"
+  "CPMMarkdownCheatsheet/highlighting": "cb54f6ecad57bcc43ee386e7d5e1a82dbba0ac1a4a0d8b6c8135c3ec0376eb9b",
+  "The--cpm-command/scaling-debug": "cdbb983fbd575e1c7346e9605c06855e18ae588378258729179128b09e2c3df3"
 }
