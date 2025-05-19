@@ -95,6 +95,7 @@ Subcommands:
 * [enabled](#scaling-enabled)
 * [method](#scaling-method)
 * [reset](#scaling-reset)
+* [debug](#scaling-debug)
 
 
 <a name="scaling-limit"/>
@@ -129,6 +130,22 @@ Supported options:
 ### scaling reset
 Usage: `/cpm scaling reset <player>`  
 Reset the scaling for the selected player.
+
+
+<a name="scaling-debug"/>
+
+### scaling debug
+Usage: `/cpm scaling debug <player>`  
+Prints all of the scaling settings for the player: requested scale `Rq`, actual scale `V`, limits `Lim`, scaling method `M`.  
+Example output:
+```
+Scaling debug for <player>:
+
+- 'Entity Scaling' M: attribute, V: 1.5 (Rq: 1.5), Lim: 0.01 - 3.0
+- 'Eye Height' M: Not Supported (Rq: 1.0)
+- 'Jump Height' M: attribute, V: 1.0 (Rq: 1.0), Lim: 0.01 - 10.0
+- 'Health' M: Scaling limited to normal value (Rq: 1.0)
+```
 
 
 <a name="animate"/>
