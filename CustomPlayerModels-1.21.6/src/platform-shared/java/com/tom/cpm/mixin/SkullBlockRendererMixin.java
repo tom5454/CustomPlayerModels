@@ -7,16 +7,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -53,36 +53,18 @@ public class SkullBlockRendererMixin {
 		}
 	}
 
-	@Redirect(at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/RenderType;entityTranslucent("
-					+ "Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
-			),
-			method = "getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;Lnet/minecraft/resources/ResourceLocation;)"
-					+ "Lnet/minecraft/client/renderer/RenderType;")
-	private static RenderType onGetRenderType(ResourceLocation resLoc, SkullBlock.Type skullType, ResolvableProfile gameProfileIn, ResourceLocation resourceLocation) {
-		if(RefHolder.CPM_MODELS == null)return RenderType.entityTranslucent(resLoc);
-		SkullModelBase model = RefHolder.CPM_MODELS.apply(skullType);
+	@Inject(at = @At("HEAD"),
+			method = "getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;)"
+					+ "Lnet/minecraft/client/renderer/RenderType;", cancellable = true)
+	private static void onGetRenderType(SkullBlock.Type type, ResolvableProfile resolvableProfile, CallbackInfoReturnable<RenderType> cbi) {
+		if (RefHolder.CPM_MODELS == null)return;
+		SkullModelBase model = RefHolder.CPM_MODELS.apply(type);
 		RefHolder.CPM_MODELS = null;
-		ModelTexture mt = new ModelTexture(resLoc);
+		if (type != SkullBlock.Types.PLAYER || resolvableProfile == null)return;
+		ModelTexture mt = new ModelTexture(Minecraft.getInstance().getSkinManager().getInsecureSkin(resolvableProfile.gameProfile()).texture());
 		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
-		return mt.getRenderType();
-	}
-
-	@Redirect(at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/RenderType;entityCutoutNoCullZOffset("
-					+ "Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"
-			),
-			method = "getRenderType(Lnet/minecraft/world/level/block/SkullBlock$Type;Lnet/minecraft/world/item/component/ResolvableProfile;Lnet/minecraft/resources/ResourceLocation;)"
-					+ "Lnet/minecraft/client/renderer/RenderType;")
-	private static RenderType onGetRenderTypeNoSkin(ResourceLocation resLoc, SkullBlock.Type skullType, ResolvableProfile gameProfileIn, ResourceLocation resourceLocation) {
-		if(RefHolder.CPM_MODELS == null)return RenderType.entityCutoutNoCullZOffset(resLoc);
-		SkullModelBase model = RefHolder.CPM_MODELS.apply(skullType);
-		RefHolder.CPM_MODELS = null;
-		ModelTexture mt = new ModelTexture(resLoc);
-		CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
-		return mt.getRenderType();
+		if (mt.getTexture() != null)
+			cbi.setReturnValue(mt.getRenderType());
 	}
 
 	@Inject(at = @At("RETURN"),

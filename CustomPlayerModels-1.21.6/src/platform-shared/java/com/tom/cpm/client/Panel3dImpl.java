@@ -53,7 +53,11 @@ public class Panel3dImpl extends Panel3dNative {
 		gui.drawPip(this, bounds.w, bounds.h, State::new);
 	}
 
-	public static record State(Panel3dImpl impl, int x0, int y0, int x1, int y1, ScreenRectangle scissorArea) implements PictureInPictureRenderState {
+	public static record State(Panel3dImpl impl, int x0, int y0, int x1, int y1, ScreenRectangle bounds, ScreenRectangle scissorArea) implements PictureInPictureRenderState {
+
+		public State(Panel3dImpl impl, int x0, int y0, int x1, int y1, ScreenRectangle scissorArea) {
+			this(impl, x0, y0, x1, y1, PictureInPictureRenderState.getBounds(x0, y0, x1, y1, scissorArea), scissorArea);
+		}
 
 		@Override
 		public float scale() {

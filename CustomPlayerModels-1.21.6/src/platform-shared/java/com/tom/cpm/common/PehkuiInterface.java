@@ -1,12 +1,20 @@
 package com.tom.cpm.common;
 
+import java.util.Locale;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import com.tom.cpm.shared.network.NetHandler.ScalerInterface;
 import com.tom.cpm.shared.util.ScalingOptions;
 
+import virtuoel.pehkui.api.ScaleModifier;
+import virtuoel.pehkui.api.ScaleRegistries;
 import virtuoel.pehkui.api.ScaleType;
 import virtuoel.pehkui.api.ScaleTypes;
+import virtuoel.pehkui.api.TypedScaleModifier;
 
 public class PehkuiInterface implements ScalerInterface<ServerPlayer, ScaleType> {
 
@@ -14,14 +22,29 @@ public class PehkuiInterface implements ScalerInterface<ServerPlayer, ScaleType>
 	public void setScale(ScaleType key, ServerPlayer player, float newScale) {
 		var scaleData = key.getScaleData(player);
 		scaleData.setTargetScale(newScale);
-		scaleData.setScale(newScale);
-		scaleData.setScale(newScale);
-		scaleData.tick();
-		scaleData.onUpdate();
+		scaleData.setScaleTickDelay(1);
+		scaleData.setPersistence(false);
 	}
 
 	@Override
 	public ScaleType toKey(ScalingOptions opt) {
+		String name = opt.name().toLowerCase(Locale.ROOT);
+		ScaleType[] type = new ScaleType[1];
+		ScaleModifier modifier = registerScaleModifier(name, () -> new TypedScaleModifier(() -> type[0]));
+		type[0] = registerScaleType(name, builder -> builder.affectsDimensions().addDependentModifier(modifier));
+		getBaseType(opt).getDefaultBaseValueModifiers().add(modifier);
+		return type[0];
+	}
+
+	private static ScaleModifier registerScaleModifier(String name, Supplier<ScaleModifier> factory) {
+		return ScaleRegistries.register(ScaleRegistries.SCALE_MODIFIERS, ResourceLocation.tryBuild("cpm", name), factory.get());
+	}
+
+	private static ScaleType registerScaleType(String name, UnaryOperator<ScaleType.Builder> builder) {
+		return ScaleRegistries.register(ScaleRegistries.SCALE_TYPES, ResourceLocation.tryBuild("cpm", name), builder.apply(ScaleType.Builder.create()).build());
+	}
+
+	private ScaleType getBaseType(ScalingOptions opt) {
 		switch (opt) {
 		case ENTITY:
 			return ScaleTypes.BASE;

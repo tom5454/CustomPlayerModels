@@ -90,7 +90,6 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(graphics, mouseX, mouseY, partialTicks);
 		try {
 			this.graphics = graphics;
 			graphics.pose().pushMatrix();
@@ -156,9 +155,7 @@ public class GuiImpl extends Screen implements IGui {
 	public void drawText(int x, int y, String text, int color) {
 		x += getOffset().x;
 		y += getOffset().y;
-		graphics.depthTreeUp();
 		graphics.drawString(font, text, x, y, color, false);
-		graphics.depthTreeBack();
 	}
 
 	@Override
@@ -328,7 +325,6 @@ public class GuiImpl extends Screen implements IGui {
 	public void drawTexture(int x, int y, int width, int height, float u1, float v1, float u2, float v2) {
 		x = x + getOffset().x;
 		y = y + getOffset().y;
-		graphics.depthTreeUp();
 		graphics.blit(DynTexture.getBoundLoc(), x, y, x + width, y + height, u1, u2, v1, v2);
 	}
 
@@ -342,7 +338,6 @@ public class GuiImpl extends Screen implements IGui {
 		Box box = getContext().cutBox;
 		graphics.disableScissor();
 		graphics.enableScissor(box.x, box.y, box.x + box.w, box.y + box.h);
-		graphics.depthTreeUp();
 	}
 
 	@Override
@@ -648,7 +643,7 @@ public class GuiImpl extends Screen implements IGui {
 	@Override
 	public void drawStackTooltip(int mx, int my, Stack stack) {
 		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
-		graphics.renderTooltip(font, s, mx, my);
+		graphics.setTooltipForNextFrame(font, s, mx, my);
 	}
 
 	public <I, S extends PictureInPictureRenderState> void drawPip(I instance, int w, int h, StateFactory<I, S> sf) {
