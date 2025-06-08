@@ -23,9 +23,11 @@
 	"NativeImageAccessor",
 	"PlayerRenderStateMixin",
 	"EquipmentLayerRendererMixin",
-	"SkullSpecialRendererMixin",
+	"PlayerHeadSpecialRendererMixin",
 	"GuiGraphicsMixin",
 	"GuiRendererMixin",
+	"PlayerHeadRenderInfoMixin",
+	"SpecialModelWrapperMixin",
 	
 	"MinecraftMixinFabric",
 	"LivingRendererMixinFabric",

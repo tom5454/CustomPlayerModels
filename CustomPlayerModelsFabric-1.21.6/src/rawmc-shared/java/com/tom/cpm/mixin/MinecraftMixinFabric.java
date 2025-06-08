@@ -34,8 +34,8 @@ public abstract class MinecraftMixinFabric {
 		}
 	}
 
-	@Inject(at = @At("HEAD"), method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V")
-	public void onDisconnect(Screen screen, CallbackInfo cbi) {
+	@Inject(at = @At("HEAD"), method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V")
+	public void onDisconnect(Screen screen, boolean b, CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.onLogout();
 	}
 }

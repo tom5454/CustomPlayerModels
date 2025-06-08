@@ -23,7 +23,7 @@ public class ClientCommand extends BrigadierCommandHandler<FabricClientCommandSo
 
 	@Override
 	protected boolean hasOPPermission(FabricClientCommandSource source) {
-		return source.hasPermission(2);
+		return false;
 	}
 
 	@Override
