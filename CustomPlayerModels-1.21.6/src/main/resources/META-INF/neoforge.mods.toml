@@ -1,0 +1,78 @@
+# This is an example mods.toml file. It contains the data relating to the loading mods.
+# There are several mandatory fields (#mandatory), and many more that are optional (#optional).
+# The overall format is standard TOML format, v0.5.0.
+# Note that there are a couple of TOML lists in this file.
+# Find more information on toml format here:  https://github.com/toml-lang/toml
+# The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
+modLoader="javafml" #mandatory
+# A version range to match for said mod loader - for regular FML @Mod it will be the the FML version. This is currently 47.
+loaderVersion="[1,)" #mandatory
+# The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
+# Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
+license="MIT License"
+# A URL to refer people to when problems occur with this mod
+issueTrackerURL="https://github.com/tom5454/CustomPlayerModels/issues" #optional
+# A list of mods - how many allowed here is determined by the individual mod loader
+[[mods]] #mandatory
+# The modid of the mod
+modId="cpm" #mandatory
+# The version number of the mod
+version="${file.jarVersion}" #mandatory
+# A display name for the mod
+displayName="Customizable Player Models" #mandatory
+# A URL to query for updates for this mod. See the JSON update specification <here>
+updateJSONURL="https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json" #optional
+# A URL for the "homepage" for this mod, displayed in the mod UI
+displayURL="https://www.curseforge.com/minecraft/mc-mods/custom-player-models" #optional
+# A file name (in the root of the mod JAR) containing a logo for display
+logoFile="icon.png" #optional
+# A text field displayed in the mod UI
+credits="tom5454" #optional
+# A text field displayed in the mod UI
+authors="tom5454" #optional
+# Display Test controls the display for your mod in the server connection screen
+# MATCH_VERSION means that your mod will cause a red X if the versions on client and server differ. This is the default behaviour and should be what you choose if you have server and client elements to your mod.
+# IGNORE_SERVER_VERSION means that your mod will not cause a red X if it's present on the server but not on the client. This is what you should use if you're a server only mod.
+# IGNORE_ALL_VERSION means that your mod will not cause a red X if it's present on the client or the server. This is a special case and should only be used if your mod has no server component.
+# NONE means that no display test is set on your mod. You need to do this yourself, see IExtensionPoint.DisplayTest for more information. You can define any scheme you wish with this value.
+# IMPORTANT NOTE: this is NOT an instruction as to which environments (CLIENT or DEDICATED SERVER) your mod loads on. Your mod should load (and maybe do nothing!) whereever it finds itself.
+displayTest="IGNORE_ALL_VERSION" # MATCH_VERSION is the default if nothing is specified (#optional)
+
+# The description text for the mod (multi line!) (#mandatory)
+description='''
+Customize your minecraft avatar!
+'''
+# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+[[dependencies.cpm]] #optional
+    # the modid of the dependency
+    modId="neoforge" #mandatory
+    # Does this dependency have to exist - if not, ordering below must be specified
+    type="required"
+    # The version range of the dependency
+    versionRange="[21.6.0-beta,)" #mandatory
+    # An ordering relationship for the dependency - BEFORE or AFTER required if the dependency is not mandatory
+    # BEFORE - This mod is loaded BEFORE the dependency
+    # AFTER - This mod is loaded AFTER the dependency
+    ordering="NONE"
+    # Side this dependency is applied on - BOTH, CLIENT, or SERVER
+    side="BOTH"
+# Here's another dependency
+[[dependencies.cpm]]
+    modId="minecraft"
+    type="required"
+    # This version range declares a minimum of the current minecraft version up to but not including the next major version
+    versionRange="[1.21.6,1.22)"
+    ordering="NONE"
+    side="BOTH"
+
+# Features are specific properties of the game environment, that you may want to declare you require. This example declares
+# that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
+# stop your mod loading on the server for example.
+#[features.${mod_id}]
+#openGLVersion="[3.2,)"
+[[mixins]]
+config = "cpm.mixins.json"
+[[mixins]]
+config = "cpm.mixins.shared.json"
+[[mixins]]
+config = "cpm.mixins.compat.json"
