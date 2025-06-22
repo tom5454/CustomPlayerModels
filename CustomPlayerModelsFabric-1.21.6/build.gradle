@@ -71,7 +71,7 @@ dependencies {
         	exclude(group: "net.fabricmc.fabric-api")
     	}
     	modCompileOnly('maven.modrinth:iris:1.8.10+1.21.5-fabric')
-		modCompileOnly('maven.modrinth:vivecraft:1.21.5-1.2.5-b3-fabric')
+		modCompileOnly('maven.modrinth:vivecraft:1.21.6-1.2.5-b2-fabric')
 	} else {
 		compileOnly files("../CustomPlayerModels-1.21.6/stubs/iris.jar")
 		compileOnly files("../CustomPlayerModels-1.21.6/stubs/vc.jar")

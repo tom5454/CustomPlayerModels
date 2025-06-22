@@ -7,7 +7,6 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
 
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -60,10 +59,8 @@ public class ServerHandler extends ServerHandlerBase {
 	}
 
 	@SubscribeEvent
-	public void onTick(ServerTickEvent evt) {
-		if(evt.phase == Phase.END) {
-			netHandler.tick();
-		}
+	public void onTick(ServerTickEvent.Post evt) {
+		netHandler.tick();
 	}
 
 	@SubscribeEvent

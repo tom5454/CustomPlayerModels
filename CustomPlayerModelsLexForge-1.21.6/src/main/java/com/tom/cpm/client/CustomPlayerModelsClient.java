@@ -18,7 +18,6 @@ import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -80,18 +79,20 @@ public class CustomPlayerModelsClient extends ClientBase {
 	}
 
 	@SubscribeEvent
-	public void renderTick(RenderTickEvent evt) {
-		if(evt.phase == Phase.START) {
-			mc.getPlayerRenderManager().getAnimationEngine().update(evt.getTimer().getGameTimeDeltaPartialTick(true));
+	public void renderTick(RenderTickEvent.Pre evt) {
+		mc.getPlayerRenderManager().getAnimationEngine().update(evt.getTimer().getGameTimeDeltaPartialTick(true));
+	}
+
+	@SubscribeEvent
+	public void clientTickPre(ClientTickEvent.Pre evt) {
+		if(!Minecraft.getInstance().isPaused()) {
+			mc.getPlayerRenderManager().getAnimationEngine().tick();
 		}
 	}
 
 	@SubscribeEvent
-	public void clientTick(ClientTickEvent evt) {
-		if(evt.phase == Phase.START && !Minecraft.getInstance().isPaused()) {
-			mc.getPlayerRenderManager().getAnimationEngine().tick();
-		}
-		if (Minecraft.getInstance().player == null || evt.phase == Phase.START)
+	public void clientTickPost(ClientTickEvent.Post evt) {
+		if (Minecraft.getInstance().player == null)
 			return;
 
 		if(KeyBindings.gestureMenuBinding.consumeClick()) {

@@ -76,7 +76,7 @@ public class LWJGLKeyCodes extends KeyCodes {
 		KEY_CAPS_LOCK     = Keyboard.KEY_CAPITAL       ;
 		KEY_SCROLL_LOCK   = Keyboard.KEY_SCROLL        ;
 		KEY_NUM_LOCK      = Keyboard.KEY_NUMLOCK       ;
-		KEY_PRINT_SCREEN  = Keyboard.KEY_SYSRQ         ;
+		KEY_PRINT_SCREEN  = -1                         ;
 		KEY_PAUSE         = Keyboard.KEY_PAUSE         ;
 		KEY_F1            = Keyboard.KEY_F1            ;
 		KEY_F2            = Keyboard.KEY_F2            ;
@@ -128,7 +128,7 @@ public class LWJGLKeyCodes extends KeyCodes {
 		KEY_RIGHT_CONTROL = Keyboard.KEY_RCONTROL      ;
 		KEY_RIGHT_ALT     = Keyboard.KEY_RMENU         ;
 		KEY_RIGHT_SUPER   = Keyboard.KEY_RMETA         ;
-		KEY_MENU          = Keyboard.KEY_APPS          ;
-		KEY_LAST          = Keyboard.KEY_APPS          ;
+		KEY_MENU          = -1                         ;
+		KEY_LAST          = Keyboard.KEY_RMETA         ;
 	}
 }

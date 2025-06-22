@@ -3,7 +3,6 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0.29,6.2)'
-    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
 version = project.mod_version
@@ -39,6 +38,13 @@ minecraft {
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
+    	configureEach {
+    		arg "-mixin.config=cpm.mixins.json"
+    		arg "-mixin.config=cpm.mixins.compat.json"
+    		arg "-mixin.config=cpm.mixins.shared.json"
+    		property "mixin.debug.verbose", "true"
+			property "mixin.debug.export", "true"
+    	}
         client {
             workingDirectory project.file('run')
 
@@ -53,9 +59,6 @@ minecraft {
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
-
-            property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
 
             mods {
                 "cpm" {
@@ -79,9 +82,6 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
-            property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-
             mods {
                 "cpm" {
                     source sourceSets.main
@@ -103,9 +103,6 @@ minecraft {
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
-
-            property 'mixin.env.remapRefMap', 'true'
-			property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
             args '--mod', 'cpm', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
@@ -151,24 +148,13 @@ repositories {
     }
 }
 
-mixin {
-    config 'cpm.mixins.json'
-    config 'cpm.mixins.shared.json'
-    config 'cpm.mixins.compat.json'
-    
-    debug.verbose = true
-    debug.export = true
-}
-
 dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.21.6-56.0.1'
-
-    // Mixin annotation processor - generates the refmap
-    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
-    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    
+    compileOnly("io.github.llamalad7:mixinextras-common:0.4.1")
     
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 

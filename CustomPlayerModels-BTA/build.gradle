@@ -5,7 +5,7 @@ plugins {
 
 import org.gradle.internal.os.OperatingSystem
 
-project.ext.lwjglVersion = "3.3.4"
+project.ext.lwjglVersion = "3.3.3"
 
 switch (OperatingSystem.current()) {
 	case OperatingSystem.LINUX:
@@ -111,7 +111,9 @@ dependencies {
 	// If you do not need Halplibe you can comment this line out or delete this line
 	//implementation("turniplabs:halplibe:${project.halplibe_version}")
 
-	modImplementation("turniplabs:modmenu-bta:${project.mod_menu_version}")
+	modImplementation("turniplabs:modmenu-bta:${project.mod_menu_version}") {
+		transitive = false
+	}
 
 	implementation "org.slf4j:slf4j-api:1.8.0-beta4"
 	implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"
@@ -123,7 +125,9 @@ dependencies {
 	implementation("org.apache.logging.log4j:log4j-api:${log4jVersion}")
 	implementation("org.apache.logging.log4j:log4j-1.2-api:${log4jVersion}")
 
-	modImplementation("com.github.zarzelcow:legacy-lwjgl3:1.0.4")
+	modImplementation("com.github.Better-than-Adventure:legacy-lwjgl3:1.0.5") {
+		transitive = false
+	}
 	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
 	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
