@@ -1,12 +1,16 @@
 package com.tom.cpm.client;
 
 import java.util.List;
+import java.util.function.Function;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.options.SkinCustomizationScreen;
+import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.network.chat.Component;
 
 import net.minecraftforge.client.ConfigScreenHandler;
@@ -14,6 +18,7 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RegisterPictureInPictureRendererEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,6 +28,7 @@ import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import com.tom.cpl.tag.AllTagManagers;
+import com.tom.cpm.client.GuiGraphicsEx.RegistrationHandler;
 import com.tom.cpm.common.Command;
 import com.tom.cpm.shared.config.ConfigKeys;
 import com.tom.cpm.shared.config.ModConfig;
@@ -38,6 +44,7 @@ public class CustomPlayerModelsClient extends ClientBase {
 		init0();
 		RegisterKeyMappingsEvent.getBus(ctx.getModBusGroup()).addListener(KeyBindings::init);
 		RegisterClientReloadListenersEvent.getBus(ctx.getModBusGroup()).addListener(INSTANCE::registerReloadListeners);
+		RegisterPictureInPictureRendererEvent.BUS.addListener(INSTANCE::registerPip);
 		ctx.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, scr) -> new GuiImpl(SettingsGui::new, scr)));
 	}
 
@@ -147,5 +154,16 @@ public class CustomPlayerModelsClient extends ClientBase {
 
 	private void registerReloadListeners(RegisterClientReloadListenersEvent event) {
 		mc.setTags(new AllTagManagers(event::registerReloadListener, CPMTagLoader::new));
+	}
+
+	private void registerPip(RegisterPictureInPictureRendererEvent event) {
+		GuiGraphicsEx.registerPictureInPictureRenderers(new RegistrationHandler() {
+
+			@Override
+			public <T extends PictureInPictureRenderState> void register(Class<T> stateClass,
+					Function<BufferSource, PictureInPictureRenderer<T>> factory) {
+				event.register(factory.apply(event.getBufferSource()));
+			}
+		});
 	}
 }

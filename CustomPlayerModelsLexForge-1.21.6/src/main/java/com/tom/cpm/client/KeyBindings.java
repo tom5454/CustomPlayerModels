@@ -23,7 +23,7 @@ public class KeyBindings implements IKeybind {
 	public static IKeybind[] quickAccess = new IKeybind[IKeybind.QUICK_ACCESS_KEYBINDS_COUNT];
 
 	public static void init(RegisterKeyMappingsEvent evt) {
-		gestureMenuBinding = new KeyMapping("key.cpm.gestureMenu", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_G), "key.cpm.category");
+		gestureMenuBinding = new KeyMapping("key.cpm.gestureMenu", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_H), "key.cpm.category");
 		renderToggleBinding = new KeyMapping("key.cpm.renderToggle", KeyConflictContext.IN_GAME, InputConstants.UNKNOWN, "key.cpm.category");
 		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu", evt));
 		kbs.add(new KeyBindings(renderToggleBinding, "renderToggle", evt));

@@ -42,7 +42,7 @@ dependencies {
 	compileOnly "com.tom5454.cpm:CustomPlayerModels-API:${project.cpm_api_version}"
 	modImplementation "com.tom5454.cpm:CustomPlayerModels-Fabric-${project.cpm_mc_version}:${project.cpm_runtime_version}"
 	
-	modImplementation "local:flashback:0.6.0"
+	modImplementation "local:Flashback:0.34.0-MC1.21.1"
 	modImplementation "local:mixinconstraints:1.0.1"
 	modImplementation "local:mixinsquared-fabric:0.2.0-beta.6"
 	

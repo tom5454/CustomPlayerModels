@@ -33,6 +33,7 @@ import com.tom.cpm.shared.network.packet.SetSkinS2C;
 @SuppressWarnings("unchecked")
 public class CPMPacketInjector {
 	public static NetHandler<CustomPacketPayload.Type<ByteArrayPayload>, net.minecraft.world.entity.player.Player, FlashbackNet> netHandler;
+	private static FlashbackNet flashbackRecorder = new FlashbackNet();
 	private static Function<GameProfile, Object> keyFactory;
 	private static Supplier<Map<Object, byte[]>> serverModelsGetter;
 	private static Supplier<LoadingCache<Object, Player<?>>> cacheGetter;
@@ -85,21 +86,20 @@ public class CPMPacketInjector {
 	public static void injectStartPackets() {
 		var net = MinecraftClientAccess.get().getNetHandler();
 		if (net.hasModClient()) {
-			FlashbackNet netTo = new FlashbackNet();
 			Minecraft.getInstance().level.players().forEach(p -> {
 				var key = keyFactory.apply(p.getGameProfile());
 				byte[] data = serverModelsGetter.get().get(key);
 				if (data != null) {
 					NBTTagCompound d = new NBTTagCompound();
 					d.setByteArray(NetworkUtil.DATA_TAG, data);
-					netHandler.sendPacketTo(netTo, new SetSkinS2C(p.getId(), d));
+					netHandler.sendPacketTo(flashbackRecorder, new SetSkinS2C(p.getId(), d));
 				}
 				Player<?> loaded = cacheGetter.get().getIfPresent(key);
 				if (loaded != null) {
 					if (loaded.animState.gestureData != null) {
 						NBTTagCompound evt = new NBTTagCompound();
 						evt.setByteArray(NetworkUtil.GESTURE, loaded.animState.gestureData);
-						netHandler.sendPacketTo(netTo, new ReceiveEventS2C(p.getId(), evt));
+						netHandler.sendPacketTo(flashbackRecorder, new ReceiveEventS2C(p.getId(), evt));
 					}
 				}
 			});

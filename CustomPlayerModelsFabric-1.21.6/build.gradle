@@ -45,9 +45,9 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	/*modImplementation("com.terraformersmc:modmenu:12.0.0-beta.1") {
+	modImplementation("com.terraformersmc:modmenu:15.0.0-beta.3") {
         exclude(group: "net.fabricmc.fabric-api")
-    }*/
+    }
 	
 	compileOnly files("../CustomPlayerModels-1.21.6/stubs/of.jar")
 	
@@ -95,7 +95,7 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/java"
 			srcDir "../CustomPlayerModels-1.21.6/src/platform-shared/java"
 			srcDir "src/rawmc-shared/java"
-			exclude "com/tom/cpm/ModMenu.java"
+			//exclude "com/tom/cpm/ModMenu.java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"

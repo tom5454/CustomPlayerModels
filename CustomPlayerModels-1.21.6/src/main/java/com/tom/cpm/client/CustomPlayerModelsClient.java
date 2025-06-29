@@ -16,6 +16,7 @@ import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
@@ -40,6 +41,7 @@ public class CustomPlayerModelsClient extends ClientBase {
 		bus.addListener(KeyBindings::init);
 		bus.addListener(INSTANCE::registerReloadListeners);
 		bus.addListener(INSTANCE::registerPipelines);
+		bus.addListener(INSTANCE::registerPip);
 	}
 
 	public void init() {
@@ -153,5 +155,9 @@ public class CustomPlayerModelsClient extends ClientBase {
 	private void registerPipelines(RegisterRenderPipelinesEvent event) {
 		CustomRenderTypes.linesNoDepth();//Class init
 		Platform.pipelines.forEach(event::registerPipeline);
+	}
+
+	private void registerPip(RegisterPictureInPictureRenderersEvent event) {
+		GuiGraphicsEx.registerPictureInPictureRenderers(event::register);
 	}
 }

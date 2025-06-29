@@ -22,7 +22,6 @@
 	"EquipmentLayerRendererMixin",
 	"PlayerHeadSpecialRendererMixin",
 	"GuiGraphicsMixin",
-	"GuiRendererMixin",
 	"PlayerHeadRenderInfoMixin",
 	"SpecialModelWrapperMixin"
   ],
