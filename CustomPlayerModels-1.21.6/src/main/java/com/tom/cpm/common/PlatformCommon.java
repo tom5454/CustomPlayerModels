@@ -35,8 +35,18 @@ public class PlatformCommon {
 			accept(t, u, PAYLOAD_HANDLER);
 		}
 
-		public static void register(PacketRegistryP toClient, PacketRegistryP toServer, PacketRegistryP bidirectional) {
+		public static void register(PacketRegistryP toClient, PacketRegistryP toServer, PacketRegistryBi bidirectional) {
 			NetworkInit.register(toClient, toServer, bidirectional);
+		}
+	}
+
+	@FunctionalInterface
+	public static interface PacketRegistryBi extends PacketRegistry {
+		void accept(Type<ByteArrayPayload> t, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload> u, IPayloadHandler<ByteArrayPayload> hs, IPayloadHandler<ByteArrayPayload> hc);
+
+		@Override
+		default void accept(Type<ByteArrayPayload> t, StreamCodec<? super FriendlyByteBuf, ByteArrayPayload> u) {
+			accept(t, u, PAYLOAD_HANDLER, PAYLOAD_HANDLER);
 		}
 	}
 }

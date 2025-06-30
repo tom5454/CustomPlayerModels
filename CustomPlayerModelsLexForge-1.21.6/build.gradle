@@ -7,7 +7,7 @@ plugins {
 
 version = project.mod_version
 group = "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'CustomPlayerModelsLexForge-1.21.6'
+archivesBaseName = 'CustomPlayerModelsLexForge-1.21.7'
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -28,7 +28,7 @@ minecraft {
     // Use non-default mappings at your own risk. They may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
     //mappings channel: 'parchment', version: '2022.05.02-1.18.2'
-    mappings channel: 'official', version: '1.21.6'
+    mappings channel: 'official', version: '1.21.7'
     
     reobf = false
     copyIdeResources = true
@@ -152,7 +152,7 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.21.6-56.0.9'
+    minecraft 'net.minecraftforge:forge:1.21.7-57.0.0'
     
     compileOnly("io.github.llamalad7:mixinextras-common:0.4.1")
     

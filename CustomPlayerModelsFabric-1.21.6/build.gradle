@@ -70,7 +70,7 @@ dependencies {
     	modImplementation ('com.github.Virtuoel:Pehkui:3.8.3') {
         	exclude(group: "net.fabricmc.fabric-api")
     	}
-    	modCompileOnly('maven.modrinth:iris:1.8.10+1.21.5-fabric')
+    	modCompileOnly('maven.modrinth:iris:1.9.1+1.21.7-fabric')
 		modCompileOnly('maven.modrinth:vivecraft:1.21.6-1.2.5-b2-fabric')
 	} else {
 		compileOnly files("../CustomPlayerModels-1.21.6/stubs/iris.jar")

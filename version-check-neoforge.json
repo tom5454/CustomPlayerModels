@@ -9,7 +9,8 @@
     "1.21.3-latest": "0.6.22a",
     "1.21.4-latest": "0.6.22a",
     "1.21.5-latest": "0.6.22a",
-    "1.21.6-latest": "0.6.22c"
+    "1.21.6-latest": "0.6.22c",
+    "1.21.7-latest": "0.6.22a"
   },
   "1.20.2": {
     "0.0.0": "1.20.1-forge",
@@ -126,6 +127,9 @@
     "0.6.22a": "1.21.6 port",
     "0.6.22b": "Updated to BTA 7.3_04\nChanged gestures keybind default to H on 1.21.6 (Closes #794)\nFixed text fields not rendering on 1.21.6 (Closes #793)",
     "0.6.22c": "Fixed text not rendering in some cases (Closes #795)\nChanged gestures keybind default to H on 1.21.6 (Closes #796)\nFixed crash with NeoForge 21.6.19-beta\nFixed error with ModMenu on fabric"
+  },
+  "1.21.7": {
+    "0.6.22a": "1.21.7 port"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }
