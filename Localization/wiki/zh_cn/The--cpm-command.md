@@ -95,6 +95,7 @@ Base64模型：使用Base64选项导出的模型。
 * [enabled](#scaling-enabled)
 * [method](#scaling-method)
 * [reset](#scaling-reset)
+* [debug](#scaling-debug)
 
 
 <a name="scaling-limit"/>
@@ -129,6 +130,22 @@ Base64模型：使用Base64选项导出的模型。
 ### scaling reset
 使用：`/cpm scaling reset <玩家>`  
 重置选定玩家的缩放比例。
+
+
+<a name="scaling-debug"/>
+
+### 缩放调试
+使用：`/cpm scaling debug <玩家>`  
+打印玩家所有缩放设置：请求比例“Rq”、实际比例“V”、限制“Lim”、缩放方法“M”。  
+示例输出：
+```
+<玩家>的缩放调试：
+
+- “实体缩放” M: 属性，V：1.5（Rq: 1.5），Lim：0.01 - 3.0
+- “眼睛高度” M: 不支持（Rq: 1.0）
+- “跳跃高度” M: 属性，V: 1.0（Rq: 1.0），Lim：0.01 - 10.0
+- “生命值” M：缩放限制为正常值（Rq: 1.0）
+```
 
 
 <a name="animate"/>

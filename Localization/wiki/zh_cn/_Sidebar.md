@@ -16,8 +16,9 @@
 * [模型菜单](https://github.com/tom5454/CustomPlayerModels/wiki/Models-Menu)
 * [游戏内控制](https://github.com/tom5454/CustomPlayerModels/wiki/Controls#in-game-controls-keybindings)
 * [扩展Mod](https://github.com/tom5454/CustomPlayerModels/wiki/Mod-Integrations)
-* [比例](https://github.com/tom5454/CustomPlayerModels/wiki/Scaling)
+* [缩放](https://github.com/tom5454/CustomPlayerModels/wiki/Scaling)
 * 命令
   * [/cpmclient 命令](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpmclient-command)
   * [/cpm 命令](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpm-command)
 * [API (Beta)](https://github.com/tom5454/CustomPlayerModels/wiki/API-documentation)
+* [Wiki Markdown 备忘单](https://github.com/tom5454/CustomPlayerModels/wiki/CPMMarkdownCheatsheet)
