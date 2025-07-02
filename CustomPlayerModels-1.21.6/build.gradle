@@ -32,7 +32,7 @@ repositories {
 }
 
 base {
-    archivesName = 'CustomPlayerModels-1.21.5'
+    archivesName = 'CustomPlayerModels-1.21.7'
 }
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
@@ -138,7 +138,7 @@ dependencies {
     compileOnly files("stubs/fpm.jar")
     
     if (useLib) {
-    	compileOnly "maven.modrinth:vivecraft:1.21.4-1.2.0-neoforge"
+    	compileOnly "maven.modrinth:vivecraft:1.21.6-1.2.5-b2-neoforge"
     	compileOnly 'com.github.Virtuoel:Pehkui:3.8.3-1.21-neoforge'
     } else {
     	compileOnly files("stubs/pehkui.jar")

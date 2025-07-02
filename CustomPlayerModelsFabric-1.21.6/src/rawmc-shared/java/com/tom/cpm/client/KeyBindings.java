@@ -18,7 +18,7 @@ public class KeyBindings implements IKeybind {
 	public static IKeybind[] quickAccess = new IKeybind[IKeybind.QUICK_ACCESS_KEYBINDS_COUNT];
 
 	public static void init() {
-		gestureMenuBinding = new KeyMapping("key.cpm.gestureMenu", GLFW.GLFW_KEY_G, "key.cpm.category");
+		gestureMenuBinding = new KeyMapping("key.cpm.gestureMenu", GLFW.GLFW_KEY_H, "key.cpm.category");
 		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu"));
 
 		renderToggleBinding = new KeyMapping("key.cpm.renderToggle", InputConstants.UNKNOWN.getValue(), "key.cpm.category");

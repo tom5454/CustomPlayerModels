@@ -32,7 +32,9 @@
     "1.21.3-latest": "0.6.22a",
     "1.21.4-latest": "0.6.22a",
     "1.21.1-latest": "0.6.22a",
-    "1.21.5-latest": "0.6.22a"
+    "1.21.5-latest": "0.6.22a",
+    "1.21.6-latest": "0.6.22c",
+    "1.21.7-latest": "0.6.22a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -964,6 +966,15 @@
     "0.0.0": "1.21.4-forge",
     "0.6.21a": "Minecraft Forge 1.21.5 port\n\nFixed crash with iris (Closes #768)",
     "0.6.22a": "Added `/cpm scaling debug \u003cplayer\u003e` command, lists all of the scaling settings\nUpdated Spanish translations (#761)\n25w18a port\n\nRewrote the pehkui scaling system\nFixed ConcurrentModificationException errors while loading models\nRemoved remove flight speed attribute scaler (didn\u0027t actually work)\nFixed 0 sized cubes still drawing triangles\nFixed paste client delete confirm popup missing OK button text\nMarked the bukkit plugin as incompatible with forge/neo/fabric"
+  },
+  "1.21.6": {
+    "0.0.0": "1.21.5-forge",
+    "0.6.22a": "1.21.6 port",
+    "0.6.22b": "Updated to BTA 7.3_04\nChanged gestures keybind default to H on 1.21.6 (Closes #794)\nFixed text fields not rendering on 1.21.6 (Closes #793)",
+    "0.6.22c": "Fixed text not rendering in some cases (Closes #795)\nChanged gestures keybind default to H on 1.21.6 (Closes #796)\nFixed crash with NeoForge 21.6.19-beta\nFixed error with ModMenu on fabric"
+  },
+  "1.21.7": {
+    "0.6.22a": "1.21.7 port"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }

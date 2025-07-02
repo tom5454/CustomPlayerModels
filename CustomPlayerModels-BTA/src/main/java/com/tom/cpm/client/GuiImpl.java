@@ -19,8 +19,10 @@ import net.minecraft.client.gui.ButtonElement;
 import net.minecraft.client.gui.ItemElement;
 import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.TextFieldElement;
+import net.minecraft.client.gui.TooltipElement;
 import net.minecraft.client.gui.chat.ScreenChat;
 import net.minecraft.client.input.InputType;
+import net.minecraft.client.option.enums.DescriptionPromptEnum;
 import net.minecraft.client.render.tessellator.Tessellator;
 import net.minecraft.client.util.debug.DebugRender;
 import net.minecraft.core.item.ItemStack;
@@ -51,13 +53,14 @@ import com.tom.cpm.shared.util.Log;
 public class GuiImpl extends Screen implements IGui {
 	private static final KeyCodes CODES = new LWJGLKeyCodes();
 	private static final NativeGuiComponents nativeComponents = new NativeGuiComponents();
-	protected static ItemElement itemRenderer = new ItemElement(Minecraft.INSTANCE);
 	private Frame gui;
 	private Screen parent;
 	private CtxStack stack;
 	private UIColors colors;
 	private Consumer<Runnable> closeListener;
 	private int vanillaScale = -1;
+	private TooltipElement tooltipElement;
+	private ItemElement itemElement;
 
 	static {
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
@@ -66,8 +69,11 @@ public class GuiImpl extends Screen implements IGui {
 	}
 
 	public GuiImpl(Function<IGui, Frame> creator, Screen parent) {
+		final Minecraft mc = Minecraft.getMinecraft();
 		this.colors = new UIColors();
 		this.parent = parent;
+		this.tooltipElement = new TooltipElement(mc);
+		this.itemElement = new ItemElement(mc);
 		try {
 			this.gui = creator.apply(this);
 		} catch (Throwable e) {
@@ -260,7 +266,6 @@ public class GuiImpl extends Screen implements IGui {
 			private String message1 = "Custom Player Models";
 			private String message2 = Lang.format("error.cpm.crash", e);
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public void init() {
 				super.init();
@@ -273,7 +278,7 @@ public class GuiImpl extends Screen implements IGui {
 
 			@Override
 			public void render(int par1, int par2, float par3) {
-				GuiImpl.drawGradientRect(0, 0, this.width, this.height, -12574688, -11530224, 0);
+				drawGradientRect(0, 0, this.width, this.height, -12574688, -11530224);
 				this.drawStringCentered(this.font, this.message1, this.width / 2, 90, 16777215);
 				this.drawStringCentered(this.font, this.message2, this.width / 2, 110, 16777215);
 				super.render(par1, par2, par3);
@@ -675,155 +680,20 @@ public class GuiImpl extends Screen implements IGui {
 		x += getOffset().x;
 		y += getOffset().y;
 		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
-		itemRenderer.render(s, x, y);
+		try {
+			itemElement.render(s, x, y);
+		} catch (Exception e) {
+			Log.error("Error rendering item in GUI: " + s.getItemKey(), e);
+		}
 	}
 
 	@Override
 	public void drawStackTooltip(int mx, int my, Stack stack) {
 		ItemStack s = ItemStackHandlerImpl.impl.unwrap(stack);
-		drawItemStackTooltip(s, mx, my);
-	}
-
-	@SuppressWarnings("unchecked")
-	protected void drawItemStackTooltip(ItemStack par1ItemStack, int par2, int par3) {
-		/*List<String> list = new ArrayList<>();
-		list.add(class_629.method_2049(par1ItemStack.getTranslationKey() + ".name"));
-
-		this.drawHoveringText(list, par2, par3, this.font);*/
-	}
-
-	/*protected void drawHoveringText(List<String> par1List, int par2, int par3, TextRenderer font) {
-		if (!par1List.isEmpty()) {
-			GL11.glDisable(32826);
-			class_583.method_1927();
-			GL11.glDisable(2896);
-			GL11.glDisable(2929);
-			int k = 0;
-			Iterator<String> iterator = par1List.iterator();
-
-			int j1;
-			while (iterator.hasNext()) {
-				String s = iterator.next();
-				j1 = font.getWidth(s);
-				if (j1 > k) {
-					k = j1;
-				}
-			}
-
-			int i1 = par2 + 12;
-			j1 = par3 - 12;
-			int k1 = 8;
-			if (par1List.size() > 1) {
-				k1 += 2 + (par1List.size() - 1) * 10;
-			}
-
-			if (i1 + k > this.width) {
-				i1 -= 28 + k;
-			}
-
-			if (j1 + k1 + 6 > this.height) {
-				j1 = this.height - k1 - 6;
-			}
-
-			this.zLevel = 300.0F;
-			//itemRenderer.zOffset = 300.0F;
-			int l1 = -267386864;
-			this.drawGradientRect(i1 - 3, j1 - 4, i1 + k + 3, j1 - 3, l1, l1);
-			this.drawGradientRect(i1 - 3, j1 + k1 + 3, i1 + k + 3, j1 + k1 + 4, l1, l1);
-			this.drawGradientRect(i1 - 3, j1 - 3, i1 + k + 3, j1 + k1 + 3, l1, l1);
-			this.drawGradientRect(i1 - 4, j1 - 3, i1 - 3, j1 + k1 + 3, l1, l1);
-			this.drawGradientRect(i1 + k + 3, j1 - 3, i1 + k + 4, j1 + k1 + 3, l1, l1);
-			int i2 = 1347420415;
-			int j2 = (i2 & 16711422) >> 1 | i2 & -16777216;
-			this.drawGradientRect(i1 - 3, j1 - 3 + 1, i1 - 3 + 1, j1 + k1 + 3 - 1, i2, j2);
-			this.drawGradientRect(i1 + k + 2, j1 - 3 + 1, i1 + k + 3, j1 + k1 + 3 - 1, i2, j2);
-			this.drawGradientRect(i1 - 3, j1 - 3, i1 + k + 3, j1 - 3 + 1, i2, i2);
-			this.drawGradientRect(i1 - 3, j1 + k1 + 2, i1 + k + 3, j1 + k1 + 3, j2, j2);
-
-			for (int k2 = 0; k2 < par1List.size(); ++k2) {
-				String s1 = par1List.get(k2);
-				font.drawWithShadow(s1, i1, j1, -1);
-				if (k2 == 0) {
-					j1 += 2;
-				}
-
-				j1 += 10;
-			}
-
-			this.zLevel = 0.0F;
-			//itemRenderer.zOffset = 0.0F;
-			GL11.glEnable(2896);
-			GL11.glEnable(2929);
-			class_583.method_1930();
-			GL11.glEnable(32826);
+		final boolean showDescription = DescriptionPromptEnum.showDescription(this.mc);
+		final String str = this.tooltipElement.getTooltipText(s, showDescription, null);
+		if (str.length() > 0) {
+			this.tooltipElement.render(str, mx, my, 8, -8);
 		}
-
-	}
-
-	public static void drawRect(int var0, int var1, int var2, int var3, int var4) {
-		int var5;
-		if (var0 < var2) {
-			var5 = var0;
-			var0 = var2;
-			var2 = var5;
-		}
-
-		if (var1 < var3) {
-			var5 = var1;
-			var1 = var3;
-			var3 = var5;
-		}
-
-		float var10 = (var4 >> 24 & 255) / 255.0F;
-		float var6 = (var4 >> 16 & 255) / 255.0F;
-		float var7 = (var4 >> 8 & 255) / 255.0F;
-		float var8 = (var4 & 255) / 255.0F;
-		Tessellator var9 = Tessellator.instance;
-		GL11.glEnable(3042);
-		GL11.glDisable(3553);
-		GL11.glBlendFunc(770, 771);
-		GL11.glColor4f(var6, var7, var8, var10);
-		var9.startDrawingQuads();
-		var9.addVertex(var0, var3, 0.0D);
-		var9.addVertex(var2, var3, 0.0D);
-		var9.addVertex(var2, var1, 0.0D);
-		var9.addVertex(var0, var1, 0.0D);
-		var9.draw();
-		GL11.glEnable(3553);
-		GL11.glDisable(3042);
-	}*/
-
-	@Override
-	protected void drawGradientRect(int var1, int var2, int var3, int var4, int var5, int var6) {
-		drawGradientRect(var1, var2, var3, var4, var5, var6, this.zLevel);
-	}
-
-	protected static void drawGradientRect(int var1, int var2, int var3, int var4, int var5, int var6, double z) {
-		float var7 = (var5 >> 24 & 255) / 255.0F;
-		float var8 = (var5 >> 16 & 255) / 255.0F;
-		float var9 = (var5 >> 8 & 255) / 255.0F;
-		float var10 = (var5 & 255) / 255.0F;
-		float var11 = (var6 >> 24 & 255) / 255.0F;
-		float var12 = (var6 >> 16 & 255) / 255.0F;
-		float var13 = (var6 >> 8 & 255) / 255.0F;
-		float var14 = (var6 & 255) / 255.0F;
-		GL11.glDisable(3553);
-		GL11.glEnable(3042);
-		GL11.glDisable(3008);
-		GL11.glBlendFunc(770, 771);
-		GL11.glShadeModel(7425);
-		Tessellator var15 = Tessellator.instance;
-		var15.startDrawingQuads();
-		var15.setColorRGBA_F(var8, var9, var10, var7);
-		var15.addVertex(var3, var2, z);
-		var15.addVertex(var1, var2, z);
-		var15.setColorRGBA_F(var12, var13, var14, var11);
-		var15.addVertex(var1, var4, z);
-		var15.addVertex(var3, var4, z);
-		var15.draw();
-		GL11.glShadeModel(7424);
-		GL11.glDisable(3042);
-		GL11.glEnable(3008);
-		GL11.glEnable(3553);
 	}
 }

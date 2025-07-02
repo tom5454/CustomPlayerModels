@@ -5,30 +5,9 @@
   "mixins": [
   	"common.PlayerListMixin",
 	"common.PlayerMixin",
-	"common.ServerEntityMixin",
-	"ServerGamePacketListenerImplMixin"
+	"common.ServerEntityMixin"
   ],
   "client": [
-    "PlayerRendererMixin",
-	"CapeLayerMixin",
-	"WingsLayerMixin",
-	"HumanoidArmorLayerMixin",
-	"SkullBlockRendererMixin",
-	"CustomHeadLayerMixin",
-	"ParrotOnShoulderLayerMixin",
-	"LocalPlayerMixin",
-	"LivingRendererMixin",
-	"ClientPacketListenerMixin",
-	"GuiAccessor",
-	"NativeImageAccessor",
-	"PlayerRenderStateMixin",
-	"EquipmentLayerRendererMixin",
-	"PlayerHeadSpecialRendererMixin",
-	"GuiGraphicsMixin",
-	"GuiRendererMixin",
-	"PlayerHeadRenderInfoMixin",
-	"SpecialModelWrapperMixin",
-	
 	"MinecraftMixinFabric",
 	"LivingRendererMixinFabric",
 	"PlayerRendererMixinFabric"

@@ -31,12 +31,13 @@
   },
   "mixins": [
   	"cpm.mixins.json",
+  	"cpm.mixins.shared.json",
   	"cpm.mixins.compat.json"
   ],
   "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.7.4",
     "fabric-api": "*",
-    "minecraft": ">1.21.1"
+    "minecraft": ">=1.21.7"
   }
 }

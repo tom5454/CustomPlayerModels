@@ -155,7 +155,7 @@ public class GuiImpl extends Screen implements IGui {
 	public void drawText(int x, int y, String text, int color) {
 		x += getOffset().x;
 		y += getOffset().y;
-		graphics.drawString(font, text, x, y, color, false);
+		graphics.drawString(font, text, x, y, color | 0xFF000000, false);
 	}
 
 	@Override
@@ -277,7 +277,7 @@ public class GuiImpl extends Screen implements IGui {
 			super.render(graphics, mouseX, mouseY, partialTicks);
 			String[] txt = I18n.get("error.cpm.crash", error).split("\\\\");
 			for (int i = 0; i < txt.length; i++) {
-				graphics.drawCenteredString(this.font, txt[i], this.width / 2, 15 + i * 10, 16777215);
+				graphics.drawCenteredString(this.font, txt[i], this.width / 2, 15 + i * 10, 0xFFFFFFFF);
 			}
 		}
 
@@ -360,7 +360,7 @@ public class GuiImpl extends Screen implements IGui {
 			this.field.setMaxLength(1024*1024);
 			this.field.setBordered(false);
 			this.field.setVisible(true);
-			this.field.setTextColor(16777215);
+			this.field.setTextColor(colors.label_text_color);
 			this.field.setResponder(this);
 			this.enabled = true;
 		}
@@ -608,7 +608,7 @@ public class GuiImpl extends Screen implements IGui {
 		graphics.pose().pushMatrix();
 		graphics.pose().translate(x, y);
 		graphics.pose().scale(scale, scale);
-		graphics.drawString(font, text.<Component>remap(), 0, 0, color, false);
+		graphics.drawString(font, text.<Component>remap(), 0, 0, color | 0xFF000000, false);
 		graphics.pose().popMatrix();
 	}
 

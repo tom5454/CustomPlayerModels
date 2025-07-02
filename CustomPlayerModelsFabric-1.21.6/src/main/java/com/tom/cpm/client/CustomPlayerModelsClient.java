@@ -1,17 +1,23 @@
 package com.tom.cpm.client;
 
+import java.util.function.Function;
+
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.PlayPayloadHandler;
+import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.options.SkinCustomizationScreen;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
 
@@ -70,8 +76,13 @@ public class CustomPlayerModelsClient extends ClientBase implements ClientModIni
 			netHandler.receiveClient(p.id(), new FastByteArrayInputStream(p.data()), (NetH) c.player().connection);
 		};
 		CustomPlayerModels.clientPackets.forEach(p -> ClientPlayNetworking.registerGlobalReceiver(p, h));
+		GuiGraphicsEx.registerPictureInPictureRenderers(this::registerPip);
 		CustomPlayerModels.LOG.info("Customizable Player Models Client Initialized");
 		apiInit();
+	}
+
+	private <T extends PictureInPictureRenderState> void registerPip(Class<T> stateClass, Function<MultiBufferSource.BufferSource, PictureInPictureRenderer<T>> factory) {
+		SpecialGuiElementRegistry.register(c -> factory.apply(c.vertexConsumers()));
 	}
 
 	public void onLogout() {
