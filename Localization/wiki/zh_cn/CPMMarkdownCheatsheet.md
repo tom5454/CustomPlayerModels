@@ -1,9 +1,9 @@
 这是根据 [Markdown Here](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) 修改的副本，  
 包含了 CPM 游戏内 Wiki 查看器支持的所有功能。
 
-本文旨在作为快速参考和展示。  
-如需更完整的信息，请参见 [John Gruber 的原始规范](http://daringfireball.net/projects/markdown/)  
-以及 [Github 风格 Markdown 的信息页面](http://github.github.com/github-flavored-markdown/)。
+本文旨在作为快速参考与演示。  
+如需更完整的信息，请参阅 [John Gruber 的原始规范](http://daringfireball.net/projects/markdown/)  
+以及 [GitHub 风格 Markdown 的说明页面](http://github.github.com/github-flavored-markdown/)。
 
 
 <a name="table-of-contents"/>
@@ -21,7 +21,7 @@
 [分隔线](#hr)  
 [换行符](#lines)  
 [YouTube 视频嵌入](#videos)  
-[高亮 / 提示框](#highlighting) 
+[高亮 / 提示框](#highlighting)
 
 <a name="headers"/>
 

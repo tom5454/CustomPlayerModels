@@ -1,9 +1,10 @@
 
 <a name="cpm-api-documentation"/>
 
-# CPM Api 文档
+# CPM API 文档
 目录：
-* [开始](#setup) ([版本](#latest-versions))
+
+* [起步](#setup) ([版本](#latest-versions))
 * [创建你的插件](#create-your-plugin)
 * [客户端 API](#client-api)
 * [通用 API](#common-api)
@@ -11,7 +12,7 @@
 
 <a name="setup"/>
 
-## 开始
+## 起步
 将 CPM api 添加到你的 gradle 构建脚本（`build.gradle`）：
 
 
@@ -228,7 +229,7 @@ public class CPMCompat implements ICPMPlugin {
 
 ### Forge 1.16 及更高版本
 发送 IMC 消息。
- 
+
 ```java
 public MyMod() {
 	...
@@ -309,6 +310,7 @@ else
 <a name="rendering-an-entity-with-cpm-model"/>
 
 #### 使用 CPM 模型渲染实体
+
 1. 在渲染之前使用渲染器设置 GameProfile 或 LocalModel。
 `setGameProfile(gameProfile)`：渲染玩家模型
 `setLocalModel(localModel)`：渲染本地模型，[加载本地模型](#loading-a-local-model)
