@@ -1,7 +1,6 @@
 package com.tom.cpm.web.client.util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +16,6 @@ import com.tom.cpl.math.Vec2i;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
 import com.tom.cpm.shared.editor.project.ProjectFile.BAIS;
-import com.tom.cpm.web.client.FS;
 import com.tom.cpm.web.client.java.Java;
 import com.tom.cpm.web.client.java.Java.ResourceInputStream;
 import com.tom.cpm.web.client.render.RenderSystem;
@@ -70,22 +68,22 @@ public class ImageIO implements IImageIO {
 	}
 
 	@Override
-	public Image read(File f) throws IOException {
-		try(FileInputStream fi = new FileInputStream(f)) {
-			return read(fi);
-		}
-	}
-
-	@Override
 	public CompletableFuture<Image> readF(File file) {
-		CompletableFuture<Image> f = new CompletableFuture<>();
-		try {
-			f.complete(read(file));
-			return f;
-		} catch (Exception e) {
-		}
-		Java.promiseToCf(FS.getContent(file.getAbsolutePath()).then(v -> loadImage(v, true, false)), f);
-		return f;
+		return com.tom.cpm.web.client.java.io.FileInputStream.openFile(file).thenCompose(fin -> {
+			try (InputStream fi = fin) {
+				try {
+					return CompletableFuture.completedFuture(read(fi));
+				} catch (Exception e) {
+					CompletableFuture<Image> f = new CompletableFuture<>();
+					Java.promiseToCf(loadImage(fin.getB64(), true, false), f);
+					return f;
+				}
+			} catch (Exception e) {
+				CompletableFuture<Image> f = new CompletableFuture<>();
+				f.completeExceptionally(e);
+				return f;
+			}
+		});
 	}
 
 	public static CompletableFuture<Image> loadImage(byte[] f) {
@@ -162,5 +160,10 @@ public class ImageIO implements IImageIO {
 		} catch (Throwable e) {
 			throw new IOException(e);
 		}
+	}
+
+	@Override
+	public Image read(File f) throws IOException {
+		throw new UnsupportedOperationException();
 	}
 }

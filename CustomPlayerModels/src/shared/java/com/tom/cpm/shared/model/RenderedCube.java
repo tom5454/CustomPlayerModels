@@ -130,6 +130,12 @@ public class RenderedCube implements IModelComponent {
 		}
 	}
 
+	public void setColor(int color) {
+		if(recolor || cube.texSize == 0) {
+			this.color = color;
+		}
+	}
+
 	@Override
 	public Vec3f getPosition() {
 		return pos;

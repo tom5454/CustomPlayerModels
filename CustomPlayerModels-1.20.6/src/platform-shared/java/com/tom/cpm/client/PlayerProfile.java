@@ -51,7 +51,9 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 	private final GameProfile profile;
 	private String skinType;
 
-	public PlayerProfile(GameProfile profile) {
+	public static GameProfile getPlayerProfile(net.minecraft.world.entity.player.Player player) {
+		if (player == null)return null;
+		var profile = player.getGameProfile();
 		if (profile.getProperties().isEmpty()) {
 			var conn = Minecraft.getInstance().getConnection();
 			if (conn != null) {
@@ -59,7 +61,10 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 				if(info != null)profile = info.getProfile();
 			}
 		}
+		return profile;
+	}
 
+	public PlayerProfile(GameProfile profile) {
 		this.profile = new GameProfile(profile.getId(), profile.getName());
 		cloneProperties(profile.getProperties(), this.profile.getProperties());
 

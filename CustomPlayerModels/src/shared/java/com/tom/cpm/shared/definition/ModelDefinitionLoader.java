@@ -84,22 +84,24 @@ public class ModelDefinitionLoader<GP> {
 			if(key.uniqueKey.startsWith("model:")) {
 				String b64 = key.uniqueKey.substring(6);
 				Log.debug("Loading key model for " + key.profile);
-				player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(b64, player), THREAD_POOL));
+				player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(b64, player), THREAD_POOL), true);
 			} else if(serverModels.containsKey(key)) {
 				Log.debug("Loading server model for " + key.profile);
-				player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(serverModels.get(key), player), THREAD_POOL));
+				player.setModelDefinition(CompletableFuture.supplyAsync(() -> loadModel(serverModels.get(key), player), THREAD_POOL), true);
 			} else {
 				Log.debug("Loading skin model for " + key.profile);
 				player.setModelDefinition(texLoad.thenCompose(v -> player.getTextures().getTexture(TextureType.SKIN)).thenApplyAsync(skin -> {
 					if(skin != null && player.getModelDefinition() == null) {
 						return loadModel(skin, player);
+					} else if(!player.getTextures().hasTexture(TextureType.SKIN) && player.isClientPlayer()) {
+						return new ModelDefinition(new LocalizedIOException("Custom skin not found", new FormatText("error.cpm.no_skin_url")), player);
 					} else {
 						return null;
 					}
-				}, THREAD_POOL));
+				}, THREAD_POOL), false);
 			}
 		} catch (Exception e) {
-			player.setModelDefinition(CompletableFuture.completedFuture(new ModelDefinition(e, player)));
+			player.setModelDefinition(CompletableFuture.completedFuture(new ModelDefinition(e, player)), false);
 		}
 		return player;
 	}
@@ -250,12 +252,20 @@ public class ModelDefinitionLoader<GP> {
 			serverModels.remove(key);
 			invalidateAll(key);
 		} else {
-			Key key = new Key(forPlayer, null);
-			serverModels.put(key, data);
-			invalidateAll(key);
-			Player<?> player = loadPlayer(forPlayer, PLAYER_UNIQUE);
+			serverModels.put(new Key(forPlayer, null), data);
+			Player<?> player = reloadPlayer(forPlayer, PLAYER_UNIQUE);
 			player.forcedSkin = forced;
 		}
+	}
+
+	public byte[] getModel(GP forPlayer) {
+		Key key = new Key(forPlayer, null);
+		return serverModels.get(key);
+	}
+
+	public Player<?> getLoadedPlayer(GP forPlayer) {
+		Key key = new Key(forPlayer, PLAYER_UNIQUE);
+		return cache.getIfPresent(key);
 	}
 
 	private void invalidateAll(Key key) {
@@ -388,5 +398,11 @@ public class ModelDefinitionLoader<GP> {
 			}
 		}
 		throw new LocalizedIOException("Unknown domain: " + url.getHost(), new FormatText("label.cpm.link.unknownDomain", url.getHost()));
+	}
+
+	public Player<?> reloadPlayer(GP gprofile, String unique) {
+		Key key = new Key(gprofile, null);
+		invalidateAll(key);
+		return loadPlayer(gprofile, unique);
 	}
 }

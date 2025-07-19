@@ -110,10 +110,6 @@ mixin {
 }
 
 repositories {
-    maven { // TOP
-        name 'tterrag maven'
-        url "https://maven.tterrag.com/"
-    }
     maven { // McJtyLib
         url "https://maven.k-4u.nl"
     }
@@ -127,6 +123,10 @@ repositories {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
     }
+    maven {
+		name "ModMaven"
+		url "https://modmaven.dev"
+	}
 }
 
 dependencies {

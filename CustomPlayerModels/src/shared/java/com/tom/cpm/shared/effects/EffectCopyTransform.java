@@ -10,14 +10,16 @@ import com.tom.cpm.shared.model.RenderedCube;
 public class EffectCopyTransform implements IRenderEffect {
 	private int from, to;
 	private short copy;
+	private float multiply;
 
 	public EffectCopyTransform() {
 	}
 
-	public EffectCopyTransform(int from, int to, short copy) {
+	public EffectCopyTransform(int from, int to, short copy, float multiply) {
 		this.from = from;
 		this.to = to;
 		this.copy = copy;
+		this.multiply = multiply;
 	}
 
 	@Override
@@ -25,6 +27,11 @@ public class EffectCopyTransform implements IRenderEffect {
 		from = in.readVarInt();
 		to = in.readVarInt();
 		copy = (short) in.readVarInt();
+		if ((copy & (1 << 14)) != 0) {
+			multiply = in.readFloat();
+		} else {
+			multiply = 1f;
+		}
 	}
 
 	@Override
@@ -32,6 +39,8 @@ public class EffectCopyTransform implements IRenderEffect {
 		out.writeVarInt(from);
 		out.writeVarInt(to);
 		out.writeVarInt(copy);
+		if (Math.abs(multiply - 1f) > 0.01f)
+			out.writeFloat(multiply);
 	}
 
 	@Override
@@ -39,7 +48,7 @@ public class EffectCopyTransform implements IRenderEffect {
 		RenderedCube from = def.getElementById(this.from);
 		RenderedCube to = def.getElementById(this.to);
 		if(from != null && to != null) {
-			def.getAnimations().addCopy(new CopyTransform(from, to, copy));
+			def.getAnimations().addCopy(new CopyTransform(from, to, copy, multiply));
 		}
 	}
 

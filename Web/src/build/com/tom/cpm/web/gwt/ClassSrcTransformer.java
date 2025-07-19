@@ -78,6 +78,8 @@ public class ClassSrcTransformer {
 					String[] sp = string.split(" ", 2);
 					String i = sp[1].substring(0, sp[1].length() - 1);
 					imports.add(i);
+				} else if(string.trim().startsWith("//")) {
+					classBody.add(string);//Stray comment
 				} else if(pkg != null) {
 					if(!string.trim().isEmpty()) {
 						inBody = true;

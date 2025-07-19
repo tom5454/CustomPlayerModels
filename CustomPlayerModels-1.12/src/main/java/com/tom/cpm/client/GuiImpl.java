@@ -327,7 +327,7 @@ public class GuiImpl extends GuiScreen implements IGui {
 			this.field.setMaxStringLength(1024*1024);
 			this.field.setEnableBackgroundDrawing(false);
 			this.field.setVisible(true);
-			this.field.setTextColor(16777215);
+			this.field.setTextColor(colors.label_text_color);
 			this.field.setGuiResponder(this);
 		}
 

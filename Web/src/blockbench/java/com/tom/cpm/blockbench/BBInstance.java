@@ -46,33 +46,4 @@ public class BBInstance extends WebMC {
 	protected String getLangChangeDesc() {
 		return "bb-label.language.reloadRequired.desc";
 	}
-
-	/*private static final String CHANGELOG_URL = "https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/version-check.json";
-
-	@Override
-	public Function<String, CompletableFuture<byte[]>> getNetworkFetch() {
-		Http http = Js.uncheckedCast(Global.require("http"));//HTTP doesn't follow redirects
-		HttpAgent agent = new HttpAgent();
-		return url -> {
-			CompletableFuture<byte[]> cf = new CompletableFuture<>();
-			Java.promiseToCf(new Promise<>((res, rej) -> {
-				RequestProperties pr = RequestProperties.make(url.equals("changelog") ? CHANGELOG_URL : url);
-				pr.method = "GET";
-				pr.agent = agent;
-				HttpRequest rq = http.request(pr, r -> {
-					r.on("data", chunk -> {
-						DomGlobal.console.log("request chunk");
-						DomGlobal.console.log(chunk);
-					});
-					r.on("end", __ -> {
-						DomGlobal.console.log("request end");
-						rej.onInvoke("NYI");
-					});
-				});
-				rq.on("error", rej::onInvoke);
-				rq.end();
-			}), cf);
-			return cf;
-		};
-	}*/
 }

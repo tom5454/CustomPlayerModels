@@ -355,7 +355,7 @@ public class GuiImpl extends Screen implements IGui {
 					if (this.enabled) {
 						boolean var1 = this.focused && this.focusedTicks / 6 % 2 == 0;
 						this.drawStringWithShadow(this.textRenderer, this.getText() + (var1 ? "_" : ""), this.x + 4,
-								this.y + (this.height - 8) / 2, 16777215);
+								this.y + (this.height - 8) / 2, colors.label_text_color);
 					} else {
 						this.drawStringWithShadow(this.textRenderer, this.getText(), this.x + 4, this.y + (this.height - 8) / 2,
 								7368816);

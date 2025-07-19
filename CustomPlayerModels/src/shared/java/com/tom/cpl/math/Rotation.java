@@ -6,6 +6,8 @@ import java.util.Map;
 import com.tom.cpl.math.Quaternion.RotationOrder;
 
 public class Rotation {
+	public static final Rotation ZERO = new Rotation();
+
 	public float x;
 	public float y;
 	public float z;

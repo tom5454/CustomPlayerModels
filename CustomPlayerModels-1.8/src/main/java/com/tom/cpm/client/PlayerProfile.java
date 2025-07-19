@@ -6,6 +6,8 @@ import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelPlayer;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,6 +41,19 @@ public class PlayerProfile extends Player<EntityPlayer> {
 	public static boolean inGui;
 	private final GameProfile profile;
 	private String skinType;
+
+	public static GameProfile getPlayerProfile(EntityPlayer player) {
+		if (player == null)return null;
+		GameProfile profile = player.getGameProfile();
+		if (profile.getProperties().isEmpty()) {
+			NetHandlerPlayClient conn = Minecraft.getMinecraft().getNetHandler();
+			if (conn != null) {
+				NetworkPlayerInfo info = conn.getPlayerInfo(profile.getId());
+				if(info != null)profile = info.getGameProfile();
+			}
+		}
+		return profile;
+	}
 
 	public PlayerProfile(GameProfile profile) {
 		this.profile = new GameProfile(profile.getId(), profile.getName());

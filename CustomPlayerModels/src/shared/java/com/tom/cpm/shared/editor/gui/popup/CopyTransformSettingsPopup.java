@@ -10,6 +10,7 @@ import com.tom.cpl.gui.elements.Label;
 import com.tom.cpl.gui.elements.ListPicker;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupPanel;
+import com.tom.cpl.gui.elements.Spinner;
 import com.tom.cpl.gui.util.FlowLayout;
 import com.tom.cpl.math.Box;
 import com.tom.cpm.shared.editor.CopyTransformEffect;
@@ -45,11 +46,39 @@ public class CopyTransformSettingsPopup extends PopupPanel {
 		createPanel("rotation", rot);
 		createPanel("render_scale", rsc);
 
+		Panel miscTr = new Panel(gui);
+		miscTr.setBounds(new Box(5, 0, 290, 20));
+
 		Checkbox cbxV = new Checkbox(gui, gui.i18nFormat("label.cpm.visible"));
-		cbxV.setBounds(new Box(5, 0, 170, 20));
+		cbxV.setBounds(new Box(0, 0, 75, 20));
 		cbxV.setSelected(cte.copyVis);
 		cbxV.setAction(() -> cbxV.setSelected(!cbxV.isSelected()));
-		addElement(cbxV);
+		miscTr.addElement(cbxV);
+
+		Checkbox cbxC = new Checkbox(gui, gui.i18nFormat("action.cpm.color"));
+		cbxC.setBounds(new Box(80, 0, 75, 20));
+		cbxC.setSelected(cte.copyColor);
+		cbxC.setAction(() -> cbxC.setSelected(!cbxC.isSelected()));
+		miscTr.addElement(cbxC);
+		addElement(miscTr);
+
+		Panel settings = new Panel(gui);
+		settings.setBounds(new Box(5, 0, 290, 30));
+
+		settings.addElement(new Label(gui, gui.i18nFormat("label.cpm.copyTransform.multiply")).setBounds(new Box(0, 0, 0, 0)));
+
+		Spinner multiplySpinner = new Spinner(gui);
+		multiplySpinner.setBounds(new Box(0, 10, 50, 20));
+		multiplySpinner.setDp(2);
+		multiplySpinner.setValue(cte.multiply);
+		settings.addElement(multiplySpinner);
+
+		Checkbox cbxA = new Checkbox(gui, gui.i18nFormat("label.cpm.anim_additive"));
+		cbxA.setBounds(new Box(80, 10, 75, 20));
+		cbxA.setSelected(cte.additive);
+		cbxA.setAction(() -> cbxA.setSelected(!cbxA.isSelected()));
+		settings.addElement(cbxA);
+		addElement(settings);
 
 		Button ok = new Button(gui, gui.i18nFormat("button.cpm.ok"), () -> {
 			ActionBuilder ab = e.action("set", "label.cpm.copyTransformSettings");
@@ -64,6 +93,9 @@ public class CopyTransformSettingsPopup extends PopupPanel {
 			ab.updateValueOp(cte, cte.copySY, rsc[1], (a, b) -> a.copySY = b);
 			ab.updateValueOp(cte, cte.copySZ, rsc[2], (a, b) -> a.copySZ = b);
 			ab.updateValueOp(cte, cte.copyVis, cbxV.isSelected(), (a, b) -> a.copyVis = b);
+			ab.updateValueOp(cte, cte.copyColor, cbxC.isSelected(), (a, b) -> a.copyColor = b);
+			ab.updateValueOp(cte, cte.additive, cbxA.isSelected(), (a, b) -> a.additive = b);
+			ab.updateValueOp(cte, cte.multiply, multiplySpinner.getValue(), (a, b) -> a.multiply = b);
 			ab.execute();
 			close();
 		});

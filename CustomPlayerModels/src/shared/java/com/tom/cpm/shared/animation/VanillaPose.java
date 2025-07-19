@@ -1,10 +1,13 @@
 package com.tom.cpm.shared.animation;
 
 import java.util.Locale;
+import java.util.function.Supplier;
 
 import com.tom.cpl.function.ToFloatFunction;
 import com.tom.cpl.math.MathHelper;
 import com.tom.cpl.text.I18n;
+import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.network.ModelEventType;
 
 public enum VanillaPose implements IPose {
 	CUSTOM,
@@ -66,9 +69,9 @@ public enum VanillaPose implements IPose {
 	VR_THIRD_PERSON_SITTING,
 	VR_THIRD_PERSON_STANDING,
 	FIRST_PERSON_HAND,
-	HEALTH(syncedState(s -> s.health)),
-	HUNGER(syncedState(s -> s.hunger)),
-	AIR(syncedState(s -> s.air)),
+	HEALTH(syncedState(s -> s.health, () -> ModelEventType.HEALTH)),
+	HUNGER(syncedState(s -> s.hunger, () -> ModelEventType.HUNGER)),
+	AIR(syncedState(s -> s.air, () -> ModelEventType.AIR)),
 	IN_MENU,
 	INVISIBLE,
 	LIGHT(s -> Math.max(s.skyLight, s.blockLight) / 15f),
@@ -88,9 +91,12 @@ public enum VanillaPose implements IPose {
 		i18nKey = "label.cpm.pose." + name().toLowerCase(Locale.ROOT);
 	}
 
-	private static ToFloatFunction<AnimationState> syncedState(ToFloatFunction<ServerAnimationState> state) {
+	private static ToFloatFunction<AnimationState> syncedState(ToFloatFunction<ServerAnimationState> state, Supplier<ModelEventType> type) {
 		return s -> {
-			if(s.serverState.updated)return state.apply(s.serverState);
+			boolean reqEvent = MinecraftClientAccess.get().requiresSelfEventForAnimation(type.get());
+
+			if (s.serverState.updated && (!s.serverState.isSelf || reqEvent))
+				return state.apply(s.serverState);
 			else return state.apply(s.localState);
 		};
 	}

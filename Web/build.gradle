@@ -70,11 +70,9 @@ sourceSets {
 	main {
 		java {
 			srcDir "src/build"
-			exclude "com/ekotrope/gwt/emul/**"
 		}
 		resources {
 			srcDir "src/build"
-			if(!doBuild)exclude "com/ekotrope/gwt/emul/**"
 		}
 		compileClasspath = main.compileClasspath + files(main.java.srcDirs)
 	}
@@ -104,20 +102,17 @@ dependencies {
     implementation "com.google.elemental2:elemental2-webstorage:1.1.0"
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'com.google.guava:guava-gwt:31.1-jre'
-    //implementation "com.ekotrope:gwt-completablefuture:1.0.0"
+    implementation "com.tom5454.gwt-completablefuture:GWT-CompletableFuture:1.1.0"
     implementation 'org.gwtproject:gwt-user:2.10.0'
     implementation 'org.gwtproject:gwt-dev:2.10.0'
     implementation 'org.gwtproject:gwt-codeserver:2.10.0'
     implementation 'javax.validation:validation-api:1.0.0.GA'
     implementation 'javax.validation:validation-api:1.0.0.GA:sources'
     implementation 'org.slf4gwt:slf4gwt:1.4'
-    /*implementation 'com.alexdupre:pngj:2.1.2.1'
-    implementation 'com.alexdupre:pngj:2.1.2.1:sources'
-    implementation 'com.jcraft:jzlib:1.1.3'
-    implementation 'com.jcraft:jzlib:1.1.3:sources'*/
+    implementation 'com.tom5454.pngj-gwt:PNGJ-GWT:2.2.0'
     if ("${useLib}" != "null") {
-    	extraLibs "com.tom5454.cpm:CustomPlayerModels-API:0.6.4"
-    	extraLibs "com.tom5454.cpm:CustomPlayerModels-API:0.6.4:sources"
+    	extraLibs "com.tom5454.cpm:CustomPlayerModels-API:0.6.22"
+    	extraLibs "com.tom5454.cpm:CustomPlayerModels-API:0.6.22:sources"
     }
     priority files(sourceSets.main.java.srcDirs)
 	priority files(sourceSets.blockbench.java.srcDirs)

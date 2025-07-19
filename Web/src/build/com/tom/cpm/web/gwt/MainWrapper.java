@@ -2,6 +2,8 @@ package com.tom.cpm.web.gwt;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,7 @@ public class MainWrapper {
 	private static String mode = "Dev";
 
 	public static void main(String[] args) throws Exception {
+		System.setOut(new PrintStream(new DualOutputStream(System.out, new FileOutputStream("gwt.log")), true));
 		System.out.println("GWT Launch Wrapper initializing");
 		boolean build, debug = false;
 		if(args.length > 0 && (args[0].equals("--build") || args[0].equals("--buildDebug"))) {
@@ -27,7 +30,7 @@ public class MainWrapper {
 		System.out.println("Making launch args");
 		List<String> a = new ArrayList<>();
 		a.add("-logLevel");
-		a.add("INFO");
+		a.add("DEBUG");
 		a.add("-war");
 		a.add("./war");
 		if(build) {
@@ -122,7 +125,6 @@ public class MainWrapper {
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("Byte\\.toUnsignedInt\\(", "com.tom.cpm.web.client.java.Java.toUnsignedInt("));
 			ClassSrcTransformer.transformers.add(c -> c.regexTransformBody("\\/\\/\\$\\{fill_resource_map_lqsnlna\\}\\$", resGen));
 			ClassSrcTransformer.addImportTransformRegex("^java\\.nio\\.(\\w+)$", "com.tom.cpm.web.client.java.nio.$1");
-			ClassSrcTransformer.addImportTransformRegex("^java\\.util\\.zip\\.(\\w+)$", "com.tom.cpm.web.client.java.zip.$1");
 			ClassSrcTransformer.addImportTransform("java.io.DataInput", "com.tom.cpm.web.client.java.io.DataInput");
 			ClassSrcTransformer.addImportTransform("java.io.DataInputStream", "com.tom.cpm.web.client.java.io.DataInputStream");
 			ClassSrcTransformer.addImportTransform("java.io.DataOutput", "com.tom.cpm.web.client.java.io.DataOutput");

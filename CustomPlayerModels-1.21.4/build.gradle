@@ -136,7 +136,8 @@ dependencies {
     compileOnly files("stubs/of.jar")
     compileOnly files("stubs/iris.jar")
     compileOnly files("stubs/fpm.jar")
-    compileOnly "maven.modrinth:vivecraft:1.21.4-1.2.0-neoforge"
+    compileOnly files("stubs/realcamera.jar")
+    compileOnly "maven.modrinth:vivecraft:1.21.4-1.2.5-neoforge"
     
     if (useLib) {
     	//compileOnly 'maven.modrinth:vivecraft:1.20.6-1.1.9-b1-neoforge'

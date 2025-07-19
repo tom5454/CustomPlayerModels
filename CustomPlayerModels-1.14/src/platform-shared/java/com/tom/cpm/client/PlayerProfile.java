@@ -7,6 +7,8 @@ import java.util.function.BooleanSupplier;
 
 import net.minecraft.block.AbstractSkullBlock;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
+import net.minecraft.client.network.play.NetworkPlayerInfo;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager.ISkinAvailableCallback;
@@ -48,6 +50,19 @@ public class PlayerProfile extends Player<PlayerEntity> {
 
 	private final GameProfile profile;
 	private String skinType;
+
+	public static GameProfile getPlayerProfile(PlayerEntity player) {
+		if (player == null)return null;
+		GameProfile profile = player.getGameProfile();
+		if (profile.getProperties().isEmpty()) {
+			ClientPlayNetHandler conn = Minecraft.getInstance().getConnection();
+			if (conn != null) {
+				NetworkPlayerInfo info = conn.getPlayerInfo(profile.getId());
+				if(info != null)profile = info.getProfile();
+			}
+		}
+		return profile;
+	}
 
 	public PlayerProfile(GameProfile profile) {
 		this.profile = new GameProfile(profile.getId(), profile.getName());

@@ -88,6 +88,13 @@ public class ViewportPanel extends ViewportPanelBase3d {
 
 	@Override
 	public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
+		if(MinecraftObjectHolder.DEBUGGING && gui.isCtrlDown()) {
+			Vec2i ws = get3dSize();
+			if(debugTexture == null)debugTexture = new TextureProvider();
+			if(debugTexture.getImage() == null || debugTexture.getImage().getWidth() != ws.x || debugTexture.getImage().getHeight() != ws.y)
+				debugTexture.setImage(new Image(ws.x, ws.y));
+			debugTexture.getImage().fill(0x00000000);
+		}
 		if(editor.renderBase.get())renderBase(stack, buf);
 		editor.definition.renderingPanel = this;
 		renderModel(stack, buf, partialTicks);
@@ -96,6 +103,10 @@ public class ViewportPanel extends ViewportPanelBase3d {
 		rp.finishAll();
 
 		editor.definition.renderingPanel = null;
+		if(MinecraftObjectHolder.DEBUGGING && gui.isCtrlDown()) {
+			debugTexture.texture.markDirty();
+			debugTexture.bind();//Force reupload
+		}
 	}
 
 	public void finishTransform(EditorRenderer.Bounds b) {
@@ -117,16 +128,8 @@ public class ViewportPanel extends ViewportPanelBase3d {
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
 		gui.drawText(0, -10, "a", 0xffffffff);//For some reason this fixes #221
-		if(MinecraftObjectHolder.DEBUGGING && gui.isCtrlDown()) {
-			Vec2i ws = get3dSize();
-			if(debugTexture == null)debugTexture = new TextureProvider();
-			if(debugTexture.getImage() == null || debugTexture.getImage().getWidth() != ws.x || debugTexture.getImage().getHeight() != ws.y)
-				debugTexture.setImage(new Image(ws.x, ws.y));
-			debugTexture.getImage().fill(0x00000000);
-		}
 		super.draw(event, partialTicks);
 		if(MinecraftObjectHolder.DEBUGGING && gui.isCtrlDown()) {
-			debugTexture.texture.markDirty();
 			debugTexture.bind();
 			draw3dOverlay();
 		}

@@ -176,7 +176,9 @@ public class AnimationState {
 	}
 
 	public void receiveEvent(NBTTagCompound tag, boolean isClient) {
+		serverState.isSelf = isClient;
 		if(!isClient || tag.getBoolean(NetworkUtil.SELF_EVENT)) {
+			serverState.updated = true;
 			for(ModelEventType t : ModelEventType.VALUES) {
 				if(tag.hasKey(t.getName())) {
 					t.read(this, tag);

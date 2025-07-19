@@ -118,4 +118,10 @@ public abstract class PlayerTextureLoader {
 	public CompletableFuture<Image> getTexture(TextureType type) {
 		return textures.computeIfAbsent(type, Texture::new).get();
 	}
+
+	public boolean hasTexture(TextureType type) {
+		Texture t = textures.get(type);
+		if (t == null)return false;
+		return t.url != null;
+	}
 }

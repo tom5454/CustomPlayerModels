@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Minecraft;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.xtracr.realcamera.RealCameraCore;
 
 import com.tom.cpm.client.RealCameraDetector;
@@ -15,12 +16,12 @@ import com.tom.cpm.client.RealCameraDetector;
 public class RealCameraCoreMixin_RC {
 
 	@Inject(at = @At("HEAD"), method = "updateModel", remap = false)
-	private static void onUpdateModelPre(final Minecraft client, final float tickDelta, CallbackInfo cbi) {
+	private static void onUpdateModelPre(final Minecraft client, final float tickDelta, PoseStack poseStack, CallbackInfo cbi) {
 		RealCameraDetector.realCameraRendering = true;
 	}
 
 	@Inject(at = @At("RETURN"), method = "updateModel", remap = false)
-	private static void onUpdateModelPost(final Minecraft client, final float tickDelta, CallbackInfo cbi) {
+	private static void onUpdateModelPost(final Minecraft client, final float tickDelta, PoseStack poseStack, CallbackInfo cbi) {
 		RealCameraDetector.realCameraRendering = false;
 	}
 }

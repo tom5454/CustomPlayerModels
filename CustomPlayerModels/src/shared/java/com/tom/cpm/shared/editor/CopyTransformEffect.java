@@ -3,6 +3,8 @@ package com.tom.cpm.shared.editor;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.tom.cpl.math.Rotation;
+import com.tom.cpl.math.Vec3f;
 import com.tom.cpl.text.I18n;
 import com.tom.cpm.shared.editor.elements.ModelElement;
 import com.tom.cpm.shared.editor.project.JsonMap;
@@ -21,6 +23,9 @@ public class CopyTransformEffect {
 	public boolean copySY;
 	public boolean copySZ;
 	public boolean copyVis;
+	public boolean copyColor;
+	public boolean additive;
+	public float multiply = 1f;
 
 	public CopyTransformEffect(ModelElement to) {
 		this.to = to;
@@ -38,6 +43,9 @@ public class CopyTransformEffect {
 		copySY = data.getBoolean("sy", false);
 		copySZ = data.getBoolean("sz", false);
 		copyVis = data.getBoolean("cv", false);
+		copyColor = data.getBoolean("r", false);
+		additive = data.getBoolean("additive", false);
+		multiply = data.getFloat("multiply", 1f);
 	}
 
 	public short toShort() {
@@ -52,24 +60,34 @@ public class CopyTransformEffect {
 		if(copySY)r |= (1 << 7);
 		if(copySZ)r |= (1 << 8);
 		if(copyVis)r |= (1 << 9);
+		if(copyColor)r |= (1 << 10);
+		if(additive)r |= (1 << 11);
+		if(Math.abs(multiply - 1f) > 0.01f)r |= (1 << 14);
 		return r;
 	}
 
 	public void apply() {
 		if(from != null) {
-			to.rc.setPosition(false,
-					copyPX ? from.rc.getTransformPosition().x : to.rc.getTransformPosition().x,
-							copyPY ? from.rc.getTransformPosition().y : to.rc.getTransformPosition().y,
-									copyPZ ? from.rc.getTransformPosition().z : to.rc.getTransformPosition().z);
-			to.rc.setRotation(false,
-					copyRX ? from.rc.getTransformRotation().x : to.rc.getTransformRotation().x,
-							copyRY ? from.rc.getTransformRotation().y : to.rc.getTransformRotation().y,
-									copyRZ ? from.rc.getTransformRotation().z : to.rc.getTransformRotation().z);
-			to.rc.setRenderScale(false,
-					copySX ? from.rc.getRenderScale().x : to.rc.getRenderScale().x,
-							copySY ? from.rc.getRenderScale().y : to.rc.getRenderScale().y,
-									copySZ ? from.rc.getRenderScale().z : to.rc.getRenderScale().z);
+			Vec3f pf = from.rc.getTransformPosition();
+			Vec3f pt;
+			Rotation rf = from.rc.getTransformRotation();
+			Rotation rt;
+			Vec3f sf = from.rc.getRenderScale();
+			Vec3f st;
+			if (additive) {
+				pt = Vec3f.ZERO;
+				rt = Rotation.ZERO;
+				st = Vec3f.ZERO;
+			} else {
+				pt = to.rc.getTransformPosition();
+				rt = to.rc.getTransformRotation();
+				st = to.rc.getRenderScale();
+			}
+			to.rc.setPosition(additive, copyPX ? pf.x * multiply : pt.x, copyPY ? pf.y * multiply : pt.y, copyPZ ? pf.z * multiply : pt.z);
+			to.rc.setRotation(additive, copyRX ? rf.x * multiply : rt.x, copyRY ? rf.y * multiply : rt.y, copyRZ ? rf.z * multiply : rt.z);
+			to.rc.setRenderScale(additive, copySX ? sf.x * multiply : st.x, copySY ? sf.y * multiply : st.y, copySZ ? sf.z * multiply : st.z);
 			if(copyVis)to.rc.setVisible(to.rc.doDisplay() && from.rc.isVisible());
+			if(copyColor)to.rc.setColor(from.rc.getRGB());
 		}
 	}
 
@@ -86,6 +104,9 @@ public class CopyTransformEffect {
 		r.put("sy", copySY);
 		r.put("sz", copySZ);
 		r.put("cv", copyVis);
+		r.put("color", copyColor);
+		r.put("additive", additive);
+		r.put("multiply", multiply);
 		return r;
 	}
 
@@ -111,7 +132,19 @@ public class CopyTransformEffect {
 			sb.append("\\  ");
 			sb.append(gui.i18nFormat("label.cpm.visible"));
 		}
-		if(!(p || r || s || copyVis)) {
+		if(copyColor) {
+			sb.append("\\  ");
+			sb.append(gui.i18nFormat("action.cpm.color"));
+		}
+		if(additive) {
+			sb.append("\\  ");
+			sb.append(gui.i18nFormat("label.cpm.anim_additive"));
+		}
+		if(Math.abs(multiply - 1f) > 0.01f) {
+			sb.append("\\  ");
+			sb.append(gui.i18nFormat("tooltip.cpm.copyTransform.multiply", String.format("%.2f", multiply)));
+		}
+		if(!(p || r || s || copyVis || copyColor)) {
 			sb.append("\\  ");
 			sb.append(gui.i18nFormat("tooltip.cpm.noCopyTransforms"));
 		}
@@ -144,5 +177,6 @@ public class CopyTransformEffect {
 		copySY = v;
 		copySZ = v;
 		copyVis = v;
+		copyColor = v;
 	}
 }

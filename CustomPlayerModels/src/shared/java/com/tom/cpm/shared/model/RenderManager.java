@@ -2,6 +2,7 @@ package com.tom.cpm.shared.model;
 
 import java.util.function.Function;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
@@ -34,6 +35,17 @@ public class RenderManager<G, P, M, D> {
 		if(profile == null) {
 			renderManager.unbindModel(toBind);
 			return false;
+		}
+		if (!profile.isModel) {
+			String texture = getTexture.apply(gprofile);
+			String ptexture = getTexture.apply((G) profile.getGameProfile());
+			if (texture != null && !Objects.equal(texture, ptexture)) {
+				profile = (Player<P>) loader.reloadPlayer(gprofile, unique);
+			}
+			if(profile == null) {
+				renderManager.unbindModel(toBind);
+				return false;
+			}
 		}
 		ModelDefinition def = profile.getModelDefinition();
 		if(def != null) {

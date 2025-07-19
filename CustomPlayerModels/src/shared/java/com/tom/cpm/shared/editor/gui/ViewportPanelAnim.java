@@ -40,12 +40,6 @@ public class ViewportPanelAnim extends ViewportPanel {
 
 	@Override
 	public void draw(MouseEvent event, float partialTicks) {
-		anims = null;
-		if(editor.playFullAnim) {
-			anims = editor.testPoses.stream().map(p -> AnimationDisplayData.getFor(p)).
-					filter(d -> d.type == Type.LAYERS || d.type == Type.HAND || d.type == Type.PROGRESS).collect(Collectors.toList());
-		}
-		editor.applyAnim = true;
 		super.draw(event, partialTicks);
 		if (editor.selectedAnim != null && editor.selectedAnim.pose instanceof VanillaPose) {
 			int spr = -1;
@@ -78,8 +72,6 @@ public class ViewportPanelAnim extends ViewportPanel {
 				}
 			}
 		}
-		editor.applyAnim = false;
-		anims = null;
 	}
 
 	@Override
@@ -244,6 +236,12 @@ public class ViewportPanelAnim extends ViewportPanel {
 
 	@Override
 	public void render(MatrixStack stack, VBuffers buf, float partialTicks) {
+		anims = null;
+		if(editor.playFullAnim) {
+			anims = editor.testPoses.stream().map(p -> AnimationDisplayData.getFor(p)).
+					filter(d -> d.type == Type.LAYERS || d.type == Type.HAND || d.type == Type.PROGRESS).collect(Collectors.toList());
+		}
+		editor.applyAnim = true;
 		if(editor.showPreviousFrame.get() && editor.selectedAnim != null && editor.selectedElement != null && editor.selectedAnim.getFrames().size() > 1) {
 			editor.selectedAnim.prevFrame();
 			editor.definition.renderingPanel = this;
@@ -254,6 +252,8 @@ public class ViewportPanelAnim extends ViewportPanel {
 			editor.selectedAnim.nextFrame();
 		}
 		super.render(stack, buf, partialTicks);
+		editor.applyAnim = false;
+		anims = null;
 	}
 
 	@Override

@@ -81,7 +81,7 @@ public class ExporterImpl {
 					parts.add(new ModelPartRenderEffect(new EffectRenderItem(el.id, el.itemRenderer.slot, el.itemRenderer.slotID)));
 				}
 				if(el.copyTransform != null && el.copyTransform.from != null) {
-					otherParts2.add(new ModelPartRenderEffect(new EffectCopyTransform(el.copyTransform.from.id, el.id, el.copyTransform.toShort())));
+					otherParts2.add(new ModelPartRenderEffect(new EffectCopyTransform(el.copyTransform.from.id, el.id, el.copyTransform.toShort(), el.copyTransform.multiply)));
 				}
 			}
 		});

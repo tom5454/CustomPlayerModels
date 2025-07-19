@@ -33,6 +33,7 @@ public abstract class Player<P> {
 	public boolean forcedSkin;
 	public boolean sentEventSubs;
 	public String unique;
+	public boolean isModel;
 
 	public PlayerTextureLoader getTextures() {
 		if(textures == null) {
@@ -60,8 +61,9 @@ public abstract class Player<P> {
 		animState.voiceMuted = MinecraftCommonAccess.get().getApi().clientApi().getVoiceMutedProviders().stream().anyMatch(p -> p.test(player));
 	}
 
-	public void setModelDefinition(CompletableFuture<ModelDefinition> definition) {
+	public void setModelDefinition(CompletableFuture<ModelDefinition> definition, boolean isModel) {
 		this.definition = definition.exceptionally(e -> new ModelDefinition(e, this));
+		this.isModel = isModel;
 	}
 
 	public ModelDefinition getModelDefinition0() {

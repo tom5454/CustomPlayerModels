@@ -33,6 +33,7 @@ import com.tom.cpm.common.EntityTypeHandlerImpl;
 import com.tom.cpm.common.PlayerInventory;
 import com.tom.cpm.common.WorldImpl;
 import com.tom.cpm.mixinplugin.FPMDetector;
+import com.tom.cpm.mixinplugin.RCDetector;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.model.SkinType;
 import com.tom.cpm.shared.model.render.PlayerModelSetup.ArmPose;
@@ -41,18 +42,28 @@ import com.tom.cpm.shared.skin.TextureType;
 
 public class PlayerProfile extends Player<net.minecraft.world.entity.player.Player> {
 	public static boolean inGui;
-	public static BooleanSupplier inFirstPerson;
+	private static BooleanSupplier inFirstPerson;
 	static {
 		inFirstPerson = () -> false;
 		if (FPMDetector.doApply()) {
 			FirstPersonDetector.init();
 		}
+		if (RCDetector.doApply()) {
+			RealCameraDetector.init();
+		}
+	}
+
+	public static void addInFirstPerson(BooleanSupplier inFirstPerson) {
+		BooleanSupplier old = PlayerProfile.inFirstPerson;
+		PlayerProfile.inFirstPerson = () -> inFirstPerson.getAsBoolean() || old.getAsBoolean();
 	}
 
 	private final GameProfile profile;
 	private String skinType;
 
-	public PlayerProfile(GameProfile profile) {
+	public static GameProfile getPlayerProfile(net.minecraft.world.entity.player.Player player) {
+		if (player == null)return null;
+		var profile = player.getGameProfile();
 		if (profile.getProperties().isEmpty()) {
 			var conn = Minecraft.getInstance().getConnection();
 			if (conn != null) {
@@ -60,7 +71,10 @@ public class PlayerProfile extends Player<net.minecraft.world.entity.player.Play
 				if(info != null)profile = info.getProfile();
 			}
 		}
+		return profile;
+	}
 
+	public PlayerProfile(GameProfile profile) {
 		this.profile = new GameProfile(profile.getId(), profile.getName());
 		cloneProperties(profile.getProperties(), this.profile.getProperties());
 

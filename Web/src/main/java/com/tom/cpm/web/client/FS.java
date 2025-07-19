@@ -18,6 +18,7 @@ public class FS {
 		return impl.getContent(path);
 	}
 
+	@Deprecated
 	public static String getContentSync(String path) throws FileNotFoundException {
 		if(impl == null)throw new FileNotFoundException();
 		return impl.getContentSync(path);

@@ -166,7 +166,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 
 	@Override
 	public Object getCurrentPlayerIDObject() {
-		return mc.player != null ? mc.player.getGameProfile() : null;
+		return PlayerProfile.getPlayerProfile(mc.player);
 	}
 
 	@Override

@@ -152,9 +152,9 @@ dependencies {
   	runtimeOnly fg.deobf("mezz.jei:jei-1.15.2:6.0.0.2")
   	
   	// compile against the TOP API but do not include it at runtime
-  	compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.15:1.15-2.0.0-3:api")
+  	//compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.15:1.15-2.0.0-3:api")
   	// at runtime, use the full TOP jar
-  	runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.15:1.15-2.0.0-3")
+  	//runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.15:1.15-2.0.0-3")
   	
   	compileOnly files("of.jar")
 }

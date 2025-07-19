@@ -1,17 +1,36 @@
 package com.tom.cpm.web.client.java.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
 
 import com.tom.cpm.web.client.FS;
+import com.tom.cpm.web.client.java.Java;
+
+import elemental2.promise.Promise;
 
 public class FileInputStream extends InputStream {
 	private ByteArrayInputStream bais;
+	private String b64;
 
+	@Deprecated
 	public FileInputStream(File file) throws FileNotFoundException {
-		bais = new ByteArrayInputStream(Base64.getDecoder().decode(FS.getContentSync(file.getAbsolutePath())));
+		this(FS.getContentSync(file.getAbsolutePath()));
+	}
+
+	private FileInputStream(String b64) {
+		this.b64 = b64;
+		bais = new ByteArrayInputStream(Base64.getDecoder().decode(b64));
+	}
+
+	public static CompletableFuture<FileInputStream> openFile(File file) {
+		CompletableFuture<FileInputStream> cf = new CompletableFuture<>();
+		Promise<FileInputStream> p = FS.getContent(file.getAbsolutePath()).then(d -> Promise.resolve(new FileInputStream(d)));
+		Java.promiseToCf(p, cf);
+		return cf;
 	}
 
 	@Override
@@ -66,5 +85,10 @@ public class FileInputStream extends InputStream {
 	@Override
 	public void close() throws IOException {
 		bais = null;
+		b64 = null;
+	}
+
+	public String getB64() {
+		return b64;
 	}
 }

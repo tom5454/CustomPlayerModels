@@ -9,7 +9,8 @@
   "client": [
 	"AbstractTextureMixin_OF",
 	"VRArmRendererMixin_$vivecraft",
-	"BlockEntityRenderDispatcherMixin_Iris"
+	"BlockEntityRenderDispatcherMixin_Iris",
+	"RealCameraCoreMixin_RC"
   ],
   "injectors": {
     "defaultRequire": 1

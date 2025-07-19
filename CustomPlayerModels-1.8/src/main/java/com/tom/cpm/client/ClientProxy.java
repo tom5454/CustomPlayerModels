@@ -85,7 +85,7 @@ public class ClientProxy extends CommonProxy {
 		mc = new MinecraftObject(minecraft);
 		MinecraftForge.EVENT_BUS.register(this);
 		KeyBindings.init();
-		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), EntityPlayer::getGameProfile);
+		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerProfile::getPlayerProfile);
 		manager.setGPGetters(GameProfile::getProperties, Property::getValue);
 		netHandler = new NetHandler<>(ResourceLocation::new);
 		Executor ex = minecraft::addScheduledTask;

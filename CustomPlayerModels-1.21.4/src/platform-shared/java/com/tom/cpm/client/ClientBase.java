@@ -50,7 +50,7 @@ public abstract class ClientBase {
 	}
 
 	public void init1() {
-		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), net.minecraft.world.entity.player.Player::getGameProfile);
+		manager = new RenderManager<>(mc.getPlayerRenderManager(), mc.getDefinitionLoader(), PlayerProfile::getPlayerProfile);
 		manager.setGPGetters(GameProfile::getProperties, Property::value);
 		netHandler = new NetHandler<>((k, v) -> new CustomPacketPayload.Type<>(ResourceLocation.tryBuild(k, v)));
 		netHandler.setExecutor(() -> minecraft);

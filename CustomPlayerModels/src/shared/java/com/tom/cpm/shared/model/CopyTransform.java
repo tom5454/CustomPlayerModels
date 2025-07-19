@@ -16,8 +16,11 @@ public class CopyTransform {
 	private final boolean copySY;
 	private final boolean copySZ;
 	private final boolean copyVis;
+	private final boolean copyColor;
+	private final boolean additive;
+	private final float multiply;
 
-	public CopyTransform(RenderedCube from, RenderedCube to, short copy) {
+	public CopyTransform(RenderedCube from, RenderedCube to, short copy, float multiply) {
 		this.from = from;
 		this.to = to;
 		copyPX = (copy & (1 << 0)) != 0;
@@ -30,18 +33,32 @@ public class CopyTransform {
 		copySY = (copy & (1 << 7)) != 0;
 		copySZ = (copy & (1 << 8)) != 0;
 		copyVis = (copy & (1 << 9)) != 0;
+		copyColor = (copy & (1 << 10)) != 0;
+		additive = (copy & (1 << 11)) != 0;
+		//bit 14: multiply
+		this.multiply = multiply;
 	}
 
 	public void apply() {
 		Vec3f pf = from.getTransformPosition();
-		Vec3f pt = to.getTransformPosition();
+		Vec3f pt;
 		Rotation rf = from.getTransformRotation();
-		Rotation rt = to.getTransformRotation();
+		Rotation rt;
 		Vec3f sf = from.getRenderScale();
-		Vec3f st = to.getRenderScale();
-		to.setPosition(false, copyPX ? pf.x : pt.x, copyPY ? pf.y : pt.y, copyPZ ? pf.z : pt.z);
-		to.setRotation(false, copyRX ? rf.x : rt.x, copyRY ? rf.y : rt.y, copyRZ ? rf.z : rt.z);
-		to.setRenderScale(false, copySX ? sf.x : st.x, copySY ? sf.y : st.y, copySZ ? sf.z : st.z);
+		Vec3f st;
+		if (additive) {
+			pt = Vec3f.ZERO;
+			rt = Rotation.ZERO;
+			st = Vec3f.ZERO;
+		} else {
+			pt = to.getTransformPosition();
+			rt = to.getTransformRotation();
+			st = to.getRenderScale();
+		}
+		to.setPosition(additive, copyPX ? pf.x * multiply : pt.x, copyPY ? pf.y * multiply : pt.y, copyPZ ? pf.z * multiply : pt.z);
+		to.setRotation(additive, copyRX ? rf.x * multiply : rt.x, copyRY ? rf.y * multiply : rt.y, copyRZ ? rf.z * multiply : rt.z);
+		to.setRenderScale(additive, copySX ? sf.x * multiply : st.x, copySY ? sf.y * multiply : st.y, copySZ ? sf.z * multiply : st.z);
 		if(copyVis)to.setVisible(from.isVisible());
+		if(copyColor)to.setColor(from.getRGB());
 	}
 }
