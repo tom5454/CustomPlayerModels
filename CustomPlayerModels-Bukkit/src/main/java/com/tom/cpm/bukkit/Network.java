@@ -111,7 +111,7 @@ public class Network implements PluginMessageListener, Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent evt) {
 		try {
-			Method addChn = evt.getPlayer().getClass().getDeclaredMethod("addChannel", String.class);
+			Method addChn = evt.getPlayer().getClass().getMethod("addChannel", String.class);
 			netHandler.registerOut(c -> addChn.invoke(evt.getPlayer(), c));
 		} catch (Exception e) {
 			e.printStackTrace();
