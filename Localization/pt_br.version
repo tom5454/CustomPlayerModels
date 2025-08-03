@@ -1497,5 +1497,22 @@
   "cpmmodels-label.notification.file_processing_failed": "File failed processing",
   "cpmmodels-label.notification.mod_state.changed.rejected": "Your project was rejected!",
   "cpmmodels-label.notification.mod_state.changed.accepted": "Your project was accepted!",
-  "cpmmodels-label.notification.empty": "You\u0027re all caught up!"
+  "cpmmodels-label.notification.empty": "You\u0027re all caught up!",
+  "cpmmodels-label.link.website": "Website",
+  "cpmmodels-label.profile_links": "Profile Links:",
+  "cpmmodels-label.project_sort.by": "Sort by:",
+  "cpmmodels-label.project_sort.name": "Name",
+  "cpmmodels-label.project_sort.downloads": "Downloads",
+  "cpmmodels-label.project_sort.created": "Created",
+  "cpmmodels-label.project_sort.updated": "Updated",
+  "cpmmodels-label.project_sort.follows": "Follows",
+  "cpmmodels-label.projects.list_empty": "Nothing here",
+  "cpmmodels-label.project_type.model": "CPM Model",
+  "cpmmodels-label.project_type.project": "CPM Project",
+  "cpmmodels-label.project_type.texture": "Texture",
+  "cpmmodels-label.project_type.template": "Template",
+  "label.cpm.safety.animCnt.layer": "Layer animations count: %s/%s",
+  "label.cpm.safety.animCnt.pose": "Pose animations count: %s/%s",
+  "label.cpm.safety.animCnt.gesture": "Gesture animations count: %s/%s",
+  "label.cpm.safety.animCnt.layerCtrl": "Layer controlled count: %s/%s"
 }

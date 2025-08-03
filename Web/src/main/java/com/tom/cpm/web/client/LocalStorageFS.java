@@ -76,19 +76,19 @@ public class LocalStorageFS implements IFS {
 	}
 
 	public String[] list(String path) {
-		if("/mnt".equals(path))return JsObject.keys(session).map((v, __, ___) -> "/mnt/" + v).asArray(new String[0]);
+		if("/mnt".equals(path))return JsObject.keys(session).map((v, __) -> "/mnt/" + v).asArray(new String[0]);
 		if(!this.enable) {
 			if("/".equals(path))return new String[] {"/mnt"};
 			return null;
 		}
-		String pf = "m:" + path;
+		var pf = "m:" + path;
 		String i = local.getItem(pf);
 		if(i != null) {
 			if(Meta.parse(i).folder) {
 				if(!path.endsWith("/"))pf += "/";
 				final String fpf = pf;
 				JsArray<String> l = new JsArray<>();
-				JsObject.keys(local).forEach((name, __, ___) -> {
+				JsObject.keys(local).forEach((name, __) -> {
 					if(name.startsWith(fpf) && name.indexOf("/", fpf.length()) == -1 && name != "m:/") {
 						l.push(name.substring(2));
 					}
@@ -235,7 +235,6 @@ public class LocalStorageFS implements IFS {
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
 	private static class HTMLLinkElementEx extends HTMLLinkElement {
 		public String download;
-		public native void click();
 	}
 
 	private class FileImpl implements IFile {

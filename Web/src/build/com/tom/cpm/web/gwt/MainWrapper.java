@@ -30,11 +30,10 @@ public class MainWrapper {
 		System.out.println("Making launch args");
 		List<String> a = new ArrayList<>();
 		a.add("-logLevel");
-		a.add("DEBUG");
-		a.add("-war");
-		a.add("./war");
+		a.add("INFO");
+		a.add("-sourceLevel");
+		a.add("17");
 		if(build) {
-			a.clear();
 			a.add("-setProperty");
 			a.add("cpm.debug=" + debug);
 			a.add("-style");
@@ -59,6 +58,8 @@ public class MainWrapper {
 			}
 			a.add("com.tom.cpm.CPM" + mode);
 		} else {
+			a.add("-war");
+			a.add("./war");
 			a.add("-style");
 			a.add("DETAILED");
 			a.add("-setProperty");
@@ -103,7 +104,7 @@ public class MainWrapper {
 
 			System.out.println("Running resource generator");
 
-			Supplier<String> resGen = new Supplier<String>() {
+			Supplier<String> resGen = new Supplier<>() {
 				private String r;
 				private long lastGen;
 

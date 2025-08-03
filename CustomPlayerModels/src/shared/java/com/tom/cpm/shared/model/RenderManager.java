@@ -36,7 +36,7 @@ public class RenderManager<G, P, M, D> {
 			renderManager.unbindModel(toBind);
 			return false;
 		}
-		if (!profile.isModel) {
+		if (!profile.isModel && getTexture != null) {
 			String texture = getTexture.apply(gprofile);
 			String ptexture = getTexture.apply((G) profile.getGameProfile());
 			if (texture != null && !Objects.equal(texture, ptexture)) {
@@ -82,9 +82,11 @@ public class RenderManager<G, P, M, D> {
 	}
 
 	public void bindPlayerState(Player<P> player, D buffer, M toBind, String arg) {
-		ModelDefinition def = profile.getModelDefinition();
-		renderManager.bindModel(toBind, arg, buffer, def, profile, profile.animState.animationMode);
-		renderManager.getAnimationEngine().prepareAnimations(profile, profile.animState.animationMode, def);
+		if (profile != null) {
+			ModelDefinition def = profile.getModelDefinition();
+			renderManager.bindModel(toBind, arg, buffer, def, profile, profile.animState.animationMode);
+			renderManager.getAnimationEngine().prepareAnimations(profile, profile.animState.animationMode, def);
+		}
 	}
 
 	public void unbindClear(M model) {

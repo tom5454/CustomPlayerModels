@@ -394,7 +394,7 @@ public class ModelElement extends Cube implements IElem, TreeElement {
 	@Override
 	public void drawTexture(IGui gui, int x, int y, float xs, float ys) {
 		if (locked)return;
-		if(texture && (showInEditor || editor.selectedElement == this))
+		if((type == ElementType.ROOT_PART || texture) && (showInEditor || editor.selectedElement == this))
 			TextureDisplay.drawBoxTextureOverlay(gui, this, x, y, xs, ys, TextureDisplay.getAlphaForBox(editor.selectedElement == this));
 	}
 

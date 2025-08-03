@@ -57,7 +57,7 @@ dependencies {
     modImplementation("io.github.douira:glsl-transformer:2.0.1")
     modImplementation("org.anarres:jcpp:1.4.14")*/
     
-    modCompileOnly('maven.modrinth:vivecraft:1.21.7-1.2.5-b5-fabric')
+    modCompileOnly('maven.modrinth:vivecraft:1.21.8-1.2.5-b6-fabric')
 	implementation "com.electronwill.night-config:core:3.6.6"
     implementation "com.electronwill.night-config:toml:3.6.6"
     implementation("org.lwjgl:lwjgl-openvr:3.3.3")

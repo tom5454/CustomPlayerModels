@@ -54,14 +54,14 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 	
-	modImplementation ('maven.modrinth:pehkui:3.8.2+1.14.4-1.20.6')
-	
 	compileOnly files("../CustomPlayerModels-1.20/stubs/of.jar")
 	compileOnly files("../CustomPlayerModels-1.20/stubs/iris_old.jar")
 	if (useLib) {
 		modImplementation('maven.modrinth:real-camera:zNuo1rxQ')
+		modImplementation ('maven.modrinth:pehkui:3.8.2+1.14.4-1.20.6')
 	} else {
 		compileOnly files("../CustomPlayerModels-1.20/stubs/realcamera.jar")
+		compileOnly files("../CustomPlayerModels-1.20/stubs/pehkui.jar")
 	}
 	
     modImplementation ('maven.modrinth:vivecraft:1.20.1-1.2.0-fabric')

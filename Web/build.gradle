@@ -9,7 +9,7 @@ archivesBaseName = 'CustomPlayerModels-GWT'
 def useLib = System.getProperty("useLib")
 def doBuild = System.getProperty("doBuild")
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 repositories {
     mavenCentral()
@@ -97,15 +97,15 @@ sourceSets {
 }
 
 dependencies {
-    implementation "com.google.elemental2:elemental2-core:1.1.0"
-    implementation "com.google.elemental2:elemental2-webgl:1.1.0"
-    implementation "com.google.elemental2:elemental2-webstorage:1.1.0"
+    implementation "com.google.elemental2:elemental2-core:1.2.3"
+    implementation "com.google.elemental2:elemental2-webgl:1.2.3"
+    implementation "com.google.elemental2:elemental2-webstorage:1.2.3"
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'com.google.guava:guava-gwt:31.1-jre'
     implementation "com.tom5454.gwt-completablefuture:GWT-CompletableFuture:1.1.0"
-    implementation 'org.gwtproject:gwt-user:2.10.0'
-    implementation 'org.gwtproject:gwt-dev:2.10.0'
-    implementation 'org.gwtproject:gwt-codeserver:2.10.0'
+    implementation 'org.gwtproject:gwt-user:2.12.2'
+    implementation 'org.gwtproject:gwt-dev:2.12.2'
+    implementation 'org.gwtproject:gwt-codeserver:2.12.2'
     implementation 'javax.validation:validation-api:1.0.0.GA'
     implementation 'javax.validation:validation-api:1.0.0.GA:sources'
     implementation 'org.slf4gwt:slf4gwt:1.4'

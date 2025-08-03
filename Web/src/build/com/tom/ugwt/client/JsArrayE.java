@@ -18,7 +18,7 @@ public class JsArrayE<E> extends JsArray<E> {
 
 	@JsOverlay
 	public final void forEach(Consumer<? super E> f) {
-		forEach((e, __, ___) -> {
+		forEach((e, __) -> {
 			f.accept(e);
 			return null;
 		});
@@ -31,7 +31,7 @@ public class JsArrayE<E> extends JsArray<E> {
 
 	@JsOverlay
 	public final void forEachReverse(Consumer<E> f) {
-		forEachReverse((e, __, ___) -> {
+		forEachReverse((e, __) -> {
 			f.accept(e);
 			return null;
 		});

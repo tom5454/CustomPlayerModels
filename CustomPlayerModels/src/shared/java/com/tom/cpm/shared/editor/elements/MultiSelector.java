@@ -60,6 +60,7 @@ public interface MultiSelector extends TreeElement {
 		@Override
 		public void updateGui() {
 			if (elements.isEmpty())return;
+			ModelElement first = elements.get(0);
 			if (allMatch(e -> e.type == ElementType.NORMAL)) {
 				editor.setOffset.accept(getVec(VecType.OFFSET));
 				if (allMatch(e -> e.itemRenderer == null)) {
@@ -68,21 +69,24 @@ public interface MultiSelector extends TreeElement {
 							editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.mode.tex"));
 							editor.setModePanel.accept(ModeDisplayType.TEX);
 							editor.setTexturePanel.accept(getVecUV());
+							editor.setReColor.accept(first.recolor);
+							if (allMatch(e -> e.recolor)) {
+								editor.setPartColor.accept(first.rgb);
+							}
 						}
 					} else {
 						editor.setModeBtn.accept(editor.ui.i18nFormat("button.cpm.mode.color"));
 						editor.setModePanel.accept(ModeDisplayType.COLOR);
-						editor.setPartColor.accept(0);
+						editor.setPartColor.accept(first.rgb);
 					}
 					double mc = elements.stream().mapToDouble(e -> e.mcScale).average().orElse(0);
 					editor.setMCScale.accept((float) mc);
 				}
 				editor.setDelEn.accept(true);
-				ModelElement me = elements.get(0);
-				editor.setHiddenEffect.accept(me.hidden);
-				editor.setGlow.accept(me.glow);
-				editor.setMirror.accept(me.mirror);
-				editor.setSingleTex.accept(me.singleTex);
+				editor.setHiddenEffect.accept(first.hidden);
+				editor.setGlow.accept(first.glow);
+				editor.setMirror.accept(first.mirror);
+				editor.setSingleTex.accept(first.singleTex);
 			}
 			editor.setPosition.accept(getVec(VecType.POSITION));
 			editor.setRot.accept(getVec(VecType.ROTATION));

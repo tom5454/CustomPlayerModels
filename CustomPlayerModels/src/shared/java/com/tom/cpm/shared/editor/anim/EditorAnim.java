@@ -204,8 +204,16 @@ public class EditorAnim implements IAnimation {
 	}
 
 	public void setScale(Vec3f v) {
-		if(currentFrame != null && editor.getSelectedElement() != null) {
-			currentFrame.setScale(editor.getSelectedElement(), v);
+		if(currentFrame != null) {
+			if (editor.selectedElement instanceof ElementImpl)
+				((ElementImpl) editor.selectedElement).setVecAnim(v, me -> {
+					IElem dt = currentFrame.getData(me);
+					if (dt != null)return dt.getScale();
+					else if(this.add)return new Vec3f();
+					return me.scale;
+				}, currentFrame::setScale);
+			else if (editor.getSelectedElement() != null)
+				currentFrame.setScale(editor.getSelectedElement(), v);
 		}
 		components = null;
 		psfs = null;
@@ -489,8 +497,15 @@ public class EditorAnim implements IAnimation {
 						else if(this.add)return new Vec3f();
 						return me.rotation;
 					});
+					Vec3f s = e.getVecAnim(me -> {
+						IElem dt = selFrm.getData(me);
+						if (dt != null)return dt.getScale();
+						else if(this.add)return new Vec3f();
+						return me.scale;
+					});
 					editor.setAnimPos.accept(p);
 					editor.setAnimRot.accept(r);
+					editor.setAnimScale.accept(s);
 					if (e.allMatch(x -> x.recolor || !x.texture)) {
 						editor.setAnimColor.accept(e.getFirst().rgb);
 					}

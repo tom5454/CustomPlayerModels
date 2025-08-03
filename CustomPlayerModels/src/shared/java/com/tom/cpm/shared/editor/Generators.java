@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import com.tom.cpl.gui.IGui;
 import com.tom.cpl.gui.elements.ChooseElementPopup;
@@ -29,6 +28,7 @@ import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ItemSlot;
 import com.tom.cpl.util.NamedElement.NameMapper;
 import com.tom.cpm.shared.MinecraftClientAccess;
+import com.tom.cpm.shared.animation.AnimationType;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinitionLoader;
 import com.tom.cpm.shared.editor.actions.ActionBuilder;
@@ -356,9 +356,34 @@ public class Generators {
 	private static void checkSafetyLevel(EditorGui eg) {
 		IGui gui = eg.getGui();
 		SafetyReport report = SafetyLevel.getLevel(eg.getEditor());
-		String msg = report.details.stream().map(t -> t.toString(gui)).collect(Collectors.joining("\\"));
+		List<String> msg = new ArrayList<>();
 		String lvl = gui.i18nFormat("label.cpm.safetyLevel", gui.i18nFormat("label.cpm.safetyProfile." + report.getLvl()));
-		eg.openPopup(new MessagePopup(eg, gui.i18nFormat("label.cpm.info"), lvl + "\\" + msg));
+		msg.add(lvl);
+		report.details.stream().map(t -> t.toString(gui)).forEach(msg::add);
+		collectAnimationDetails(eg, msg);
+		eg.openPopup(new MessagePopup(eg, gui.i18nFormat("label.cpm.info"), String.join("\\", msg)));
+	}
+
+	private static void collectAnimationDetails(EditorGui eg, List<String> msgs) {
+		Editor e = eg.getEditor();
+		long layerCnt = e.animations.stream().
+				filter(a -> a.type.isLayer()).map(a -> a.getId()).distinct().count();
+		long poseCnt = e.animations.stream().
+				filter(a -> a.type == AnimationType.CUSTOM_POSE).map(a -> a.getId()).distinct().count();
+		long gestureCnt = e.animations.stream().
+				filter(a -> a.type == AnimationType.GESTURE).map(a -> a.getId()).distinct().count();
+		long layerCtrlCnt = e.animations.stream().
+				filter(a -> (a.type == AnimationType.GESTURE || a.type == AnimationType.CUSTOM_POSE) && a.layerControlled).
+				map(a -> a.getId()).distinct().count();
+		msgs.add(eg.getGui().i18nFormat("label.cpm.safety.animCnt.pose", poseCnt, 253));
+		msgs.add(eg.getGui().i18nFormat("label.cpm.safety.animCnt.gesture", gestureCnt, 253));
+		msgs.add(eg.getGui().i18nFormat("label.cpm.safety.animCnt.layer", layerCnt, 253));
+		if (e.animEnc != null) {
+			int limit = (1 << e.animEnc.freeLayers.size()) - 2;
+			msgs.add(eg.getGui().i18nFormat("label.cpm.safety.animCnt.layerCtrl", layerCtrlCnt, limit));
+		} else  {
+			msgs.add(eg.getGui().i18nFormat("label.cpm.safety.animCnt.layerCtrl", layerCtrlCnt, "?"));
+		}
 	}
 
 	private static void mirrorElement(EditorGui eg) {

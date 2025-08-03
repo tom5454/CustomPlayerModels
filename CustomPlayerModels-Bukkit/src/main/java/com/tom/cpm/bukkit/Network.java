@@ -50,7 +50,9 @@ public class Network implements PluginMessageListener, Listener {
 			try {
 				Attribute.values();
 				hasAttributes = true;
+				Log.info("Attributes available, loading scalers");
 			} catch (Throwable e) {
+				Log.warn("Attributes not found", e);
 			}
 			final boolean fhasAttributes = hasAttributes;
 			netHandler.setGetPlayerAnimGetters((t, u) -> {
@@ -58,7 +60,7 @@ public class Network implements PluginMessageListener, Listener {
 				u.creativeFlying = t.isFlying();
 				u.falling = t.getFallDistance();
 				if (fhasAttributes) {
-					u.health = (float) (t.getHealth() / t.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+					u.health = (float) (t.getHealth() / t.getAttribute(AttributeScaler.MAX_HEALTH).getValue());
 				} else {
 					u.health = (float) (t.getHealth() / t.getMaxHealth());
 				}

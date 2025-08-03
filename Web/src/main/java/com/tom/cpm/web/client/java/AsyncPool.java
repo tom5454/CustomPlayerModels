@@ -8,7 +8,10 @@ public class AsyncPool implements Executor {
 
 	@Override
 	public void execute(Runnable command) {
-		new Promise<>((res, rej) -> command.run());
+		Promise.resolve((Void) null).then(ignored -> {
+			command.run();
+			return null;
+		});
 	}
 
 }
