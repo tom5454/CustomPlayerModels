@@ -427,7 +427,7 @@ public class ExampleGenerator {
 
 name：动画名称
 `IClientAPI.playAnimation(name);` 或
-value：0：重置姿势/手势，1：播放姿势/手势，对于图层值：0-255，切换：0-1 或 -1 切换状态
+value：0：重置姿势/动作，1：播放姿势/动作，对于图层值：0-255，切换：0-1 或 -1 切换状态
 `IClientAPI.playAnimation(name, value);`  
 返回：如果找到动画并开始播放，则返回 true
 
@@ -549,7 +549,7 @@ Fabric: `VertexConsumerProvider.class`
 name：动画名称
 `ICommonAPI.playAnimation(Player.class, playerObj, name);` or  
 `ICommonAPI.playAnimation(Player.class, playerObj, name, value);`  
-Value：0：重置姿势/手势，1：播放姿势/手势，图层值：0-255，切换：0-1 或 -1 切换状态
+Value：0：重置姿势/动作，1：播放姿势/动作，图层值：0-255，切换：0-1 或 -1 切换状态
 [Player.class](#common-playerclass)
 
 
