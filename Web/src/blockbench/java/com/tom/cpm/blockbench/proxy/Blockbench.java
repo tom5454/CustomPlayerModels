@@ -1,7 +1,5 @@
 package com.tom.cpm.blockbench.proxy;
 
-import com.tom.cpm.blockbench.proxy.electron.Electron;
-
 import elemental2.core.ArrayBuffer;
 import elemental2.core.JsObject;
 import elemental2.dom.Blob;
@@ -86,8 +84,7 @@ public class Blockbench {
 
 	@JsOverlay
 	public static void focus() {
-		if(Electron.isElectron())Electron.app.focus();
-		else DomGlobal.window.focus();
+		DomGlobal.window.focus();
 	}
 
 	public static native boolean hasFlag(String flag);

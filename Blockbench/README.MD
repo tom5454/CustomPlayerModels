@@ -2,7 +2,7 @@
 **This plugin is in beta, some features are not supported yet**  
 - CPM animations may break when importing  
 
-Tested with Blockbench desktop 4.12.4 portable
+Tested with Blockbench desktop 5.0.2 portable
 
 If you find a bug report it here [Bugtracker](https://github.com/tom5454/CustomPlayerModels/issues) / Click on issues, and create an issue with screenshots and your blockbench project attached in a .zip file.  
 
@@ -17,6 +17,10 @@ The plugin should be installed and you can import and export `.cpmproject` files
   
 Open the plugin: [Link](https://raw.githubusercontent.com/tom5454/CustomPlayerModels/master/Blockbench/cpm_plugin.js), then Save the Page (Right click/Save Page, or Ctrl+S). Then in Blockbench go to File/Plugins then Load Plugin from File, and open the downloaded `.js` file.
 </details>
+
+## For Blockbench 4.12.x
+Change the URL:  
+`https://cpmweb.tom5454.com/blockbench/0.6.24_pre1/cpm_plugin.js`
 
 ### Installing older versions
 Change the URL:  

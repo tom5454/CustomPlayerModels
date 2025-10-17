@@ -1,7 +1,6 @@
 package com.tom.cpm.blockbench.ee;
 
 import com.tom.cpl.util.Pair;
-import com.tom.cpm.blockbench.proxy.electron.ElectronDialog.DialogProperties;
 import com.tom.cpm.shared.editor.Editor;
 import com.tom.cpm.shared.editor.gui.EditorGui;
 import com.tom.cpm.shared.editor.project.ProjectIO;
@@ -19,7 +18,6 @@ public interface EmbeddedEditor {
 	void onReady();
 	Promise<Void> openProject(ArrayBuffer dt);
 	Promise<Void> openInHost(ArrayBuffer a);
-	Promise<String> openFileDialog(boolean isSave, DialogProperties dialog);
 
 	public static Promise<Object> openProjectFromBuffer(ArrayBuffer ab) {
 		EditorGui eg = (EditorGui) WebMC.getInstance().getGui().getFrame();

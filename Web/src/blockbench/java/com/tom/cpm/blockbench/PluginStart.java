@@ -38,7 +38,7 @@ public class PluginStart implements EntryPoint {
 		System.setErr(new LoggingPrintStream("STDERR", DomGlobal.console::error));
 		RenderSystem.preloaded(() -> {
 			try {
-				FS.setImpl(Global.isApp() ? new BlockBenchFS() : new LocalStorageFS(DomGlobal.window));
+				FS.setImpl(new LocalStorageFS(DomGlobal.window));
 				new BBInstance() {
 
 					@Override
@@ -64,7 +64,7 @@ public class PluginStart implements EntryPoint {
 			prop.icon = "icon-player";
 			prop.onload = PluginStart::onLoad;
 			prop.onunload = PluginStart::onUnload;
-			prop.min_version = "4.12.1";
+			prop.min_version = "5.0.0";
 			Plugin.register(System.getProperty("cpm.pluginId"), prop);
 		});
 	}

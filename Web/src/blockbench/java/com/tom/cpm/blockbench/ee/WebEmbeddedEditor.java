@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import com.tom.cpl.gui.Frame;
 import com.tom.cpl.gui.elements.MessagePopup;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
-import com.tom.cpm.blockbench.proxy.electron.ElectronDialog.DialogProperties;
 import com.tom.cpm.web.client.WebMC;
 import com.tom.cpm.web.client.render.RenderSystem.WindowEx;
 import com.tom.cpm.web.client.resources.Resources;
@@ -80,12 +79,19 @@ public class WebEmbeddedEditor implements EmbeddedEditor {
 				});
 			});
 
+			HTMLScriptElement scriptZip = Js.uncheckedCast(window.document.createElement("script"));
+			scriptZip.textContent = DomGlobal.atob(Resources.getResource("assets/cpmblockbench/ee/jszip.min.js"));
+			window.document.body.appendChild(scriptZip);
+
 			String bootstrap = DomGlobal.atob(Resources.getResource("assets/cpmblockbench/ee/web_bootstrap.js"));
-			HTMLScriptElement script = Js.uncheckedCast(window.document.createElement("script"));
-			script.textContent = bootstrap.
+			HTMLScriptElement scriptBootstrap = Js.uncheckedCast(window.document.createElement("script"));
+			scriptBootstrap.textContent = bootstrap.
 					replace("$ver", System.getProperty("cpm.version")).
-					replace("$platform", DomGlobal.btoa(WebMC.platform)).
-					replace("$$$", DomGlobal.btoa("(" + UGWTContext.getAppScript() + ")()"));
+					replace("$platform", DomGlobal.btoa(WebMC.platform));
+			window.document.body.appendChild(scriptBootstrap);
+
+			HTMLScriptElement script = Js.uncheckedCast(window.document.createElement("script"));
+			script.textContent = "(" + UGWTContext.getAppScript() + ")()";
 			window.document.body.appendChild(script);
 		});
 	}
@@ -170,11 +176,6 @@ public class WebEmbeddedEditor implements EmbeddedEditor {
 			Frame frm = WebMC.getInstance().getGui().getFrame();
 			frm.openPopup(new MessagePopup(frm, I18n.get("label.cpm.info"), I18n.get("bb-label.openedInBB")));
 		});
-	}
-
-	@Override
-	public Promise<String> openFileDialog(boolean isSave, DialogProperties dialog) {
-		return Promise.reject(new UnsupportedOperationException());
 	}
 
 	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "$$ugwt_m_Object_$$")

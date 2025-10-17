@@ -1,7 +1,6 @@
 package com.tom.cpm.blockbench.proxy;
 
 import com.tom.cpm.blockbench.proxy.MenuBar.BarItem;
-import com.tom.cpm.blockbench.proxy.electron.Shell;
 import com.tom.ugwt.client.JsArrayE;
 
 import elemental2.core.JsObject;
@@ -44,10 +43,6 @@ public class Global {
 
 		@JsProperty(name = "$$ugwt_m_Language.data_$$")
 		public static JsPropertyMap<String> lang;
-
-		@JsProperty(name = "$$ugwt_m_shell_$$")
-		public static Shell shell;
-
 	}
 
 	@JsOverlay
@@ -78,10 +73,5 @@ public class Global {
 	@JsOverlay
 	public static JsPropertyMap<String> getLang() {
 		return G.lang;
-	}
-
-	@JsOverlay
-	public static void openExternal(String path) {
-		G.shell.openExternal(path);
 	}
 }
