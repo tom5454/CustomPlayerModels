@@ -790,6 +790,8 @@ public class BlockbenchExport {
 				}
 				if(rot != null) {
 					Vec3f v = rot.toVecF();
+					v.x *= -1;
+					v.y *= -1;
 					if(!ea.add)v = v.add(addRot);
 					ActionBuilder.limitVec(v, 0, 360, true);
 					dt.setRot(v);
