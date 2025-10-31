@@ -4,7 +4,6 @@ import com.tom.cpl.config.ModConfigFile;
 import com.tom.cpl.gui.elements.Panel;
 import com.tom.cpl.gui.elements.PopupMenu;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
-import com.tom.cpm.blockbench.proxy.Global;
 import com.tom.cpm.web.client.WebMC;
 
 import elemental2.dom.DomGlobal;
@@ -30,11 +29,6 @@ public class BBInstance extends WebMC {
 		}
 		break;
 		}
-	}
-
-	@Override
-	public void openURL(String url) {
-		Global.openExternal(url);
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package com.tom.cpm.blockbench.format;
 
 import com.tom.cpm.blockbench.BBActions;
-import com.tom.cpm.blockbench.BlockBenchFS;
 import com.tom.cpm.blockbench.PluginStart;
 import com.tom.cpm.blockbench.convert.OldPluginConvert;
 import com.tom.cpm.blockbench.convert.ProjectConvert;
@@ -52,14 +51,10 @@ public class CPMCodec {
 		prop.load_filter.extensions = new String[] {"cpmproject"};
 		prop.export = ProjectConvert::export;
 		prop.write = (content, path) -> {
-			if(BlockBenchFS.fs.existsSync(path) && codec.overwrite) {
-				codec.overwrite(content, path, codec::afterSave);
-			} else {
-				WriteProperties pr = new WriteProperties();
-				pr.content = content;
-				pr.savetype = "zip";
-				Blockbench.writeFile(path, pr, codec::afterSave);
-			}
+			WriteProperties pr = new WriteProperties();
+			pr.content = content;
+			pr.savetype = "zip";
+			Blockbench.writeFile(path, pr, codec::afterSave);
 		};
 		codec = new Codec("cpmproject", prop);
 		ModelFormat.FormatProperties ctr = new ModelFormat.FormatProperties();

@@ -336,6 +336,8 @@ public class BlockbenchImport {
 					rot = rot.sub(addRot);
 				}
 				pos.y *= -1;
+				rot.x *= -1;
+				rot.y *= -1;
 
 				boolean hasColor = me.type != ElementType.ROOT_PART && (me.recolor || !me.texture);
 				BoneAnimator be = an.get(me);
