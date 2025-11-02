@@ -37,8 +37,8 @@ Ctrl + Y：重做操作
 <a name="in-game-controls-keybindings"/>
 
 ## 游戏内控制（按键绑定）
-手势菜单（默认 G）：
-![图片：手势菜单](https://github.com/tom5454/CustomPlayerModels/wiki/images/gestures_menu.png)  
+动作菜单（默认 G）：
+![图片：动作菜单](https://github.com/tom5454/CustomPlayerModels/wiki/images/gestures_menu.png)  
 用于控制自定义动画，并可设置快速访问的按键绑定。  
 快速访问键 1-6：绑定自定义动画以快速触发  
 切换渲染：启用 / 关闭自定义模型的渲染效果。
@@ -47,4 +47,4 @@ Ctrl + Y：重做操作
 <a name="setting-up-quick-access"/>
 
 ### 设置快速访问
-将鼠标悬停在目标姿势或手势上，然后点击快速访问键进行绑定。
+将鼠标悬停在目标姿势或动作上，然后点击快速访问键进行绑定。
