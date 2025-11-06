@@ -148,8 +148,13 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			return new Field<>(get, set, null);
 		}
 
-		protected abstract ModelPart getRoot();
-		protected abstract void setRoot(ModelPart part);
+		protected ModelPart getRoot() {
+			return model().root;
+		}
+
+		protected void setRoot(ModelPart part) {
+			model().root = part;
+		}
 
 		@SuppressWarnings("unchecked")
 		protected M model() {
@@ -181,16 +186,6 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			register(create2ndLayer(() -> model.rightPants , v -> model.rightPants  = v, rightLeg));
 			register(create2ndLayer(() -> model.jacket     , v -> model.jacket      = v, body));
 		}
-
-		@Override
-		protected ModelPart getRoot() {
-			return model().root;
-		}
-
-		@Override
-		protected void setRoot(ModelPart part) {
-			model().root = part;
-		}
 	}
 
 	private static class RedirectHolderApi extends RDH<HumanoidModel<? extends HumanoidRenderState>> {
@@ -216,16 +211,6 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 				register(new Field<>(() -> mp.jacket     , v -> mp.jacket      = v, null));
 			}
 		}
-
-		@Override
-		protected ModelPart getRoot() {
-			return model().root;
-		}
-
-		@Override
-		protected void setRoot(ModelPart part) {
-			model().root = part;
-		}
 	}
 
 	private static class RedirectHolderSkull extends RDH<SkullModel> {
@@ -234,16 +219,6 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			super(mngr, model);
 
 			register(createRendered(() -> model.head, v -> model.head = v, PlayerModelParts.HEAD));
-		}
-
-		@Override
-		protected ModelPart getRoot() {
-			return model().root;
-		}
-
-		@Override
-		protected void setRoot(ModelPart part) {
-			model().root = part;
 		}
 	}
 
@@ -254,16 +229,6 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 			register(createRendered(() -> model.rightWing, v -> model.rightWing = v, RootModelType.ELYTRA_RIGHT));
 			register(createRendered(() -> model.leftWing,  v -> model.leftWing  = v, RootModelType.ELYTRA_LEFT));
-		}
-
-		@Override
-		protected ModelPart getRoot() {
-			return model().root;
-		}
-
-		@Override
-		protected void setRoot(ModelPart part) {
-			model().root = part;
 		}
 	}
 
@@ -281,16 +246,6 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 
 			register(new Field<>(() -> model.hat , v -> model.hat  = v, null));
 		}
-
-		@Override
-		protected ModelPart getRoot() {
-			return model().root;
-		}
-
-		@Override
-		protected void setRoot(ModelPart part) {
-			model().root = part;
-		}
 	}
 
 	private static class RedirectHolderArmor2 extends RDH<HumanoidModel<HumanoidRenderState>> {
@@ -302,16 +257,6 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			register(createRendered(() -> model.rightLeg, v -> model.rightLeg = v, RootModelType.ARMOR_RIGHT_LEG));
 			register(createRendered(() -> model.leftLeg,  v -> model.leftLeg  = v, RootModelType.ARMOR_LEFT_LEG));
 		}
-
-		@Override
-		protected ModelPart getRoot() {
-			return model().root;
-		}
-
-		@Override
-		protected void setRoot(ModelPart part) {
-			model().root = part;
-		}
 	}
 
 	private static class RedirectHolderCape extends RDH<PlayerCapeModel<PlayerRenderState>> {
@@ -320,16 +265,6 @@ public class PlayerRenderManager extends ModelRenderManager<MultiBufferSource, M
 			super(mngr, model);
 
 			register(createRendered(() -> model.cape,     v -> model.cape     = v, RootModelType.CAPE));
-		}
-
-		@Override
-		protected ModelPart getRoot() {
-			return model().root;
-		}
-
-		@Override
-		protected void setRoot(ModelPart part) {
-			model().root = part;
 		}
 	}
 

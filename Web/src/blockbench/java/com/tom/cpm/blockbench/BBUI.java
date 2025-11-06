@@ -24,7 +24,7 @@ public class BBUI implements UI {
 		Dialog.DialogProperties dctr = new Dialog.DialogProperties();
 		dctr.id = "ui_msg";
 		dctr.title = title;
-		dctr.lines = new String[] {text.replace("\\", "<br>")};
+		dctr.lines = new String[] {"<p>" + text.replace("\\", "<br>") + "</p>"};
 		dctr.singleButton = true;
 		dctr.buttons = new String[] {closeBtn};
 		new Dialog(dctr).show();
@@ -52,7 +52,7 @@ public class BBUI implements UI {
 		Dialog.DialogProperties dctr = new Dialog.DialogProperties();
 		dctr.id = "ui_confirm";
 		dctr.title = title;
-		dctr.lines = new String[] {msg.replace("\\", "<br>")};
+		dctr.lines = new String[] {"<p>" + msg.replace("\\", "<br>") + "</p>"};
 		dctr.buttons = new String[] {okTxt, cancelTxt};
 		dctr.onConfirm = e -> {
 			ok.run();

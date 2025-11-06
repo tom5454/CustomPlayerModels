@@ -19,6 +19,7 @@ import com.mojang.brigadier.CommandDispatcher;
 
 import com.tom.cpm.shared.network.NetH;
 import com.tom.cpm.shared.network.NetHandler;
+import com.tom.cpm.shared.network.packet.HelloS2C;
 
 public class ServerHandler extends ServerHandlerBase {
 	public static NetHandler<CustomPacketPayload.Type<ByteArrayPayload>, ServerPlayer, ServerGamePacketListenerImpl> netHandler;
@@ -27,6 +28,7 @@ public class ServerHandler extends ServerHandlerBase {
 		netHandler = init();
 		netHandler.setGetOnlinePlayers(() -> ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers());
 		netHandler.setExecutor(ServerLifecycleHooks::getCurrentServer);
+		netHandler.setAllowPackets(h -> h.hasChannel(netHandler.getPacketKey(HelloS2C.class)));
 		if(ModList.get().isLoaded("pehkui")) {
 			netHandler.addScaler(new PehkuiInterface());
 		}

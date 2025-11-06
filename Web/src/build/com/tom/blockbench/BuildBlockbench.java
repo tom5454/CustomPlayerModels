@@ -11,7 +11,7 @@ import com.tom.cpl.util.Pair;
 import com.tom.cpm.web.gwt.ClasspathFix;
 
 public class BuildBlockbench {
-	public static final String VERSION = "0.6.24_pre3";
+	public static final String VERSION = "0.6.25_pre1";
 
 	public static void main(String[] args0) {
 		Pair<File, File> in = main(false, true);

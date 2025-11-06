@@ -161,6 +161,7 @@ public class SocialPanel extends Panel {
 			if(unique != null) {
 				if(unique.equals(ModelDefinitionLoader.SKULL_UNIQUE) || unique.startsWith("skull_tex:"))type = "skull";
 				else if(unique.startsWith("model:"))type = "model";
+				else if(unique.startsWith("man:"))type = "mannequin";
 			}
 			return new Tooltip(frm, gui.i18nFormat("tooltip.cpm.playerUUID", getName(), getUUID().toString(),
 					gui.i18nFormat("label.cpm.modelLoadingType." + type)));

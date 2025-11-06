@@ -14,8 +14,8 @@ import net.minecraft.world.entity.animal.Parrot;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import com.tom.cpl.util.ItemSlot;
-import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.PlayerRenderManager;
+import com.tom.cpm.client.PlayerRenderStateAccess;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.render.ItemTransform;
@@ -27,7 +27,7 @@ public class ParrotOnShoulderLayerMixin {
 	public void onRender(final PoseStack poseStack, final MultiBufferSource multiBufferSource, final int i,
 			final PlayerRenderState playerRenderState, final Parrot.Variant variant, final float f, final float g,
 			final boolean leftShoulderIn, CallbackInfo cbi) {
-		Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = ((PlayerRenderStateAccess) playerRenderState).cpm$getPlayer();
 		if(pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if(def != null) {

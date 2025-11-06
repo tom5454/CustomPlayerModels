@@ -21,6 +21,7 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 import com.tom.cpl.config.ModConfigFile;
@@ -87,7 +88,7 @@ public class CustomPlayerModels extends CommonBase {
 	}
 
 	private void onPayloadRegister(RegisterPayloadHandlersEvent event) {
-		PayloadRegistrar registrar = event.registrar("1").optional();
+		PayloadRegistrar registrar = event.registrar("1").optional().executesOn(HandlerThread.NETWORK);
 		PacketRegistryP.register(registrar::playToClient, registrar::playToServer, registrar::playBidirectional);
 	}
 

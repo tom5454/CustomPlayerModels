@@ -52,7 +52,7 @@ public class PopupDialogs {
 		if(err instanceof PopupDialogs.CancelException)return;
 		if(err instanceof UserException) {
 			UserException ex = (UserException) err;
-			errorDialog.setLines(msg, "<br>", ex.getMessage());
+			errorDialog.setLines("<p>" + msg + "<br>" + ex.getMessage() + "</p>");
 			errorDialog.show();
 			return;
 		}
@@ -70,12 +70,12 @@ public class PopupDialogs {
 			errorMsg = msg + "\n" + err;
 		}
 		errorMsg += "\nPlatform: " + WebMC.platform;
-		errorDialog.setLines(msg, "<br>", err.toString(), "<br>", I18n.get("bb-label.pleaseReport"), "<br>", "Platform: " + WebMC.platform, "<br>", "<button onclick='" + copyErrorFunc + "(\"" + DomGlobal.btoa(errorMsg) + "\")'>" + I18n.get("bb-button.copyErrorMsg") + "</button>");
+		errorDialog.setLines("<p>" + msg + "<br>" + err.toString() + "<br>" + I18n.get("bb-label.pleaseReport") + "<br>" + "Platform: " + WebMC.platform + "<br>" + "<button onclick='" + copyErrorFunc + "(\"" + DomGlobal.btoa(errorMsg) + "\")'>" + I18n.get("bb-button.copyErrorMsg") + "</button></p>");
 		errorDialog.show();
 	}
 
 	public static void displayMessage(String msg) {
-		infoDialog.setLines(msg);
+		infoDialog.setLines("<p>" + msg + "</p>");
 		infoDialog.show();
 	}
 

@@ -518,9 +518,9 @@ public class BlockbenchExport {
 			pr.id = "cpm_list_decimals";
 			pr.title = I18n.get("bb-label.warn.uvDecimalFixer.list");
 			pr.singleButton = true;
-			pr.lines = new String[] {
-					I18n.formatBr("bb-label.warn.uvDecimalFixer.info"),
-					decFixApplied.stream().collect(Collectors.joining("<br>", "<div style='padding: 8px;'>", "</div>"))
+			pr.lines = new String[] {"<div>" +
+					I18n.formatBr("bb-label.warn.uvDecimalFixer.info") +
+					decFixApplied.stream().collect(Collectors.joining("<br>", "<div style='padding: 8px;'>", "</div></div>"))
 			};
 			pr.onCancel = () -> {
 				res.onInvoke(false);

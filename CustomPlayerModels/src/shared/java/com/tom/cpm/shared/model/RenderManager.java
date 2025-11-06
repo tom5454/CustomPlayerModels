@@ -81,11 +81,38 @@ public class RenderManager<G, P, M, D> {
 		return null;
 	}
 
+	public Player<P> loadSkull(G gprofile) {
+		String unique;
+		if(getSkullModel == null)unique = ModelDefinitionLoader.SKULL_UNIQUE;
+		else {
+			unique = getSkullModel.apply(gprofile);
+			if(unique == null) {
+				if(getTexture == null)unique = ModelDefinitionLoader.SKULL_UNIQUE;
+				else unique = getTexture.apply(gprofile);
+				if(unique == null)unique = ModelDefinitionLoader.SKULL_UNIQUE;
+				else unique = "skull_tex:" + unique;
+			}
+			else unique = "model:" + unique;
+		}
+
+		Player<P> profile = (Player<P>) loader.loadPlayer(gprofile, unique);
+		if(profile == null) {
+			return null;
+		}
+		ModelDefinition def = profile.getModelDefinition();
+		if(def != null) {
+			this.profile = profile;
+			profile.animState.animationMode = AnimationMode.SKULL;
+			return profile;
+		}
+		return null;
+	}
+
 	public void bindPlayerState(Player<P> player, D buffer, M toBind, String arg) {
-		if (profile != null) {
-			ModelDefinition def = profile.getModelDefinition();
-			renderManager.bindModel(toBind, arg, buffer, def, profile, profile.animState.animationMode);
-			renderManager.getAnimationEngine().prepareAnimations(profile, profile.animState.animationMode, def);
+		if (player != null) {
+			ModelDefinition def = player.getModelDefinition();
+			renderManager.bindModel(toBind, arg, buffer, def, player, player.animState.animationMode);
+			renderManager.getAnimationEngine().prepareAnimations(player, player.animState.animationMode, def);
 		}
 	}
 

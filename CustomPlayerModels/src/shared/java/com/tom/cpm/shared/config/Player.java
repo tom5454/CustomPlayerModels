@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 import com.tom.cpm.shared.MinecraftClientAccess;
@@ -139,5 +140,11 @@ public abstract class Player<P> {
 				to.putAll("textures", from.get("textures"));
 		} catch (Exception e) {
 		}
+	}
+
+	public static <P> Multimap<String, P> cloneProperties(Multimap<String, P> from) {
+		Multimap<String, P> map = LinkedHashMultimap.create();
+		cloneProperties(from, map);
+		return map;
 	}
 }

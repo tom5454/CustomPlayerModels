@@ -106,10 +106,10 @@ sourceSets {
 }
 
 repositories {
-    maven { // TOP
-        name 'tterrag maven'
-        url "https://maven.tterrag.com/"
-    }
+    maven {
+		name "ModMaven"
+		url "https://modmaven.dev"
+	}
     maven { // McJtyLib
         url "https://maven.k-4u.nl"
     }

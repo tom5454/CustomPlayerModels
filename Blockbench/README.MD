@@ -2,7 +2,7 @@
 **This plugin is in beta, some features are not supported yet**  
 - CPM animations may break when importing  
 
-Tested with Blockbench desktop 5.0.2 portable
+Tested with Blockbench desktop 5.0.3 portable
 
 If you find a bug report it here [Bugtracker](https://github.com/tom5454/CustomPlayerModels/issues) / Click on issues, and create an issue with screenshots and your blockbench project attached in a .zip file.  
 

@@ -168,7 +168,12 @@ public class EditorGui extends Frame {
 		int scale = ModConfig.getCommonConfig().getInt(ConfigKeys.EDITOR_SCALE, -1);
 		if(scale != -1 && rescaleGui) {
 			if(gui.getScale() != scale) {
-				gui.setScale(scale);
+				rescaleGui = false;
+				try {
+					gui.setScale(scale);
+				} finally {
+					rescaleGui = true;
+				}
 				return;
 			}
 		}

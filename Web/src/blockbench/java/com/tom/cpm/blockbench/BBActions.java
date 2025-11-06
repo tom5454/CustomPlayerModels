@@ -211,7 +211,7 @@ public class BBActions {
 				Dialog.DialogProperties dctr = new Dialog.DialogProperties();
 				dctr.id = "cpm_pick_color";
 				dctr.title = I18n.get("label.cpm.changeColor");
-				dctr.lines = new String[] {I18n.formatBr("tooltip.cpm.recolor.colorbtn"), "<br><input type='text' id='cpm_recolor_picker' />"};
+				dctr.lines = new String[] {"<p>" + I18n.formatBr("tooltip.cpm.recolor.colorbtn") + "<br><input type='text' id='cpm_recolor_picker' /></p>"};
 				dctr.singleButton = true;
 				dctr.buttons = new String[] {I18n.get("button.cpm.ok"), I18n.get("button.cpm.cancel")};
 				int[] newColor = new int[] {-1};
@@ -253,7 +253,7 @@ public class BBActions {
 			a.name = I18n.get("label.cpm.hidden_effect");
 			a.description = "";
 			a.condition = new Action.Condition();
-			a.condition.method = c -> Project.selected_groups.length > 0;
+			a.condition.method = c -> Project.selected_groups != null && Project.selected_groups.length > 0;
 			a.onChange = v -> {
 				if(Project.selected_groups.length > 0) {
 					Undo.initEdit(UndoData.make(Project.selected_groups.array()));

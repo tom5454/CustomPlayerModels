@@ -25,6 +25,7 @@ public class Dialog {
 
 	public Dialog(DialogProperties ctr) {}
 
+	@Deprecated
 	private String[] lines;
 	private Object object;
 	public CallbackConfirm onConfirm;
@@ -41,7 +42,9 @@ public class Dialog {
 		public CallbackButton onButton;
 		public CallbackFormChange onFormChange;
 		public CallbackBuild onOpen;
-		public String[] lines, buttons;
+		@Deprecated
+		public String[] lines;
+		public String[] buttons;
 		public boolean singleButton;
 		public int width, confirmIndex, cancelIndex;
 		public VueComponent component;
@@ -239,6 +242,7 @@ public class Dialog {
 	public native void hide();
 
 	@JsOverlay
+	@Deprecated
 	public final void setLines(String... lines) {
 		hide();
 		this.lines = lines;

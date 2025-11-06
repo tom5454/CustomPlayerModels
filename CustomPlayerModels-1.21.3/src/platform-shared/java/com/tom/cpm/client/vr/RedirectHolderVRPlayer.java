@@ -34,12 +34,12 @@ public class RedirectHolderVRPlayer extends RDH<VRPlayerModel> {
 		register(createRendered(           () -> model.rightLeg , v -> model.rightLeg  = v, PlayerModelParts.RIGHT_LEG));
 		register(createRendered(           () -> model.leftLeg  , v -> model.leftLeg   = v, PlayerModelParts.LEFT_LEG));
 
-		register(new Field<>(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
-		register(new Field<>(() -> model.leftSleeve , v -> model.leftSleeve  = v, null));
-		register(new Field<>(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
-		register(new Field<>(() -> model.leftPants  , v -> model.leftPants   = v, null));
-		register(new Field<>(() -> model.rightPants , v -> model.rightPants  = v, null));
-		register(new Field<>(() -> model.jacket     , v -> model.jacket      = v, null));
+		register(create2ndLayer(() -> model.hat        , v -> model.hat         = v, null)).setCopyFrom(head);
+		register(create2ndLayer(() -> model.leftSleeve , v -> model.leftSleeve  = v, null));
+		register(create2ndLayer(() -> model.rightSleeve, v -> model.rightSleeve = v, null));
+		register(create2ndLayer(() -> model.leftPants  , v -> model.leftPants   = v, null));
+		register(create2ndLayer(() -> model.rightPants , v -> model.rightPants  = v, null));
+		register(create2ndLayer(() -> model.jacket     , v -> model.jacket      = v, null));
 
 		//register(new Field<>(() -> model.vrHMD, v -> model.vrHMD = v, null));//disable
 		if(!seated) {
@@ -55,15 +55,5 @@ public class RedirectHolderVRPlayer extends RDH<VRPlayerModel> {
 
 	@Override
 	protected void setupTransform(MatrixStack stack, RedirectRenderer<ModelPart> part, boolean pre) {
-	}
-
-	@Override
-	protected ModelPart getRoot() {
-		return model().root;
-	}
-
-	@Override
-	protected void setRoot(ModelPart part) {
-		model().root = part;
 	}
 }

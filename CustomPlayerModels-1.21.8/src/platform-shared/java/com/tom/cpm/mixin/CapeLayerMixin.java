@@ -25,6 +25,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tom.cpm.client.CapeTransformUtil;
 import com.tom.cpm.client.CustomPlayerModelsClient;
 import com.tom.cpm.client.ModelTexture;
+import com.tom.cpm.client.PlayerRenderStateAccess;
 import com.tom.cpm.shared.config.Player;
 import com.tom.cpm.shared.definition.ModelDefinition;
 import com.tom.cpm.shared.model.RootModelType;
@@ -43,7 +44,7 @@ public abstract class CapeLayerMixin extends RenderLayer<PlayerRenderState, Play
 			+ "Lnet/minecraft/client/renderer/entity/state/PlayerRenderState;FF)V", cancellable = true)
 	public void onRender(final PoseStack poseStack, final MultiBufferSource bufferIn, final int i,
 			final PlayerRenderState state, final float f, final float g, CallbackInfo cbi) {
-		Player<?> pl = CustomPlayerModelsClient.INSTANCE.manager.getBoundPlayer();
+		Player<?> pl = ((PlayerRenderStateAccess) state).cpm$getPlayer();
 		if (pl != null) {
 			ModelDefinition def = pl.getModelDefinition();
 			if (def != null && def.hasRoot(RootModelType.CAPE)) {

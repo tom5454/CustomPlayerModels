@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -117,5 +118,13 @@ public class VBuffers {
 	public VBuffers setBatched(boolean batched) {
 		this.batched = batched;
 		return this;
+	}
+
+	public static VBuffers record(BiConsumer<NativeRenderType, RecordBuffer> recordStarted) {
+		return new VBuffers(rt -> {
+			RecordBuffer buffer = new RecordBuffer();
+			recordStarted.accept(rt, buffer);
+			return buffer;
+		}).setBatched(true);
 	}
 }

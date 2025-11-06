@@ -19,6 +19,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
@@ -94,6 +95,7 @@ public class NetHandler<RL, P, NET> {
 	protected Supplier<Collection<? extends P>> getOnlinePlayers;
 	protected Map<ScalingOptions, Map<String, Scaler<P>>> scaleSetters = new EnumMap<>(ScalingOptions.class);
 	protected BiConsumer<? super P, ServerAnimationState> animStateUpdate;
+	protected Predicate<NET> allowPackets = net -> true;
 
 	private List<ConfigChangeRequest<?, ?>> recommendedSettingChanges = new ArrayList<>();
 	private EnumSet<ServerCaps> serverCaps = EnumSet.noneOf(ServerCaps.class);
@@ -161,7 +163,8 @@ public class NetHandler<RL, P, NET> {
 			}
 		}
 
-		sendPacketTo0((NET) net, new HelloS2C(data));
+		if (allowPackets.test((NET) net))
+			sendPacketTo0((NET) net, new HelloS2C(data));
 	}
 
 	private NBTTag writeCaps() {
@@ -650,5 +653,13 @@ public class NetHandler<RL, P, NET> {
 
 	public boolean hasScalingWarning() {
 		return scalingWarning;
+	}
+
+	public void setAllowPackets(Predicate<NET> allowPackets) {
+		this.allowPackets = allowPackets;
+	}
+
+	public RL getPacketKey(Class<? extends IPacket> packetClass) {
+		return packetLookup.get(packetClass);
 	}
 }
