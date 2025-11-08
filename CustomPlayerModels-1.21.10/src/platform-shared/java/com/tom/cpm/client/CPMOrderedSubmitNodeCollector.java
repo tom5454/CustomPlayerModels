@@ -29,6 +29,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import com.tom.cpm.client.SelfRenderer.RenderCollector;
@@ -180,6 +181,12 @@ public class CPMOrderedSubmitNodeCollector implements OrderedSubmitNodeCollector
 		@Override
 		public OrderedSubmitNodeCollector order(int order) {
 			return new CPMOrderedSubmitNodeCollector(collector.order(order));
+		}
+
+		public static void injectSNC(LocalRef<SubmitNodeCollector> snc) {
+			var collector = snc.get();
+			if (collector instanceof CPMSubmitNodeCollector)return;
+			snc.set(new CPMSubmitNodeCollector(collector));
 		}
 	}
 }

@@ -125,13 +125,13 @@ extends LivingEntityRenderer<AvatarlikeEntity, AvatarRenderState, PlayerModel> i
 
 	@Inject(at = @At("HEAD"), method = "renderRightHand")
 	public void onRenderRightArmPre(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final ResourceLocation resourceLocation, final boolean sleeve, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
-		snc.set(new CPMSubmitNodeCollector(vertexConsumers));
+		CPMSubmitNodeCollector.injectSNC(snc);
 		CustomPlayerModelsClient.INSTANCE.renderHand(getModel());
 	}
 
 	@Inject(at = @At("HEAD"), method = "renderLeftHand")
 	public void onRenderLeftArmPre(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final ResourceLocation resourceLocation, final boolean sleeve, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
-		snc.set(new CPMSubmitNodeCollector(vertexConsumers));
+		CPMSubmitNodeCollector.injectSNC(snc);
 		CustomPlayerModelsClient.INSTANCE.renderHand(getModel());
 	}
 

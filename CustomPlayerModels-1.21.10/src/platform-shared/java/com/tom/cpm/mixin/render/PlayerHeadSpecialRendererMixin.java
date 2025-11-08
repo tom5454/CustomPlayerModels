@@ -53,7 +53,8 @@ public class PlayerHeadSpecialRendererMixin {
 			@Local PlayerSkinRenderCache.RenderInfo info
 			) {
 		if (info != null) {
-			collector = new CPMSubmitNodeCollector(collector);
+			if (!(collector instanceof CPMSubmitNodeCollector))
+				collector = new CPMSubmitNodeCollector(collector);
 			CustomPlayerModelsClient.INSTANCE.manager.bindSkull(info.gameProfile(), null, modelBase);
 			ModelTexture mt = new ModelTexture(info.playerSkin().body().texturePath());
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(modelBase, mt, TextureSheetType.SKIN);

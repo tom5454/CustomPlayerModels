@@ -54,7 +54,7 @@ public abstract class SkullBlockRendererMixin implements BlockEntityRenderer<Sku
 	public void onSubmitPre(SkullBlockRenderState state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState cam, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc, @Local SkullModelBase model) {
 		SkullBlockRenderStateAccess sa = (SkullBlockRenderStateAccess) state;
 		if (sa.cpm$getPlayer() != null) {
-			snc.set(new CPMSubmitNodeCollector(collector));
+			CPMSubmitNodeCollector.injectSNC(snc);
 
 			ModelTexture mt = new ModelTexture(sa.cpm$getSkin().body().texturePath());
 			CustomPlayerModelsClient.INSTANCE.manager.bindPlayerState(sa.cpm$getPlayer(), null, model, null);

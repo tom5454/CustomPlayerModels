@@ -136,13 +136,14 @@ dependencies {
     compileOnly files("stubs/of.jar")
     compileOnly files("stubs/iris.jar")
     compileOnly files("stubs/fpm.jar")
+    compileOnly "maven.modrinth:vivecraft:1.21.10-1.3.4-neoforge"
     
     if (useLib) {
-    	compileOnly "maven.modrinth:vivecraft:1.21.6-1.2.5-b2-neoforge"
+    	//compileOnly "maven.modrinth:vivecraft:1.21.6-1.2.5-b2-neoforge"
     	compileOnly 'com.github.Virtuoel:Pehkui:3.8.3-1.21-neoforge'
     } else {
     	compileOnly files("stubs/pehkui.jar")
-    	compileOnly files("stubs/vc.jar")
+    	//compileOnly files("stubs/vc.jar")
     }
 }
 

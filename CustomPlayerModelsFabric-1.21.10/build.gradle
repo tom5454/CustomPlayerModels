@@ -45,9 +45,9 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
-	/*modImplementation("com.terraformersmc:modmenu:15.0.0-beta.3") {
+	modImplementation("com.terraformersmc:modmenu:16.0.0-rc.1") {
         exclude(group: "net.fabricmc.fabric-api")
-    }*/
+    }
 	
 	compileOnly files("../CustomPlayerModels-1.21.10/stubs/of.jar")
 	
@@ -57,7 +57,7 @@ dependencies {
     modImplementation("io.github.douira:glsl-transformer:3.0.0-pre3")
     modImplementation("org.anarres:jcpp:1.4.14")
     
-    /*modCompileOnly('maven.modrinth:vivecraft:1.21.10-1.3.3-fabric')
+    /*modCompileOnly('maven.modrinth:vivecraft:1.21.10-1.3.4-fabric')
 	implementation "com.electronwill.night-config:core:3.6.6"
     implementation "com.electronwill.night-config:toml:3.6.6"
     implementation("org.lwjgl:lwjgl-openvr:3.3.3")
@@ -96,7 +96,7 @@ sourceSets {
 			srcDir "../CustomPlayerModels/src/shared/java"
 			srcDir "../CustomPlayerModels-1.21.10/src/platform-shared/java"
 			srcDir "src/rawmc-shared/java"
-			exclude "com/tom/cpm/ModMenu.java"
+			//exclude "com/tom/cpm/ModMenu.java"
 		}
 		resources {
 			srcDir "../CustomPlayerModels/src/shared/resources"

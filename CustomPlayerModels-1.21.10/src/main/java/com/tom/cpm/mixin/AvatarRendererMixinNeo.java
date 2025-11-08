@@ -32,18 +32,18 @@ public abstract class AvatarRendererMixinNeo extends LivingEntityRenderer<Abstra
 
 	@Inject(at = @At("HEAD"), target = @Desc(value = "submit", args = {AvatarRenderState.class, PoseStack.class, SubmitNodeCollector.class, CameraRenderState.class}))
 	public void onSubmit(AvatarRenderState p_433493_, PoseStack p_434615_, SubmitNodeCollector p_433768_, CameraRenderState p_450931_, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
-		snc.set(new CPMSubmitNodeCollector(p_433768_));
+		CPMSubmitNodeCollector.injectSNC(snc);
 	}
 
 	@Inject(at = @At("HEAD"), target = @Desc(value = "renderRightHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, ResourceLocation.class, boolean.class, AbstractClientPlayer.class}))
 	public void onRenderRightArmPre(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final ResourceLocation resourceLocation, final boolean sleeve, AbstractClientPlayer pl, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
-		snc.set(new CPMSubmitNodeCollector(vertexConsumers));
+		CPMSubmitNodeCollector.injectSNC(snc);
 		CustomPlayerModelsClient.INSTANCE.renderHand(pl, getModel());
 	}
 
 	@Inject(at = @At("HEAD"), target = @Desc(value = "renderLeftHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, ResourceLocation.class, boolean.class, AbstractClientPlayer.class}))
 	public void onRenderLeftArmPre(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final ResourceLocation resourceLocation, final boolean sleeve, AbstractClientPlayer pl, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
-		snc.set(new CPMSubmitNodeCollector(vertexConsumers));
+		CPMSubmitNodeCollector.injectSNC(snc);
 		CustomPlayerModelsClient.INSTANCE.renderHand(pl, getModel());
 	}
 

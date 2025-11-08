@@ -56,14 +56,4 @@ public class RedirectHolderVRPlayer extends RDH<VRPlayerModel> {
 	@Override
 	protected void setupTransform(MatrixStack stack, RedirectRenderer<ModelPart> part, boolean pre) {
 	}
-
-	@Override
-	protected ModelPart getRoot() {
-		return model().root;
-	}
-
-	@Override
-	protected void setRoot(ModelPart part) {
-		model().root = part;
-	}
 }

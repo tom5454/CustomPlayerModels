@@ -45,7 +45,7 @@ public abstract class CustomHeadLayerMixin<S extends LivingEntityRenderState, M 
 		if (state.wornHeadType != SkullBlock.Types.PLAYER)return;
 		ResolvableProfile resolvableprofile = state.wornHeadProfile;
 		if (resolvableprofile != null) {
-			snc.set(new CPMSubmitNodeCollector(p_433246_));
+			CPMSubmitNodeCollector.injectSNC(snc);
 			var info = this.playerSkinRenderCache.getOrDefault(resolvableprofile);
 			CustomPlayerModelsClient.INSTANCE.manager.bindSkull(info.gameProfile(), null, model);
 			ModelTexture mt = new ModelTexture(info.playerSkin().body().texturePath());

@@ -40,9 +40,9 @@ public class CustomRenderTypes {
 				.build();
 	});
 
-	public static final RenderType ENTITY_COLOR = entityTranslucent(ResourceLocation.parse("textures/misc/white.png"));
+	public static final RenderType ENTITY_COLOR = entityTranslucent(ResourceLocation.parse("cpm:textures/white.png"));
 
-	public static final RenderType ENTITY_COLOR_EYES = glowingEyes(ResourceLocation.parse("textures/misc/white.png"));
+	public static final RenderType ENTITY_COLOR_EYES = glowingEyes(ResourceLocation.parse("cpm:textures/white.png"));
 
 	public static RenderType entityColorTranslucent() {
 		return ENTITY_COLOR;

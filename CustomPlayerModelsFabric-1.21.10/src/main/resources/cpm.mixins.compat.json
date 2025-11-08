@@ -7,7 +7,8 @@
   "mixins": [
   ],
   "client": [
-    "AbstractTextureMixin_OF"
+    "AbstractTextureMixin_OF",
+	"VRArmRendererMixin_$vivecraft"
   ],
   "injectors": {
     "defaultRequire": 1
