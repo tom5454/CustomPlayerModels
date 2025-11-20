@@ -1,0 +1,59 @@
+accessWidener	v1	named
+mutable field net/minecraft/client/model/player/PlayerModel leftSleeve Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/player/PlayerModel rightSleeve Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/player/PlayerModel leftPants Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/player/PlayerModel rightPants Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/player/PlayerModel jacket Lnet/minecraft/client/model/geom/ModelPart;
+
+extendable class net/minecraft/client/model/geom/ModelPart
+mutable field net/minecraft/client/model/HumanoidModel head Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel hat Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel body Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel rightArm Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel leftArm Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel rightLeg Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/HumanoidModel leftLeg Lnet/minecraft/client/model/geom/ModelPart;
+
+mutable field net/minecraft/client/model/player/PlayerCapeModel cape Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/player/PlayerCapeModel cape Lnet/minecraft/client/model/geom/ModelPart;
+
+mutable field net/minecraft/client/model/Model root Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/Model root Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible field net/minecraft/client/Options modelParts Ljava/util/Set;
+
+accessible field net/minecraft/client/model/object/skull/SkullModel head Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/object/skull/SkullModel head Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible field net/minecraft/client/model/object/equipment/ElytraModel rightWing Lnet/minecraft/client/model/geom/ModelPart;
+accessible field net/minecraft/client/model/object/equipment/ElytraModel leftWing Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/object/equipment/ElytraModel rightWing Lnet/minecraft/client/model/geom/ModelPart;
+mutable field net/minecraft/client/model/object/equipment/ElytraModel leftWing Lnet/minecraft/client/model/geom/ModelPart;
+
+accessible class net/minecraft/server/level/ChunkMap$TrackedEntity
+accessible field net/minecraft/server/level/ChunkMap entityMap Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
+accessible field net/minecraft/server/level/ChunkMap$TrackedEntity seenBy Ljava/util/Set;
+accessible field net/minecraft/server/level/ChunkMap$TrackedEntity entity Lnet/minecraft/world/entity/Entity;
+
+accessible method net/minecraft/world/level/storage/LevelResource <init> (Ljava/lang/String;)V
+
+accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
+
+accessible field net/minecraft/client/gui/components/EditBox highlightPos I
+
+accessible field net/minecraft/server/network/ServerCommonPacketListenerImpl server Lnet/minecraft/server/MinecraftServer;
+
+accessible class net/minecraft/world/level/biome/Biome$ClimateSettings 
+accessible field net/minecraft/world/level/biome/Biome climateSettings Lnet/minecraft/world/level/biome/Biome$ClimateSettings;
+
+accessible class net/minecraft/client/resources/SkinManager$TextureCache
+accessible field net/minecraft/client/resources/SkinManager skinTextures Lnet/minecraft/client/resources/SkinManager$TextureCache;
+accessible field net/minecraft/client/resources/SkinManager$TextureCache root Ljava/nio/file/Path;
+
+accessible method net/minecraft/client/renderer/RenderPipelines register (Lcom/mojang/blaze3d/pipeline/RenderPipeline;)Lcom/mojang/blaze3d/pipeline/RenderPipeline;
+accessible field net/minecraft/client/renderer/RenderPipelines PIPELINES_BY_LOCATION Ljava/util/Map;
+accessible field net/minecraft/client/renderer/RenderPipelines MATRICES_FOG_SNIPPET Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
+
+accessible class net/minecraft/client/gui/GuiGraphics$ScissorStack
+
+accessible method net/minecraft/client/renderer/rendertype/RenderType create (Ljava/lang/String;Lnet/minecraft/client/renderer/rendertype/RenderSetup;)Lnet/minecraft/client/renderer/rendertype/RenderType;
