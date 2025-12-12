@@ -10,7 +10,7 @@
     "1.16.4-latest": "0.4.3a",
     "1.16.5-latest": "0.6.25a",
     "1.8.9-latest": "0.6.25a",
-    "1.7.10-latest": "0.6.25a",
+    "1.7.10-latest": "0.6.25b",
     "1.15.2-latest": "0.6.25a",
     "1.16.4-fabric-latest": "0.4.3a",
     "1.16.5-fabric-latest": "0.6.25a",
@@ -84,7 +84,8 @@
     "1.21.8-fabric-latest": "0.6.25a",
     "1.21.10-latest": "0.6.25b",
     "1.21.10-fabric-latest": "0.6.25b",
-    "1.21.11-fabric-latest": "0.6.25a"
+    "1.21.11-fabric-latest": "0.6.25b",
+    "1.21.11-latest": "0.6.25a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -614,7 +615,8 @@
     "0.6.22a": "Added `/cpm scaling debug \u003cplayer\u003e` command, lists all of the scaling settings\nUpdated Spanish translations (#761)\n25w18a port\n\nRewrote the pehkui scaling system\nFixed ConcurrentModificationException errors while loading models\nRemoved remove flight speed attribute scaler (didn\u0027t actually work)\nFixed 0 sized cubes still drawing triangles\nFixed paste client delete confirm popup missing OK button text\nMarked the bukkit plugin as incompatible with forge/neo/fabric",
     "0.6.23a": "Added copy color option to copy transforms\nAdded additive option to copy transforms\nAdded multiply option to copy transforms\nUpdated Simplified Chinese translations (#803)\n\nFixed animation editor not working on 1.21.7 (Closes #798)\nFixed crash with Minecraft Forge 1.21.7 (Closes #799)\nFixed crash with Iris or Vivecraft on 1.21.7 fabric (Closes #800)\nFixed load from skin not working with server-side skin changers or via-version proxies (? #659)\nFixed hunger, health and air animations not working on dedicated servers for other players (Closes #804)\nFixed crash with real camera (Closes #807)",
     "0.6.24a": "Added layer animations count to Check Safety level\nAdded: render scale in animation works with multi-select\n\nFixed error with scaling on Paper (Closes #640)\nFixed plugin not working on Paper 1.21.7+ (#809)\nFixed crash with 1.6 and older minecraft versions\nFixed rare crash on 1.21.3 and newer\nFixed vanilla parts not showing their UV box in the editor\nFixed multi-select set color not working with recolored cubes",
-    "0.6.25a": "1.21.10 port\nSkin models work on Mannequins\n\nUpdated Chinese translations (#834)\nFixed color sliders not working on (1.21.8+)\nFixed login issue on NeoForge (Closes #854)\nFixed invalid editor gui scale crashing the editor (Closes #839)"
+    "0.6.25a": "1.21.10 port\nSkin models work on Mannequins\n\nUpdated Chinese translations (#834)\nFixed color sliders not working on (1.21.8+)\nFixed login issue on NeoForge (Closes #854)\nFixed invalid editor gui scale crashing the editor (Closes #839)",
+    "0.6.25b": "1.21.11 port\n\nFixed crash with RenderPlayer API on 1.7.10 (Closes #898)"
   },
   "1.15.2": {
     "0.0.0": "1.16.5",
@@ -2166,6 +2168,10 @@
     "0.6.25b": "Fixed colored cubes on 1.21.10 (Closes #884)\nFixed ModMenu error on 1.21.10 (Closes #882)\nFixed ViveCraft support on 1.21.10"
   },
   "1.21.11-fabric": {
-    "0.6.25a": "1.21.11-pre1 port"
+    "0.6.25a": "1.21.11-pre1 port",
+    "0.6.25b": "1.21.11 port\n\nFixed crash with RenderPlayer API on 1.7.10 (Closes #898)"
+  },
+  "1.21.11": {
+    "0.6.25a": "1.21.11 port\n\nFixed crash with RenderPlayer API on 1.7.10 (Closes #898)"
   }
 }
