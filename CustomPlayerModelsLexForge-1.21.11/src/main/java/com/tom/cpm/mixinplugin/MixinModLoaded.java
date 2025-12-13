@@ -1,0 +1,11 @@
+package com.tom.cpm.mixinplugin;
+
+import net.minecraftforge.fml.loading.LoadingModList;
+
+public class MixinModLoaded {
+
+	public static boolean isLoaded(String id) {
+		return LoadingModList.get().getModFileById(id) != null;
+	}
+
+}
