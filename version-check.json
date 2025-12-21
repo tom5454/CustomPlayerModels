@@ -83,7 +83,7 @@
     "1.21.8-latest": "0.6.25a",
     "1.21.8-fabric-latest": "0.6.25a",
     "1.21.10-latest": "0.6.25b",
-    "1.21.10-fabric-latest": "0.6.25b",
+    "1.21.10-fabric-latest": "0.6.25c",
     "1.21.11-fabric-latest": "0.6.25b",
     "1.21.11-latest": "0.6.25a"
   },
@@ -2165,7 +2165,8 @@
   },
   "1.21.10-fabric": {
     "0.6.25a": "1.21.10 port\nSkin models work on Mannequins\n\nUpdated Chinese translations (#834)\nFixed color sliders not working on (1.21.8+)\nFixed login issue on NeoForge (Closes #854)\nFixed invalid editor gui scale crashing the editor (Closes #839)",
-    "0.6.25b": "Fixed colored cubes on 1.21.10 (Closes #884)\nFixed ModMenu error on 1.21.10 (Closes #882)\nFixed ViveCraft support on 1.21.10"
+    "0.6.25b": "Fixed colored cubes on 1.21.10 (Closes #884)\nFixed ModMenu error on 1.21.10 (Closes #882)\nFixed ViveCraft support on 1.21.10",
+    "0.6.25c": "Fix mixin crash with ViveCraft"
   },
   "1.21.11-fabric": {
     "0.6.25a": "1.21.11-pre1 port",
