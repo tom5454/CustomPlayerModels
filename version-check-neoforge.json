@@ -13,7 +13,7 @@
     "1.21.7-latest": "0.6.25a",
     "1.21.8-latest": "0.6.25a",
     "1.21.10-latest": "0.6.25b",
-    "1.21.11-latest": "0.6.25a"
+    "1.21.11-latest": "0.6.25b"
   },
   "1.20.2": {
     "0.0.0": "1.20.1-forge",
@@ -174,7 +174,8 @@
     "0.6.25b": "Fixed colored cubes on 1.21.10 (Closes #884)\nFixed ModMenu error on 1.21.10 (Closes #882)\nFixed ViveCraft support on 1.21.10"
   },
   "1.21.11": {
-    "0.6.25a": "1.21.11 port\n\nFixed crash with RenderPlayer API on 1.7.10 (Closes #898)"
+    "0.6.25a": "1.21.11 port\n\nFixed crash with RenderPlayer API on 1.7.10 (Closes #898)",
+    "0.6.25b": "Fix mixin crash with ViveCraft 1.21.11 (Closes #914)\nUpdated to new BTA fabric, fixes crash\nFixed keybinds not working on BTA (Closes #819)"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }

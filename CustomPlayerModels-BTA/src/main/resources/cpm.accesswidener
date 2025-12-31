@@ -1,4 +1,4 @@
-accessWidener	v1	named
+accessWidener	v1	official
 accessible field net/minecraft/client/render/entity/MobRendererPlayer modelBipedMain Lnet/minecraft/client/render/model/ModelBiped;
 accessible field net/minecraft/client/render/entity/MobRendererPlayer modelArmorChestplate Lnet/minecraft/client/render/model/ModelBiped;
 accessible field net/minecraft/client/render/entity/MobRendererPlayer modelArmor Lnet/minecraft/client/render/model/ModelBiped;

@@ -15,9 +15,4 @@ public class ModMenu implements ModMenuApi {
 	public Function<Screen, ? extends Screen> getConfigScreenFactory() {
 		return screen -> new GuiImpl(SettingsGui::new, screen);
 	}
-
-	@Override
-	public String getModId() {
-		return "cpm";
-	}
 }

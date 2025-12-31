@@ -20,9 +20,7 @@ public class KeyBindings implements IKeybind {
 	public static IKeybind[] quickAccess = new IKeybind[IKeybind.QUICK_ACCESS_KEYBINDS_COUNT];
 	private static OptionsCategory cpmBinds;
 
-	public static void init() {
-		cpmBinds = new OptionsCategory("key.cpm.category");
-
+	public static void preInit() {
 		gestureMenuBinding = new KeyBinding("key.cpm.gestureMenu").setDefault(InputDevice.keyboard, Keyboard.KEY_G);
 		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu"));
 
@@ -33,7 +31,11 @@ public class KeyBindings implements IKeybind {
 			createQA(i);
 
 		kbs.forEach(e -> GameSettings.keys.add(((KeyBindings) e).kb));
+	}
 
+	public static void init() {
+		cpmBinds = new OptionsCategory("key.cpm.category");
+		kbs.forEach(kb -> cpmBinds.withComponent(new KeyBindingComponent(((KeyBindings) kb).kb)));
 		OptionsPages.CONTROLS.withComponent(cpmBinds);
 	}
 
@@ -51,8 +53,6 @@ public class KeyBindings implements IKeybind {
 	private KeyBindings(KeyBinding kb, String name) {
 		this.kb = kb;
 		this.name = name;
-
-		cpmBinds.withComponent(new KeyBindingComponent(kb));
 	}
 
 	@Override

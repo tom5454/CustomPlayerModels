@@ -53,7 +53,7 @@ public class VRArmRendererMixin_$vivecraft extends AvatarRenderer<AbstractClient
 
 	@ModifyArg(at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/rendertype/RenderType;entityTranslucent("
+			target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;entityTranslucent("
 					+ "Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;"
 			), method = "renderHand")
 	public Identifier getSkinTex(Identifier arg) {

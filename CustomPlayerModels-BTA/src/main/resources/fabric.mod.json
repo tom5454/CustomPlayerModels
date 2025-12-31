@@ -30,6 +30,9 @@
     ],
 	"server": [
 		"com.tom.cpm.server.CustomPlayerModelsServer"
+	],
+	"initOptions": [
+		"com.tom.cpm.client.KeybindingsSetup"
 	]
   },
   "mixins": [
@@ -38,6 +41,7 @@
   "accessWidener" : "cpm.accesswidener",
   "depends": {
     "fabricloader": ">=0.13.3",
-    "minecraft": "~7.3.1"
+    "minecraft": "~7.3.1",
+    "halplibe": ">=5.3.3"
   }
 }
