@@ -16,7 +16,7 @@ import com.tom.cpm.common.NetworkInit;
 @Mixin(ClientboundCustomPayloadPacket.class)
 public class ClientboundCustomPayloadPacketMixin {
 
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;make(Ljava/lang/Object;Ljava/util/function/Consumer;)Ljava/lang/Object;"), method = "<clinit>", index = 1)
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;make(Ljava/lang/Object;Ljava/util/function/Consumer;)Ljava/lang/Object;"), method = "<clinit>", index = 1)
 	private static Consumer implementProperNetworking(Consumer listInit) {
 		return l -> {
 			listInit.accept(l);

@@ -85,7 +85,7 @@
     "1.21.10-latest": "0.6.25b",
     "1.21.10-fabric-latest": "0.6.25c",
     "1.21.11-fabric-latest": "0.6.25c",
-    "1.21.11-latest": "0.6.25b"
+    "1.21.11-latest": "0.6.25c"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -2176,6 +2176,7 @@
   },
   "1.21.11": {
     "0.6.25a": "1.21.11 port\n\nFixed crash with RenderPlayer API on 1.7.10 (Closes #898)",
-    "0.6.25b": "Fix mixin crash with ViveCraft 1.21.11 (Closes #914)\nUpdated to new BTA fabric, fixes crash\nFixed keybinds not working on BTA (Closes #819)"
+    "0.6.25b": "Fix mixin crash with ViveCraft 1.21.11 (Closes #914)\nUpdated to new BTA fabric, fixes crash\nFixed keybinds not working on BTA (Closes #819)",
+    "0.6.25c": "Fixed world join crash on Forge 1.21.11 (Closes #918)"
   }
 }

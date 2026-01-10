@@ -152,7 +152,7 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.21.11-61.0.2'
+    minecraft 'net.minecraftforge:forge:1.21.11-61.0.5'
     
     compileOnly("io.github.llamalad7:mixinextras-common:0.4.1")
     
