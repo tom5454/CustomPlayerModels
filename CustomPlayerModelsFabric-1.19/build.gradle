@@ -17,6 +17,7 @@ group = project.maven_group
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 repositories {
+	maven { url "https://maven.terraformersmc.com/releases/"}
 	maven {
         url 'https://www.cursemaven.com'
         content {
