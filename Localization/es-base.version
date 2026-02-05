@@ -1560,5 +1560,10 @@
   "cpmmodels-label.mdedit.image.urlOrFile": "or",
   "cpmmodels-label.rules.lastUpdate": "Last Updated: %s",
   "cpmmodels-label.rules.outdated": "This page is outdated, see the English version for a more up to date variant.",
-  "cpmmodels-tooltip.gallery.hiddenImage": "Hidden Image, only available through links. Useful for images in descriptions."
+  "cpmmodels-tooltip.gallery.hiddenImage": "Hidden Image, only available through links. Useful for images in descriptions.",
+  "cpmmodels-label.project.state.private": "The project is marked private! Only you can see it!",
+  "cpmmodels-label.project.state.private.pre": "The project is marked private! Only you will be able to see it!",
+  "cpmmodels-label.project.state.unlisted": "The project is marked as unlisted! Only people with the link can find it.",
+  "cpmmodels-label.project.state.unlisted.pre": "The project is marked as unlisted! Only people with the link will be able to find it.",
+  "cpmmodels-label.mod.project_not_public": "The project visibility is: %s!"
 }
