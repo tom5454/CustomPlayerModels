@@ -1473,6 +1473,7 @@
   "cpmmodels-label.notification.file_processing_failed": "File failed processing",
   "cpmmodels-label.notification.mod_state.changed.rejected": "Your project was rejected!",
   "cpmmodels-label.notification.mod_state.changed.accepted": "Your project was accepted!",
+  "cpmmodels-label.notification.mod_state.changed.waiting": "Your project is waiting moderator approval",
   "cpmmodels-label.notification.empty": "You\u0027re all caught up!",
   "cpmmodels-label.link.website": "Website",
   "cpmmodels-label.profile_links": "Profile Links:",

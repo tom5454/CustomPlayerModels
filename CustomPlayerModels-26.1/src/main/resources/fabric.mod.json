@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "cpm",
+  "version": "-",
+
+  "name": "Customizable Player Models",
+  "description": "Customize your minecraft avatar!",
+  "authors": [
+    "tom5454"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models",
+    "sources": "https://github.com/tom5454/CustomPlayerModels"
+  },
+
+  "license": "MIT",
+  "icon": "icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "neoforge": "*"
+  }
+}

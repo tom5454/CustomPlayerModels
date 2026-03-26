@@ -1474,6 +1474,7 @@
   "cpmmodels-label.notification.file_processing_failed": "文件处理失败",
   "cpmmodels-label.notification.mod_state.changed.rejected": "你的项目未通过审核！",
   "cpmmodels-label.notification.mod_state.changed.accepted": "你的项目已通过审核！",
+  "cpmmodels-label.notification.mod_state.changed.waiting": "UNLOCALIZED: Your project is waiting moderator approval",
   "cpmmodels-label.notification.empty": "没有新通知啦～",
   "cpmmodels-label.link.website": "网站",
   "cpmmodels-label.profile_links": "项目链接：",

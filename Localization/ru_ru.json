@@ -1482,6 +1482,7 @@
   "cpmmodels-label.notification.file_processing_failed": "UNLOCALIZED: File failed processing",
   "cpmmodels-label.notification.mod_state.changed.rejected": "UNLOCALIZED: Your project was rejected!",
   "cpmmodels-label.notification.mod_state.changed.accepted": "UNLOCALIZED: Your project was accepted!",
+  "cpmmodels-label.notification.mod_state.changed.waiting": "UNLOCALIZED: Your project is waiting moderator approval",
   "cpmmodels-label.notification.empty": "UNLOCALIZED: You\u0027re all caught up!",
   "cpmmodels-label.link.website": "UNLOCALIZED: Website",
   "cpmmodels-label.profile_links": "UNLOCALIZED: Profile Links:",

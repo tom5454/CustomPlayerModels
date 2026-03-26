@@ -1546,6 +1546,11 @@
   "cpmmodels-button.footer.webEditor": "CPM Web Editor",
   "cpmmodels-button.footer.bbPlugin": "Blockbench Plugin",
   "cpmmodels-button.rules.viewMainVersion": "View Main Version",
+  "cpmmodels-label.project.state.private": "The project is marked private! Only you can see it!",
+  "cpmmodels-label.project.state.private.pre": "The project is marked private! Only you will be able to see it!",
+  "cpmmodels-label.project.state.unlisted": "The project is marked as unlisted! Only people with the link can find it.",
+  "cpmmodels-label.project.state.unlisted.pre": "The project is marked as unlisted! Only people with the link will be able to find it.",
+  "cpmmodels-label.notification.mod_state.changed.waiting": "Your project is waiting moderator approval",
   "cpmmodels-label.file_type": "File Type",
   "cpmmodels-label.file_type.pick": "-- Pick File Type --",
   "cpmmodels-label.footer.disclaimer": "This site is not an official Minecraft service and is not approved by or associated with Mojang or Microsoft.",
@@ -1560,10 +1565,6 @@
   "cpmmodels-label.mdedit.image.urlOrFile": "or",
   "cpmmodels-label.rules.lastUpdate": "Last Updated: %s",
   "cpmmodels-label.rules.outdated": "This page is outdated, see the English version for a more up to date variant.",
-  "cpmmodels-tooltip.gallery.hiddenImage": "Hidden Image, only available through links. Useful for images in descriptions.",
-  "cpmmodels-label.project.state.private": "The project is marked private! Only you can see it!",
-  "cpmmodels-label.project.state.private.pre": "The project is marked private! Only you will be able to see it!",
-  "cpmmodels-label.project.state.unlisted": "The project is marked as unlisted! Only people with the link can find it.",
-  "cpmmodels-label.project.state.unlisted.pre": "The project is marked as unlisted! Only people with the link will be able to find it.",
-  "cpmmodels-label.mod.project_not_public": "The project visibility is: %s!"
+  "cpmmodels-label.mod.project_not_public": "The project visibility is: %s!",
+  "cpmmodels-tooltip.gallery.hiddenImage": "Hidden Image, only available through links. Useful for images in descriptions."
 }

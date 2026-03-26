@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "com.tom.cpm.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+  	"common.PlayerListMixin",
+	"common.PlayerMixin",
+	"common.ServerEntityMixin"
+  ],
+  "client": [
+	"MinecraftMixinFabric",
+	"LivingEntityRendererFabric",
+	"AvatarRendererFabric"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
