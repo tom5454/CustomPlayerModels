@@ -87,7 +87,8 @@
     "1.21.11-fabric-latest": "0.6.25d",
     "1.21.11-latest": "0.6.25d",
     "26.1-latest": "0.6.25a",
-    "26.1-fabric-latest": "0.6.25a"
+    "26.1-fabric-latest": "0.6.25a",
+    "26.2-fabric-latest": "0.6.25a"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -2190,5 +2191,8 @@
   },
   "26.1-fabric": {
     "0.6.25a": "26.1 port\n\nImplement Render API on 1.21.10 (Closes #943)"
+  },
+  "26.2-fabric": {
+    "0.6.25a": "26.2-snapshot-1 port (Vulkan is supported)"
   }
 }
