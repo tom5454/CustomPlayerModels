@@ -7,7 +7,7 @@
 [CF上的Fabric/Quilt](https://www.curseforge.com/minecraft/mc-mods/custom-player-models-fabric)  
 [CF上的Bukkit/Spigot/Paper](https://www.curseforge.com/minecraft/bukkit-plugins/custom-player-models-bukkit)  
 [GitHub上的Bukkit/Spigot/Paper](https://github.com/tom5454/CustomPlayerModels/releases)  
-[Modrinth上的Forge, Fabric 或 Quilt](https://modrinth.com/mod/custom-player-models)
+[Modrinth上的Forge，Fabric 或 Quilt](https://modrinth.com/mod/custom-player-models)
 
 
 <a name="q-discord"/>
@@ -67,60 +67,59 @@
 <a name="q-how-do-you-make-more-shapes"/>
 
 ### 问题：我要如何制作更多形状？
-回答：你必须使用方块组合来制作复杂形状，否则就没有别的方式实现。  
+回答：你只能使用“块”来组合制作出复杂形状，没有其他方法能实现制作复杂形状。  
 例如，你可以用两个相同颜色的方块拼出一个三角形。
 
 <a name="q-how-do-i-animate"/>
 
 ### 问题：我要如何制作动画？
-回答：将模型从一个姿势移动到另一个姿势，使用毫秒数设定动画时长。  
-你还可以在动画中让某些部件出现或消失！
+回答：通过调整不同姿势，并设置毫秒数值来控制动作之间的过渡时长。你还可以设置部件在动画过程中的显示与隐藏！
 
 
 <a name="q-how-do-i-export"/>
 
 ### 问题：我要如何导出？
-回答：点击“导出”按钮，选择一个皮肤以供未安装 CPM 的玩家看到。  
-设定导出位置与文件名称，如果文件名重复或包含非法字符，则导出会失败。
+回答：点击“导出”按钮，并选择一个原版玩家可见的皮肤（即未安装 CPM 玩家看到的默认外观）。
+随后选择保存路径并命名；若文件名重复或包含非法字符，将无法成功导出。
 
 <a name="q-what-is-a-gist"/>
 
 ### 问题：Gist 是什么？
-回答：你可以在 <https://gist.github.com> 创建一个 Gist。  
-你需要一个 GitHub 账户，然后模组会生成一段内容，复制并粘贴进 Gist。  
-完成后复制 Gist 的链接并粘贴进编辑器。  
-由于皮肤文件存储数据有限，这种方式可以储存更大的模型数据。
+回答：你可以通过 <https://gist.github.com/> 来创建它。
+你需要登录 GitHub 账号，模组会生成一段数据供你复制并粘贴到 Gist 中。创建完成后，将该 Gist 链接复制并粘贴回编辑器即可。
+
+之所以需要这样做，是因为模型数据量太大，无法直接全部存储在皮肤文件内，必须通过这种方式进行外部托管。
 
 <a name="qare-there-any-tutorials"/>
 
 ### 问题：有教程吗？
-回答：请参考 [Discord 上的 #community-tutorials](https://discord.com/channels/811508670205788211/844561618281168968)，  
+回答：请参考 [Discord 上的 #community-tutorials 频道](https://discord.com/channels/811508670205788211/844561618281168968)，  
 或查看 [CPM 综合用户指南](https://docs.google.com/presentation/d/117GBWxtyNT6L3a69cENXz1Gjx-MplB1UC9l_uISn6oQ/edit?usp=sharing)（作者：Discord 的 @w3eb）
 
 
 <a name="q-how-do-i-make-a-part-glow"/>
 
 ### 问题：如何让部件发光？
-回答：使用名为“发光的眼睛”的效果可以让整个部件/方块发出光（如末影人眼）。  
-它本身是透明的，解决办法是：在完全相同的位置放置两个相同的部件，仅让其中一个发光，  
-这样就能做出一个“实心发光”的效果！  
-（你还可以使用光影效果实现真正的发光）
+回答：通过应用“发光的眼睛”效果，你可以让整个部件或方块像末影人眼睛那样不受光照影响。
+由于该效果会使部件表现得像透明层（只显示发光部分），解决方法是：在完全相同的位置放置两个重合的部件，其中一个保持常规渲染，另一个应用“发光的眼睛”效果。
+这样就能实现既有实心纹理、又有发光效果的部件了。
+（如果你安装了光影，该部件还会产生真实的辉光效果。）
 
 
 <a name="q-how-do-i-stop-using-the-vanilla-animations"/>
 
 ### 问题：如何禁用原版动画？
-回答：关闭附加功能（Additive），然后稍微移动一下根部肢体，就可以开始制作自己的动画了！  
-（不是“转换原版部件”功能中的那部分内容）  
-你也可以使用“禁用原版动画”效果。
+回答：关闭“叠加 (Additive)”模式，然后微调一下根部肢体的位置，即可开始制作你自己的动画。
+（注意：这不适用于你从原版部件转换而来的子零件。）
+此外，你也可以直接应用“禁用原版动画”效果。
 
 
 <a name="q-its-not-showing-up-in-game"/>
 
 ### 问题：模型在游戏中没有显示！
-回答：你确定使用的是正确的皮肤吗？  
-检查皮肤上是否包含模型数据（如颜色和部件等）。  
-离线/盗版服务器不会加载皮肤，请先在单人游戏中测试。
+回答：请确认你是否使用了正确的皮肤。
+检查皮肤文件上是否有模型数据（即皮肤边缘那些杂乱的颜色块等）。
+由于离线/盗版服务器无法加载皮肤，请先在单人模式下进行测试。
 
 
 <a name="q-can-someone-make-me-a-model"/>
@@ -132,14 +131,14 @@
 <a name="q-how-to-make-fancy-legs"/>
 
 ### 问题：如何制作好看的腿？
-回答：以特定方式排列方块来制作特殊腿型。  
+回答：以特定方式排列“块”来制作特殊腿型。  
 许多人常用做的双足（bipedal）结构的腿型。
 
 
 <a name="q-how-do-i-make-a-tail"/>
 
 ### 问题：我要如何制作尾巴？
-回答：添加一系列方块并使其延长即可。  
+回答：添加一系列“块”并使其延长即可。  
 你可以在 YouTube 上找到相关视频教程。
 
 
