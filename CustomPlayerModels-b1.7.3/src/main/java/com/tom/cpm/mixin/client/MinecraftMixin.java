@@ -112,7 +112,7 @@ public abstract class MinecraftMixin {
 		if (!isWorldRemote())cbi.setReturnValue(true);
 		if (command.startsWith("/")) {
 			SinglePlayerCommands.executeCommand((Minecraft) (Object) this, command);
-		} else {
+		} else if (!isWorldRemote()) {
 			inGameHud.addChatMessage("<" + player.name + "> " + command);
 		}
 	}
