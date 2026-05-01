@@ -4,7 +4,7 @@
 # `/cpm` 命令
 
 > [!NOTE]
-> 这是服务器端 CPM 命令，客户端命令请查看 `/cpm client`，详情见[这里](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpmclient-command)  
+> 这是服务器端 CPM 命令，客户端命令请查看 `/cpmclient`，详情见[这里](https://github.com/tom5454/CustomPlayerModels/wiki/The--cpmclient-command)  
 
 
 <a name="subcommands"/>
@@ -101,7 +101,6 @@ Base64模型：使用 Base64 选项导出的模型。
 <a name="scaling-limit"/>
 
 ### scaling limit
-### scaling limit
 用法：  
 `/cpm scaling <缩放选项> limit [玩家] <最大>`  
 或  
@@ -139,18 +138,18 @@ Base64模型：使用 Base64 选项导出的模型。
 
 <a name="scaling-debug"/>
 
-### 缩放调试
+### scaling debug
 用法：`/cpm scaling debug <玩家>`  
 打印玩家所有缩放设置，请求比例（Rq）、实际比例（V）、限制（Lim）、缩放方法（M）。
 
-示例输出：
+缩放调试示例输出：
 ``` plaintext
 <玩家> 的缩放调试：
 
-- “实体缩放” M: 属性，V：1.5（Rq: 1.5），Lim：0.01 - 3.0
-- “眼睛高度” M: 不支持（Rq: 1.0）
-- “跳跃高度” M: 属性，V: 1.0（Rq: 1.0），Lim：0.01 - 10.0
-- “生命值” M：缩放限制为正常值（Rq: 1.0）
+- “实体缩放” 比例: pehkui, V：1.0 (Rq：1.0), Lim：0.01 - 10.0
+- “视线高度” 比例: attribute, V：1.0 (Rq：1.0), Lim：0.01 - 10.0
+- “受到摔落伤害比例” 比例: pehkui, V：1.0 (Rq：1.0), Lim：0.01 - 10.0
+- “生命值” 比例: pehkui, V：1.0 (Rq：1.0), Lim：0.1 - 4.0
 ```
 
 
