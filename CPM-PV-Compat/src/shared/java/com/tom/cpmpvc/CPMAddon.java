@@ -3,13 +3,12 @@ package com.tom.cpmpvc;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.google.inject.Inject;
-
 import com.tom.cpm.shared.MinecraftClientAccess;
 
 import su.plo.voice.api.addon.AddonInitializer;
 import su.plo.voice.api.addon.AddonLoaderScope;
 import su.plo.voice.api.addon.ClientAddonsLoader;
+import su.plo.voice.api.addon.InjectPlasmoVoice;
 import su.plo.voice.api.addon.annotation.Addon;
 import su.plo.voice.api.client.PlasmoVoiceClient;
 import su.plo.voice.api.client.connection.ServerConnection;
@@ -19,14 +18,14 @@ import su.plo.voice.api.event.EventSubscribe;
 import su.plo.voice.client.audio.source.ClientPlayerSource;
 import su.plo.voice.proto.data.player.VoicePlayerInfo;
 
-@Addon(id = CPMPVC.MOD_ID, scope = AddonLoaderScope.CLIENT, version = "2.1.1", authors = "tom5454")
+@Addon(id = CPMPVC.MOD_ID, scope = AddonLoaderScope.CLIENT, version = "2.1.2", authors = "tom5454")
 public class CPMAddon implements AddonInitializer {
 	public static final CPMAddon INSTANCE = new CPMAddon();
 
 	private CPMAddon() {
 	}
 
-	@Inject
+	@InjectPlasmoVoice
 	private PlasmoVoiceClient voiceClient;
 
 	@Override
