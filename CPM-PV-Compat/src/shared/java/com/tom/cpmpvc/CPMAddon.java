@@ -11,6 +11,7 @@ import su.plo.voice.api.addon.ClientAddonsLoader;
 import su.plo.voice.api.addon.InjectPlasmoVoice;
 import su.plo.voice.api.addon.annotation.Addon;
 import su.plo.voice.api.client.PlasmoVoiceClient;
+import su.plo.voice.api.client.audio.capture.ClientActivation;
 import su.plo.voice.api.client.connection.ServerConnection;
 import su.plo.voice.api.client.event.audio.capture.AudioCaptureProcessedEvent;
 import su.plo.voice.api.client.event.audio.source.AudioSourceWriteEvent;
@@ -39,7 +40,13 @@ public class CPMAddon implements AddonInitializer {
 
 	@EventSubscribe
 	public void onCaptureProcessed(AudioCaptureProcessedEvent event) {
-		CPMPVC.handle(event.getProcessed().getMono());
+		// AudioCaptureProcessedEvent triggers even when audio is not actually sent to the server
+		// so we have to check if any activation is active right now to see if player is speaking
+		boolean isSpeaking = voiceClient.getActivationManager()
+				.getActivations()
+				.stream().anyMatch(ClientActivation::isActive);
+
+		CPMPVC.handle(isSpeaking ? event.getProcessed().getMono() : null);
 	}
 
 	@EventSubscribe
