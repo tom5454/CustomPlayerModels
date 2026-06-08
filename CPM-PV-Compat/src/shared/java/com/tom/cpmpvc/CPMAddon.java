@@ -62,11 +62,21 @@ public class CPMAddon implements AddonInitializer {
 		if (!connection.isPresent()) return false;
 
 		Optional<VoicePlayerInfo> playerInfo = connection.get().getPlayerById(player);
-		if (!playerInfo.isPresent())return false;
-		if (playerInfo.get().isMuted() || playerInfo.get().isMicrophoneMuted())return true;
+		if (!playerInfo.isPresent()) return false;
+
+		boolean isMutedOnServer = playerInfo.get().isMuted();
+		boolean inMutedOnClient = voiceClient.getConfig()
+				.getVoice()
+				.getVolumes()
+				.getMute("source_" + player)
+				.value();
+
+		if (isMutedOnServer || inMutedOnClient) return true;
+
 		if (MinecraftClientAccess.get().getCurrentClientPlayer().getUUID().equals(player)) {
 			return voiceClient.getConfig().getVoice().getMicrophoneDisabled().value();
 		}
+
 		return false;
 	}
 }
