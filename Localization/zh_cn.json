@@ -1273,7 +1273,7 @@
   "bb-label.warn.uvDecimalFixer.info": "模型包含非整数 UV 坐标或尺寸。\\已应用 16x 网格对齐修复。\\若模型在 CPM 中显示正常，可忽略此警告。\\受影响的块列表：",
   "bb-label.error.failedToLoadTexture": "无法加载纹理图像数据：%s\\请重启 Blockbench 并重试\\错误信息：%s",
   "bb-label.openedInBB": "请返回 Blockbench 标签页以继续操作",
-  "bb-label.error.initFailed": "UNLOCALIZED: Unexpected error while loading the CPM Plugin",
+  "bb-label.error.initFailed": "加载 CPM 插件时发生意外错误",
   "bb-tooltip.export.renameGroup": "将组重命名为所选类型\\如果已存在同名组，则操作将失败。",
   "bb-tooltip.anim.snapping": "吸附精度决定 CPM 导出的帧率分辨率。\\导出的动画将以吸附精度帧率进行线性插值。",
   "bb-tooltip.warn.uvDecimalFixerApplied": "点击 %s 按钮查看受影响的块列表",
