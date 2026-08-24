@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.model.player.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -15,6 +14,7 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Avatar;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
@@ -24,7 +24,7 @@ import com.tom.cpm.client.CPMOrderedSubmitNodeCollector.CPMSubmitNodeCollector;
 import com.tom.cpm.client.CustomPlayerModelsClient;
 
 @Mixin(AvatarRenderer.class)
-public abstract class AvatarRendererMixinNeo extends LivingEntityRenderer<AbstractClientPlayer, AvatarRenderState, PlayerModel> {
+public abstract class AvatarRendererMixinNeo extends LivingEntityRenderer<Avatar, AvatarRenderState, PlayerModel> {
 
 	public AvatarRendererMixinNeo(Context p_174289_, PlayerModel p_174290_, float p_174291_) {
 		super(p_174289_, p_174290_, p_174291_);
@@ -35,25 +35,25 @@ public abstract class AvatarRendererMixinNeo extends LivingEntityRenderer<Abstra
 		CPMSubmitNodeCollector.injectSNC(snc);
 	}
 
-	@Inject(at = @At("HEAD"), target = @Desc(value = "renderRightHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, Identifier.class, boolean.class, AbstractClientPlayer.class}))
-	public void onRenderRightArmPre(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final Identifier resourceLocation, final boolean sleeve, AbstractClientPlayer pl, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
+	@Inject(at = @At("HEAD"), target = @Desc(value = "renderRightHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, Identifier.class, boolean.class, Avatar.class}))
+	public void onRenderRightArmPre(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final Identifier resourceLocation, final boolean sleeve, Avatar pl, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
 		CPMSubmitNodeCollector.injectSNC(snc);
 		CustomPlayerModelsClient.INSTANCE.renderHand(pl, getModel());
 	}
 
-	@Inject(at = @At("HEAD"), target = @Desc(value = "renderLeftHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, Identifier.class, boolean.class, AbstractClientPlayer.class}))
-	public void onRenderLeftArmPre(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final Identifier resourceLocation, final boolean sleeve, AbstractClientPlayer pl, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
+	@Inject(at = @At("HEAD"), target = @Desc(value = "renderLeftHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, Identifier.class, boolean.class, Avatar.class}))
+	public void onRenderLeftArmPre(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final Identifier resourceLocation, final boolean sleeve, Avatar pl, CallbackInfo cbi, @Local LocalRef<SubmitNodeCollector> snc) {
 		CPMSubmitNodeCollector.injectSNC(snc);
 		CustomPlayerModelsClient.INSTANCE.renderHand(pl, getModel());
 	}
 
-	@Inject(at = @At("RETURN"), target = @Desc(value = "renderRightHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, Identifier.class, boolean.class, AbstractClientPlayer.class}))
-	public void onRenderRightArmPost(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final Identifier resourceLocation, final boolean sleeve, AbstractClientPlayer pl, CallbackInfo cbi) {
+	@Inject(at = @At("RETURN"), target = @Desc(value = "renderRightHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, Identifier.class, boolean.class, Avatar.class}))
+	public void onRenderRightArmPost(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final Identifier resourceLocation, final boolean sleeve, Avatar pl, CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.renderHandPost(getModel());
 	}
 
-	@Inject(at = @At("RETURN"), target = @Desc(value = "renderLeftHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, Identifier.class, boolean.class, AbstractClientPlayer.class}))
-	public void onRenderLeftArmPost(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final Identifier resourceLocation, final boolean sleeve, AbstractClientPlayer pl, CallbackInfo cbi) {
+	@Inject(at = @At("RETURN"), target = @Desc(value = "renderLeftHand", args = {PoseStack.class, SubmitNodeCollector.class, int.class, Identifier.class, boolean.class, Avatar.class}))
+	public void onRenderLeftArmPost(final PoseStack poseStack, final SubmitNodeCollector vertexConsumers, final int i, final Identifier resourceLocation, final boolean sleeve, Avatar pl, CallbackInfo cbi) {
 		CustomPlayerModelsClient.INSTANCE.renderHandPost(getModel());
 	}
 }

@@ -24,6 +24,6 @@
   "depends": {
     "fabricloader": ">=0.7.4",
     "minecraft": ">=1.14.4",
-	"cpm": ">=0.6.26a"
+	"cpm": "*"
   }
 }

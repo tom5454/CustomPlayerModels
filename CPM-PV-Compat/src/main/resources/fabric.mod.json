@@ -24,6 +24,6 @@
   "depends": {
     "fabricloader": ">=0.7.4",
 	"plasmovoice": ">=2.1.1",
-	"cpm": ">=0.6.26a"
+	"cpm": "*"
   }
 }

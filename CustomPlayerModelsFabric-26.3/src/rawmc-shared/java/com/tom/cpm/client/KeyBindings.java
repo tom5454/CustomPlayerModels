@@ -3,8 +3,6 @@ package com.tom.cpm.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.glfw.GLFW;
-
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.input.KeyEvent;
@@ -23,7 +21,7 @@ public class KeyBindings implements IKeybind {
 	public static void init() {
 		category = KeyMapping.Category.register(Identifier.tryBuild("cpm", "keys"));
 
-		gestureMenuBinding = new KeyMapping("key.cpm.gestureMenu", GLFW.GLFW_KEY_H, category);
+		gestureMenuBinding = new KeyMapping("key.cpm.gestureMenu", InputConstants.KEY_H, category);
 		kbs.add(new KeyBindings(gestureMenuBinding, "gestureMenu"));
 
 		renderToggleBinding = new KeyMapping("key.cpm.renderToggle", InputConstants.UNKNOWN.getValue(), category);

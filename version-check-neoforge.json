@@ -16,7 +16,7 @@
     "1.21.11-latest": "0.6.27a",
     "26.1-latest": "0.6.27a",
     "26.1.1-latest": "0.6.27a",
-    "26.2-latest": "0.6.27a",
+    "26.2-latest": "0.6.27b",
     "26.1.2-latest": "0.6.27a"
   },
   "1.20.2": {
@@ -225,7 +225,8 @@
   },
   "26.2": {
     "0.6.26a": "26.2 port",
-    "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)"
+    "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)",
+    "0.6.27b": "Fixed crash on NeoForge 26.2.0.10-beta+\n26.3 Snapshot 5 port"
   },
   "26.1.2": {
     "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)"

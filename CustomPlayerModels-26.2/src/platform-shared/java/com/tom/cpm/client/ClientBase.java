@@ -8,7 +8,6 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.object.equipment.ElytraModel;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
@@ -87,7 +86,7 @@ public abstract class ClientBase {
 		renderHand(Minecraft.getInstance().player, model);
 	}
 
-	public void renderHand(AbstractClientPlayer pl, PlayerModel model) {
+	public void renderHand(Avatar pl, PlayerModel model) {
 		manager.bindHand(pl, null, model);
 	}
 

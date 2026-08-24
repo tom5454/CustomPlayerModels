@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import com.moulberry.flashback.Flashback;
 
@@ -27,7 +27,7 @@ public class CPMPacketInjector {
 	public static NetHandler<CustomPacketPayload.Type<ByteArrayPayload>, net.minecraft.world.entity.player.Player, FlashbackNet> netHandler;
 
 	static {
-		netHandler = new NetHandler<>((k, v) -> new CustomPacketPayload.Type<>(ResourceLocation.tryBuild(k, v)));
+		netHandler = new NetHandler<>((k, v) -> new CustomPacketPayload.Type<>(Identifier.tryBuild(k, v)));
 		netHandler.setExecutor(() -> Minecraft.getInstance());
 		netHandler.setSendPacketServer(Function.identity(), (c, rl, pb) -> c.send(new ClientboundCustomPayloadPacket(new ByteArrayPayload(rl, pb))), ent -> {
 			return (Collection<net.minecraft.world.entity.player.Player>) ent.level().players();

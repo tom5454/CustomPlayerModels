@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.Connection;
 import net.minecraft.world.entity.Avatar;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 
 import com.tom.cpm.mixinplugin.MixinModLoaded;
 
