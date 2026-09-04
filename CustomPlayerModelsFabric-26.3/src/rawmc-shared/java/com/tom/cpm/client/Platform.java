@@ -2,8 +2,12 @@ package com.tom.cpm.client;
 
 import java.util.function.Supplier;
 
+import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.SubmitNodeCollection;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer.Submit;
 import net.minecraft.network.Connection;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Avatar;
 
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
@@ -30,5 +34,9 @@ public class Platform {
 		var p = factory.get();
 		RenderPipelines.register(p);
 		return () -> p;
+	}
+
+	public static void submitAlwaysOnTop(SubmitNodeCollection st, Submit<Unit> submit) {
+		st.submitCustom(SubmitRenderPhases.ALWAYS_ON_TOP, submit);
 	}
 }

@@ -50,7 +50,7 @@ public abstract class CustomHeadLayerMixin<S extends LivingEntityRenderState, M 
 			CustomPlayerModelsClient.INSTANCE.manager.bindSkull(info.gameProfile(), null, model);
 			ModelTexture mt = new ModelTexture(info.playerSkin().body().texturePath());
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
-			rt.set(mt.getRenderType());
+			rt.set(mt.getRenderType().getRenderType());
 		}
 	}
 

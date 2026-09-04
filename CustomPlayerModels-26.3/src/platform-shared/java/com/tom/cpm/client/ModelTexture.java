@@ -4,26 +4,25 @@ import java.util.function.Function;
 
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 
 import com.tom.cpl.render.RenderTypeBuilder.TextureHandler;
 
-public class ModelTexture implements TextureHandler<Identifier, RenderType> {
+public class ModelTexture implements TextureHandler<Identifier, SubmitProfile> {
 	private CallbackInfoReturnable<Identifier> texture;
-	private Function<Identifier, RenderType> renderType;
+	private Function<Identifier, SubmitProfile> renderType;
 
 	public ModelTexture(CallbackInfoReturnable<Identifier> texture,
-			Function<Identifier, RenderType> renderType) {
+			Function<Identifier, SubmitProfile> renderType) {
 		this.texture = texture;
 		this.renderType = renderType;
 	}
 
-	public ModelTexture(Function<Identifier, RenderType> renderType) {
+	public ModelTexture(Function<Identifier, SubmitProfile> renderType) {
 		this(new CallbackInfoReturnable<>(null, true), renderType);
 	}
 
-	public ModelTexture(Identifier tex, Function<Identifier, RenderType> renderType) {
+	public ModelTexture(Identifier tex, Function<Identifier, SubmitProfile> renderType) {
 		this(new CallbackInfoReturnable<>(null, true, tex), renderType);
 	}
 
@@ -50,7 +49,7 @@ public class ModelTexture implements TextureHandler<Identifier, RenderType> {
 	}
 
 	@Override
-	public RenderType getRenderType() {
+	public SubmitProfile getRenderType() {
 		return renderType.apply(getTexture());
 	}
 }

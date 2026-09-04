@@ -38,10 +38,10 @@
     "1.21.8-latest": "0.6.27a",
     "1.21.10-latest": "0.6.27a",
     "1.21.11-latest": "0.6.27a",
-    "26.1-latest": "0.6.27a",
-    "26.1.1-latest": "0.6.27a",
-    "26.1.2-latest": "0.6.27a",
-    "26.2-latest": "0.6.27b"
+    "26.1-latest": "0.6.27b",
+    "26.1.1-latest": "0.6.27b",
+    "26.1.2-latest": "0.6.27b",
+    "26.2-latest": "0.6.27c"
   },
   "1.12.2": {
     "0.0.5a": "First release",
@@ -1169,18 +1169,25 @@
     "0.0.0": "1.21.11-forge",
     "0.6.25a": "26.1 port\n\nImplement Render API on 1.21.10 (Closes #943)",
     "0.6.26a": "Added new animations for holding a spear (Closes #905)\nUpdated Simplified Chinese Translations (#887, #930, #975)\nNew CPM plugin registration on Forge and NeoForge\nNew paper plugin with Folia support (Closes #842)\n26.2 snapshot 8 port\n\nFixed crash with Real Camera 0.7.0 (Closes #881)\nRe-added Real Camera compat on 1.21.8 and 26.1\nRe-added Vivecraft support on 1.21.11+\nFixed duplicated chat messages on babric b1.7.3 servers (Closes #969)\nFixed gesture gui crashing on babric b1.7.3 when playing on a server (Closes #968)\nFixed texture editor not working on 1.21.8+ (Closes #917)\nFixed editor issue with ImmediatelyFast (Closes #821)\nFixed incorrect resource reloader usage (Closes #970)\nFixed animations breaking in the Inventory Screen (Closes #965)",
-    "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)"
+    "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)",
+    "0.6.27b": "26.3 Pre-Release 1 port\r\n\r\nFix issues with Iris Shaders on 26.1+ (Closes #1010)"
   },
   "26.1.1": {
+    "0.0.0": "26.1-forge",
     "0.6.26a": "Added new animations for holding a spear (Closes #905)\nUpdated Simplified Chinese Translations (#887, #930, #975)\nNew CPM plugin registration on Forge and NeoForge\nNew paper plugin with Folia support (Closes #842)\n26.2 snapshot 8 port\n\nFixed crash with Real Camera 0.7.0 (Closes #881)\nRe-added Real Camera compat on 1.21.8 and 26.1\nRe-added Vivecraft support on 1.21.11+\nFixed duplicated chat messages on babric b1.7.3 servers (Closes #969)\nFixed gesture gui crashing on babric b1.7.3 when playing on a server (Closes #968)\nFixed texture editor not working on 1.21.8+ (Closes #917)\nFixed editor issue with ImmediatelyFast (Closes #821)\nFixed incorrect resource reloader usage (Closes #970)\nFixed animations breaking in the Inventory Screen (Closes #965)",
-    "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)"
+    "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)",
+    "0.6.27b": "26.3 Pre-Release 1 port\r\n\r\nFix issues with Iris Shaders on 26.1+ (Closes #1010)"
   },
   "26.1.2": {
-    "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)"
+    "0.0.0": "26.1.1-forge",
+    "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)",
+    "0.6.27b": "26.3 Pre-Release 1 port\r\n\r\nFix issues with Iris Shaders on 26.1+ (Closes #1010)"
   },
   "26.2": {
+    "0.0.0": "26.1.2-forge",
     "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)",
-    "0.6.27b": "Fixed crash on NeoForge 26.2.0.10-beta+\n26.3 Snapshot 5 port"
+    "0.6.27b": "Fixed crash on NeoForge 26.2.0.10-beta+\n26.3 Snapshot 5 port",
+    "0.6.27c": "26.3 Pre-Release 1 port\r\n\r\nFix issues with Iris Shaders on 26.1+ (Closes #1010)"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }

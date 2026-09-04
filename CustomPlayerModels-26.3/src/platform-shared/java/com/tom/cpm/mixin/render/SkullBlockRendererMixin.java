@@ -60,7 +60,7 @@ public abstract class SkullBlockRendererMixin implements BlockEntityRenderer<Sku
 			ModelTexture mt = new ModelTexture(sa.cpm$getSkin().body().texturePath());
 			CustomPlayerModelsClient.INSTANCE.manager.bindPlayerState(sa.cpm$getPlayer(), null, model, null, new AnimationState(AnimationMode.SKULL));
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, mt, TextureSheetType.SKIN);
-			state.renderType = mt.getRenderType();
+			state.renderType = mt.getRenderType().getRenderType();
 		}
 	}
 

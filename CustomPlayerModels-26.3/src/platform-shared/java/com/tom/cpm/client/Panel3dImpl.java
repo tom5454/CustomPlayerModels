@@ -101,9 +101,9 @@ public class Panel3dImpl extends Panel3dNative {
 			try {
 				poseStack.pushPose();
 				poseStack.mulPose(new Matrix4f().scaling(size, size, size));
-				poseStack.mulPose(quaternion);
+				poseStack.rotate(quaternion);
 
-				poseStack.mulPose(Axis.YP.rotation((float) (yaw + Math.PI)));
+				poseStack.rotate(Axis.YP, (float) (yaw + Math.PI));
 				poseStack.translate(-cam.position.x, -cam.position.y, -cam.position.z);
 
 				pipState.impl().view = Mat4f.map(poseStack.last().pose(), Matrix4f::get);

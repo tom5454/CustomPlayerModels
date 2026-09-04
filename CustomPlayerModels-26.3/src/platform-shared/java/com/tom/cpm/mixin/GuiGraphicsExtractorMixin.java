@@ -11,7 +11,7 @@ import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 
 import com.tom.cpm.client.GuiGraphicsExtractorEx;
 import com.tom.cpm.client.GuiRenderStates.Colored4RectangleRenderState;

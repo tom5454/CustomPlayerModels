@@ -158,7 +158,7 @@ public class PlayerProfile extends Player<Avatar> {
 		animState.wearingBoots = !player.getItemBySlot(EquipmentSlot.FEET).isEmpty();
 		animState.mainHand = Hand.of(player.getMainArm());
 		animState.activeHand = Hand.of(animState.mainHand, player.getUsedItemHand());
-		animState.swingingHand = Hand.of(animState.mainHand, player.swingingArm);
+		animState.swingingHand = player.getCurrentSwing() != null ? Hand.of(animState.mainHand, player.getCurrentSwing().hand()) : null;
 		animState.hurtTime = player.hurtTime;
 		animState.isOnLadder = player.onClimbable();
 		animState.isBurning = player.displayFireAnimation();
@@ -199,7 +199,7 @@ public class PlayerProfile extends Player<Avatar> {
 
 	public void updateFromState(AnimationState animState, AvatarRenderState state) {
 		animState.resetModel();
-		animState.attackTime = state.attackTime;
+		animState.attackTime = state.swingAnimation;
 		animState.swimAmount = state.swimAmount;
 		animState.leftArm = ArmPose.of(state.leftArmPose);
 		animState.rightArm = ArmPose.of(state.rightArmPose);

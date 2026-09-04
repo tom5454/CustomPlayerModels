@@ -8,8 +8,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.lwjgl.glfw.GLFW;
-
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
@@ -34,6 +32,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.item.ItemStack;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 
 import com.tom.cpl.gui.Frame;
@@ -59,7 +58,7 @@ import com.tom.cpm.shared.MinecraftCommonAccess;
 import com.tom.cpm.shared.gui.panel.Panel3d;
 
 public class GuiImpl extends Screen implements IGui {
-	protected static final KeyCodes CODES = new GLFWKeyCodes();
+	protected static final KeyCodes CODES = new SDLKeyCodes();
 	protected static final NativeGuiComponents nativeComponents = new NativeGuiComponents();
 	protected Frame gui;
 	protected Screen parent;
@@ -72,7 +71,7 @@ public class GuiImpl extends Screen implements IGui {
 
 	static {
 		nativeComponents.register(TextField.class, local(GuiImpl::createTextField));
-		nativeComponents.register(FileChooserPopup.class, TinyFDChooser::new);
+		nativeComponents.register(FileChooserPopup.class, SDLChooser::new);
 		nativeComponents.register(Panel3d.class, Panel3dImpl::new);
 	}
 
@@ -171,9 +170,14 @@ public class GuiImpl extends Screen implements IGui {
 	public boolean keyPressed(KeyEvent keyEvent) {
 		try {
 			int keyCode = keyEvent.key();
-			int scanCode = keyEvent.scancode();
+			int scanCode = keyEvent.keycode();
 			this.keyModif.setModifier(keyEvent.modifiers());
-			KeyboardEvent evt = new KeyboardEvent(keyCode, scanCode, (char) -1, GLFW.glfwGetKeyName(keyCode, scanCode));
+			var key = InputConstants.getKey(keyEvent);
+			String keyName = key.getName();
+			if (keyName.startsWith("key.keyboard.")) {
+				keyName = keyName.substring("key.keyboard.".length());
+			}
+			KeyboardEvent evt = new KeyboardEvent(keyCode, scanCode, (char) -1, keyName);
 			gui.keyPressed(evt);
 			if(!evt.isConsumed()) {
 				if(minecraft.player != null && minecraft.options.keyChat.matches(keyEvent) && minecraft.options.chatVisibility().get() != ChatVisiblity.HIDDEN) {
@@ -211,11 +215,43 @@ public class GuiImpl extends Screen implements IGui {
 		}
 	}
 
+	private int mapMouseButton(MouseButtonEvent event) {
+		switch (event.button()) {
+		case 1: {
+			return 0;
+		}
+		case 2: {
+			return 2;
+		}
+		case 3: {
+			return 1;
+		}
+		default:
+			return event.button() - 1;
+		}
+	}
+
+	private int mapMouseButton(MouseEvent event) {
+		switch (event.btn) {
+		case 0: {
+			return 1;
+		}
+		case 2: {
+			return 2;
+		}
+		case 1: {
+			return 3;
+		}
+		default:
+			return event.btn + 1;
+		}
+	}
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
 		try {
 			this.keyModif.setModifier(mouseButtonEvent.modifiers());
-			MouseEvent evt = new MouseEvent((int) mouseButtonEvent.x(), (int) mouseButtonEvent.y(), mouseButtonEvent.button());
+			MouseEvent evt = new MouseEvent((int) mouseButtonEvent.x(), (int) mouseButtonEvent.y(), mapMouseButton(mouseButtonEvent));
 			gui.mouseClick(evt);
 			return evt.isConsumed();
 		} catch (Throwable e) {
@@ -228,7 +264,7 @@ public class GuiImpl extends Screen implements IGui {
 	public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double dx, double dy) {
 		try {
 			this.keyModif.setModifier(mouseButtonEvent.modifiers());
-			MouseEvent evt = new MouseEvent((int) mouseButtonEvent.x(), (int) mouseButtonEvent.y(), mouseButtonEvent.button());
+			MouseEvent evt = new MouseEvent((int) mouseButtonEvent.x(), (int) mouseButtonEvent.y(), mapMouseButton(mouseButtonEvent));
 			gui.mouseDrag(evt);
 			return evt.isConsumed();
 		} catch (Throwable e) {
@@ -241,7 +277,7 @@ public class GuiImpl extends Screen implements IGui {
 	public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
 		try {
 			this.keyModif.setModifier(mouseButtonEvent.modifiers());
-			MouseEvent evt = new MouseEvent((int) mouseButtonEvent.x(), (int) mouseButtonEvent.y(), mouseButtonEvent.button());
+			MouseEvent evt = new MouseEvent((int) mouseButtonEvent.x(), (int) mouseButtonEvent.y(), mapMouseButton(mouseButtonEvent));
 			gui.mouseRelease(evt);
 			return evt.isConsumed();
 		} catch (Throwable e) {
@@ -429,7 +465,7 @@ public class GuiImpl extends Screen implements IGui {
 			field.setY(bounds.y + currentOff.y);
 			field.setWidth(bounds.w);
 			field.setHeight(bounds.h);
-			if(field.mouseClicked(new MouseButtonEvent(evt.x + currentOff.x, evt.y + currentOff.y, new MouseButtonInfo(evt.btn, keyModif.modifiers())), false)) {
+			if(field.mouseClicked(new MouseButtonEvent(evt.x + currentOff.x, evt.y + currentOff.y, new MouseButtonInfo(mapMouseButton(evt), keyModif.modifiers())), false)) {
 				field.setFocused(true);
 				evt.consume();
 			} else {

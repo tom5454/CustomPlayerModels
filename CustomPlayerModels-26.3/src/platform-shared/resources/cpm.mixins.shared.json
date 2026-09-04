@@ -7,7 +7,6 @@
   ],
   "client": [
 	"access.HudAccessor",
-	"access.NativeImageAccessor",
 	
 	"LocalPlayerMixin",
 	"ClientPacketListenerMixin",
