@@ -1,5 +1,6 @@
 package com.tom.cpm.blockbench.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Function;
 
@@ -7,6 +8,7 @@ import com.tom.cpm.blockbench.PluginStart;
 import com.tom.cpm.blockbench.convert.WarnEntry;
 import com.tom.cpm.blockbench.proxy.Dialog;
 import com.tom.cpm.web.client.WebMC;
+import com.tom.cpm.web.client.java.Base64;
 import com.tom.cpm.web.client.util.Clipboard;
 import com.tom.cpm.web.client.util.I18n;
 import com.tom.ugwt.client.ExceptionUtil;
@@ -70,7 +72,8 @@ public class PopupDialogs {
 			errorMsg = msg + "\n" + err;
 		}
 		errorMsg += "\nPlatform: " + WebMC.platform;
-		errorDialog.setLines("<p>" + msg + "<br>" + err.toString() + "<br>" + I18n.get("bb-label.pleaseReport") + "<br>" + "Platform: " + WebMC.platform + "<br>" + "<button onclick='" + copyErrorFunc + "(\"" + DomGlobal.btoa(errorMsg) + "\")'>" + I18n.get("bb-button.copyErrorMsg") + "</button></p>");
+
+		errorDialog.setLines("<p>" + msg + "<br>" + err.toString() + "<br>" + I18n.get("bb-label.pleaseReport") + "<br>" + "Platform: " + WebMC.platform + "<br>" + "<button onclick='" + copyErrorFunc + "(\"" + Base64.getEncoder().encodeToString(errorMsg.getBytes(StandardCharsets.UTF_8)) + "\")'>" + I18n.get("bb-button.copyErrorMsg") + "</button></p>");
 		errorDialog.show();
 	}
 
