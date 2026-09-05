@@ -31,6 +31,7 @@ import com.tom.cpl.math.MatrixStack;
 import com.tom.cpl.math.Vec4f;
 import com.tom.cpl.render.VBuffers;
 import com.tom.cpm.client.MinecraftObject.DynTexture;
+import com.tom.cpm.client.SubmitProfile.ModelSubmitProfile;
 import com.tom.cpm.client.vr.VRPlayerRenderer;
 import com.tom.cpm.shared.model.PlayerModelParts;
 import com.tom.cpm.shared.model.RootModelType;
@@ -41,8 +42,9 @@ import com.tom.cpm.shared.skin.TextureProvider;
 import com.tom.cpm.shared.util.Log;
 
 public class PlayerRenderManager extends ModelRenderManager<Void, ModelTexture, ModelPart, Model> {
-	public static final Function<Identifier, RenderType> armor = RenderTypes::armorCutoutNoCull;
-	public static final Function<Identifier, RenderType> entity = RenderTypes::entityTranslucent;
+	public static final Function<Identifier, SubmitProfile> armor = ModelSubmitProfile.of(RenderTypes::armorCutoutNoCull);
+	public static final Function<Identifier, RenderType> entityRt = RenderTypes::entityTranslucent;
+	public static final Function<Identifier, SubmitProfile> entity = ModelSubmitProfile.of(entityRt);
 
 	public PlayerRenderManager() {
 		setFactory(new RedirectHolderFactory<Void, ModelTexture, ModelPart>() {

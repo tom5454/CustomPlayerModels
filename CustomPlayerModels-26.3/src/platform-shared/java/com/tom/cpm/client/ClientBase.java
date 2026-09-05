@@ -13,7 +13,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -69,7 +68,7 @@ public abstract class ClientBase {
 
 	public static void apiInit() {
 		CustomPlayerModels.api.buildClient().voicePlayer(Avatar.class, Avatar::getUUID).
-		renderApi(Model.class, Identifier.class, RenderType.class, Void.class, GameProfile.class, ModelTexture::new).
+		//renderApi(Model.class, Identifier.class, RenderType.class, Void.class, GameProfile.class, ModelTexture::new).
 		localModelApi(GameProfile::new).init();
 	}
 

@@ -53,7 +53,7 @@ public class PlayerHeadSpecialRendererMixin {
 			CustomPlayerModelsClient.INSTANCE.manager.bindSkull(info.gameProfile(), null, modelBase);
 			ModelTexture mt = new ModelTexture(info.playerSkin().body().texturePath());
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(modelBase, mt, TextureSheetType.SKIN);
-			renderType = mt.getRenderType();
+			renderType = mt.getRenderType().getRenderType();
 		}
 		op.call(animationValue, poseStack, collector, lightCoords, model, renderType, outlineColor, breakProgress);
 	}

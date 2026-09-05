@@ -24,7 +24,7 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.QuadParticleRenderState;
 import net.minecraft.client.renderer.texture.UvMapping;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -92,13 +92,6 @@ public class CPMOrderedSubmitNodeCollector implements OrderedSubmitNodeCollector
 	}
 
 	@Override
-	public void submitItem(PoseStack poseStack, ItemDisplayContext displayContext, int lightCoords, int overlayCoords,
-			int outlineColor, int[] tintLayers, List<BakedQuad> quads, FoilType foilType) {
-		collector.submitItem(poseStack, displayContext, lightCoords, overlayCoords, outlineColor, tintLayers, quads,
-				foilType);
-	}
-
-	@Override
 	public void submitCustomGeometry(PoseStack poseStack, RenderType renderType,
 			CustomGeometryRenderer customGeometryRenderer) {
 		collector.submitCustomGeometry(poseStack, renderType, customGeometryRenderer);
@@ -157,5 +150,18 @@ public class CPMOrderedSubmitNodeCollector implements OrderedSubmitNodeCollector
 	public void submitBreakingBlockModel(PoseStack poseStack, List<BlockStateModelPart> parts, int progress,
 			boolean isBlockTranslucent) {
 		collector.submitBreakingBlockModel(poseStack, parts, progress, isBlockTranslucent);
+	}
+
+	@Override
+	public void submitItem(PoseStack poseStack, ItemDisplayContext displayContext, int lightCoords, int overlayCoords,
+			int outlineColor, int[] tintLayers, ItemQuads quads, FoilType foilType) {
+		collector.submitItem(poseStack, displayContext, lightCoords, overlayCoords, outlineColor, tintLayers, quads,
+				foilType);
+	}
+
+	@Override
+	public void submitTextBackground(PoseStack poseStack, float x0, float y0, float x1, float y1, int color,
+			DisplayMode displayMode, int lightCoords) {
+		collector.submitTextBackground(poseStack, x0, y0, x1, y1, color, displayMode, lightCoords);
 	}
 }

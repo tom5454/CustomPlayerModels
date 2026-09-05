@@ -73,7 +73,7 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
 								this.model,
 								state,
 								poseStack,
-								mt.getRenderType(),
+								mt.getRenderType().getRenderType(),
 								light,
 								OverlayTexture.NO_OVERLAY,
 								state.outlineColor

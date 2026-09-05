@@ -14,7 +14,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -33,6 +32,8 @@ import com.tom.cpl.tag.AllTagManagers;
 import com.tom.cpl.util.DynamicTexture.ITexture;
 import com.tom.cpl.util.Image;
 import com.tom.cpl.util.ImageIO.IImageIO;
+import com.tom.cpm.client.SubmitProfile.GizmoSubmitProfile;
+import com.tom.cpm.client.SubmitProfile.ModelSubmitProfile;
 import com.tom.cpm.common.BiomeHandlerImpl;
 import com.tom.cpm.shared.MinecraftClientAccess;
 import com.tom.cpm.shared.MinecraftObjectHolder;
@@ -49,7 +50,7 @@ public class MinecraftObject implements MinecraftClientAccess {
 	private final ModelDefinitionLoader<GameProfile> loader;
 	private final PlayerRenderManager prm;
 	private AllTagManagers tags;
-	public RenderTypeBuilder<Identifier, RenderType> renderBuilder;
+	public RenderTypeBuilder<Identifier, SubmitProfile> renderBuilder;
 
 	public static final SkinLayerCodec<PlayerModelPart> LAYER_CODEC = new SkinLayerCodec<>(new PlayerModelPart[] {
 			PlayerModelPart.HAT,
@@ -65,11 +66,11 @@ public class MinecraftObject implements MinecraftClientAccess {
 		loader = new ModelDefinitionLoader<>(PlayerProfile::new, GameProfile::id, GameProfile::name);
 		prm = new PlayerRenderManager();
 		renderBuilder = new RenderTypeBuilder<>();
-		renderBuilder.register(RenderMode.DEFAULT, RenderTypes::entityTranslucent, 0);
-		renderBuilder.register(RenderMode.GLOW, CustomRenderTypes::glowingEyes, 1);
-		renderBuilder.register(RenderMode.COLOR, CustomRenderTypes::entityColorTranslucent, 0);
-		renderBuilder.register(RenderMode.COLOR_GLOW, CustomRenderTypes::entityColorEyes, 1);
-		renderBuilder.register(RenderMode.OUTLINE, CustomRenderTypes::linesNoDepth, 2);
+		renderBuilder.register(RenderMode.DEFAULT, ModelSubmitProfile.of(RenderTypes::entityTranslucent), 0);
+		renderBuilder.register(RenderMode.GLOW, ModelSubmitProfile.of(CustomRenderTypes::glowingEyes), 1);
+		renderBuilder.register(RenderMode.COLOR, ModelSubmitProfile.of(CustomRenderTypes::entityColorTranslucent), 0);
+		renderBuilder.register(RenderMode.COLOR_GLOW, ModelSubmitProfile.of(CustomRenderTypes::entityColorEyes), 1);
+		renderBuilder.register(RenderMode.OUTLINE, GizmoSubmitProfile.of(), 2);
 	}
 
 	public void setTags(AllTagManagers tags) {

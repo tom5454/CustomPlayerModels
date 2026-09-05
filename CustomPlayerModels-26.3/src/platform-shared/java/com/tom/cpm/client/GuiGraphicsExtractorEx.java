@@ -8,7 +8,7 @@ import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.state.gui.pip.PictureInPictureRenderState;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 
 public interface GuiGraphicsExtractorEx {
 	void cpm$fillGradient(RenderPipeline renderPipeline, TextureSetup textureSetup, int x0, int y0, int x1, int y1,
