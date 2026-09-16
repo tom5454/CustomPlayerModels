@@ -1,6 +1,8 @@
 package com.tom.cpm.client;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
@@ -28,10 +30,10 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.item.ItemStack;
 
+import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 
@@ -674,7 +676,11 @@ public class GuiImpl extends Screen implements IGui {
 
 	@Override
 	public void openURL0(String url) {
-		Util.getPlatform().openUri(url);
+		try {
+			Blaze3D.openUri(new URI(url));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public GuiGraphicsExtractor getMCGraphics() {
