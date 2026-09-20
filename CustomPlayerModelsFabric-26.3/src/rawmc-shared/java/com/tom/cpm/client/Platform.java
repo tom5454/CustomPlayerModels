@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.Submit;
+import net.minecraft.client.renderer.oit.OitPipelineSet;
 import net.minecraft.network.Connection;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Avatar;
@@ -31,6 +32,12 @@ public class Platform {
 	}
 
 	public static Supplier<RenderPipeline> registerPipeline(Supplier<RenderPipeline> factory) {
+		var p = factory.get();
+		RenderPipelines.register(p);
+		return () -> p;
+	}
+
+	public static Supplier<OitPipelineSet> registerOitPipeline(Supplier<OitPipelineSet> factory) {
 		var p = factory.get();
 		RenderPipelines.register(p);
 		return () -> p;

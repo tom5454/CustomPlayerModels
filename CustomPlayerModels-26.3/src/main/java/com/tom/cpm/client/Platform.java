@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.Submit;
+import net.minecraft.client.renderer.oit.OitPipelineSet;
 import net.minecraft.network.Connection;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Avatar;
@@ -19,6 +20,7 @@ import io.netty.channel.Channel;
 
 public class Platform {
 	public static List<RenderPipeline> pipelines = new ArrayList<>();
+	public static List<OitPipelineSet> oitPipelines = new ArrayList<>();
 
 	public static boolean isSitting(Avatar player) {
 		return player.isPassenger() && (player.getVehicle() != null && player.getVehicle().shouldRiderSit());
@@ -39,6 +41,12 @@ public class Platform {
 	public static Supplier<RenderPipeline> registerPipeline(Supplier<RenderPipeline> factory) {
 		var pipeline = factory.get();
 		pipelines.add(pipeline);
+		return () -> pipeline;
+	}
+
+	public static Supplier<OitPipelineSet> registerOitPipeline(Supplier<OitPipelineSet> factory) {
+		var pipeline = factory.get();
+		oitPipelines.add(pipeline);
 		return () -> pipeline;
 	}
 

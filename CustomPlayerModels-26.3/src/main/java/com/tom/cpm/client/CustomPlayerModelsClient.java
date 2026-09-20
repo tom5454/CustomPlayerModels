@@ -159,6 +159,7 @@ public class CustomPlayerModelsClient extends ClientBase {
 	private void registerPipelines(RegisterRenderPipelinesEvent event) {
 		CustomRenderTypes.linesNoDepth();//Class init
 		Platform.pipelines.forEach(event::registerPipeline);
+		Platform.oitPipelines.forEach(event::registerOitPipelineSet);
 	}
 
 	private void registerPip(RegisterPictureInPictureRenderersEvent event) {

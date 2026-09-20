@@ -18,7 +18,7 @@
     "26.1.1-latest": "0.6.27b",
     "26.2-latest": "0.6.27c",
     "26.1.2-latest": "0.6.27b",
-    "26.3-latest": "0.6.27a"
+    "26.3-latest": "0.6.27b"
   },
   "1.20.2": {
     "0.0.0": "1.20.1-forge",
@@ -241,7 +241,8 @@
   },
   "26.3": {
     "0.0.0": "26.2-neoforge",
-    "0.6.27a": "26.3 port"
+    "0.6.27a": "26.3 port",
+    "0.6.27b": "Fixed crash with enchanted armor (Closes #1025)\r\nFixed crash with Improved Transparency enabled (Closes #1022)"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }
