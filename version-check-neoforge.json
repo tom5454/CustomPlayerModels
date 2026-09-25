@@ -17,7 +17,8 @@
     "26.1-latest": "0.6.27b",
     "26.1.1-latest": "0.6.27b",
     "26.2-latest": "0.6.27c",
-    "26.1.2-latest": "0.6.27b"
+    "26.1.2-latest": "0.6.27b",
+    "26.3-latest": "0.6.27b"
   },
   "1.20.2": {
     "0.0.0": "1.20.1-forge",
@@ -237,6 +238,11 @@
     "0.0.0": "26.1.1-neoforge",
     "0.6.27a": "Forge 26.2 port\n26.3 Snapshot 2 port\nAdded alphabetical sorting to file choosers\n\nFixed standing on ladder animations (Closes #985)\nFixed crash with new versions of ViveCraft (Closes #992)",
     "0.6.27b": "26.3 Pre-Release 1 port\r\n\r\nFix issues with Iris Shaders on 26.1+ (Closes #1010)"
+  },
+  "26.3": {
+    "0.0.0": "26.2-neoforge",
+    "0.6.27a": "26.3 port",
+    "0.6.27b": "Fixed crash with enchanted armor (Closes #1025)\r\nFixed crash with Improved Transparency enabled (Closes #1022)"
   },
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/custom-player-models"
 }

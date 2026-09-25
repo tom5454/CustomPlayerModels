@@ -5,7 +5,6 @@ import java.util.List;
 import org.joml.Quaternionf;
 import org.jspecify.annotations.Nullable;
 
-import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhase;
 import net.minecraft.client.gui.Font.DisplayMode;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
@@ -17,7 +16,6 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState.LeashState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState.ShadowPiece;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
-import net.minecraft.client.renderer.feature.submit.SubmitNode;
 import net.minecraft.client.renderer.gizmos.DrawableGizmoPrimitives.Group;
 import net.minecraft.client.renderer.item.ItemStackRenderState.FoilType;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -123,11 +121,6 @@ public class CPMOrderedSubmitNodeCollector implements OrderedSubmitNodeCollector
 	@Override
 	public void submitGizmoPrimitives(Group group, CameraRenderState camera, boolean onTop) {
 		collector.submitGizmoPrimitives(group, camera, onTop);
-	}
-
-	@Override
-	public <T extends SubmitNode> void submitCustom(SubmitRenderPhase<T> phase, T node) {
-		collector.submitCustom(phase, node);
 	}
 
 	@Override

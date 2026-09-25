@@ -3,7 +3,6 @@ package com.tom.cpm.client;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.LayeringTransform;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
@@ -12,27 +11,18 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.renderpearl.api.pipeline.BlendFunction;
 import com.mojang.renderpearl.api.pipeline.ColorTargetState;
 import com.mojang.renderpearl.api.pipeline.CompareOp;
 import com.mojang.renderpearl.api.pipeline.DepthStencilState;
-import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 
 public class CustomRenderTypes {
+
 	public static final Supplier<RenderPipeline> EYES = Platform.registerPipeline(() -> {
-		return RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
+		return RenderPipeline.builder(RenderPipelines.ENTITY_NO_LIGHTMAP_SNIPPET, RenderPipelines.EYES_SNIPPET)
 				.withLocation(Identifier.tryBuild("cpm", "pipeline/eyes"))
-				.withVertexShader("core/entity")
-				.withFragmentShader("core/entity")
-				.withShaderDefine("EMISSIVE")
-				.withShaderDefine("NO_OVERLAY")
-				.withShaderDefine("NO_CARDINAL_LIGHTING")
-				.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
 				.withColorTargetState(new ColorTargetState(BlendFunction.ADDITIVE))
-				.withVertexBinding(0, DefaultVertexFormat.ENTITY)
-				.withPrimitiveTopology(PrimitiveTopology.QUADS)
 				.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
 				.build();
 	});
@@ -52,6 +42,7 @@ public class CustomRenderTypes {
 	private static final Function<Identifier, RenderType> GLOWING_EYES = Util.memoize(identifier -> {
 		final RenderSetup renderSetup9 = RenderSetup.builder(EYES.get())
 				.withTexture("Sampler0", identifier)
+				.setOitPipelines(RenderPipelines.OIT_EYES)
 				.sortOnUpload()
 				.createRenderSetup();
 		return RenderType.create("eyes", renderSetup9);

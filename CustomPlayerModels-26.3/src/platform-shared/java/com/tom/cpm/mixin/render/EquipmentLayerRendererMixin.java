@@ -46,7 +46,7 @@ public class EquipmentLayerRendererMixin {
 							+ "Lnet/minecraft/client/renderer/texture/UvMapping;I"
 							+ ")V",
 							shift = Shift.BEFORE,
-							ordinal = 2
+							ordinal = 1
 					),
 			method = CPMRENDERLAYERSMETHOD)
 	private <S> void onSumbitArmorTrim(
@@ -82,6 +82,28 @@ public class EquipmentLayerRendererMixin {
 			int p_436591_,
 			CallbackInfo cbi,
 			@Local(ordinal = 1) LocalRef<Identifier> Identifier2) {
+		grabTexture(layerType, model, Identifier2);
+	}
+
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;armorCutoutNoCullGlint(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;", shift = Shift.BEFORE), method = CPMRENDERLAYERSMETHOD)
+	public void grabTextureGlint(
+			EquipmentClientInfo.LayerType layerType,
+			ResourceKey<EquipmentAsset> p_387603_,
+			Model<Object> model,
+			Object p_435806_,
+			ItemStack p_371670_,
+			PoseStack p_371767_,
+			SubmitNodeCollector p_435795_,
+			int p_371309_,
+			@Nullable Identifier p_371639_,
+			int p_435821_,
+			int p_436591_,
+			CallbackInfo cbi,
+			@Local(ordinal = 1) LocalRef<Identifier> Identifier2) {
+		grabTexture(layerType, model, Identifier2);
+	}
+
+	private static void grabTexture(EquipmentClientInfo.LayerType layerType, Model<Object> model, LocalRef<Identifier> Identifier2) {
 		if (layerType == LayerType.HUMANOID || layerType == LayerType.HUMANOID_LEGGINGS) {
 			CustomPlayerModelsClient.mc.getPlayerRenderManager().bindSkin(model, new ModelTexture(Identifier2.get(), PlayerRenderManager.armor), layerType == LayerType.HUMANOID_LEGGINGS ? TextureSheetType.ARMOR2 : TextureSheetType.ARMOR1);
 		} else if (layerType == LayerType.WINGS) {

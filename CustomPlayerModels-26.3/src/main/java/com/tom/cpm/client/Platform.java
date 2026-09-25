@@ -1,49 +1,56 @@
 package com.tom.cpm.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
-import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.Submit;
 import net.minecraft.client.renderer.oit.OitPipelineSet;
 import net.minecraft.network.Connection;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Avatar;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.client.submit.RenderPhaseKeys;
 
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
-
-import com.tom.cpm.mixinplugin.MixinModLoaded;
 
 import io.netty.channel.Channel;
 
 public class Platform {
+	public static List<RenderPipeline> pipelines = new ArrayList<>();
+	public static List<OitPipelineSet> oitPipelines = new ArrayList<>();
 
 	public static boolean isSitting(Avatar player) {
-		return player.isPassenger();
+		return player.isPassenger() && (player.getVehicle() != null && player.getVehicle().shouldRiderSit());
+	}
+
+	public static void setHeight(AbstractWidget w, int h) {
+		w.setHeight(h);
 	}
 
 	public static Channel getChannel(Connection conn) {
-		return conn.channel;
+		return conn.channel();
 	}
 
 	public static boolean isModLoaded(String id) {
-		return MixinModLoaded.isLoaded(id);
+		return ModList.get().isLoaded(id);
 	}
 
 	public static Supplier<RenderPipeline> registerPipeline(Supplier<RenderPipeline> factory) {
-		var p = factory.get();
-		RenderPipelines.register(p);
-		return () -> p;
+		var pipeline = factory.get();
+		pipelines.add(pipeline);
+		return () -> pipeline;
 	}
 
 	public static Supplier<OitPipelineSet> registerOitPipeline(Supplier<OitPipelineSet> factory) {
-		var p = factory.get();
-		RenderPipelines.register(p);
-		return () -> p;
+		var pipeline = factory.get();
+		oitPipelines.add(pipeline);
+		return () -> pipeline;
 	}
 
 	public static void submitAlwaysOnTop(SubmitNodeCollection st, Submit<Unit> submit) {
-		st.submitCustom(SubmitRenderPhases.ALWAYS_ON_TOP, submit);
+		st.submitSpecial(RenderPhaseKeys.ALWAYS_ON_TOP, submit);
 	}
 }
