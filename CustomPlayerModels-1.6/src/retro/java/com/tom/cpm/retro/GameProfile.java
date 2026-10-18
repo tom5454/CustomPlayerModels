@@ -52,9 +52,7 @@ public class GameProfile {
 					if (skinType == null) {
 						skinType = "default";
 					}
-					if (url.startsWith("http://textures.minecraft.net/texture/")) {
-						textureURLMap.put(tt, url);
-					}
+					textureURLMap.put(tt, url);
 				}
 			}
 		}
